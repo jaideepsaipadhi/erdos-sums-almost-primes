@@ -571,6 +571,15 @@ theorem assembly_identity (k : ℕ) (c δ : ℕ → ℝ) (q : ℝ) :
     Finset.mul_sum, Finset.sum_mul]
   simp only [mul_comm, mul_left_comm, mul_assoc]
 
+/-- Lemma 1 substituted into E(k)'s actual definition. -/
+theorem E_eq_via_lemma1 (a₁ : ℝ) (k : ℕ) (hk : 1 ≤ k)
+    (hsum1 : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n))) :
+    E a₁ k = 2 ^ k * (1 - Ik k - Tk k) - a₁ * k ^ 2 := by
+  unfold E
+  rw [lemma1_foundation k hk hsum1]
+  ring
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
