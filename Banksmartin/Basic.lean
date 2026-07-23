@@ -208,6 +208,43 @@ structure NumericalFacts : Prop where
   alpha_bound   : alphaConst ≤ 15.5716
   Gamma_bound   : GammaConst ≤ 105.41
 
+/-- The T_k tail bound denominator is positive for k ≥ 1. -/
+lemma Tk_bound_pos (k : ℕ) (hk : 1 ≤ k) :
+    0 < (k : ℝ) * Real.log 2 * (2 ^ k - 1) := by
+  have h1 : (0:ℝ) < (k : ℝ) := by exact_mod_cast hk
+  have h2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have h3 : (0:ℝ) < (2:ℝ) ^ k - 1 := by
+    have : (1:ℝ) < 2 ^ k := by
+      calc (1:ℝ) < 2 ^ 1 := by norm_num
+        _ ≤ 2 ^ k := by
+            apply pow_le_pow_right₀ (by norm_num)
+            omega
+    linarith
+  positivity
+
+/-- The reciprocal tail bound decreases in k. -/
+lemma Tk_bound_decreasing (k : ℕ) (hk : 1 ≤ k) :
+    1 / (((k : ℝ) + 1) * Real.log 2 * (2 ^ (k + 1) - 1)) <
+      1 / ((k : ℝ) * Real.log 2 * (2 ^ k - 1)) := by
+  have hden_k : 0 < (k : ℝ) * Real.log 2 * (2 ^ k - 1) := Tk_bound_pos k hk
+  have hlog2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hp2k : (0 : ℝ) < (2 : ℝ) ^ k := by positivity
+  have hkge1 : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk
+  have heq : (2 : ℝ) ^ (k + 1) = 2 ^ k * 2 := by ring
+  have diff_eq :
+      ((k : ℝ) + 1) * Real.log 2 * (2 ^ (k + 1) - 1) -
+        (k : ℝ) * Real.log 2 * (2 ^ k - 1)
+      = Real.log 2 * (((k : ℝ) + 2) * 2 ^ k - 1) := by
+    rw [heq]; ring
+  have bracket_pos : (0 : ℝ) < ((k : ℝ) + 2) * 2 ^ k - 1 := by
+    nlinarith [hp2k, hkge1]
+  have diff_pos :
+      0 < ((k : ℝ) + 1) * Real.log 2 * (2 ^ (k + 1) - 1) -
+        (k : ℝ) * Real.log 2 * (2 ^ k - 1) := by
+    rw [diff_eq]; exact mul_pos hlog2 bracket_pos
+  apply one_div_lt_one_div_of_lt hden_k
+  linarith [diff_pos]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
