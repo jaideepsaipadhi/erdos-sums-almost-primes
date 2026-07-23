@@ -769,6 +769,34 @@ theorem log_one_add_sub_self_lower (y : ℝ) (hy0 : 0 ≤ y) :
   simp only [add_zero, Real.log_one] at h0
   linarith
 
+/-- Combined two-sided log bound: |log(1-x)+x| ≤ 3x² for |x| ≤ 2/3. -/
+theorem log_bound_combined (x : ℝ) (hx : |x| ≤ 2/3) :
+    |Real.log (1 - x) + x| ≤ 3 * x^2 := by
+  by_cases hx0 : (0:ℝ) ≤ x
+  · have hx1 : x < 1 := by
+      have := abs_le.mp hx; linarith [this.2]
+    have hub := log_one_sub_add_self_nonpos x hx0 hx1
+    have hlb := log_one_sub_add_self_lower x hx0 hx1
+    have hxle : x ≤ 2/3 := (abs_le.mp hx).2
+    have h1mx : (1:ℝ)/3 ≤ 1 - x := by linarith
+    rw [abs_le]
+    constructor
+    · have : x^2 / (1 - x) ≤ 3 * x^2 := by
+        rw [div_le_iff₀ (by linarith : (0:ℝ) < 1 - x)]
+        nlinarith [sq_nonneg x]
+      linarith
+    · nlinarith [hub, sq_nonneg x]
+  · set y := -x with hy
+    have hy0 : 0 ≤ y := by linarith
+    have hub := log_one_add_sub_self_nonpos y hy0
+    have hlb := log_one_add_sub_self_lower y hy0
+    have hxy : Real.log (1 - x) + x = Real.log (1 + y) - y := by rw [hy]; ring_nf
+    rw [hxy, abs_le]
+    have hy2 : y^2 = x^2 := by rw [hy]; ring
+    constructor
+    · linarith [hlb, hy2.symm ▸ hlb]
+    · nlinarith [hub, hy2]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
