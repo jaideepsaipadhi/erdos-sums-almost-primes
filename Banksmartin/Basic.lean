@@ -537,6 +537,40 @@ theorem lemma1_foundation (k : ℕ) (hk : 1 ≤ k)
       hsummable_Ioc.congr (fun n => (hnorm_eq n).symm)
     exact MeasureTheory.integral_tsum_of_summable_integral_norm hint hsummable_norm2
 
+/-- LINK 3 (assembly), pure algebra given the coefficient sums as data. -/
+theorem assembly_identity (k : ℕ) (c δ : ℕ → ℝ) (q : ℝ) :
+    ∑ i ∈ Finset.range (k + 1), c i * 2 ^ i * (2 ^ (k - i + 1) - q * ((k - i : ℕ):ℝ) ^ 2 + δ (k - i)) =
+      2 ^ (k + 1) * (∑ i ∈ Finset.range (k + 1), c i) -
+        q * ((k:ℝ) ^ 2 * (∑ i ∈ Finset.range (k + 1), 2 ^ i * c i) -
+          2 * k * (∑ i ∈ Finset.range (k + 1), (i:ℝ) * 2 ^ i * c i) +
+          (∑ i ∈ Finset.range (k + 1), (i:ℝ) ^ 2 * 2 ^ i * c i)) +
+        (∑ i ∈ Finset.range (k + 1), 2 ^ i * c i * δ (k - i)) := by
+  have hterm : ∀ i ∈ Finset.range (k + 1),
+      c i * 2 ^ i * (2 ^ (k - i + 1) - q * ((k - i : ℕ):ℝ) ^ 2 + δ (k - i)) =
+        c i * 2 ^ (k + 1) -
+          q * (c i * 2 ^ i * (k:ℝ) ^ 2 - 2 * k * (c i * 2 ^ i * (i:ℝ)) + c i * 2 ^ i * (i:ℝ) ^ 2) +
+          c i * 2 ^ i * δ (k - i) := by
+    intro i hi
+    have hik : i ≤ k := by
+      have := Finset.mem_range.mp hi; omega
+    have hcast : ((k - i : ℕ):ℝ) = (k:ℝ) - (i:ℝ) := Nat.cast_sub hik
+    have hexp : (2:ℝ) ^ i * 2 ^ (k - i + 1) = 2 ^ (k + 1) := by
+      rw [← pow_add]
+      congr 1
+      omega
+    rw [hcast]
+    have expand :
+        c i * 2 ^ i * ((2:ℝ) ^ (k - i + 1) - q * ((k:ℝ) - i) ^ 2 + δ (k - i)) =
+          c i * (2 ^ i * 2 ^ (k - i + 1)) -
+            q * (c i * 2 ^ i * ((k:ℝ) - i) ^ 2) + c i * 2 ^ i * δ (k - i) := by
+      ring
+    rw [expand, hexp]
+    ring
+  rw [Finset.sum_congr rfl hterm]
+  simp only [mul_add, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib,
+    Finset.mul_sum, Finset.sum_mul]
+  simp only [mul_comm, mul_left_comm, mul_assoc]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
