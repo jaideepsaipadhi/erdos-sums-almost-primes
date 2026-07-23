@@ -285,6 +285,17 @@ lemma B_mono_in_param (u : ℝ) {j1 j2 : ℝ} (hj1 : 0 ≤ j1) (hj12 : j1 ≤ j2
     exact mul_le_mul_of_nonneg_right hj12 hlog2
   exact h_mono ha hab
 
+/-- Discrete corollary of B_mono_in_param: for natural j1 ≤ j2 (the actual
+    index type used in the gap-5 sum Σ B_{m-i}), B is monotone. -/
+lemma B_mono_nat (u : ℝ) {j1 j2 : ℕ} (hj12 : j1 ≤ j2) :
+    (2 : ℝ) ^ (-(j1 : ℝ) * Real.exp (-u)) - 1 +
+        (j1 : ℝ) * Real.log 2 * Real.exp (-u) ≤
+      (2 : ℝ) ^ (-(j2 : ℝ) * Real.exp (-u)) - 1 +
+        (j2 : ℝ) * Real.log 2 * Real.exp (-u) := by
+  have hj1r : (0 : ℝ) ≤ (j1 : ℝ) := by positivity
+  have hj12r : (j1 : ℝ) ≤ (j2 : ℝ) := by exact_mod_cast hj12
+  exact B_mono_in_param u hj1r hj12r
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
