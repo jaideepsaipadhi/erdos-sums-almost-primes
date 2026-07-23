@@ -345,6 +345,24 @@ lemma Fk_summable (k : ℕ) (s : ℝ) (hs : 1 < s) :
     Real.summable_nat_rpow.mpr (by linarith)
   exact hcomp.subtype _
 
+/-- ∫₁^∞ n^{-s} ds = 1/(n log n) for n ≥ 2. -/
+lemma integral_n_neg_s (n : ℕ) (hn : 2 ≤ n) :
+    ∫ s in Set.Ioi (1:ℝ), (n:ℝ) ^ (-s) =
+      1 / ((n : ℝ) * Real.log n) := by
+  have hn1 : (1:ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < n)
+  have hlogn : 0 < Real.log n := Real.log_pos hn1
+  have hnpos : (0:ℝ) < (n:ℝ) := by positivity
+  have hpteq : ∀ s : ℝ, (n:ℝ) ^ (-s) = Real.exp (-(Real.log n * s)) := by
+    intro s
+    rw [Real.rpow_def_of_pos hnpos]
+    congr 1; ring
+  simp_rw [hpteq]
+  rw [MeasureTheory.integral_comp_mul_left_Ioi (fun u => Real.exp (-u)) 1 hlogn]
+  simp only [smul_eq_mul, mul_one]
+  rw [integral_exp_neg_Ioi, Real.exp_neg, Real.exp_log hnpos]
+  rw [one_div, mul_inv]
+  ring
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
