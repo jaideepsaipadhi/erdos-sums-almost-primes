@@ -595,6 +595,13 @@ theorem criterion_explicit (a₁ : ℝ) (k : ℕ) (hk : 1 ≤ k)
   push_cast
   ring
 
+/-- T_k ≥ 0. -/
+theorem Tk_nonneg (k : ℕ) : 0 ≤ Tk k := by
+  unfold Tk
+  apply tsum_nonneg
+  intro n
+  positivity
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
