@@ -461,6 +461,82 @@ lemma integral_n_neg_s_Ioi2_value (n : ℕ) (hn : 2 ≤ n) :
   rw [one_div, mul_inv]
   ring
 
+/-- I_k := ∫₁² F_k(s) ds. -/
+noncomputable def Ik (k : ℕ) : ℝ := ∫ s in Set.Ioc (1:ℝ) 2, Fk k s ∂MeasureTheory.volume
+
+/-- T_k := Σ_{Ω(n)=k} 1/(n² log n). -/
+noncomputable def Tk (k : ℕ) : ℝ :=
+  ∑' n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k}, 1 / ((n : ℝ) ^ 2 * Real.log n)
+
+/-- LEMMA 1 (foundation): f_k = I_k + T_k. -/
+theorem lemma1_foundation (k : ℕ) (hk : 1 ≤ k)
+    (hsum1 : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n))) :
+    f k = Ik k + Tk k := by
+  have hn2 : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k}, 2 ≤ (n : ℕ) := fun n => n.2.1
+  have hIoc_le : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
+      0 ≤ ∫ s in Set.Ioc (1:ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume ∧
+      ∫ s in Set.Ioc (1:ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume
+        ≤ 1 / ((n:ℝ) * Real.log n) := by
+    intro n
+    have hsplit := integral_n_neg_s_split n (hn2 n)
+    have hpt := integral_n_neg_s n (hn2 n)
+    have hIoi2nonneg : 0 ≤ ∫ s in Set.Ioi (2:ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume := by
+      apply MeasureTheory.integral_nonneg; intro s; positivity
+    have hIocnonneg : 0 ≤ ∫ s in Set.Ioc (1:ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume := by
+      apply MeasureTheory.integral_nonneg; intro s; positivity
+    refine ⟨hIocnonneg, ?_⟩
+    rw [← hpt]
+    linarith [hsplit, hIoi2nonneg]
+  have hsummable_Ioc : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+      ∫ s in Set.Ioc (1:ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume) :=
+    Summable.of_nonneg_of_le (fun n => (hIoc_le n).1) (fun n => (hIoc_le n).2) hsum1
+  have hTk_le : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
+      0 ≤ 1 / ((n:ℝ) ^ 2 * Real.log n) ∧
+        1 / ((n:ℝ) ^ 2 * Real.log n) ≤ 1 / ((n:ℝ) * Real.log n) := by
+    intro n
+    have hnpos : (0:ℝ) < (n:ℝ) :=
+      by exact_mod_cast (lt_of_lt_of_le (by norm_num : (0:ℕ) < 2) (hn2 n))
+    have hn1 : (1:ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < (n:ℕ))
+    have hlogn := Real.log_pos hn1
+    have hnpos2 : (0:ℝ) < (n:ℝ) ^ 2 := pow_pos hnpos 2
+    have hprod : 0 < (n:ℝ) ^ 2 * Real.log n := mul_pos hnpos2 hlogn
+    have hprod1 : 0 < (n:ℝ) * Real.log n := mul_pos hnpos hlogn
+    constructor
+    · exact le_of_lt (div_pos (by norm_num) hprod)
+    · apply div_le_div_of_nonneg_left (by norm_num) hprod1
+      nlinarith [sq_nonneg ((n:ℝ) - 1)]
+  have hsummable_Tk : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+      1 / ((n:ℝ) ^ 2 * Real.log n)) :=
+    Summable.of_nonneg_of_le (fun n => (hTk_le n).1) (fun n => (hTk_le n).2) hsum1
+  unfold f
+  rw [tsum_congr (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+    (integral_n_neg_s n (hn2 n)).symm)]
+  have hpt_split2 : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
+      ∫ s in Set.Ioi (1:ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume =
+        ∫ s in Set.Ioc (1:ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume +
+          1 / ((n:ℝ) ^ 2 * Real.log n) := by
+    intro n
+    rw [integral_n_neg_s_split n (hn2 n), integral_n_neg_s_Ioi2_value n (hn2 n)]
+  rw [tsum_congr hpt_split2, Summable.tsum_add hsummable_Ioc hsummable_Tk]
+  congr 1
+  · have hint : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
+        MeasureTheory.Integrable (fun s : ℝ => (n:ℝ) ^ (-s))
+          (MeasureTheory.volume.restrict (Set.Ioc (1:ℝ) 2)) :=
+      fun n => (continuous_n_neg_s n (hn2 n)).integrableOn_Ioc
+    unfold Ik Fk
+    have hnorm_eq : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
+        ∫ s in Set.Ioc (1:ℝ) 2, ‖(n:ℝ) ^ (-s)‖ ∂MeasureTheory.volume =
+          ∫ s in Set.Ioc (1:ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume := by
+      intro n
+      congr 1
+      funext s
+      exact Real.norm_of_nonneg (by positivity)
+    have hsummable_norm2 : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+        ∫ s in Set.Ioc (1:ℝ) 2, ‖(n:ℝ) ^ (-s)‖ ∂MeasureTheory.volume) :=
+      hsummable_Ioc.congr (fun n => (hnorm_eq n).symm)
+    exact MeasureTheory.integral_tsum_of_summable_integral_norm hint hsummable_norm2
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
