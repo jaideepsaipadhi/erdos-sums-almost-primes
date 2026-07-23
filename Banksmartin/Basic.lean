@@ -296,6 +296,28 @@ lemma B_mono_nat (u : ℝ) {j1 j2 : ℕ} (hj12 : j1 ≤ j2) :
   have hj12r : (j1 : ℝ) ≤ (j2 : ℝ) := by exact_mod_cast hj12
   exact B_mono_in_param u hj1r hj12r
 
+/-- The gap-5 domination step: Σ_{i=0}^{m} B_{m-i}(u) ≤ (m+1)·B_m(u). -/
+lemma B_sum_le (u : ℝ) (m : ℕ) :
+    ∑ i ∈ Finset.range (m + 1),
+        ((2 : ℝ) ^ (-((m - i : ℕ) : ℝ) * Real.exp (-u)) - 1 +
+          ((m - i : ℕ) : ℝ) * Real.log 2 * Real.exp (-u))
+      ≤ (m + 1) * ((2 : ℝ) ^ (-(m : ℝ) * Real.exp (-u)) - 1 +
+          (m : ℝ) * Real.log 2 * Real.exp (-u)) := by
+  calc ∑ i ∈ Finset.range (m + 1),
+      ((2 : ℝ) ^ (-((m - i : ℕ) : ℝ) * Real.exp (-u)) - 1 +
+        ((m - i : ℕ) : ℝ) * Real.log 2 * Real.exp (-u))
+      ≤ ∑ _i ∈ Finset.range (m + 1),
+          ((2 : ℝ) ^ (-(m : ℝ) * Real.exp (-u)) - 1 +
+            (m : ℝ) * Real.log 2 * Real.exp (-u)) := by
+        apply Finset.sum_le_sum
+        intro i _hi
+        exact B_mono_nat u (Nat.sub_le m i)
+    _ = (m + 1) * ((2 : ℝ) ^ (-(m : ℝ) * Real.exp (-u)) - 1 +
+          (m : ℝ) * Real.log 2 * Real.exp (-u)) := by
+        rw [Finset.sum_const, Finset.card_range]
+        push_cast
+        ring
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
