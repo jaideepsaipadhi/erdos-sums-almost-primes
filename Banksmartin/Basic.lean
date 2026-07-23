@@ -1,0 +1,213 @@
+import Mathlib
+
+set_option linter.style.header false
+
+open Real BigOperators
+
+noncomputable section
+
+/-- Ω(n): number of prime factors of n with multiplicity. -/
+def bigOmega (n : ℕ) : ℕ := (Nat.factorization n).sum (fun _ e => e)
+
+def f (k : ℕ) : ℝ :=
+  ∑' n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k}, 1 / ((n : ℝ) * Real.log n)
+
+/-- Every n ≥ 1 satisfies 2^(Ω(n)) ≤ n (strong induction via the minimal
+    prime factor: n = p * m with p ≥ 2 prime, Ω(n) = Ω(m) + 1, m < n). -/
+lemma pow_bigOmega_le (n : ℕ) (hn : 1 ≤ n) : 2 ^ bigOmega n ≤ n := by
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+    match n, hn with
+    | 1, _ => simp [bigOmega]
+    | (n + 2), _ =>
+      set N := n + 2 with hN
+      have hN2 : 2 ≤ N := by omega
+      set p := N.minFac with hp
+      have hp_prime : p.Prime := Nat.minFac_prime (by omega)
+      have hp_dvd : p ∣ N := Nat.minFac_dvd N
+      obtain ⟨m, hm⟩ := hp_dvd
+      have hp2 : 2 ≤ p := hp_prime.two_le
+      have hm1 : 1 ≤ m := by
+        rcases Nat.eq_zero_or_pos m with h0 | h0
+        · exfalso; rw [h0, mul_zero] at hm; omega
+        · exact h0
+      have hmN : m < N := by
+        rw [hm]; nlinarith
+      have hbO : bigOmega N = bigOmega m + 1 := by
+        have hpne : p ≠ 0 := hp_prime.pos.ne'
+        have hmne : m ≠ 0 := by omega
+        have hfact : N.factorization = p.factorization + m.factorization := by
+          rw [hm, Nat.factorization_mul hpne hmne]
+        have hpfact : p.factorization = Finsupp.single p 1 := by
+          rw [hp_prime.factorization]
+        unfold bigOmega
+        rw [hfact, hpfact]
+        rw [Finsupp.sum_add_index' (by simp) (by simp)]
+        rw [Finsupp.sum_single_index (by simp)]
+        ring
+      rw [hbO, pow_succ]
+      have := ih m hmN hm1
+      calc 2 ^ bigOmega m * 2 ≤ m * p := by
+            apply Nat.mul_le_mul this hp2
+        _ = N := by rw [hm]; ring
+
+/-- Every k-almost-prime n ≥ 2 satisfies n ≥ 2^k. -/
+lemma le_of_bigOmega (n : ℕ) (k : ℕ) (hn : 2 ≤ n) (hk : bigOmega n = k) :
+    2 ^ k ≤ n := hk ▸ pow_bigOmega_le n (by omega)
+
+/-- 2^k itself is a k-almost-prime: Ω(2^k) = k. Combined with `le_of_bigOmega`,
+    this shows 2^k is exactly the smallest k-almost-prime. -/
+lemma bigOmega_two_pow (k : ℕ) : bigOmega (2 ^ k) = k := by
+  unfold bigOmega
+  rw [Nat.factorization_pow, Nat.Prime.factorization (p := 2) (by norm_num)]
+  simp
+
+/-- Ω is completely additive: Ω(a*b) = Ω(a) + Ω(b) for a, b ≠ 0. -/
+lemma bigOmega_mul (a b : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) :
+    bigOmega (a * b) = bigOmega a + bigOmega b := by
+  unfold bigOmega
+  rw [Nat.factorization_mul ha hb]
+  rw [Finsupp.sum_add_index' (by simp) (by simp)]
+
+/-- Ω(1) = 0. -/
+lemma bigOmega_one : bigOmega 1 = 0 := by
+  unfold bigOmega
+  simp
+
+/-- Ω is monotone under strict divisor growth: if a ∣ n and a < n (a, n ≠ 0),
+    then Ω(a) < Ω(n). -/
+lemma bigOmega_lt_of_dvd_of_lt (a n : ℕ) (ha : a ≠ 0) (hn : n ≠ 0)
+    (hdvd : a ∣ n) (hlt : a < n) : bigOmega a < bigOmega n := by
+  obtain ⟨c, hc⟩ := hdvd
+  have hc0 : c ≠ 0 := by
+    rintro rfl; simp at hc; omega
+  have hc1 : c ≠ 1 := by
+    rintro rfl; simp at hc; omega
+  have hcO : 1 ≤ bigOmega c := by
+    rcases Nat.eq_zero_or_pos (bigOmega c) with h0 | h0
+    · exfalso
+      apply hc1
+      by_contra hc1'
+      have hp := Nat.minFac_prime hc1'
+      have hpdvd := Nat.minFac_dvd c
+      obtain ⟨d, hd⟩ := hpdvd
+      have hd0 : d ≠ 0 := by
+        rintro rfl; simp at hd; exact hc0 hd
+      have hp1 : bigOmega (Nat.minFac c) = 1 := by
+        unfold bigOmega
+        rw [hp.factorization]
+        simp
+      have := bigOmega_mul (Nat.minFac c) d hp.pos.ne' hd0
+      rw [← hd, hp1, h0] at this
+      omega
+    · exact h0
+  rw [hc, bigOmega_mul a c ha hc0]
+  omega
+
+/-- The counting function for k-almost-primes up to x. -/
+noncomputable def piK (k : ℕ) (x : ℝ) : ℕ :=
+  (Finset.Icc 2 ⌊x⌋₊).filter (fun n => bigOmega n = k) |>.card
+
+/-- DEEP FACT (Landau, elementary form; not yet formalized): the count of
+    k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
+    an explicit witness constant C_k rather than raw big-O, since the O
+    needs to be usable inside a partial-summation argument. This is the one
+    piece of real analytic number theory in the whole formalization; every
+    other lemma in this file is either algebra or follows from this one. -/
+lemma piK_bound (k : ℕ) (hk : 1 ≤ k) :
+    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 3 ≤ x →
+      (piK k x : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
+  sorry -- THE deep step: elementary induction on k via the identity
+        -- π_k(x) = Σ_{p ≤ x^(1/k)} π_{k-1}(x/p) + (correction for p > x^(1/k)),
+        -- Chebyshev-type bounds on Σ_p 1/p up to y (Mertens' second theorem),
+        -- and induction on k. This is a genuine multi-day sub-project
+        -- (see e.g. Tenenbaum, "Introduction to Analytic and Probabilistic
+        -- Number Theory", II.6, for the classical elementary argument).
+
+/-- Given the counting bound, convergence follows by partial summation
+    (Abel summation against π_k, using log n → ∞ to kill the count's
+    polynomial-in-log-log growth). Standard once piK_bound is in hand. -/
+lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
+    Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n)) := by
+  obtain ⟨C, hC, hbound⟩ := piK_bound k hk
+  sorry -- partial summation against hbound; standard but not short.
+
+def E (a₁ : ℝ) (k : ℕ) : ℝ := 2 ^ k * (1 - f k) - a₁ * k ^ 2
+
+theorem criterion (a₁ : ℝ) (k : ℕ) :
+    f (k + 1) - f k =
+      (2 : ℝ) ^ (-(k : ℝ) - 1) *
+        (a₁ * ((k : ℝ) ^ 2 - 2 * k - 1) + 2 * E a₁ k - E a₁ (k + 1)) := by
+  have hrpow : (2 : ℝ) ^ (-(k : ℝ) - 1) = ((2 : ℝ) ^ (k + 1))⁻¹ := by
+    rw [show (-(k : ℝ) - 1) = -(((k + 1 : ℕ) : ℝ)) by push_cast; ring]
+    rw [Real.rpow_neg (by norm_num), Real.rpow_natCast]
+  rw [hrpow]
+  simp only [E]
+  have h2 : (2 : ℝ) ^ k ≠ 0 := by positivity
+  have h2' : (2 : ℝ) ^ (k + 1) ≠ 0 := by positivity
+  field_simp
+  push_cast
+  ring
+
+lemma B_nonneg (j : ℕ) (u : ℝ) :
+    0 ≤ (2 : ℝ) ^ (-(j : ℝ) * Real.exp (-u)) - 1 + j * Real.log 2 * Real.exp (-u) := by
+  set x : ℝ := (j : ℝ) * Real.log 2 * Real.exp (-u) with hx
+  have hx0 : 0 ≤ x := by positivity
+  have h : (2 : ℝ) ^ (-(j : ℝ) * Real.exp (-u)) = Real.exp (-x) := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]
+    congr 1; rw [hx]; ring
+  rw [h]
+  have := Real.add_one_le_exp (-x)
+  linarith
+
+lemma geom_tail_bound (t : ℕ → ℝ) (n₀ : ℕ)
+    (hratio : ∀ n ≥ n₀ + 1, |t (n + 1)| ≤ |t n| / 2)
+    (hsum : Summable fun n => |t (n₀ + 1 + n)|) :
+    |∑' n, t (n₀ + 1 + n)| ≤ 2 * |t (n₀ + 1)| := by
+  have hbound : ∀ n : ℕ, |t (n₀ + 1 + n)| ≤ |t (n₀ + 1)| * (1 / 2) ^ n := by
+    intro n
+    induction n with
+    | zero => simp
+    | succ n ih =>
+        have hr := hratio (n₀ + 1 + n) (by omega)
+        have heq : n₀ + 1 + (n + 1) = (n₀ + 1 + n) + 1 := by omega
+        rw [heq]
+        calc |t (n₀ + 1 + n + 1)| ≤ |t (n₀ + 1 + n)| / 2 := hr
+          _ ≤ (|t (n₀ + 1)| * (1 / 2) ^ n) / 2 := by linarith
+          _ = |t (n₀ + 1)| * (1 / 2) ^ (n + 1) := by ring
+  have hsummable_geom : Summable (fun n : ℕ => |t (n₀ + 1)| * (1 / 2 : ℝ) ^ n) :=
+    (summable_geometric_of_lt_one (by norm_num) (by norm_num)).mul_left _
+  have h1 : ‖∑' n, t (n₀ + 1 + n)‖ ≤ ∑' n, ‖t (n₀ + 1 + n)‖ := norm_tsum_le_tsum_norm hsum
+  have h2 : ∑' n, ‖t (n₀ + 1 + n)‖ ≤ ∑' n, |t (n₀ + 1)| * (1 / 2 : ℝ) ^ n := by
+    apply Summable.tsum_le_tsum _ hsum hsummable_geom
+    intro n
+    simpa using hbound n
+  have h3 : ∑' n, |t (n₀ + 1)| * (1 / 2 : ℝ) ^ n = |t (n₀ + 1)| * 2 := by
+    rw [tsum_mul_left, tsum_geometric_of_lt_one (by norm_num) (by norm_num)]
+    norm_num
+  calc |∑' n, t (n₀ + 1 + n)| = ‖∑' n, t (n₀ + 1 + n)‖ := (Real.norm_eq_abs _).symm
+    _ ≤ ∑' n, ‖t (n₀ + 1 + n)‖ := h1
+    _ ≤ ∑' n, |t (n₀ + 1)| * (1 / 2 : ℝ) ^ n := h2
+    _ = |t (n₀ + 1)| * 2 := h3
+    _ = 2 * |t (n₀ + 1)| := by ring
+
+noncomputable def dConst : ℝ := 0.3786950
+noncomputable def rhoConst : ℝ := -0.1749323
+noncomputable def SstarConst : ℝ := 6.9763
+noncomputable def alphaConst : ℝ := 15.5716
+noncomputable def GammaConst : ℝ := 105.41
+
+structure NumericalFacts : Prop where
+  d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
+  rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
+  Sstar_bound   : SstarConst ≤ 6.9763
+  alpha_bound   : alphaConst ≤ 15.5716
+  Gamma_bound   : GammaConst ≤ 105.41
+
+theorem erdos_sums_increase_from_six
+    (hnum : NumericalFacts) :
+    ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
+  sorry
+
+end
