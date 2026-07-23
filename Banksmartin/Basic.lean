@@ -341,7 +341,9 @@ noncomputable def Fk (k : ℕ) (s : ℝ) : ℝ :=
 /-- F_k(s) is summable for s > 1. -/
 lemma Fk_summable (k : ℕ) (s : ℝ) (hs : 1 < s) :
     Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} => (n : ℝ) ^ (-s)) := by
-  sorry
+  have hcomp : Summable (fun n : ℕ => (n : ℝ) ^ (-s)) :=
+    Real.summable_nat_rpow.mpr (by linarith)
+  exact hcomp.subtype _
 
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
