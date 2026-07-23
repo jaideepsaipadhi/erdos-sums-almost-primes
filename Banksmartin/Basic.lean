@@ -797,6 +797,65 @@ theorem log_bound_combined (x : ℝ) (hx : |x| ≤ 2/3) :
     · linarith [hlb, hy2.symm ▸ hlb]
     · nlinarith [hub, hy2]
 
+/-- The per-prime log-correction bound: for p ≥ 3, s ≥ 1, |z| ≤ 2,
+    |{-log(1-z p^{-s})} + z log(1-p^{-s})| ≤ 18 p^{-2s}. -/
+theorem prime_correction_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
+    (z : ℝ) (hz : |z| ≤ 2) :
+    |(-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))|
+      ≤ 18 * (p:ℝ) ^ (-2*s) := by
+  have hp0 : (0:ℝ) < (p:ℝ) := by
+    have : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    linarith
+  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1/3 := by
+    rw [ha_def]
+    have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+      linarith
+    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+      rw [Real.rpow_neg_one, inv_eq_one_div]
+    rw [h2] at h1
+    have h3 : (1:ℝ) / (p:ℝ) ≤ 1/3 := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
+    linarith
+  have hza_le : |z * a| ≤ 2/3 := by
+    rw [abs_mul, abs_of_pos ha_pos]
+    have hmm : |z| * a ≤ 2 * (1/3) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
+    linarith
+  have ha_le2 : |a| ≤ 2/3 := by rw [abs_of_pos ha_pos]; linarith
+  have hr1 := log_bound_combined (z * a) hza_le
+  have hr2 := log_bound_combined a ha_le2
+  have hkey : (-Real.log (1 - z * a)) + z * Real.log (1 - a)
+      = -(Real.log (1 - z * a) + z * a) + z * (Real.log (1 - a) + a) := by ring
+  rw [hkey]
+  have hstep1 : |(-(Real.log (1 - z * a) + z * a) + z * (Real.log (1 - a) + a))|
+      ≤ |Real.log (1 - z * a) + z * a| + |z * (Real.log (1 - a) + a)| := by
+    have habs : |(-(Real.log (1 - z * a) + z * a)) + z * (Real.log (1 - a) + a)|
+        ≤ |(-(Real.log (1 - z * a) + z * a))| + |z * (Real.log (1 - a) + a)| := by
+      first
+      | exact abs_add _ _
+      | exact abs_add_le _ _
+      | exact abs_add (-(Real.log (1 - z * a) + z * a)) (z * (Real.log (1 - a) + a))
+    rwa [abs_neg] at habs
+  have hstep2 : |z * (Real.log (1 - a) + a)| ≤ |z| * (3 * a^2) := by
+    rw [abs_mul]
+    exact mul_le_mul_of_nonneg_left hr2 (abs_nonneg z)
+  have hfinal : |Real.log (1 - z * a) + z * a| + |z * (Real.log (1 - a) + a)|
+      ≤ 3 * (z*a)^2 + |z| * (3 * a^2) := by linarith
+  have hbound : 3 * (z*a)^2 + |z| * (3 * a^2) ≤ 18 * a^2 := by
+    have hz2 : z^2 ≤ 4 := by nlinarith [abs_le.mp hz]
+    nlinarith [sq_nonneg a, hz2, hz, sq_abs z]
+  have heq : (18:ℝ) * a^2 = 18 * (p:ℝ) ^ (-2*s) := by
+    rw [ha_def, ← Real.rpow_natCast ((p:ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
+    ring_nf
+  calc |(-(Real.log (1 - z * a) + z * a) + z * (Real.log (1 - a) + a))|
+      ≤ |Real.log (1 - z * a) + z * a| + |z * (Real.log (1 - a) + a)| := hstep1
+    _ ≤ 3 * (z*a)^2 + |z| * (3 * a^2) := hfinal
+    _ ≤ 18 * a^2 := hbound
+    _ = 18 * (p:ℝ) ^ (-2*s) := heq
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
