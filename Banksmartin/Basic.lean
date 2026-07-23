@@ -397,6 +397,47 @@ lemma fk_eq_integral_Fk (k : ℕ) (hk : 1 ≤ k)
   rw [tsum_congr (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} => (integral_n_neg_s n n.2.1).symm)]
   exact MeasureTheory.integral_tsum_of_summable_integral_norm hint hsummable_norm
 
+/-- The function s ↦ n^{-s} is continuous. -/
+lemma continuous_n_neg_s (n : ℕ) (hn : 2 ≤ n) : Continuous (fun s : ℝ => (n:ℝ) ^ (-s)) := by
+  have hnpos : (0:ℝ) < (n:ℝ) := by positivity
+  exact (Real.continuous_const_rpow hnpos.ne').comp continuous_neg
+
+/-- n^{-s} is integrable on Ioi 1. -/
+lemma integrable_n_neg_s_Ioi1 (n : ℕ) (hn : 2 ≤ n) :
+    MeasureTheory.Integrable (fun s : ℝ => (n:ℝ) ^ (-s))
+      (MeasureTheory.volume.restrict (Set.Ioi (1:ℝ))) := by
+  by_contra hni
+  have hz := MeasureTheory.integral_undef hni
+  rw [integral_n_neg_s n hn] at hz
+  have : (0:ℝ) < 1 / ((n:ℝ) * Real.log n) := by
+    have hn1 : (1:ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < n)
+    have := Real.log_pos hn1
+    positivity
+  linarith [hz ▸ this]
+
+/-- n^{-s} is integrable on Ioi 2 (via Ioi 2 ⊆ Ioi 1). -/
+lemma integrable_n_neg_s_Ioi2 (n : ℕ) (hn : 2 ≤ n) :
+    MeasureTheory.Integrable (fun s : ℝ => (n:ℝ) ^ (-s))
+      (MeasureTheory.volume.restrict (Set.Ioi (2:ℝ))) := by
+  have hsub : Set.Ioi (2:ℝ) ⊆ Set.Ioi (1:ℝ) := fun x hx => lt_trans (by norm_num : (1:ℝ) < 2) hx
+  exact MeasureTheory.IntegrableOn.mono_set (integrable_n_neg_s_Ioi1 n hn) hsub
+
+/-- Splitting the improper integral at s=2. -/
+lemma integral_n_neg_s_split (n : ℕ) (hn : 2 ≤ n) :
+    ∫ s in Set.Ioi (1:ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume =
+      ∫ s in Set.Ioc (1:ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume +
+        ∫ s in Set.Ioi (2:ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume := by
+  have hunion : Set.Ioi (1:ℝ) = Set.Ioc (1:ℝ) 2 ∪ Set.Ioi (2:ℝ) := by
+    rw [Set.Ioc_union_Ioi_eq_Ioi (by norm_num : (1:ℝ) ≤ 2)]
+  have hdisj : Disjoint (Set.Ioc (1:ℝ) 2) (Set.Ioi (2:ℝ)) := by
+    rw [Set.disjoint_left]
+    rintro x ⟨_, hx2⟩ hx2'
+    exact absurd hx2 (not_le.mpr hx2')
+  rw [hunion]
+  exact MeasureTheory.setIntegral_union hdisj measurableSet_Ioi
+    ((continuous_n_neg_s n hn).integrableOn_Ioc)
+    (integrable_n_neg_s_Ioi2 n hn)
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
