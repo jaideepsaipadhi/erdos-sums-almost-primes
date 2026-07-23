@@ -1,6 +1,7 @@
 import Mathlib
 
 set_option linter.style.header false
+set_option linter.unusedVariables false
 
 open Real BigOperators
 
@@ -18,7 +19,7 @@ lemma pow_bigOmega_le (n : ℕ) (hn : 1 ≤ n) : 2 ^ bigOmega n ≤ n := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     match n, hn with
-    | 1, _ => simp [bigOmega]
+    | 1, _hn => simp [bigOmega]
     | (n + 2), _ =>
       set N := n + 2 with hN
       have hN2 : 2 ≤ N := by omega
@@ -92,7 +93,9 @@ lemma bigOmega_lt_of_dvd_of_lt (a n : ℕ) (ha : a ≠ 0) (hn : n ≠ 0)
       have hpdvd := Nat.minFac_dvd c
       obtain ⟨d, hd⟩ := hpdvd
       have hd0 : d ≠ 0 := by
-        rintro rfl; simp at hd; exact hc0 hd
+        rintro rfl
+        simp only [mul_zero] at hd
+        exact hc0 hd
       have hp1 : bigOmega (Nat.minFac c) = 1 := by
         unfold bigOmega
         rw [hp.factorization]
