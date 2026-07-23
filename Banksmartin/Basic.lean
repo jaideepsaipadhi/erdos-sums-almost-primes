@@ -363,6 +363,40 @@ lemma integral_n_neg_s (n : ℕ) (hn : 2 ≤ n) :
   rw [one_div, mul_inv]
   ring
 
+/-- The Tonelli exchange: f_k = ∫₁^∞ F_k(s) ds. -/
+lemma fk_eq_integral_Fk (k : ℕ) (hk : 1 ≤ k)
+    (hsum1 : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n))) :
+    f k = ∫ s in Set.Ioi (1:ℝ), Fk k s := by
+  unfold f Fk
+  have habs : ∀ (n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k}) (s : ℝ),
+      ‖(n:ℝ) ^ (-s)‖ = (n:ℝ) ^ (-s) := by
+    intro n s
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+  have hnorm_eq : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
+      ∫ s in Set.Ioi (1:ℝ), ‖(n:ℝ) ^ (-s)‖ = 1 / ((n:ℝ) * Real.log n) := by
+    intro n
+    simp_rw [habs]
+    exact integral_n_neg_s n n.2.1
+  have hsummable_norm : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+      ∫ s in Set.Ioi (1:ℝ), ‖(n:ℝ) ^ (-s)‖) := by
+    simp_rw [hnorm_eq]; exact hsum1
+  have hint : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
+      MeasureTheory.Integrable (fun s => (n:ℝ) ^ (-s))
+        (MeasureTheory.volume.restrict (Set.Ioi (1:ℝ))) := by
+    intro n
+    by_contra hni
+    have hz := MeasureTheory.integral_undef hni
+    rw [integral_n_neg_s n n.2.1] at hz
+    have : (0:ℝ) < 1 / ((n:ℝ) * Real.log n) := by
+      have hn2 : 2 ≤ (n:ℕ) := n.2.1
+      have : (1:ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < (n:ℕ))
+      have := Real.log_pos this
+      positivity
+    linarith [hz ▸ this]
+  rw [tsum_congr (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} => (integral_n_neg_s n n.2.1).symm)]
+  exact MeasureTheory.integral_tsum_of_summable_integral_norm hint hsummable_norm
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
