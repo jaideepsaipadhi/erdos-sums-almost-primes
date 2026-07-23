@@ -638,6 +638,53 @@ theorem log_one_sub_add_self_nonpos (x : ℝ) (hx0 : 0 ≤ x) (hx1 : x < 1) :
   have h0 := hanti (Set.mem_Ico.mpr ⟨le_refl 0, one_pos⟩) (Set.mem_Ico.mpr ⟨hx0, hx1⟩) hx0
   simpa using h0
 
+/-- log(1-x)+x ≥ -x²/(1-x) for x ∈ [0,1). -/
+theorem log_one_sub_add_self_lower (x : ℝ) (hx0 : 0 ≤ x) (hx1 : x < 1) :
+    -(x^2 / (1 - x)) ≤ Real.log (1 - x) + x := by
+  have hderiv : ∀ y ∈ Set.Ico (0:ℝ) 1,
+      HasDerivAt (fun t => Real.log (1 - t) + t + t^2 / (1 - t))
+        (-1 / (1 - y) + 1 + (2 * y * (1 - y) - y^2 * (-1)) / (1 - y)^2) y := by
+    intro y hy
+    have hy1 : (1:ℝ) - y ≠ 0 := by
+      have := hy.2; linarith
+    have h1 : HasDerivAt (fun t : ℝ => 1 - t) (-1) y := by
+      simpa using (hasDerivAt_id y).const_sub (1:ℝ)
+    have h2 : HasDerivAt (fun t : ℝ => Real.log (1 - t)) (-1 / (1 - y)) y := by
+      have := h1.log hy1
+      simpa using this
+    have h3 : HasDerivAt (fun t : ℝ => t^2) (2 * y) y := by
+      have := hasDerivAt_pow 2 y
+      simpa using this
+    have h4 : HasDerivAt (fun t : ℝ => t^2 / (1 - t))
+        ((2 * y * (1 - y) - y^2 * (-1)) / (1 - y)^2) y := h3.div h1 hy1
+    exact (h2.add (hasDerivAt_id y)).add h4
+  have hmono : MonotoneOn (fun t => Real.log (1 - t) + t + t^2 / (1 - t)) (Set.Ico (0:ℝ) 1) := by
+    apply monotoneOn_of_deriv_nonneg (convex_Ico 0 1)
+    · apply ContinuousOn.add
+      · apply ContinuousOn.add
+        · apply ContinuousOn.log (by fun_prop)
+          intro y hy; have := hy.2; linarith [hy.2]
+        · fun_prop
+      · apply ContinuousOn.div (by fun_prop) (by fun_prop)
+        intro y hy; have := hy.2; simp; linarith [hy.2]
+    · intro y hy
+      rw [interior_Ico] at hy
+      exact ((hderiv y (Set.mem_Ico.mpr ⟨hy.1.le, hy.2⟩)).differentiableAt).differentiableWithinAt
+    · intro y hy
+      rw [interior_Ico] at hy
+      have hd := hderiv y (Set.mem_Ico.mpr ⟨hy.1.le, hy.2⟩)
+      rw [hd.deriv]
+      have hy1 : (0:ℝ) < 1 - y := by linarith [hy.2]
+      have hyy : (0:ℝ) ≤ y := hy.1.le
+      have heq : -1 / (1 - y) + 1 + (2 * y * (1 - y) - y^2 * (-1)) / (1 - y)^2 = y / (1 - y)^2 := by
+        field_simp; ring
+      rw [heq]
+      positivity
+  have h0 := hmono (Set.mem_Ico.mpr ⟨le_refl 0, one_pos⟩) (Set.mem_Ico.mpr ⟨hx0, hx1⟩) hx0
+  simp only [Real.log_one, sub_zero, zero_pow, ne_eq, OfNat.ofNat_ne_zero,
+    not_false_eq_true, zero_div, add_zero, zero_add] at h0
+  linarith
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
