@@ -333,6 +333,16 @@ lemma sum_exp_terms_le (u : ℝ) (hu : 0 ≤ u) (m : ℕ) :
   | exact Finset.sum_le_tsum (Finset.range (m + 1)) hnn hsummable
   | exact hsummable.sum_le_tsum (Finset.range (m + 1)) hnn
 
+/-- F_k(s) := Σ_{Ω(n)=k} n^{-s}, the Dirichlet series restricted to
+    k-almost-primes. -/
+noncomputable def Fk (k : ℕ) (s : ℝ) : ℝ :=
+  ∑' n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k}, (n : ℝ) ^ (-s)
+
+/-- F_k(s) is summable for s > 1. -/
+lemma Fk_summable (k : ℕ) (s : ℝ) (hs : 1 < s) :
+    Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} => (n : ℝ) ^ (-s)) := by
+  sorry
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
