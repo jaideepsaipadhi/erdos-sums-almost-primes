@@ -318,6 +318,21 @@ lemma B_sum_le (u : ℝ) (m : ℕ) :
         push_cast
         ring
 
+/-- Σ_{i=0}^{m} (2u)^i/i! ≤ exp(2u) for u ≥ 0. -/
+lemma sum_exp_terms_le (u : ℝ) (hu : 0 ≤ u) (m : ℕ) :
+    ∑ i ∈ Finset.range (m + 1), (2 * u) ^ i / Nat.factorial i ≤ Real.exp (2 * u) := by
+  have h2u : (0 : ℝ) ≤ 2 * u := by linarith
+  rw [Real.exp_eq_exp_ℝ, NormedSpace.exp_eq_tsum_div]
+  have hsummable : Summable (fun i => (2 * u) ^ i / Nat.factorial i) :=
+    Real.summable_pow_div_factorial (2 * u)
+  have hnn : ∀ i ∉ Finset.range (m + 1), (0:ℝ) ≤ (2 * u) ^ i / Nat.factorial i := by
+    intro i _hi
+    positivity
+  first
+  | exact sum_le_tsum (Finset.range (m + 1)) hnn hsummable
+  | exact Finset.sum_le_tsum (Finset.range (m + 1)) hnn hsummable
+  | exact hsummable.sum_le_tsum (Finset.range (m + 1)) hnn
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
