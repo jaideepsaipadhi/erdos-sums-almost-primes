@@ -580,6 +580,21 @@ theorem E_eq_via_lemma1 (a₁ : ℝ) (k : ℕ) (hk : 1 ≤ k)
   rw [lemma1_foundation k hk hsum1]
   ring
 
+/-- Fully explicit criterion: f(k+1)-f(k) purely in terms of I_k,T_k. -/
+theorem criterion_explicit (a₁ : ℝ) (k : ℕ) (hk : 1 ≤ k)
+    (hsum1 : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n)))
+    (hsum1' : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = (k+1)} =>
+      1 / ((n : ℝ) * Real.log n))) :
+    f (k + 1) - f k =
+      (2 : ℝ) ^ (-(k : ℝ) - 1) *
+        (a₁ * ((k : ℝ) ^ 2 - 2 * k - 1) +
+          2 * (2 ^ k * (1 - Ik k - Tk k) - a₁ * k ^ 2) -
+          (2 ^ (k+1) * (1 - Ik (k+1) - Tk (k+1)) - a₁ * (k+1:ℝ) ^ 2)) := by
+  rw [criterion a₁ k, E_eq_via_lemma1 a₁ k hk hsum1, E_eq_via_lemma1 a₁ (k+1) (by omega) hsum1']
+  push_cast
+  ring
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
