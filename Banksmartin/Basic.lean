@@ -685,6 +685,90 @@ theorem log_one_sub_add_self_lower (x : ℝ) (hx0 : 0 ≤ x) (hx1 : x < 1) :
     not_false_eq_true, zero_div, add_zero, zero_add] at h0
   linarith
 
+/-- log(1+y)-y ≤ 0 for y ≥ 0. -/
+theorem log_one_add_sub_self_nonpos (y : ℝ) (hy0 : 0 ≤ y) :
+    Real.log (1 + y) - y ≤ 0 := by
+  have hderiv : ∀ t ∈ Set.Ici (0:ℝ), HasDerivAt (fun s => Real.log (1 + s) + -s)
+      (1 / (1 + t) + -1) t := by
+    intro t ht
+    have ht0 : (0:ℝ) ≤ t := ht
+    have ht1 : (1:ℝ) + t ≠ 0 := by positivity
+    have h1 : HasDerivAt (fun s : ℝ => 1 + s) 1 t := by
+      simpa using (hasDerivAt_id t).const_add (1:ℝ)
+    have h2 : HasDerivAt (fun s : ℝ => Real.log (1 + s)) (1 / (1 + t)) t := by
+      have := h1.log ht1
+      simpa using this
+    have h3 : HasDerivAt (fun s : ℝ => -s) (-1) t := (hasDerivAt_id t).neg
+    exact h2.add h3
+  have hanti : AntitoneOn (fun s => Real.log (1 + s) + -s) (Set.Ici (0:ℝ)) := by
+    apply antitoneOn_of_deriv_nonpos (convex_Ici 0)
+    · apply ContinuousOn.add
+      · apply ContinuousOn.log (by fun_prop)
+        intro t ht
+        have ht0 : (0:ℝ) ≤ t := ht
+        positivity
+      · fun_prop
+    · intro t ht
+      rw [interior_Ici] at ht
+      exact ((hderiv t (Set.mem_Ici.mpr ht.le)).differentiableAt).differentiableWithinAt
+    · intro t ht
+      rw [interior_Ici] at ht
+      have ht0 : (0:ℝ) < t := ht
+      have hd := hderiv t (Set.mem_Ici.mpr ht0.le)
+      rw [hd.deriv]
+      have ht1 : (0:ℝ) < 1 + t := by linarith
+      have : (1:ℝ) / (1 + t) ≤ 1 := by
+        rw [div_le_one ht1]; linarith
+      linarith
+  have h0 := hanti (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hy0) hy0
+  simp only [Real.log_one, add_zero] at h0
+  linarith
+
+/-- log(1+y)-y ≥ -y²/2 for y ≥ 0. -/
+theorem log_one_add_sub_self_lower (y : ℝ) (hy0 : 0 ≤ y) :
+    -(y^2 / 2) ≤ Real.log (1 + y) - y := by
+  have hderiv : ∀ t ∈ Set.Ici (0:ℝ),
+      HasDerivAt (fun s => Real.log (1 + s) + -s + s^2 / 2)
+        (1 / (1 + t) + -1 + t) t := by
+    intro t ht
+    have ht0 : (0:ℝ) ≤ t := ht
+    have ht1 : (1:ℝ) + t ≠ 0 := by positivity
+    have h1 : HasDerivAt (fun s : ℝ => 1 + s) 1 t := by
+      simpa using (hasDerivAt_id t).const_add (1:ℝ)
+    have h2 : HasDerivAt (fun s : ℝ => Real.log (1 + s)) (1 / (1 + t)) t := by
+      have := h1.log ht1
+      simpa using this
+    have h3neg : HasDerivAt (fun s : ℝ => -s) (-1) t := (hasDerivAt_id t).neg
+    have h4 : HasDerivAt (fun s : ℝ => s^2 / 2) t t := by
+      have := (hasDerivAt_pow 2 t).div_const 2
+      simpa using this
+    exact (h2.add h3neg).add h4
+  have hmono : MonotoneOn (fun s => Real.log (1 + s) + -s + s^2 / 2) (Set.Ici (0:ℝ)) := by
+    apply monotoneOn_of_deriv_nonneg (convex_Ici 0)
+    · apply ContinuousOn.add
+      · apply ContinuousOn.add
+        · apply ContinuousOn.log (by fun_prop)
+          intro t ht
+          have ht0 : (0:ℝ) ≤ t := ht
+          positivity
+        · fun_prop
+      · fun_prop
+    · intro t ht
+      rw [interior_Ici] at ht
+      exact ((hderiv t (Set.mem_Ici.mpr ht.le)).differentiableAt).differentiableWithinAt
+    · intro t ht
+      rw [interior_Ici] at ht
+      have ht0 : (0:ℝ) < t := ht
+      have hd := hderiv t (Set.mem_Ici.mpr ht0.le)
+      rw [hd.deriv]
+      have ht1 : (0:ℝ) < 1 + t := by linarith
+      have hkey : 1 / (1 + t) + -1 + t = t^2 / (1 + t) := by
+        field_simp; ring
+      rw [hkey]; positivity
+  have h0 := hmono (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hy0) hy0
+  simp only [add_zero, Real.log_one] at h0
+  linarith
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
