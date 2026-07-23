@@ -245,6 +245,46 @@ lemma Tk_bound_decreasing (k : ℕ) (hk : 1 ≤ k) :
   apply one_div_lt_one_div_of_lt hden_k
   linarith [diff_pos]
 
+/-- The building block h(x) = exp(-x) - 1 + x is monotone increasing on
+    [0, ∞). -/
+lemma h_mono {a b : ℝ} (ha : 0 ≤ a) (hab : a ≤ b) :
+    Real.exp (-a) - 1 + a ≤ Real.exp (-b) - 1 + b := by
+  have hbase : Real.exp (-(b - a)) ≥ 1 - (b - a) := by
+    have := Real.add_one_le_exp (-(b - a))
+    linarith
+  have hea_le1 : Real.exp (-a) ≤ 1 := by
+    have hle : Real.exp (-a) ≤ Real.exp 0 := Real.exp_le_exp.mpr (by linarith)
+    rwa [Real.exp_zero] at hle
+  have key : (b - a) ≥ Real.exp (-a) * (1 - Real.exp (-(b - a))) := by
+    have h1 : (1 : ℝ) - Real.exp (-(b - a)) ≥ 0 := by
+      have hle : Real.exp (-(b - a)) ≤ Real.exp 0 := Real.exp_le_exp.mpr (by linarith)
+      rw [Real.exp_zero] at hle
+      linarith
+    have step1 := mul_le_of_le_one_left h1 hea_le1
+    linarith [step1, hbase]
+  have hexp_split : Real.exp (-b) = Real.exp (-a) * Real.exp (-(b - a)) := by
+    rw [← Real.exp_add]; ring_nf
+  nlinarith [key, hexp_split]
+
+/-- B_j(u) is monotone increasing in j (real parameter ≥ 0), for fixed u.
+    Behind the gap-5 domination B_{m-i} ≤ B_m. -/
+lemma B_mono_in_param (u : ℝ) {j1 j2 : ℝ} (hj1 : 0 ≤ j1) (hj12 : j1 ≤ j2) :
+    (2 : ℝ) ^ (-j1 * Real.exp (-u)) - 1 + j1 * Real.log 2 * Real.exp (-u) ≤
+      (2 : ℝ) ^ (-j2 * Real.exp (-u)) - 1 + j2 * Real.log 2 * Real.exp (-u) := by
+  have hrw : ∀ j : ℝ, (2 : ℝ) ^ (-j * Real.exp (-u)) =
+      Real.exp (-(j * Real.log 2 * Real.exp (-u))) := by
+    intro j
+    rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]
+    congr 1; ring
+  rw [hrw j1, hrw j2]
+  have heu : (0 : ℝ) ≤ Real.exp (-u) := (Real.exp_pos (-u)).le
+  have hlog2 : (0 : ℝ) ≤ Real.log 2 := (Real.log_pos (by norm_num)).le
+  have ha : (0 : ℝ) ≤ j1 * Real.log 2 * Real.exp (-u) := by positivity
+  have hab : j1 * Real.log 2 * Real.exp (-u) ≤ j2 * Real.log 2 * Real.exp (-u) := by
+    apply mul_le_mul_of_nonneg_right _ heu
+    exact mul_le_mul_of_nonneg_right hj12 hlog2
+  exact h_mono ha hab
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
