@@ -438,6 +438,29 @@ lemma integral_n_neg_s_split (n : ℕ) (hn : 2 ≤ n) :
     ((continuous_n_neg_s n hn).integrableOn_Ioc)
     (integrable_n_neg_s_Ioi2 n hn)
 
+/-- ∫₂^∞ n^{-s} ds = 1/(n² log n) for n ≥ 2. -/
+lemma integral_n_neg_s_Ioi2_value (n : ℕ) (hn : 2 ≤ n) :
+    ∫ s in Set.Ioi (2:ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume =
+      1 / ((n:ℝ) ^ 2 * Real.log n) := by
+  have hnpos : (0:ℝ) < (n:ℝ) := by positivity
+  have hn1 : (1:ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < n)
+  have hlogn : 0 < Real.log n := Real.log_pos hn1
+  have hpteq : ∀ s : ℝ, (n:ℝ) ^ (-s) = Real.exp (-(Real.log n * s)) := by
+    intro s
+    rw [Real.rpow_def_of_pos hnpos]
+    congr 1; ring
+  simp_rw [hpteq]
+  rw [MeasureTheory.integral_comp_mul_left_Ioi (fun u => Real.exp (-u)) 2 hlogn]
+  simp only [smul_eq_mul]
+  rw [integral_exp_neg_Ioi, Real.exp_neg]
+  have hexp2 : Real.exp (Real.log n * 2) = (n:ℝ) ^ 2 := by
+    have heq : Real.log (n:ℝ) * 2 = Real.log n + Real.log n := by ring
+    rw [heq, Real.exp_add, Real.exp_log hnpos]
+    ring
+  rw [hexp2]
+  rw [one_div, mul_inv]
+  ring
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
