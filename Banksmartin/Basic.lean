@@ -1662,6 +1662,19 @@ theorem G2tailC_eq_exp_sum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 
   have hhasprod_G2 := G2tailC_hasProd s hs z hz
   exact (hhasprod_G2.unique hhasprod_exp)
 
+/-- G2tailC is differentiable on the ball |z|<2. -/
+theorem G2tailC_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
+    DifferentiableOn ℂ (fun z => G2tailC s z) (Metric.ball 0 2) := by
+  have heq : ∀ z ∈ Metric.ball (0:ℂ) 2, G2tailC s z = Complex.exp
+      (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+        ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ))) := by
+    intro z hz
+    rw [Metric.mem_ball, dist_zero_right] at hz
+    exact G2tailC_eq_exp_sum s hs z hz.le
+  apply DifferentiableOn.congr _ heq
+  exact Complex.differentiable_exp.comp_differentiableOn (correction_sum_differentiableOn s hs)
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
