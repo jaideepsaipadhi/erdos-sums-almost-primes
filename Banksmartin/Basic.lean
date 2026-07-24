@@ -1063,6 +1063,17 @@ theorem prime_factor_multipliable (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| �
     ring
   simpa only [heq] using hmult
 
+/-- The tail of G₂: infinite product over primes p≥5. -/
+noncomputable def G2tail (s z : ℝ) : ℝ :=
+  ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z
+
+/-- G2tail actually has this product as its value, since the family is
+    genuinely Multipliable. -/
+theorem G2tail_hasProd (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
+    HasProd (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z) (G2tail s z) :=
+  (prime_factor_multipliable s hs z hz).hasProd
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
