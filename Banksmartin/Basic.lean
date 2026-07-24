@@ -2026,9 +2026,41 @@ theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 
         have hqdvdn : q ∣ n := hqdvd.trans (Nat.div_dvd_of_dvd hpdvd)
         rw [← hnminFac]
         exact Nat.minFac_le_of_dvd hq.two_le hqdvdn
-    · sorry
-    · sorry
-    · sorry
+    · intro m hm
+      obtain ⟨hmMem, hmO, hmfac⟩ := Finset.mem_filter.mp hm
+      obtain ⟨hm2, hmx⟩ := Finset.mem_Icc.mp hmMem
+      have hOmegap : bigOmega p = 1 := by
+        unfold bigOmega; rw [hpp.factorization]; simp
+      have hOmegapm : bigOmega (p * m) = k + 1 := by
+        rw [bigOmega_mul p m hpp.pos.ne' (by omega), hOmegap, hmO]; ring
+      have hminFacpm : (p * m).minFac = p := by
+        have hle : (p * m).minFac ≤ p := Nat.minFac_le_of_dvd hp2 (Dvd.intro m rfl)
+        have hge : p ≤ (p * m).minFac := by
+          have hprime : (p*m).minFac.Prime := Nat.minFac_prime (by
+            intro h; rw [h] at hOmegapm; simp [bigOmega] at hOmegapm)
+          have hdvd : (p * m).minFac ∣ p * m := Nat.minFac_dvd _
+          rcases (Nat.Prime.dvd_mul hprime).mp hdvd with hdp | hdm
+          · exact ((Nat.prime_dvd_prime_iff_eq hprime hpp).mp hdp).symm.le
+          · exact hmfac _ hprime hdm
+        omega
+      refine Finset.mem_filter.mpr ⟨Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr
+        ⟨by nlinarith [hpp.two_le], ?_⟩, hOmegapm, ?_⟩, hminFacpm⟩
+      · rw [Nat.le_floor_iff (by positivity)] at hmx ⊢
+        have : (m:ℝ) ≤ x / p := hmx
+        have hpm : (p * m : ℝ) ≤ x := by
+          rw [le_div_iff₀ (by positivity)] at this
+          push_cast
+          nlinarith
+        exact_mod_cast hpm
+      · intro q hq hqdvd
+        rcases (Nat.Prime.dvd_mul hq).mp hqdvd with hdp | hdm
+        · rw [(Nat.prime_dvd_prime_iff_eq hq hpp).mp hdp]; exact hp0
+        · exact hp0.trans (hmfac _ hq hdm)
+    · intro n hn
+      obtain ⟨hnInS, hnminFac⟩ := Finset.mem_filter.mp hn
+      exact Nat.mul_div_cancel' (hnminFac ▸ Nat.minFac_dvd n)
+    · intro m hm
+      exact Nat.mul_div_cancel_left m hpp.pos
   · intro n hn
     obtain ⟨hnMem, hnO, hnfac⟩ := Finset.mem_filter.mp hn
     obtain ⟨hn2, hnx⟩ := Finset.mem_Icc.mp hnMem
