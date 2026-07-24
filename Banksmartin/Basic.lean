@@ -2782,7 +2782,30 @@ theorem integral_term_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos :
   rw [MeasureTheory.integral_mul_const, hint_ftc] at hle
   linarith [hle]
 
-/-- Combining abel_summation_ratio_log with integral_term_bound. -/
+/-- Generalized version with an arbitrary upper bound B. -/
+theorem sum_ratio_log_bound_gen (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
+    (hxpos : 0 < x) (B : ℝ) (hB1 : 3 ≤ x / B) (hx3 : (p₀ : ℝ) ≤ B) :
+    ∑ k ∈ Finset.Ioc p₀ ⌊B⌋₊,
+        ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) ≤
+      ((x / (p₀:ℝ)) / Real.log (x / (p₀:ℝ))) * (Nat.primeCounting ⌊B⌋₊ : ℝ) := by
+  have habel := abel_summation_ratio_log_gen x p₀ hp₀ hxpos B (by linarith [hB1]) hx3
+  have hintbound := integral_term_bound_gen x p₀ hp₀ hxpos B hB1 hx3
+  have ha : 0 < (p₀ : ℝ) := by exact_mod_cast hp₀
+  have hpc_nonneg : (0:ℝ) ≤ (Nat.primeCounting p₀ : ℝ) := by positivity
+  have hh_nonneg : (0:ℝ) ≤ (x/(p₀:ℝ)) / Real.log (x/(p₀:ℝ)) := by
+    have hxb : 1 < x / (p₀:ℝ) := by
+      have hb : 0 < B := by
+        by_contra hle
+        push_neg at hle
+        have : x / B ≤ 0 := div_nonpos_of_nonneg_of_nonpos hxpos.le hle
+        linarith
+      have hge : x / B ≤ x / (p₀:ℝ) := by
+        apply div_le_div_of_nonneg_left hxpos.le ha hx3
+      linarith [hB1]
+    have hlogpos : 0 < Real.log (x/(p₀:ℝ)) := Real.log_pos hxb
+    positivity
+  nlinarith [habel, hintbound, mul_nonneg hh_nonneg hpc_nonneg]
+
 theorem sum_ratio_log_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
     (hxpos : 0 < x) (hx3 : (p₀ : ℝ) ≤ x / 3) :
     ∑ k ∈ Finset.Ioc p₀ ⌊x / 3⌋₊,
