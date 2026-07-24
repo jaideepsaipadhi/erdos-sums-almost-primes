@@ -2222,6 +2222,13 @@ theorem sum_log_prime_le_primorial (n : ℕ) :
     exact_mod_cast (Finset.mem_filter.mp hp).2.pos.ne'
   linarith [h3 ▸ h2]
 
+/-- Primes in (√n, n] each contribute ≥ log(√n) to the sum. -/
+theorem sum_log_prime_ge_sqrt_range (n : ℕ) (hn : 4 ≤ n) :
+    (∑ p ∈ Finset.range (n+1) with Nat.Prime p, Real.log p) ≥
+      ((Nat.primeCounting n : ℝ) - Nat.primeCounting ⌊Real.sqrt n⌋₊) *
+        Real.log (Real.sqrt n) := by
+  sorry
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
