@@ -2136,6 +2136,20 @@ theorem bigOmega_eq_one_iff (n : ℕ) : bigOmega n = 1 ↔ n.Prime := by
     rw [hpp.factorization]
     simp
 
+/-- piK(1,x) equals Nat.primeCounting ⌊x⌋₊. -/
+theorem piK_one_eq_primeCounting (x : ℝ) : piK 1 x = Nat.primeCounting ⌊x⌋₊ := by
+  unfold piK Nat.primeCounting Nat.primeCounting'
+  rw [Nat.count_eq_card_filter_range]
+  congr 1
+  ext n
+  simp only [Finset.mem_filter, Finset.mem_Icc, Finset.mem_range]
+  rw [bigOmega_eq_one_iff]
+  constructor
+  · rintro ⟨⟨_, hnx⟩, hprime⟩
+    exact ⟨by omega, hprime⟩
+  · rintro ⟨hnx, hprime⟩
+    exact ⟨⟨hprime.two_le, by omega⟩, hprime⟩
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
