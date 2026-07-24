@@ -2406,6 +2406,11 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     · obtain ⟨C, hC, hbound⟩ := ih hnpos
       refine ⟨C * 100, by positivity, fun p₀ x hx => ?_⟩
       rw [piKFrom_succ_eq n hnpos x p₀ (by linarith)]
+      have hterm_bound : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
+          x / p ≥ 3 → (piKFrom n (x / p) p : ℝ) ≤
+            C * (x / p) * (Real.log (Real.log (x / p))) ^ (n - 1) / Real.log (x / p) := by
+        intro p hp hge3
+        exact hbound p (x / p) hge3
       have hvanish2 : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
           n ≥ 2 → x / p < 3 → piKFrom n (x / p) p = 0 := by
         intro p hp hn2 hlt
