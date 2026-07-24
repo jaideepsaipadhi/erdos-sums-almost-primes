@@ -2383,7 +2383,19 @@ theorem piK_bound_one :
         linarith [h2le, hstep]
       linarith [hpc_le', hfinal2]
 
-/-- Σ_{p≤n} log p ≤ n*log4, via primorial_le_four_pow (core Mathlib). -/
+/-- Generalized version of piK_bound for piKFrom at arbitrary p₀. -/
+theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
+    ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
+      (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
+  induction k with
+  | zero => omega
+  | succ n ih =>
+    rcases Nat.eq_zero_or_pos n with hn0 | hnpos
+    · subst hn0
+      sorry
+    · obtain ⟨C, hC, hbound⟩ := ih hnpos
+      sorry
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
