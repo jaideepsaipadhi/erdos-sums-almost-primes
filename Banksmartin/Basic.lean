@@ -2291,6 +2291,38 @@ theorem sum_log_prime_ge_sqrt_range (n : ℕ) (hn : 4 ≤ n) :
   rw [hcast] at hsum_split
   nlinarith [hsum_split, hsmall_nonneg]
 
+/-- Our own reconstruction of the Chebyshev-type explicit upper bound. -/
+theorem primeCounting_le_bound_own (n : ℕ) (hn : 4 ≤ n) :
+    (Nat.primeCounting n : ℝ) ≤ Real.sqrt n + (n * Real.log 4) / Real.log (Real.sqrt n) := by
+  have h1 := sum_log_prime_le_primorial n
+  have h2 := sum_log_prime_ge_sqrt_range n hn
+  have hsqrt_pos : 0 < Real.sqrt n := Real.sqrt_pos.mpr (by positivity)
+  have hlogsqrt_pos : 0 < Real.log (Real.sqrt n) := by
+    apply Real.log_pos
+    have : (2:ℝ) ≤ Real.sqrt n := by
+      rw [show (2:ℝ) = Real.sqrt 4 by
+        rw [show (4:ℝ) = 2^2 by norm_num, Real.sqrt_sq (by norm_num)]]
+      apply Real.sqrt_le_sqrt
+      exact_mod_cast hn
+    linarith
+  have hcombined : ((Nat.primeCounting n : ℝ) - ⌊Real.sqrt n⌋₊.primeCounting) *
+      Real.log (Real.sqrt n) ≤ n * Real.log 4 := by linarith
+  have htrivial : (⌊Real.sqrt n⌋₊.primeCounting : ℝ) ≤ Real.sqrt n := by
+    have h3 : ⌊Real.sqrt n⌋₊.primeCounting ≤ ⌊Real.sqrt n⌋₊ := by
+      have := Nat.primesLE_card_eq_primeCounting ⌊Real.sqrt n⌋₊
+      rw [← this]
+      calc (Nat.primesLE ⌊Real.sqrt n⌋₊).card ≤ (Finset.Icc 2 ⌊Real.sqrt n⌋₊).card := by
+            apply Finset.card_le_card
+            intro x hx
+            rw [Nat.mem_primesLE] at hx
+            exact Finset.mem_Icc.mpr ⟨hx.2.two_le, hx.1⟩
+        _ ≤ ⌊Real.sqrt n⌋₊ := by simp
+    calc (⌊Real.sqrt n⌋₊.primeCounting : ℝ) ≤ (⌊Real.sqrt n⌋₊ : ℝ) := by exact_mod_cast h3
+      _ ≤ Real.sqrt n := Nat.floor_le (by positivity)
+  have := (div_le_div_iff_of_pos_right hlogsqrt_pos).mpr hcombined
+  rw [mul_div_assoc, div_self hlogsqrt_pos.ne', mul_one] at this
+  linarith [htrivial, this]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
