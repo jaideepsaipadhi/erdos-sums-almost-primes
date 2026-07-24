@@ -2782,7 +2782,13 @@ theorem integral_term_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos :
   rw [MeasureTheory.integral_mul_const, hint_ftc] at hle
   linarith [hle]
 
-/-- Generalized version with an arbitrary upper bound B. -/
+/-- Dyadic partition scaffold. -/
+theorem dyadic_partition_scaffold (p₀ N : ℕ) (hp₀ : 1 ≤ p₀) (hN : p₀ ≤ N) :
+    ∃ J : ℕ, Finset.Ioc p₀ N =
+      (Finset.range (J+1)).biUnion (fun j =>
+        Finset.Ioc (p₀ * 2^j) (min (p₀ * 2^(j+1)) N)) := by
+  sorry
+
 theorem sum_ratio_log_bound_gen (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
     (hxpos : 0 < x) (B : ℝ) (hB1 : 3 ≤ x / B) (hx3 : (p₀ : ℝ) ≤ B) :
     ∑ k ∈ Finset.Ioc p₀ ⌊B⌋₊,
