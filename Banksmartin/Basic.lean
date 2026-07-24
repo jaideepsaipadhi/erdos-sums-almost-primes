@@ -2460,6 +2460,30 @@ theorem continuousOn_deriv_ratio_log (x : ℝ) (a b : ℝ) (ha : 0 < a)
   · exact ContinuousAt.pow hcont_logxt 2
   · exact pow_ne_zero 2 hlogne
 
+/-- IntegrableOn (deriv f) (Icc a b). -/
+theorem integrableOn_deriv_ratio_log (x : ℝ) (a b : ℝ) (ha : 0 < a)
+    (hb : 0 < b) (hxa : 1 < x / b) (hab : a ≤ b) :
+    MeasureTheory.IntegrableOn (deriv (fun s => (x / s) / Real.log (x / s)))
+      (Set.Icc a b) MeasureTheory.volume := by
+  have hcont := continuousOn_deriv_ratio_log x a b ha hb hxa hab
+  have heq : Set.EqOn (fun t => (x / t ^ 2) * (1 - Real.log (x / t)) / (Real.log (x / t)) ^ 2)
+      (deriv (fun s => (x / s) / Real.log (x / s)))
+      (Set.Icc a b) := by
+    intro t ht
+    simp only [Set.mem_Icc] at ht
+    have htpos : 0 < t := lt_of_lt_of_le ha ht.1
+    have hxpos : 0 < x := by
+      have : 0 < x / b := by linarith
+      rcases (div_pos_iff.mp this) with ⟨h1, _⟩ | ⟨_, h2⟩
+      · exact h1
+      · linarith
+    have hxt : 1 < x / t := by
+      have hxb_le : x / b ≤ x / t := by
+        apply div_le_div_of_nonneg_left hxpos.le htpos ht.2
+      linarith [hxa, hxb_le]
+    exact (deriv_ratio_log_eq x t htpos hxt).symm
+  exact hcont.integrableOn_Icc.congr_fun heq measurableSet_Icc
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
