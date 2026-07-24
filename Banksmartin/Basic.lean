@@ -3583,6 +3583,22 @@ theorem h_p0_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos : 0 < x)
     have := hanti h1mem hpmem h1lt.le
     simpa using this
 
+/-- Explicit-constant Ioc form of the dyadic bound, for direct use downstream
+(the existential master would hide the witness after destructuring). -/
+theorem sum_ratio_log_dyadic' (p₀ : ℕ) (x : ℝ) (hp₀ : 1 ≤ p₀) (hx : 9 ≤ x) :
+    ∑ k ∈ Finset.Ioc p₀ ⌊x / 3⌋₊,
+        ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) ≤
+      384 * x * Real.log (Real.log x) / Real.log x := by
+  obtain ⟨h2J3, hJ13⟩ := dyadic_log_bounds x hx
+  calc ∑ k ∈ Finset.Ioc p₀ ⌊x / 3⌋₊,
+        ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ)
+      = ∑ j ∈ Finset.range (Nat.log 2 ⌊x / 3⌋₊ + 1),
+          ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
+            ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) :=
+        sum_dyadic_fiberwise p₀ ⌊x / 3⌋₊ _
+    _ ≤ 384 * x * Real.log (Real.log x) / Real.log x :=
+        sum_ratio_log_dyadic_core x p₀ (Nat.log 2 ⌊x / 3⌋₊) hp₀ hx h2J3 hJ13
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
@@ -3603,7 +3619,7 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
       calc (piKFrom 1 x p₀ : ℝ) ≤ (piK 1 x : ℝ) := by exact_mod_cast hsub
         _ ≤ C * x * (Real.log (Real.log x)) ^ (1 - 1) / Real.log x := hbound x hx
     · obtain ⟨C, hC, hbound⟩ := ih hnpos
-      refine ⟨C * 100, by positivity, fun p₀ x hx => ?_⟩
+      refine ⟨(C + 1) * 2000, by nlinarith [hC], fun p₀ x hx => ?_⟩
       rw [piKFrom_succ_eq n hnpos x p₀ (by linarith)]
       have hterm_bound : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
           x / p ≥ 3 → (piKFrom n (x / p) p : ℝ) ≤
@@ -3674,7 +3690,299 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
           have h2 : (⌊x/p⌋₊ : ℝ) ≤ x / p := Nat.floor_le (by positivity)
           linarith
         linarith
-      sorry
+      simp only [Nat.add_sub_cancel]
+      have hxpos0 : (0:ℝ) < x := by linarith
+      have hdich : 9 ≤ x ∨ x < 9 := by
+        by_cases h : (9:ℝ) ≤ x
+        · exact Or.inl h
+        · exact Or.inr (not_le.mp h)
+      rcases hdich with hx9 | hx9
+      · -- MAIN BRANCH: x >= 9, thread through the dyadic bound
+        push_cast
+        classical
+        have hlogx_pos : (0:ℝ) < Real.log x := Real.log_pos (by linarith)
+        have hloglog_pos : (0:ℝ) < Real.log (Real.log x) := by
+          have h2 := two_le_log x hx9
+          exact Real.log_pos (by linarith)
+        have hvanish3 : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
+            x / p < 3 → piKFrom n (x / p) p = 0 := by
+          intro p hp hlt
+          rcases Nat.lt_or_ge n 2 with hn1 | hn2
+          · have hn1' : n = 1 := by omega
+            subst hn1'
+            obtain ⟨hpmem, hpprime⟩ := Finset.mem_filter.mp hp
+            have hp2le : 2 ≤ p := hpprime.two_le
+            have hppos : (0:ℝ) < (p:ℝ) := by exact_mod_cast (by omega : 0 < p)
+            unfold piKFrom
+            apply Finset.card_eq_zero.mpr
+            apply Finset.filter_eq_empty_iff.mpr
+            intro m hm
+            simp only [Finset.mem_Icc] at hm
+            intro hcontra
+            obtain ⟨hmO, hmin_⟩ := hcontra
+            have hmprime : m.Prime := (bigOmega_eq_one_iff m).mp hmO
+            have hpm : p ≤ m := hmin_ m hmprime dvd_rfl
+            have hmle : (m:ℝ) ≤ x / p := by
+              have h1 : (m:ℝ) ≤ (⌊x / p⌋₊ : ℝ) := by exact_mod_cast hm.2
+              have h2 : (⌊x / p⌋₊ : ℝ) ≤ x / p :=
+                Nat.floor_le (div_nonneg (by linarith) hppos.le)
+              linarith
+            have hm3 : m < 3 := by
+              have hmr : (m:ℝ) < 3 := lt_of_le_of_lt hmle hlt
+              exact_mod_cast hmr
+            have hp2 : p = 2 := by omega
+            rw [hp2] at hlt
+            have h2c : ((2:ℕ):ℝ) = 2 := by norm_num
+            rw [h2c] at hlt
+            linarith
+          · exact hvanish2 p hp hn2 hlt
+        have hdrop : ∑ p ∈ ((Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime)).filter
+              (fun p => p ≤ ⌊x / 3⌋₊), (piKFrom n (x / p) p : ℝ)
+            = ∑ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
+              (piKFrom n (x / p) p : ℝ) := by
+          apply Finset.sum_subset (Finset.filter_subset _ _)
+          intro p hp hpn
+          have hple : ¬ p ≤ ⌊x / 3⌋₊ := fun hle =>
+            hpn (Finset.mem_filter.mpr ⟨hp, hle⟩)
+          have hgt : ⌊x / 3⌋₊ < p := by omega
+          obtain ⟨hpmem, hpprime⟩ := Finset.mem_filter.mp hp
+          have hp2le : 2 ≤ p := hpprime.two_le
+          have hppos : (0:ℝ) < (p:ℝ) := by exact_mod_cast (by omega : 0 < p)
+          have hxp3 : x / (p:ℝ) < 3 := by
+            have h3 : (⌊x / 3⌋₊ : ℝ) + 1 ≤ (p:ℝ) := by
+              exact_mod_cast Nat.succ_le_of_lt hgt
+            have h2 : x / 3 < (⌊x / 3⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one _
+            rw [div_lt_iff₀ hppos]
+            nlinarith [h3, h2]
+          rw [hvanish3 p hp hxp3]
+          norm_num
+        rw [← hdrop]
+        have hterm3 : ∀ p ∈ ((Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime)).filter
+            (fun p => p ≤ ⌊x / 3⌋₊),
+            (piKFrom n (x / p) p : ℝ) ≤
+              C * (Real.log (Real.log x)) ^ (n - 1) *
+                (((x / p) / Real.log (x / p)) * (if Nat.Prime p then 1 else 0 : ℝ)) := by
+          intro p hpT
+          have hp := Finset.mem_of_mem_filter p hpT
+          obtain ⟨_, hple⟩ := Finset.mem_filter.mp hpT
+          obtain ⟨hpmem, hpprime⟩ := Finset.mem_filter.mp hp
+          have hp2le : 2 ≤ p := hpprime.two_le
+          have hppos : (0:ℝ) < (p:ℝ) := by exact_mod_cast (by omega : 0 < p)
+          have hpleR : (p:ℝ) ≤ x / 3 := by
+            have h1 : (p:ℝ) ≤ (⌊x / 3⌋₊ : ℝ) := by exact_mod_cast hple
+            have h2 : (⌊x / 3⌋₊ : ℝ) ≤ x / 3 := Nat.floor_le (by linarith)
+            linarith
+          have hge3 : x / (p:ℝ) ≥ 3 :=
+            div_ge_three_of_le_third x (p:ℝ) (by linarith) hppos hpleR
+          have hp1R : (1:ℝ) ≤ (p:ℝ) := by
+            have h2r : (2:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp2le
+            linarith
+          have h1 := hterm_bound2 p hp hp1R hge3
+          rw [if_pos hpprime, mul_one]
+          exact h1
+        have hsum2 := Finset.sum_le_sum hterm3
+        have hfac : ∑ p ∈ ((Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime)).filter
+              (fun p => p ≤ ⌊x / 3⌋₊),
+              C * (Real.log (Real.log x)) ^ (n - 1) *
+                (((x / p) / Real.log (x / p)) * (if Nat.Prime p then 1 else 0 : ℝ))
+            = C * (Real.log (Real.log x)) ^ (n - 1) *
+              ∑ p ∈ ((Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime)).filter
+                (fun p => p ≤ ⌊x / 3⌋₊),
+                (((x / p) / Real.log (x / p)) * (if Nat.Prime p then 1 else 0 : ℝ)) := by
+          rw [Finset.mul_sum]
+        have hTsub : ((Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime)).filter
+            (fun p => p ≤ ⌊x / 3⌋₊) ⊆ Finset.Ioc 1 ⌊x / 3⌋₊ := by
+          intro p hpT
+          have hp := Finset.mem_of_mem_filter p hpT
+          obtain ⟨_, hple⟩ := Finset.mem_filter.mp hpT
+          obtain ⟨hpmem, hpprime⟩ := Finset.mem_filter.mp hp
+          exact Finset.mem_Ioc.mpr ⟨hpprime.one_lt, hple⟩
+        have hnonneg : ∀ k ∈ Finset.Ioc 1 ⌊x / 3⌋₊,
+            k ∉ ((Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime)).filter
+              (fun p => p ≤ ⌊x / 3⌋₊) →
+            0 ≤ ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) := by
+          intro k hk _
+          simp only [Finset.mem_Ioc] at hk
+          have hkpos : (0:ℝ) < (k:ℝ) := by exact_mod_cast (by omega : 0 < k)
+          have hkleR : (k:ℝ) ≤ x / 3 := by
+            have h1 : (k:ℝ) ≤ (⌊x / 3⌋₊ : ℝ) := by exact_mod_cast hk.2
+            have h2 : (⌊x / 3⌋₊ : ℝ) ≤ x / 3 := Nat.floor_le (by linarith)
+            linarith
+          have hge3 : (3:ℝ) ≤ x / (k:ℝ) :=
+            div_ge_three_of_le_third x (k:ℝ) (by linarith) hkpos hkleR
+          have hlogk : (0:ℝ) < Real.log (x / (k:ℝ)) := Real.log_pos (by linarith)
+          apply mul_nonneg
+          · exact div_nonneg (by linarith) hlogk.le
+          · split_ifs <;> norm_num
+        have hsum3 := Finset.sum_le_sum_of_subset_of_nonneg hTsub hnonneg
+        have hdy := sum_ratio_log_dyadic' 1 x (le_refl 1) hx9
+        have hLL_nonneg : (0:ℝ) ≤ Real.log (Real.log x) := hloglog_pos.le
+        have hCL_nonneg : (0:ℝ) ≤ C * (Real.log (Real.log x)) ^ (n - 1) :=
+          mul_nonneg hC.le (pow_nonneg hLL_nonneg _)
+        have hpow : (Real.log (Real.log x)) ^ (n - 1) * Real.log (Real.log x)
+            = (Real.log (Real.log x)) ^ n := by
+          rw [← pow_succ]
+          congr 1
+          omega
+        have hfinal_eq : C * (Real.log (Real.log x)) ^ (n - 1) *
+              (384 * x * Real.log (Real.log x) / Real.log x)
+            = 384 * C * x * (Real.log (Real.log x)) ^ n / Real.log x := by
+          rw [← hpow]
+          ring
+        have hcc : 384 * C * x * (Real.log (Real.log x)) ^ n / Real.log x ≤
+            (C + 1) * 2000 * x * (Real.log (Real.log x)) ^ n / Real.log x := by
+          have hq : (0:ℝ) ≤ x * (Real.log (Real.log x)) ^ n / Real.log x :=
+            div_nonneg (mul_nonneg (by linarith) (pow_nonneg hLL_nonneg n)) hlogx_pos.le
+          have hs1 : 384 * C * x * (Real.log (Real.log x)) ^ n / Real.log x
+              = (384 * C) * (x * (Real.log (Real.log x)) ^ n / Real.log x) := by ring
+          have hs2 : (C + 1) * 2000 * x * (Real.log (Real.log x)) ^ n / Real.log x
+              = ((C + 1) * 2000) * (x * (Real.log (Real.log x)) ^ n / Real.log x) := by ring
+          rw [hs1, hs2]
+          apply mul_le_mul_of_nonneg_right _ hq
+          linarith
+        calc ∑ p ∈ ((Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime)).filter
+              (fun p => p ≤ ⌊x / 3⌋₊), (piKFrom n (x / p) p : ℝ)
+            ≤ ∑ p ∈ ((Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime)).filter
+              (fun p => p ≤ ⌊x / 3⌋₊),
+              C * (Real.log (Real.log x)) ^ (n - 1) *
+                (((x / p) / Real.log (x / p)) * (if Nat.Prime p then 1 else 0 : ℝ)) := hsum2
+          _ = C * (Real.log (Real.log x)) ^ (n - 1) *
+              ∑ p ∈ ((Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime)).filter
+                (fun p => p ≤ ⌊x / 3⌋₊),
+                (((x / p) / Real.log (x / p)) * (if Nat.Prime p then 1 else 0 : ℝ)) := hfac
+          _ ≤ C * (Real.log (Real.log x)) ^ (n - 1) *
+              ∑ k ∈ Finset.Ioc 1 ⌊x / 3⌋₊,
+                (((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ)) :=
+              mul_le_mul_of_nonneg_left hsum3 hCL_nonneg
+          _ ≤ C * (Real.log (Real.log x)) ^ (n - 1) *
+              (384 * x * Real.log (Real.log x) / Real.log x) :=
+              mul_le_mul_of_nonneg_left hdy hCL_nonneg
+          _ = 384 * C * x * (Real.log (Real.log x)) ^ n / Real.log x := hfinal_eq
+          _ ≤ (C + 1) * 2000 * x * (Real.log (Real.log x)) ^ n / Real.log x := hcc
+      · -- SMALL BRANCH: 3 <= x < 9
+        rw [← piKFrom_succ_eq n hnpos x p₀ (by linarith)]
+        classical
+        have hlog3_ge : (27:ℝ)/25 ≤ Real.log 3 := by
+          have he : Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
+          have h1 : (23:ℝ)/25 ≤ Real.exp (-((2:ℝ)/25)) := by
+            have := Real.add_one_le_exp (-((2:ℝ)/25))
+            linarith
+          have hmul : Real.exp ((2:ℝ)/25) * Real.exp (-((2:ℝ)/25)) = 1 := by
+            rw [← Real.exp_add]
+            simp
+          have h2 : Real.exp ((2:ℝ)/25) ≤ 25/23 := by
+            have hepos : (0:ℝ) < Real.exp (-((2:ℝ)/25)) := Real.exp_pos _
+            nlinarith [hmul, h1, hepos, (Real.exp_pos ((2:ℝ)/25)).le]
+          have h4 : Real.exp ((27:ℝ)/25) ≤ 3 := by
+            have hsplit : Real.exp ((27:ℝ)/25) = Real.exp 1 * Real.exp ((2:ℝ)/25) := by
+              rw [← Real.exp_add]
+              norm_num
+            rw [hsplit]
+            nlinarith [he, h2, (Real.exp_pos ((2:ℝ)/25)).le, (Real.exp_pos 1).le]
+          have h5 : Real.log (Real.exp ((27:ℝ)/25)) ≤ Real.log 3 :=
+            Real.log_le_log (Real.exp_pos _) h4
+          rwa [Real.log_exp] at h5
+        have hlogx_ge : (27:ℝ)/25 ≤ Real.log x :=
+          le_trans hlog3_ge (Real.log_le_log (by norm_num) hx)
+        have hlx_pos : (0:ℝ) < Real.log x := by linarith
+        have hlog3_le : Real.log 3 ≤ (9:ℝ)/8 := by
+          have he : (2.7182818283:ℝ) < Real.exp 1 := Real.exp_one_gt_d9
+          have h1 : (9:ℝ)/8 ≤ Real.exp ((1:ℝ)/8) := by
+            have := Real.add_one_le_exp ((1:ℝ)/8)
+            linarith
+          have h2 : (3:ℝ) ≤ Real.exp ((9:ℝ)/8) := by
+            have hsplit : Real.exp ((9:ℝ)/8) = Real.exp 1 * Real.exp ((1:ℝ)/8) := by
+              rw [← Real.exp_add]
+              norm_num
+            rw [hsplit]
+            nlinarith [he, h1, (Real.exp_pos ((1:ℝ)/8)).le, (Real.exp_pos 1).le]
+          have h5 : Real.log 3 ≤ Real.log (Real.exp ((9:ℝ)/8)) :=
+            Real.log_le_log (by norm_num) h2
+          rwa [Real.log_exp] at h5
+        have hlogx_le : Real.log x ≤ (9:ℝ)/4 := by
+          have h1 : Real.log x ≤ Real.log 9 := Real.log_le_log (by linarith) (by linarith)
+          have h2 : Real.log 9 = 2 * Real.log 3 := by
+            rw [show (9:ℝ) = 3 ^ 2 by norm_num, Real.log_pow]
+            norm_num
+          linarith [hlog3_le]
+        have hLL_ge : (2:ℝ)/27 ≤ Real.log (Real.log x) := by
+          have h1 : Real.log ((Real.log x)⁻¹) ≤ (Real.log x)⁻¹ - 1 :=
+            Real.log_le_sub_one_of_pos (inv_pos.mpr hlx_pos)
+          rw [Real.log_inv] at h1
+          have h3 : 1 / Real.log x ≤ 1 / ((27:ℝ)/25) :=
+            one_div_le_one_div_of_le (by norm_num) hlogx_ge
+          simp only [one_div] at h3
+          have h4 : ((27:ℝ)/25)⁻¹ = 25/27 := by norm_num
+          rw [h4] at h3
+          linarith [h1, h3]
+        rcases Nat.lt_or_ge n 3 with hn3 | hn3
+        · -- n <= 2: numeric absorption
+          have hn2' : n ≤ 2 := by omega
+          have hLLn : (4:ℝ)/729 ≤ (Real.log (Real.log x)) ^ n := by
+            calc (4:ℝ)/729 = ((2:ℝ)/27) ^ 2 := by norm_num
+              _ ≤ ((2:ℝ)/27) ^ n := by
+                  apply pow_le_pow_of_le_one (by norm_num) (by norm_num) hn2'
+              _ ≤ (Real.log (Real.log x)) ^ n := by
+                  apply pow_le_pow_left₀ (by norm_num) hLL_ge
+          have hcount : (piKFrom (n + 1) x p₀ : ℝ) ≤ x := by
+            have h1 : piKFrom (n + 1) x p₀ ≤ (Finset.Icc 2 ⌊x⌋₊).card := by
+              unfold piKFrom
+              exact Finset.card_filter_le _ _
+            have h2 : (Finset.Icc 2 ⌊x⌋₊).card ≤ ⌊x⌋₊ := by
+              rw [Nat.card_Icc]
+              omega
+            have h3 : (⌊x⌋₊ : ℝ) ≤ x := Nat.floor_le (by linarith)
+            calc (piKFrom (n + 1) x p₀ : ℝ)
+                ≤ ((Finset.Icc 2 ⌊x⌋₊).card : ℝ) := by exact_mod_cast h1
+              _ ≤ (⌊x⌋₊ : ℝ) := by exact_mod_cast h2
+              _ ≤ x := h3
+          have hinv : (4:ℝ)/9 ≤ 1 / Real.log x := by
+            calc (4:ℝ)/9 = 1 / ((9:ℝ)/4) := by norm_num
+              _ ≤ 1 / Real.log x := one_div_le_one_div_of_le hlx_pos hlogx_le
+          have hs1 : (6000:ℝ) ≤ (C + 1) * 2000 * x := by
+            nlinarith [mul_nonneg hC.le (by linarith : (0:ℝ) ≤ x)]
+          have hs2 : (6000:ℝ) * ((4:ℝ)/729)
+              ≤ ((C + 1) * 2000 * x) * (Real.log (Real.log x)) ^ n :=
+            mul_le_mul hs1 hLLn (by norm_num) (by linarith)
+          have hs3 : (6000:ℝ) * ((4:ℝ)/729) * ((4:ℝ)/9)
+              ≤ (((C + 1) * 2000 * x) * (Real.log (Real.log x)) ^ n) * (1 / Real.log x) :=
+            mul_le_mul hs2 hinv (by norm_num) (by linarith [hs2])
+          calc (piKFrom (n + 1) x p₀ : ℝ)
+              ≤ x := hcount
+            _ ≤ 9 := by linarith
+            _ ≤ (6000:ℝ) * ((4:ℝ)/729) * ((4:ℝ)/9) := by norm_num
+            _ ≤ (((C + 1) * 2000 * x) * (Real.log (Real.log x)) ^ n) * (1 / Real.log x) := hs3
+            _ = (C + 1) * 2000 * x * (Real.log (Real.log x)) ^ n / Real.log x := by ring
+        · -- n >= 3: the count is literally zero since 2^(n+1) >= 16 > x
+          have hzero : piKFrom (n + 1) x p₀ = 0 := by
+            unfold piKFrom
+            apply Finset.card_eq_zero.mpr
+            apply Finset.filter_eq_empty_iff.mpr
+            intro m hm
+            simp only [Finset.mem_Icc] at hm
+            intro hcontra
+            obtain ⟨hmO, _⟩ := hcontra
+            have hmge : 2 ^ (n + 1) ≤ m := by
+              have hb := pow_bigOmega_le m (by omega)
+              rw [hmO] at hb
+              exact hb
+            have h16 : 16 ≤ 2 ^ (n + 1) := by
+              calc (16:ℕ) = 2 ^ 4 := by norm_num
+                _ ≤ 2 ^ (n + 1) := Nat.pow_le_pow_right (by norm_num) (by omega)
+            have hmle : (m:ℝ) ≤ x := by
+              have h1 : (m:ℝ) ≤ (⌊x⌋₊ : ℝ) := by exact_mod_cast hm.2
+              have h2 : (⌊x⌋₊ : ℝ) ≤ x := Nat.floor_le (by linarith)
+              linarith
+            have h16r : (16:ℝ) ≤ (m:ℝ) := by
+              exact_mod_cast le_trans h16 hmge
+            linarith
+          rw [hzero]
+          simp only [Nat.cast_zero]
+          have hLLpos : (0:ℝ) < Real.log (Real.log x) := Real.log_pos (by linarith)
+          apply div_nonneg _ hlx_pos.le
+          apply mul_nonneg _ (pow_nonneg hLLpos.le n)
+          apply mul_nonneg _ (by linarith : (0:ℝ) ≤ x)
+          nlinarith [hC]
 
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
