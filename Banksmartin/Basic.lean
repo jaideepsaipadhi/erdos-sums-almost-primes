@@ -1909,6 +1909,31 @@ theorem iteratedDeriv_conj_symm {U : Set ℂ} (hUopen : IsOpen U)
       rw [hstep, Complex.conj_conj]
     exact hstep2.symm
 
+/-- gCoeff is real-valued: culmination of the Schwarz-reflection arc. -/
+theorem gCoeff_real (i : ℕ) (s : ℝ) (hs : 1 ≤ s) :
+    (starRingEnd ℂ) (gCoeff i s) = gCoeff i s := by
+  unfold gCoeff
+  have hUopen : IsOpen (Metric.ball (0:ℂ) 2) := Metric.isOpen_ball
+  have hUconj : ∀ w ∈ Metric.ball (0:ℂ) 2, (starRingEnd ℂ) w ∈ Metric.ball (0:ℂ) 2 := by
+    intro w hw
+    rw [Metric.mem_ball, dist_zero_right] at hw ⊢
+    rwa [Complex.norm_conj]
+  have hf : DifferentiableOn ℂ (fun z => G2C s z) (Metric.ball (0:ℂ) 2) :=
+    G2C_differentiableOn s hs
+  have hsymm : ∀ w ∈ Metric.ball (0:ℂ) 2,
+      G2C s ((starRingEnd ℂ) w) = (starRingEnd ℂ) (G2C s w) := by
+    intro w hw
+    rw [Metric.mem_ball, dist_zero_right] at hw
+    exact G2C_conj_symm s hs w hw
+  have h0 : (0:ℂ) ∈ Metric.ball (0:ℂ) 2 := by
+    rw [Metric.mem_ball]; simp
+  have hind := (iteratedDeriv_conj_symm hUopen hUconj hf hsymm i).1 0 h0
+  simp only [map_zero] at hind
+  rw [map_div₀]
+  congr 1
+  · exact hind.symm
+  · exact Complex.conj_ofReal _
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
