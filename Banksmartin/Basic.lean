@@ -2404,6 +2404,8 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
       calc (piKFrom 1 x p₀ : ℝ) ≤ (piK 1 x : ℝ) := by exact_mod_cast hsub
         _ ≤ C * x * (Real.log (Real.log x)) ^ (1 - 1) / Real.log x := hbound x hx
     · obtain ⟨C, hC, hbound⟩ := ih hnpos
+      refine ⟨C * 100, by positivity, fun p₀ x hx => ?_⟩
+      rw [piKFrom_succ_eq n hnpos x p₀ (by linarith)]
       sorry
 
 theorem erdos_sums_increase_from_six
