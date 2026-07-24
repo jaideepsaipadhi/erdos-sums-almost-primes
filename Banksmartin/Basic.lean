@@ -2406,6 +2406,26 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     · obtain ⟨C, hC, hbound⟩ := ih hnpos
       refine ⟨C * 100, by positivity, fun p₀ x hx => ?_⟩
       rw [piKFrom_succ_eq n hnpos x p₀ (by linarith)]
+      have hvanish : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
+          x / p < 2 ^ n → piKFrom n (x / p) p = 0 := by
+        intro p hp hlt
+        classical
+        unfold piKFrom
+        apply Finset.card_eq_zero.mpr
+        apply Finset.filter_eq_empty_iff.mpr
+        intro m hm
+        simp only [Finset.mem_Icc] at hm
+        intro hcontra
+        obtain ⟨hmO, _⟩ := hcontra
+        have hmge : (2:ℝ) ^ n ≤ m := by
+          have := pow_bigOmega_le m (by omega)
+          rw [hmO] at this
+          exact_mod_cast this
+        have hmle : (m:ℝ) ≤ x / p := by
+          have h1 : (m:ℝ) ≤ (⌊x/p⌋₊ : ℝ) := by exact_mod_cast hm.2
+          have h2 : (⌊x/p⌋₊ : ℝ) ≤ x / p := Nat.floor_le (by positivity)
+          linarith
+        linarith
       sorry
 
 theorem erdos_sums_increase_from_six
