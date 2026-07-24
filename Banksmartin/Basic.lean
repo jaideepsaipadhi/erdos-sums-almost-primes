@@ -1128,7 +1128,109 @@ theorem complex_log_bound (w : ℂ) (hw : ‖w‖ < 1) :
     have heq : -((1 - (t:ℂ) * w)⁻¹ * -w) = w / (1 - (t:ℂ) * w) := by
       rw [div_eq_mul_inv]; ring
     rwa [heq] at h3
-  sorry -- next: FTC to get ∫₀¹ w/(1-tw) dt = log(1-w), then bound
+  have hcont : ContinuousOn (fun t : ℝ => w / (1 - (t:ℂ) * w)) (Set.Icc 0 1) := by
+    apply ContinuousOn.div continuousOn_const
+    · fun_prop
+    · intro t ht
+      have := (hslit t ht)
+      intro heq
+      rw [heq] at this
+      simp [Complex.slitPlane] at this
+  have hFTC : ∫ t in (0:ℝ)..1, w / (1 - (t:ℂ) * w) =
+      (-Complex.log (1 - (1:ℝ) * w)) - (-Complex.log (1 - (0:ℝ) * w)) := by
+    apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (f := fun s : ℝ => -Complex.log (1 - (s:ℂ) * w))
+      (f' := fun t : ℝ => w / (1 - (t:ℂ) * w))
+    · intro t ht
+      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)] at ht
+      exact hderiv t ht
+    · apply ContinuousOn.intervalIntegrable
+      rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+      exact hcont
+  simp only [Complex.ofReal_one, one_mul, Complex.ofReal_zero, zero_mul, sub_zero,
+    Complex.log_one, neg_zero, sub_zero] at hFTC
+  have hintg : ∀ t ∈ Set.Icc (0:ℝ) 1, w / (1 - (t:ℂ) * w) - w =
+      (t:ℂ) * w^2 / (1 - (t:ℂ) * w) := by
+    intro t ht
+    have hne : (1:ℂ) - (t:ℂ) * w ≠ 0 := by
+      intro heq
+      have := hslit t ht
+      rw [heq] at this
+      simp [Complex.slitPlane] at this
+    rw [← sub_eq_zero]
+    have step1 : w / (1 - (t:ℂ) * w) - (t:ℂ) * w^2 / (1 - (t:ℂ) * w) =
+        (w - (t:ℂ) * w^2) / (1 - (t:ℂ) * w) := div_sub_div_same w ((t:ℂ) * w^2) _
+    have step2 : w - (t:ℂ) * w^2 = w * (1 - (t:ℂ) * w) := by ring
+    have step3 : w / (1 - (t:ℂ) * w) - w - (t:ℂ) * w^2 / (1 - (t:ℂ) * w) =
+        (w / (1 - (t:ℂ) * w) - (t:ℂ) * w^2 / (1 - (t:ℂ) * w)) - w := by ring
+    rw [step3, step1, step2, mul_div_assoc, div_self hne, mul_one]
+    ring
+  have hintconst : ∫ t in (0:ℝ)..1, w = w := by
+    simp [intervalIntegral.integral_const]
+  have hsplit : ∫ t in (0:ℝ)..1, (w / (1 - (t:ℂ) * w) - w) =
+      ∫ t in (0:ℝ)..1, ((t:ℂ) * w^2 / (1 - (t:ℂ) * w)) := by
+    apply intervalIntegral.integral_congr
+    intro t ht
+    rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)] at ht
+    exact hintg t ht
+  have hlhs : ∫ t in (0:ℝ)..1, (w / (1 - (t:ℂ) * w) - w) = -Complex.log (1 - w) - w := by
+    rw [intervalIntegral.integral_sub]
+    · rw [hFTC, hintconst]
+    · exact (hcont.mono (Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1) ▸ Set.Subset.refl _)).intervalIntegrable
+    · exact intervalIntegrable_const
+  have hkey : Complex.log (1 - w) + w = -(∫ t in (0:ℝ)..1, ((t:ℂ) * w^2 / (1 - (t:ℂ) * w))) := by
+    have h1 : -Complex.log (1 - w) - w = ∫ t in (0:ℝ)..1, ((t:ℂ) * w^2 / (1 - (t:ℂ) * w)) := by
+      rw [← hlhs, hsplit]
+    linear_combination -h1
+  rw [hkey, norm_neg]
+  have hbound : ∀ t ∈ Set.uIcc (0:ℝ) 1,
+      ‖(t:ℂ) * w^2 / (1 - (t:ℂ) * w)‖ ≤ ‖w‖^2 / (1 - ‖w‖) := by
+    intro t ht
+    rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)] at ht
+    have ht0 : (0:ℝ) ≤ t := ht.1
+    have ht1 : t ≤ 1 := ht.2
+    have hne : (1:ℂ) - (t:ℂ) * w ≠ 0 := by
+      intro heq
+      have := hslit t (Set.mem_Icc.mpr ⟨ht0, ht1⟩)
+      rw [heq] at this
+      simp [Complex.slitPlane] at this
+    have hdenom : 1 - ‖w‖ ≤ ‖(1:ℂ) - (t:ℂ) * w‖ := by
+      have h1 : ((1:ℂ) - (t:ℂ) * w).re ≤ ‖(1:ℂ) - (t:ℂ) * w‖ := by
+        have := hre_le_norm ((1:ℂ) - (t:ℂ) * w)
+        rw [abs_le] at this
+        linarith [this.2]
+      have h2 : 1 - ‖w‖ ≤ ((1:ℂ) - (t:ℂ) * w).re := by
+        simp only [Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
+          Complex.ofReal_im]
+        have h3 : t * w.re ≤ ‖w‖ := by
+          have h4 := hre_le_norm w
+          rw [abs_le] at h4
+          nlinarith [h4.2]
+        nlinarith [h3]
+      linarith
+    have hdenom_pos : (0:ℝ) < 1 - ‖w‖ := by linarith [hw]
+    have htnorm : ‖(t:ℂ)‖ = t := by
+      first
+      | rw [Complex.norm_real]; exact abs_of_nonneg ht0
+      | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ht0
+      | simp [Complex.norm_eq_abs, abs_of_nonneg ht0]
+    calc ‖(t:ℂ) * w^2 / (1 - (t:ℂ) * w)‖
+        = t * ‖w‖^2 / ‖(1:ℂ) - (t:ℂ) * w‖ := by
+          rw [norm_div, norm_mul, norm_pow, htnorm]
+      _ ≤ t * ‖w‖^2 / (1 - ‖w‖) := by
+          apply div_le_div_of_nonneg_left (by positivity) hdenom_pos hdenom
+      _ ≤ 1 * ‖w‖^2 / (1 - ‖w‖) := by
+          apply div_le_div_of_nonneg_right _ hdenom_pos.le
+          nlinarith [sq_nonneg ‖w‖, ht1]
+      _ = ‖w‖^2 / (1 - ‖w‖) := by ring
+  have hfinal := intervalIntegral.norm_integral_le_of_norm_le_const
+      (a := (0:ℝ)) (b := (1:ℝ)) (C := ‖w‖^2 / (1 - ‖w‖))
+      (f := fun t : ℝ => (t:ℂ) * w^2 / (1 - (t:ℂ) * w))
+      (fun t ht => hbound t (by
+        rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+        rw [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)] at ht
+        exact Set.Ioc_subset_Icc_self ht))
+  simpa using hfinal
 
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
