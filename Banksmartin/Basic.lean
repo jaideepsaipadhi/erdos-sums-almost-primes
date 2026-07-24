@@ -1934,6 +1934,17 @@ theorem gCoeff_real (i : ℕ) (s : ℝ) (hs : 1 ≤ s) :
   · exact hind.symm
   · exact Complex.conj_ofReal _
 
+/-- gCoeff literally equals its own real part (embedded in ℂ). -/
+theorem gCoeff_eq_ofReal (i : ℕ) (s : ℝ) (hs : 1 ≤ s) :
+    gCoeff i s = (((gCoeff i s).re : ℝ) : ℂ) := by
+  have hreal := gCoeff_real i s hs
+  have him : (gCoeff i s).im = 0 := by
+    have := Complex.conj_eq_iff_im.mp hreal
+    exact this
+  apply Complex.ext
+  · simp
+  · simp [him]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
