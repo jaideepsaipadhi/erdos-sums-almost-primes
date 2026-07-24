@@ -856,6 +856,26 @@ theorem prime_correction_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     _ ≤ 18 * a^2 := hbound
     _ = 18 * (p:ℝ) ^ (-2*s) := heq
 
+/-- Summability of the per-prime correction terms. -/
+theorem prime_correction_summable (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
+    Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      |(-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))|) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => 18 * (p:ℝ) ^ (-2*s)) := by
+    have h2s : -(2*s) < -1 := by linarith
+    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+      Real.summable_nat_rpow.mpr h2s
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+      hbase.subtype _
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (18:ℝ) * (p:ℝ) ^ (-2*s) =
+        18 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+      intro p; ring_nf
+    simp_rw [heq]
+    exact hsub.mul_left 18
+  apply Summable.of_nonneg_of_le
+    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => abs_nonneg _)
+    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => prime_correction_bound (p:ℕ) p.property.2 s hs z hz)
+    hcomp
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
