@@ -1311,6 +1311,28 @@ theorem prime_correction_bound_complex (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 
         rw [ha_def, ← Real.rpow_natCast ((p:ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
         ring_nf
 
+/-- Complex-z analogue of prime_correction_summable. -/
+theorem prime_correction_summable_complex (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
+    Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      ‖(-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)‖) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => 18 * (p:ℝ) ^ (-2*s)) := by
+    have h2s : -(2*s) < -1 := by linarith
+    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+      Real.summable_nat_rpow.mpr h2s
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+      hbase.subtype _
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (18:ℝ) * (p:ℝ) ^ (-2*s) =
+        18 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+      intro p; ring_nf
+    simp_rw [heq]
+    exact hsub.mul_left 18
+  apply Summable.of_nonneg_of_le
+    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => norm_nonneg _)
+    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      prime_correction_bound_complex (p:ℕ) p.property.2 s hs z hz)
+    hcomp
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
