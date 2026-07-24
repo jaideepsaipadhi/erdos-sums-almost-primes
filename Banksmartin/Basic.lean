@@ -2596,7 +2596,93 @@ theorem boundary_term_bound (x : ℝ) (hx : 9 ≤ x) (C : ℝ) (hC : 0 < C)
   have hCpos : (0:ℝ) ≤ C * (x/3) / Real.log (x/3) := by positivity
   exact mul_le_mul hpc_bound (le_refl _) hpos3log3 hCpos
 
-/-- Bound on the integral term -∫h'(t)π(t)dt. -/
+/-- Generalized version with an arbitrary upper bound B. -/
+theorem integral_term_bound_gen (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos : 0 < x)
+    (B : ℝ) (hB1 : 3 ≤ x / B) (hx3 : (p₀ : ℝ) ≤ B) :
+    -(∫ t in Set.Ioc (p₀:ℝ) B,
+        deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊t⌋₊ : ℝ)) ≤
+      (Nat.primeCounting ⌊B⌋₊ : ℝ) *
+        (((x/(p₀:ℝ)) / Real.log (x/(p₀:ℝ))) - ((x/B) / Real.log (x/B))) := by
+  have ha : 0 < (p₀ : ℝ) := by exact_mod_cast hp₀
+  have hb : 0 < B := by
+    by_contra hle
+    push_neg at hle
+    have : x / B ≤ 0 := div_nonpos_of_nonneg_of_nonpos hxpos.le hle
+    linarith
+  have hab : (p₀:ℝ) ≤ B := hx3
+  have hpc_mono : ∀ t ∈ Set.Ioc (p₀:ℝ) B, (Nat.primeCounting ⌊t⌋₊ : ℝ) ≤
+      (Nat.primeCounting ⌊B⌋₊ : ℝ) := by
+    intro t ht
+    simp only [Set.mem_Ioc] at ht
+    have hfloor_le : ⌊t⌋₊ ≤ ⌊B⌋₊ := by
+      apply Nat.floor_le_floor
+      linarith [ht.2]
+    exact_mod_cast Nat.monotone_primeCounting hfloor_le
+  have hderiv_neg : ∀ t ∈ Set.Ioc (p₀:ℝ) B,
+      deriv (fun s => (x / s) / Real.log (x / s)) t ≤ 0 := by
+    intro t ht
+    simp only [Set.mem_Ioc] at ht
+    have htpos : 0 < t := lt_of_lt_of_le ha ht.1.le
+    have hxt3 : (3:ℝ) ≤ x / t := by
+      have hge : x / B ≤ x / t := by
+        apply div_le_div_of_nonneg_left hxpos.le htpos ht.2
+      linarith [hB1]
+    have hxt : 1 < x / t := by linarith
+    rw [deriv_ratio_log_eq x t htpos hxt]
+    have hlogxt_gt1 : 1 < Real.log (x/t) := by
+      have h3le : Real.log 3 ≤ Real.log (x/t) := Real.log_le_log (by norm_num) hxt3
+      have hloge1 : Real.exp 1 < 3 := by linarith [Real.exp_one_lt_d9]
+      have : (1:ℝ) < Real.log 3 := by
+        calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+          _ < Real.log 3 := Real.log_lt_log (Real.exp_pos 1) hloge1
+      linarith
+    have hnum_neg : (1:ℝ) - Real.log (x/t) < 0 := by linarith
+    have hden_pos : (0:ℝ) < (Real.log (x/t))^2 := by positivity
+    have hxt2_pos : (0:ℝ) < x/t^2 := by positivity
+    have hprod_neg : x/t^2 * (1 - Real.log (x/t)) < 0 := mul_neg_of_pos_of_neg hxt2_pos hnum_neg
+    exact div_nonpos_of_nonpos_of_nonneg hprod_neg.le hden_pos.le
+  have hint_ftc : ∫ t in Set.Ioc (p₀:ℝ) B, deriv (fun s => (x / s) / Real.log (x / s)) t =
+      ((x/B) / Real.log (x/B)) - ((x/(p₀:ℝ)) / Real.log (x/(p₀:ℝ))) := by
+    have hdiff : ∀ t ∈ Set.Icc (p₀:ℝ) B, DifferentiableAt ℝ
+        (fun s => (x / s) / Real.log (x / s)) t := by
+      intro t ht
+      simp only [Set.mem_Icc] at ht
+      have htpos : 0 < t := lt_of_lt_of_le ha ht.1
+      have hxt : 1 < x / t := by
+        have hge : x / B ≤ x / t := by
+          apply div_le_div_of_nonneg_left hxpos.le htpos ht.2
+        linarith [hB1]
+      exact differentiableAt_ratio_log x t htpos hxt
+    have hcont : ContinuousOn (fun s => (x / s) / Real.log (x / s)) (Set.Icc (p₀:ℝ) B) :=
+      fun t ht => (hdiff t ht).continuousAt.continuousWithinAt
+    have hint := integrableOn_deriv_ratio_log x (p₀:ℝ) B ha hb (by linarith [hB1]) hab
+    rw [← intervalIntegral.integral_of_le hab]
+    apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (f := fun s => (x / s) / Real.log (x / s))
+    · intro t ht
+      rw [Set.uIcc_of_le hab] at ht
+      have htpos' : 0 < t := lt_of_lt_of_le ha ht.1
+      have hxt : 1 < x / t := by
+        have hge : x / B ≤ x / t := by
+          apply div_le_div_of_nonneg_left hxpos.le htpos' ht.2
+        linarith [hB1]
+      rw [deriv_ratio_log_eq x t htpos' hxt]
+      obtain ⟨d, hd, hdeq⟩ := hasDerivAt_ratio_log x t htpos' hxt
+      rwa [hdeq] at hd
+    · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hab]
+      exact hint.mono_set Set.Ioc_subset_Icc_self
+  have hle := MeasureTheory.setIntegral_mono_on
+    (μ := MeasureTheory.volume)
+    (f := fun t => deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊B⌋₊ : ℝ))
+    (g := fun t => deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊t⌋₊ : ℝ))
+    sorry sorry measurableSet_Ioc (by
+      intro t ht
+      have h1 := hderiv_neg t ht
+      have h2 := hpc_mono t ht
+      nlinarith [mul_le_mul_of_nonpos_left h2 h1])
+  rw [MeasureTheory.integral_mul_const, hint_ftc] at hle
+  linarith [hle]
+
 theorem integral_term_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos : 0 < x)
     (hx3 : (p₀ : ℝ) ≤ x / 3) :
     -(∫ t in Set.Ioc (p₀:ℝ) (x/3),
