@@ -1877,6 +1877,38 @@ theorem G2C_conj_symm (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 2) :
   rw [hcast] at hsymm3
   rw [hsymm3, G2tailC_conj_symm s hs z hz, ← map_mul]
 
+/-- Conjugate-reflection symmetry AND differentiability both propagate to
+    every iterated derivative. -/
+theorem iteratedDeriv_conj_symm {U : Set ℂ} (hUopen : IsOpen U)
+    (hUconj : ∀ w ∈ U, (starRingEnd ℂ) w ∈ U)
+    {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f U)
+    (hsymm : ∀ w ∈ U, f ((starRingEnd ℂ) w) = (starRingEnd ℂ) (f w)) :
+    ∀ n : ℕ, (∀ w ∈ U, iteratedDeriv n f ((starRingEnd ℂ) w) =
+        (starRingEnd ℂ) (iteratedDeriv n f w)) ∧
+      DifferentiableOn ℂ (iteratedDeriv n f) U := by
+  intro n
+  induction n with
+  | zero =>
+    refine ⟨?_, ?_⟩
+    · simpa using hsymm
+    · simpa using hf
+  | succ n ih =>
+    obtain ⟨hsymm_n, hdiff_n⟩ := ih
+    have hdiff_succ : DifferentiableOn ℂ (iteratedDeriv (n+1) f) U := by
+      rw [iteratedDeriv_succ]
+      exact hdiff_n.analyticOnNhd hUopen |>.deriv.differentiableOn
+    refine ⟨?_, hdiff_succ⟩
+    intro w hw
+    have hderiv_symm := hasDerivAt_conj_of_symm hUopen hUconj hsymm_n hw
+      ((hdiff_n ((starRingEnd ℂ) w) (hUconj w hw)).differentiableAt
+        (hUopen.mem_nhds (hUconj w hw))).hasDerivAt
+    rw [iteratedDeriv_succ]
+    have hstep := hderiv_symm.deriv
+    have hstep2 : (starRingEnd ℂ) (deriv (iteratedDeriv n f) w) =
+        deriv (iteratedDeriv n f) ((starRingEnd ℂ) w) := by
+      rw [hstep, Complex.conj_conj]
+    exact hstep2.symm
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
