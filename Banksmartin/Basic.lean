@@ -2358,7 +2358,30 @@ theorem piK_bound_one :
           exact mul_le_mul_of_nonneg_right hle_const hxpos
         linarith [hcombined, hhalve, hxbound, hconst]
       exact hfinal
-    · sorry
+    · have hfloor_le4 : (⌊x⌋₊:ℝ) ≤ 4 := (Nat.floor_le (by linarith)).trans hx4
+      have hfloor_le4' : ⌊x⌋₊ ≤ 4 := by exact_mod_cast hfloor_le4
+      have hpc_le : Nat.primeCounting ⌊x⌋₊ ≤ Nat.primeCounting 4 :=
+        Nat.monotone_primeCounting hfloor_le4'
+      have hpc4 : Nat.primeCounting 4 = 2 := by decide
+      rw [hpc4] at hpc_le
+      have hpc_le' : (Nat.primeCounting ⌊x⌋₊ : ℝ) ≤ 2 := by exact_mod_cast hpc_le
+      have hlogx_pos : 0 < Real.log x := Real.log_pos (by linarith)
+      have hlog4_pos : 0 < Real.log 4 := Real.log_pos (by norm_num)
+      have hlogx_le : Real.log x ≤ Real.log 4 := Real.log_le_log (by linarith) hx4
+      have hbound_small : (3:ℝ) / Real.log 4 ≤ x / Real.log x := by
+        rw [div_le_div_iff₀ hlog4_pos hlogx_pos]
+        nlinarith [hlogx_le, hx]
+      have h2le : (2:ℝ) ≤ (2 + 4 * Real.log 4 + 10) * (3 / Real.log 4) := by
+        rw [← mul_div_assoc, le_div_iff₀ hlog4_pos]
+        nlinarith [hlog4_pos]
+      have hstep : (2 + 4 * Real.log 4 + 10) * (3 / Real.log 4) ≤
+          (2 + 4 * Real.log 4 + 10) * (x / Real.log x) := by
+        apply mul_le_mul_of_nonneg_left hbound_small
+        positivity
+      have hfinal2 : (2:ℝ) ≤ (2 + 4 * Real.log 4 + 10) * x / Real.log x := by
+        rw [mul_div_assoc]
+        linarith [h2le, hstep]
+      linarith [hpc_le', hfinal2]
 
 /-- Σ_{p≤n} log p ≤ n*log4, via primorial_le_four_pow (core Mathlib). -/
 theorem erdos_sums_increase_from_six
