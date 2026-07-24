@@ -1005,6 +1005,44 @@ theorem prime_factor_sub_one_summable (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => prime_factor_sub_one_bound (p:ℕ) p.property.2 s hs z hz)
     hcomp
 
+/-- The G₂ per-prime factor equals exp(correction_p). -/
+theorem prime_factor_eq_exp (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
+    (z : ℝ) (hz : |z| ≤ 2) :
+    (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z =
+      Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) := by
+  have hp0 : (0:ℝ) < (p:ℝ) := by
+    have : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    linarith
+  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1/3 := by
+    rw [ha_def]
+    have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+      linarith
+    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+      rw [Real.rpow_neg_one, inv_eq_one_div]
+    rw [h2] at h1
+    have h3 : (1:ℝ) / (p:ℝ) ≤ 1/3 := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
+    linarith
+  have hza_lt : z * a < 1 := by
+    have : |z * a| ≤ 2/3 := by
+      rw [abs_mul, abs_of_pos ha_pos]
+      have hmm : |z| * a ≤ 2 * (1/3) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
+      linarith
+    have := (abs_le.mp this).2
+    linarith
+  have h1za_pos : 0 < 1 - z * a := by linarith
+  have h1a_pos : 0 < 1 - a := by linarith
+  have hrpow_pos : 0 < (1 - a) ^ z := Real.rpow_pos_of_pos h1a_pos z
+  have hfactor_pos : 0 < (1 - z * a)⁻¹ * (1 - a) ^ z := by positivity
+  rw [← Real.exp_log hfactor_pos]
+  congr 1
+  rw [Real.log_mul (by positivity) (by positivity), Real.log_inv,
+    Real.log_rpow h1a_pos]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
