@@ -965,6 +965,46 @@ theorem correction_le_one (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
   have hchain : (p:ℝ) ^ (-2*s) ≤ 1/25 := le_trans h1 (h2.trans_eq h5val)
   linarith [hchain]
 
+/-- |exp(correction_p) - 1| ≤ 36 p^{-2s} for p ≥ 5. -/
+theorem prime_factor_sub_one_bound (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
+    (z : ℝ) (hz : |z| ≤ 2) :
+    |Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1|
+      ≤ 36 * (p:ℝ) ^ (-2*s) := by
+  set c : ℝ := (-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))
+    with hc_def
+  have hp3 : (3:ℝ) ≤ (p:ℝ) := by
+    have : (5:ℕ) ≤ p := hp
+    have : (5:ℝ) ≤ (p:ℝ) := by exact_mod_cast this
+    linarith
+  have hp3nat : 3 ≤ p := by omega
+  have hbound : |c| ≤ 18 * (p:ℝ) ^ (-2*s) := prime_correction_bound p hp3nat s hs z hz
+  have hle1 : 18 * (p:ℝ) ^ (-2*s) ≤ 1 := correction_le_one p hp s hs
+  have hc1 : |c| ≤ 1 := le_trans hbound hle1
+  have hexp := abs_exp_sub_one_le c hc1
+  calc |Real.exp c - 1| ≤ 2 * |c| := hexp
+    _ ≤ 2 * (18 * (p:ℝ) ^ (-2*s)) := by linarith
+    _ = 36 * (p:ℝ) ^ (-2*s) := by ring
+
+/-- Summability of |factor_p - 1| over primes p ≥ 5. -/
+theorem prime_factor_sub_one_summable (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
+    Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      |Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1|) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 36 * (p:ℝ) ^ (-2*s)) := by
+    have h2s : -(2*s) < -1 := by linarith
+    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+      Real.summable_nat_rpow.mpr h2s
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+      hbase.subtype _
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (36:ℝ) * (p:ℝ) ^ (-2*s) =
+        36 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+      intro p; ring_nf
+    simp_rw [heq]
+    exact hsub.mul_left 36
+  apply Summable.of_nonneg_of_le
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => abs_nonneg _)
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => prime_factor_sub_one_bound (p:ℕ) p.property.2 s hs z hz)
+    hcomp
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
