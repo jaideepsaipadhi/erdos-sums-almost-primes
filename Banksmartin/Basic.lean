@@ -1946,6 +1946,27 @@ theorem gCoeff_eq_ofReal (i : ℕ) (s : ℝ) (hs : 1 ≤ s) :
   · simp
   · simp [him]
 
+open scoped Classical in
+/-- The k-almost-prime counting function, restricted to numbers whose
+    smallest prime factor is ≥ p₀ -- the standard auxiliary object needed
+    for the classical elementary induction on k. -/
+noncomputable def piKFrom (k : ℕ) (x : ℝ) (p₀ : ℕ) : ℕ :=
+  (Finset.Icc 2 ⌊x⌋₊).filter
+    (fun n => bigOmega n = k ∧ ∀ q, q.Prime → q ∣ n → p₀ ≤ q) |>.card
+
+/-- piK is the p₀=2 case of piKFrom. -/
+theorem piK_eq_piKFrom_two (k : ℕ) (x : ℝ) : piK k x = piKFrom k x 2 := by
+  classical
+  unfold piK piKFrom
+  congr 1
+  apply Finset.filter_congr
+  intro n hn
+  constructor
+  · intro h
+    exact ⟨h, fun q hq _ => hq.two_le⟩
+  · intro h
+    exact h.1
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
