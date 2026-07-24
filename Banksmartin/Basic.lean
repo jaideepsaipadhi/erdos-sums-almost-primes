@@ -1736,6 +1736,49 @@ theorem hasDerivAt_conj_of_symm {U : Set ℂ} (hUopen : IsOpen U)
   rw [hasDerivAt_iff_tendsto]
   exact hfinal
 
+/-- Each per-prime factor satisfies conjugate-reflection symmetry. -/
+theorem prime_factor_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) (z : ℂ) :
+    (1 - (starRingEnd ℂ) z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ ((starRingEnd ℂ) z) =
+      (starRingEnd ℂ) ((1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
+  have hp0 : (0:ℝ) < (p:ℝ) := by
+    have : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    linarith
+  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1/3 := by
+    rw [ha_def]
+    have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+      linarith
+    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+      rw [Real.rpow_neg_one, inv_eq_one_div]
+    rw [h2] at h1
+    have h3 : (1:ℝ) / (p:ℝ) ≤ 1/3 := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
+    linarith
+  have h1a_pos : (0:ℝ) < 1 - a := by linarith
+  have h1a_ne : (((1 - a : ℝ)):ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]; linarith
+  have hlog1a : Complex.log (((1 - a : ℝ)):ℂ) = ((Real.log (1-a) : ℝ):ℂ) := by
+    rw [Complex.ofReal_log h1a_pos.le]
+  have hlog1a_real : (starRingEnd ℂ) (Complex.log (((1 - a : ℝ)):ℂ)) =
+      Complex.log (((1 - a : ℝ)):ℂ) := by
+    rw [hlog1a]; exact Complex.conj_ofReal _
+  have hane_conj : (starRingEnd ℂ) ((a:ℂ)) = (a:ℂ) := Complex.conj_ofReal _
+  have hcpow_symm : (((1 - a : ℝ)):ℂ) ^ ((starRingEnd ℂ) z) =
+      (starRingEnd ℂ) ((((1 - a : ℝ)):ℂ) ^ z) := by
+    rw [Complex.cpow_def_of_ne_zero h1a_ne, Complex.cpow_def_of_ne_zero h1a_ne,
+      ← Complex.exp_conj]
+    congr 1
+    rw [map_mul, hlog1a_real]
+  have hinv_symm : (1 - (starRingEnd ℂ) z * (a:ℂ))⁻¹ =
+      (starRingEnd ℂ) ((1 - z * (a:ℂ))⁻¹) := by
+    rw [map_inv₀, map_sub, map_one, map_mul, hane_conj]
+  rw [hcpow_symm, hinv_symm, ← map_mul]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
