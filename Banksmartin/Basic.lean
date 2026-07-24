@@ -1078,6 +1078,58 @@ theorem G2tail_hasProd (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
 noncomputable def G2 (s z : ℝ) : ℝ :=
   (1 - z * (3:ℝ) ^ (-s))⁻¹ * (1 - (3:ℝ) ^ (-s)) ^ z * G2tail s z
 
+/-- Complex log bound: |log(1-w)+w| ≤ |w|²/(1-|w|) for |w|<1. -/
+theorem complex_log_bound (w : ℂ) (hw : ‖w‖ < 1) :
+    ‖Complex.log (1 - w) + w‖ ≤ ‖w‖^2 / (1 - ‖w‖) := by
+  have hre_le_norm : ∀ v : ℂ, |v.re| ≤ ‖v‖ := by
+    intro v
+    have hns : v.re^2 ≤ Complex.normSq v := by
+      have : Complex.normSq v = v.re^2 + v.im^2 := by
+        rw [Complex.normSq_apply]; ring
+      nlinarith [sq_nonneg v.im, this]
+    have hnormsq : ‖v‖^2 = Complex.normSq v := by
+      first
+      | rw [Complex.norm_eq_abs, Complex.abs_apply, Real.sq_sqrt (Complex.normSq_nonneg v)]
+      | rw [Complex.sq_norm]
+      | rw [Complex.norm_sq_apply]
+      | exact (Complex.normSq_eq_abs v).symm ▸ (Complex.sq_abs v)
+      | rw [Complex.norm_def, Real.sq_sqrt (Complex.normSq_nonneg v)]
+    have : v.re^2 ≤ ‖v‖^2 := by rw [hnormsq]; exact hns
+    nlinarith [abs_nonneg v.re, norm_nonneg v, sq_abs v.re, this]
+  have hslit : ∀ t ∈ Set.Icc (0:ℝ) 1, (1 - (t:ℂ) * w) ∈ Complex.slitPlane := by
+    intro t ht
+    have hre : (0:ℝ) < (1 - (t:ℂ) * w).re := by
+      simp only [Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
+        Complex.ofReal_im]
+      have h1 : t ≤ 1 := ht.2
+      have h2 : (0:ℝ) ≤ t := ht.1
+      have h3 : t * w.re ≤ ‖w‖ := by
+        have h4 := hre_le_norm w
+        rw [abs_le] at h4
+        nlinarith [h4.2]
+      nlinarith [hw, h3]
+    left; exact hre
+  have hderiv : ∀ t ∈ Set.Icc (0:ℝ) 1,
+      HasDerivAt (fun s : ℝ => -Complex.log (1 - (s:ℂ) * w)) (w / (1 - (t:ℂ) * w)) t := by
+    intro t ht
+    have h1 : HasDerivAt (fun s : ℝ => (1:ℂ) - (s:ℂ) * w) (-w) t := by
+      have hid : HasDerivAt (fun s : ℝ => (s:ℂ)) (1:ℂ) t := by
+        first
+        | exact Complex.hasDerivAt_ofReal t
+        | simpa using (Complex.ofRealCLM.hasDerivAt (x := t))
+        | exact (hasDerivAt_id t).ofReal_comp
+      simpa using (hid.mul_const w).const_sub (1:ℂ)
+    have hslit_t := hslit t ht
+    have hlogderiv : HasDerivAt Complex.log (1 - (t:ℂ) * w)⁻¹ (1 - (t:ℂ) * w) :=
+      Complex.hasDerivAt_log hslit_t
+    have h2 := hlogderiv.comp t h1
+    have h3 : HasDerivAt (fun s : ℝ => -Complex.log (1 - (s:ℂ) * w))
+        (-((1 - (t:ℂ) * w)⁻¹ * -w)) t := h2.neg
+    have heq : -((1 - (t:ℂ) * w)⁻¹ * -w) = w / (1 - (t:ℂ) * w) := by
+      rw [div_eq_mul_inv]; ring
+    rwa [heq] at h3
+  sorry -- next: FTC to get ∫₀¹ w/(1-tw) dt = log(1-w), then bound
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
