@@ -2242,7 +2242,54 @@ theorem sum_log_prime_ge_sqrt_range (n : ℕ) (hn : 4 ≤ n) :
     intro x hx
     rw [Finset.mem_range] at hx ⊢
     omega
-  sorry
+  have hcard_eq : ((Finset.range (n+1)).filter Nat.Prime).card = Nat.primeCounting n := by
+    rw [← Nat.primesLE_eq_filter_range]
+    exact Nat.primesLE_card_eq_primeCounting n
+  have hcard_eq2 : ((Finset.range (⌊Real.sqrt n⌋₊ + 1)).filter Nat.Prime).card =
+      Nat.primeCounting ⌊Real.sqrt n⌋₊ := by
+    rw [← Nat.primesLE_eq_filter_range]
+    exact Nat.primesLE_card_eq_primeCounting _
+  have hdiff_card : ((Finset.range (n+1)).filter Nat.Prime \
+      (Finset.range (⌊Real.sqrt n⌋₊ + 1)).filter Nat.Prime).card =
+      Nat.primeCounting n - Nat.primeCounting ⌊Real.sqrt n⌋₊ := by
+    rw [Finset.card_sdiff, Finset.inter_eq_left.mpr hsub, hcard_eq, hcard_eq2]
+  have hlarge_ge : ∀ p ∈ (Finset.range (n+1)).filter Nat.Prime \
+      (Finset.range (⌊Real.sqrt n⌋₊ + 1)).filter Nat.Prime,
+      Real.log (Real.sqrt n) ≤ Real.log p := by
+    intro p hp
+    rw [Finset.mem_sdiff] at hp
+    obtain ⟨hp1, hp2⟩ := hp
+    rw [Finset.mem_filter, Finset.mem_range] at hp1
+    rw [Finset.mem_filter, Finset.mem_range] at hp2
+    apply Real.log_le_log (by positivity)
+    have hpp : ⌊Real.sqrt n⌋₊ < p := by
+      by_contra h
+      push_neg at h
+      exact hp2 ⟨Nat.lt_succ_of_le h, hp1.2⟩
+    calc Real.sqrt n ≤ (⌊Real.sqrt n⌋₊ : ℝ) + 1 := (Nat.lt_floor_add_one _).le
+      _ ≤ p := by exact_mod_cast hpp
+  have hsum_split := Finset.sum_le_sum hlarge_ge
+  rw [Finset.sum_const, hdiff_card, nsmul_eq_mul] at hsum_split
+  have hfull_eq : ∑ p ∈ (Finset.range (n+1)).filter Nat.Prime, Real.log p =
+      ∑ p ∈ (Finset.range (⌊Real.sqrt n⌋₊ + 1)).filter Nat.Prime, Real.log p +
+        ∑ p ∈ (Finset.range (n+1)).filter Nat.Prime \
+          (Finset.range (⌊Real.sqrt n⌋₊ + 1)).filter Nat.Prime, Real.log p := by
+    rw [← Finset.sum_sdiff hsub]
+    ring
+  rw [hfull_eq]
+  have hsmall_nonneg : 0 ≤ ∑ p ∈ (Finset.range (⌊Real.sqrt n⌋₊ + 1)).filter Nat.Prime,
+      Real.log p := by
+    apply Finset.sum_nonneg
+    intro p hp
+    rw [Finset.mem_filter] at hp
+    exact Real.log_nonneg (by exact_mod_cast hp.2.one_lt.le)
+  have hmono : ⌊Real.sqrt n⌋₊.primeCounting ≤ n.primeCounting :=
+    Nat.monotone_primeCounting hfloor_le
+  have hcast : ((n.primeCounting - ⌊Real.sqrt n⌋₊.primeCounting : ℕ) : ℝ) =
+      (n.primeCounting : ℝ) - ⌊Real.sqrt n⌋₊.primeCounting :=
+    Nat.cast_sub hmono
+  rw [hcast] at hsum_split
+  nlinarith [hsum_split, hsmall_nonneg]
 
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
