@@ -2073,6 +2073,69 @@ theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 
     have hple : n.minFac ≤ n := Nat.minFac_le (by omega)
     omega
 
+/-- bigOmega n = 1 iff n is prime. -/
+theorem bigOmega_eq_one_iff (n : ℕ) : bigOmega n = 1 ↔ n.Prime := by
+  constructor
+  · intro hn1
+    have hn2 : 2 ≤ n := by
+      by_contra h
+      push_neg at h
+      interval_cases n <;> simp [bigOmega] at hn1
+    set p := n.minFac with hp_def
+    have hpp : p.Prime := Nat.minFac_prime (by omega)
+    have hpdvd : p ∣ n := Nat.minFac_dvd n
+    have hOmega : bigOmega n = bigOmega p + bigOmega (n / p) := by
+      conv_lhs => rw [← Nat.div_mul_cancel hpdvd, mul_comm]
+      exact bigOmega_mul p (n/p) hpp.pos.ne' (by
+        rcases Nat.eq_zero_or_pos (n/p) with h0|h0
+        · exfalso
+          have : n = 0 := by
+            have := Nat.div_mul_cancel hpdvd
+            rw [h0, zero_mul] at this
+            omega
+          omega
+        · omega)
+    have hOmegap : bigOmega p = 1 := by
+      unfold bigOmega; rw [hpp.factorization]; simp
+    have hOmegam : bigOmega (n / p) = 0 := by omega
+    have hm1 : n / p = 1 := by
+      by_contra hm
+      have hm2 : 2 ≤ n / p := by
+        rcases Nat.eq_zero_or_pos (n/p) with h0|h0
+        · exfalso
+          have hcontra : n = 0 := by
+            have heq := Nat.div_mul_cancel hpdvd
+            rw [h0, zero_mul] at heq
+            omega
+          omega
+        · omega
+      set q := (n/p).minFac with hq_def
+      have hqp : q.Prime := Nat.minFac_prime (by omega)
+      have hqdvd : q ∣ (n/p) := Nat.minFac_dvd (n/p)
+      have hOmegam2 : bigOmega (n/p) = bigOmega q + bigOmega ((n/p) / q) := by
+        conv_lhs => rw [← Nat.div_mul_cancel hqdvd, mul_comm]
+        exact bigOmega_mul q ((n/p)/q) hqp.pos.ne' (by
+          rcases Nat.eq_zero_or_pos ((n/p)/q) with h0'|h0'
+          · exfalso
+            have heq2 : n/p = 0 := by
+              have heq := Nat.div_mul_cancel hqdvd
+              rw [h0', zero_mul] at heq
+              omega
+            omega
+          · omega)
+      have hOmegaq : bigOmega q = 1 := by
+        unfold bigOmega; rw [hqp.factorization]; simp
+      omega
+    have : n = p := by
+      have := Nat.div_mul_cancel hpdvd
+      rw [hm1, one_mul] at this
+      omega
+    rwa [this]
+  · intro hpp
+    unfold bigOmega
+    rw [hpp.factorization]
+    simp
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
