@@ -1779,6 +1779,71 @@ theorem prime_factor_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     rw [map_inv₀, map_sub, map_one, map_mul, hane_conj]
   rw [hcpow_symm, hinv_symm, ← map_mul]
 
+/-- Each per-prime correction term satisfies conjugate-reflection symmetry
+    on the ball |z|<2. -/
+theorem correction_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
+    (z : ℂ) (hz : ‖z‖ < 2) :
+    (-Complex.log (1 - (starRingEnd ℂ) z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        (starRingEnd ℂ) z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ) =
+      (starRingEnd ℂ) ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) := by
+  have hp0 : (0:ℝ) < (p:ℝ) := by
+    have : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    linarith
+  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1/3 := by
+    rw [ha_def]
+    have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+      linarith
+    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+      rw [Real.rpow_neg_one, inv_eq_one_div]
+    rw [h2] at h1
+    have h3 : (1:ℝ) / (p:ℝ) ≤ 1/3 := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
+    linarith
+  have h1a_pos : (0:ℝ) < 1 - a := by linarith
+  have hlog1a_real : (starRingEnd ℂ) ((Real.log (1 - a) : ℝ):ℂ) =
+      ((Real.log (1 - a) : ℝ):ℂ) := Complex.conj_ofReal _
+  have hane_conj : (starRingEnd ℂ) ((a:ℂ)) = (a:ℂ) := Complex.conj_ofReal _
+  have hre_pos : ∀ w : ℂ, ‖w‖ < 2 → (0:ℝ) < ((1:ℂ) - w * (a:ℂ)).re := by
+    intro w hw
+    simp only [Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
+      Complex.ofReal_im]
+    have hre_le_norm : |w.re| ≤ ‖w‖ := by
+      have hns : w.re^2 ≤ Complex.normSq w := by
+        have : Complex.normSq w = w.re^2 + w.im^2 := by
+          rw [Complex.normSq_apply]; ring
+        nlinarith [sq_nonneg w.im, this]
+      have hnormsq : ‖w‖^2 = Complex.normSq w := by
+        first
+        | rw [Complex.norm_eq_abs, Complex.abs_apply, Real.sq_sqrt (Complex.normSq_nonneg w)]
+        | rw [Complex.sq_norm]
+        | rw [Complex.norm_sq_apply]
+        | exact (Complex.normSq_eq_abs w).symm ▸ (Complex.sq_abs w)
+        | rw [Complex.norm_def, Real.sq_sqrt (Complex.normSq_nonneg w)]
+      have hsq : w.re^2 ≤ ‖w‖^2 := by rw [hnormsq]; exact hns
+      nlinarith [abs_nonneg w.re, norm_nonneg w, sq_abs w.re, hsq]
+    have hre_le : w.re * a ≤ ‖w‖ * a := by
+      rw [abs_le] at hre_le_norm
+      nlinarith [hre_le_norm.2, ha_pos]
+    nlinarith [hw, ha_pos, hre_le]
+  have harg_ne : ∀ w : ℂ, ‖w‖ < 2 →
+      ((1:ℂ) - w * (a:ℂ)).arg ≠ Real.pi := by
+    intro w hw harg
+    have := hre_pos w hw
+    rw [Complex.arg_eq_pi_iff] at harg
+    linarith [harg.1]
+  have hlog_conj : Complex.log ((starRingEnd ℂ) (1 - z * (a:ℂ))) =
+      (starRingEnd ℂ) (Complex.log (1 - z * (a:ℂ))) := by
+    rw [Complex.log_conj (1 - z * (a:ℂ)) (harg_ne z hz)]
+  have hconj_sub : (starRingEnd ℂ) (1 - z * (a:ℂ)) = 1 - (starRingEnd ℂ) z * (a:ℂ) := by
+    rw [map_sub, map_one, map_mul, hane_conj]
+  rw [← hconj_sub, hlog_conj]
+  simp only [map_neg, map_add, map_mul, hlog1a_real]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
