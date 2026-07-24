@@ -2412,6 +2412,12 @@ theorem hasDerivAt_ratio_log (x t : ℝ) (htpos : 0 < t) (hxt : 1 < x / t) :
   field_simp
   ring
 
+/-- DifferentiableAt version of hasDerivAt_ratio_log. -/
+theorem differentiableAt_ratio_log (x t : ℝ) (htpos : 0 < t) (hxt : 1 < x / t) :
+    DifferentiableAt ℝ (fun s => (x / s) / Real.log (x / s)) t := by
+  obtain ⟨d, hd, _⟩ := hasDerivAt_ratio_log x t htpos hxt
+  exact hd.differentiableAt
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
