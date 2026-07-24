@@ -1683,6 +1683,10 @@ theorem G2C_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
   · exact prime_factor_differentiableOn 3 (le_refl 3) s hs
   · exact G2tailC_differentiableOn s hs
 
+/-- The i-th Taylor coefficient of G₂ at z=0: g_i(s) = G₂^(i)(0)/i!. -/
+noncomputable def gCoeff (i : ℕ) (s : ℝ) : ℂ :=
+  (iteratedDeriv i (fun z => G2C s z) 0) / (i.factorial : ℂ)
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
