@@ -2406,9 +2406,9 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     · obtain ⟨C, hC, hbound⟩ := ih hnpos
       refine ⟨C * 100, by positivity, fun p₀ x hx => ?_⟩
       rw [piKFrom_succ_eq n hnpos x p₀ (by linarith)]
-      have hvanish : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
-          x / p < 2 ^ n → piKFrom n (x / p) p = 0 := by
-        intro p hp hlt
+      have hvanish2 : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
+          n ≥ 2 → x / p < 3 → piKFrom n (x / p) p = 0 := by
+        intro p hp hn2 hlt
         classical
         unfold piKFrom
         apply Finset.card_eq_zero.mpr
@@ -2421,6 +2421,11 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
           have := pow_bigOmega_le m (by omega)
           rw [hmO] at this
           exact_mod_cast this
+        have h4le : (4:ℝ) ≤ 2 ^ n := by
+          calc (4:ℝ) = 2 ^ 2 := by norm_num
+            _ ≤ 2 ^ n := by
+              apply pow_le_pow_right₀ (by norm_num)
+              omega
         have hmle : (m:ℝ) ≤ x / p := by
           have h1 : (m:ℝ) ≤ (⌊x/p⌋₊ : ℝ) := by exact_mod_cast hm.2
           have h2 : (⌊x/p⌋₊ : ℝ) ≤ x / p := Nat.floor_le (by positivity)
