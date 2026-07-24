@@ -2150,6 +2150,78 @@ theorem piK_one_eq_primeCounting (x : ℝ) : piK 1 x = Nat.primeCounting ⌊x⌋
   · rintro ⟨hnx, hprime⟩
     exact ⟨⟨hprime.two_le, by omega⟩, hprime⟩
 
+/-- piK_bound's k=1 base case. -/
+theorem piK_bound_one :
+    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 3 ≤ x →
+      (piK 1 x : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (1 - 1) / Real.log x := by
+  use 1 + 4 * Real.log 4 + 10
+  constructor
+  · positivity
+  · intro x hx
+    rw [piK_one_eq_primeCounting]
+    norm_num
+    have hlogx_pos : 0 < Real.log x := Real.log_pos (by linarith)
+    rcases le_total 4 x with hx4 | hx4
+    · have hfloor_ge : (⌊x⌋₊ : ℝ) ≥ x / 2 := by
+        have h1 : (⌊x⌋₊ : ℝ) > x - 1 := by
+          have := Nat.sub_one_lt_floor x
+          linarith [Nat.floor_le (show (0:ℝ) ≤ x by linarith)]
+        linarith
+      have hfloor_le : (⌊x⌋₊ : ℝ) ≤ x := Nat.floor_le (by linarith)
+      have hfloor2 : (2:ℝ) ≤ ⌊x⌋₊ := by linarith
+      have hlogfloor_pos : 0 < Real.log ⌊x⌋₊ := Real.log_pos (by exact_mod_cast hfloor2)
+      have hlog4 : Real.log 4 ≤ Real.log x := Real.log_le_log (by norm_num) hx4
+      have hlogfloor_ge : Real.log ⌊x⌋₊ ≥ Real.log x / 2 := by
+        have hge : Real.log ⌊x⌋₊ ≥ Real.log (x/2) := Real.log_le_log (by linarith) hfloor_ge
+        have heq : Real.log (x/2) = Real.log x - Real.log 2 := by
+          rw [Real.log_div (by linarith) (by norm_num)]
+        have hlog2 : Real.log 2 ≤ Real.log x / 2 := by
+          have : Real.log 4 = 2 * Real.log 2 := by
+            rw [show (4:ℝ) = 2^2 by norm_num, Real.log_pow]; ring
+          linarith
+        linarith
+      have hbound := primeCounting_le_bound ⌊x⌋₊ hfloor2 |>.trans_eq rfl
+      have hsqrt_le : Real.sqrt ⌊x⌋₊ ≤ ⌊x⌋₊ / Real.log ⌊x⌋₊ := by
+        rw [le_div_iff₀ hlogfloor_pos]
+        have hlogsqrt : Real.log ⌊x⌋₊ ≤ Real.sqrt ⌊x⌋₊ := by
+          have := Real.log_le_sub_one_of_pos (show (0:ℝ) < Real.sqrt ⌊x⌋₊ by
+            exact Real.sqrt_pos.mpr (by linarith))
+          calc Real.log ⌊x⌋₊ = 2 * Real.log (Real.sqrt ⌊x⌋₊) := by
+                rw [← Real.log_pow, sq_sqrt (by linarith : (0:ℝ) ≤ ⌊x⌋₊)]
+            _ ≤ 2 * (Real.sqrt ⌊x⌋₊ - 1) := by linarith
+            _ ≤ Real.sqrt ⌊x⌋₊ := by
+                have hsq : Real.sqrt (⌊x⌋₊:ℝ) ^ 2 = (⌊x⌋₊:ℝ) := Real.sq_sqrt (by linarith)
+                have hnn : 0 ≤ Real.sqrt (⌊x⌋₊:ℝ) := Real.sqrt_nonneg _
+                nlinarith [hsq, hnn]
+        calc Real.sqrt ⌊x⌋₊ * Real.log ⌊x⌋₊ ≤ Real.sqrt ⌊x⌋₊ * Real.sqrt ⌊x⌋₊ := by
+              apply mul_le_mul_of_nonneg_left hlogsqrt (Real.sqrt_nonneg _)
+          _ = ⌊x⌋₊ := Real.mul_self_sqrt (by linarith)
+      calc (Nat.primeCounting ⌊x⌋₊ : ℝ) ≤ Real.sqrt ⌊x⌋₊ + (2 * ⌊x⌋₊ * Real.log 4) / Real.log ⌊x⌋₊ := hbound
+        _ ≤ ⌊x⌋₊ / Real.log ⌊x⌋₊ + (2 * ⌊x⌋₊ * Real.log 4) / (Real.log x / 2) := by
+              gcongr
+              exact hlogfloor_ge
+        _ ≤ x / Real.log x + 4 * Real.log 4 * (x / Real.log x) := by
+              rw [div_div_eq_mul_div, div_le_iff₀ hlogx_pos] at *
+              sorry
+        _ ≤ (1 + 4 * Real.log 4 + 10) * x / Real.log x := by nlinarith [hlogx_pos]
+    · sorry
+
+/-- Σ_{p≤n} log p ≤ n*log4, via primorial_le_four_pow (core Mathlib). -/
+theorem sum_log_prime_le_primorial (n : ℕ) :
+    (∑ p ∈ Finset.range (n+1) with Nat.Prime p, Real.log p) ≤ n * Real.log 4 := by
+  have h1 : (primorial n : ℝ) ≤ 4 ^ n := by exact_mod_cast primorial_le_four_pow n
+  have hpos : (0:ℝ) < primorial n := by exact_mod_cast primorial_pos n
+  have h2 : Real.log (primorial n : ℝ) ≤ Real.log ((4:ℝ) ^ n) := by
+    apply Real.log_le_log hpos h1
+  rw [Real.log_pow] at h2
+  have h3 : Real.log (primorial n : ℝ) =
+      ∑ p ∈ Finset.range (n+1) with Nat.Prime p, Real.log p := by
+    unfold primorial
+    rw [Nat.cast_prod, Real.log_prod]
+    intro p hp
+    exact_mod_cast (Finset.mem_filter.mp hp).2.pos.ne'
+  linarith [h3 ▸ h2]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
