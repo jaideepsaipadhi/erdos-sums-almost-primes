@@ -1592,6 +1592,33 @@ theorem correction_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 �
     · exact Or.inl hre_pos
   · exact differentiableAt_id.mul_const _
 
+/-- The sum of correction terms is differentiable in z on |z|<2. -/
+theorem correction_sum_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
+    DifferentiableOn ℂ (fun z : ℂ => ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)))
+      (Metric.ball 0 2) := by
+  apply Complex.differentiableOn_tsum_of_summable_norm
+    (u := fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 18 * (p:ℝ) ^ (-2*s))
+  · have h2s : -(2*s) < -1 := by linarith
+    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+      Real.summable_nat_rpow.mpr h2s
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+      hbase.subtype _
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (18:ℝ) * (p:ℝ) ^ (-2*s) =
+        18 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+      intro p; ring_nf
+    simp_rw [heq]
+    exact hsub.mul_left 18
+  · intro p
+    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
+    exact correction_differentiableOn (p:ℕ) hp3 s hs
+  · exact Metric.isOpen_ball
+  · intro p w hw
+    rw [Metric.mem_ball, dist_zero_right] at hw
+    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
+    exact prime_correction_bound_complex (p:ℕ) hp3 s hs w hw.le
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
