@@ -2672,6 +2672,66 @@ theorem sum_ratio_log_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
     positivity
   nlinarith [habel, hintbound, mul_nonneg hh_nonneg hpc_nonneg]
 
+/-- h(p₀) ≤ h(1) = x/logx, since h is antitone on [1,p₀]. -/
+theorem h_p0_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos : 0 < x)
+    (hx3 : (p₀:ℝ) ≤ x/3) :
+    (x/(p₀:ℝ)) / Real.log (x/(p₀:ℝ)) ≤ x / Real.log x := by
+  rcases eq_or_lt_of_le hp₀ with heq | hlt
+  · simp [← heq]
+  · have ha : 0 < (p₀:ℝ) := by exact_mod_cast hp₀
+    have h1lt : (1:ℝ) < (p₀:ℝ) := by exact_mod_cast hlt
+    have hconv : Convex ℝ (Set.Icc (1:ℝ) (p₀:ℝ)) := convex_Icc _ _
+    have hint_eq : interior (Set.Icc (1:ℝ) (p₀:ℝ)) = Set.Ioo (1:ℝ) (p₀:ℝ) :=
+      interior_Icc
+    have hxt3_of : ∀ t, 1 ≤ t → t ≤ (p₀:ℝ) → (3:ℝ) ≤ x / t := by
+      intro t ht1 ht2
+      have htle3 : t ≤ x/3 := le_trans ht2 hx3
+      have htpos : 0 < t := lt_of_lt_of_le one_pos ht1
+      have heq3 : x / (x/3) = 3 := by field_simp
+      have hge : x / (x/3) ≤ x / t := by
+        apply div_le_div_of_nonneg_left hxpos.le htpos htle3
+      linarith [heq3 ▸ hge]
+    have hcont : ContinuousOn (fun s => (x/s)/Real.log (x/s)) (Set.Icc (1:ℝ) (p₀:ℝ)) := by
+      intro t ht
+      simp only [Set.mem_Icc] at ht
+      have htpos : 0 < t := lt_of_lt_of_le one_pos ht.1
+      have hxt3 := hxt3_of t ht.1 ht.2
+      exact (differentiableAt_ratio_log x t htpos (by linarith)).continuousAt.continuousWithinAt
+    have hdiff : DifferentiableOn ℝ (fun s => (x/s)/Real.log (x/s))
+        (interior (Set.Icc (1:ℝ) (p₀:ℝ))) := by
+      rw [hint_eq]
+      intro t ht
+      simp only [Set.mem_Ioo] at ht
+      have htpos : 0 < t := lt_trans one_pos ht.1
+      have hxt3 := hxt3_of t ht.1.le ht.2.le
+      exact (differentiableAt_ratio_log x t htpos (by linarith)).differentiableWithinAt
+    have hderiv_np : ∀ t ∈ interior (Set.Icc (1:ℝ) (p₀:ℝ)),
+        deriv (fun s => (x/s)/Real.log (x/s)) t ≤ 0 := by
+      rw [hint_eq]
+      intro t ht
+      simp only [Set.mem_Ioo] at ht
+      have htpos : 0 < t := lt_trans one_pos ht.1
+      have hxt3 := hxt3_of t ht.1.le ht.2.le
+      have hxt : 1 < x / t := by linarith
+      rw [deriv_ratio_log_eq x t htpos hxt]
+      have hlogxt_gt1 : 1 < Real.log (x/t) := by
+        have h3le : Real.log 3 ≤ Real.log (x/t) := Real.log_le_log (by norm_num) hxt3
+        have hloge1 : Real.exp 1 < 3 := by linarith [Real.exp_one_lt_d9]
+        have hl3 : (1:ℝ) < Real.log 3 := by
+          calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+            _ < Real.log 3 := Real.log_lt_log (Real.exp_pos 1) hloge1
+        linarith
+      have hnum_neg : (1:ℝ) - Real.log (x/t) < 0 := by linarith
+      have hden_pos : (0:ℝ) < (Real.log (x/t))^2 := by positivity
+      have hxt2_pos : (0:ℝ) < x/t^2 := by positivity
+      have hprod_neg : x/t^2 * (1 - Real.log (x/t)) < 0 := mul_neg_of_pos_of_neg hxt2_pos hnum_neg
+      exact div_nonpos_of_nonpos_of_nonneg hprod_neg.le hden_pos.le
+    have hanti := antitoneOn_of_deriv_nonpos hconv hcont hdiff hderiv_np
+    have h1mem : (1:ℝ) ∈ Set.Icc (1:ℝ) (p₀:ℝ) := ⟨le_refl _, h1lt.le⟩
+    have hpmem : (p₀:ℝ) ∈ Set.Icc (1:ℝ) (p₀:ℝ) := ⟨h1lt.le, le_refl _⟩
+    have := hanti h1mem hpmem h1lt.le
+    simpa using this
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
