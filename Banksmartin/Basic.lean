@@ -1979,7 +1979,17 @@ theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 
   rw [Finset.card_eq_sum_card_fiberwise (f := Nat.minFac)
     (t := (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime))]
   · sorry -- per-fiber bijection n ↔ n/p, to be tackled next
-  · sorry -- membership: LHS elements' minFac lands in the RHS index set
+  · intro n hn
+    obtain ⟨hnMem, hnO, hnfac⟩ := Finset.mem_filter.mp hn
+    obtain ⟨hn2, hnx⟩ := Finset.mem_Icc.mp hnMem
+    have hn1 : n ≠ 1 := by omega
+    have hpp := Nat.minFac_prime hn1
+    have hpdvd := Nat.minFac_dvd n
+    have hp0 := hnfac _ hpp hpdvd
+    apply Finset.mem_filter.mpr
+    refine ⟨Finset.mem_Icc.mpr ⟨hp0, ?_⟩, hpp⟩
+    have hple : n.minFac ≤ n := Nat.minFac_le (by omega)
+    omega
 
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
