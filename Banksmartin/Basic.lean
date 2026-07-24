@@ -1978,7 +1978,57 @@ theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 
   unfold piKFrom
   rw [Finset.card_eq_sum_card_fiberwise (f := Nat.minFac)
     (t := (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime))]
-  · sorry -- per-fiber bijection n ↔ n/p, to be tackled next
+  · apply Finset.sum_congr rfl
+    intro p hp
+    obtain ⟨hpMem, hpp⟩ := Finset.mem_filter.mp hp
+    obtain ⟨hp0, hplex⟩ := Finset.mem_Icc.mp hpMem
+    have hp2 : 2 ≤ p := hpp.two_le
+    apply Finset.card_bij' (fun n _ => n / p) (fun m _ => p * m)
+    · intro n hn
+      obtain ⟨hnInS, hnminFac⟩ := Finset.mem_filter.mp hn
+      obtain ⟨hnMem, hnO, hnfac⟩ := Finset.mem_filter.mp hnInS
+      obtain ⟨hn2, hnx⟩ := Finset.mem_Icc.mp hnMem
+      have hpdvd : p ∣ n := hnminFac ▸ Nat.minFac_dvd n
+      have hnpk : bigOmega (n / p) = k := by
+        have hOmega : bigOmega n = bigOmega (n/p) + bigOmega p := by
+          conv_lhs => rw [← Nat.div_mul_cancel hpdvd]
+          exact bigOmega_mul (n/p) p (by
+            rcases Nat.eq_zero_or_pos (n/p) with h0|h0
+            · exfalso
+              have hcontra : n = 0 := by
+                have := Nat.div_mul_cancel hpdvd
+                rw [h0, zero_mul] at this
+                omega
+              omega
+            · omega) hpp.pos.ne'
+        have hOmegap : bigOmega p = 1 := by
+          unfold bigOmega; rw [hpp.factorization]; simp
+        omega
+      have hnp2 : 2 ≤ n / p := by
+        by_contra h
+        push_neg at h
+        interval_cases (n / p)
+        · simp [bigOmega] at hnpk; omega
+        · have : bigOmega 1 = 0 := by simp [bigOmega]
+          omega
+      refine Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨hnp2, ?_⟩, hnpk, ?_⟩
+      · have hcast : ((n / p : ℕ) : ℝ) = (n:ℝ) / p := by
+          rw [eq_div_iff (by positivity)]
+          exact_mod_cast Nat.div_mul_cancel hpdvd
+        rw [Nat.le_floor_iff (by positivity), hcast]
+        calc (n:ℝ)/p ≤ (⌊x⌋₊:ℝ)/p := by
+              apply div_le_div_of_nonneg_right _ (by positivity)
+              exact_mod_cast hnx
+          _ ≤ x / p := by
+              apply div_le_div_of_nonneg_right _ (by positivity)
+              exact Nat.floor_le (by positivity)
+      · intro q hq hqdvd
+        have hqdvdn : q ∣ n := hqdvd.trans (Nat.div_dvd_of_dvd hpdvd)
+        rw [← hnminFac]
+        exact Nat.minFac_le_of_dvd hq.two_le hqdvdn
+    · sorry
+    · sorry
+    · sorry
   · intro n hn
     obtain ⟨hnMem, hnO, hnfac⟩ := Finset.mem_filter.mp hn
     obtain ⟨hn2, hnx⟩ := Finset.mem_Icc.mp hnMem
