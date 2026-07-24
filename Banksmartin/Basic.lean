@@ -2418,6 +2418,48 @@ theorem differentiableAt_ratio_log (x t : ℝ) (htpos : 0 < t) (hxt : 1 < x / t)
   obtain ⟨d, hd, _⟩ := hasDerivAt_ratio_log x t htpos hxt
   exact hd.differentiableAt
 
+/-- deriv f equals our explicit closed form pointwise. -/
+theorem deriv_ratio_log_eq (x t : ℝ) (htpos : 0 < t) (hxt : 1 < x / t) :
+    deriv (fun s => (x / s) / Real.log (x / s)) t =
+      (x / t ^ 2) * (1 - Real.log (x / t)) / (Real.log (x / t)) ^ 2 := by
+  obtain ⟨d, hd, hdeq⟩ := hasDerivAt_ratio_log x t htpos hxt
+  rw [hd.deriv, hdeq]
+
+/-- Continuity of the closed-form derivative expression. -/
+theorem continuousOn_deriv_ratio_log (x : ℝ) (a b : ℝ) (ha : 0 < a)
+    (hb : 0 < b) (hxa : 1 < x / b) (hab : a ≤ b) :
+    ContinuousOn (fun t => (x / t ^ 2) * (1 - Real.log (x / t)) / (Real.log (x / t)) ^ 2)
+      (Set.Icc a b) := by
+  have hxpos : 0 < x := by
+    have : 0 < x / b := by linarith
+    rcases (div_pos_iff.mp this) with ⟨h1, _⟩ | ⟨_, h2⟩
+    · exact h1
+    · linarith
+  intro t ht
+  simp only [Set.mem_Icc] at ht
+  have htpos : 0 < t := lt_of_lt_of_le ha ht.1
+  have htne : t ≠ 0 := htpos.ne'
+  have hxtpos : 0 < x / t := by positivity
+  have hxt : 1 < x / t := by
+    have hxb_le : x / b ≤ x / t := by
+      apply div_le_div_of_nonneg_left hxpos.le htpos ht.2
+    linarith [hxa, hxb_le]
+  have hlogne : Real.log (x / t) ≠ 0 := ne_of_gt (Real.log_pos hxt)
+  have hcont_xt2 : ContinuousAt (fun s : ℝ => x / s ^ 2) t := by
+    apply ContinuousAt.div continuousAt_const
+    · exact ContinuousAt.pow continuousAt_id 2
+    · exact pow_ne_zero 2 htne
+  have hcont_logxt : ContinuousAt (fun s : ℝ => Real.log (x / s)) t := by
+    have hdiv_cont : ContinuousAt (fun s : ℝ => x / s) t :=
+      ContinuousAt.div continuousAt_const continuousAt_id htne
+    exact (Real.continuousAt_log hxtpos.ne').comp hdiv_cont
+  apply ContinuousAt.continuousWithinAt
+  apply ContinuousAt.div
+  · apply ContinuousAt.mul hcont_xt2
+    exact ContinuousAt.sub continuousAt_const hcont_logxt
+  · exact ContinuousAt.pow hcont_logxt 2
+  · exact pow_ne_zero 2 hlogne
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
