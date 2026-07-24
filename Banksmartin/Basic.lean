@@ -1043,6 +1043,26 @@ theorem prime_factor_eq_exp (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
   rw [Real.log_mul (by positivity) (by positivity), Real.log_inv,
     Real.log_rpow h1a_pos]
 
+/-- MULTIPLIABLE: the G₂ per-prime factor is Multipliable over primes p≥5. -/
+theorem prime_factor_multipliable (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
+    Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z) := by
+  have hsummable := prime_factor_sub_one_summable s hs z hz
+  have hmult : Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      1 + (Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1)) := by
+    first
+    | exact multipliable_one_add_of_summable hsummable
+    | exact multipliable_one_add_of_summable_norm hsummable
+    | exact multipliable_one_add_of_summable (f := fun p => Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1) hsummable
+  have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z =
+        1 + (Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1) := by
+    intro p
+    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
+    rw [prime_factor_eq_exp (p:ℕ) hp3 s hs z hz]
+    ring
+  simpa only [heq] using hmult
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
