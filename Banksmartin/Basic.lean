@@ -1675,6 +1675,14 @@ theorem G2tailC_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
   apply DifferentiableOn.congr _ heq
   exact Complex.differentiable_exp.comp_differentiableOn (correction_sum_differentiableOn s hs)
 
+/-- G2C is differentiable on the ball |z|<2. -/
+theorem G2C_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
+    DifferentiableOn ℂ (fun z => G2C s z) (Metric.ball 0 2) := by
+  unfold G2C
+  apply DifferentiableOn.mul
+  · exact prime_factor_differentiableOn 3 (le_refl 3) s hs
+  · exact G2tailC_differentiableOn s hs
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
