@@ -2634,7 +2634,23 @@ theorem integral_term_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos :
       rwa [hdeq] at hd
     · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hab]
       exact hint.mono_set Set.Ioc_subset_Icc_self
-  sorry
+  have hderiv_int : ∫ t in Set.Ioc (p₀:ℝ) (x/3), (-deriv (fun s => (x / s) / Real.log (x / s)) t) =
+      ((x/(p₀:ℝ)) / Real.log (x/(p₀:ℝ))) - ((x/(x/3)) / Real.log (x/(x/3))) := by
+    rw [MeasureTheory.integral_neg, hint_ftc]; ring
+  have hpc_mono' : ∀ t ∈ Set.Ioc (p₀:ℝ) (x/3),
+      deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊x/3⌋₊ : ℝ) ≤
+      deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊t⌋₊ : ℝ) := by
+    intro t ht
+    have h1 := hderiv_neg t ht
+    have h2 := hpc_mono t ht
+    nlinarith [mul_le_mul_of_nonpos_left h2 h1]
+  have hle := MeasureTheory.setIntegral_mono_on
+    (μ := MeasureTheory.volume)
+    (f := fun t => deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊x/3⌋₊ : ℝ))
+    (g := fun t => deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊t⌋₊ : ℝ))
+    sorry sorry measurableSet_Ioc hpc_mono'
+  rw [MeasureTheory.integral_mul_const, hint_ftc] at hle
+  linarith [hle]
 
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
