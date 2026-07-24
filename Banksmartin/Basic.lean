@@ -1449,6 +1449,23 @@ theorem prime_factor_multipliable_complex (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz
     ring
   simpa only [heq] using hmult
 
+/-- The complex-z tail of G₂: product over primes p≥5. -/
+noncomputable def G2tailC (s : ℝ) (z : ℂ) : ℂ :=
+  ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+    (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z
+
+/-- G2tailC genuinely has this product as its value. -/
+theorem G2tailC_hasProd (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
+    HasProd (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z)
+      (G2tailC s z) :=
+  (prime_factor_multipliable_complex s hs z hz).hasProd
+
+/-- The full complex G₂(s,z): p=3 factor times the convergent tail. -/
+noncomputable def G2C (s : ℝ) (z : ℂ) : ℂ :=
+  (1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+    (((1 - (3:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z * G2tailC s z
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
