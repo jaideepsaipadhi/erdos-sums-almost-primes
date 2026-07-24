@@ -2411,6 +2411,45 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
             C * (x / p) * (Real.log (Real.log (x / p))) ^ (n - 1) / Real.log (x / p) := by
         intro p hp hge3
         exact hbound p (x / p) hge3
+      have hloglog_crude : ∀ p : ℝ, p ≥ 1 → x / p ≥ 3 →
+          Real.log (Real.log (x / p)) ≤ Real.log (Real.log x) := by
+        intro p hp1 hge3
+        have hxp_le : x / p ≤ x := by
+          rw [div_le_iff₀ (by linarith)]
+          nlinarith [hx, hp1]
+        have hlogxp_pos : 0 < Real.log (x / p) := Real.log_pos (by linarith)
+        apply Real.log_le_log hlogxp_pos
+        exact Real.log_le_log (by linarith) hxp_le
+      have hterm_bound2 : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
+          (p:ℝ) ≥ 1 → x / p ≥ 3 → (piKFrom n (x / p) p : ℝ) ≤
+            C * (Real.log (Real.log x)) ^ (n - 1) * ((x / p) / Real.log (x / p)) := by
+        intro p hp hp1 hge3
+        have h1 := hterm_bound p hp hge3
+        have h2 := hloglog_crude p hp1 hge3
+        have hloglogpos : 0 ≤ Real.log (Real.log (x/p)) := by
+          have hxp3 : (3:ℝ) ≤ x/p := hge3
+          have he_lt3 : Real.exp 1 < 3 := by
+            have := Real.exp_one_lt_d9
+            linarith
+          have hloge_lt3 : (1:ℝ) < Real.log 3 := by
+            calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+              _ < Real.log 3 := Real.log_lt_log (Real.exp_pos 1) he_lt3
+          have h3le : Real.log 3 ≤ Real.log (x/p) := Real.log_le_log (by norm_num) hxp3
+          have hge1 : (1:ℝ) ≤ Real.log (x/p) := by linarith
+          exact Real.log_nonneg hge1
+        have hpow_le : (Real.log (Real.log (x/p))) ^ (n-1) ≤ (Real.log (Real.log x)) ^ (n-1) := by
+          apply pow_le_pow_left₀ hloglogpos h2
+        calc (piKFrom n (x / p) p : ℝ)
+            ≤ C * (x / p) * (Real.log (Real.log (x / p))) ^ (n - 1) / Real.log (x / p) := h1
+          _ ≤ C * (Real.log (Real.log x)) ^ (n - 1) * ((x / p) / Real.log (x / p)) := by
+              rw [show C * (x/p) * (Real.log (Real.log (x/p)))^(n-1) / Real.log (x/p) =
+                  C * ((Real.log (Real.log (x/p)))^(n-1)) * ((x/p) / Real.log (x/p)) by ring]
+              gcongr
+              have hlogxp_pos : 0 < Real.log (x/p) := by
+                apply Real.log_pos
+                linarith [hge3]
+              have hxp_pos : 0 ≤ x/p := by linarith [hge3]
+              positivity
       have hvanish2 : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
           n ≥ 2 → x / p < 3 → piKFrom n (x / p) p = 0 := by
         intro p hp hn2 hlt
