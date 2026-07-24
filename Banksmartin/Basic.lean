@@ -1466,6 +1466,57 @@ noncomputable def G2C (s : ℝ) (z : ℂ) : ℂ :=
   (1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
     (((1 - (3:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z * G2tailC s z
 
+/-- Each G₂ per-prime factor is differentiable in z on |z|<2. -/
+theorem prime_factor_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
+    DifferentiableOn ℂ (fun z : ℂ => (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+      (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) (Metric.ball 0 2) := by
+  have hp0 : (0:ℝ) < (p:ℝ) := by
+    have : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    linarith
+  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1/3 := by
+    rw [ha_def]
+    have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+      linarith
+    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+      rw [Real.rpow_neg_one, inv_eq_one_div]
+    rw [h2] at h1
+    have h3 : (1:ℝ) / (p:ℝ) ≤ 1/3 := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
+    linarith
+  have h1a_pos : (0:ℝ) < 1 - a := by linarith
+  have h1a_ne : (((1 - a : ℝ)):ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  intro z hz
+  rw [Metric.mem_ball, dist_zero_right] at hz
+  have hza_lt : ‖z * (a:ℂ)‖ < 1 := by
+    have hane : ‖(a:ℂ)‖ = a := by
+      first
+      | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
+      | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
+    rw [norm_mul, hane]
+    nlinarith [hz, ha_le, ha_pos]
+  have h1za_ne : (1:ℂ) - z * (a:ℂ) ≠ 0 := by
+    intro heq
+    have h := sub_eq_zero.mp heq
+    have hn : (1:ℝ) = ‖z * (a:ℂ)‖ := by rw [← h]; simp
+    linarith [hza_lt]
+  apply DifferentiableAt.differentiableWithinAt
+  apply DifferentiableAt.mul
+  · have hlin : DifferentiableAt ℂ (fun w : ℂ => (1:ℂ) - w * (a:ℂ)) z := by
+      first
+      | exact (differentiableAt_const (1:ℂ)).sub (differentiableAt_id.mul_const (a:ℂ))
+      | exact (differentiableAt_const (1:ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a:ℂ))
+    exact hlin.inv h1za_ne
+  · first
+    | exact differentiableAt_id.const_cpow (Or.inr h1a_ne)
+    | exact differentiableAt_id.const_cpow (Or.inl h1a_ne)
+    | exact DifferentiableAt.const_cpow differentiableAt_id (Or.inr h1a_ne)
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
