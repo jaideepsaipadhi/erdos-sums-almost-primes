@@ -2227,6 +2227,21 @@ theorem sum_log_prime_ge_sqrt_range (n : ℕ) (hn : 4 ≤ n) :
     (∑ p ∈ Finset.range (n+1) with Nat.Prime p, Real.log p) ≥
       ((Nat.primeCounting n : ℝ) - Nat.primeCounting ⌊Real.sqrt n⌋₊) *
         Real.log (Real.sqrt n) := by
+  have hsqrt_le : Real.sqrt n ≤ n := by
+    have hn1 : (1:ℝ) ≤ n := by exact_mod_cast (by omega : 1 ≤ n)
+    calc Real.sqrt n ≤ Real.sqrt (n*n) := by
+          apply Real.sqrt_le_sqrt; nlinarith [hn1]
+      _ = n := by rw [show (n:ℝ)*n = n^2 by ring, Real.sqrt_sq (by positivity)]
+  have hfloor_le : ⌊Real.sqrt n⌋₊ ≤ n := by
+    have h1 : (⌊Real.sqrt n⌋₊ : ℝ) ≤ Real.sqrt n := Nat.floor_le (by positivity)
+    have h2 : (⌊Real.sqrt n⌋₊ : ℝ) ≤ n := h1.trans hsqrt_le
+    exact_mod_cast h2
+  have hsub : (Finset.range (⌊Real.sqrt n⌋₊ + 1)).filter Nat.Prime ⊆
+      (Finset.range (n+1)).filter Nat.Prime := by
+    apply Finset.filter_subset_filter
+    intro x hx
+    rw [Finset.mem_range] at hx ⊢
+    omega
   sorry
 
 theorem erdos_sums_increase_from_six
