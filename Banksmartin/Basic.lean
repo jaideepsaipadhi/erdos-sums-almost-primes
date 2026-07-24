@@ -1868,6 +1868,15 @@ theorem G2tailC_conj_symm (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 2) 
   congr 1
   exact correction_sum_conj_symm s hs z hz
 
+/-- G2C satisfies conjugate-reflection symmetry on the ball |z|<2. -/
+theorem G2C_conj_symm (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 2) :
+    G2C s ((starRingEnd ℂ) z) = (starRingEnd ℂ) (G2C s z) := by
+  unfold G2C
+  have hcast : ((3:ℕ):ℝ) = (3:ℝ) := by norm_num
+  have hsymm3 := prime_factor_conj_symm 3 (le_refl 3) s hs z
+  rw [hcast] at hsymm3
+  rw [hsymm3, G2tailC_conj_symm s hs z hz, ← map_mul]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
