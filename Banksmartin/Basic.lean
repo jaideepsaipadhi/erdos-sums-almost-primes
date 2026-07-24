@@ -2383,7 +2383,35 @@ theorem piK_bound_one :
         linarith [h2le, hstep]
       linarith [hpc_le', hfinal2]
 
-/-- Generalized version of piK_bound for piKFrom at arbitrary p₀. -/
+/-- Derivative of h(t) := (x/t)/log(x/t). -/
+theorem hasDerivAt_ratio_log (x t : ℝ) (htpos : 0 < t) (hxt : 1 < x / t) :
+    ∃ d : ℝ, HasDerivAt (fun s => (x / s) / Real.log (x / s)) d t ∧
+      d = (x / t ^ 2) * (1 - Real.log (x / t)) / (Real.log (x / t)) ^ 2 := by
+  have htne : t ≠ 0 := htpos.ne'
+  have hu : HasDerivAt (fun s => x / s) (x * -(t^2)⁻¹) t := by
+    have h1 : HasDerivAt (fun s : ℝ => s⁻¹) (-(t^2)⁻¹) t := hasDerivAt_inv htne
+    have h2 := h1.const_mul x
+    have heq : (fun s : ℝ => x / s) = (fun s : ℝ => x * s⁻¹) := by
+      funext s; rw [div_eq_mul_inv]
+    rw [heq]
+    exact h2
+  have hxpos : 0 < x := by
+    have hposdiv : 0 < x / t := by linarith
+    by_contra hxle
+    push_neg at hxle
+    have : x / t ≤ 0 := div_nonpos_of_nonpos_of_nonneg hxle htpos.le
+    linarith
+  have hxt_ne : x / t ≠ 0 := by positivity
+  have hv : HasDerivAt (fun s => Real.log (x / s)) ((x * -(t^2)⁻¹) / (x/t)) t :=
+    hu.log hxt_ne
+  have hvne : Real.log (x / t) ≠ 0 := ne_of_gt (Real.log_pos hxt)
+  have hfinal := hu.div hv hvne
+  refine ⟨_, hfinal, ?_⟩
+  have htsq : t ^ 2 ≠ 0 := pow_ne_zero 2 htne
+  have hxtne : x / t ≠ 0 := hxt_ne
+  field_simp
+  ring
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
