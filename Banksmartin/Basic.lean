@@ -112,30 +112,6 @@ lemma bigOmega_lt_of_dvd_of_lt (a n : ℕ) (ha : a ≠ 0) (hn : n ≠ 0)
 noncomputable def piK (k : ℕ) (x : ℝ) : ℕ :=
   (Finset.Icc 2 ⌊x⌋₊).filter (fun n => bigOmega n = k) |>.card
 
-/-- DEEP FACT (Landau, elementary form; not yet formalized): the count of
-    k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
-    an explicit witness constant C_k rather than raw big-O, since the O
-    needs to be usable inside a partial-summation argument. This is the one
-    piece of real analytic number theory in the whole formalization; every
-    other lemma in this file is either algebra or follows from this one. -/
-lemma piK_bound (k : ℕ) (hk : 1 ≤ k) :
-    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 3 ≤ x →
-      (piK k x : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
-  sorry -- THE deep step: elementary induction on k via the identity
-        -- π_k(x) = Σ_{p ≤ x^(1/k)} π_{k-1}(x/p) + (correction for p > x^(1/k)),
-        -- Chebyshev-type bounds on Σ_p 1/p up to y (Mertens' second theorem),
-        -- and induction on k. This is a genuine multi-day sub-project
-        -- (see e.g. Tenenbaum, "Introduction to Analytic and Probabilistic
-        -- Number Theory", II.6, for the classical elementary argument).
-
-/-- Given the counting bound, convergence follows by partial summation
-    (Abel summation against π_k, using log n → ∞ to kill the count's
-    polynomial-in-log-log growth). Standard once piK_bound is in hand. -/
-lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
-    Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
-      1 / ((n : ℝ) * Real.log n)) := by
-  obtain ⟨C, hC, hbound⟩ := piK_bound k hk
-  sorry -- partial summation against hbound; standard but not short.
 
 def E (a₁ : ℝ) (k : ℕ) : ℝ := 2 ^ k * (1 - f k) - a₁ * k ^ 2
 
@@ -3983,6 +3959,29 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
           apply mul_nonneg _ (pow_nonneg hLLpos.le n)
           apply mul_nonneg _ (by linarith : (0:ℝ) ≤ x)
           nlinarith [hC]
+
+/-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
+    k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
+    an explicit witness constant C_k rather than raw big-O, since the O
+    needs to be usable inside a partial-summation argument. This is the one
+    piece of real analytic number theory in the whole formalization; every
+    other lemma in this file is either algebra or follows from this one. -/
+lemma piK_bound (k : ℕ) (hk : 1 ≤ k) :
+    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 3 ≤ x →
+      (piK k x : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
+  obtain ⟨C, hC, hbound⟩ := piKFrom_bound k hk
+  refine ⟨C, hC, fun x hx => ?_⟩
+  rw [piK_eq_piKFrom_two]
+  exact hbound 2 x hx
+
+/-- Given the counting bound, convergence follows by partial summation
+    (Abel summation against π_k, using log n → ∞ to kill the count's
+    polynomial-in-log-log growth). Standard once piK_bound is in hand. -/
+lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
+    Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n)) := by
+  obtain ⟨C, hC, hbound⟩ := piK_bound k hk
+  sorry -- partial summation against hbound; standard but not short.
 
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
