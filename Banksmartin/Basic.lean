@@ -2570,6 +2570,70 @@ theorem integral_term_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos :
       apply Nat.floor_le_floor
       linarith [ht.2]
     exact_mod_cast Nat.monotone_primeCounting hfloor_le
+  have hderiv_neg : ∀ t ∈ Set.Ioc (p₀:ℝ) (x/3),
+      deriv (fun s => (x / s) / Real.log (x / s)) t ≤ 0 := by
+    intro t ht
+    simp only [Set.mem_Ioc] at ht
+    have htpos : 0 < t := lt_of_lt_of_le ha ht.1.le
+    have hxt : 1 < x / t := by
+      have hge : x / (x/3) ≤ x / t := by
+        apply div_le_div_of_nonneg_left hxpos.le htpos ht.2
+      have heq3 : x / (x/3) = 3 := by field_simp
+      linarith [heq3 ▸ hge]
+    rw [deriv_ratio_log_eq x t htpos hxt]
+    have hxt3 : (3:ℝ) ≤ x / t := by
+      have heq3 : x / (x/3) = 3 := by field_simp
+      have hge : x / (x/3) ≤ x / t := by
+        apply div_le_div_of_nonneg_left hxpos.le htpos ht.2
+      linarith [heq3 ▸ hge]
+    have hlogxt_gt1 : 1 < Real.log (x/t) := by
+      have h3le : Real.log 3 ≤ Real.log (x/t) := Real.log_le_log (by norm_num) hxt3
+      have hloge1 : Real.exp 1 < 3 := by linarith [Real.exp_one_lt_d9]
+      have : (1:ℝ) < Real.log 3 := by
+        calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+          _ < Real.log 3 := Real.log_lt_log (Real.exp_pos 1) hloge1
+      linarith
+    have hnum_neg : (1:ℝ) - Real.log (x/t) < 0 := by linarith
+    have hden_pos : (0:ℝ) < (Real.log (x/t))^2 := by positivity
+    have hxt2_pos : (0:ℝ) < x/t^2 := by positivity
+    have hprod_neg : x/t^2 * (1 - Real.log (x/t)) < 0 := mul_neg_of_pos_of_neg hxt2_pos hnum_neg
+    exact div_nonpos_of_nonpos_of_nonneg hprod_neg.le hden_pos.le
+  have hint_ftc : ∫ t in Set.Ioc (p₀:ℝ) (x/3), deriv (fun s => (x / s) / Real.log (x / s)) t =
+      ((x/(x/3)) / Real.log (x/(x/3))) - ((x/(p₀:ℝ)) / Real.log (x/(p₀:ℝ))) := by
+    have hdiff : ∀ t ∈ Set.Icc (p₀:ℝ) (x/3), DifferentiableAt ℝ
+        (fun s => (x / s) / Real.log (x / s)) t := by
+      intro t ht
+      simp only [Set.mem_Icc] at ht
+      have htpos : 0 < t := lt_of_lt_of_le ha ht.1
+      have hxt : 1 < x / t := by
+        have heq3 : x / (x/3) = 3 := by field_simp
+        have hge : x / (x/3) ≤ x / t := by
+          apply div_le_div_of_nonneg_left hxpos.le htpos ht.2
+        linarith [heq3 ▸ hge]
+      exact differentiableAt_ratio_log x t htpos hxt
+    have hcont : ContinuousOn (fun s => (x / s) / Real.log (x / s)) (Set.Icc (p₀:ℝ) (x/3)) :=
+      fun t ht => (hdiff t ht).continuousAt.continuousWithinAt
+    have hxb : 1 < x / (x/3) := by
+      have heq3 : x / (x/3) = 3 := by field_simp
+      linarith [heq3]
+    have hint := integrableOn_deriv_ratio_log x (p₀:ℝ) (x/3) ha hb hxb hab
+    rw [← intervalIntegral.integral_of_le hab]
+    apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (f := fun s => (x / s) / Real.log (x / s))
+    · intro t ht
+      rw [Set.uIcc_of_le hab] at ht
+      have htpos' : 0 < t := lt_of_lt_of_le ha ht.1
+      have hxt3 : (3:ℝ) ≤ x / t := by
+        have heq3 : x / (x/3) = 3 := by field_simp
+        have hge : x / (x/3) ≤ x / t := by
+          apply div_le_div_of_nonneg_left hxpos.le htpos' ht.2
+        linarith [heq3 ▸ hge]
+      have hxt : 1 < x / t := by linarith
+      rw [deriv_ratio_log_eq x t htpos' hxt]
+      obtain ⟨d, hd, hdeq⟩ := hasDerivAt_ratio_log x t htpos' hxt
+      rwa [hdeq] at hd
+    · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hab]
+      exact hint.mono_set Set.Ioc_subset_Icc_self
   sorry
 
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
