@@ -2652,6 +2652,26 @@ theorem integral_term_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos :
   rw [MeasureTheory.integral_mul_const, hint_ftc] at hle
   linarith [hle]
 
+/-- Combining abel_summation_ratio_log with integral_term_bound. -/
+theorem sum_ratio_log_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
+    (hxpos : 0 < x) (hx3 : (p₀ : ℝ) ≤ x / 3) :
+    ∑ k ∈ Finset.Ioc p₀ ⌊x / 3⌋₊,
+        ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) ≤
+      ((x / (p₀:ℝ)) / Real.log (x / (p₀:ℝ))) * (Nat.primeCounting ⌊x/3⌋₊ : ℝ) := by
+  have habel := abel_summation_ratio_log x p₀ hp₀ hxpos hx3
+  have hintbound := integral_term_bound x p₀ hp₀ hxpos hx3
+  have ha : 0 < (p₀ : ℝ) := by exact_mod_cast hp₀
+  have hpc_nonneg : (0:ℝ) ≤ (Nat.primeCounting p₀ : ℝ) := by positivity
+  have hh_nonneg : (0:ℝ) ≤ (x/(p₀:ℝ)) / Real.log (x/(p₀:ℝ)) := by
+    have hxb : 1 < x / (p₀:ℝ) := by
+      have heq3 : x / (x/3) = 3 := by field_simp
+      have hge : x / (x/3) ≤ x / (p₀:ℝ) := by
+        apply div_le_div_of_nonneg_left hxpos.le ha hx3
+      linarith [heq3 ▸ hge]
+    have hlogpos : 0 < Real.log (x/(p₀:ℝ)) := Real.log_pos hxb
+    positivity
+  nlinarith [habel, hintbound, mul_nonneg hh_nonneg hpc_nonneg]
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
