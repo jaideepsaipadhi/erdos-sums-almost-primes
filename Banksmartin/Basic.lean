@@ -1976,8 +1976,10 @@ theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 
         piKFrom k (x / p) p := by
   classical
   unfold piKFrom
-  sorry -- the actual bijection: n ↦ (n.minFac, n / n.minFac); needs
-        -- Finset.card_biUnion or Finset.sum_card_fiberwise-style machinery.
+  rw [Finset.card_eq_sum_card_fiberwise (f := Nat.minFac)
+    (t := (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime))]
+  · sorry -- per-fiber bijection n ↔ n/p, to be tackled next
+  · sorry -- membership: LHS elements' minFac lands in the RHS index set
 
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
