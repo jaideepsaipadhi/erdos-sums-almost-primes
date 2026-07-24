@@ -2392,7 +2392,17 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
   | succ n ih =>
     rcases Nat.eq_zero_or_pos n with hn0 | hnpos
     · subst hn0
-      sorry
+      obtain ⟨C, hC, hbound⟩ := piK_bound_one
+      refine ⟨C, hC, fun p₀ x hx => ?_⟩
+      have hsub : piKFrom 1 x p₀ ≤ piK 1 x := by
+        unfold piKFrom piK
+        apply Finset.card_le_card
+        intro n hn
+        classical
+        obtain ⟨hnmem, hnO, _⟩ := Finset.mem_filter.mp hn
+        exact Finset.mem_filter.mpr ⟨hnmem, hnO⟩
+      calc (piKFrom 1 x p₀ : ℝ) ≤ (piK 1 x : ℝ) := by exact_mod_cast hsub
+        _ ≤ C * x * (Real.log (Real.log x)) ^ (1 - 1) / Real.log x := hbound x hx
     · obtain ⟨C, hC, hbound⟩ := ih hnpos
       sorry
 
