@@ -2782,12 +2782,704 @@ theorem integral_term_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos :
   rw [MeasureTheory.integral_mul_const, hint_ftc] at hle
   linarith [hle]
 
-/-- Dyadic partition scaffold. -/
-theorem dyadic_partition_scaffold (p₀ N : ℕ) (hp₀ : 1 ≤ p₀) (hN : p₀ ≤ N) :
-    ∃ J : ℕ, Finset.Ioc p₀ N =
-      (Finset.range (J+1)).biUnion (fun j =>
-        Finset.Ioc (p₀ * 2^j) (min (p₀ * 2^(j+1)) N)) := by
-  sorry
+/-- Decompose a sum over `Ioc p₀ N` into dyadic fibers indexed by `Nat.log 2 k`.
+Pure bookkeeping via `Finset.sum_fiberwise_of_maps_to`: fibers of a function are
+disjoint for free, so no partition or covering lemma is needed. -/
+theorem sum_dyadic_fiberwise (p₀ N : ℕ) (g : ℕ → ℝ) :
+    ∑ k ∈ Finset.Ioc p₀ N, g k =
+      ∑ j ∈ Finset.range (Nat.log 2 N + 1),
+        ∑ k ∈ (Finset.Ioc p₀ N).filter (fun k => Nat.log 2 k = j), g k := by
+  classical
+  refine (Finset.sum_fiberwise_of_maps_to ?_ g).symm
+  intro k hk
+  simp only [Finset.mem_Ioc] at hk
+  simp only [Finset.mem_range, Nat.lt_succ_iff]
+  exact Nat.log_mono_right hk.2
+
+/-- Elements of dyadic fiber `j` satisfy `2^j ≤ k < 2^(j+1)`. -/
+theorem dyadic_fiber_mem_bounds (p₀ N j k : ℕ)
+    (hk : k ∈ (Finset.Ioc p₀ N).filter (fun k => Nat.log 2 k = j)) :
+    2 ^ j ≤ k ∧ k < 2 ^ (j + 1) := by
+  classical
+  obtain ⟨hkmem, hkj⟩ := Finset.mem_filter.mp hk
+  simp only [Finset.mem_Ioc] at hkmem
+  have hk0 : k ≠ 0 := by omega
+  constructor
+  · calc 2 ^ j = 2 ^ Nat.log 2 k := by rw [hkj]
+      _ ≤ k := Nat.pow_log_le_self 2 hk0
+  · calc k < 2 ^ (Nat.log 2 k + 1) := Nat.lt_pow_succ_log_self (by norm_num) k
+      _ = 2 ^ (j + 1) := by rw [hkj]
+
+/-- The number of primes in dyadic fiber `j` is at most pi(2^(j+1)). -/
+theorem dyadic_fiber_prime_card (p₀ N j : ℕ) :
+    ((((Finset.Ioc p₀ N).filter (fun k => Nat.log 2 k = j)).filter
+        (fun k => Nat.Prime k)).card : ℝ) ≤
+      (Nat.primeCounting (2 ^ (j + 1)) : ℝ) := by
+  classical
+  have hsub : (((Finset.Ioc p₀ N).filter (fun k => Nat.log 2 k = j)).filter
+      (fun k => Nat.Prime k)) ⊆
+      (Finset.range (2 ^ (j + 1) + 1)).filter Nat.Prime := by
+    intro k hk
+    obtain ⟨hkfib, hkp⟩ := Finset.mem_filter.mp hk
+    have hb := dyadic_fiber_mem_bounds p₀ N j k hkfib
+    refine Finset.mem_filter.mpr ⟨?_, hkp⟩
+    exact Finset.mem_range.mpr (by omega)
+  have hcount : Nat.primeCounting (2 ^ (j + 1)) =
+      ((Finset.range (2 ^ (j + 1) + 1)).filter Nat.Prime).card := by
+    simp [Nat.primeCounting, Nat.primeCounting', Nat.count_eq_card_filter_range]
+  have hcard := Finset.card_le_card hsub
+  rw [hcount]
+  exact_mod_cast hcard
+
+/-- h(t) = (x/t)/log(x/t) is antitone on [1, x/3]. Extracted from the argument
+inside `h_p0_bound` so it can be reused per dyadic fiber. -/
+theorem ratio_log_antitoneOn (x : ℝ) (hx : 3 ≤ x) :
+    AntitoneOn (fun s => (x / s) / Real.log (x / s)) (Set.Icc (1:ℝ) (x / 3)) := by
+  have hxpos : (0:ℝ) < x := by linarith
+  have hconv : Convex ℝ (Set.Icc (1:ℝ) (x/3)) := convex_Icc _ _
+  have hint_eq : interior (Set.Icc (1:ℝ) (x/3)) = Set.Ioo (1:ℝ) (x/3) := interior_Icc
+  have hxt3_of : ∀ t, 1 ≤ t → t ≤ x/3 → (3:ℝ) ≤ x / t := by
+    intro t ht1 ht2
+    have htpos : 0 < t := lt_of_lt_of_le one_pos ht1
+    have heq3 : x / (x/3) = 3 := by field_simp
+    have hge : x / (x/3) ≤ x / t := div_le_div_of_nonneg_left hxpos.le htpos ht2
+    linarith [heq3 ▸ hge]
+  have hcont : ContinuousOn (fun s => (x/s)/Real.log (x/s)) (Set.Icc (1:ℝ) (x/3)) := by
+    intro t ht
+    simp only [Set.mem_Icc] at ht
+    have htpos : 0 < t := lt_of_lt_of_le one_pos ht.1
+    have hxt3 := hxt3_of t ht.1 ht.2
+    exact (differentiableAt_ratio_log x t htpos (by linarith)).continuousAt.continuousWithinAt
+  have hdiff : DifferentiableOn ℝ (fun s => (x/s)/Real.log (x/s))
+      (interior (Set.Icc (1:ℝ) (x/3))) := by
+    rw [hint_eq]
+    intro t ht
+    simp only [Set.mem_Ioo] at ht
+    have htpos : 0 < t := lt_trans one_pos ht.1
+    have hxt3 := hxt3_of t ht.1.le ht.2.le
+    exact (differentiableAt_ratio_log x t htpos (by linarith)).differentiableWithinAt
+  have hderiv_np : ∀ t ∈ interior (Set.Icc (1:ℝ) (x/3)),
+      deriv (fun s => (x/s)/Real.log (x/s)) t ≤ 0 := by
+    rw [hint_eq]
+    intro t ht
+    simp only [Set.mem_Ioo] at ht
+    have htpos : 0 < t := lt_trans one_pos ht.1
+    have hxt3 := hxt3_of t ht.1.le ht.2.le
+    have hxt : 1 < x / t := by linarith
+    rw [deriv_ratio_log_eq x t htpos hxt]
+    have hlogxt_gt1 : 1 < Real.log (x/t) := by
+      have h3le : Real.log 3 ≤ Real.log (x/t) := Real.log_le_log (by norm_num) hxt3
+      have hloge1 : Real.exp 1 < 3 := by linarith [Real.exp_one_lt_d9]
+      have hl3 : (1:ℝ) < Real.log 3 := by
+        calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+          _ < Real.log 3 := Real.log_lt_log (Real.exp_pos 1) hloge1
+      linarith
+    have hnum_neg : (1:ℝ) - Real.log (x/t) < 0 := by linarith
+    have hden_pos : (0:ℝ) < (Real.log (x/t))^2 := by positivity
+    have hxt2_pos : (0:ℝ) < x/t^2 := by positivity
+    have hprod_neg : x/t^2 * (1 - Real.log (x/t)) < 0 :=
+      mul_neg_of_pos_of_neg hxt2_pos hnum_neg
+    exact div_nonpos_of_nonpos_of_nonneg hprod_neg.le hden_pos.le
+  exact antitoneOn_of_deriv_nonpos hconv hcont hdiff hderiv_np
+
+/-- Fiber j = 0 is empty: every k in `Ioc p₀ N` has k ≥ 2, hence `Nat.log 2 k ≥ 1`. -/
+theorem dyadic_fiber_zero_empty (p₀ N : ℕ) (hp₀ : 1 ≤ p₀) :
+    (Finset.Ioc p₀ N).filter (fun k => Nat.log 2 k = 0) = ∅ := by
+  classical
+  apply Finset.filter_eq_empty_iff.mpr
+  intro k hk
+  simp only [Finset.mem_Ioc] at hk
+  have h2k : 2 ≤ k := by omega
+  have hpos : 0 < Nat.log 2 k := Nat.log_pos (by norm_num) h2k
+  omega
+
+/-- Per-fiber bound: on dyadic fiber j, every term is at most h(2^j) (antitone),
+and the number of prime terms is at most pi(2^(j+1)). -/
+theorem dyadic_fiber_sum_bound (x : ℝ) (p₀ j : ℕ) (hp₀ : 1 ≤ p₀)
+    (hx : 9 ≤ x) (h2j : (2 ^ j : ℝ) ≤ x / 3) :
+    ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
+        ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) ≤
+      ((x / (2 ^ j : ℝ)) / Real.log (x / (2 ^ j : ℝ))) *
+        (Nat.primeCounting (2 ^ (j + 1)) : ℝ) := by
+  classical
+  have hxpos : (0:ℝ) < x := by linarith
+  have h2jpos : (0:ℝ) < (2 ^ j : ℝ) := by positivity
+  have hx2j3 : (3:ℝ) ≤ x / (2 ^ j : ℝ) := by
+    have heq3 : x / (x / 3) = 3 := by field_simp
+    have hge : x / (x / 3) ≤ x / (2 ^ j : ℝ) :=
+      div_le_div_of_nonneg_left hxpos.le h2jpos h2j
+    linarith [heq3 ▸ hge]
+  have hlogpos : 0 < Real.log (x / (2 ^ j : ℝ)) := Real.log_pos (by linarith)
+  have hb_nonneg : 0 ≤ (x / (2 ^ j : ℝ)) / Real.log (x / (2 ^ j : ℝ)) :=
+    div_nonneg (div_nonneg hxpos.le h2jpos.le) hlogpos.le
+  have h1le2j : (1:ℝ) ≤ (2 ^ j : ℝ) := by
+    exact_mod_cast Nat.one_le_two_pow
+  have hstep1 : ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
+      ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ)
+      = ∑ k ∈ ((Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j)).filter
+          (fun k => Nat.Prime k), ((x / k) / Real.log (x / k)) := by
+    conv_rhs => rw [Finset.sum_filter]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    by_cases hP : Nat.Prime k
+    · simp [hP]
+    · simp [hP]
+  have hanti := ratio_log_antitoneOn x (by linarith)
+  have hterm : ∀ k ∈ ((Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j)).filter
+      (fun k => Nat.Prime k),
+      ((x / k) / Real.log (x / k)) ≤
+        ((x / (2 ^ j : ℝ)) / Real.log (x / (2 ^ j : ℝ))) := by
+    intro k hk
+    obtain ⟨hkS, hkp⟩ := Finset.mem_filter.mp hk
+    have hb := dyadic_fiber_mem_bounds p₀ ⌊x / 3⌋₊ j k hkS
+    obtain ⟨hkmem, hkj⟩ := Finset.mem_filter.mp hkS
+    simp only [Finset.mem_Ioc] at hkmem
+    have hk2 : 2 ≤ k := by omega
+    have hk1R : (1:ℝ) ≤ (k : ℝ) := by exact_mod_cast (by omega : 1 ≤ k)
+    have hkfloor : (k : ℝ) ≤ (⌊x / 3⌋₊ : ℝ) := by exact_mod_cast hkmem.2
+    have hfloorle : (⌊x / 3⌋₊ : ℝ) ≤ x / 3 := Nat.floor_le (by linarith)
+    have hkleR : (k : ℝ) ≤ x / 3 := by linarith
+    have h2jkR : (2 ^ j : ℝ) ≤ (k : ℝ) := by exact_mod_cast hb.1
+    have hmono := hanti (Set.mem_Icc.mpr ⟨h1le2j, h2j⟩)
+      (Set.mem_Icc.mpr ⟨hk1R, hkleR⟩) h2jkR
+    simpa using hmono
+  have hsum_le := Finset.sum_le_card_nsmul
+    (((Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j)).filter
+      (fun k => Nat.Prime k))
+    (fun k => ((x / k) / Real.log (x / k)))
+    ((x / (2 ^ j : ℝ)) / Real.log (x / (2 ^ j : ℝ))) hterm
+  rw [nsmul_eq_mul] at hsum_le
+  have hcard := dyadic_fiber_prime_card p₀ ⌊x / 3⌋₊ j
+  calc ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
+      ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ)
+      = ∑ k ∈ ((Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j)).filter
+          (fun k => Nat.Prime k), ((x / k) / Real.log (x / k)) := hstep1
+    _ ≤ ((((Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j)).filter
+          (fun k => Nat.Prime k)).card : ℝ) *
+        ((x / (2 ^ j : ℝ)) / Real.log (x / (2 ^ j : ℝ))) := hsum_le
+    _ ≤ (Nat.primeCounting (2 ^ (j + 1)) : ℝ) *
+        ((x / (2 ^ j : ℝ)) / Real.log (x / (2 ^ j : ℝ))) :=
+      mul_le_mul_of_nonneg_right hcard hb_nonneg
+    _ = ((x / (2 ^ j : ℝ)) / Real.log (x / (2 ^ j : ℝ))) *
+        (Nat.primeCounting (2 ^ (j + 1)) : ℝ) := mul_comm _ _
+
+
+/-- Chebyshev specialized to powers of two: pi(2^(j+1)) ≤ 8*2^(j+1)/(j+1).
+The sqrt term is absorbed via sqrt(n)*log(sqrt(n)) ≤ n and log 2 > 1/2. -/
+theorem primeCounting_two_pow_bound (j : ℕ) (hj : 1 ≤ j) :
+    (Nat.primeCounting (2 ^ (j + 1)) : ℝ) ≤ 8 * 2 ^ (j + 1) / (j + 1) := by
+  have hn4 : 4 ≤ 2 ^ (j + 1) := by
+    calc 4 = 2 ^ 2 := by norm_num
+      _ ≤ 2 ^ (j + 1) := Nat.pow_le_pow_right (by norm_num) (by omega)
+  have hmain := primeCounting_le_bound_own (2 ^ (j + 1)) hn4
+  have hcast : ((2 ^ (j + 1) : ℕ) : ℝ) = (2:ℝ) ^ (j + 1) := by norm_cast
+  rw [hcast] at hmain
+  have h2pos : (0:ℝ) < (2:ℝ) ^ (j + 1) := by positivity
+  have hj1pos : (0:ℝ) < (j:ℝ) + 1 := by positivity
+  have hlog2pos : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hlogsqrt : Real.log (Real.sqrt ((2:ℝ) ^ (j + 1)))
+      = ((j:ℝ) + 1) * Real.log 2 / 2 := by
+    rw [Real.log_sqrt h2pos.le, Real.log_pow]
+    push_cast
+    try ring
+  have hlog4 : Real.log 4 = 2 * Real.log 2 := by
+    rw [show (4:ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
+    norm_num
+  have hterm2 : (2:ℝ) ^ (j + 1) * Real.log 4 / Real.log (Real.sqrt ((2:ℝ) ^ (j + 1)))
+      = 4 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1) := by
+    rw [hlogsqrt, hlog4]
+    have hne1 : ((j:ℝ) + 1) ≠ 0 := hj1pos.ne'
+    have hne2 : Real.log 2 ≠ 0 := hlog2pos.ne'
+    field_simp
+    try ring
+  have hs_nonneg : 0 ≤ Real.sqrt ((2:ℝ) ^ (j + 1)) := Real.sqrt_nonneg _
+  have hlog2_half : (1:ℝ)/2 ≤ Real.log 2 := by
+    linarith [Real.log_two_gt_d9]
+  have hsqrt_bound : Real.sqrt ((2:ℝ) ^ (j + 1))
+      ≤ 4 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1) := by
+    have hlog_le : Real.log (Real.sqrt ((2:ℝ) ^ (j + 1)))
+        ≤ Real.sqrt ((2:ℝ) ^ (j + 1)) := Real.log_le_self hs_nonneg
+    have hsq : Real.sqrt ((2:ℝ) ^ (j + 1)) * Real.sqrt ((2:ℝ) ^ (j + 1))
+        = (2:ℝ) ^ (j + 1) := Real.mul_self_sqrt h2pos.le
+    have hkey : Real.sqrt ((2:ℝ) ^ (j + 1)) * (((j:ℝ) + 1) * Real.log 2 / 2)
+        ≤ (2:ℝ) ^ (j + 1) := by
+      rw [← hlogsqrt]
+      calc Real.sqrt ((2:ℝ) ^ (j + 1)) * Real.log (Real.sqrt ((2:ℝ) ^ (j + 1)))
+          ≤ Real.sqrt ((2:ℝ) ^ (j + 1)) * Real.sqrt ((2:ℝ) ^ (j + 1)) :=
+            mul_le_mul_of_nonneg_left hlog_le hs_nonneg
+        _ = (2:ℝ) ^ (j + 1) := hsq
+    rw [le_div_iff₀ hj1pos]
+    nlinarith [hkey, hs_nonneg, hj1pos, hlog2_half,
+      mul_nonneg (mul_nonneg hs_nonneg hj1pos.le) (sub_nonneg.mpr hlog2_half)]
+  rw [hterm2] at hmain
+  have h48 : 4 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1) + 4 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1)
+      = 8 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1) := by ring
+  push_cast
+  linarith [hmain, hsqrt_bound, h48]
+
+/-- Per-fiber constant simplification:
+h(2^j) * pi(2^(j+1)) ≤ 16*x / ((j+1) * log(x/2^j)). -/
+theorem dyadic_term_bound (x : ℝ) (j : ℕ) (hj : 1 ≤ j) (hx : 9 ≤ x)
+    (h2j : (2:ℝ) ^ j ≤ x / 3) :
+    ((x / (2:ℝ) ^ j) / Real.log (x / (2:ℝ) ^ j)) *
+        (Nat.primeCounting (2 ^ (j + 1)) : ℝ) ≤
+      16 * x / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)) := by
+  have hxpos : (0:ℝ) < x := by linarith
+  have h2jpos : (0:ℝ) < (2:ℝ) ^ j := by positivity
+  have hx2j3 : (3:ℝ) ≤ x / (2:ℝ) ^ j := by
+    have heq3 : x / (x / 3) = 3 := by field_simp
+    have hge : x / (x / 3) ≤ x / (2:ℝ) ^ j :=
+      div_le_div_of_nonneg_left hxpos.le h2jpos h2j
+    linarith [heq3 ▸ hge]
+  have hlogpos : (0:ℝ) < Real.log (x / (2:ℝ) ^ j) := Real.log_pos (by linarith)
+  have hj1pos : (0:ℝ) < (j:ℝ) + 1 := by positivity
+  have hh_nonneg : (0:ℝ) ≤ (x / (2:ℝ) ^ j) / Real.log (x / (2:ℝ) ^ j) :=
+    div_nonneg (by positivity) hlogpos.le
+  have hpc := primeCounting_two_pow_bound j hj
+  push_cast at hpc
+  have hid : ((x / (2:ℝ) ^ j) / Real.log (x / (2:ℝ) ^ j)) *
+      (8 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1))
+      = 16 * x / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)) := by
+    have hne1 : ((j:ℝ) + 1) ≠ 0 := hj1pos.ne'
+    have hne2 : Real.log (x / (2:ℝ) ^ j) ≠ 0 := hlogpos.ne'
+    have hne3 : (2:ℝ) ^ j ≠ 0 := h2jpos.ne'
+    rw [pow_succ]
+    field_simp
+    try ring
+  calc ((x / (2:ℝ) ^ j) / Real.log (x / (2:ℝ) ^ j)) *
+      (Nat.primeCounting (2 ^ (j + 1)) : ℝ)
+      ≤ ((x / (2:ℝ) ^ j) / Real.log (x / (2:ℝ) ^ j)) *
+        (8 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1)) :=
+        mul_le_mul_of_nonneg_left hpc hh_nonneg
+    _ = 16 * x / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)) := hid
+
+/-- On the low dyadic range ((2^j)^2 ≤ x): log(x/2^j) ≥ (log x)/2. -/
+theorem log_ratio_low (x : ℝ) (j : ℕ) (hx : 9 ≤ x)
+    (hsq : ((2:ℝ) ^ j) ^ 2 ≤ x) :
+    Real.log x / 2 ≤ Real.log (x / (2:ℝ) ^ j) := by
+  have hxpos : (0:ℝ) < x := by linarith
+  have h2jpos : (0:ℝ) < (2:ℝ) ^ j := by positivity
+  have h2j_le_sqrt : (2:ℝ) ^ j ≤ Real.sqrt x := by
+    rw [show ((2:ℝ) ^ j) = Real.sqrt (((2:ℝ) ^ j) ^ 2) by
+      rw [Real.sqrt_sq h2jpos.le]]
+    exact Real.sqrt_le_sqrt hsq
+  have hsqrt_pos : 0 < Real.sqrt x := Real.sqrt_pos.mpr hxpos
+  have hdiv : Real.sqrt x ≤ x / (2:ℝ) ^ j := by
+    rw [le_div_iff₀ h2jpos]
+    calc Real.sqrt x * (2:ℝ) ^ j ≤ Real.sqrt x * Real.sqrt x :=
+          mul_le_mul_of_nonneg_left h2j_le_sqrt hsqrt_pos.le
+      _ = x := Real.mul_self_sqrt hxpos.le
+  calc Real.log x / 2 = Real.log (Real.sqrt x) := (Real.log_sqrt hxpos.le).symm
+    _ ≤ Real.log (x / (2:ℝ) ^ j) := Real.log_le_log hsqrt_pos hdiv
+
+/-- Harmonic sum bound, real form: sum_(i<n) 1/(i+1) ≤ 1 + log n. -/
+theorem harmonic_sum_le (n : ℕ) :
+    ∑ i ∈ Finset.range n, (1:ℝ) / ((i:ℝ) + 1) ≤ 1 + Real.log n := by
+  have heq : ((harmonic n : ℚ) : ℝ)
+      = ∑ i ∈ Finset.range n, (1:ℝ) / ((i:ℝ) + 1) := by
+    unfold harmonic
+    push_cast
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [one_div]
+  rw [← heq]
+  exact harmonic_le_one_add_log n
+
+
+/-- Flip helper: B ≤ x/3 gives 3 ≤ x/B (dedups a pattern used repeatedly). -/
+theorem div_ge_three_of_le_third (x B : ℝ) (hxpos : 0 < x) (hB : 0 < B)
+    (h : B ≤ x / 3) : 3 ≤ x / B := by
+  have heq3 : x / (x / 3) = 3 := by field_simp
+  have hge : x / (x / 3) ≤ x / B := div_le_div_of_nonneg_left hxpos.le hB h
+  linarith [heq3 ▸ hge]
+
+/-- For x ≥ 9 we have log x ≥ 2, via e^2 < 7.4 < 9. -/
+theorem two_le_log (x : ℝ) (hx : 9 ≤ x) : (2:ℝ) ≤ Real.log x := by
+  have h1 : Real.exp 1 < 2.7182818286 := Real.exp_one_lt_d9
+  have h2 : Real.exp 2 = Real.exp 1 * Real.exp 1 := by
+    rw [← Real.exp_add]
+    norm_num
+  have he2 : Real.exp 2 ≤ x := by
+    rw [h2]
+    nlinarith [(Real.exp_pos 1).le, h1, hx]
+  rw [show (2:ℝ) = Real.log (Real.exp 2) by rw [Real.log_exp]]
+  exact Real.log_le_log (Real.exp_pos 2) he2
+
+/-- For x ≥ 9, loglog x ≥ log 2. -/
+theorem loglog_ge_log_two (x : ℝ) (hx : 9 ≤ x) :
+    Real.log 2 ≤ Real.log (Real.log x) := by
+  have h2 := two_le_log x hx
+  exact Real.log_le_log (by norm_num) (by linarith)
+
+/-- The dyadic index J = Nat.log 2 (floor(x/3)) brackets x/3 between 2^J and 2^(J+1). -/
+theorem dyadic_log_bounds (x : ℝ) (hx : 9 ≤ x) :
+    (2:ℝ) ^ (Nat.log 2 ⌊x / 3⌋₊) ≤ x / 3 ∧
+      x / 3 ≤ (2:ℝ) ^ (Nat.log 2 ⌊x / 3⌋₊ + 1) := by
+  have hx3 : (3:ℝ) ≤ x / 3 := by linarith
+  have hN : 3 ≤ ⌊x / 3⌋₊ := Nat.le_floor (by push_cast; linarith)
+  constructor
+  · have h1 : (2:ℕ) ^ (Nat.log 2 ⌊x / 3⌋₊) ≤ ⌊x / 3⌋₊ :=
+      Nat.pow_log_le_self 2 (by omega)
+    have h2 : (⌊x / 3⌋₊ : ℝ) ≤ x / 3 := Nat.floor_le (by linarith)
+    calc (2:ℝ) ^ (Nat.log 2 ⌊x / 3⌋₊)
+        = ((2 ^ (Nat.log 2 ⌊x / 3⌋₊) : ℕ) : ℝ) := by norm_cast
+      _ ≤ (⌊x / 3⌋₊ : ℝ) := by exact_mod_cast h1
+      _ ≤ x / 3 := h2
+  · have h1 : ⌊x / 3⌋₊ < 2 ^ (Nat.log 2 ⌊x / 3⌋₊ + 1) :=
+      Nat.lt_pow_succ_log_self (by norm_num) _
+    have h2 : x / 3 < (⌊x / 3⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one _
+    have h3 : (⌊x / 3⌋₊ : ℝ) + 1
+        ≤ ((2 ^ (Nat.log 2 ⌊x / 3⌋₊ + 1) : ℕ) : ℝ) := by
+      exact_mod_cast Nat.succ_le_of_lt h1
+    calc x / 3 ≤ (⌊x / 3⌋₊ : ℝ) + 1 := h2.le
+      _ ≤ ((2 ^ (Nat.log 2 ⌊x / 3⌋₊ + 1) : ℕ) : ℝ) := h3
+      _ = (2:ℝ) ^ (Nat.log 2 ⌊x / 3⌋₊ + 1) := by norm_cast
+
+/-- If x/3 ≤ 2^(J+1) then (J+1)*log 2 ≥ (log x)/2, via sqrt x ≤ x/3 for x ≥ 9. -/
+theorem log_x_half_le (x : ℝ) (J : ℕ) (hx : 9 ≤ x)
+    (hJ : x / 3 ≤ (2:ℝ) ^ (J + 1)) :
+    Real.log x / 2 ≤ ((J:ℝ) + 1) * Real.log 2 := by
+  have hxpos : (0:ℝ) < x := by linarith
+  have h3sqrt : (3:ℝ) ≤ Real.sqrt x := by
+    rw [show (3:ℝ) = Real.sqrt 9 by
+      rw [show (9:ℝ) = 3 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]]
+    exact Real.sqrt_le_sqrt hx
+  have hsqrt_le : Real.sqrt x ≤ x / 3 := by
+    rw [le_div_iff₀ (by norm_num : (0:ℝ) < 3)]
+    calc Real.sqrt x * 3 ≤ Real.sqrt x * Real.sqrt x :=
+          mul_le_mul_of_nonneg_left h3sqrt (Real.sqrt_nonneg x)
+      _ = x := Real.mul_self_sqrt hxpos.le
+  calc Real.log x / 2 = Real.log (Real.sqrt x) := (Real.log_sqrt hxpos.le).symm
+    _ ≤ Real.log ((2:ℝ) ^ (J + 1)) :=
+        Real.log_le_log (Real.sqrt_pos.mpr hxpos) (le_trans hsqrt_le hJ)
+    _ = ((J:ℝ) + 1) * Real.log 2 := by
+        rw [Real.log_pow]
+        push_cast
+        try ring
+
+/-- If 2^J ≤ x then J+1 ≤ 2*log x, for x ≥ 9. -/
+theorem J_le_two_log (x : ℝ) (J : ℕ) (hx : 9 ≤ x)
+    (hJ : (2:ℝ) ^ J ≤ x) : ((J:ℝ) + 1) ≤ 2 * Real.log x := by
+  have hlogx2 := two_le_log x hx
+  have hJlog : (J:ℝ) * Real.log 2 ≤ Real.log x := by
+    calc (J:ℝ) * Real.log 2 = Real.log ((2:ℝ) ^ J) := by rw [Real.log_pow]
+      _ ≤ Real.log x := Real.log_le_log (by positivity) hJ
+  have hlog2_23 : (2:ℝ) / 3 ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
+  have hJle : (J:ℝ) ≤ (3 / 2) * Real.log x := by
+    have h1 : (J:ℝ) * ((2:ℝ) / 3) ≤ (J:ℝ) * Real.log 2 :=
+      mul_le_mul_of_nonneg_left hlog2_23 (by positivity)
+    nlinarith [hJlog]
+  linarith [hJle, hlogx2]
+
+/-- The final constant absorption: 1 + log(J+1) ≤ 4*loglog x when J+1 ≤ 2*log x. -/
+theorem one_add_log_le_loglog (x : ℝ) (J : ℕ) (hx : 9 ≤ x)
+    (hJ2 : ((J:ℝ) + 1) ≤ 2 * Real.log x) :
+    1 + Real.log ((J:ℝ) + 1) ≤ 4 * Real.log (Real.log x) := by
+  have hlogx2 := two_le_log x hx
+  have hloglog := loglog_ge_log_two x hx
+  have hJ1pos : (0:ℝ) < (J:ℝ) + 1 := by positivity
+  have hA : Real.log ((J:ℝ) + 1) ≤ Real.log 2 + Real.log (Real.log x) := by
+    calc Real.log ((J:ℝ) + 1) ≤ Real.log (2 * Real.log x) :=
+          Real.log_le_log hJ1pos hJ2
+      _ = Real.log 2 + Real.log (Real.log x) := Real.log_mul (by norm_num) (by linarith)
+  have hB : (1:ℝ) ≤ 2 * Real.log 2 := by
+    have he : Real.exp 1 ≤ 4 := by linarith [Real.exp_one_lt_d9]
+    have h4 : Real.log 4 = 2 * Real.log 2 := by
+      rw [show (4:ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
+      norm_num
+    calc (1:ℝ) = Real.log (Real.exp 1) := (Real.log_exp 1).symm
+      _ ≤ Real.log 4 := Real.log_le_log (Real.exp_pos 1) he
+      _ = 2 * Real.log 2 := h4
+  linarith [hA, hB, hloglog]
+
+/-- Low dyadic range (j ≤ M, 2M ≤ J): harmonic bound with the (log x)/2 floor. -/
+theorem dyadic_low_sum (x : ℝ) (J M : ℕ) (hx : 9 ≤ x) (hM : 2 * M ≤ J)
+    (hJ : (2:ℝ) ^ J ≤ x) :
+    ∑ j ∈ Finset.range (M + 1), 1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+      ≤ 2 / Real.log x * (1 + Real.log ((M:ℝ) + 1)) := by
+  have hxpos : (0:ℝ) < x := by linarith
+  have hlogx_pos : (0:ℝ) < Real.log x := Real.log_pos (by linarith)
+  have hc_nonneg : (0:ℝ) ≤ 2 / Real.log x := by positivity
+  have hterm : ∀ j ∈ Finset.range (M + 1),
+      1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+        ≤ 2 / Real.log x * (1 / ((j:ℝ) + 1)) := by
+    intro j hj
+    simp only [Finset.mem_range, Nat.lt_succ_iff] at hj
+    have hsq : ((2:ℝ) ^ j) ^ 2 ≤ x := by
+      have h1 : ((2:ℝ) ^ j) ^ 2 = (2:ℝ) ^ (j * 2) := (pow_mul 2 j 2).symm
+      rw [h1]
+      calc (2:ℝ) ^ (j * 2) ≤ (2:ℝ) ^ J := by
+            apply pow_le_pow_right₀ (by norm_num)
+            omega
+        _ ≤ x := hJ
+    have hlow := log_ratio_low x j hx hsq
+    have hj1 : (0:ℝ) < (j:ℝ) + 1 := by positivity
+    have hden1 : (0:ℝ) < ((j:ℝ) + 1) * (Real.log x / 2) := by positivity
+    have hmono : ((j:ℝ) + 1) * (Real.log x / 2)
+        ≤ ((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j) :=
+      mul_le_mul_of_nonneg_left hlow hj1.le
+    have h1 := one_div_le_one_div_of_le hden1 hmono
+    have h2 : 1 / (((j:ℝ) + 1) * (Real.log x / 2))
+        = 2 / Real.log x * (1 / ((j:ℝ) + 1)) := by
+      have hne1 : ((j:ℝ) + 1) ≠ 0 := hj1.ne'
+      have hne2 : Real.log x ≠ 0 := hlogx_pos.ne'
+      field_simp
+      try ring
+    calc 1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+        ≤ 1 / (((j:ℝ) + 1) * (Real.log x / 2)) := h1
+      _ = 2 / Real.log x * (1 / ((j:ℝ) + 1)) := h2
+  have hsum1 := Finset.sum_le_sum hterm
+  have hsum2 : ∑ j ∈ Finset.range (M + 1), 2 / Real.log x * (1 / ((j:ℝ) + 1))
+      = 2 / Real.log x * ∑ j ∈ Finset.range (M + 1), (1 / ((j:ℝ) + 1)) := by
+    rw [Finset.mul_sum]
+  have hharm := harmonic_sum_le (M + 1)
+  have hcastlog : Real.log ((M + 1 : ℕ) : ℝ) = Real.log ((M:ℝ) + 1) := by norm_cast
+  calc ∑ j ∈ Finset.range (M + 1),
+      1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+      ≤ ∑ j ∈ Finset.range (M + 1), 2 / Real.log x * (1 / ((j:ℝ) + 1)) := hsum1
+    _ = 2 / Real.log x * ∑ j ∈ Finset.range (M + 1), (1 / ((j:ℝ) + 1)) := hsum2
+    _ ≤ 2 / Real.log x * (1 + Real.log ((M:ℝ) + 1)) := by
+        apply mul_le_mul_of_nonneg_left _ hc_nonneg
+        calc ∑ i ∈ Finset.range (M + 1), (1:ℝ) / ((i:ℝ) + 1)
+            ≤ 1 + Real.log ((M + 1 : ℕ) : ℝ) := hharm
+          _ = 1 + Real.log ((M:ℝ) + 1) := by rw [hcastlog]
+
+/-- High dyadic range (M < j ≤ J, J ≤ 2M+1): reflected harmonic bound. -/
+theorem dyadic_high_sum (x : ℝ) (J M : ℕ) (hx : 9 ≤ x) (hJM : J ≤ 2 * M + 1)
+    (hJ3 : (2:ℝ) ^ J ≤ x / 3) :
+    ∑ j ∈ Finset.Ico (M + 1) (J + 1),
+        1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+      ≤ 2 / (((J:ℝ) + 1) * Real.log 2) * (1 + Real.log ((J:ℝ) + 1)) := by
+  have hxpos : (0:ℝ) < x := by linarith
+  have hlog2_pos : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hJ1pos : (0:ℝ) < (J:ℝ) + 1 := by positivity
+  have hc_nonneg : (0:ℝ) ≤ 2 / (((J:ℝ) + 1) * Real.log 2) := by positivity
+  have hterm : ∀ j ∈ Finset.Ico (M + 1) (J + 1),
+      1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+        ≤ 2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := by
+    intro j hj
+    simp only [Finset.mem_Ico] at hj
+    have hjJ : j ≤ J := by omega
+    have h2jpos : (0:ℝ) < (2:ℝ) ^ j := by positivity
+    have h2Jpos : (0:ℝ) < (2:ℝ) ^ J := by positivity
+    have hx2J : (3:ℝ) ≤ x / (2:ℝ) ^ J :=
+      div_ge_three_of_le_third x ((2:ℝ) ^ J) hxpos h2Jpos hJ3
+    have hsplit : x / (2:ℝ) ^ j = (x / (2:ℝ) ^ J) * (2:ℝ) ^ (J - j) := by
+      have hpow : (2:ℝ) ^ J = (2:ℝ) ^ j * (2:ℝ) ^ (J - j) := by
+        rw [← pow_add]
+        congr 1
+        omega
+      rw [hpow]
+      field_simp
+      try ring
+    have hx2j_ge : (2:ℝ) ^ ((J - j) + 1) ≤ x / (2:ℝ) ^ j := by
+      rw [hsplit, pow_succ]
+      have h2 : (2:ℝ) ≤ x / (2:ℝ) ^ J := by linarith
+      calc (2:ℝ) ^ (J - j) * 2 ≤ (2:ℝ) ^ (J - j) * (x / (2:ℝ) ^ J) :=
+            mul_le_mul_of_nonneg_left h2 (by positivity)
+        _ = (x / (2:ℝ) ^ J) * (2:ℝ) ^ (J - j) := mul_comm _ _
+    have hlog_ge : ((((J - j : ℕ) : ℝ)) + 1) * Real.log 2
+        ≤ Real.log (x / (2:ℝ) ^ j) := by
+      have h1 : Real.log ((2:ℝ) ^ ((J - j) + 1))
+          = ((((J - j : ℕ) : ℝ)) + 1) * Real.log 2 := by
+        rw [Real.log_pow]
+        push_cast
+        try ring
+      calc ((((J - j : ℕ) : ℝ)) + 1) * Real.log 2
+          = Real.log ((2:ℝ) ^ ((J - j) + 1)) := h1.symm
+        _ ≤ Real.log (x / (2:ℝ) ^ j) := Real.log_le_log (by positivity) hx2j_ge
+    have hfrac : ((J:ℝ) + 1) / 2 ≤ (j:ℝ) + 1 := by
+      have hn : J + 1 ≤ 2 * (j + 1) := by omega
+      have hcast := (Nat.cast_le (α := ℝ)).mpr hn
+      push_cast at hcast
+      linarith
+    have hlog_pos_j : (0:ℝ) < Real.log (x / (2:ℝ) ^ j) := by
+      have h1 : (0:ℝ) < ((((J - j : ℕ) : ℝ)) + 1) * Real.log 2 := by positivity
+      linarith [hlog_ge]
+    have hden_lower : (0:ℝ) <
+        ((J:ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2) := by
+      positivity
+    have hden_ge : ((J:ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2)
+        ≤ ((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j) :=
+      mul_le_mul hfrac hlog_ge (by positivity) (by positivity)
+    have h1 := one_div_le_one_div_of_le hden_lower hden_ge
+    have h2 : 1 / (((J:ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2))
+        = 2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := by
+      have hne1 : ((J:ℝ) + 1) ≠ 0 := hJ1pos.ne'
+      have hne2 : Real.log 2 ≠ 0 := hlog2_pos.ne'
+      have hne3 : ((((J - j : ℕ) : ℝ)) + 1) ≠ 0 := by positivity
+      field_simp
+      try ring
+    calc 1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+        ≤ 1 / (((J:ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2)) := h1
+      _ = 2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := h2
+  have hsum1 := Finset.sum_le_sum hterm
+  have hsum2 : ∑ j ∈ Finset.Ico (M + 1) (J + 1),
+      2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1))
+      = 2 / (((J:ℝ) + 1) * Real.log 2) *
+        ∑ j ∈ Finset.Ico (M + 1) (J + 1), (1 / (((J - j : ℕ) : ℝ) + 1)) := by
+    rw [Finset.mul_sum]
+  have hsub : Finset.Ico (M + 1) (J + 1) ⊆ Finset.range (J + 1) := by
+    rw [Finset.range_eq_Ico]
+    exact Finset.Ico_subset_Ico (Nat.zero_le _) le_rfl
+  have hsum3 : ∑ j ∈ Finset.Ico (M + 1) (J + 1), (1 / (((J - j : ℕ) : ℝ) + 1))
+      ≤ ∑ j ∈ Finset.range (J + 1), (1 / (((J - j : ℕ) : ℝ) + 1)) := by
+    apply Finset.sum_le_sum_of_subset_of_nonneg hsub
+    intro i _ _
+    positivity
+  have hreflect : ∑ j ∈ Finset.range (J + 1),
+      (1:ℝ) / (((J - j : ℕ) : ℝ) + 1)
+      = ∑ i ∈ Finset.range (J + 1), (1:ℝ) / ((i:ℝ) + 1) := by
+    rw [← Finset.sum_range_reflect (fun i => (1:ℝ) / ((i:ℝ) + 1)) (J + 1)]
+    refine Finset.sum_congr rfl fun j hj => ?_
+    have hjj : J + 1 - 1 - j = J - j := by omega
+    rw [hjj]
+  have hharm := harmonic_sum_le (J + 1)
+  have hcastlog : Real.log ((J + 1 : ℕ) : ℝ) = Real.log ((J:ℝ) + 1) := by norm_cast
+  calc ∑ j ∈ Finset.Ico (M + 1) (J + 1),
+      1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+      ≤ ∑ j ∈ Finset.Ico (M + 1) (J + 1),
+        2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := hsum1
+    _ = 2 / (((J:ℝ) + 1) * Real.log 2) *
+        ∑ j ∈ Finset.Ico (M + 1) (J + 1), (1 / (((J - j : ℕ) : ℝ) + 1)) := hsum2
+    _ ≤ 2 / (((J:ℝ) + 1) * Real.log 2) *
+        ∑ j ∈ Finset.range (J + 1), (1 / (((J - j : ℕ) : ℝ) + 1)) :=
+        mul_le_mul_of_nonneg_left hsum3 hc_nonneg
+    _ = 2 / (((J:ℝ) + 1) * Real.log 2) *
+        ∑ i ∈ Finset.range (J + 1), (1 / ((i:ℝ) + 1)) := by rw [hreflect]
+    _ ≤ 2 / (((J:ℝ) + 1) * Real.log 2) * (1 + Real.log ((J:ℝ) + 1)) := by
+        apply mul_le_mul_of_nonneg_left _ hc_nonneg
+        calc ∑ i ∈ Finset.range (J + 1), (1:ℝ) / ((i:ℝ) + 1)
+            ≤ 1 + Real.log ((J + 1 : ℕ) : ℝ) := hharm
+          _ = 1 + Real.log ((J:ℝ) + 1) := by rw [hcastlog]
+
+
+/-- Core of the dyadic bound, parametrized by the bracketing index J:
+if 2^J ≤ x/3 ≤ 2^(J+1), the fiberwise double sum is at most 384*x*loglog x/log x. -/
+theorem sum_ratio_log_dyadic_core (x : ℝ) (p₀ J : ℕ) (hp₀ : 1 ≤ p₀)
+    (hx : 9 ≤ x) (h2J3 : (2:ℝ) ^ J ≤ x / 3)
+    (hJ13 : x / 3 ≤ (2:ℝ) ^ (J + 1)) :
+    ∑ j ∈ Finset.range (J + 1),
+        ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
+          ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) ≤
+      384 * x * Real.log (Real.log x) / Real.log x := by
+  have hxpos : (0:ℝ) < x := by linarith
+  have hlogx2 := two_le_log x hx
+  have hlogx_pos : (0:ℝ) < Real.log x := by linarith
+  have hloglog_pos : (0:ℝ) < Real.log (Real.log x) := Real.log_pos (by linarith)
+  have h2J : (2:ℝ) ^ J ≤ x := by linarith
+  have hterm : ∀ j ∈ Finset.range (J + 1),
+      ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
+          ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) ≤
+        16 * x / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)) := by
+    intro j hj
+    simp only [Finset.mem_range, Nat.lt_succ_iff] at hj
+    have h2j : (2:ℝ) ^ j ≤ x / 3 := by
+      calc (2:ℝ) ^ j ≤ (2:ℝ) ^ J := by
+            apply pow_le_pow_right₀ (by norm_num)
+            exact hj
+        _ ≤ x / 3 := h2J3
+    have hx2j3 : (3:ℝ) ≤ x / (2:ℝ) ^ j :=
+      div_ge_three_of_le_third x ((2:ℝ) ^ j) hxpos (by positivity) h2j
+    have hlogj_pos : (0:ℝ) < Real.log (x / (2:ℝ) ^ j) := Real.log_pos (by linarith)
+    rcases Nat.eq_zero_or_pos j with hj0 | hjpos
+    · subst hj0
+      rw [dyadic_fiber_zero_empty p₀ ⌊x / 3⌋₊ hp₀, Finset.sum_empty]
+      have hden : (0:ℝ) < (((0:ℕ):ℝ) + 1) * Real.log (x / (2:ℝ) ^ (0:ℕ)) :=
+        mul_pos (by positivity) hlogj_pos
+      exact div_nonneg (by linarith) hden.le
+    · exact le_trans (dyadic_fiber_sum_bound x p₀ j hp₀ hx h2j)
+        (dyadic_term_bound x j hjpos hx h2j)
+  have hsum1 := Finset.sum_le_sum hterm
+  have hfactor : ∑ j ∈ Finset.range (J + 1),
+      16 * x / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+      = 16 * x * ∑ j ∈ Finset.range (J + 1),
+          1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)) := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    ring
+  have hsplit : ∑ j ∈ Finset.range (J + 1),
+      (1:ℝ) / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+      = (∑ j ∈ Finset.range (J / 2 + 1),
+          (1:ℝ) / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)))
+        + ∑ j ∈ Finset.Ico (J / 2 + 1) (J + 1),
+            (1:ℝ) / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)) := by
+    simp only [Finset.range_eq_Ico]
+    exact (Finset.sum_Ico_consecutive _ (Nat.zero_le (J / 2 + 1)) (by omega)).symm
+  have hlow := dyadic_low_sum x J (J / 2) hx (by omega) h2J
+  have hhigh := dyadic_high_sum x J (J / 2) hx (by omega) h2J3
+  have hhalf := log_x_half_le x J hx hJ13
+  have hJ2 := J_le_two_log x J hx h2J
+  have habs := one_add_log_le_loglog x J hx hJ2
+  have hM_log : 1 + Real.log (((J / 2 : ℕ):ℝ) + 1) ≤ 4 * Real.log (Real.log x) := by
+    have hle : (J / 2 : ℕ) ≤ J := Nat.div_le_self J 2
+    have h1 : (((J / 2 : ℕ):ℝ) + 1) ≤ ((J:ℝ) + 1) := by
+      have hc := (Nat.cast_le (α := ℝ)).mpr hle
+      linarith
+    have h2 : Real.log (((J / 2 : ℕ):ℝ) + 1) ≤ Real.log ((J:ℝ) + 1) :=
+      Real.log_le_log (by positivity) h1
+    linarith [habs]
+  have hhigh_coef : 2 / (((J:ℝ) + 1) * Real.log 2) ≤ 4 / Real.log x := by
+    have hlogx_ne : Real.log x ≠ 0 := hlogx_pos.ne'
+    have h1 : 2 / (((J:ℝ) + 1) * Real.log 2) ≤ 2 / (Real.log x / 2) :=
+      div_le_div_of_nonneg_left (by norm_num) (by linarith) hhalf
+    have h2 : 2 / (Real.log x / 2) = 4 / Real.log x := by
+      field_simp
+      try ring
+    calc 2 / (((J:ℝ) + 1) * Real.log 2) ≤ 2 / (Real.log x / 2) := h1
+      _ = 4 / Real.log x := h2
+  have hc_low : (0:ℝ) ≤ 2 / Real.log x := div_nonneg (by norm_num) hlogx_pos.le
+  have hL2 : 2 / Real.log x * (1 + Real.log (((J / 2 : ℕ):ℝ) + 1))
+      ≤ 8 * Real.log (Real.log x) / Real.log x := by
+    calc 2 / Real.log x * (1 + Real.log (((J / 2 : ℕ):ℝ) + 1))
+        ≤ 2 / Real.log x * (4 * Real.log (Real.log x)) :=
+          mul_le_mul_of_nonneg_left hM_log hc_low
+      _ = 8 * Real.log (Real.log x) / Real.log x := by ring
+  have hH2 : 2 / (((J:ℝ) + 1) * Real.log 2) * (1 + Real.log ((J:ℝ) + 1))
+      ≤ 16 * Real.log (Real.log x) / Real.log x := by
+    have h1pl : (0:ℝ) ≤ 1 + Real.log ((J:ℝ) + 1) := by
+      have hln : (0:ℝ) ≤ Real.log ((J:ℝ) + 1) :=
+        Real.log_nonneg (le_add_of_nonneg_left (Nat.cast_nonneg J))
+      linarith
+    calc 2 / (((J:ℝ) + 1) * Real.log 2) * (1 + Real.log ((J:ℝ) + 1))
+        ≤ 4 / Real.log x * (1 + Real.log ((J:ℝ) + 1)) :=
+          mul_le_mul_of_nonneg_right hhigh_coef h1pl
+      _ ≤ 4 / Real.log x * (4 * Real.log (Real.log x)) :=
+          mul_le_mul_of_nonneg_left habs (div_nonneg (by norm_num) hlogx_pos.le)
+      _ = 16 * Real.log (Real.log x) / Real.log x := by ring
+  have hU : ∑ j ∈ Finset.range (J + 1),
+      (1:ℝ) / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j))
+      ≤ 24 * Real.log (Real.log x) / Real.log x := by
+    have h824 : 8 * Real.log (Real.log x) / Real.log x
+        + 16 * Real.log (Real.log x) / Real.log x
+        = 24 * Real.log (Real.log x) / Real.log x := by ring
+    linarith [hsplit, hlow, hhigh, hL2, hH2, h824]
+  calc ∑ j ∈ Finset.range (J + 1),
+      ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
+        ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ)
+      ≤ ∑ j ∈ Finset.range (J + 1),
+        16 * x / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)) := hsum1
+    _ = 16 * x * ∑ j ∈ Finset.range (J + 1),
+        1 / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)) := hfactor
+    _ ≤ 16 * x * (24 * Real.log (Real.log x) / Real.log x) :=
+        mul_le_mul_of_nonneg_left hU (by linarith)
+    _ = 384 * x * Real.log (Real.log x) / Real.log x := by ring
+
+/-- THE dyadic sum bound, now proven: the weighted prime sum
+∑_(p prime ≤ x/3) (x/p)/log(x/p) is at most 384*x*loglog x/log x. -/
+theorem sum_ratio_log_dyadic :
+    ∃ K : ℝ, 0 < K ∧ ∀ (p₀ : ℕ) (x : ℝ), 1 ≤ p₀ → 9 ≤ x →
+      ∑ k ∈ Finset.Ioc p₀ ⌊x / 3⌋₊,
+          ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) ≤
+        K * x * Real.log (Real.log x) / Real.log x := by
+  refine ⟨384, by norm_num, fun p₀ x hp₀ hx => ?_⟩
+  obtain ⟨h2J3, hJ13⟩ := dyadic_log_bounds x hx
+  calc ∑ k ∈ Finset.Ioc p₀ ⌊x / 3⌋₊,
+        ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ)
+      = ∑ j ∈ Finset.range (Nat.log 2 ⌊x / 3⌋₊ + 1),
+          ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
+            ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) :=
+        sum_dyadic_fiberwise p₀ ⌊x / 3⌋₊ _
+    _ ≤ 384 * x * Real.log (Real.log x) / Real.log x :=
+        sum_ratio_log_dyadic_core x p₀ (Nat.log 2 ⌊x / 3⌋₊) hp₀ hx h2J3 hJ13
 
 theorem sum_ratio_log_bound_gen (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
     (hxpos : 0 < x) (B : ℝ) (hB1 : 3 ≤ x / B) (hx3 : (p₀ : ℝ) ≤ B) :
