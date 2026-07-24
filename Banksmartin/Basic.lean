@@ -1517,6 +1517,21 @@ theorem prime_factor_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1
     | exact differentiableAt_id.const_cpow (Or.inl h1a_ne)
     | exact DifferentiableAt.const_cpow differentiableAt_id (Or.inr h1a_ne)
 
+/-- General fact: HasSum g a implies HasProd (exp∘g) (exp a). -/
+theorem hasProd_exp_of_hasSum {ι : Type*} {g : ι → ℂ} {a : ℂ} (h : HasSum g a) :
+    HasProd (fun i => Complex.exp (g i)) (Complex.exp a) := by
+  have heq : ∀ t : Finset ι, Complex.exp (∑ i ∈ t, g i) = ∏ i ∈ t, Complex.exp (g i) := by
+    intro t
+    first
+    | exact Complex.exp_sum t g
+    | induction t using Finset.induction with
+      | empty => simp
+      | insert hx ih => rw [Finset.sum_insert hx, Finset.prod_insert hx, Complex.exp_add, ih]
+  have htendsto : Filter.Tendsto (fun t : Finset ι => Complex.exp (∑ i ∈ t, g i))
+      Filter.atTop (nhds (Complex.exp a)) := (Complex.continuous_exp.tendsto a).comp h
+  simp only [heq] at htendsto
+  exact htendsto
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
