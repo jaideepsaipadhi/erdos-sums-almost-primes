@@ -1426,6 +1426,29 @@ theorem prime_factor_eq_exp_complex (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 �
         from mul_comm _ _]
   exact key.symm
 
+/-- Complex-z analogue of prime_factor_multipliable. -/
+theorem prime_factor_multipliable_complex (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
+    Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
+  have hsummable := prime_factor_sub_one_summable_complex s hs z hz
+  have hmult : Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      1 + (Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1)) := by
+    first
+    | exact multipliable_one_add_of_summable hsummable
+    | exact multipliable_one_add_of_summable_norm hsummable
+  have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+          (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
+        1 + (Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1) := by
+    intro p
+    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
+    rw [prime_factor_eq_exp_complex (p:ℕ) hp3 s hs z hz]
+    ring
+  simpa only [heq] using hmult
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
