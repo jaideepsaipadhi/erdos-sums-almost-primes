@@ -2484,6 +2484,50 @@ theorem integrableOn_deriv_ratio_log (x : ℝ) (a b : ℝ) (ha : 0 < a)
     exact (deriv_ratio_log_eq x t htpos hxt).symm
   exact hcont.integrableOn_Icc.congr_fun heq measurableSet_Icc
 
+/-- Applying Mathlib's Abel summation formula to our weight function h. -/
+theorem abel_summation_ratio_log (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
+    (hxpos : 0 < x) (hx3 : (p₀ : ℝ) ≤ x / 3) :
+    ∑ k ∈ Finset.Ioc p₀ ⌊x / 3⌋₊,
+        ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) =
+      ((x / (x/3)) / Real.log (x / (x/3))) * (Nat.primeCounting ⌊x/3⌋₊ : ℝ) -
+      ((x / (p₀:ℝ)) / Real.log (x / (p₀:ℝ))) * (Nat.primeCounting p₀ : ℝ) -
+      ∫ t in Set.Ioc (p₀:ℝ) (x/3),
+        deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊t⌋₊ : ℝ) := by
+  have hp₀pos : (0:ℝ) ≤ (p₀ : ℝ) := by positivity
+  have hb : 0 < x / 3 := by linarith
+  have hxa : 1 < x / (x/3) := by
+    have heq : x / (x/3) = 3 := by field_simp
+    rw [heq]; norm_num
+  have ha : 0 < (p₀ : ℝ) := by exact_mod_cast hp₀
+  have hxb : 1 < x / (p₀:ℝ) := by
+    have hge : x / (p₀:ℝ) ≥ x / (x/3) := by
+      apply div_le_div_of_nonneg_left hxpos.le ha hx3
+    linarith [hxa]
+  have hdiff : ∀ t ∈ Set.Icc (p₀:ℝ) (x/3), DifferentiableAt ℝ
+      (fun s => (x / s) / Real.log (x / s)) t := by
+    intro t ht
+    simp only [Set.mem_Icc] at ht
+    have htpos : 0 < t := lt_of_lt_of_le ha ht.1
+    have hxt : 1 < x / t := by
+      have hge2 : x / (x/3) ≤ x / t := by
+        apply div_le_div_of_nonneg_left hxpos.le htpos ht.2
+      linarith [hxa]
+    exact differentiableAt_ratio_log x t htpos hxt
+  have hint := integrableOn_deriv_ratio_log x (p₀:ℝ) (x/3) ha hb hxa (by linarith)
+  have habel := sum_mul_eq_sub_sub_integral_mul (fun k => if Nat.Prime k then (1:ℝ) else 0)
+    ha.le (by linarith) hdiff hint
+  simp only [Nat.floor_natCast] at habel
+  have hbridge : ∀ N : ℕ, (∑ k ∈ Finset.Icc 0 N, if Nat.Prime k then (1:ℝ) else 0) =
+      (Nat.primeCounting N : ℝ) := by
+    intro N
+    classical
+    rw [Nat.primeCounting, Nat.primeCounting', Nat.count_eq_card_filter_range]
+    rw [show Finset.Icc 0 N = Finset.range (N+1) by
+      ext m; simp [Finset.mem_Icc, Finset.mem_range, Nat.lt_succ_iff]]
+    rw [Finset.sum_boole]
+  simp_rw [hbridge] at habel
+  exact habel
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
