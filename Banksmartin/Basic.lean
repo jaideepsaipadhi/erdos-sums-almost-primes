@@ -2484,7 +2484,51 @@ theorem integrableOn_deriv_ratio_log (x : ℝ) (a b : ℝ) (ha : 0 < a)
     exact (deriv_ratio_log_eq x t htpos hxt).symm
   exact hcont.integrableOn_Icc.congr_fun heq measurableSet_Icc
 
-/-- Applying Mathlib's Abel summation formula to our weight function h. -/
+/-- Generalized version with an arbitrary upper bound B. -/
+theorem abel_summation_ratio_log_gen (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
+    (hxpos : 0 < x) (B : ℝ) (hB1 : 1 < x / B) (hx3 : (p₀ : ℝ) ≤ B) :
+    ∑ k ∈ Finset.Ioc p₀ ⌊B⌋₊,
+        ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) =
+      ((x / B) / Real.log (x / B)) * (Nat.primeCounting ⌊B⌋₊ : ℝ) -
+      ((x / (p₀:ℝ)) / Real.log (x / (p₀:ℝ))) * (Nat.primeCounting p₀ : ℝ) -
+      ∫ t in Set.Ioc (p₀:ℝ) B,
+        deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊t⌋₊ : ℝ) := by
+  have hp₀pos : (0:ℝ) ≤ (p₀ : ℝ) := by positivity
+  have hb : 0 < B := by
+    by_contra hle
+    push_neg at hle
+    have : x / B ≤ 0 := div_nonpos_of_nonneg_of_nonpos hxpos.le hle
+    linarith
+  have ha : 0 < (p₀ : ℝ) := by exact_mod_cast hp₀
+  have hxb : 1 < x / (p₀:ℝ) := by
+    have hge : x / (p₀:ℝ) ≥ x / B := by
+      apply div_le_div_of_nonneg_left hxpos.le ha hx3
+    linarith [hB1]
+  have hdiff : ∀ t ∈ Set.Icc (p₀:ℝ) B, DifferentiableAt ℝ
+      (fun s => (x / s) / Real.log (x / s)) t := by
+    intro t ht
+    simp only [Set.mem_Icc] at ht
+    have htpos : 0 < t := lt_of_lt_of_le ha ht.1
+    have hxt : 1 < x / t := by
+      have hge2 : x / B ≤ x / t := by
+        apply div_le_div_of_nonneg_left hxpos.le htpos ht.2
+      linarith [hB1]
+    exact differentiableAt_ratio_log x t htpos hxt
+  have hint := integrableOn_deriv_ratio_log x (p₀:ℝ) B ha hb hB1 (by linarith)
+  have habel := sum_mul_eq_sub_sub_integral_mul (fun k => if Nat.Prime k then (1:ℝ) else 0)
+    ha.le (by linarith) hdiff hint
+  simp only [Nat.floor_natCast] at habel
+  have hbridge : ∀ N : ℕ, (∑ k ∈ Finset.Icc 0 N, if Nat.Prime k then (1:ℝ) else 0) =
+      (Nat.primeCounting N : ℝ) := by
+    intro N
+    classical
+    rw [Nat.primeCounting, Nat.primeCounting', Nat.count_eq_card_filter_range]
+    rw [show Finset.Icc 0 N = Finset.range (N+1) by
+      ext m; simp [Finset.mem_Icc, Finset.mem_range, Nat.lt_succ_iff]]
+    rw [Finset.sum_boole]
+  simp_rw [hbridge] at habel
+  exact habel
+
 theorem abel_summation_ratio_log (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
     (hxpos : 0 < x) (hx3 : (p₀ : ℝ) ≤ x / 3) :
     ∑ k ∈ Finset.Ioc p₀ ⌊x / 3⌋₊,
