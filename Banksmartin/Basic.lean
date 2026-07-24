@@ -1333,6 +1333,22 @@ theorem prime_correction_summable_complex (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz
       prime_correction_bound_complex (p:ℕ) p.property.2 s hs z hz)
     hcomp
 
+/-- Complex-z analogue of prime_factor_sub_one_bound. -/
+theorem prime_factor_sub_one_bound_complex (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
+    (z : ℂ) (hz : ‖z‖ ≤ 2) :
+    ‖Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖
+      ≤ 36 * (p:ℝ) ^ (-2*s) := by
+  set c : ℂ := (-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+    z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ) with hc_def
+  have hp3 : 3 ≤ p := by omega
+  have hbound : ‖c‖ ≤ 18 * (p:ℝ) ^ (-2*s) := prime_correction_bound_complex p hp3 s hs z hz
+  have hle1 : 18 * (p:ℝ) ^ (-2*s) ≤ 1 := correction_le_one p hp s hs
+  have hc1 : ‖c‖ ≤ 1 := le_trans hbound hle1
+  calc ‖Complex.exp c - 1‖ ≤ 2 * ‖c‖ := Complex.norm_exp_sub_one_le hc1
+    _ ≤ 2 * (18 * (p:ℝ) ^ (-2*s)) := by linarith [hbound]
+    _ = 36 * (p:ℝ) ^ (-2*s) := by ring
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
