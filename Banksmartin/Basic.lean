@@ -1619,6 +1619,49 @@ theorem correction_sum_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
     have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
     exact prime_correction_bound_complex (p:ℕ) hp3 s hs w hw.le
 
+/-- G2tailC equals exp of the sum of correction terms. -/
+theorem G2tailC_eq_exp_sum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
+    G2tailC s z = Complex.exp (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ))) := by
+  have hnormsum : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      ‖(-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)‖) := by
+    have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 18 * (p:ℝ) ^ (-2*s)) := by
+      have h2s : -(2*s) < -1 := by linarith
+      have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+        Real.summable_nat_rpow.mpr h2s
+      have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+        hbase.subtype _
+      have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (18:ℝ) * (p:ℝ) ^ (-2*s) =
+          18 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+        intro p; ring_nf
+      simp_rw [heq]
+      exact hsub.mul_left 18
+    apply Summable.of_nonneg_of_le
+      (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
+      (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => by
+        have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
+        exact prime_correction_bound_complex (p:ℕ) hp3 s hs z hz)
+      hcomp
+  have hsummable : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) :=
+    Summable.of_norm hnormsum
+  have hhassum := hsummable.hasSum
+  have hhasprod_exp := hasProd_exp_of_hasSum hhassum
+  have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, Complex.exp
+      ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) =
+      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z := by
+    intro p
+    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
+    exact (prime_factor_eq_exp_complex (p:ℕ) hp3 s hs z hz).symm
+  simp only [heq] at hhasprod_exp
+  have hhasprod_G2 := G2tailC_hasProd s hs z hz
+  exact (hhasprod_G2.unique hhasprod_exp)
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
