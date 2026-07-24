@@ -1532,6 +1532,66 @@ theorem hasProd_exp_of_hasSum {ι : Type*} {g : ι → ℂ} {a : ℂ} (h : HasSu
   simp only [heq] at htendsto
   exact htendsto
 
+/-- Each per-prime correction term is differentiable in z. -/
+theorem correction_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
+    DifferentiableOn ℂ (fun z : ℂ => (-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+      z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) (Metric.ball 0 2) := by
+  have hp0 : (0:ℝ) < (p:ℝ) := by
+    have : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    linarith
+  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1/3 := by
+    rw [ha_def]
+    have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+      linarith
+    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+      rw [Real.rpow_neg_one, inv_eq_one_div]
+    rw [h2] at h1
+    have h3 : (1:ℝ) / (p:ℝ) ≤ 1/3 := by
+      apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
+    linarith
+  intro z hz
+  rw [Metric.mem_ball, dist_zero_right] at hz
+  have hane : ‖(a:ℂ)‖ = a := by
+    first
+    | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
+    | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
+  have hza_lt : ‖z * (a:ℂ)‖ < 1 := by
+    rw [norm_mul, hane]; nlinarith [hz, ha_le, ha_pos]
+  have hre_pos : (0:ℝ) < ((1:ℂ) - z * (a:ℂ)).re := by
+    simp only [Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
+      Complex.ofReal_im]
+    have hre_le_norm : |z.re| ≤ ‖z‖ := by
+      have hns : z.re^2 ≤ Complex.normSq z := by
+        have : Complex.normSq z = z.re^2 + z.im^2 := by
+          rw [Complex.normSq_apply]; ring
+        nlinarith [sq_nonneg z.im, this]
+      have hnormsq : ‖z‖^2 = Complex.normSq z := by
+        first
+        | rw [Complex.norm_eq_abs, Complex.abs_apply, Real.sq_sqrt (Complex.normSq_nonneg z)]
+        | rw [Complex.sq_norm]
+        | rw [Complex.norm_sq_apply]
+        | exact (Complex.normSq_eq_abs z).symm ▸ (Complex.sq_abs z)
+        | rw [Complex.norm_def, Real.sq_sqrt (Complex.normSq_nonneg z)]
+      have hsq : z.re^2 ≤ ‖z‖^2 := by rw [hnormsq]; exact hns
+      nlinarith [abs_nonneg z.re, norm_nonneg z, sq_abs z.re, hsq]
+    have hre_le : z.re * a ≤ ‖z‖ * a := by
+      rw [abs_le] at hre_le_norm
+      nlinarith [hre_le_norm.2, ha_pos]
+    nlinarith [hz, ha_pos, hre_le]
+  apply DifferentiableAt.differentiableWithinAt
+  apply DifferentiableAt.add
+  · apply DifferentiableAt.neg
+    apply DifferentiableAt.clog
+    · first
+      | exact (differentiableAt_const (1:ℂ)).sub (differentiableAt_id.mul_const (a:ℂ))
+      | exact (differentiableAt_const (1:ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a:ℂ))
+    · exact Or.inl hre_pos
+  · exact differentiableAt_id.mul_const _
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
