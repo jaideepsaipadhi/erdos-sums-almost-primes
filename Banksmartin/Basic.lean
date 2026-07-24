@@ -1844,6 +1844,20 @@ theorem correction_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
   rw [← hconj_sub, hlog_conj]
   simp only [map_neg, map_add, map_mul, hlog1a_real]
 
+/-- The correction-term sum satisfies conjugate-reflection symmetry. -/
+theorem correction_sum_conj_symm (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 2) :
+    ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      ((-Complex.log (1 - (starRingEnd ℂ) z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+        (starRingEnd ℂ) z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) =
+      (starRingEnd ℂ) (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+        ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ))) := by
+  rw [RCLike.conj_tsum]
+  apply tsum_congr
+  intro p
+  have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
+  exact correction_conj_symm (p:ℕ) hp3 s hs z hz
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
