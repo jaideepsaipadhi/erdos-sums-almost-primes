@@ -2528,6 +2528,30 @@ theorem abel_summation_ratio_log (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀)
   simp_rw [hbridge] at habel
   exact habel
 
+/-- Bound on the h(x/3)*π(⌊x/3⌋₊) boundary term. -/
+theorem boundary_term_bound (x : ℝ) (hx : 9 ≤ x) (C : ℝ) (hC : 0 < C)
+    (hbound : ∀ y : ℝ, 3 ≤ y → (piK 1 y : ℝ) ≤ C * y * (Real.log (Real.log y)) ^ (1 - 1) / Real.log y) :
+    ((x / (x/3)) / Real.log (x / (x/3))) * (Nat.primeCounting ⌊x/3⌋₊ : ℝ) ≤
+      C * (Real.log 3)⁻¹ * x / Real.log (x/3) := by
+  have heq3 : x / (x/3) = 3 := by
+    have hxpos : 0 < x := by linarith
+    field_simp
+  rw [heq3]
+  have hx3ge3 : (3:ℝ) ≤ x / 3 := by linarith
+  have hpc_bound := hbound (x/3) hx3ge3
+  rw [piK_one_eq_primeCounting] at hpc_bound
+  norm_num at hpc_bound
+  have hlog3pos : 0 < Real.log 3 := Real.log_pos (by norm_num)
+  have hlogx3pos : 0 < Real.log (x/3) := by
+    apply Real.log_pos; linarith
+  have hkey : (C * (x/3) / Real.log (x/3)) * (3 / Real.log 3) =
+      C * (Real.log 3)⁻¹ * x / Real.log (x/3) := by
+    field_simp
+  rw [← hkey, mul_comm (3 / Real.log 3)]
+  have hpos3log3 : (0:ℝ) ≤ 3 / Real.log 3 := by positivity
+  have hCpos : (0:ℝ) ≤ C * (x/3) / Real.log (x/3) := by positivity
+  exact mul_le_mul hpc_bound (le_refl _) hpos3log3 hCpos
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
