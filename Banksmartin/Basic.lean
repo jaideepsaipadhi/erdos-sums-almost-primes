@@ -1687,6 +1687,55 @@ theorem G2C_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
 noncomputable def gCoeff (i : ℕ) (s : ℝ) : ℂ :=
   (iteratedDeriv i (fun z => G2C s z) 0) / (i.factorial : ℂ)
 
+/-- If f(conj w) = conj(f w) for all w in an open conj-symmetric set U, and
+    f has derivative f' at conj z₀ ∈ U, then f has derivative conj(f') at z₀. -/
+theorem hasDerivAt_conj_of_symm {U : Set ℂ} (hUopen : IsOpen U)
+    (hUconj : ∀ w ∈ U, (starRingEnd ℂ) w ∈ U)
+    {f : ℂ → ℂ} (hsymm : ∀ w ∈ U, f ((starRingEnd ℂ) w) = (starRingEnd ℂ) (f w))
+    {z₀ f' : ℂ} (hz₀ : z₀ ∈ U)
+    (hf : HasDerivAt f f' ((starRingEnd ℂ) z₀)) :
+    HasDerivAt f ((starRingEnd ℂ) f') z₀ := by
+  have hz₀conj : (starRingEnd ℂ) z₀ ∈ U := hUconj z₀ hz₀
+  have hfW : HasDerivWithinAt f f' U ((starRingEnd ℂ) z₀) := hf.hasDerivWithinAt
+  rw [hasDerivWithinAt_iff_tendsto] at hfW
+  have hconj_cont : Filter.Tendsto (fun z : ℂ => (starRingEnd ℂ) z)
+      (nhdsWithin z₀ U) (nhdsWithin ((starRingEnd ℂ) z₀) U) := by
+    apply Filter.Tendsto.inf
+    · exact (Complex.continuous_conj).continuousAt.tendsto
+    · rw [Filter.tendsto_principal_principal]
+      exact fun z hz => hUconj z hz
+  have hcomp := hfW.comp hconj_cont
+  have heq : ∀ z ∈ U, ‖z - z₀‖⁻¹ * ‖f z - f z₀ - (z - z₀) • (starRingEnd ℂ) f'‖ =
+      ‖(starRingEnd ℂ) z - (starRingEnd ℂ) z₀‖⁻¹ *
+        ‖f ((starRingEnd ℂ) z) - f ((starRingEnd ℂ) z₀) -
+          ((starRingEnd ℂ) z - (starRingEnd ℂ) z₀) • f'‖ := by
+    intro z hzU
+    have h1 : f z = (starRingEnd ℂ) (f ((starRingEnd ℂ) z)) := by
+      have := hsymm ((starRingEnd ℂ) z) (hUconj z hzU)
+      rwa [Complex.conj_conj] at this
+    have h2 : f z₀ = (starRingEnd ℂ) (f ((starRingEnd ℂ) z₀)) := by
+      have := hsymm ((starRingEnd ℂ) z₀) (hUconj z₀ hz₀)
+      rwa [Complex.conj_conj] at this
+    have hnorm_conj : ‖z - z₀‖ = ‖(starRingEnd ℂ) z - (starRingEnd ℂ) z₀‖ := by
+      rw [← map_sub, Complex.norm_conj]
+    have hbracket : f z - f z₀ - (z - z₀) • (starRingEnd ℂ) f' =
+        (starRingEnd ℂ) (f ((starRingEnd ℂ) z) - f ((starRingEnd ℂ) z₀) -
+          ((starRingEnd ℂ) z - (starRingEnd ℂ) z₀) • f') := by
+      rw [h1, h2] at *
+      simp only [smul_eq_mul, map_sub, map_mul, Complex.conj_conj]
+    rw [hnorm_conj, hbracket, Complex.norm_conj]
+  have heventually : (fun x' : ℂ => ‖(starRingEnd ℂ) x' - (starRingEnd ℂ) z₀‖⁻¹ *
+        ‖f ((starRingEnd ℂ) x') - f ((starRingEnd ℂ) z₀) -
+          ((starRingEnd ℂ) x' - (starRingEnd ℂ) z₀) • f'‖) =ᶠ[nhdsWithin z₀ U]
+      (fun x' : ℂ => ‖x' - z₀‖⁻¹ * ‖f x' - f z₀ - (x' - z₀) • (starRingEnd ℂ) f'‖) := by
+    filter_upwards [self_mem_nhdsWithin] with z hz using (heq z hz).symm
+  have hfinal : Filter.Tendsto (fun z : ℂ => ‖z - z₀‖⁻¹ *
+      ‖f z - f z₀ - (z - z₀) • (starRingEnd ℂ) f'‖) (nhdsWithin z₀ U) (nhds 0) :=
+    Filter.Tendsto.congr' heventually hcomp
+  rw [hUopen.nhdsWithin_eq hz₀] at hfinal
+  rw [hasDerivAt_iff_tendsto]
+  exact hfinal
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
