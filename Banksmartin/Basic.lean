@@ -1967,6 +1967,18 @@ theorem piK_eq_piKFrom_two (k : ℕ) (x : ℝ) : piK k x = piKFrom k x 2 := by
   · intro h
     exact h.1
 
+/-- The key recursive identity: a (k+1)-almost-prime n with smallest
+    factor ≥p₀ corresponds bijectively to (p, m) where p=n.minFac (p≥p₀)
+    and m=n/p is a k-almost-prime with smallest factor ≥p. Valid for k≥1. -/
+theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 ≤ x) :
+    piKFrom (k+1) x p₀ =
+      ∑ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
+        piKFrom k (x / p) p := by
+  classical
+  unfold piKFrom
+  sorry -- the actual bijection: n ↦ (n.minFac, n / n.minFac); needs
+        -- Finset.card_biUnion or Finset.sum_card_fiberwise-style machinery.
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
