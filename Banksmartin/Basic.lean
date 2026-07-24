@@ -2552,6 +2552,26 @@ theorem boundary_term_bound (x : ℝ) (hx : 9 ≤ x) (C : ℝ) (hC : 0 < C)
   have hCpos : (0:ℝ) ≤ C * (x/3) / Real.log (x/3) := by positivity
   exact mul_le_mul hpc_bound (le_refl _) hpos3log3 hCpos
 
+/-- Bound on the integral term -∫h'(t)π(t)dt. -/
+theorem integral_term_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos : 0 < x)
+    (hx3 : (p₀ : ℝ) ≤ x / 3) :
+    -(∫ t in Set.Ioc (p₀:ℝ) (x/3),
+        deriv (fun s => (x / s) / Real.log (x / s)) t * (Nat.primeCounting ⌊t⌋₊ : ℝ)) ≤
+      (Nat.primeCounting ⌊x/3⌋₊ : ℝ) *
+        (((x/(p₀:ℝ)) / Real.log (x/(p₀:ℝ))) - ((x/(x/3)) / Real.log (x/(x/3)))) := by
+  have ha : 0 < (p₀ : ℝ) := by exact_mod_cast hp₀
+  have hb : 0 < x / 3 := by linarith
+  have hab : (p₀:ℝ) ≤ x/3 := hx3
+  have hpc_mono : ∀ t ∈ Set.Ioc (p₀:ℝ) (x/3), (Nat.primeCounting ⌊t⌋₊ : ℝ) ≤
+      (Nat.primeCounting ⌊x/3⌋₊ : ℝ) := by
+    intro t ht
+    simp only [Set.mem_Ioc] at ht
+    have hfloor_le : ⌊t⌋₊ ≤ ⌊x/3⌋₊ := by
+      apply Nat.floor_le_floor
+      linarith [ht.2]
+    exact_mod_cast Nat.monotone_primeCounting hfloor_le
+  sorry
+
 theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 < C ∧ ∀ (p₀ : ℕ) (x : ℝ), 3 ≤ x →
       (piKFrom k x p₀ : ℝ) ≤ C * x * (Real.log (Real.log x)) ^ (k - 1) / Real.log x := by
