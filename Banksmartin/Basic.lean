@@ -876,6 +876,71 @@ theorem prime_correction_summable (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| �
     (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => prime_correction_bound (p:ℕ) p.property.2 s hs z hz)
     hcomp
 
+/-- |exp(x)-1| ≤ 2|x| for |x| ≤ 1. -/
+theorem abs_exp_sub_one_le (x : ℝ) (hx : |x| ≤ 1) : |Real.exp x - 1| ≤ 2 * |x| := by
+  by_cases hx0 : x ≤ 0
+  · have hlb : (1:ℝ) + x ≤ Real.exp x := by linarith [Real.add_one_le_exp x]
+    have hub : Real.exp x ≤ 1 := by
+      have := Real.exp_le_exp.mpr hx0
+      simpa using this
+    rw [abs_of_nonpos (by linarith : Real.exp x - 1 ≤ 0)]
+    rw [abs_of_nonpos hx0]
+    linarith
+  · push_neg at hx0
+    have hx1 : x ≤ 1 := by
+      have := abs_le.mp hx; linarith [this.2]
+    have hlog2mem : Real.log 2 ∈ Set.Icc (0:ℝ) 1 := by
+      refine ⟨Real.log_nonneg (by norm_num), ?_⟩
+      have := Real.log_le_sub_one_of_pos (show (0:ℝ) < 2 by norm_num)
+      linarith
+    have he3 : Real.exp 1 < 3 := by
+      have := Real.exp_one_lt_d9
+      linarith
+    have hderiv : ∀ t : ℝ, HasDerivAt (fun u => 1 + 2*u + -Real.exp u) (2 + -Real.exp t) t := by
+      intro t
+      have h1 : HasDerivAt (fun u : ℝ => 1 + 2*u) 2 t := by
+        simpa using ((hasDerivAt_id t).const_mul 2).const_add (1:ℝ)
+      have h2 : HasDerivAt (fun u : ℝ => -Real.exp u) (-Real.exp t) t :=
+        (Real.hasDerivAt_exp t).neg
+      exact h1.add h2
+    have hub : Real.exp x ≤ 1 + 2 * x := by
+      by_cases hcase : x ≤ Real.log 2
+      · have hmono : MonotoneOn (fun u => 1 + 2*u + -Real.exp u) (Set.Icc 0 (Real.log 2)) := by
+          apply monotoneOn_of_deriv_nonneg (convex_Icc 0 (Real.log 2))
+          · fun_prop
+          · intro t _; exact (hderiv t).differentiableAt.differentiableWithinAt
+          · intro t ht
+            rw [interior_Icc] at ht
+            rw [(hderiv t).deriv]
+            have : Real.exp t ≤ 2 := by
+              rw [show (2:ℝ) = Real.exp (Real.log 2) from (Real.exp_log (by norm_num)).symm]
+              exact Real.exp_le_exp.mpr ht.2.le
+            linarith
+        have h0 := hmono (Set.mem_Icc.mpr ⟨le_refl 0, hlog2mem.1⟩)
+          (Set.mem_Icc.mpr ⟨hx0.le, hcase⟩) hx0.le
+        simp only [mul_zero, add_zero, Real.exp_zero] at h0
+        linarith
+      · push_neg at hcase
+        have hmono : AntitoneOn (fun u => 1 + 2*u + -Real.exp u) (Set.Icc (Real.log 2) 1) := by
+          apply antitoneOn_of_deriv_nonpos (convex_Icc (Real.log 2) 1)
+          · fun_prop
+          · intro t _; exact (hderiv t).differentiableAt.differentiableWithinAt
+          · intro t ht
+            rw [interior_Icc] at ht
+            rw [(hderiv t).deriv]
+            have : (2:ℝ) ≤ Real.exp t := by
+              rw [show (2:ℝ) = Real.exp (Real.log 2) from (Real.exp_log (by norm_num)).symm]
+              exact Real.exp_le_exp.mpr ht.1.le
+            linarith
+        have h0 := hmono (Set.mem_Icc.mpr ⟨hcase.le, hx1⟩)
+          (Set.mem_Icc.mpr ⟨hlog2mem.2, le_refl 1⟩) hx1
+        simp only at h0
+        nlinarith [h0, he3]
+    have hlb : (1:ℝ) + x ≤ Real.exp x := by linarith [Real.add_one_le_exp x]
+    rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ Real.exp x - 1)]
+    rw [abs_of_pos hx0]
+    linarith
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
