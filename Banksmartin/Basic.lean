@@ -1074,6 +1074,10 @@ theorem G2tail_hasProd (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
       (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z) (G2tail s z) :=
   (prime_factor_multipliable s hs z hz).hasProd
 
+/-- The full G₂(s,z): p=3 factor times the convergent tail over p≥5. -/
+noncomputable def G2 (s z : ℝ) : ℝ :=
+  (1 - z * (3:ℝ) ^ (-s))⁻¹ * (1 - (3:ℝ) ^ (-s)) ^ z * G2tail s z
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
