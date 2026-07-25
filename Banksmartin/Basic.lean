@@ -4364,6 +4364,15 @@ theorem betaCirc_mono (i j m : ℕ) (hjm : j ≤ m) :
   apply mul_le_mul_of_nonneg_left (Bfun_mono j m hjm u)
   positivity
 
+/-- Replace the varying index: sum 2^i betaCirc i (m-i) <= sum 2^i betaCirc i m. -/
+theorem sum_betaCirc_le_uniform (m : ℕ) :
+    ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i (m - i)
+      ≤ ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i m := by
+  apply Finset.sum_le_sum
+  intro i hi
+  apply mul_le_mul_of_nonneg_left _ (by positivity)
+  exact betaCirc_mono i (m - i) m (Nat.sub_le m i)
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
