@@ -5124,12 +5124,12 @@ theorem sigma_reindex (k : ℕ) (F : ℕ → ℕ → ℂ) (G : ℕ → ℕ → �
 theorem L2b_summand (k : ℕ) (s : ℝ) (hs : 1 < s) (n i : ℕ) (hin : i ≤ n) (hnk : n ≤ k) :
     (Nat.choose k n : ℂ) *
         ((Nat.choose n i : ℂ)
-          * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+          * ((Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
           * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
         * ((Nat.factorial (k - n) : ℂ) * gCoeff (k - n) s)
       / (Nat.factorial k : ℂ)
       = gCoeff (k - n) s * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)
-        * ((((-Real.log (s - 1)) ^ (k - (n - i) - (k - n))
+        * ((((Real.log (cFac s)) ^ (k - (n - i) - (k - n))
             / (Nat.factorial (k - (n - i) - (k - n))) : ℝ)) : ℂ) := by
   have hidx : k - (n - i) - (k - n) = i := by omega
   rw [hidx]
@@ -5138,11 +5138,11 @@ theorem L2b_summand (k : ℕ) (s : ℝ) (hs : 1 < s) (n i : ℕ) (hin : i ≤ n)
   have htri := choose_mul_choose_div_factorial k n i hnk hin
   rw [div_eq_iff hkfac]
   have hassoc : (Nat.choose k n : ℂ) *
-      ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+      ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
         * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
       * ((Nat.factorial (k - n) : ℂ) * gCoeff (k - n) s)
       = ((Nat.choose k n : ℂ) * (Nat.choose n i : ℂ)) *
-        (((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+        (((Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
           * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ))
           * ((Nat.factorial (k - n) : ℂ) * gCoeff (k - n) s)) := by ring
   rw [hassoc, htri]
@@ -5157,17 +5157,18 @@ theorem L2b_summand (k : ℕ) (s : ℝ) (hs : 1 < s) (n i : ℕ) (hin : i ≤ n)
 
 /-- OBLIGATION L2b: the k-th coefficient of Fbig is the triple convolution
 of the three factors' coefficients. -/
-theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
+theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
+    (hc : 0 < cFac s) :
     (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : ℂ)
       = ∑ p ∈ Finset.range (k + 1),
           ∑ q ∈ Finset.range (k - p + 1),
             gCoeff q s * (((2:ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
-              * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ) := by
+              * ((((Real.log (cFac s)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ) := by
   have hAval : ∀ i : ℕ,
       iteratedDeriv i (fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w) 0
-        = (Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ) := by
+        = (Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ) := by
     intro i
-    have h := coeff_pow_neg s hs i
+    have h := coeff_cpow s hc i
     have hfi : ((Nat.factorial i : ℕ) : ℂ) ≠ 0 :=
       Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
     field_simp at h
@@ -5189,17 +5190,17 @@ theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 
     have hfq : ((Nat.factorial q : ℕ) : ℂ) ≠ 0 :=
       Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero q)
     field_simp
-  rw [iteratedDeriv_Fbig k s hs]
+  rw [iteratedDeriv_Fbig k s hs hc]
   simp only [hAval, hBval, hCval]
   rw [Finset.sum_div]
   have hdist : ∀ n ∈ Finset.range (k + 1),
       ((Nat.choose k n : ℂ) *
         (∑ i ∈ Finset.range (n + 1),
-          (Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+          (Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
             * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))) *
         ((Nat.factorial (k - n) : ℂ) * gCoeff (k - n) s) / (Nat.factorial k : ℂ)
       = ∑ i ∈ Finset.range (n + 1), (Nat.choose k n : ℂ) *
-          ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+          ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
             * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
           * ((Nat.factorial (k - n) : ℂ) * gCoeff (k - n) s) / (Nat.factorial k : ℂ) := by
     intro n _
@@ -5207,27 +5208,27 @@ theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 
   rw [Finset.sum_congr rfl hdist]
   rw [leibniz_flatten k (fun n i => (Nat.choose k n : ℂ) *
     ((Nat.choose n i : ℂ)
-      * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+      * ((Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
       * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
     * ((Nat.factorial (k - n) : ℂ) * gCoeff (k - n) s) / (Nat.factorial k : ℂ))]
   rw [conv_flatten k (fun p q => gCoeff q s * (((2:ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
-    * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))]
+    * ((((Real.log (cFac s)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))]
   exact sigma_reindex k
     (fun n i => (Nat.choose k n : ℂ) *
-      ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+      ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
         * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
       * ((Nat.factorial (k - n) : ℂ) * gCoeff (k - n) s) / (Nat.factorial k : ℂ))
     (fun p q => gCoeff q s * (((2:ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
-      * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))
+      * ((((Real.log (cFac s)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))
     (fun n i hin hnk => L2b_summand k s hs n i hin hnk)
 
 /-- MANUSCRIPT LEMMA 2.2: the exact expansion of F_k(s). -/
-theorem Fk_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
+theorem Fk_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) (hc : 0 < cFac s) :
     Fk k s = ∑ p ∈ Finset.range (k + 1),
       ∑ q ∈ Finset.range (k - p + 1),
         (gCoeff q s).re * (2:ℝ) ^ (-((p:ℝ)) * s)
-          * ((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q))) := by
-  have hC := (Fk_eq_coeff_Fbig k s hs hs2).trans (coeff_Fbig_eq_convolution k s hs hs2)
+          * ((Real.log (cFac s)) ^ (k - p - q) / (Nat.factorial (k - p - q))) := by
+  have hC := (Fk_eq_coeff_Fbig k s hs hs2).trans (coeff_Fbig_eq_convolution k s hs hs2 hc)
   have hre : ((Fk k s : ℝ) : ℂ).re = Fk k s := Complex.ofReal_re _
   rw [← hre, hC]
   rw [Complex.re_sum]
