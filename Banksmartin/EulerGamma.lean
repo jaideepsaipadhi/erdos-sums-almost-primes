@@ -455,6 +455,12 @@ theorem EinTailFun_split (a : ℝ) (ha : 0 < a) :
     rw [intervalIntegral.integral_of_ge h1, ← hIcoIoc]
     linarith [hadd]
 
+/-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
+identified via Euler's integral. -/
+theorem ein_eq (a : ℝ) (ha : 0 < a) :
+    Ein a = Real.eulerMascheroniConstant + Real.log a + EinTailFun a := by
+  sorry
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of
