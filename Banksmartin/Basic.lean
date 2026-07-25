@@ -4190,6 +4190,58 @@ theorem Jint_split (m i : ℕ) :
         - ((m - i : ℕ) : ℝ) * Real.log 2 * ((Nat.factorial i : ℝ) / 2 ^ (i + 1)) := by
         rw [hbeta, hbase, MeasureTheory.integral_const_mul, integral_pow_exp_neg_two_mul]
 
+/-- Closed form: sum_{i <= m} (m - i) = m(m+1)/2, over the reals. -/
+theorem sum_range_sub_cast (m : ℕ) :
+    ∑ i ∈ Finset.range (m + 1), ((m - i : ℕ) : ℝ)
+      = (m : ℝ) * ((m : ℝ) + 1) / 2 := by
+  induction m with
+  | zero => simp
+  | succ M ih =>
+    rw [Finset.sum_range_succ']
+    have hcong : ∀ i ∈ Finset.range (M + 1),
+        (((M + 1 - (i + 1) : ℕ)) : ℝ) = ((M - i : ℕ) : ℝ) := by
+      intro i _
+      congr 1
+      omega
+    rw [Finset.sum_congr rfl hcong, ih]
+    push_cast
+    ring
+
+/-- Identity (11): delta_m = -1 - (log 2 / 4) m + sum_{i <= m} 2^i beta-circle(i, m-i). -/
+theorem deltaM_identity (m : ℕ) :
+    deltaM m = -1 - (Real.log 2 / 4) * (m : ℝ)
+      + ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i (m - i) := by
+  have hterm : ∀ i ∈ Finset.range (m + 1),
+      (2:ℝ) ^ i / (Nat.factorial i) * Jint m i
+        = (2:ℝ) ^ i * betaCirc i (m - i) + (2:ℝ) ^ i
+          - ((m - i : ℕ) : ℝ) * Real.log 2 / 2 := by
+    intro i _
+    rw [Jint_split m i]
+    have hfacne : ((Nat.factorial i : ℕ) : ℝ) ≠ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
+    have h2 : (2:ℝ) ^ (i + 1) = 2 ^ i * 2 := by ring
+    field_simp [h2]
+    ring
+  have hsum : ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i / (Nat.factorial i) * Jint m i
+      = (∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i (m - i))
+        + (∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i)
+        - (∑ i ∈ Finset.range (m + 1), ((m - i : ℕ) : ℝ) * Real.log 2 / 2) := by
+    rw [← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+    exact Finset.sum_congr rfl hterm
+  have hgeom : ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i = 2 ^ (m + 1) - 1 := by
+    have := geom_sum_eq (by norm_num : (2:ℝ) ≠ 1) (m + 1)
+    rw [this]
+    ring
+  have hlin : ∑ i ∈ Finset.range (m + 1), ((m - i : ℕ) : ℝ) * Real.log 2 / 2
+      = (Real.log 2 / 2) * ((m : ℝ) * ((m : ℝ) + 1) / 2) := by
+    rw [← sum_range_sub_cast m, Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    ring
+  unfold deltaM
+  rw [Am_eq_sum_Jint m, hsum, hgeom, hlin]
+  ring
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
