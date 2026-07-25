@@ -251,7 +251,21 @@ for the real Gamma function on the interval (1/2, 3/2). -/
 theorem hasDerivAt_Gamma (s : ℝ) (hs : s ∈ Set.Ioo ((1:ℝ)/2) ((3:ℝ)/2)) :
     HasDerivAt Real.Gamma
       (∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * u ^ (s - 1) * Real.log u) s := by
-  sorry
+  have hEq : Set.EqOn Real.Gamma gammaInt (Set.Ioo ((1:ℝ)/2) ((3:ℝ)/2)) := by
+    intro t ht
+    have htpos : (0:ℝ) < t := by
+      have := ht.1
+      linarith
+    rw [Real.Gamma_eq_integral htpos]
+    unfold gammaInt
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro u _
+    simp only
+    try ring
+  have hnhds : Set.Ioo ((1:ℝ)/2) ((3:ℝ)/2) ∈ nhds s := Ioo_mem_nhds hs.1 hs.2
+  have hev : Real.Gamma =ᶠ[nhds s] gammaInt :=
+    Filter.eventuallyEq_of_mem hnhds hEq
+  exact (hasDerivAt_gammaInt s hs).congr_of_eventuallyEq hev
 
 /-- OBLIGATION 5: Gamma'(1) = -gamma, from the pin's digamma_one. -/
 theorem deriv_Gamma_one :
@@ -264,7 +278,21 @@ theorem deriv_Gamma_one :
 theorem eulerMascheroni_eq_integral :
     Real.eulerMascheroniConstant
       = -∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * Real.log u := by
-  sorry
+  have hmem : (1:ℝ) ∈ Set.Ioo ((1:ℝ)/2) ((3:ℝ)/2) := by
+    constructor <;> norm_num
+  have hd := hasDerivAt_Gamma 1 hmem
+  have hsimp : (∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * u ^ ((1:ℝ) - 1) * Real.log u)
+      = ∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * Real.log u := by
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro u hu
+    have hu0 : (0:ℝ) < u := Set.mem_Ioi.mp hu
+    simp only
+    rw [show (1:ℝ) - 1 = 0 by ring, Real.rpow_zero, mul_one]
+  rw [hsimp] at hd
+  have hderiv : deriv Real.Gamma 1
+      = ∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * Real.log u := hd.deriv
+  rw [deriv_Gamma_one] at hderiv
+  linarith [hderiv]
 
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
