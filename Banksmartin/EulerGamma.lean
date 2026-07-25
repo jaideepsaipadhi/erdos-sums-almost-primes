@@ -454,7 +454,16 @@ theorem hasDerivAt_einCombo (a : ℝ) (ha : 0 < a) :
 /-- Hence the combination is constant on (0, infty). -/
 theorem einCombo_const (a b : ℝ) (ha : 0 < a) (hb : 0 < b) :
     Ein a - Real.log a - EinTailFun a = Ein b - Real.log b - EinTailFun b := by
-  sorry
+  set F : ℝ → ℝ := fun t => Ein t - Real.log t - EinTailFun t with hF
+  have hopen : IsOpen (Set.Ioi (0:ℝ)) := isOpen_Ioi
+  have hconn : IsPreconnected (Set.Ioi (0:ℝ)) := (convex_Ioi (0:ℝ)).isPreconnected
+  have hdiff : DifferentiableOn ℝ F (Set.Ioi 0) := by
+    intro t ht
+    exact ((hasDerivAt_einCombo t (Set.mem_Ioi.mp ht)).differentiableAt).differentiableWithinAt
+  have hzero : Set.EqOn (deriv F) 0 (Set.Ioi (0:ℝ)) := by
+    intro t ht
+    exact (hasDerivAt_einCombo t (Set.mem_Ioi.mp ht)).deriv
+  exact hopen.is_const_of_deriv_eq_zero hconn hdiff hzero (Set.mem_Ioi.mpr ha) (Set.mem_Ioi.mpr hb)
 
 /-- STEP C: the constant is gamma. -/
 theorem ein_eq (a : ℝ) (ha : 0 < a) :

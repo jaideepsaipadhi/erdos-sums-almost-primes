@@ -1,0 +1,12 @@
+theorem einCombo_const (a b : <<R>>) (ha : 0 < a) (hb : 0 < b) :
+    Ein a - Real.log a - EinTailFun a = Ein b - Real.log b - EinTailFun b := by
+  set F : <<R>> <<TO>> <<R>> := fun t => Ein t - Real.log t - EinTailFun t with hF
+  have hopen : IsOpen (Set.Ioi (0:<<R>>)) := isOpen_Ioi
+  have hconn : IsPreconnected (Set.Ioi (0:<<R>>)) := (convex_Ioi (0:<<R>>)).isPreconnected
+  have hdiff : DifferentiableOn <<R>> F (Set.Ioi 0) := by
+    intro t ht
+    exact ((hasDerivAt_einCombo t (Set.mem_Ioi.mp ht)).differentiableAt).differentiableWithinAt
+  have hzero : Set.EqOn (deriv F) 0 (Set.Ioi (0:<<R>>)) := by
+    intro t ht
+    exact (hasDerivAt_einCombo t (Set.mem_Ioi.mp ht)).deriv
+  exact hopen.is_const_of_deriv_eq_zero hconn hdiff hzero (Set.mem_Ioi.mpr ha) (Set.mem_Ioi.mpr hb)
