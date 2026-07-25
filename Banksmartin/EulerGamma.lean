@@ -57,6 +57,54 @@ theorem abs_log_le_self (u : ℝ) (hu : 1 ≤ u) :
   have := Real.log_le_sub_one_of_pos hpos
   linarith
 
+/-- Obligation 1, near-zero half. -/
+theorem gammaDeriv_dom_integrableOn_Ioo :
+    IntegrableOn gammaDeriv_dom (Set.Ioo 0 1) := by
+  have hb1 : IntegrableOn (fun u : ℝ => u ^ (-(3:ℝ)/4)) (Set.Ioo 0 1) := by
+    rw [intervalIntegral.integrableOn_Ioo_rpow_iff (by norm_num : (0:ℝ) < 1)]
+    norm_num
+  have hb2 : IntegrableOn (fun u : ℝ => u ^ ((1:ℝ)/4)) (Set.Ioo 0 1) := by
+    rw [intervalIntegral.integrableOn_Ioo_rpow_iff (by norm_num : (0:ℝ) < 1)]
+    norm_num
+  have hbound : IntegrableOn
+      (fun u : ℝ => 4 * u ^ (-(3:ℝ)/4) + 4 * u ^ ((1:ℝ)/4))
+      (Set.Ioo 0 1) := (hb1.const_mul 4).add (hb2.const_mul 4)
+  apply MeasureTheory.Integrable.mono hbound
+  · unfold gammaDeriv_dom
+    apply Measurable.aestronglyMeasurable
+    fun_prop
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioo] with u hu
+    obtain ⟨hu0, hu1⟩ := hu
+    unfold gammaDeriv_dom
+    have hA : (0:ℝ) < u ^ (-(1:ℝ)/2) := Real.rpow_pos_of_pos hu0 _
+    have hB : (0:ℝ) < u ^ ((1:ℝ)/2) := Real.rpow_pos_of_pos hu0 _
+    have hE : Real.exp (-u) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
+    have hL : |Real.log u| ≤ 4 * u ^ (-(1:ℝ)/4) :=
+      abs_log_le_rpow_near_zero u hu0 hu1.le
+    have hM1 : u ^ (-(1:ℝ)/2) * (4 * u ^ (-(1:ℝ)/4))
+        = 4 * u ^ (-(3:ℝ)/4) := by
+      rw [show (4:ℝ) * u ^ (-(1:ℝ)/4) = u ^ (-(1:ℝ)/4) * 4 by ring,
+        ← mul_assoc, ← Real.rpow_add hu0]
+      norm_num
+      ring
+    have hM2 : u ^ ((1:ℝ)/2) * (4 * u ^ (-(1:ℝ)/4))
+        = 4 * u ^ ((1:ℝ)/4) := by
+      rw [show (4:ℝ) * u ^ (-(1:ℝ)/4) = u ^ (-(1:ℝ)/4) * 4 by ring,
+        ← mul_assoc, ← Real.rpow_add hu0]
+      norm_num
+      ring
+    rw [Real.norm_eq_abs, Real.norm_eq_abs]
+    rw [abs_of_nonneg (by positivity : (0:ℝ) ≤ 4 * u ^ (-(3:ℝ)/4) + 4 * u ^ ((1:ℝ)/4))]
+    rw [abs_of_nonneg (by positivity : (0:ℝ) ≤
+      Real.exp (-u) * (u ^ (-(1:ℝ)/2) + u ^ ((1:ℝ)/2)) * |Real.log u|)]
+    calc Real.exp (-u) * (u ^ (-(1:ℝ)/2) + u ^ ((1:ℝ)/2)) * |Real.log u|
+        ≤ 1 * (u ^ (-(1:ℝ)/2) + u ^ ((1:ℝ)/2)) * (4 * u ^ (-(1:ℝ)/4)) := by
+          apply mul_le_mul (mul_le_mul_of_nonneg_right hE (by positivity)) hL (abs_nonneg _)
+          positivity
+      _ = u ^ (-(1:ℝ)/2) * (4 * u ^ (-(1:ℝ)/4))
+          + u ^ ((1:ℝ)/2) * (4 * u ^ (-(1:ℝ)/4)) := by ring
+      _ = 4 * u ^ (-(3:ℝ)/4) + 4 * u ^ ((1:ℝ)/4) := by rw [hM1, hM2]
+
 /-- OBLIGATION 1: the dominating function is integrable on (0, infty). -/
 theorem gammaDeriv_dom_integrable :
     IntegrableOn gammaDeriv_dom (Set.Ioi 0) := by
