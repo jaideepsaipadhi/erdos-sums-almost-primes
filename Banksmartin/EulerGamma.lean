@@ -945,11 +945,118 @@ theorem EinTailFun_tendsto_zero :
   rw [integral_Ioi_exp_neg (n:ℝ) (by linarith)] at hle
   exact hle
 
+
+theorem hasDerivAt_EinTailFun (a : ℝ) (ha : 0 < a) :
+    HasDerivAt EinTailFun (-(Real.exp (-a) / a)) a := by
+  have hcont : ContinuousAt (fun v : ℝ => Real.exp (-v) / v) a := by
+    apply ContinuousAt.div
+    · exact (Real.continuous_exp.comp continuous_neg).continuousAt
+    · exact continuousAt_id
+    · exact ne_of_gt ha
+  have hmeas : StronglyMeasurableAtFilter
+      (fun v : ℝ => Real.exp (-v) / v) (nhds a) := by
+    refine ⟨Set.univ, Filter.univ_mem, ?_⟩
+    apply Measurable.aestronglyMeasurable
+    fun_prop
+  have hint : IntervalIntegrable (fun v : ℝ => Real.exp (-v) / v)
+      MeasureTheory.volume 1 a := by
+    rcases le_total (1:ℝ) a with h1 | h1
+    · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le h1]
+      exact ((exp_div_integrableOn_Ici 1 (by norm_num)).mono
+        (fun x hx => Set.mem_Ici.mpr (le_of_lt hx.1)) le_rfl)
+    · rw [IntervalIntegrable.symm_iff, intervalIntegrable_iff_integrableOn_Ioc_of_le h1]
+      exact ((exp_div_integrableOn_Ici a ha).mono
+        (fun x hx => Set.mem_Ici.mpr (le_of_lt hx.1)) le_rfl)
+  have hFTC := intervalIntegral.integral_hasDerivAt_right hint hmeas hcont
+  have hEq : EinTailFun =ᶠ[nhds a]
+      fun t : ℝ => EinTailFun 1 - ∫ v in (1:ℝ)..t, Real.exp (-v) / v := by
+    filter_upwards [Ioi_mem_nhds ha] with t ht
+    exact EinTailFun_split t ht
+  have hderiv := (hasDerivAt_const a (EinTailFun 1)).sub hFTC
+  rw [zero_sub] at hderiv
+  exact hderiv.congr_of_eventuallyEq hEq
+
+/-- The combination Ein(a) - log a - T(a) has zero derivative on (0, infty). -/
+theorem hasDerivAt_einCombo (a : ℝ) (ha : 0 < a) :
+    HasDerivAt (fun t : ℝ => Ein t - Real.log t - EinTailFun t) 0 a := by
+  have h1 := hasDerivAt_Ein a ha
+  have h2 := Real.hasDerivAt_log (ne_of_gt ha)
+  have h3 := hasDerivAt_EinTailFun a ha
+  have hcomb := (h1.sub h2).sub h3
+  have harith : (1 - Real.exp (-a)) / a - a⁻¹ - -(Real.exp (-a) / a) = 0 := by
+    field_simp
+    try ring
+  rw [harith] at hcomb
+  exact hcomb
+
+/-- Hence the combination is constant on (0, infty). -/
+theorem einCombo_const (a b : ℝ) (ha : 0 < a) (hb : 0 < b) :
+    Ein a - Real.log a - EinTailFun a = Ein b - Real.log b - EinTailFun b := by
+  set F : ℝ → ℝ := fun t => Ein t - Real.log t - EinTailFun t with hF
+  have hopen : IsOpen (Set.Ioi (0:ℝ)) := isOpen_Ioi
+  have hconn : IsPreconnected (Set.Ioi (0:ℝ)) := (convex_Ioi (0:ℝ)).isPreconnected
+  have hdiff : DifferentiableOn ℝ F (Set.Ioi 0) := by
+    intro t ht
+    exact ((hasDerivAt_einCombo t (Set.mem_Ioi.mp ht)).differentiableAt).differentiableWithinAt
+  have hzero : Set.EqOn (deriv F) 0 (Set.Ioi (0:ℝ)) := by
+    intro t ht
+    exact (hasDerivAt_einCombo t (Set.mem_Ioi.mp ht)).deriv
+  exact hopen.is_const_of_deriv_eq_zero hconn hdiff hzero (Set.mem_Ioi.mpr ha) (Set.mem_Ioi.mpr hb)
+
 /-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
 identified via Euler's integral. -/
 theorem ein_eq (a : ℝ) (ha : 0 < a) :
     Ein a = Real.eulerMascheroniConstant + Real.log a + EinTailFun a := by
-  sorry
+  set C := Ein 1 - Real.log 1 - EinTailFun 1 with hC
+  have hconst : ∀ n : ℕ, 1 ≤ n →
+      Ein (n:ℝ) - Real.log (n:ℝ) - EinTailFun (n:ℝ) = C := by
+    intro n hn
+    have hn0 : (0:ℝ) < (n:ℝ) := by
+      have : (1:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
+      linarith
+    exact einCombo_const (n:ℝ) 1 hn0 (by norm_num)
+  have hseq : Filter.Tendsto
+      (fun n : ℕ => Ein (n:ℝ) - Real.log (n:ℝ) - EinTailFun (n:ℝ))
+      Filter.atTop (nhds (-(∫ v in Set.Ioi (0:ℝ), Real.exp (-v) * Real.log v))) := by
+    have hrewrite : ∀ᶠ n : ℕ in Filter.atTop,
+        Ein (n:ℝ) - Real.log (n:ℝ) - EinTailFun (n:ℝ)
+          = -(∫ v in Set.Ioc (0:ℝ) (n:ℝ), Real.exp (-v) * Real.log v)
+            - Real.exp (-(n:ℝ)) * Real.log (n:ℝ) - EinTailFun (n:ℝ) := by
+      filter_upwards [Filter.eventually_ge_atTop 1] with n hn
+      have hn0 : (0:ℝ) < (n:ℝ) := by
+        have : (1:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
+        linarith
+      have hpl := euler_parts_limit (n:ℝ) hn0
+      have hexpand : (1 - Real.exp (-(n:ℝ))) * Real.log (n:ℝ)
+          = Real.log (n:ℝ) - Real.exp (-(n:ℝ)) * Real.log (n:ℝ) := by ring
+      rw [hexpand] at hpl
+      linarith [hpl]
+    have hlim := ((expLog_partial_tendsto.neg.sub expNeg_log_tendsto_zero).sub
+      EinTailFun_tendsto_zero)
+    have hlim2 : Filter.Tendsto
+        (fun n : ℕ => -(∫ v in Set.Ioc (0:ℝ) (n:ℝ), Real.exp (-v) * Real.log v)
+          - Real.exp (-(n:ℝ)) * Real.log (n:ℝ) - EinTailFun (n:ℝ))
+        Filter.atTop (nhds (-(∫ v in Set.Ioi (0:ℝ), Real.exp (-v) * Real.log v))) := by
+      simpa using hlim
+    exact hlim2.congr' (Filter.EventuallyEq.symm hrewrite)
+  have hCval : C = -(∫ v in Set.Ioi (0:ℝ), Real.exp (-v) * Real.log v) := by
+    have hev : ∀ᶠ n : ℕ in Filter.atTop,
+        Ein (n:ℝ) - Real.log (n:ℝ) - EinTailFun (n:ℝ) = C := by
+      filter_upwards [Filter.eventually_ge_atTop 1] with n hn
+      exact hconst n hn
+    have hcst : Filter.Tendsto
+        (fun _ : ℕ => C) Filter.atTop
+        (nhds (-(∫ v in Set.Ioi (0:ℝ), Real.exp (-v) * Real.log v))) :=
+      hseq.congr' hev
+    exact tendsto_nhds_unique tendsto_const_nhds hcst
+  have hgamma : Real.eulerMascheroniConstant
+      = -(∫ v in Set.Ioi (0:ℝ), Real.exp (-v) * Real.log v) :=
+    eulerMascheroni_eq_integral
+  have hCa : Ein a - Real.log a - EinTailFun a = C :=
+    einCombo_const a 1 ha (by norm_num)
+  rw [hCval] at hCa
+  rw [← hgamma] at hCa
+  linarith [hCa]
 
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
