@@ -1181,6 +1181,80 @@ theorem gap_integrable (a : ℝ) (ha : 0 < a) :
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hlow, abs_one]
   exact hhigh
 
+/-- The b -> 0+ limit: int_{(0,a]} (e^-v - 1 + v)/v^2 = -(e^-a - 1 + a)/a + Ein a. -/
+theorem gap_parts_limit (a : ℝ) (ha : 0 < a) :
+    (∫ v in Set.Ioc (0:ℝ) a, (Real.exp (-v) - 1 + v) / v ^ 2)
+      = -((Real.exp (-a) - 1 + a) / a) + Ein a := by
+  have hfin : ∀ b ∈ Set.Ioc (0:ℝ) a,
+      (∫ v in Set.Ioc (0:ℝ) a, (Real.exp (-v) - 1 + v) / v ^ 2)
+        = -((Real.exp (-a) - 1 + a) / a) + Ein a
+          + ((Real.exp (-b) - 1 + b) / b
+            + ((∫ v in Set.Ioc (0:ℝ) b, (Real.exp (-v) - 1 + v) / v ^ 2) - Ein b)) := by
+    intro b hb
+    have hb0 : (0:ℝ) < b := hb.1
+    have hba : b ≤ a := hb.2
+    have hparts := gap_parts_finite b a hb0 hba
+    have hsplitgap : (∫ v in Set.Ioc (0:ℝ) a, (Real.exp (-v) - 1 + v) / v ^ 2)
+        = (∫ v in Set.Ioc (0:ℝ) b, (Real.exp (-v) - 1 + v) / v ^ 2)
+          + ∫ v in Set.Ioc b a, (Real.exp (-v) - 1 + v) / v ^ 2 := by
+      have hunion : Set.Ioc (0:ℝ) a = Set.Ioc 0 b ∪ Set.Ioc b a :=
+        (Set.Ioc_union_Ioc_eq_Ioc hb0.le hba).symm
+      have hdisj : Disjoint (Set.Ioc (0:ℝ) b) (Set.Ioc b a) := by
+        rw [Set.disjoint_left]
+        intro x hx hx2
+        exact absurd hx2.1 (not_lt.mpr hx.2)
+      have hi1 := gap_integrable b hb0
+      have hi2 : MeasureTheory.IntegrableOn
+          (fun v : ℝ => (Real.exp (-v) - 1 + v) / v ^ 2) (Set.Ioc b a) :=
+        (gap_integrable a ha).mono
+          (fun x hx => Set.mem_Ioc.mpr ⟨by linarith [hx.1], hx.2⟩) le_rfl
+      rw [hunion, MeasureTheory.setIntegral_union hdisj measurableSet_Ioc hi1 hi2]
+    have hiv : (∫ v in b..a,
+        ((Real.exp (-v) - 1 + v) / v ^ 2 - (1 - Real.exp (-v)) / v))
+        = (∫ v in Set.Ioc b a, (Real.exp (-v) - 1 + v) / v ^ 2)
+          - ∫ v in Set.Ioc b a, (1 - Real.exp (-v)) / v := by
+      rw [intervalIntegral.integral_of_le hba]
+      have hi2 : MeasureTheory.IntegrableOn
+          (fun v : ℝ => (Real.exp (-v) - 1 + v) / v ^ 2) (Set.Ioc b a) :=
+        (gap_integrable a ha).mono
+          (fun x hx => Set.mem_Ioc.mpr ⟨by linarith [hx.1], hx.2⟩) le_rfl
+      have hi3 : MeasureTheory.IntegrableOn
+          (fun v : ℝ => (1 - Real.exp (-v)) / v) (Set.Ioc b a) :=
+        (ein_integrable a ha).mono
+          (fun x hx => Set.mem_Ioc.mpr ⟨by linarith [hx.1], hx.2⟩) le_rfl
+      rw [← MeasureTheory.integral_sub hi2 hi3]
+    rw [hiv, ← Ein_sub b a hb0 hba] at hparts
+    rw [hsplitgap]
+    linarith [hparts]
+  have hlim : Filter.Tendsto
+      (fun b : ℝ => -((Real.exp (-a) - 1 + a) / a) + Ein a
+        + ((Real.exp (-b) - 1 + b) / b
+          + ((∫ v in Set.Ioc (0:ℝ) b, (Real.exp (-v) - 1 + v) / v ^ 2) - Ein b)))
+      (nhdsWithin 0 (Set.Ioi 0))
+      (nhds (-((Real.exp (-a) - 1 + a) / a) + Ein a)) := by
+    have hg1 := gapBoundary_tendsto_zero
+    have hg2 : Filter.Tendsto
+        (fun b : ℝ => ∫ v in Set.Ioc (0:ℝ) b, (Real.exp (-v) - 1 + v) / v ^ 2)
+        (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      sorry
+    have hg3 := Ein_tendsto_zero
+    have hsum := (tendsto_const_nhds (x := -((Real.exp (-a) - 1 + a) / a) + Ein a)
+      (f := nhdsWithin (0:ℝ) (Set.Ioi 0))).add (hg1.add (hg2.sub hg3))
+    simpa using hsum
+  have heq : (fun b : ℝ => -((Real.exp (-a) - 1 + a) / a) + Ein a
+      + ((Real.exp (-b) - 1 + b) / b
+        + ((∫ v in Set.Ioc (0:ℝ) b, (Real.exp (-v) - 1 + v) / v ^ 2) - Ein b)))
+      =ᶠ[nhdsWithin 0 (Set.Ioi 0)]
+      fun _ => ∫ v in Set.Ioc (0:ℝ) a, (Real.exp (-v) - 1 + v) / v ^ 2 := by
+    have hev : ∀ᶠ b in nhdsWithin (0:ℝ) (Set.Ioi 0), b < a := by
+      have hIio : Set.Iio a ∈ nhds (0:ℝ) := Iio_mem_nhds ha
+      filter_upwards [nhdsWithin_le_nhds hIio] with b hb
+      exact hb
+    filter_upwards [self_mem_nhdsWithin, hev] with b hb1 hb2
+    exact (hfin b (Set.mem_Ioc.mpr ⟨hb1, le_of_lt hb2⟩)).symm
+  have hconst := Filter.Tendsto.congr' heq hlim
+  exact tendsto_nhds_unique tendsto_const_nhds hconst
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of
