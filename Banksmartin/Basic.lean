@@ -4658,6 +4658,31 @@ theorem iteratedDeriv_eq_factorial_smul_coeff
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_perm, Fintype.card_fin]
   rw [nsmul_eq_mul]
 
+/-- The derivative of z -> k!/(c^k (1 - z/c)^(k+1)) is the next one in the family. -/
+theorem deriv_geom_family (c : ℂ) (hc : c ≠ 0) (k : ℕ) :
+    deriv (fun z : ℂ => (Nat.factorial k : ℂ) / (c ^ k * (1 - z / c) ^ (k + 1)))
+      = fun z : ℂ => (Nat.factorial (k + 1) : ℂ) / (c ^ (k + 1) * (1 - z / c) ^ (k + 2)) := by
+  sorry
+
+/-- L3b core: the n-th derivative of (1 - z/c)^(-1) at 0 is n!/c^n. -/
+theorem iteratedDeriv_geom (c : ℂ) (hc : c ≠ 0) (n : ℕ) :
+    iteratedDeriv n (fun z : ℂ => (1 - z / c)⁻¹) 0
+      = (Nat.factorial n : ℂ) / c ^ n := by
+  have hfam : ∀ k : ℕ,
+      iteratedDeriv k (fun z : ℂ => (1 - z / c)⁻¹)
+        = fun z : ℂ => (Nat.factorial k : ℂ) / (c ^ k * (1 - z / c) ^ (k + 1)) := by
+    intro k
+    induction k with
+    | zero =>
+      funext z
+      simp only [iteratedDeriv_zero, Nat.factorial_zero, Nat.cast_one, pow_zero, one_mul,
+        zero_add, pow_one]
+      rw [one_div]
+    | succ K ih =>
+      rw [iteratedDeriv_succ, ih, deriv_geom_family c hc K]
+  rw [hfam n]
+  simp
+
 /-!
 ## Manuscript Lemma 2.2 (the exact expansion) -- SCAFFOLD
 
