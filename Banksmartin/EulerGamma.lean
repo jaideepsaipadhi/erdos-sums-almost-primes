@@ -1283,9 +1283,8 @@ theorem gap_parts_limit (a : ℝ) (ha : 0 < a) :
   exact tendsto_nhds_unique tendsto_const_nhds hconst
 
 /-- The tail bound: EinTailFun a <= e^(-a)/a for a >= 1. -/
-theorem EinTailFun_le (a : ℝ) (ha : (1:ℝ) ≤ a) :
+theorem EinTailFun_le (a : ℝ) (ha0 : (0:ℝ) < a) :
     EinTailFun a ≤ Real.exp (-a) / a := by
-  have ha0 : (0:ℝ) < a := by linarith
   unfold EinTailFun
   have hIci : (∫ v in Set.Ici a, Real.exp (-v) / v)
       = ∫ v in Set.Ioi a, Real.exp (-v) / v := by
@@ -1312,7 +1311,7 @@ theorem EinTailFun_le (a : ℝ) (ha : (1:ℝ) ≤ a) :
       have hv0 : (0:ℝ) < v := by linarith
       apply div_le_div_of_nonneg_left (Real.exp_pos _).le ha0 (le_of_lt hva)
   have heval : (∫ v in Set.Ioi a, Real.exp (-v) / a) = Real.exp (-a) / a := by
-    rw [MeasureTheory.integral_div, integral_Ioi_exp_neg a (by linarith)]
+    rw [MeasureTheory.integral_div, integral_Ioi_exp_neg a ha0.le]
   linarith [hbound, heval.le, heval.ge]
 
 /-- The substitution t = v/a: the gap-five integral over (0,1] scales to
