@@ -4009,6 +4009,58 @@ theorem Am_eq_sum_Jint (m : ℕ) :
         (2:ℝ) ^ i / (Nat.factorial i) * Jint m i := by
         exact Finset.sum_range_reflect (fun i => (2:ℝ) ^ i / (Nat.factorial i) * Jint m i) (m + 1)
 
+/-- Manuscript Thm 4.1: B_j(u) = 2^(-j e^(-u)) - 1 + j log 2 e^(-u), the
+convexity gap driving identity (11). -/
+noncomputable def Bfun (j : ℕ) (u : ℝ) : ℝ :=
+  (2:ℝ) ^ (-(j:ℝ) * Real.exp (-u)) - 1 + (j:ℝ) * Real.log 2 * Real.exp (-u)
+
+/-- B_j(u) >= 0: from e^x >= 1 + x at x = -(j log 2) e^(-u). -/
+theorem Bfun_nonneg (j : ℕ) (u : ℝ) : 0 ≤ Bfun j u := by
+  unfold Bfun
+  have hrw : (2:ℝ) ^ (-(j:ℝ) * Real.exp (-u))
+      = Real.exp (-(j:ℝ) * Real.exp (-u) * Real.log 2) := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]
+    ring_nf
+  rw [hrw]
+  have h := Real.add_one_le_exp (-(j:ℝ) * Real.exp (-u) * Real.log 2)
+  nlinarith [h]
+
+/-- Manuscript (11): beta-circle, the nonnegative integral coefficient. -/
+noncomputable def betaCirc (i j : ℕ) : ℝ :=
+  (1 / (Nat.factorial i : ℝ)) *
+    ∫ u in Set.Ioi (0:ℝ), u ^ i * Real.exp (-u) * Bfun j u
+
+/-- The scaled Gamma evaluation: int_{u>0} u^i e^(-2u) du = i! / 2^(i+1),
+via the linear substitution u = v/2. -/
+theorem integral_pow_exp_neg_two_mul (i : ℕ) :
+    ∫ u in Set.Ioi (0:ℝ), u ^ i * Real.exp (-(2 * u))
+      = (Nat.factorial i : ℝ) / 2 ^ (i + 1) := by
+  have hcomp := MeasureTheory.integral_comp_mul_left_Ioi
+    (fun v => v ^ i * Real.exp (-v)) (0:ℝ) (by norm_num : (0:ℝ) < 2)
+  simp only [mul_zero] at hcomp
+  have hcong : ∀ u ∈ Set.Ioi (0:ℝ),
+      u ^ i * Real.exp (-(2 * u)) = ((2 * u) ^ i * Real.exp (-(2 * u))) / 2 ^ i := by
+    intro u _
+    rw [mul_pow]
+    field_simp
+    try ring
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi hcong]
+  rw [MeasureTheory.integral_div]
+  rw [show (∫ u in Set.Ioi (0:ℝ), (2 * u) ^ i * Real.exp (-(2 * u)))
+      = ∫ u in Set.Ioi (0:ℝ), (fun v => v ^ i * Real.exp (-v)) (2 * u) from rfl]
+  rw [hcomp]
+  have hbase : ∫ v in Set.Ioi (0:ℝ), v ^ i * Real.exp (-v)
+      = (Nat.factorial i : ℝ) := by
+    rw [← integral_exp_neg_mul_pow i]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro v _
+    simp only
+    ring
+  rw [smul_eq_mul, hbase]
+  rw [show ((2:ℝ))⁻¹ = 1 / 2 by norm_num]
+  field_simp
+  try ring
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O

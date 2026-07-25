@@ -1,0 +1,51 @@
+/-- Manuscript Thm 4.1: B_j(u) = 2^(-j e^(-u)) - 1 + j log 2 e^(-u), the
+convexity gap driving identity (11). -/
+noncomputable def Bfun (j : <<N>>) (u : <<R>>) : <<R>> :=
+  (2:<<R>>) ^ (-(j:<<R>>) * Real.exp (-u)) - 1 + (j:<<R>>) * Real.log 2 * Real.exp (-u)
+
+/-- B_j(u) >= 0: from e^x >= 1 + x at x = -(j log 2) e^(-u). -/
+theorem Bfun_nonneg (j : <<N>>) (u : <<R>>) : 0 <<LE>> Bfun j u := by
+  unfold Bfun
+  have hrw : (2:<<R>>) ^ (-(j:<<R>>) * Real.exp (-u))
+      = Real.exp (-(j:<<R>>) * Real.exp (-u) * Real.log 2) := by
+    rw [Real.rpow_def_of_pos (by norm_num : (0:<<R>>) < 2)]
+    ring_nf
+  rw [hrw]
+  have h := Real.add_one_le_exp (-(j:<<R>>) * Real.exp (-u) * Real.log 2)
+  nlinarith [h]
+
+/-- Manuscript (11): beta-circle, the nonnegative integral coefficient. -/
+noncomputable def betaCirc (i j : <<N>>) : <<R>> :=
+  (1 / (Nat.factorial i : <<R>>)) *
+    <<INT>> u in Set.Ioi (0:<<R>>), u ^ i * Real.exp (-u) * Bfun j u
+
+/-- The scaled Gamma evaluation: int_{u>0} u^i e^(-2u) du = i! / 2^(i+1),
+via the linear substitution u = v/2. -/
+theorem integral_pow_exp_neg_two_mul (i : <<N>>) :
+    <<INT>> u in Set.Ioi (0:<<R>>), u ^ i * Real.exp (-(2 * u))
+      = (Nat.factorial i : <<R>>) / 2 ^ (i + 1) := by
+  have hcomp := MeasureTheory.integral_comp_mul_left_Ioi
+    (fun v => v ^ i * Real.exp (-v)) (0:<<R>>) (by norm_num : (0:<<R>>) < 2)
+  simp only [mul_zero] at hcomp
+  have hcong : <<ALL>> u <<IN>> Set.Ioi (0:<<R>>),
+      u ^ i * Real.exp (-(2 * u)) = ((2 * u) ^ i * Real.exp (-(2 * u))) / 2 ^ i := by
+    intro u _
+    rw [mul_pow]
+    field_simp
+    ring
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi hcong]
+  rw [MeasureTheory.integral_div]
+  rw [show (<<INT>> u in Set.Ioi (0:<<R>>), (2 * u) ^ i * Real.exp (-(2 * u)))
+      = <<INT>> u in Set.Ioi (0:<<R>>), (fun v => v ^ i * Real.exp (-v)) (2 * u) from rfl]
+  rw [hcomp]
+  have hbase : <<INT>> v in Set.Ioi (0:<<R>>), v ^ i * Real.exp (-v)
+      = (Nat.factorial i : <<R>>) := by
+    rw [<<LARR>> integral_exp_neg_mul_pow i]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro v _
+    simp only
+    ring
+  rw [smul_eq_mul, hbase]
+  rw [show ((2:<<R>>))<<INV>> = 1 / 2 by norm_num]
+  field_simp
+  ring
