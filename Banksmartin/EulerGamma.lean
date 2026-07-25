@@ -770,7 +770,15 @@ theorem euler_parts_limit (c : ℝ) (hc : 0 < c) :
             _ = 4 * v ^ (-(1:ℝ)/4) := by ring
       have hcalc : (∫ v in Set.Ioc (0:ℝ) b, 4 * v ^ (-(1:ℝ)/4))
           = (16/3) * b ^ ((3:ℝ)/4) := by
-        sorry
+        have hIoc : (∫ v in Set.Ioc (0:ℝ) b, 4 * v ^ (-(1:ℝ)/4))
+            = ∫ v in (0:ℝ)..b, 4 * v ^ (-(1:ℝ)/4) := by
+          rw [intervalIntegral.integral_of_le hb0.le]
+        rw [hIoc, intervalIntegral.integral_const_mul]
+        rw [integral_rpow (Or.inl (by norm_num : (-1:ℝ) < -(1:ℝ)/4))]
+        rw [Real.zero_rpow (by norm_num)]
+        have hexp : -(1:ℝ)/4 + 1 = (3:ℝ)/4 := by norm_num
+        rw [hexp]
+        ring
       rw [hcalc] at hbound
       rw [Real.norm_eq_abs]
       exact hbound
