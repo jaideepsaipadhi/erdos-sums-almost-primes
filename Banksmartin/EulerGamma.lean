@@ -335,6 +335,39 @@ theorem ein_integrable (a : ℝ) (ha : 0 < a) :
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hlow, abs_one]
   exact hhigh
 
+/-- The tail integrand e^(-v)/v is integrable on [a, infty) for a > 0,
+dominated by e^(-v)/a. -/
+theorem exp_div_integrableOn_Ici (a : ℝ) (ha : 0 < a) :
+    MeasureTheory.IntegrableOn (fun v : ℝ => Real.exp (-v) / v) (Set.Ici a) := by
+  have hexp : MeasureTheory.IntegrableOn (fun v : ℝ => Real.exp (-v) / a) (Set.Ici a) := by
+    have hbase : MeasureTheory.IntegrableOn (fun v : ℝ => Real.exp (-v)) (Set.Ici a) := by
+      have h := Real.GammaIntegral_convergent (s := (1:ℝ)) (by norm_num)
+      have hsub : Set.Ici a ⊆ Set.Ioi (0:ℝ) := by
+        intro x hx
+        simp only [Set.mem_Ici] at hx
+        simp only [Set.mem_Ioi]
+        linarith
+      have h2 : MeasureTheory.IntegrableOn
+          (fun u : ℝ => Real.exp (-u) * u ^ ((1:ℝ) - 1)) (Set.Ioi 0) := h
+      have h3 : MeasureTheory.IntegrableOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) := by
+        apply h2.congr_fun ?_ measurableSet_Ioi
+        intro u hu
+        simp only
+        rw [show (1:ℝ) - 1 = 0 by ring, Real.rpow_zero, mul_one]
+      exact h3.mono hsub le_rfl
+    exact hbase.div_const a
+  apply MeasureTheory.Integrable.mono hexp
+  · apply Measurable.aestronglyMeasurable
+    fun_prop
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ici] with v hv
+    have hva : a ≤ v := hv
+    have hv0 : (0:ℝ) < v := by linarith
+    have hE : (0:ℝ) < Real.exp (-v) := Real.exp_pos _
+    rw [Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg (by positivity : (0:ℝ) ≤ Real.exp (-v) / v),
+      abs_of_nonneg (by positivity : (0:ℝ) ≤ Real.exp (-v) / a)]
+    apply div_le_div_of_nonneg_left hE.le ha hva
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of
