@@ -4639,6 +4639,64 @@ theorem deltaM_upper_bound_manuscript (m : ℕ) (hm : 1 ≤ m) :
   unfold cStarOne
   nlinarith [hub, hl2, hmpos]
 
+/-!
+## Manuscript Lemma 2.2 (the exact expansion) -- SCAFFOLD
+
+Target (manuscript Lemma 2.2): for s in (1, 2],
+
+  F_k(s) = sum_{i+j+l=k} g_i(s) * 2^(-j s) * (-log(s-1))^l / l!
+
+where g_i(s) = [z^i] G2(s,z), and F(s,z) = (s-1)^(-z) (1 - z/2^s)^(-1) G2(s,z).
+
+The proof factors into four obligations:
+
+L1 (generating function): the Dirichlet series with z-weighting equals the
+   Euler product, i.e. sum_n z^Omega(n) n^(-s) = prod_p (1 - z p^(-s))^(-1),
+   for s > 1 and |z| < 2^s.  [Mathlib's EulerProduct machinery is the likely
+   route; this is the substantial piece.]
+
+L2 (coefficient extraction): F_k(s), defined as the tsum over k-almost-primes
+   of n^(-s), is the k-th Taylor coefficient in z of that generating function.
+
+L3 (the three factors): the z-power series of (s-1)^(-z), of (1 - z/2^s)^(-1),
+   and of G2(s,z), with their radii (entire, 2^s, 3^s respectively).
+
+L4 (Cauchy product): the coefficient of z^k in a product of three power series
+   is the triple convolution, given absolute convergence on |z| <= 1.5.
+-/
+
+/-- The z-weighted Dirichlet generating function. -/
+noncomputable def Fgen (s : ℝ) (z : ℂ) : ℂ :=
+  ∑' n : {n : ℕ // 2 ≤ n}, z ^ (bigOmega n) * ((n : ℂ) ^ (-(s:ℂ)))
+
+/-- OBLIGATION L2: F_k(s) is the k-th Taylor coefficient of Fgen in z. -/
+theorem Fk_eq_coeff (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
+    ((Fk k s : ℝ) : ℂ)
+      = (iteratedDeriv k (fun z => Fgen s z) 0) / (Nat.factorial k : ℂ) := by
+  sorry
+
+/-- OBLIGATION L3a: the (s-1)^(-z) factor's coefficients. -/
+theorem coeff_pow_neg (s : ℝ) (hs : 1 < s) (l : ℕ) :
+    (iteratedDeriv l (fun z : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-z)) 0)
+        / (Nat.factorial l : ℂ)
+      = ((-Real.log (s - 1)) ^ l / (Nat.factorial l) : ℝ) := by
+  sorry
+
+/-- OBLIGATION L3b: the (1 - z/2^s)^(-1) factor's coefficients. -/
+theorem coeff_geom (s : ℝ) (hs : 1 < s) (j : ℕ) :
+    (iteratedDeriv j (fun z : ℂ => (1 - z / ((2:ℂ) ^ (s:ℂ)))⁻¹) 0)
+        / (Nat.factorial j : ℂ)
+      = ((2:ℝ) ^ (-(j:ℝ) * s) : ℝ) := by
+  sorry
+
+/-- MANUSCRIPT LEMMA 2.2: the exact expansion of F_k(s). -/
+theorem Fk_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
+    Fk k s = ∑ p ∈ Finset.range (k + 1),
+      ∑ q ∈ Finset.range (k - p + 1),
+        (gCoeff q s).re * (2:ℝ) ^ (-((p:ℝ)) * s)
+          * ((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q))) := by
+  sorry
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
