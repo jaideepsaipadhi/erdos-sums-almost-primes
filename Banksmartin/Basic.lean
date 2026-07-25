@@ -4959,6 +4959,46 @@ theorem iteratedDeriv_Fbig (k : ℕ) (s : ℝ) (hs : 1 < s) :
   try intro i _
   try ring
 
+/-- The trinomial identity: C(k,n) * C(n,i) / k! = 1/(i! (n-i)! (k-n)!)
+for i <= n <= k.  Verified numerically before encoding. -/
+theorem choose_mul_choose_div_factorial (k n i : ℕ) (hnk : n ≤ k) (hin : i ≤ n) :
+    (Nat.choose k n : ℂ) * (Nat.choose n i : ℂ)
+      = (Nat.factorial k : ℂ)
+        / ((Nat.factorial i : ℂ) * (Nat.factorial (n - i) : ℂ)
+          * (Nat.factorial (k - n) : ℂ)) := by
+  have hfi : ((Nat.factorial i : ℕ) : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
+  have hfni : ((Nat.factorial (n - i) : ℕ) : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n - i))
+  have hfkn : ((Nat.factorial (k - n) : ℕ) : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (k - n))
+  have hk : Nat.choose k n * (Nat.factorial n * Nat.factorial (k - n)) = Nat.factorial k := by
+    rw [← mul_assoc]
+    exact Nat.choose_mul_factorial_mul_factorial hnk
+  have hn : Nat.choose n i * (Nat.factorial i * Nat.factorial (n - i)) = Nat.factorial n := by
+    rw [← mul_assoc]
+    exact Nat.choose_mul_factorial_mul_factorial hin
+  rw [eq_div_iff (by exact mul_ne_zero (mul_ne_zero hfi hfni) hfkn)]
+  have hkC : ((Nat.choose k n : ℕ) : ℂ)
+      * (((Nat.factorial n : ℕ) : ℂ) * ((Nat.factorial (k - n) : ℕ) : ℂ))
+      = ((Nat.factorial k : ℕ) : ℂ) := by
+    exact_mod_cast congrArg (fun m : ℕ => (m : ℂ)) hk
+  have hnC : ((Nat.choose n i : ℕ) : ℂ)
+      * (((Nat.factorial i : ℕ) : ℂ) * ((Nat.factorial (n - i) : ℕ) : ℂ))
+      = ((Nat.factorial n : ℕ) : ℂ) := by
+    exact_mod_cast congrArg (fun m : ℕ => (m : ℂ)) hn
+  calc (Nat.choose k n : ℂ) * (Nat.choose n i : ℂ)
+        * ((Nat.factorial i : ℂ) * (Nat.factorial (n - i) : ℂ)
+          * (Nat.factorial (k - n) : ℂ))
+      = (Nat.choose k n : ℂ) * (Nat.factorial (k - n) : ℂ)
+        * ((Nat.choose n i : ℂ)
+          * ((Nat.factorial i : ℂ) * (Nat.factorial (n - i) : ℂ))) := by ring
+    _ = (Nat.choose k n : ℂ) * (Nat.factorial (k - n) : ℂ)
+        * (Nat.factorial n : ℂ) := by rw [hnC]
+    _ = (Nat.factorial k : ℂ) := by
+        rw [← hkC]
+        ring
+
 /-- OBLIGATION L2b: the k-th coefficient of Fbig is the triple convolution
 of the three factors' coefficients. -/
 theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :

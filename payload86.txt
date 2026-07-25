@@ -1,0 +1,40 @@
+theorem coeff_Fbig_eq_convolution (k : <<N>>) (s : <<R>>) (hs : 1 < s) (hs2 : s <<LE>> 2) :
+    (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : <<C>>)
+      = <<SUM>> p <<IN>> Finset.range (k + 1),
+          <<SUM>> q <<IN>> Finset.range (k - p + 1),
+            gCoeff q s * (((2:<<R>>) ^ (-(p:<<R>>) * s) : <<R>>) : <<C>>)
+              * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : <<R>>)) : <<C>>) := by
+  rw [iteratedDeriv_Fbig k s hs]
+  have hkfac : ((Nat.factorial k : <<N>>) : <<C>>) <<NE>> 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
+  -- Step 1: rewrite each factor's iterated derivative by the proven coefficient lemmas.
+  have hAval : <<ALL>> i : <<N>>,
+      iteratedDeriv i (fun w : <<C>> => ((s - 1 : <<R>>) : <<C>>) ^ (-w)) 0
+        = (Nat.factorial i : <<C>>)
+          * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : <<R>>)) : <<C>>) := by
+    intro i
+    have h := coeff_pow_neg s hs i
+    have hfi : ((Nat.factorial i : <<N>>) : <<C>>) <<NE>> 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
+    field_simp at h
+    linear_combination h
+  have hBval : <<ALL>> j : <<N>>,
+      iteratedDeriv j (fun w : <<C>> => (1 - w / ((2:<<C>>) ^ (s:<<C>>)))<<INV>>) 0
+        = (Nat.factorial j : <<C>>) * (((2:<<R>>) ^ (-(j:<<R>>) * s) : <<R>>) : <<C>>) := by
+    intro j
+    have h := coeff_geom s hs j
+    have hfj : ((Nat.factorial j : <<N>>) : <<C>>) <<NE>> 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero j)
+    field_simp at h
+    linear_combination h
+  have hCval : <<ALL>> q : <<N>>,
+      iteratedDeriv q (fun w : <<C>> => G2C s w) 0 = (Nat.factorial q : <<C>>) * gCoeff q s := by
+    intro q
+    unfold gCoeff
+    have hfq : ((Nat.factorial q : <<N>>) : <<C>>) <<NE>> 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero q)
+    field_simp
+  simp only [hAval, hBval, hCval]
+  -- Step 2: flatten both sides to sums over a sigma type and reindex.
+  rw [Finset.sum_div]
+  rw [<<LARR>> Finset.sum_biUnion_eq_sum_sigma] <;> sorry

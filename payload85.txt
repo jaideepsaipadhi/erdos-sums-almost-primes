@@ -1,0 +1,12 @@
+theorem coeff_Fbig_eq_convolution (k : <<N>>) (s : <<R>>) (hs : 1 < s) (hs2 : s <<LE>> 2) :
+    (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : <<C>>)
+      = <<SUM>> p <<IN>> Finset.range (k + 1),
+          <<SUM>> q <<IN>> Finset.range (k - p + 1),
+            gCoeff q s * (((2:<<R>>) ^ (-(p:<<R>>) * s) : <<R>>) : <<C>>)
+              * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : <<R>>)) : <<C>>) := by
+  rw [iteratedDeriv_Fbig k s hs]
+  have hkfac : ((Nat.factorial k : <<N>>) : <<C>>) <<NE>> 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
+  rw [Finset.sum_div]
+  rw [<<LARR>> Finset.sum_sigma', <<LARR>> Finset.sum_sigma']
+  sorry
