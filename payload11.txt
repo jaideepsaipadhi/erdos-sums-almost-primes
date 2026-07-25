@@ -1,0 +1,28 @@
+/-- The Gamma evaluation: int_{u>0} e^(-u) u^i du = i!. Foundation for the
+substitution identity (manuscript eq (5)) and Theorem 4.1. -/
+theorem integral_exp_neg_mul_pow (i : <<N>>) :
+    <<INT>> u in Set.Ioi (0:<<R>>), Real.exp (-u) * u ^ i = (Nat.factorial i : <<R>>) := by
+  calc <<INT>> u in Set.Ioi (0:<<R>>), Real.exp (-u) * u ^ i
+      = <<INT>> u in Set.Ioi (0:<<R>>), Real.exp (-u) * u ^ (((i:<<R>>) + 1) - 1) := by
+        apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+        intro u _
+        rw [show ((i:<<R>>) + 1) - 1 = (i:<<R>>) by ring, Real.rpow_natCast]
+    _ = Real.Gamma ((i:<<R>>) + 1) := (Real.Gamma_eq_integral (by positivity)).symm
+    _ = (Nat.factorial i : <<R>>) := Real.Gamma_nat_eq_factorial i
+
+/-- Manuscript eq (5): J(i) for block m, as an integral over u > 0. -/
+noncomputable def Jint (m i : <<N>>) : <<R>> :=
+  <<INT>> u in Set.Ioi (0:<<R>>),
+    u ^ i * Real.exp (-u) * (2:<<R>>) ^ (-((m - i : <<N>>):<<R>>) * Real.exp (-u))
+
+/-- Anchor: J(0) at m = 0 is 1 (the integrand collapses to e^(-u)). -/
+theorem Jint_zero : Jint 0 0 = 1 := by
+  unfold Jint
+  have hcong : <<ALL>> u : <<R>>,
+      u ^ 0 * Real.exp (-u) * (2:<<R>>) ^ (-(((0:<<N>>) - 0 : <<N>>):<<R>>) * Real.exp (-u))
+        = Real.exp (-u) * u ^ 0 := by
+    intro u
+    norm_num
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun u _ => hcong u)]
+  rw [integral_exp_neg_mul_pow 0]
+  norm_num

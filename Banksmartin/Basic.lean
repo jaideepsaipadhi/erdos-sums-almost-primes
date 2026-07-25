@@ -3845,6 +3845,81 @@ theorem block_arith (C : ℝ) (hC : 0 < C) (m j : ℕ) (hj : 1 ≤ j) :
     _ = 4 * C * (2 * (m:ℝ)) ^ m / (Real.log 2) ^ 2 * (1 / ((j:ℝ) * Real.sqrt j)) := by
         rw [hfrac]
 
+/-- Manuscript Definition 2.3: S(m) = sum_{j+l=m} int_1^2 (-log(s-1))^l/l! * 2^(-js) ds.
+Indexed by j in range (m+1), with l = m - j. -/
+noncomputable def Sm (m : ℕ) : ℝ :=
+  ∑ j ∈ Finset.range (m + 1),
+    ∫ s in Set.Ioc (1:ℝ) 2,
+      (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2:ℝ) ^ (-(j:ℝ) * s)
+      ∂MeasureTheory.volume
+
+/-- Manuscript Definition 2.3: A_m = 2^m S(m). -/
+noncomputable def Am (m : ℕ) : ℝ := 2 ^ m * Sm m
+
+/-- Manuscript Definition 2.3: delta_m = A_m - 2^(m+1) + (log 2 / 4) m^2.
+GLW Lemma 3.3 is the estimate delta_m = O(m log(m+1)); manuscript Theorem 4.1
+is the explicit two-sided bound. -/
+noncomputable def deltaM (m : ℕ) : ℝ :=
+  Am m - 2 ^ (m + 1) + (Real.log 2 / 4) * (m : ℝ) ^ 2
+
+/-- Anchor: S(0) = 1 (single term j = 0, integrand identically 1). -/
+theorem Sm_zero : Sm 0 = 1 := by
+  unfold Sm
+  rw [Finset.sum_range_one]
+  have hintegrand : ∀ s : ℝ,
+      (-Real.log (s - 1)) ^ (0 - 0) / (Nat.factorial (0 - 0)) * (2:ℝ) ^ (-((0:ℕ):ℝ) * s)
+        = 1 := by
+    intro s
+    norm_num
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun s _ => hintegrand s)]
+  rw [MeasureTheory.setIntegral_const]
+  have hvol : MeasureTheory.volume.real (Set.Ioc (1:ℝ) 2) = 1 := by
+    rw [MeasureTheory.measureReal_def, Real.volume_Ioc]
+    norm_num
+  rw [hvol]
+  norm_num
+
+/-- Anchor: A_0 = 1. -/
+theorem Am_zero : Am 0 = 1 := by
+  unfold Am
+  rw [Sm_zero]
+  norm_num
+
+/-- Manuscript Proposition 3.3 spot value, proven: delta_0 = -1 exactly. -/
+theorem deltaM_zero : deltaM 0 = -1 := by
+  unfold deltaM
+  rw [Am_zero]
+  norm_num
+
+/-- The Gamma evaluation: int_{u>0} e^(-u) u^i du = i!. Foundation for the
+substitution identity (manuscript eq (5)) and Theorem 4.1. -/
+theorem integral_exp_neg_mul_pow (i : ℕ) :
+    ∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * u ^ i = (Nat.factorial i : ℝ) := by
+  calc ∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * u ^ i
+      = ∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * u ^ (((i:ℝ) + 1) - 1) := by
+        apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+        intro u _
+        simp only [show ((i:ℝ) + 1) - 1 = (i:ℝ) by ring, Real.rpow_natCast]
+    _ = Real.Gamma ((i:ℝ) + 1) := (Real.Gamma_eq_integral (by positivity)).symm
+    _ = (Nat.factorial i : ℝ) := Real.Gamma_nat_eq_factorial i
+
+/-- Manuscript eq (5): J(i) for block m, as an integral over u > 0. -/
+noncomputable def Jint (m i : ℕ) : ℝ :=
+  ∫ u in Set.Ioi (0:ℝ),
+    u ^ i * Real.exp (-u) * (2:ℝ) ^ (-((m - i : ℕ):ℝ) * Real.exp (-u))
+
+/-- Anchor: J(0) at m = 0 is 1 (the integrand collapses to e^(-u)). -/
+theorem Jint_zero : Jint 0 0 = 1 := by
+  unfold Jint
+  have hcong : ∀ u : ℝ,
+      u ^ 0 * Real.exp (-u) * (2:ℝ) ^ (-(((0:ℕ) - 0 : ℕ):ℝ) * Real.exp (-u))
+        = Real.exp (-u) * u ^ 0 := by
+    intro u
+    norm_num
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun u _ => hcong u)]
+  rw [integral_exp_neg_mul_pow 0]
+  norm_num
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O

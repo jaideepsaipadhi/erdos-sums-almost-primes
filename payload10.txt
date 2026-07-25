@@ -1,0 +1,42 @@
+/-- Manuscript Definition 2.3: S(m) = sum_{j+l=m} int_1^2 (-log(s-1))^l/l! * 2^(-js) ds.
+Indexed by j in range (m+1), with l = m - j. -/
+noncomputable def Sm (m : <<N>>) : <<R>> :=
+  <<SUM>> j <<IN>> Finset.range (m + 1),
+    <<INT>> s in Set.Ioc (1:<<R>>) 2,
+      (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2:<<R>>) ^ (-(j:<<R>>) * s)
+      <<PD>>MeasureTheory.volume
+
+/-- Manuscript Definition 2.3: A_m = 2^m S(m). -/
+noncomputable def Am (m : <<N>>) : <<R>> := 2 ^ m * Sm m
+
+/-- Manuscript Definition 2.3: delta_m = A_m - 2^(m+1) + (log 2 / 4) m^2.
+GLW Lemma 3.3 is the estimate delta_m = O(m log(m+1)); manuscript Theorem 4.1
+is the explicit two-sided bound. -/
+noncomputable def deltaM (m : <<N>>) : <<R>> :=
+  Am m - 2 ^ (m + 1) + (Real.log 2 / 4) * (m : <<R>>) ^ 2
+
+/-- Anchor: S(0) = 1 (single term j = 0, integrand identically 1). -/
+theorem Sm_zero : Sm 0 = 1 := by
+  unfold Sm
+  rw [Finset.sum_range_one]
+  have hintegrand : <<ALL>> s : <<R>>,
+      (-Real.log (s - 1)) ^ (0 - 0) / (Nat.factorial (0 - 0)) * (2:<<R>>) ^ (-((0:<<N>>):<<R>>) * s)
+        = 1 := by
+    intro s
+    norm_num
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioc (fun s _ => hintegrand s)]
+  rw [MeasureTheory.setIntegral_const]
+  rw [Real.volume_Ioc]
+  norm_num
+
+/-- Anchor: A_0 = 1. -/
+theorem Am_zero : Am 0 = 1 := by
+  unfold Am
+  rw [Sm_zero]
+  norm_num
+
+/-- Manuscript Proposition 3.3 spot value, proven: delta_0 = -1 exactly. -/
+theorem deltaM_zero : deltaM 0 = -1 := by
+  unfold deltaM
+  rw [Am_zero]
+  norm_num
