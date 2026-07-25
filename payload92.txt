@@ -1,0 +1,44 @@
+theorem coeff_Fbig_eq_convolution (k : NN) (s : RR) (hs : 1 < s) (hs2 : s LEQ 2) :
+    (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : CC)
+      = SUM p IN Finset.range (k + 1),
+          SUM q IN Finset.range (k - p + 1),
+            gCoeff q s * (((2:RR) ^ (-(p:RR) * s) : RR) : CC)
+              * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : RR)) : CC) := by
+  have hAval : FORALL i : NN,
+      iteratedDeriv i (fun w : CC => ((s - 1 : RR) : CC) ^ (-w)) 0
+        = (Nat.factorial i : CC) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : RR)) : CC) := by
+    intro i
+    have h := coeff_pow_neg s hs i
+    have hfi : ((Nat.factorial i : NN) : CC) NEQ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
+    field_simp at h
+    linear_combination h
+  have hBval : FORALL j : NN,
+      iteratedDeriv j (fun w : CC => (1 - w / ((2:CC) ^ (s:CC)))INV) 0
+        = (Nat.factorial j : CC) * ((((2:RR) ^ (-(j:RR) * s) : RR)) : CC) := by
+    intro j
+    have h := coeff_geom s hs j
+    have hfj : ((Nat.factorial j : NN) : CC) NEQ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero j)
+    field_simp at h
+    linear_combination h
+  have hCval : FORALL q : NN,
+      iteratedDeriv q (fun w : CC => G2C s w) 0 = (Nat.factorial q : CC) * gCoeff q s := by
+    intro q
+    unfold gCoeff
+    have hfq : ((Nat.factorial q : NN) : CC) NEQ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero q)
+    field_simp
+  rw [iteratedDeriv_Fbig k s hs]
+  simp only [hAval, hBval, hCval]
+  rw [Finset.sum_div]
+  rw [leibniz_flatten k (fun n i => (Nat.choose k n : CC) *
+    ((Nat.choose n i : CC)
+      * ((Nat.factorial i : CC) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : RR)) : CC))
+      * ((Nat.factorial (n - i) : CC) * ((((2:RR) ^ (-((n - i : NN):RR) * s) : RR)) : CC)))
+    * ((Nat.factorial (k - n) : CC) * gCoeff (k - n) s) / (Nat.factorial k : CC))]
+  rw [conv_flatten k (fun p q => gCoeff q s * (((2:RR) ^ (-(p:RR) * s) : RR) : CC)
+    * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : RR)) : CC))]
+  apply sigma_reindex
+  intro n i hin hnk
+  exact L2b_summand k s hs n i hin hnk
