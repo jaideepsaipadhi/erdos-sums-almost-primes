@@ -455,6 +455,55 @@ theorem EinTailFun_split (a : ℝ) (ha : 0 < a) :
     rw [intervalIntegral.integral_of_ge h1, ← hIcoIoc]
     linarith [hadd]
 
+/-- The antiderivative identity behind integration by parts for the Euler
+integrand: d/dv [-e^(-v) log v] = e^(-v) log v - e^(-v)/v, for v > 0. -/
+theorem hasDerivAt_negExpLog (v : ℝ) (hv : 0 < v) :
+    HasDerivAt (fun t : ℝ => -(Real.exp (-t) * Real.log t))
+      (Real.exp (-v) * Real.log v - Real.exp (-v) / v) v := by
+  have hexp : HasDerivAt (fun t : ℝ => Real.exp (-t)) (-(Real.exp (-v))) v := by
+    have h : HasDerivAt (fun t : ℝ => Real.exp (-t)) (Real.exp (-v) * -1) v :=
+      (Real.hasDerivAt_exp (-v)).comp v (hasDerivAt_neg v)
+    simpa using h
+  have hlog : HasDerivAt Real.log v⁻¹ v := Real.hasDerivAt_log (ne_of_gt hv)
+  have hmul := hexp.mul hlog
+  have hneg := hmul.neg
+  have harith : -(-(Real.exp (-v)) * Real.log v + Real.exp (-v) * v⁻¹)
+      = Real.exp (-v) * Real.log v - Real.exp (-v) / v := by
+    field_simp
+    try ring
+  rw [harith] at hneg
+  exact hneg
+
+/-- Finite-interval integration by parts for the Euler integrand. -/
+theorem euler_parts_core (b c : ℝ) (hb : 0 < b) (hbc : b ≤ c) :
+    (∫ v in b..c, (Real.exp (-v) * Real.log v - Real.exp (-v) / v))
+      = -(Real.exp (-c) * Real.log c) + Real.exp (-b) * Real.log b := by
+  have hderiv : ∀ x ∈ Set.uIcc b c,
+      HasDerivAt (fun t : ℝ => -(Real.exp (-t) * Real.log t))
+        (Real.exp (-x) * Real.log x - Real.exp (-x) / x) x := by
+    intro x hx
+    rw [Set.uIcc_of_le hbc] at hx
+    exact hasDerivAt_negExpLog x (by linarith [hx.1])
+  have hint : IntervalIntegrable
+      (fun v : ℝ => Real.exp (-v) * Real.log v - Real.exp (-v) / v)
+      MeasureTheory.volume b c := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hbc]
+    apply ContinuousOn.sub
+    · apply ContinuousOn.mul
+      · exact (Real.continuous_exp.comp continuous_neg).continuousOn
+      · apply ContinuousOn.log continuousOn_id
+        intro x hx
+        simp only [id_eq]
+        exact ne_of_gt (by linarith [hx.1])
+    · apply ContinuousOn.div
+      · exact (Real.continuous_exp.comp continuous_neg).continuousOn
+      · exact continuousOn_id
+      · intro x hx
+        exact ne_of_gt (by linarith [hx.1])
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint]
+  ring
+
 /-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
 identified via Euler's integral. -/
 theorem ein_eq (a : ℝ) (ha : 0 < a) :
