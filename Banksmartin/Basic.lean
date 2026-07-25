@@ -4864,10 +4864,6 @@ convolution.  The two obligations are therefore:
        are analytic (G2C_differentiableOn gives radius 2 > 1.5).
 -/
 
-/-- The full generating function, as the product of its three factors. -/
-noncomputable def Fbig (s : ℝ) (z : ℂ) : ℂ :=
-  ((s - 1 : ℝ) : ℂ) ^ (-z) * (1 - z / ((2:ℂ) ^ (s:ℂ)))⁻¹ * G2C s z
-
 /-- c(s) = prod_{p >= 3} (1 - p^(-s))^(-1) = zeta(s)(1 - 2^(-s)).
 This is the constant whose z-th power is the first factor of F(s,z)
 when G2 is normalised as our G2C (product over p >= 3 of the
@@ -4893,6 +4889,11 @@ theorem coeff_cpow (s : ℝ) (hc : 0 < cFac s) (l : ℕ) :
   simp only [mul_zero, Complex.exp_zero, mul_one]
   push_cast
   ring
+
+/-- The full generating function, as the product of its three factors. -/
+noncomputable def Fbig (s : ℝ) (z : ℂ) : ℂ :=
+  ((cFac s : ℝ) : ℂ) ^ z * (1 - z / ((2:ℂ) ^ (s:ℂ)))⁻¹ * G2C s z
+
 
 /-!
 ### L2a scaffold
@@ -4955,19 +4956,18 @@ theorem Fk_eq_coeff_Fbig (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
   sorry
 
 /-- The (s-1)^(-z) factor is ContDiff of all orders. -/
-theorem contDiffAt_factorA (s : ℝ) (hs : 1 < s) (k : ℕ) (z : ℂ) :
-    ContDiffAt ℂ k (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) z := by
-  have hspos : (0:ℝ) < s - 1 := by linarith
-  have hsne : ((s - 1 : ℝ) : ℂ) ≠ 0 := by
+theorem contDiffAt_factorA (s : ℝ) (hc : 0 < cFac s) (k : ℕ) (z : ℂ) :
+    ContDiffAt ℂ k (fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w) z := by
+  have hsne : ((cFac s : ℝ) : ℂ) ≠ 0 := by
     simp only [ne_eq, Complex.ofReal_eq_zero]
-    linarith
-  have hrewrite : (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w))
-      = fun w : ℂ => Complex.exp ((-(Real.log (s - 1) : ℂ)) * w) := by
+    exact ne_of_gt hc
+  have hrewrite : (fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w)
+      = fun w : ℂ => Complex.exp (((Real.log (cFac s) : ℝ) : ℂ) * w) := by
     funext w
     rw [Complex.cpow_def_of_ne_zero hsne]
     congr 1
-    rw [← Complex.ofReal_log (le_of_lt hspos)]
-    ring
+    rw [← Complex.ofReal_log (le_of_lt hc)]
+    try ring
   rw [hrewrite]
   apply ContDiff.contDiffAt
   exact Complex.contDiff_exp.comp (contDiff_const.mul contDiff_id)
@@ -4993,7 +4993,7 @@ theorem contDiffAt_factorC (s : ℝ) (hs : 1 ≤ s) (k : ℕ) :
 /-- Fbig factors as (A * B) * C as functions. -/
 theorem Fbig_eq_prod (s : ℝ) :
     (fun z : ℂ => Fbig s z)
-      = ((fun z : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-z))
+      = ((fun z : ℂ => ((cFac s : ℝ) : ℂ) ^ z)
           * (fun z : ℂ => (1 - z / ((2:ℂ) ^ (s:ℂ)))⁻¹))
         * (fun z : ℂ => G2C s z) := by
   funext z
@@ -5002,28 +5002,28 @@ theorem Fbig_eq_prod (s : ℝ) :
 
 /-- Leibniz applied twice to Fbig: the k-th iterated derivative at 0 as a
 double sum with binomial coefficients. -/
-theorem iteratedDeriv_Fbig (k : ℕ) (s : ℝ) (hs : 1 < s) :
+theorem iteratedDeriv_Fbig (k : ℕ) (s : ℝ) (hs : 1 < s) (hc : 0 < cFac s) :
     iteratedDeriv k (fun z => Fbig s z) 0
       = ∑ n ∈ Finset.range (k + 1),
           (Nat.choose k n : ℂ) *
             (∑ i ∈ Finset.range (n + 1),
               (Nat.choose n i : ℂ)
-                * iteratedDeriv i (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0
+                * iteratedDeriv i (fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w) 0
                 * iteratedDeriv (n - i) (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹) 0)
             * iteratedDeriv (k - n) (fun w : ℂ => G2C s w) 0 := by
   have hs1 : (1:ℝ) ≤ s := le_of_lt hs
   have hzne : 1 - (0:ℂ) / ((2:ℂ) ^ (s:ℂ)) ≠ 0 := by
     simp
   have hA : ∀ j : ℕ, ContDiffAt ℂ j
-      (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0 :=
-    fun j => contDiffAt_factorA s hs j 0
+      (fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w) 0 :=
+    fun j => contDiffAt_factorA s hc j 0
   have hB : ∀ j : ℕ, ContDiffAt ℂ j
       (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹) 0 :=
     fun j => contDiffAt_factorB s j 0 hzne
   have hC : ∀ j : ℕ, ContDiffAt ℂ j (fun w : ℂ => G2C s w) 0 :=
     fun j => contDiffAt_factorC s hs1 j
   have hAB : ∀ j : ℕ, ContDiffAt ℂ j
-      ((fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w))
+      ((fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w)
         * (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹)) 0 :=
     fun j => (hA j).mul (hB j)
   rw [Fbig_eq_prod s]
@@ -5164,7 +5164,7 @@ theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 
             gCoeff q s * (((2:ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
               * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ) := by
   have hAval : ∀ i : ℕ,
-      iteratedDeriv i (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0
+      iteratedDeriv i (fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w) 0
         = (Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ) := by
     intro i
     have h := coeff_pow_neg s hs i
