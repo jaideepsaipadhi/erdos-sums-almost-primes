@@ -4061,6 +4061,65 @@ theorem integral_pow_exp_neg_two_mul (i : ℕ) :
   field_simp
   try ring
 
+/-- Integrability of the Gamma integrand u^i e^(-u) on (0, infty). -/
+theorem integrable_pow_exp (i : ℕ) :
+    MeasureTheory.IntegrableOn (fun u : ℝ => u ^ i * Real.exp (-u)) (Set.Ioi 0) := by
+  have h := Real.GammaIntegral_convergent (s := (i:ℝ) + 1) (by positivity)
+  apply h.congr_fun ?_ measurableSet_Ioi
+  intro u hu
+  simp only
+  rw [show ((i:ℝ) + 1) - 1 = (i:ℝ) by ring, Real.rpow_natCast]
+  ring
+
+/-- Integrability of u^i e^(-2u) on (0, infty), by domination. -/
+theorem integrable_pow_exp_two (i : ℕ) :
+    MeasureTheory.IntegrableOn (fun u : ℝ => u ^ i * Real.exp (-(2 * u))) (Set.Ioi 0) := by
+  apply MeasureTheory.Integrable.mono (integrable_pow_exp i)
+    (by fun_prop : Continuous fun u : ℝ => u ^ i * Real.exp (-(2 * u))).aestronglyMeasurable
+  filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with u hu
+  have hu0 : (0:ℝ) < u := Set.mem_Ioi.mp hu
+  simp only [Real.norm_eq_abs]
+  rw [abs_of_nonneg (mul_nonneg (pow_nonneg hu0.le i) (Real.exp_pos _).le),
+    abs_of_nonneg (mul_nonneg (pow_nonneg hu0.le i) (Real.exp_pos _).le)]
+  apply mul_le_mul_of_nonneg_left _ (pow_nonneg hu0.le i)
+  apply Real.exp_le_exp.mpr
+  linarith
+
+/-- Integrability of the J-integrand: the damping factor is at most 1. -/
+theorem integrable_Jint_integrand (c : ℝ) (hc : 0 ≤ c) (i : ℕ) :
+    MeasureTheory.IntegrableOn
+      (fun u : ℝ => u ^ i * Real.exp (-u) * (2:ℝ) ^ (-c * Real.exp (-u)))
+      (Set.Ioi 0) := by
+  have hfeq : (fun u : ℝ => u ^ i * Real.exp (-u) * (2:ℝ) ^ (-c * Real.exp (-u)))
+      = fun u : ℝ => u ^ i * Real.exp (-u) * Real.exp (-c * Real.exp (-u) * Real.log 2) := by
+    funext u
+    rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]
+    ring_nf
+  rw [hfeq]
+  apply MeasureTheory.Integrable.mono (integrable_pow_exp i)
+    (by fun_prop :
+      Continuous fun u : ℝ => u ^ i * Real.exp (-u) * Real.exp (-c * Real.exp (-u) * Real.log 2)).aestronglyMeasurable
+  filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with u hu
+  have hu0 : (0:ℝ) < u := Set.mem_Ioi.mp hu
+  have hl2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have harg : -c * Real.exp (-u) * Real.log 2 ≤ 0 := by
+    have h1 : (0:ℝ) ≤ c * Real.exp (-u) * Real.log 2 :=
+      mul_nonneg (mul_nonneg hc (Real.exp_pos _).le) hl2.le
+    linarith
+  have hdamp : Real.exp (-c * Real.exp (-u) * Real.log 2) ≤ 1 := by
+    calc Real.exp (-c * Real.exp (-u) * Real.log 2) ≤ Real.exp 0 :=
+          Real.exp_le_exp.mpr harg
+      _ = 1 := Real.exp_zero
+  simp only [Real.norm_eq_abs]
+  rw [abs_of_nonneg (mul_nonneg (mul_nonneg (pow_nonneg hu0.le i) (Real.exp_pos _).le)
+      (Real.exp_pos _).le),
+    abs_of_nonneg (mul_nonneg (pow_nonneg hu0.le i) (Real.exp_pos _).le)]
+  calc u ^ i * Real.exp (-u) * Real.exp (-c * Real.exp (-u) * Real.log 2)
+      ≤ u ^ i * Real.exp (-u) * 1 :=
+        mul_le_mul_of_nonneg_left hdamp
+          (mul_nonneg (pow_nonneg hu0.le i) (Real.exp_pos _).le)
+    _ = u ^ i * Real.exp (-u) := mul_one _
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
