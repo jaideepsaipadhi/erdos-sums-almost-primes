@@ -1,0 +1,28 @@
+theorem sigma_reindex (k : NN) (F : NN ARR NN ARR CC) (G : NN ARR NN ARR CC)
+    (hval : FORALL n i : NN, i LEQ n TO n LEQ k TO F n i = G (n - i) (k - n)) :
+    SUM x IN (Finset.range (k + 1)).sigma (fun n => Finset.range (n + 1)), F x.1 x.2
+      = SUM y IN (Finset.range (k + 1)).sigma (fun p => Finset.range (k - p + 1)), G y.1 y.2 := by
+  apply Finset.sum_nbij'
+    (i := fun x : Sigma (fun _ : NN => NN) => Sigma.mk (x.1 - x.2) (k - x.1))
+    (j := fun y : Sigma (fun _ : NN => NN) => Sigma.mk (k - y.2) (k - y.2 - y.1))
+  DOT intro x hx
+    simp only [Finset.mem_sigma, Finset.mem_range] at hx
+    simp only [Finset.mem_sigma, Finset.mem_range]
+    omega
+  DOT intro y hy
+    simp only [Finset.mem_sigma, Finset.mem_range] at hy
+    simp only [Finset.mem_sigma, Finset.mem_range]
+    omega
+  DOT intro x hx
+    simp only [Finset.mem_sigma, Finset.mem_range] at hx
+    have h1 : k - (x.1 - x.2) - (k - x.1) = x.2 := by omega
+    have h2 : k - (k - x.1) = x.1 := by omega
+    simp only [h1, h2]
+  DOT intro y hy
+    simp only [Finset.mem_sigma, Finset.mem_range] at hy
+    have h1 : k - y.2 - (k - y.2 - y.1) = y.1 := by omega
+    have h2 : k - (k - y.2) = y.2 := by omega
+    simp only [h1, h2]
+  DOT intro x hx
+    simp only [Finset.mem_sigma, Finset.mem_range] at hx
+    exact hval x.1 x.2 (by omega) (by omega)
