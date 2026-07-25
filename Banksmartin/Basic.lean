@@ -4756,6 +4756,40 @@ L4 (Cauchy product): the coefficient of z^k in a product of three power series
    is the triple convolution, given absolute convergence on |z| <= 1.5.
 -/
 
+/-- The z-weighted completely multiplicative function n -> z^Omega(n) n^(-s),
+bundled as a monoid-with-zero hom for Mathlib's Euler product machinery. -/
+noncomputable def zOmegaHom (s : ℝ) (z : ℂ) : ℕ →*₀ ℂ where
+  toFun n := if n = 0 then 0 else z ^ (bigOmega n) * ((n : ℂ) ^ (-(s:ℂ)))
+  map_zero' := by simp
+  map_one' := by
+    simp only [if_neg (one_ne_zero)]
+    have hO : bigOmega 1 = 0 := by
+      unfold bigOmega
+      simp
+    rw [hO, pow_zero, one_mul]
+    norm_num
+  map_mul' := by
+    intro a b
+    by_cases ha : a = 0
+    · simp [ha]
+    · by_cases hb : b = 0
+      · simp [hb]
+      · have hab : a * b ≠ 0 := mul_ne_zero ha hb
+        simp only [if_neg ha, if_neg hb, if_neg hab]
+        rw [bigOmega_mul a b ha hb, pow_add]
+        have hcast : (((a * b : ℕ) : ℂ)) = (a : ℂ) * (b : ℂ) := by
+          push_cast
+          ring
+        rw [hcast]
+        have hbridge : ((a : ℂ) * (b : ℂ)) ^ (-(s:ℂ))
+            = (a : ℂ) ^ (-(s:ℂ)) * (b : ℂ) ^ (-(s:ℂ)) := by
+          have hA : ((a : ℕ) : ℂ) = (((a : ℕ) : ℝ) : ℂ) := by push_cast; ring
+          have hB : ((b : ℕ) : ℂ) = (((b : ℕ) : ℝ) : ℂ) := by push_cast; ring
+          rw [hA, hB]
+          exact Complex.mul_cpow_ofReal_nonneg (Nat.cast_nonneg a) (Nat.cast_nonneg b) _
+        rw [hbridge]
+        ring
+
 /-- The z-weighted Dirichlet generating function. -/
 noncomputable def Fgen (s : ℝ) (z : ℂ) : ℂ :=
   ∑' n : {n : ℕ // 2 ≤ n}, z ^ (bigOmega n) * ((n : ℂ) ^ (-(s:ℂ)))
