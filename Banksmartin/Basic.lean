@@ -3596,6 +3596,244 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
           apply mul_nonneg _ (by linarith : (0:ℝ) ≤ x)
           nlinarith [hC]
 
+/-- Telescoping bound: partial sums of 1/(j*sqrt j) over [2,N] never exceed 2. -/
+theorem telescope_sqrt (N : ℕ) :
+    ∑ j ∈ Finset.Icc 2 N, (1:ℝ) / ((j:ℝ) * Real.sqrt j) ≤ 2 := by
+  have hstep : ∀ M : ℕ,
+      ∑ j ∈ Finset.Icc 2 M, (1:ℝ) / ((j:ℝ) * Real.sqrt j)
+        ≤ 2 * (1 - 1 / Real.sqrt (M:ℝ)) := by
+    intro M
+    induction M with
+    | zero => simp
+    | succ M ih =>
+      rcases Nat.lt_or_ge M 1 with hM0 | hM1
+      · have hM0' : M = 0 := by omega
+        subst hM0'
+        rw [show Finset.Icc 2 1 = (∅ : Finset ℕ) by decide]
+        simp
+      · rw [Finset.sum_Icc_succ_top (by omega : 2 ≤ M + 1)]
+        have hMR : (1:ℝ) ≤ (M:ℝ) := by exact_mod_cast hM1
+        have hsM : (0:ℝ) < Real.sqrt (M:ℝ) := Real.sqrt_pos.mpr (by linarith)
+        have hsM1 : (0:ℝ) < Real.sqrt ((M:ℝ) + 1) := Real.sqrt_pos.mpr (by linarith)
+        have hmulM : Real.sqrt (M:ℝ) * Real.sqrt (M:ℝ) = (M:ℝ) :=
+          Real.mul_self_sqrt (by linarith)
+        have hmulM1 : Real.sqrt ((M:ℝ) + 1) * Real.sqrt ((M:ℝ) + 1) = (M:ℝ) + 1 :=
+          Real.mul_self_sqrt (by linarith)
+        have hle : Real.sqrt (M:ℝ) ≤ Real.sqrt ((M:ℝ) + 1) :=
+          Real.sqrt_le_sqrt (by linarith)
+        have hkey : (Real.sqrt ((M:ℝ) + 1) - Real.sqrt (M:ℝ)) *
+            (Real.sqrt ((M:ℝ) + 1) + Real.sqrt (M:ℝ)) = 1 := by
+          nlinarith [hmulM, hmulM1]
+        have hcast : (((M + 1 : ℕ)):ℝ) = (M:ℝ) + 1 := by push_cast; ring
+        have htail : (1:ℝ) / (((M + 1 : ℕ):ℝ) * Real.sqrt ((M + 1 : ℕ):ℝ))
+            ≤ 2 * (1 / Real.sqrt (M:ℝ) - 1 / Real.sqrt ((M:ℝ) + 1)) := by
+          rw [hcast]
+          have hdenom : (0:ℝ) < ((M:ℝ) + 1) * Real.sqrt ((M:ℝ) + 1) := by positivity
+          rw [div_le_iff₀ hdenom]
+          have hdiff : 1 / Real.sqrt (M:ℝ) - 1 / Real.sqrt ((M:ℝ) + 1)
+              = (Real.sqrt ((M:ℝ) + 1) - Real.sqrt (M:ℝ)) /
+                (Real.sqrt (M:ℝ) * Real.sqrt ((M:ℝ) + 1)) := by
+            field_simp
+            try ring
+          rw [hdiff]
+          have hab_pos : (0:ℝ) < Real.sqrt (M:ℝ) * Real.sqrt ((M:ℝ) + 1) := by
+            positivity
+          have hform : 2 * ((Real.sqrt ((M:ℝ) + 1) - Real.sqrt (M:ℝ)) /
+                (Real.sqrt (M:ℝ) * Real.sqrt ((M:ℝ) + 1))) * (((M:ℝ) + 1) * Real.sqrt ((M:ℝ) + 1))
+              = (2 * (Real.sqrt ((M:ℝ) + 1) - Real.sqrt (M:ℝ)) * (((M:ℝ) + 1) * Real.sqrt ((M:ℝ) + 1))) /
+                (Real.sqrt (M:ℝ) * Real.sqrt ((M:ℝ) + 1)) := by
+            ring
+          rw [hform, le_div_iff₀ hab_pos]
+          nlinarith [hkey, hle, hsM, hsM1, hmulM1, hmulM,
+            mul_pos hsM hsM1,
+            mul_nonneg (mul_nonneg hsM1.le hsM1.le) (sub_nonneg.mpr hle),
+            mul_nonneg hsM1.le (sub_nonneg.mpr hle)]
+        have hfinal : 2 * (1 - 1 / Real.sqrt (M:ℝ)) +
+            2 * (1 / Real.sqrt (M:ℝ) - 1 / Real.sqrt ((M:ℝ) + 1))
+            = 2 * (1 - 1 / Real.sqrt ((M:ℝ) + 1)) := by ring
+        calc ∑ j ∈ Finset.Icc 2 M, (1:ℝ) / ((j:ℝ) * Real.sqrt j)
+              + (1:ℝ) / (((M + 1 : ℕ):ℝ) * Real.sqrt ((M + 1 : ℕ):ℝ))
+            ≤ 2 * (1 - 1 / Real.sqrt (M:ℝ)) +
+              2 * (1 / Real.sqrt (M:ℝ) - 1 / Real.sqrt ((M:ℝ) + 1)) :=
+              add_le_add ih htail
+          _ = 2 * (1 - 1 / Real.sqrt ((M:ℝ) + 1)) := hfinal
+          _ = 2 * (1 - 1 / Real.sqrt (((M + 1 : ℕ)):ℝ)) := by rw [hcast]
+  calc ∑ j ∈ Finset.Icc 2 N, (1:ℝ) / ((j:ℝ) * Real.sqrt j)
+      ≤ 2 * (1 - 1 / Real.sqrt (N:ℝ)) := hstep N
+    _ ≤ 2 := by
+        have h1 : (0:ℝ) ≤ 1 / Real.sqrt (N:ℝ) := by positivity
+        linarith
+
+/-- Power-of-log bound: (log y)^m ≤ (2m)^m * sqrt y for y >= 1, m >= 1. -/
+theorem log_pow_le_sqrt (m : ℕ) (hm : 1 ≤ m) (y : ℝ) (hy : 1 ≤ y) :
+    (Real.log y) ^ m ≤ (2 * (m:ℝ)) ^ m * Real.sqrt y := by
+  have hypos : (0:ℝ) < y := by linarith
+  have hm_pos : (0:ℝ) < (m:ℝ) := by exact_mod_cast (by omega : 0 < m)
+  have hm_ne : (m:ℝ) ≠ 0 := hm_pos.ne'
+  have h1 : Real.log (y ^ ((1:ℝ) / (2 * (m:ℝ)))) = (1 / (2 * (m:ℝ))) * Real.log y :=
+    Real.log_rpow hypos _
+  have h2 : Real.log (y ^ ((1:ℝ) / (2 * (m:ℝ)))) ≤ y ^ ((1:ℝ) / (2 * (m:ℝ))) :=
+    Real.log_le_self (Real.rpow_nonneg hypos.le _)
+  have h3 : (1 / (2 * (m:ℝ))) * Real.log y ≤ y ^ ((1:ℝ) / (2 * (m:ℝ))) := by
+    rw [← h1]
+    exact h2
+  have hlog_le : Real.log y ≤ 2 * (m:ℝ) * y ^ ((1:ℝ) / (2 * (m:ℝ))) := by
+    calc Real.log y = 2 * (m:ℝ) * ((1 / (2 * (m:ℝ))) * Real.log y) := by
+          field_simp
+      _ ≤ 2 * (m:ℝ) * y ^ ((1:ℝ) / (2 * (m:ℝ))) :=
+          mul_le_mul_of_nonneg_left h3 (by positivity)
+  have hlog_nn : (0:ℝ) ≤ Real.log y := Real.log_nonneg hy
+  have hp : (Real.log y) ^ m ≤ (2 * (m:ℝ) * y ^ ((1:ℝ) / (2 * (m:ℝ)))) ^ m := by
+    apply pow_le_pow_left₀ hlog_nn hlog_le
+  have hsplit : (2 * (m:ℝ) * y ^ ((1:ℝ) / (2 * (m:ℝ)))) ^ m
+      = (2 * (m:ℝ)) ^ m * (y ^ ((1:ℝ) / (2 * (m:ℝ)))) ^ m := mul_pow _ _ _
+  have hrpow : (y ^ ((1:ℝ) / (2 * (m:ℝ)))) ^ m = Real.sqrt y := by
+    rw [← Real.rpow_natCast (y ^ ((1:ℝ) / (2 * (m:ℝ)))) m,
+      ← Real.rpow_mul hypos.le]
+    rw [show (1:ℝ) / (2 * (m:ℝ)) * (m:ℝ) = 1 / 2 by field_simp; try ring]
+    rw [Real.sqrt_eq_rpow]
+  calc (Real.log y) ^ m ≤ (2 * (m:ℝ) * y ^ ((1:ℝ) / (2 * (m:ℝ)))) ^ m := hp
+    _ = (2 * (m:ℝ)) ^ m * (y ^ ((1:ℝ) / (2 * (m:ℝ)))) ^ m := hsplit
+    _ = (2 * (m:ℝ)) ^ m * Real.sqrt y := by rw [hrpow]
+
+/-- The summand 1/(t log t) is antitone past 2. -/
+theorem inv_mul_log_le (a b : ℝ) (ha : 2 ≤ a) (hab : a ≤ b) :
+    1 / (b * Real.log b) ≤ 1 / (a * Real.log a) := by
+  have hla : (0:ℝ) < Real.log a := Real.log_pos (by linarith)
+  have hlb : Real.log a ≤ Real.log b := Real.log_le_log (by linarith) hab
+  have hpa : (0:ℝ) < a * Real.log a := mul_pos (by linarith) hla
+  apply one_div_le_one_div_of_le hpa
+  apply mul_le_mul hab hlb hla.le (by linarith)
+
+/-- Nonzero terms in dyadic block j inject into the piK count at 2^(j+1). -/
+theorem block_count_le_piK (kk j M : ℕ) :
+    (((Finset.Ioc 1 M).filter (fun n => Nat.log 2 n = j)).filter
+        (fun n => 2 ≤ n ∧ bigOmega n = kk)).card
+      ≤ piK kk (((2:ℕ) ^ (j + 1) : ℕ) : ℝ) := by
+  classical
+  unfold piK
+  rw [Nat.floor_natCast]
+  apply Finset.card_le_card
+  intro n hn
+  obtain ⟨hnf, hn2, hnO⟩ := Finset.mem_filter.mp hn
+  have hb := dyadic_fiber_mem_bounds 1 M j n hnf
+  exact Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨hn2, by omega⟩, hnO⟩
+
+/-- Per-block arithmetic: the piK bound value at 2^(j+1) times the max term size
+in block j is at most K / (j * sqrt j), with K explicit. -/
+theorem block_arith (C : ℝ) (hC : 0 < C) (m j : ℕ) (hj : 1 ≤ j) :
+    C * (2:ℝ) ^ (j + 1) * (Real.log (Real.log ((2:ℝ) ^ (j + 1)))) ^ m /
+        Real.log ((2:ℝ) ^ (j + 1)) * (1 / ((2:ℝ) ^ j * Real.log ((2:ℝ) ^ j)))
+      ≤ 4 * C * (2 * (m:ℝ)) ^ m / (Real.log 2) ^ 2 * (1 / ((j:ℝ) * Real.sqrt j)) := by
+  have hl2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hl2' : Real.log 2 ≤ 1 := by
+    have := Real.log_le_sub_one_of_pos (by norm_num : (0:ℝ) < 2)
+    linarith
+  have hl2h : (1:ℝ) / 2 ≤ Real.log 2 := by
+    have hsq : Real.exp ((1:ℝ) / 2) * Real.exp ((1:ℝ) / 2) = Real.exp 1 := by
+      rw [← Real.exp_add]
+      norm_num
+    have he := Real.exp_one_lt_d9
+    have hp := Real.exp_pos ((1:ℝ) / 2)
+    have h2 : Real.exp ((1:ℝ) / 2) ≤ 2 := by nlinarith
+    have h2' : Real.log (Real.exp ((1:ℝ) / 2)) ≤ Real.log 2 :=
+      Real.log_le_log (Real.exp_pos _) h2
+    rwa [Real.log_exp] at h2'
+  have hjpos : (0:ℝ) < (j:ℝ) := by exact_mod_cast (by omega : 0 < j)
+  have hjR : (1:ℝ) ≤ (j:ℝ) := by exact_mod_cast hj
+  have hj1pos : (0:ℝ) < (j:ℝ) + 1 := by linarith
+  have hsj : (0:ℝ) < Real.sqrt j := Real.sqrt_pos.mpr hjpos
+  have hjj : Real.sqrt j * Real.sqrt j = (j:ℝ) := Real.mul_self_sqrt hjpos.le
+  have hA : (0:ℝ) < (2:ℝ) ^ j := by positivity
+  have hlogj : Real.log ((2:ℝ) ^ j) = (j:ℝ) * Real.log 2 := by
+    rw [Real.log_pow]
+  have hlogj1 : Real.log ((2:ℝ) ^ (j + 1)) = ((j:ℝ) + 1) * Real.log 2 := by
+    rw [Real.log_pow]
+    push_cast
+    ring
+  rw [hlogj, hlogj1]
+  have hll_ub : Real.log (((j:ℝ) + 1) * Real.log 2) ≤ Real.log ((j:ℝ) + 1) := by
+    apply Real.log_le_log (mul_pos hj1pos hl2)
+    nlinarith [hl2', hj1pos]
+  have hll_nn : (0:ℝ) ≤ Real.log (((j:ℝ) + 1) * Real.log 2) := by
+    apply Real.log_nonneg
+    nlinarith [hl2h, hjR, mul_nonneg (by linarith : (0:ℝ) ≤ (j:ℝ) - 1) hl2.le]
+  have hpow1 : (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m ≤ (Real.log ((j:ℝ) + 1)) ^ m := by
+    apply pow_le_pow_left₀ hll_nn hll_ub
+  have hLP : (Real.log ((j:ℝ) + 1)) ^ m ≤ (2 * (m:ℝ)) ^ m * Real.sqrt ((j:ℝ) + 1) := by
+    rcases Nat.eq_zero_or_pos m with hm0 | hm1
+    · subst hm0
+      simp only [pow_zero, one_mul]
+      have h1 : Real.sqrt 1 ≤ Real.sqrt ((j:ℝ) + 1) := Real.sqrt_le_sqrt (by linarith)
+      rw [Real.sqrt_one] at h1
+      linarith
+    · exact log_pow_le_sqrt m hm1 ((j:ℝ) + 1) (by linarith)
+  have hsq1 : Real.sqrt ((j:ℝ) + 1) ≤ 2 * Real.sqrt j := by
+    have h4 : Real.sqrt ((j:ℝ) + 1) ≤ Real.sqrt (4 * (j:ℝ)) :=
+      Real.sqrt_le_sqrt (by linarith)
+    have h5 : Real.sqrt (4 * (j:ℝ)) = 2 * Real.sqrt j := by
+      rw [show (4:ℝ) * (j:ℝ) = (2:ℝ) ^ 2 * (j:ℝ) by ring,
+        Real.sqrt_mul (by positivity), Real.sqrt_sq (by norm_num)]
+    rw [h5] at h4
+    exact h4
+  have hX : (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m
+      ≤ (2 * (m:ℝ)) ^ m * (2 * Real.sqrt j) := by
+    have h3 : (2 * (m:ℝ)) ^ m * Real.sqrt ((j:ℝ) + 1)
+        ≤ (2 * (m:ℝ)) ^ m * (2 * Real.sqrt j) :=
+      mul_le_mul_of_nonneg_left hsq1 (pow_nonneg (by positivity) m)
+    linarith [hpow1, hLP, h3]
+  have hE1 : C * (2:ℝ) ^ (j + 1) * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
+        (((j:ℝ) + 1) * Real.log 2) * (1 / ((2:ℝ) ^ j * ((j:ℝ) * Real.log 2)))
+      = 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
+        (((j:ℝ) + 1) * (j:ℝ) * (Real.log 2) ^ 2) := by
+    rw [pow_succ]
+    field_simp
+    try ring
+  have hEL : 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
+        (((j:ℝ) + 1) * (j:ℝ) * (Real.log 2) ^ 2)
+      = 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m *
+        (1 / (((j:ℝ) + 1) * (j:ℝ))) * (1 / (Real.log 2) ^ 2) := by
+    field_simp [hl2.ne', hjpos.ne', hj1pos.ne']
+    try ring
+  have hinv : 1 / (((j:ℝ) + 1) * (j:ℝ)) ≤ 1 / ((j:ℝ) * (j:ℝ)) := by
+    apply one_div_le_one_div_of_le (mul_pos hjpos hjpos)
+    nlinarith [hjpos]
+  have hK0 : (0:ℝ) ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) := by
+    apply mul_nonneg (by linarith)
+    apply mul_nonneg (pow_nonneg (by positivity) m)
+    positivity
+  have hstep1 : 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m
+      ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) :=
+    mul_le_mul_of_nonneg_left hX (by linarith)
+  have hstep2 : 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m *
+        (1 / (((j:ℝ) + 1) * (j:ℝ)))
+      ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:ℝ) * (j:ℝ))) :=
+    mul_le_mul hstep1 hinv (le_of_lt (one_div_pos.mpr (mul_pos hj1pos hjpos))) hK0
+  have hstep3 : 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m *
+        (1 / (((j:ℝ) + 1) * (j:ℝ))) * (1 / (Real.log 2) ^ 2)
+      ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:ℝ) * (j:ℝ))) *
+        (1 / (Real.log 2) ^ 2) :=
+    mul_le_mul_of_nonneg_right hstep2 (le_of_lt (one_div_pos.mpr (pow_pos hl2 2)))
+  have hER : 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:ℝ) * (j:ℝ))) *
+        (1 / (Real.log 2) ^ 2)
+      = 4 * C * (2 * (m:ℝ)) ^ m / (Real.log 2) ^ 2 * (Real.sqrt j / ((j:ℝ) * (j:ℝ))) := by
+    ring
+  have hfrac : Real.sqrt j / ((j:ℝ) * (j:ℝ)) = 1 / ((j:ℝ) * Real.sqrt j) := by
+    rw [div_eq_div_iff (mul_pos hjpos hjpos).ne' (mul_pos hjpos hsj).ne']
+    linear_combination (j:ℝ) * hjj
+  calc C * (2:ℝ) ^ (j + 1) * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
+        (((j:ℝ) + 1) * Real.log 2) * (1 / ((2:ℝ) ^ j * ((j:ℝ) * Real.log 2)))
+      = 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
+        (((j:ℝ) + 1) * (j:ℝ) * (Real.log 2) ^ 2) := hE1
+    _ = 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m *
+        (1 / (((j:ℝ) + 1) * (j:ℝ))) * (1 / (Real.log 2) ^ 2) := hEL
+    _ ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:ℝ) * (j:ℝ))) *
+        (1 / (Real.log 2) ^ 2) := hstep3
+    _ = 4 * C * (2 * (m:ℝ)) ^ m / (Real.log 2) ^ 2 *
+        (Real.sqrt j / ((j:ℝ) * (j:ℝ))) := hER
+    _ = 4 * C * (2 * (m:ℝ)) ^ m / (Real.log 2) ^ 2 * (1 / ((j:ℝ) * Real.sqrt j)) := by
+        rw [hfrac]
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
@@ -3617,7 +3855,182 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
     Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
       1 / ((n : ℝ) * Real.log n)) := by
   obtain ⟨C, hC, hbound⟩ := piK_bound k hk
-  sorry -- partial summation against hbound; standard but not short.
+  classical
+  have hl2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hind : Summable (Set.indicator {n : ℕ | 2 ≤ n ∧ bigOmega n = k}
+      (fun n : ℕ => 1 / ((n:ℝ) * Real.log n))) := by
+    set I := Set.indicator {n : ℕ | 2 ≤ n ∧ bigOmega n = k}
+      (fun n : ℕ => 1 / ((n:ℝ) * Real.log n)) with hI
+    have hInn : ∀ n : ℕ, 0 ≤ I n := by
+      intro n
+      rw [hI]
+      apply Set.indicator_nonneg
+      intro a ha
+      obtain ⟨ha2, _⟩ := ha
+      have haR : (2:ℝ) ≤ (a:ℝ) := by exact_mod_cast ha2
+      have hla : (0:ℝ) < Real.log a := Real.log_pos (by linarith)
+      exact le_of_lt (one_div_pos.mpr (mul_pos (by linarith) hla))
+    have hIvan : ∀ n : ℕ, ¬(2 ≤ n ∧ bigOmega n = k) → I n = 0 := by
+      intro n hn
+      rw [hI, Set.indicator_apply,
+        if_neg (show n ∉ {n : ℕ | 2 ≤ n ∧ bigOmega n = k} from fun hmem => hn hmem)]
+    have hImem : ∀ n : ℕ, 2 ≤ n → bigOmega n = k →
+        I n = 1 / ((n:ℝ) * Real.log n) := by
+      intro n h2 hO
+      rw [hI, Set.indicator_apply,
+        if_pos (show n ∈ {n : ℕ | 2 ≤ n ∧ bigOmega n = k} from ⟨h2, hO⟩)]
+    have hblock : ∀ N j : ℕ, 1 ≤ j →
+        ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j), I n
+          ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 *
+            (1 / ((j:ℝ) * Real.sqrt j)) := by
+      intro N j hj
+      have hdz : ∑ n ∈ ((Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j)).filter
+            (fun n => 2 ≤ n ∧ bigOmega n = k), I n
+          = ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j), I n := by
+        apply Finset.sum_subset (Finset.filter_subset _ _)
+        intro n hn hnP
+        apply hIvan
+        intro hmem
+        exact hnP (Finset.mem_filter.mpr ⟨hn, hmem⟩)
+      rw [← hdz]
+      have hterm : ∀ n ∈ ((Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j)).filter
+          (fun n => 2 ≤ n ∧ bigOmega n = k),
+          I n ≤ 1 / ((2:ℝ) ^ j * Real.log ((2:ℝ) ^ j)) := by
+        intro n hn
+        obtain ⟨hnf, hn2, hnO⟩ := Finset.mem_filter.mp hn
+        have hb := dyadic_fiber_mem_bounds 1 N j n hnf
+        have h2j : (((2:ℕ) ^ j : ℕ) : ℝ) ≤ (n:ℝ) := by exact_mod_cast hb.1
+        have h2jR : (((2:ℕ) ^ j : ℕ) : ℝ) = (2:ℝ) ^ j := by push_cast; ring
+        rw [h2jR] at h2j
+        have h2le : (2:ℝ) ≤ (2:ℝ) ^ j := by
+          calc (2:ℝ) = (2:ℝ) ^ 1 := by norm_num
+            _ ≤ (2:ℝ) ^ j := by
+                apply pow_le_pow_right₀ (by norm_num) hj
+        rw [hImem n hn2 hnO]
+        exact inv_mul_log_le ((2:ℝ) ^ j) (n:ℝ) h2le h2j
+      have hsum1 := Finset.sum_le_sum hterm
+      rw [Finset.sum_const, nsmul_eq_mul] at hsum1
+      have hbpos : (0:ℝ) < 1 / ((2:ℝ) ^ j * Real.log ((2:ℝ) ^ j)) := by
+        apply one_div_pos.mpr
+        apply mul_pos (by positivity)
+        rw [Real.log_pow]
+        exact mul_pos (by exact_mod_cast (by omega : 0 < j)) hl2
+      have hcast2 : (((2:ℕ) ^ (j + 1) : ℕ) : ℝ) = (2:ℝ) ^ (j + 1) := by
+        push_cast
+        ring
+      have hcard := block_count_le_piK k j N
+      rw [hcast2] at hcard
+      have hcardR : (((((Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j)).filter
+            (fun n => 2 ≤ n ∧ bigOmega n = k)).card : ℕ) : ℝ)
+          ≤ (piK k ((2:ℝ) ^ (j + 1)) : ℝ) := by
+        exact_mod_cast hcard
+      have h4n : (4:ℕ) ≤ 2 ^ (j + 1) := by
+        calc (4:ℕ) = 2 ^ 2 := by norm_num
+          _ ≤ 2 ^ (j + 1) := Nat.pow_le_pow_right (by norm_num) (by omega)
+      have hx3 : (3:ℝ) ≤ (((2:ℕ) ^ (j + 1) : ℕ) : ℝ) := by
+        have h4r : (4:ℝ) ≤ (((2:ℕ) ^ (j + 1) : ℕ) : ℝ) := by exact_mod_cast h4n
+        linarith
+      have hpk := hbound (((2:ℕ) ^ (j + 1) : ℕ) : ℝ) hx3
+      rw [hcast2] at hpk
+      calc ∑ n ∈ ((Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j)).filter
+            (fun n => 2 ≤ n ∧ bigOmega n = k), I n
+          ≤ (((((Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j)).filter
+              (fun n => 2 ≤ n ∧ bigOmega n = k)).card : ℕ) : ℝ) *
+              (1 / ((2:ℝ) ^ j * Real.log ((2:ℝ) ^ j))) := hsum1
+        _ ≤ (piK k ((2:ℝ) ^ (j + 1)) : ℝ) *
+              (1 / ((2:ℝ) ^ j * Real.log ((2:ℝ) ^ j))) :=
+            mul_le_mul_of_nonneg_right hcardR hbpos.le
+        _ ≤ C * (2:ℝ) ^ (j + 1) * (Real.log (Real.log ((2:ℝ) ^ (j + 1)))) ^ (k - 1) /
+              Real.log ((2:ℝ) ^ (j + 1)) * (1 / ((2:ℝ) ^ j * Real.log ((2:ℝ) ^ j))) :=
+            mul_le_mul_of_nonneg_right hpk hbpos.le
+        _ ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 *
+              (1 / ((j:ℝ) * Real.sqrt j)) :=
+            block_arith C hC (k - 1) j hj
+    have hKnn : (0:ℝ) ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 :=
+      div_nonneg (mul_nonneg (by linarith : (0:ℝ) ≤ 4 * C)
+        (pow_nonneg (by positivity) _)) (by positivity)
+    have hpartial : ∀ N : ℕ, ∑ i ∈ Finset.range N, I i
+        ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 * 3 := by
+      intro N
+      have h1 : ∑ i ∈ Finset.range N, I i ≤ ∑ i ∈ Finset.Ioc 1 N, I i := by
+        have hzs : ∑ i ∈ (Finset.range N).filter (fun i => 1 < i), I i
+            = ∑ i ∈ Finset.range N, I i := by
+          apply Finset.sum_subset (Finset.filter_subset _ _)
+          intro i hi hif
+          apply hIvan
+          intro hmem
+          obtain ⟨h2i, _⟩ := hmem
+          exact hif (Finset.mem_filter.mpr ⟨hi, by omega⟩)
+        rw [← hzs]
+        apply Finset.sum_le_sum_of_subset_of_nonneg
+        · intro i hi
+          obtain ⟨hir, hi1⟩ := Finset.mem_filter.mp hi
+          have hiN := Finset.mem_range.mp hir
+          exact Finset.mem_Ioc.mpr ⟨hi1, by omega⟩
+        · intro i _ _
+          exact hInn i
+      have h2 := sum_dyadic_fiberwise 1 N I
+      have hfib0 : (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = 0) = (∅ : Finset ℕ) := by
+        apply Finset.filter_eq_empty_iff.mpr
+        intro n hn
+        simp only [Finset.mem_Ioc] at hn
+        have hlp := Nat.log_pos (by norm_num : 1 < 2) (by omega : 2 ≤ n)
+        omega
+      have hsplit : Finset.range (Nat.log 2 N + 1)
+          = insert 0 (Finset.Icc 1 (Nat.log 2 N)) := by
+        ext x
+        simp only [Finset.mem_range, Finset.mem_insert, Finset.mem_Icc]
+        omega
+      have hIcc3 : ∑ j ∈ Finset.Icc 1 (Nat.log 2 N),
+          1 / ((j:ℝ) * Real.sqrt j) ≤ 3 := by
+        rcases Nat.lt_or_ge (Nat.log 2 N) 1 with hJ0 | hJ1
+        · have hemp : Finset.Icc 1 (Nat.log 2 N) = (∅ : Finset ℕ) := by
+            apply Finset.Icc_eq_empty
+            omega
+          rw [hemp, Finset.sum_empty]
+          norm_num
+        · have hins : Finset.Icc 1 (Nat.log 2 N)
+              = insert 1 (Finset.Icc 2 (Nat.log 2 N)) := by
+            ext x
+            simp only [Finset.mem_Icc, Finset.mem_insert]
+            omega
+          rw [hins, Finset.sum_insert (by simp)]
+          have ht := telescope_sqrt (Nat.log 2 N)
+          have h11 : (1:ℝ) / (((1:ℕ):ℝ) * Real.sqrt ((1:ℕ):ℝ)) = 1 := by
+            simp [Real.sqrt_one]
+          rw [h11]
+          linarith [ht]
+      have hmain : ∑ j ∈ Finset.Icc 1 (Nat.log 2 N),
+          ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j), I n
+            ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 * 3 := by
+        calc ∑ j ∈ Finset.Icc 1 (Nat.log 2 N),
+            ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j), I n
+            ≤ ∑ j ∈ Finset.Icc 1 (Nat.log 2 N),
+              4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 *
+                (1 / ((j:ℝ) * Real.sqrt j)) :=
+              Finset.sum_le_sum (fun j hjm => hblock N j (Finset.mem_Icc.mp hjm).1)
+          _ = 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 *
+              ∑ j ∈ Finset.Icc 1 (Nat.log 2 N), (1 / ((j:ℝ) * Real.sqrt j)) := by
+              rw [Finset.mul_sum]
+          _ ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 * 3 :=
+              mul_le_mul_of_nonneg_left hIcc3 hKnn
+      calc ∑ i ∈ Finset.range N, I i
+          ≤ ∑ i ∈ Finset.Ioc 1 N, I i := h1
+        _ = ∑ j ∈ Finset.range (Nat.log 2 N + 1),
+            ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j), I n := h2
+        _ = ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = 0), I n
+            + ∑ j ∈ Finset.Icc 1 (Nat.log 2 N),
+                ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j), I n := by
+            rw [hsplit, Finset.sum_insert (by simp)]
+        _ = ∑ j ∈ Finset.Icc 1 (Nat.log 2 N),
+              ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j), I n := by
+            rw [hfib0]
+            simp
+        _ ≤ _ := hmain
+    exact summable_of_sum_range_le hInn hpartial
+  exact (summable_subtype_iff_indicator
+    (s := {n : ℕ | 2 ≤ n ∧ bigOmega n = k})
+    (f := fun n : ℕ => 1 / ((n:ℝ) * Real.log n))).mpr hind
 
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :

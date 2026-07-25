@@ -1,0 +1,113 @@
+/-- Per-block arithmetic: the piK bound value at 2^(j+1) times the max term size
+in block j is at most K / (j * sqrt j), with K explicit. -/
+theorem block_arith (C : <<R>>) (hC : 0 < C) (m j : <<N>>) (hj : 1 <<LE>> j) :
+    C * (2:<<R>>) ^ (j + 1) * (Real.log (Real.log ((2:<<R>>) ^ (j + 1)))) ^ m /
+        Real.log ((2:<<R>>) ^ (j + 1)) * (1 / ((2:<<R>>) ^ j * Real.log ((2:<<R>>) ^ j)))
+      <<LE>> 4 * C * (2 * (m:<<R>>)) ^ m / (Real.log 2) ^ 2 * (1 / ((j:<<R>>) * Real.sqrt j)) := by
+  have hl2 : (0:<<R>>) < Real.log 2 := Real.log_pos (by norm_num)
+  have hl2' : Real.log 2 <<LE>> 1 := by
+    have := Real.log_le_sub_one_of_pos (by norm_num : (0:<<R>>) < 2)
+    linarith
+  have hl2h : (1:<<R>>) / 2 <<LE>> Real.log 2 := by
+    have hsq : Real.exp ((1:<<R>>) / 2) * Real.exp ((1:<<R>>) / 2) = Real.exp 1 := by
+      rw [<<LARR>> Real.exp_add]
+      norm_num
+    have he := Real.exp_one_lt_d9
+    have hp := Real.exp_pos ((1:<<R>>) / 2)
+    have h2 : Real.exp ((1:<<R>>) / 2) <<LE>> 2 := by nlinarith
+    have h2' : Real.log (Real.exp ((1:<<R>>) / 2)) <<LE>> Real.log 2 :=
+      Real.log_le_log (Real.exp_pos _) h2
+    rwa [Real.log_exp] at h2'
+  have hjpos : (0:<<R>>) < (j:<<R>>) := by exact_mod_cast (by omega : 0 < j)
+  have hjR : (1:<<R>>) <<LE>> (j:<<R>>) := by exact_mod_cast hj
+  have hj1pos : (0:<<R>>) < (j:<<R>>) + 1 := by linarith
+  have hsj : (0:<<R>>) < Real.sqrt j := Real.sqrt_pos.mpr hjpos
+  have hjj : Real.sqrt j * Real.sqrt j = (j:<<R>>) := Real.mul_self_sqrt hjpos.le
+  have hA : (0:<<R>>) < (2:<<R>>) ^ j := by positivity
+  have hlogj : Real.log ((2:<<R>>) ^ j) = (j:<<R>>) * Real.log 2 := by
+    rw [Real.log_pow]
+  have hlogj1 : Real.log ((2:<<R>>) ^ (j + 1)) = ((j:<<R>>) + 1) * Real.log 2 := by
+    rw [Real.log_pow]
+    push_cast
+    ring
+  rw [hlogj, hlogj1]
+  have hll_ub : Real.log (((j:<<R>>) + 1) * Real.log 2) <<LE>> Real.log ((j:<<R>>) + 1) := by
+    apply Real.log_le_log (mul_pos hj1pos hl2)
+    nlinarith [hl2', hj1pos]
+  have hll_nn : (0:<<R>>) <<LE>> Real.log (((j:<<R>>) + 1) * Real.log 2) := by
+    apply Real.log_nonneg
+    nlinarith [hl2h, hjR, mul_nonneg (by linarith : (0:<<R>>) <<LE>> (j:<<R>>) - 1) hl2.le]
+  have hpow1 : (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m <<LE>> (Real.log ((j:<<R>>) + 1)) ^ m := by
+    apply pow_le_pow_left<<S0>> hll_nn hll_ub
+  have hLP : (Real.log ((j:<<R>>) + 1)) ^ m <<LE>> (2 * (m:<<R>>)) ^ m * Real.sqrt ((j:<<R>>) + 1) := by
+    rcases Nat.eq_zero_or_pos m with hm0 | hm1
+    <<DOT>> subst hm0
+      simp only [pow_zero, one_mul]
+      have h1 : Real.sqrt 1 <<LE>> Real.sqrt ((j:<<R>>) + 1) := Real.sqrt_le_sqrt (by linarith)
+      rw [Real.sqrt_one] at h1
+      linarith
+    <<DOT>> exact log_pow_le_sqrt m hm1 ((j:<<R>>) + 1) (by linarith)
+  have hsq1 : Real.sqrt ((j:<<R>>) + 1) <<LE>> 2 * Real.sqrt j := by
+    have h4 : Real.sqrt ((j:<<R>>) + 1) <<LE>> Real.sqrt (4 * (j:<<R>>)) :=
+      Real.sqrt_le_sqrt (by linarith)
+    have h5 : Real.sqrt (4 * (j:<<R>>)) = 2 * Real.sqrt j := by
+      rw [show (4:<<R>>) * (j:<<R>>) = (2:<<R>>) ^ 2 * (j:<<R>>) by ring,
+        Real.sqrt_mul (by positivity), Real.sqrt_sq (by norm_num)]
+    rw [h5] at h4
+    exact h4
+  have hX : (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m
+      <<LE>> (2 * (m:<<R>>)) ^ m * (2 * Real.sqrt j) := by
+    have h3 : (2 * (m:<<R>>)) ^ m * Real.sqrt ((j:<<R>>) + 1)
+        <<LE>> (2 * (m:<<R>>)) ^ m * (2 * Real.sqrt j) :=
+      mul_le_mul_of_nonneg_left hsq1 (pow_nonneg (by positivity) m)
+    linarith [hpow1, hLP, h3]
+  have hE1 : C * (2:<<R>>) ^ (j + 1) * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m /
+        (((j:<<R>>) + 1) * Real.log 2) * (1 / ((2:<<R>>) ^ j * ((j:<<R>>) * Real.log 2)))
+      = 2 * C * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m /
+        (((j:<<R>>) + 1) * (j:<<R>>) * (Real.log 2) ^ 2) := by
+    rw [pow_succ]
+    field_simp
+    ring
+  have hEL : 2 * C * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m /
+        (((j:<<R>>) + 1) * (j:<<R>>) * (Real.log 2) ^ 2)
+      = 2 * C * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m *
+        (1 / (((j:<<R>>) + 1) * (j:<<R>>))) * (1 / (Real.log 2) ^ 2) := by
+    ring
+  have hinv : 1 / (((j:<<R>>) + 1) * (j:<<R>>)) <<LE>> 1 / ((j:<<R>>) * (j:<<R>>)) := by
+    apply one_div_le_one_div_of_le (mul_pos hjpos hjpos)
+    nlinarith [hjpos]
+  have hK0 : (0:<<R>>) <<LE>> 2 * C * ((2 * (m:<<R>>)) ^ m * (2 * Real.sqrt j)) := by
+    apply mul_nonneg (by linarith)
+    apply mul_nonneg (pow_nonneg (by positivity) m)
+    positivity
+  have hstep1 : 2 * C * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m
+      <<LE>> 2 * C * ((2 * (m:<<R>>)) ^ m * (2 * Real.sqrt j)) :=
+    mul_le_mul_of_nonneg_left hX (by linarith)
+  have hstep2 : 2 * C * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m *
+        (1 / (((j:<<R>>) + 1) * (j:<<R>>)))
+      <<LE>> 2 * C * ((2 * (m:<<R>>)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:<<R>>) * (j:<<R>>))) :=
+    mul_le_mul hstep1 hinv (le_of_lt (one_div_pos.mpr (mul_pos hj1pos hjpos))) hK0
+  have hstep3 : 2 * C * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m *
+        (1 / (((j:<<R>>) + 1) * (j:<<R>>))) * (1 / (Real.log 2) ^ 2)
+      <<LE>> 2 * C * ((2 * (m:<<R>>)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:<<R>>) * (j:<<R>>))) *
+        (1 / (Real.log 2) ^ 2) :=
+    mul_le_mul_of_nonneg_right hstep2 (le_of_lt (one_div_pos.mpr (pow_pos hl2 2)))
+  have hER : 2 * C * ((2 * (m:<<R>>)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:<<R>>) * (j:<<R>>))) *
+        (1 / (Real.log 2) ^ 2)
+      = 4 * C * (2 * (m:<<R>>)) ^ m / (Real.log 2) ^ 2 * (Real.sqrt j / ((j:<<R>>) * (j:<<R>>))) := by
+    ring
+  have hfrac : Real.sqrt j / ((j:<<R>>) * (j:<<R>>)) = 1 / ((j:<<R>>) * Real.sqrt j) := by
+    rw [div_eq_div_iff (mul_pos hjpos hjpos).ne' (mul_pos hjpos hsj).ne']
+    linear_combination (j:<<R>>) * hjj
+  calc C * (2:<<R>>) ^ (j + 1) * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m /
+        (((j:<<R>>) + 1) * Real.log 2) * (1 / ((2:<<R>>) ^ j * ((j:<<R>>) * Real.log 2)))
+      = 2 * C * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m /
+        (((j:<<R>>) + 1) * (j:<<R>>) * (Real.log 2) ^ 2) := hE1
+    _ = 2 * C * (Real.log (((j:<<R>>) + 1) * Real.log 2)) ^ m *
+        (1 / (((j:<<R>>) + 1) * (j:<<R>>))) * (1 / (Real.log 2) ^ 2) := hEL
+    _ <<LE>> 2 * C * ((2 * (m:<<R>>)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:<<R>>) * (j:<<R>>))) *
+        (1 / (Real.log 2) ^ 2) := hstep3
+    _ = 4 * C * (2 * (m:<<R>>)) ^ m / (Real.log 2) ^ 2 *
+        (Real.sqrt j / ((j:<<R>>) * (j:<<R>>))) := hER
+    _ = 4 * C * (2 * (m:<<R>>)) ^ m / (Real.log 2) ^ 2 * (1 / ((j:<<R>>) * Real.sqrt j)) := by
+        rw [hfrac]
