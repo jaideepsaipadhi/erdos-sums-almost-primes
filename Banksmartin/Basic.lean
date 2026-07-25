@@ -4242,6 +4242,29 @@ theorem deltaM_identity (m : ℕ) :
   rw [Am_eq_sum_Jint m, hsum, hgeom, hlin]
   ring
 
+/-- betaCirc is nonnegative: the integrand is a product of nonnegatives. -/
+theorem betaCirc_nonneg (i j : ℕ) : 0 ≤ betaCirc i j := by
+  unfold betaCirc
+  apply mul_nonneg
+  · positivity
+  · apply MeasureTheory.setIntegral_nonneg measurableSet_Ioi
+    intro u hu
+    have hu0 : (0:ℝ) < u := Set.mem_Ioi.mp hu
+    apply mul_nonneg (mul_nonneg (pow_nonneg hu0.le i) (Real.exp_pos _).le)
+    exact Bfun_nonneg j u
+
+/-- MANUSCRIPT THEOREM 4.1, LOWER BOUND: delta_m >= -1 - (log 2 / 4) m,
+for every m. Immediate from identity (11) and nonnegativity of beta-circle. -/
+theorem deltaM_lower_bound (m : ℕ) :
+    -1 - (Real.log 2 / 4) * (m : ℝ) ≤ deltaM m := by
+  rw [deltaM_identity m]
+  have hsum : (0:ℝ) ≤
+      ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i (m - i) := by
+    apply Finset.sum_nonneg
+    intro i _
+    exact mul_nonneg (by positivity) (betaCirc_nonneg i (m - i))
+  linarith
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
