@@ -4921,6 +4921,44 @@ theorem Fbig_eq_prod (s : ℝ) :
   unfold Fbig
   simp only [Pi.mul_apply]
 
+/-- Leibniz applied twice to Fbig: the k-th iterated derivative at 0 as a
+double sum with binomial coefficients. -/
+theorem iteratedDeriv_Fbig (k : ℕ) (s : ℝ) (hs : 1 < s) :
+    iteratedDeriv k (fun z => Fbig s z) 0
+      = ∑ n ∈ Finset.range (k + 1),
+          (Nat.choose k n : ℂ) *
+            (∑ i ∈ Finset.range (n + 1),
+              (Nat.choose n i : ℂ)
+                * iteratedDeriv i (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0
+                * iteratedDeriv (n - i) (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹) 0)
+            * iteratedDeriv (k - n) (fun w : ℂ => G2C s w) 0 := by
+  have hs1 : (1:ℝ) ≤ s := le_of_lt hs
+  have hzne : 1 - (0:ℂ) / ((2:ℂ) ^ (s:ℂ)) ≠ 0 := by
+    simp
+  have hA : ∀ j : ℕ, ContDiffAt ℂ j
+      (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0 :=
+    fun j => contDiffAt_factorA s hs j 0
+  have hB : ∀ j : ℕ, ContDiffAt ℂ j
+      (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹) 0 :=
+    fun j => contDiffAt_factorB s j 0 hzne
+  have hC : ∀ j : ℕ, ContDiffAt ℂ j (fun w : ℂ => G2C s w) 0 :=
+    fun j => contDiffAt_factorC s hs1 j
+  have hAB : ∀ j : ℕ, ContDiffAt ℂ j
+      ((fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w))
+        * (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹)) 0 :=
+    fun j => (hA j).mul (hB j)
+  rw [Fbig_eq_prod s]
+  rw [iteratedDeriv_mul (hAB k) (hC k)]
+  apply Finset.sum_congr rfl
+  intro n hn
+  rw [iteratedDeriv_mul (hA n) (hB n)]
+  try rw [Finset.sum_mul]
+  try rw [Finset.mul_sum]
+  try rw [Finset.sum_mul]
+  try apply Finset.sum_congr rfl
+  try intro i _
+  try ring
+
 /-- OBLIGATION L2b: the k-th coefficient of Fbig is the triple convolution
 of the three factors' coefficients. -/
 theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
