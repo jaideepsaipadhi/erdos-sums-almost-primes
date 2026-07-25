@@ -1,0 +1,34 @@
+/-- The betaCirc integrand is integrable on (0, infty). -/
+theorem integrable_betaCirc_integrand (i j : <<N>>) :
+    MeasureTheory.IntegrableOn
+      (fun u : <<R>> => u ^ i * Real.exp (-u) * Bfun j u) (Set.Ioi 0) := by
+  have hI1 := integrable_pow_exp i
+  have hI2 := integrable_pow_exp_two i
+  have hI3 := integrable_Jint_integrand ((j:<<N>>):<<R>>) (by positivity) i
+  have hfeq : (fun u : <<R>> => u ^ i * Real.exp (-u) * Bfun j u)
+      = fun u : <<R>> =>
+        (u ^ i * Real.exp (-u) * (2:<<R>>) ^ (-((j:<<N>>):<<R>>) * Real.exp (-u))
+          - u ^ i * Real.exp (-u))
+        + ((j:<<N>>):<<R>>) * Real.log 2 * (u ^ i * Real.exp (-(2 * u))) := by
+    funext u
+    unfold Bfun
+    have hexp : Real.exp (-u) * Real.exp (-u) = Real.exp (-(2 * u)) := by
+      rw [<<LARR>> Real.exp_add]
+      ring_nf
+    rw [show Real.exp (-(2 * u)) = Real.exp (-u) * Real.exp (-u) from hexp.symm]
+    ring
+  rw [hfeq]
+  exact (hI3.sub hI1).add (hI2.const_mul _)
+
+/-- Per-term monotonicity: betaCirc i j is monotone in j (from Bfun_mono). -/
+theorem betaCirc_mono (i j m : <<N>>) (hjm : j <<LE>> m) :
+    betaCirc i j <<LE>> betaCirc i m := by
+  unfold betaCirc
+  apply mul_le_mul_of_nonneg_left _ (by positivity)
+  apply MeasureTheory.setIntegral_mono_on
+    (integrable_betaCirc_integrand i j) (integrable_betaCirc_integrand i m)
+    measurableSet_Ioi
+  intro u hu
+  have hu0 : (0:<<R>>) < u := hu
+  apply mul_le_mul_of_nonneg_left (Bfun_mono j m hjm u)
+  positivity

@@ -4329,6 +4329,41 @@ theorem sum_pow_div_factorial_le_exp (x : ℝ) (hx : 0 ≤ x) (m : ℕ) :
   positivity
 
 
+/-- The betaCirc integrand is integrable on (0, infty). -/
+theorem integrable_betaCirc_integrand (i j : ℕ) :
+    MeasureTheory.IntegrableOn
+      (fun u : ℝ => u ^ i * Real.exp (-u) * Bfun j u) (Set.Ioi 0) := by
+  have hI1 := integrable_pow_exp i
+  have hI2 := integrable_pow_exp_two i
+  have hI3 := integrable_Jint_integrand ((j:ℕ):ℝ) (by positivity) i
+  have hfeq : (fun u : ℝ => u ^ i * Real.exp (-u) * Bfun j u)
+      = fun u : ℝ =>
+        (u ^ i * Real.exp (-u) * (2:ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u))
+          - u ^ i * Real.exp (-u))
+        + ((j:ℕ):ℝ) * Real.log 2 * (u ^ i * Real.exp (-(2 * u))) := by
+    funext u
+    unfold Bfun
+    have hexp : Real.exp (-u) * Real.exp (-u) = Real.exp (-(2 * u)) := by
+      rw [← Real.exp_add]
+      ring_nf
+    rw [show Real.exp (-(2 * u)) = Real.exp (-u) * Real.exp (-u) from hexp.symm]
+    ring
+  rw [hfeq]
+  exact (hI3.sub hI1).add (hI2.const_mul _)
+
+/-- Per-term monotonicity: betaCirc i j is monotone in j (from Bfun_mono). -/
+theorem betaCirc_mono (i j m : ℕ) (hjm : j ≤ m) :
+    betaCirc i j ≤ betaCirc i m := by
+  unfold betaCirc
+  apply mul_le_mul_of_nonneg_left _ (by positivity)
+  apply MeasureTheory.setIntegral_mono_on
+    (integrable_betaCirc_integrand i j) (integrable_betaCirc_integrand i m)
+    measurableSet_Ioi
+  intro u hu
+  have hu0 : (0:ℝ) < u := hu
+  apply mul_le_mul_of_nonneg_left (Bfun_mono j m hjm u)
+  positivity
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
