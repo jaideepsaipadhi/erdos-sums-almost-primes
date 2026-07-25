@@ -5203,6 +5203,14 @@ theorem zOmegaNorm_prime_lt_one (s : ℝ) (hs : 1 < s) (z : ℂ)
         have hkey := mul_lt_mul_of_pos_right hz hinvpos
         rwa [mul_inv_cancel₀ (ne_of_gt h2s)] at hkey
 
+/-- The Euler factors as an indicator family on all naturals, multipliable. -/
+theorem zOmegaNorm_indicator_multipliable (s : ℝ) (hs : 1 < s) (z : ℂ)
+    (hz : Norm.norm z < (2:ℝ) ^ s) :
+    Multipliable (Set.mulIndicator {p : ℕ | p.Prime}
+      (fun p : ℕ => (1 - Norm.norm z * ((p:ℝ) ^ (-s)))⁻¹)) := by
+  rw [← multipliable_subtype_iff_mulIndicator]
+  exact zOmega_factors_multipliable s hs z
+
 /-- A1: absolute summability of the z-weighted Dirichlet family. -/
 theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : ‖z‖ < (2:ℝ) ^ s) :
