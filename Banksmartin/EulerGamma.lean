@@ -36,6 +36,27 @@ namespace BanksMartin
 noncomputable def gammaDeriv_dom (u : ℝ) : ℝ :=
   Real.exp (-u) * (u ^ (-(1:ℝ)/2) + u ^ ((1:ℝ)/2)) * |Real.log u|
 
+/-- Near zero: |log u| is dominated by a small negative power. -/
+theorem abs_log_le_rpow_near_zero (u : ℝ) (hu : 0 < u) (hu1 : u ≤ 1) :
+    |Real.log u| ≤ 4 * u ^ (-(1:ℝ)/4) := by
+  have hx : (0:ℝ) < u ^ (-(1:ℝ)/4) := Real.rpow_pos_of_pos hu _
+  have hlogx : Real.log (u ^ (-(1:ℝ)/4)) = (-(1:ℝ)/4) * Real.log u :=
+    Real.log_rpow hu _
+  have hle := Real.log_le_sub_one_of_pos hx
+  rw [hlogx] at hle
+  have hnonpos : Real.log u ≤ 0 := Real.log_nonpos hu.le hu1
+  rw [abs_of_nonpos hnonpos]
+  linarith
+
+/-- Far out: |log u| is dominated by u itself. -/
+theorem abs_log_le_self (u : ℝ) (hu : 1 ≤ u) :
+    |Real.log u| ≤ u := by
+  have hpos : (0:ℝ) < u := by linarith
+  have hnonneg : 0 ≤ Real.log u := Real.log_nonneg hu
+  rw [abs_of_nonneg hnonneg]
+  have := Real.log_le_sub_one_of_pos hpos
+  linarith
+
 /-- OBLIGATION 1: the dominating function is integrable on (0, infty). -/
 theorem gammaDeriv_dom_integrable :
     IntegrableOn gammaDeriv_dom (Set.Ioi 0) := by
