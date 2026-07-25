@@ -4639,6 +4639,25 @@ theorem deltaM_upper_bound_manuscript (m : ℕ) (hm : 1 ≤ m) :
   unfold cStarOne
   nlinarith [hub, hl2, hmpos]
 
+/-- BRIDGE: for a function with a power series on a ball, analytic everywhere,
+the n-th iterated (one-dimensional) derivative at the center is n! times the
+n-th coefficient. This is the Taylor-coefficient relation Mathlib does not
+state directly for `iteratedDeriv`. -/
+theorem iteratedDeriv_eq_factorial_smul_coeff
+    {f : ℂ → ℂ} {p : FormalMultilinearSeries ℂ ℂ ℂ} {r : ENNReal}
+    (h : HasFPowerSeriesOnBall f p 0 r) (h' : AnalyticOn ℂ f Set.univ) (n : ℕ) :
+    iteratedDeriv n f 0 = (Nat.factorial n : ℂ) * p.coeff n := by
+  have hv := h.iteratedFDeriv_eq_sum h' (v := fun _ : Fin n => (1:ℂ))
+  rw [iteratedDeriv_eq_iteratedFDeriv]
+  rw [hv]
+  have hconst : ∀ σ : Equiv.Perm (Fin n),
+      p n (fun i => (fun _ : Fin n => (1:ℂ)) (σ i)) = p.coeff n := by
+    intro σ
+    rfl
+  rw [Finset.sum_congr rfl (fun σ _ => hconst σ)]
+  rw [Finset.sum_const, Finset.card_univ, Fintype.card_perm, Fintype.card_fin]
+  rw [nsmul_eq_mul]
+
 /-!
 ## Manuscript Lemma 2.2 (the exact expansion) -- SCAFFOLD
 
