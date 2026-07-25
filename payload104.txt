@@ -1,0 +1,13 @@
+theorem zOmega_factors_multipliable (s : RR) (hs : 1 < s) (z : CC) :
+    Multipliable (fun p : Nat.Primes =>
+      (1 - Norm.norm z * (((p:NN):RR) ^ (-s)))INV) := by
+  have hsum := zOmega_prime_sum_summable s hs z
+  have hnn : FORALL p : Nat.Primes, (0:RR) LEQ Norm.norm z * (((p:NN):RR) ^ (-s)) := by
+    intro p
+    positivity
+  have hhalf : EVFC p in Filter.cofinite,
+      Norm.norm z * (((p:NN):RR) ^ (-s)) LEQ 1/2 := by
+    have h := hsum.tendsto_cofinite_zero.eventually_le_const (by norm_num : (0:RR) < 1/2)
+    filter_upwards [h] with p hp
+    exact hp
+  sorry

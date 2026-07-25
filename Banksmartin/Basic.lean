@@ -5033,6 +5033,18 @@ theorem neg_log_one_sub_le (x : ℝ) (hx0 : 0 ≤ x) (hx : x ≤ 1/2) :
     rwa [Real.log_exp] at this
   linarith
 
+theorem zOmega_factors_multipliable (s : ℝ) (hs : 1 < s) (z : ℂ) :
+    Multipliable (fun p : Nat.Primes =>
+      (1 - Norm.norm z * (((p:ℕ):ℝ) ^ (-s)))⁻¹) := by
+  have hsum := zOmega_prime_sum_summable s hs z
+  have hnn : ∀ p : Nat.Primes, (0:ℝ) ≤ Norm.norm z * (((p:ℕ):ℝ) ^ (-s)) := by
+    intro p
+    positivity
+  have hhalf : ∀ᶠ p : Nat.Primes in Filter.cofinite,
+      Norm.norm z * (((p:ℕ):ℝ) ^ (-s)) ≤ 1/2 :=
+    hsum.tendsto_cofinite_zero.eventually_le_const (by norm_num : (0:ℝ) < 1/2)
+  sorry
+
 /-- A1: absolute summability of the z-weighted Dirichlet family. -/
 theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : ‖z‖ < (2:ℝ) ^ s) :
