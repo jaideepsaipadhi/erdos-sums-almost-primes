@@ -1236,7 +1236,34 @@ theorem gap_parts_limit (a : ℝ) (ha : 0 < a) :
     have hg2 : Filter.Tendsto
         (fun b : ℝ => ∫ v in Set.Ioc (0:ℝ) b, (Real.exp (-v) - 1 + v) / v ^ 2)
         (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
-      sorry
+      have hid : Filter.Tendsto (fun b : ℝ => b) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
+        Filter.tendsto_id.mono_left nhdsWithin_le_nhds
+      apply squeeze_zero_norm' _ hid
+      filter_upwards [self_mem_nhdsWithin] with b hb
+      have hb0 : (0:ℝ) < b := hb
+      have hle : |∫ v in Set.Ioc (0:ℝ) b, (Real.exp (-v) - 1 + v) / v ^ 2|
+          ≤ ∫ v in Set.Ioc (0:ℝ) b, (1:ℝ) := by
+        apply MeasureTheory.abs_integral_le_integral_abs.trans
+        apply MeasureTheory.setIntegral_mono_on
+        · exact (gap_integrable b hb0).abs
+        · have hfin : MeasureTheory.volume (Set.Ioc (0:ℝ) b) ≠ ⊤ := by
+            rw [Real.volume_Ioc]
+            exact ENNReal.ofReal_ne_top
+          exact integrableOn_const hfin
+        · exact measurableSet_Ioc
+        · intro v hv
+          obtain ⟨hlow, hhigh⟩ := gap_integrand_bounds v hv.1
+          rw [abs_of_nonneg hlow]
+          exact hhigh
+      have hconst : (∫ v in Set.Ioc (0:ℝ) b, (1:ℝ)) = b := by
+        rw [MeasureTheory.setIntegral_const]
+        have hvol : MeasureTheory.volume.real (Set.Ioc (0:ℝ) b) = b := by
+          rw [MeasureTheory.measureReal_def, Real.volume_Ioc]
+          simp [ENNReal.toReal_ofReal hb0.le]
+        rw [hvol]
+        ring
+      rw [hconst] at hle
+      exact hle
     have hg3 := Ein_tendsto_zero
     have hsum := (tendsto_const_nhds (x := -((Real.exp (-a) - 1 + a) / a) + Ein a)
       (f := nhdsWithin (0:ℝ) (Set.Ioi 0))).add (hg1.add (hg2.sub hg3))

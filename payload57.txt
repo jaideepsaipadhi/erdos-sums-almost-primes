@@ -1,0 +1,31 @@
+    have hg2 : Filter.Tendsto
+        (fun b : <<R>> => <<INT>> v in Set.Ioc (0:<<R>>) b, (Real.exp (-v) - 1 + v) / v ^ 2)
+        (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      have hid : Filter.Tendsto (fun b : <<R>> => b) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
+        Filter.tendsto_id.mono_left nhdsWithin_le_nhds
+      apply squeeze_zero_norm' _ hid
+      filter_upwards [self_mem_nhdsWithin] with b hb
+      have hb0 : (0:<<R>>) < b := hb
+      have hle : |<<INT>> v in Set.Ioc (0:<<R>>) b, (Real.exp (-v) - 1 + v) / v ^ 2|
+          <<LE>> <<INT>> v in Set.Ioc (0:<<R>>) b, (1:<<R>>) := by
+        apply MeasureTheory.abs_integral_le_integral_abs.trans
+        apply MeasureTheory.setIntegral_mono_on
+        <<DOT>> exact (gap_integrable b hb0).abs
+        <<DOT>> have hfin : MeasureTheory.volume (Set.Ioc (0:<<R>>) b) <<NE>> <<TOP>> := by
+            rw [Real.volume_Ioc]
+            exact ENNReal.ofReal_ne_top
+          exact integrableOn_const hfin
+        <<DOT>> exact measurableSet_Ioc
+        <<DOT>> intro v hv
+          obtain <<LA>>hlow, hhigh<<RA>> := gap_integrand_bounds v hv.1
+          rw [abs_of_nonneg hlow]
+          exact hhigh
+      have hconst : (<<INT>> v in Set.Ioc (0:<<R>>) b, (1:<<R>>)) = b := by
+        rw [MeasureTheory.setIntegral_const]
+        have hvol : MeasureTheory.volume.real (Set.Ioc (0:<<R>>) b) = b := by
+          rw [MeasureTheory.measureReal_def, Real.volume_Ioc]
+          simp [ENNReal.toReal_ofReal hb0.le]
+        rw [hvol]
+        ring
+      rw [hconst] at hle
+      exact hle
