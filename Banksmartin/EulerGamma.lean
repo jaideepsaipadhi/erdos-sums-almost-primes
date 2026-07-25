@@ -406,69 +406,54 @@ noncomputable def EinTailFun (a : ℝ) : ℝ :=
 /-- The tail function splits at any reference point: T(a) = T(1) - int_1^a e^-v/v. -/
 theorem EinTailFun_split (a : ℝ) (ha : 0 < a) :
     EinTailFun a = EinTailFun 1 - ∫ v in (1:ℝ)..a, Real.exp (-v) / v := by
-  sorry
-
-theorem hasDerivAt_EinTailFun (a : ℝ) (ha : 0 < a) :
-    HasDerivAt EinTailFun (-(Real.exp (-a) / a)) a := by
-  have hcont : ContinuousAt (fun v : ℝ => Real.exp (-v) / v) a := by
-    apply ContinuousAt.div
-    · exact (Real.continuous_exp.comp continuous_neg).continuousAt
-    · exact continuousAt_id
-    · exact ne_of_gt ha
-  have hmeas : StronglyMeasurableAtFilter
-      (fun v : ℝ => Real.exp (-v) / v) (nhds a) := by
-    refine ⟨Set.univ, Filter.univ_mem, ?_⟩
-    apply Measurable.aestronglyMeasurable
-    fun_prop
-  have hint : IntervalIntegrable (fun v : ℝ => Real.exp (-v) / v)
-      MeasureTheory.volume 1 a := by
-    rcases le_total (1:ℝ) a with h1 | h1
-    · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le h1]
-      exact ((exp_div_integrableOn_Ici 1 (by norm_num)).mono
-        (fun x hx => Set.mem_Ici.mpr (le_of_lt hx.1)) le_rfl)
-    · rw [IntervalIntegrable.symm_iff, intervalIntegrable_iff_integrableOn_Ioc_of_le h1]
-      exact ((exp_div_integrableOn_Ici a ha).mono
-        (fun x hx => Set.mem_Ici.mpr (le_of_lt hx.1)) le_rfl)
-  have hFTC := intervalIntegral.integral_hasDerivAt_right hint hmeas hcont
-  have hEq : EinTailFun =ᶠ[nhds a]
-      fun t : ℝ => EinTailFun 1 - ∫ v in (1:ℝ)..t, Real.exp (-v) / v := by
-    filter_upwards [Ioi_mem_nhds ha] with t ht
-    exact EinTailFun_split t ht
-  have hderiv := (hasDerivAt_const a (EinTailFun 1)).sub hFTC
-  rw [zero_sub] at hderiv
-  exact hderiv.congr_of_eventuallyEq hEq
-
-/-- The combination Ein(a) - log a - T(a) has zero derivative on (0, infty). -/
-theorem hasDerivAt_einCombo (a : ℝ) (ha : 0 < a) :
-    HasDerivAt (fun t : ℝ => Ein t - Real.log t - EinTailFun t) 0 a := by
-  have h1 := hasDerivAt_Ein a ha
-  have h2 := Real.hasDerivAt_log (ne_of_gt ha)
-  have h3 := hasDerivAt_EinTailFun a ha
-  have hcomb := (h1.sub h2).sub h3
-  have harith : (1 - Real.exp (-a)) / a - a⁻¹ - -(Real.exp (-a) / a) = 0 := by
-    field_simp
-    try ring
-  rw [harith] at hcomb
-  exact hcomb
-
-/-- Hence the combination is constant on (0, infty). -/
-theorem einCombo_const (a b : ℝ) (ha : 0 < a) (hb : 0 < b) :
-    Ein a - Real.log a - EinTailFun a = Ein b - Real.log b - EinTailFun b := by
-  set F : ℝ → ℝ := fun t => Ein t - Real.log t - EinTailFun t with hF
-  have hopen : IsOpen (Set.Ioi (0:ℝ)) := isOpen_Ioi
-  have hconn : IsPreconnected (Set.Ioi (0:ℝ)) := (convex_Ioi (0:ℝ)).isPreconnected
-  have hdiff : DifferentiableOn ℝ F (Set.Ioi 0) := by
-    intro t ht
-    exact ((hasDerivAt_einCombo t (Set.mem_Ioi.mp ht)).differentiableAt).differentiableWithinAt
-  have hzero : Set.EqOn (deriv F) 0 (Set.Ioi (0:ℝ)) := by
-    intro t ht
-    exact (hasDerivAt_einCombo t (Set.mem_Ioi.mp ht)).deriv
-  exact hopen.is_const_of_deriv_eq_zero hconn hdiff hzero (Set.mem_Ioi.mpr ha) (Set.mem_Ioi.mpr hb)
-
-/-- STEP C: the constant is gamma. -/
-theorem ein_eq (a : ℝ) (ha : 0 < a) :
-    Ein a = Real.eulerMascheroniConstant + Real.log a + EinTailFun a := by
-  sorry
+  unfold EinTailFun
+  rcases le_total (1:ℝ) a with h1 | h1
+  · have hunion : Set.Ici (1:ℝ) = Set.Ico 1 a ∪ Set.Ici a :=
+      (Set.Ico_union_Ici_eq_Ici h1).symm
+    have hdisj : Disjoint (Set.Ico (1:ℝ) a) (Set.Ici a) := by
+      rw [Set.disjoint_left]
+      intro x hx hx2
+      exact absurd (Set.mem_Ici.mp hx2) (not_le.mpr hx.2)
+    have hint1 : MeasureTheory.IntegrableOn
+        (fun v : ℝ => Real.exp (-v) / v) (Set.Ico 1 a) :=
+      (exp_div_integrableOn_Ici 1 (by norm_num)).mono
+        (fun x hx => Set.mem_Ici.mpr hx.1) le_rfl
+    have hint2 : MeasureTheory.IntegrableOn
+        (fun v : ℝ => Real.exp (-v) / v) (Set.Ici a) :=
+      exp_div_integrableOn_Ici a ha
+    have hadd : (∫ v in Set.Ici (1:ℝ), Real.exp (-v) / v)
+        = (∫ v in Set.Ico (1:ℝ) a, Real.exp (-v) / v)
+          + ∫ v in Set.Ici a, Real.exp (-v) / v := by
+      rw [hunion, MeasureTheory.setIntegral_union hdisj measurableSet_Ici hint1 hint2]
+    have hIcoIoc : (∫ v in Set.Ico (1:ℝ) a, Real.exp (-v) / v)
+        = ∫ v in Set.Ioc (1:ℝ) a, Real.exp (-v) / v := by
+      rw [MeasureTheory.integral_Ico_eq_integral_Ioo,
+        MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    rw [intervalIntegral.integral_of_le h1, ← hIcoIoc]
+    linarith [hadd]
+  · have hunion : Set.Ici a = Set.Ico a 1 ∪ Set.Ici 1 :=
+      (Set.Ico_union_Ici_eq_Ici h1).symm
+    have hdisj : Disjoint (Set.Ico a (1:ℝ)) (Set.Ici 1) := by
+      rw [Set.disjoint_left]
+      intro x hx hx2
+      exact absurd (Set.mem_Ici.mp hx2) (not_le.mpr hx.2)
+    have hint1 : MeasureTheory.IntegrableOn
+        (fun v : ℝ => Real.exp (-v) / v) (Set.Ico a 1) :=
+      (exp_div_integrableOn_Ici a ha).mono
+        (fun x hx => Set.mem_Ici.mpr hx.1) le_rfl
+    have hint2 : MeasureTheory.IntegrableOn
+        (fun v : ℝ => Real.exp (-v) / v) (Set.Ici 1) :=
+      exp_div_integrableOn_Ici 1 (by norm_num)
+    have hadd : (∫ v in Set.Ici a, Real.exp (-v) / v)
+        = (∫ v in Set.Ico a (1:ℝ), Real.exp (-v) / v)
+          + ∫ v in Set.Ici 1, Real.exp (-v) / v := by
+      rw [hunion, MeasureTheory.setIntegral_union hdisj measurableSet_Ici hint1 hint2]
+    have hIcoIoc : (∫ v in Set.Ico a (1:ℝ), Real.exp (-v) / v)
+        = ∫ v in Set.Ioc a (1:ℝ), Real.exp (-v) / v := by
+      rw [MeasureTheory.integral_Ico_eq_integral_Ioo,
+        MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    rw [intervalIntegral.integral_of_ge h1, ← hIcoIoc]
+    linarith [hadd]
 
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
