@@ -5002,6 +5002,14 @@ theorem zOmega_smooth_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
   exact (EulerProduct.summable_and_hasSum_smoothNumbers_prod_primesBelow_tsum
     hf1 hmul hprime N).1
 
+/-- A1 step 3a: the scaled prime sum converges. -/
+theorem zOmega_prime_sum_summable (s : ℝ) (hs : 1 < s) (z : ℂ) :
+    Summable (fun p : Nat.Primes => Norm.norm z * ((p:ℝ) ^ (-s))) := by
+  have hbase : Summable (fun p : Nat.Primes => ((p:ℝ) ^ (-s))) := by
+    rw [Nat.Primes.summable_rpow]
+    linarith
+  exact hbase.mul_left _
+
 /-- A1: absolute summability of the z-weighted Dirichlet family. -/
 theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : ‖z‖ < (2:ℝ) ^ s) :
