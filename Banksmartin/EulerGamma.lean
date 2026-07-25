@@ -1315,6 +1315,40 @@ theorem EinTailFun_le (a : ℝ) (ha : (1:ℝ) ≤ a) :
     rw [MeasureTheory.integral_div, integral_Ioi_exp_neg a (by linarith)]
   linarith [hbound, heval.le, heval.ge]
 
+/-- The substitution t = v/a: the gap-five integral over (0,1] scales to
+a times the integral over (0,a]. -/
+theorem gap_substitution (a : ℝ) (ha : 0 < a) :
+    (∫ t in Set.Ioc (0:ℝ) 1, (Real.exp (-(a * t)) - 1 + a * t) / t ^ 2)
+      = a * ∫ v in Set.Ioc (0:ℝ) a, (Real.exp (-v) - 1 + v) / v ^ 2 := by
+  have hane : a ≠ 0 := ne_of_gt ha
+  have hlhs : (∫ t in Set.Ioc (0:ℝ) 1, (Real.exp (-(a * t)) - 1 + a * t) / t ^ 2)
+      = ∫ t in (0:ℝ)..1, (Real.exp (-(a * t)) - 1 + a * t) / t ^ 2 := by
+    rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  have hrhs : (∫ v in Set.Ioc (0:ℝ) a, (Real.exp (-v) - 1 + v) / v ^ 2)
+      = ∫ v in (0:ℝ)..a, (Real.exp (-v) - 1 + v) / v ^ 2 := by
+    rw [intervalIntegral.integral_of_le ha.le]
+  rw [hlhs, hrhs]
+  have hcong : (∫ t in (0:ℝ)..1, (Real.exp (-(a * t)) - 1 + a * t) / t ^ 2)
+      = ∫ t in (0:ℝ)..1,
+        a ^ 2 * ((fun v : ℝ => (Real.exp (-v) - 1 + v) / v ^ 2) (a * t)) := by
+    apply intervalIntegral.integral_congr
+    intro t ht
+    rw [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1)] at ht
+    simp only
+    rcases eq_or_lt_of_le ht.1 with h0 | h0
+    · rw [← h0]
+      simp
+    · field_simp
+      try ring
+  rw [hcong, intervalIntegral.integral_const_mul]
+  have hsub : (∫ t in (0:ℝ)..1, (fun v : ℝ => (Real.exp (-v) - 1 + v) / v ^ 2) (a * t))
+      = a⁻¹ • ∫ v in (a * 0)..(a * 1), (Real.exp (-v) - 1 + v) / v ^ 2 :=
+    intervalIntegral.integral_comp_mul_left
+      (f := fun v : ℝ => (Real.exp (-v) - 1 + v) / v ^ 2) hane
+  rw [hsub, mul_zero, mul_one, smul_eq_mul]
+  field_simp
+  try ring
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of
