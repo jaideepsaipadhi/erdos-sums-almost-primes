@@ -368,10 +368,36 @@ theorem exp_div_integrableOn_Ici (a : ℝ) (ha : 0 < a) :
       abs_of_nonneg (by positivity : (0:ℝ) ≤ Real.exp (-v) / a)]
     apply div_le_div_of_nonneg_left hE.le ha hva
 
-/-- Ein has derivative (1 - e^(-a))/a at each a > 0, by FTC. -/
+/-- Ein as an interval integral, matching Mathlib's FTC shape. -/
+theorem Ein_eq_intervalIntegral (a : ℝ) (ha : 0 ≤ a) :
+    Ein a = ∫ v in (0:ℝ)..a, (1 - Real.exp (-v)) / v := by
+  unfold Ein
+  rw [intervalIntegral.integral_of_le ha]
+
+/-- The Ein integrand is interval-integrable on any [0, b] with b > 0. -/
+theorem ein_intervalIntegrable (b : ℝ) (hb : 0 < b) :
+    IntervalIntegrable (fun v : ℝ => (1 - Real.exp (-v)) / v) MeasureTheory.volume 0 b := by
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hb.le]
+  exact ein_integrable b hb
+
 theorem hasDerivAt_Ein (a : ℝ) (ha : 0 < a) :
     HasDerivAt Ein ((1 - Real.exp (-a)) / a) a := by
-  sorry
+  have hcont : ContinuousAt (fun v : ℝ => (1 - Real.exp (-v)) / v) a := by
+    apply ContinuousAt.div
+    · exact continuousAt_const.sub (Real.continuous_exp.comp continuous_neg).continuousAt
+    · exact continuousAt_id
+    · exact ne_of_gt ha
+  have hmeas : StronglyMeasurableAtFilter
+      (fun v : ℝ => (1 - Real.exp (-v)) / v) (nhds a) := by
+    refine ⟨Set.univ, Filter.univ_mem, ?_⟩
+    apply Measurable.aestronglyMeasurable
+    fun_prop
+  have hint := ein_intervalIntegrable a ha
+  have hFTC := intervalIntegral.integral_hasDerivAt_right hint hmeas hcont
+  have hEq : Ein =ᶠ[nhds a] fun t : ℝ => ∫ v in (0:ℝ)..t, (1 - Real.exp (-v)) / v := by
+    filter_upwards [Ioi_mem_nhds ha] with t ht
+    exact Ein_eq_intervalIntegral t (le_of_lt ht)
+  exact hFTC.congr_of_eventuallyEq hEq
 
 /-- The tail function T(a) = int_{[a,inf)} e^(-v)/v has derivative -e^(-a)/a. -/
 noncomputable def EinTailFun (a : ℝ) : ℝ :=

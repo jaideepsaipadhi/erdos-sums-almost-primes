@@ -1,0 +1,27 @@
+/-- Ein as an interval integral, matching Mathlib's FTC shape. -/
+theorem Ein_eq_intervalIntegral (a : <<R>>) (ha : 0 <<LE>> a) :
+    Ein a = <<INT>> v in (0:<<R>>)..a, (1 - Real.exp (-v)) / v := by
+  unfold Ein
+  rw [intervalIntegral.integral_of_le ha]
+  rfl
+
+/-- The Ein integrand is interval-integrable on any [0, b] with b > 0. -/
+theorem ein_intervalIntegrable (b : <<R>>) (hb : 0 < b) :
+    IntervalIntegrable (fun v : <<R>> => (1 - Real.exp (-v)) / v) MeasureTheory.volume 0 b := by
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hb.le]
+  exact ein_integrable b hb
+
+theorem hasDerivAt_Ein (a : <<R>>) (ha : 0 < a) :
+    HasDerivAt Ein ((1 - Real.exp (-a)) / a) a := by
+  have hcont : ContinuousAt (fun v : <<R>> => (1 - Real.exp (-v)) / v) a := by
+    apply ContinuousAt.div
+    <<DOT>> exact continuousAt_const.sub (Real.continuous_exp.comp continuous_neg).continuousAt
+    <<DOT>> exact continuousAt_id
+    <<DOT>> exact ne_of_gt ha
+  have hint := ein_intervalIntegrable (a + 1) (by linarith)
+  have hFTC := intervalIntegral.integral_hasDerivAt_right hint
+    (hcont.stronglyMeasurableAtFilter_nhdsWithin _ _) hcont
+  have hEq : Ein =<<FEQ>>[nhds a] fun t : <<R>> => <<INT>> v in (0:<<R>>)..t, (1 - Real.exp (-v)) / v := by
+    filter_upwards [Ioi_mem_nhds ha] with t ht
+    exact Ein_eq_intervalIntegral t (le_of_lt ht)
+  exact hFTC.congr_of_eventuallyEq hEq
