@@ -5334,6 +5334,25 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
   have hval : (∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m))
       = ∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹ := hgeo.2.tsum_eq
   have hfin : (∏ i ∈ Finset.range N, G i) ≤ ((1 - ‖z‖ * ((2:ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' p : Nat.Primes, ‖z‖ * ((p:ℝ) ^ (-s)))) := by
+    have hprimes_sum : Summable (fun p : Nat.Primes => Norm.norm z * ((p:ℝ) ^ (-s))) :=
+      zOmega_prime_sum_summable s hs z
+    have hGle : ∀ i ∈ Finset.range N, i ≠ 2 →
+        G i ≤ Real.exp (2 * (Norm.norm z * ((i:ℝ) ^ (-s)))) := by
+      intro i _ hi2
+      rw [hG]
+      by_cases hp : i ∈ {p : ℕ | p.Prime}
+      · rw [Set.mulIndicator_of_mem hp]
+        have hprime : i.Prime := hp
+        have hi3 : 3 ≤ i := by
+          have h2 : 2 ≤ i := hprime.two_le
+          omega
+        apply inv_one_sub_le_exp
+        · positivity
+        · exact zOmega_half_of_three_le s hs z hz hi3
+      · rw [Set.mulIndicator_of_notMem hp]
+        have : (0:ℝ) ≤ 2 * (Norm.norm z * ((i:ℝ) ^ (-s))) := by positivity
+        calc (1:ℝ) = Real.exp 0 := (Real.exp_zero).symm
+          _ ≤ Real.exp (2 * (Norm.norm z * ((i:ℝ) ^ (-s)))) := Real.exp_le_exp.mpr this
     sorry
   calc (∑ x ∈ u, Norm.norm (zOmegaHom s z x))
       ≤ ∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m) := hsum_le

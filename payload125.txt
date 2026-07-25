@@ -1,0 +1,25 @@
+    have hprimes_sum : Summable (fun p : Nat.Primes => Norm.norm z * ((p:RR) ^ (-s))) :=
+      zOmega_prime_sum_summable s hs z
+    have hGle : FORALL i IN Finset.range N, i NEQ 2 IMP
+        G i LEQ Real.exp (2 * (Norm.norm z * ((i:RR) ^ (-s)))) := by
+      intro i _ hi2
+      rw [hG]
+      by_cases hp : i IN {p : NN | p.Prime}
+      DOT rw [Set.mulIndicator_of_mem hp]
+        have hprime : i.Prime := hp
+        have hi3 : 3 LEQ i := by
+          rcases hprime.eq_two_or_odd' with h2 | hodd
+          DOT exact absurd h2 hi2
+          DOT rcases Nat.lt_or_ge i 3 with h | h
+            DOT interval_cases i
+              DOT exact absurd hprime (by norm_num)
+              DOT exact absurd rfl hi2
+            DOT exact h
+        apply inv_one_sub_le_exp
+        DOT positivity
+        DOT exact zOmega_half_of_three_le s hs z hz hi3
+      DOT rw [Set.mulIndicator_of_notMem hp]
+        have : (0:RR) LEQ 2 * (Norm.norm z * ((i:RR) ^ (-s))) := by positivity
+        calc (1:RR) = Real.exp 0 := (Real.exp_zero).symm
+          _ LEQ Real.exp (2 * (Norm.norm z * ((i:RR) ^ (-s)))) := Real.exp_le_exp.mpr this
+    sorry
