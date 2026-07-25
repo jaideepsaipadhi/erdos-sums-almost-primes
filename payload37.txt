@@ -1,0 +1,55 @@
+/-- The regularized antiderivative: d/dv [(1 - e^(-v)) log v]
+= e^(-v) log v - (e^(-v) - 1)/v, for v > 0. Unlike the raw by-parts form,
+the boundary term (1 - e^(-b)) log b tends to 0 as b -> 0+. -/
+theorem hasDerivAt_regAntideriv (v : <<R>>) (hv : 0 < v) :
+    HasDerivAt (fun t : <<R>> => (1 - Real.exp (-t)) * Real.log t)
+      (Real.exp (-v) * Real.log v - (Real.exp (-v) - 1) / v) v := by
+  have hexp : HasDerivAt (fun t : <<R>> => 1 - Real.exp (-t)) (Real.exp (-v)) v := by
+    have h : HasDerivAt (fun t : <<R>> => Real.exp (-t)) (Real.exp (-v) * -1) v :=
+      (Real.hasDerivAt_exp (-v)).comp v (hasDerivAt_neg v)
+    have h2 : HasDerivAt (fun t : <<R>> => Real.exp (-t)) (-(Real.exp (-v))) v := by
+      simpa using h
+    simpa using h2.const_sub 1
+  have hlog : HasDerivAt Real.log v<<INV>> v := Real.hasDerivAt_log (ne_of_gt hv)
+  have hmul := hexp.mul hlog
+  have harith : Real.exp (-v) * Real.log v + (1 - Real.exp (-v)) * v<<INV>>
+      = Real.exp (-v) * Real.log v - (Real.exp (-v) - 1) / v := by
+    field_simp
+    try ring
+  rw [harith] at hmul
+  exact hmul
+
+/-- Regularized integration by parts on [b, c], 0 < b <= c. -/
+theorem euler_parts_reg (b c : <<R>>) (hb : 0 < b) (hbc : b <<LE>> c) :
+    (<<INT>> v in b..c, (Real.exp (-v) * Real.log v - (Real.exp (-v) - 1) / v))
+      = (1 - Real.exp (-c)) * Real.log c - (1 - Real.exp (-b)) * Real.log b := by
+  have hderiv : <<ALL>> x <<IN>> Set.uIcc b c,
+      HasDerivAt (fun t : <<R>> => (1 - Real.exp (-t)) * Real.log t)
+        (Real.exp (-x) * Real.log x - (Real.exp (-x) - 1) / x) x := by
+    intro x hx
+    rw [Set.uIcc_of_le hbc] at hx
+    exact hasDerivAt_regAntideriv x (by linarith [hx.1])
+  have hint : IntervalIntegrable
+      (fun v : <<R>> => Real.exp (-v) * Real.log v - (Real.exp (-v) - 1) / v)
+      MeasureTheory.volume b c := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hbc]
+    apply ContinuousOn.sub
+    <<DOT>> apply ContinuousOn.mul
+      <<DOT>> exact (Real.continuous_exp.comp continuous_neg).continuousOn
+      <<DOT>> apply ContinuousOn.log continuousOn_id
+        intro x hx
+        simp only [id_eq]
+        exact ne_of_gt (by linarith [hx.1])
+    <<DOT>> apply ContinuousOn.div
+      <<DOT>> exact ((Real.continuous_exp.comp continuous_neg).sub continuous_const).continuousOn
+      <<DOT>> exact continuousOn_id
+      <<DOT>> intro x hx
+        exact ne_of_gt (by linarith [hx.1])
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint]
+
+/-- The regularized boundary term vanishes at 0: (1 - e^(-b)) log b -> 0. -/
+theorem regBoundary_tendsto_zero :
+    Filter.Tendsto (fun b : <<R>> => (1 - Real.exp (-b)) * Real.log b)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+  sorry
