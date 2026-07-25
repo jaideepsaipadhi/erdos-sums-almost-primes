@@ -4771,7 +4771,23 @@ theorem coeff_pow_neg (s : ℝ) (hs : 1 < s) (l : ℕ) :
     (iteratedDeriv l (fun z : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-z)) 0)
         / (Nat.factorial l : ℂ)
       = ((-Real.log (s - 1)) ^ l / (Nat.factorial l) : ℝ) := by
-  sorry
+  have hspos : (0:ℝ) < s - 1 := by linarith
+  have hsne : ((s - 1 : ℝ) : ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  have hrewrite : (fun z : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-z))
+      = fun z : ℂ => Complex.exp ((-(Real.log (s - 1) : ℂ)) * z) := by
+    funext z
+    rw [Complex.cpow_def_of_ne_zero hsne]
+    congr 1
+    rw [← Complex.ofReal_log (le_of_lt hspos)]
+    ring
+  rw [hrewrite, iteratedDeriv_cexp_const_mul l (-(Real.log (s - 1) : ℂ))]
+  simp only [mul_zero, Complex.exp_zero, mul_one]
+  have hfacnz : ((Nat.factorial l : ℕ) : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero l)
+  push_cast
+  ring
 
 /-- OBLIGATION L3b: the (1 - z/2^s)^(-1) factor's coefficients. -/
 theorem coeff_geom (s : ℝ) (hs : 1 < s) (j : ℕ) :
