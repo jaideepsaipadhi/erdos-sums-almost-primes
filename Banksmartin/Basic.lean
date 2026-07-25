@@ -5064,6 +5064,15 @@ theorem zOmega_factors_multipliable (s : ℝ) (hs : 1 < s) (z : ℂ) :
     exact Summable.of_norm_bounded_eventually hsum2 hbound
   exact Real.multipliable_of_summable_log' hpos hlogsum
 
+/-- A1 step 4a: membership — naturals below N are N-smooth. -/
+theorem mem_smoothNumbers_of_lt (N m : ℕ) (hm : 0 < m) (hlt : m < N) :
+    m ∈ N.smoothNumbers := by
+  rw [Nat.mem_smoothNumbers]
+  refine ⟨ hm.ne', ?_⟩
+  intro p hp
+  have hpm : p ∣ m := Nat.dvd_of_mem_primeFactorsList hp
+  exact lt_of_le_of_lt (Nat.le_of_dvd hm hpm) hlt
+
 /-- A1: absolute summability of the z-weighted Dirichlet family. -/
 theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : ‖z‖ < (2:ℝ) ^ s) :
