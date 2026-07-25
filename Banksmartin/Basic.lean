@@ -1,5 +1,6 @@
 import PrimeNumberTheoremAnd.IEANTN.Mertens
 import Mathlib
+import Banksmartin.EulerGamma
 
 set_option linter.style.header false
 set_option linter.unusedVariables false
@@ -4574,6 +4575,50 @@ theorem exp_Bfun_integral_eq (m : ℕ) :
   rw [← Real.exp_add]
   ring_nf
   simp [Real.exp_zero]
+
+/-- MANUSCRIPT THEOREM 4.1, UPPER BOUND: delta_m <= a log a + gamma a - a + 1
+- 1 - (log2/4) m, where a = m log 2. -/
+theorem deltaM_upper_bound (m : ℕ) (hm : 1 ≤ m) :
+    deltaM m ≤ -1 - (Real.log 2 / 4) * (m : ℝ)
+      + (((m:ℕ):ℝ) * Real.log 2) * Real.log (((m:ℕ):ℝ) * Real.log 2)
+      + Real.eulerMascheroniConstant * (((m:ℕ):ℝ) * Real.log 2)
+      - ((m:ℕ):ℝ) * Real.log 2 + 1 := by
+  have hl2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hmpos : (0:ℝ) < ((m:ℕ):ℝ) := by
+    have : (1:ℝ) ≤ ((m:ℕ):ℝ) := by exact_mod_cast hm
+    linarith
+  have hapos : (0:ℝ) < ((m:ℕ):ℝ) * Real.log 2 := by positivity
+  have hIooIoc : (∫ t in Set.Ioo (0:ℝ) 1,
+      (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * t)) - 1
+        + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2)
+      = ∫ t in Set.Ioc (0:ℝ) 1,
+        (Real.exp (-(((m:ℕ):ℝ) * Real.log 2) * t) - 1
+          + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := by
+    rw [MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioo
+    intro t _
+    simp only
+    rw [show -(((m:ℕ):ℝ) * Real.log 2) * t = -(((m:ℕ):ℝ) * Real.log 2 * t) by ring]
+  have hgap := BanksMartin.gap_five_evaluation (((m:ℕ):ℝ) * Real.log 2) hapos
+  have hchain := sum_betaCirc_le_uniform m
+  have hchain2 := sum_betaCirc_le_integral m
+  have hsubst := exp_Bfun_integral_eq m
+  rw [deltaM_identity m]
+  have hfinal : ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i (m - i)
+      ≤ (((m:ℕ):ℝ) * Real.log 2) * Real.log (((m:ℕ):ℝ) * Real.log 2)
+        + Real.eulerMascheroniConstant * (((m:ℕ):ℝ) * Real.log 2)
+        - ((m:ℕ):ℝ) * Real.log 2 + 1 := by
+    calc ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i (m - i)
+        ≤ ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i m := hchain
+      _ ≤ ∫ u in Set.Ioi (0:ℝ), Real.exp u * Bfun m u := hchain2
+      _ = ∫ t in Set.Ioo (0:ℝ) 1,
+          (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * t)) - 1
+            + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := hsubst
+      _ = ∫ t in Set.Ioc (0:ℝ) 1,
+          (Real.exp (-(((m:ℕ):ℝ) * Real.log 2) * t) - 1
+            + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := hIooIoc
+      _ ≤ _ := hgap
+  linarith [hfinal]
 
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
