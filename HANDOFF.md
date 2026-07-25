@@ -37,3 +37,16 @@ digamma_one available; still needs Gamma differentiation under integral.
 PIN LESSONS TONIGHT: inside setIntegral_congr_fun bodies use simp only never
 rw (lambda-blindness); every ring after field_simp is try ring; ae arguments
 via filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu.
+
+EULERGAMMA SCAFFOLD (Banksmartin/EulerGamma.lean, separate file to preserve
+Basic.lean's 1-sorry invariant). 7 obligations stated and typechecked; 3 and 5
+PROVEN. Key pin finds: Real.hasDerivAt_Gamma_one : HasDerivAt Gamma (-gamma) 1
+and Real.eulerMascheroniConstant_eq_neg_deriv both live in
+Mathlib/NumberTheory/Harmonic/GammaDeriv.lean (namespace Real, ~line 92-96);
+that file proves Gamma' via harmonic numbers, NOT integrals — confirmed no
+integral representation anywhere in Mathlib for this. Exponent derivative is
+HasDerivAt.const_rpow (Pow/Deriv.lean:731), NOT hasDerivAt_const_rpow.
+REMAINING: Obl 1 (dominating fn integrable — hardest of the small ones,
+u^(-1/2)|log u| near 0), Obl 2 (pointwise domination), Obl 4 (THE WALL:
+differentiation under the integral via
+hasDerivAt_integral_of_dominated_loc_of_deriv_le), Target, and gap_five.
