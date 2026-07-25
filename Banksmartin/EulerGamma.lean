@@ -1086,6 +1086,37 @@ theorem hasDerivAt_gapAntideriv (v : ℝ) (hv : 0 < v) :
   convert hn2 using 1
   ring
 
+/-- Finite-interval by-parts for the gap-five integrand, 0 < b <= a. -/
+theorem gap_parts_finite (b a : ℝ) (hb : 0 < b) (hba : b ≤ a) :
+    (∫ v in b..a, ((Real.exp (-v) - 1 + v) / v ^ 2 - (1 - Real.exp (-v)) / v))
+      = -((Real.exp (-a) - 1 + a) / a) + (Real.exp (-b) - 1 + b) / b := by
+  have hderiv : ∀ x ∈ Set.uIcc b a,
+      HasDerivAt (fun t : ℝ => -((Real.exp (-t) - 1 + t) / t))
+        ((Real.exp (-x) - 1 + x) / x ^ 2 - (1 - Real.exp (-x)) / x) x := by
+    intro x hx
+    rw [Set.uIcc_of_le hba] at hx
+    exact hasDerivAt_gapAntideriv x (by linarith [hx.1])
+  have hint : IntervalIntegrable
+      (fun v : ℝ => (Real.exp (-v) - 1 + v) / v ^ 2 - (1 - Real.exp (-v)) / v)
+      MeasureTheory.volume b a := by
+    apply ContinuousOn.intervalIntegrable
+    rw [Set.uIcc_of_le hba]
+    apply ContinuousOn.sub
+    · apply ContinuousOn.div
+      · exact (((Real.continuous_exp.comp continuous_neg).sub continuous_const).add
+          continuous_id).continuousOn
+      · exact (continuous_pow 2).continuousOn
+      · intro x hx
+        have : (0:ℝ) < x := by linarith [hx.1]
+        positivity
+    · apply ContinuousOn.div
+      · exact (continuous_const.sub (Real.continuous_exp.comp continuous_neg)).continuousOn
+      · exact continuousOn_id
+      · intro x hx
+        exact ne_of_gt (by linarith [hx.1])
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint]
+  ring
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of
