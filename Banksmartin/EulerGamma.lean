@@ -159,7 +159,10 @@ theorem gammaDeriv_dom_integrableOn_Ici :
 /-- OBLIGATION 1: the dominating function is integrable on (0, infty). -/
 theorem gammaDeriv_dom_integrable :
     IntegrableOn gammaDeriv_dom (Set.Ioi 0) := by
-  sorry
+  have hsplit : Set.Ioo (0:ℝ) 1 ∪ Set.Ici 1 = Set.Ioi 0 :=
+    Set.Ioo_union_Ici_eq_Ioi (by norm_num)
+  rw [← hsplit]
+  exact gammaDeriv_dom_integrableOn_Ioo.union gammaDeriv_dom_integrableOn_Ici
 
 /-- OBLIGATION 2: pointwise domination of the s-derivative of the Gamma
 integrand, uniformly for s in (1/2, 3/2). -/
