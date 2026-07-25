@@ -1282,6 +1282,39 @@ theorem gap_parts_limit (a : ℝ) (ha : 0 < a) :
   have hconst := Filter.Tendsto.congr' heq hlim
   exact tendsto_nhds_unique tendsto_const_nhds hconst
 
+/-- The tail bound: EinTailFun a <= e^(-a)/a for a >= 1. -/
+theorem EinTailFun_le (a : ℝ) (ha : (1:ℝ) ≤ a) :
+    EinTailFun a ≤ Real.exp (-a) / a := by
+  have ha0 : (0:ℝ) < a := by linarith
+  unfold EinTailFun
+  have hIci : (∫ v in Set.Ici a, Real.exp (-v) / v)
+      = ∫ v in Set.Ioi a, Real.exp (-v) / v := by
+    apply MeasureTheory.setIntegral_congr_set
+    exact (MeasureTheory.Ioi_ae_eq_Ici).symm
+  rw [hIci]
+  have hbound : (∫ v in Set.Ioi a, Real.exp (-v) / v)
+      ≤ ∫ v in Set.Ioi a, Real.exp (-v) / a := by
+    apply MeasureTheory.setIntegral_mono_on
+    · exact (exp_div_integrableOn_Ici a ha0).congr_set_ae MeasureTheory.Ioi_ae_eq_Ici
+    · have hbase : MeasureTheory.IntegrableOn
+          (fun u : ℝ => Real.exp (-u) * u ^ ((1:ℝ) - 1)) (Set.Ioi 0) :=
+        Real.GammaIntegral_convergent (s := (1:ℝ)) (by norm_num)
+      have hb2 : MeasureTheory.IntegrableOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) := by
+        apply hbase.congr_fun ?_ measurableSet_Ioi
+        intro u _
+        simp only
+        rw [show (1:ℝ) - 1 = 0 by ring, Real.rpow_zero, mul_one]
+      exact (hb2.mono (fun x hx => Set.mem_Ioi.mpr (by linarith [Set.mem_Ioi.mp hx]))
+        le_rfl).div_const a
+    · exact measurableSet_Ioi
+    · intro v hv
+      have hva : a < v := hv
+      have hv0 : (0:ℝ) < v := by linarith
+      apply div_le_div_of_nonneg_left (Real.exp_pos _).le ha0 (le_of_lt hva)
+  have heval : (∫ v in Set.Ioi a, Real.exp (-v) / a) = Real.exp (-a) / a := by
+    rw [MeasureTheory.integral_div, integral_Ioi_exp_neg a (by linarith)]
+  linarith [hbound, heval.le, heval.ge]
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of

@@ -1,0 +1,32 @@
+/-- The tail bound: EinTailFun a <= e^(-a)/a for a >= 1. -/
+theorem EinTailFun_le (a : <<R>>) (ha : 1 <<LE>> a) :
+    EinTailFun a <<LE>> Real.exp (-a) / a := by
+  have ha0 : (0:<<R>>) < a := by linarith
+  unfold EinTailFun
+  have hIci : (<<INT>> v in Set.Ici a, Real.exp (-v) / v)
+      = <<INT>> v in Set.Ioi a, Real.exp (-v) / v := by
+    apply MeasureTheory.setIntegral_congr_set
+    exact (MeasureTheory.Ioi_ae_eq_Ici)
+  rw [hIci]
+  have hbound : (<<INT>> v in Set.Ioi a, Real.exp (-v) / v)
+      <<LE>> <<INT>> v in Set.Ioi a, Real.exp (-v) / a := by
+    apply MeasureTheory.setIntegral_mono_on
+    <<DOT>> exact (exp_div_integrableOn_Ici a ha0).congr_set_ae MeasureTheory.Ioi_ae_eq_Ici
+    <<DOT>> have hbase : MeasureTheory.IntegrableOn
+          (fun u : <<R>> => Real.exp (-u) * u ^ ((1:<<R>>) - 1)) (Set.Ioi 0) :=
+        Real.GammaIntegral_convergent (s := (1:<<R>>)) (by norm_num)
+      have hb2 : MeasureTheory.IntegrableOn (fun u : <<R>> => Real.exp (-u)) (Set.Ioi 0) := by
+        apply hbase.congr_fun ?_ measurableSet_Ioi
+        intro u _
+        simp only
+        rw [show (1:<<R>>) - 1 = 0 by ring, Real.rpow_zero, mul_one]
+      exact (hb2.mono (fun x hx => Set.mem_Ioi.mpr (by linarith [Set.mem_Ioi.mp hx]))
+        le_rfl).div_const a
+    <<DOT>> exact measurableSet_Ioi
+    <<DOT>> intro v hv
+      have hva : a < v := hv
+      have hv0 : (0:<<R>>) < v := by linarith
+      apply div_le_div_of_nonneg_left (Real.exp_pos _).le ha0 (le_of_lt hva)
+  have heval : (<<INT>> v in Set.Ioi a, Real.exp (-v) / a) = Real.exp (-a) / a := by
+    rw [MeasureTheory.integral_div, integral_Ioi_exp_neg a (by linarith)]
+  linarith [hbound, heval.le, heval.ge]
