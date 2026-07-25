@@ -4778,7 +4778,27 @@ theorem coeff_geom (s : ℝ) (hs : 1 < s) (j : ℕ) :
     (iteratedDeriv j (fun z : ℂ => (1 - z / ((2:ℂ) ^ (s:ℂ)))⁻¹) 0)
         / (Nat.factorial j : ℂ)
       = ((2:ℝ) ^ (-(j:ℝ) * s) : ℝ) := by
-  sorry
+  have hcnz : ((2:ℂ) ^ (s:ℂ)) ≠ 0 := by
+    rw [Ne, Complex.cpow_eq_zero_iff]
+    intro hcon
+    exact absurd hcon.1 (by norm_num)
+  rw [iteratedDeriv_geom ((2:ℂ) ^ (s:ℂ)) hcnz j]
+  have hfacnz : ((Nat.factorial j : ℕ) : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero j)
+  rw [div_div, mul_comm, ← div_div, div_self hfacnz]
+  rw [one_div]
+  have hreal : ((2:ℂ) ^ (s:ℂ)) = (((2:ℝ) ^ s : ℝ) : ℂ) := by
+    rw [Complex.ofReal_cpow (by norm_num : (0:ℝ) ≤ 2)]
+    norm_num
+  rw [hreal]
+  rw [← Complex.ofReal_pow]
+  rw [← Complex.ofReal_inv]
+  norm_cast
+  rw [← Real.rpow_natCast ((2:ℝ) ^ s) j, ← Real.rpow_mul (by norm_num)]
+  rw [← Real.rpow_neg (by norm_num)]
+  congr 1
+  push_cast
+  ring
 
 /-- MANUSCRIPT LEMMA 2.2: the exact expansion of F_k(s). -/
 theorem Fk_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :

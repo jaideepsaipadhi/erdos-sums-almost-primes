@@ -1,0 +1,23 @@
+theorem coeff_geom (s : <<R>>) (hs : 1 < s) (j : <<N>>) :
+    (iteratedDeriv j (fun z : <<C>> => (1 - z / ((2:<<C>>) ^ (s:<<C>>)))<<INV>>) 0)
+        / (Nat.factorial j : <<C>>)
+      = ((2:<<R>>) ^ (-(j:<<R>>) * s) : <<R>>) := by
+  have hcnz : ((2:<<C>>) ^ (s:<<C>>)) <<NE>> 0 := by
+    rw [Ne, Complex.cpow_eq_zero_iff]
+    intro hcon
+    exact absurd hcon.1 (by norm_num)
+  rw [iteratedDeriv_geom ((2:<<C>>) ^ (s:<<C>>)) hcnz j]
+  have hfacnz : ((Nat.factorial j : <<N>>) : <<C>>) <<NE>> 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero j)
+  rw [div_div_eq_mul_div, mul_comm, mul_div_assoc, div_self hfacnz, mul_one]
+  have hreal : ((2:<<C>>) ^ (s:<<C>>)) = (((2:<<R>>) ^ s : <<R>>) : <<C>>) := by
+    rw [<<LARR>> Complex.ofReal_cpow (by norm_num : (0:<<R>>) <<LE>> 2)]
+    norm_cast
+  rw [hreal]
+  rw [<<LARR>> Complex.ofReal_pow]
+  rw [<<LARR>> Complex.ofReal_inv]
+  norm_cast
+  rw [<<LARR>> Real.rpow_natCast ((2:<<R>>) ^ s) j, <<LARR>> Real.rpow_mul (by norm_num)]
+  rw [<<LARR>> Real.rpow_neg (by norm_num)]
+  congr 1
+  ring
