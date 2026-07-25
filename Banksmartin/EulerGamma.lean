@@ -851,6 +851,33 @@ theorem expLog_partial_tendsto :
   rw [hunion] at hnat
   exact hnat
 
+/-- e^(-n) log n -> 0 along the naturals. -/
+theorem expNeg_log_tendsto_zero :
+    Filter.Tendsto (fun n : ℕ => Real.exp (-(n:ℝ)) * Real.log (n:ℝ))
+      Filter.atTop (nhds 0) := by
+  have hmaj : Filter.Tendsto (fun n : ℕ => Real.exp (-(n:ℝ)) * (n:ℝ))
+      Filter.atTop (nhds 0) := by
+    have h := Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero 1
+    have heq : (fun x : ℝ => x ^ 1 * Real.exp (-x))
+        = fun x : ℝ => Real.exp (-x) * x := by
+      funext x
+      rw [pow_one]
+      ring
+    rw [heq] at h
+    exact h.comp tendsto_natCast_atTop_atTop
+  apply squeeze_zero_norm' _ hmaj
+  filter_upwards [Filter.eventually_ge_atTop 1] with n hn
+  have hn1 : (1:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
+  have hE : (0:ℝ) < Real.exp (-(n:ℝ)) := Real.exp_pos _
+  have hL : |Real.log (n:ℝ)| ≤ (n:ℝ) := abs_log_le_self (n:ℝ) hn1
+  rw [Real.norm_eq_abs, abs_mul, abs_of_pos hE]
+  exact mul_le_mul_of_nonneg_left hL hE.le
+
+/-- The tail integral vanishes at infinity. -/
+theorem EinTailFun_tendsto_zero :
+    Filter.Tendsto (fun n : ℕ => EinTailFun (n:ℝ)) Filter.atTop (nhds 0) := by
+  sorry
+
 /-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
 identified via Euler's integral. -/
 theorem ein_eq (a : ℝ) (ha : 0 < a) :

@@ -1,0 +1,22 @@
+theorem expNeg_log_tendsto_zero :
+    Filter.Tendsto (fun n : <<N>> => Real.exp (-(n:<<R>>)) * Real.log (n:<<R>>))
+      Filter.atTop (nhds 0) := by
+  have hmaj : Filter.Tendsto (fun n : <<N>> => Real.exp (-(n:<<R>>)) * (n:<<R>>))
+      Filter.atTop (nhds 0) := by
+    have h := Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero 1
+    have heq : (fun x : <<R>> => x ^ 1 * Real.exp (-x))
+        = fun x : <<R>> => Real.exp (-x) * x := by
+      funext x
+      rw [pow_one]
+      ring
+    rw [heq] at h
+    exact h.comp tendsto_natCast_atTop_atTop
+  apply squeeze_zero_norm' _ hmaj
+  filter_upwards [Filter.eventually_ge_atTop 1] with n hn
+  have hn1 : (1:<<R>>) <<LE>> (n:<<R>>) := by exact_mod_cast hn
+  have hE : (0:<<R>>) < Real.exp (-(n:<<R>>)) := Real.exp_pos _
+  have hL : |Real.log (n:<<R>>)| <<LE>> (n:<<R>>) := abs_log_le_self (n:<<R>>) hn1
+  rw [Real.norm_eq_abs, abs_mul, abs_of_pos hE, Real.norm_eq_abs, abs_mul, abs_of_pos hE,
+    abs_of_nonneg (by linarith : (0:<<R>>) <<LE>> (n:<<R>>))]
+  exact mul_le_mul_of_nonneg_left hL hE.le
+
