@@ -1,0 +1,14 @@
+/-- The norm of the z-weighted family, bundled as a real monoid-with-zero hom. -/
+noncomputable def zOmegaNormHom (s : RR) (z : CC) : NN ARROW*ZERO RR where
+  toFun n := Norm.norm (zOmegaHom s z n)
+  map_zero' := by
+    simp only [map_zero, norm_zero]
+  map_one' := by
+    simp only [map_one, norm_one]
+  map_mul' := by
+    intro a b
+    simp only [map_mul, norm_mul]
+
+/-- The norm bundle agrees with the norm of the complex bundle. -/
+theorem zOmegaNormHom_apply (s : RR) (z : CC) (n : NN) :
+    zOmegaNormHom s z n = Norm.norm (zOmegaHom s z n) := rfl

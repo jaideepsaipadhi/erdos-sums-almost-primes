@@ -4986,6 +4986,21 @@ theorem zOmega_prime_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     summable_geometric_of_lt_one (by positivity) hratio
   exact hgeo.congr (fun n => (hterm n).symm)
 
+/-- The norm of the z-weighted family, bundled as a real monoid-with-zero hom. -/
+noncomputable def zOmegaNormHom (s : ℝ) (z : ℂ) : ℕ →*₀ ℝ where
+  toFun n := Norm.norm (zOmegaHom s z n)
+  map_zero' := by
+    simp only [map_zero, norm_zero]
+  map_one' := by
+    simp only [map_one, norm_one]
+  map_mul' := by
+    intro a b
+    simp only [map_mul, norm_mul]
+
+/-- The norm bundle agrees with the norm of the complex bundle. -/
+theorem zOmegaNormHom_apply (s : ℝ) (z : ℂ) (n : ℕ) :
+    zOmegaNormHom s z n = Norm.norm (zOmegaHom s z n) := rfl
+
 /-- A1 step 2: for each N, the family is summable over N-smooth numbers. -/
 theorem zOmega_smooth_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : Norm.norm z < (2:ℝ) ^ s) (N : ℕ) :
