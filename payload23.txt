@@ -1,0 +1,43 @@
+/-- The Gamma integral as a function of s, on the region where it converges. -/
+noncomputable def gammaInt (s : <<R>>) : <<R>> :=
+  <<INT>> u in Set.Ioi (0:<<R>>), Real.exp (-u) * u ^ (s - 1)
+
+/-- OBLIGATION 4a: differentiation under the integral sign for gammaInt at any
+s in (1/2, 3/2), via dominated convergence with gammaDeriv_dom. -/
+theorem hasDerivAt_gammaInt (s : <<R>>) (hs : s <<IN>> Set.Ioo ((1:<<R>>)/2) ((3:<<R>>)/2)) :
+    HasDerivAt gammaInt
+      (<<INT>> u in Set.Ioi (0:<<R>>), Real.exp (-u) * u ^ (s - 1) * Real.log u) s := by
+  have hsnhds : Set.Ioo ((1:<<R>>)/2) ((3:<<R>>)/2) <<IN>> nhds s :=
+    Ioo_mem_nhds hs.1 hs.2
+  have hmeas : <<ALL>>' x in nhds s,
+      MeasureTheory.AEStronglyMeasurable
+        (fun u : <<R>> => Real.exp (-u) * u ^ (x - 1))
+        (MeasureTheory.volume.restrict (Set.Ioi 0)) := by
+    filter_upwards with x
+    apply Measurable.aestronglyMeasurable
+    fun_prop
+  have hint : MeasureTheory.Integrable
+      (fun u : <<R>> => Real.exp (-u) * u ^ (s - 1))
+      (MeasureTheory.volume.restrict (Set.Ioi 0)) := by
+    have h := Real.GammaIntegral_convergent (s := s) (by linarith [hs.1])
+    exact h
+  have hmeas' : MeasureTheory.AEStronglyMeasurable
+      (fun u : <<R>> => Real.exp (-u) * u ^ (s - 1) * Real.log u)
+      (MeasureTheory.volume.restrict (Set.Ioi 0)) := by
+    apply Measurable.aestronglyMeasurable
+    fun_prop
+  have hbnd : <<ALL>>m u <<PD>>(MeasureTheory.volume.restrict (Set.Ioi (0:<<R>>))),
+      <<ALL>> x <<IN>> Set.Ioo ((1:<<R>>)/2) ((3:<<R>>)/2),
+        <<NORM>>Real.exp (-u) * u ^ (x - 1) * Real.log u<<NORM>> <<LE>> gammaDeriv_dom u := by
+    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with u hu x hx
+    rw [Real.norm_eq_abs]
+    exact gammaDeriv_dominated u (Set.mem_Ioi.mp hu) x hx
+  have hdif : <<ALL>>m u <<PD>>(MeasureTheory.volume.restrict (Set.Ioi (0:<<R>>))),
+      <<ALL>> x <<IN>> Set.Ioo ((1:<<R>>)/2) ((3:<<R>>)/2),
+        HasDerivAt (fun t : <<R>> => Real.exp (-u) * u ^ (t - 1))
+          (Real.exp (-u) * u ^ (x - 1) * Real.log u) x := by
+    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with u hu x _
+    exact hasDerivAt_gamma_integrand u (Set.mem_Ioi.mp hu) x
+  have hmain := hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    hsnhds hmeas hint hmeas' hbnd gammaDeriv_dom_integrable hdif
+  exact hmain.2
