@@ -1,0 +1,13 @@
+  have hsm : Summable (fun m : N.smoothNumbers => Norm.norm (zOmegaHom s z m)) := by
+    have := hgeo.1
+    apply this.congr
+    intro m
+    simp only [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+    rfl
+  have hsum_le : (SUMF x IN u, Norm.norm (zOmegaHom s z x))
+      LEQ TSUMX m : N.smoothNumbers, Norm.norm (zOmegaHom s z m) := by
+    have hinj : SUMF x IN u, Norm.norm (zOmegaHom s z x)
+        = SUMF x IN u.filter (fun x => x NEQ 0), Norm.norm (zOmegaHom s z x) := by
+      apply (Finset.sum_filter_ne_zero u (p := fun x => x NEQ 0) ?_).symm
+      sorry
+    sorry

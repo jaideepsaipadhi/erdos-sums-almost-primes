@@ -5299,9 +5299,38 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
       have h1 := zOmegaNorm_prime_pow s z hqp 1
       rw [pow_one, pow_one] at h1
       rw [h1]
+  have hsm : Summable (fun m : N.smoothNumbers => Norm.norm (zOmegaHom s z m)) := by
+    apply hgeo.1.congr
+    intro m
+    show ‖zOmegaNormHom s z (m : ℕ)‖ = ‖zOmegaHom s z (m : ℕ)‖
+    rw [zOmegaNormHom_apply, Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
   have hsum_le : (∑ x ∈ u, Norm.norm (zOmegaHom s z x))
       ≤ ∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m) := by
-    sorry
+    rw [tsum_subtype (N.smoothNumbers) (fun n : ℕ => Norm.norm (zOmegaHom s z n))]
+    have hsm' : Summable (Set.indicator (N.smoothNumbers)
+        (fun n : ℕ => Norm.norm (zOmegaHom s z n))) := by
+      rwa [←  summable_subtype_iff_indicator]
+    have hle : ∀ x ∈ u, Norm.norm (zOmegaHom s z x)
+        ≤ Set.indicator (N.smoothNumbers)
+          (fun n : ℕ => Norm.norm (zOmegaHom s z n)) x := by
+      intro x hxu
+      by_cases hx0 : x = 0
+      · subst hx0
+        rw [show zOmegaHom s z 0 = 0 from map_zero _, norm_zero]
+        apply Set.indicator_nonneg
+        intro a _
+        exact norm_nonneg _
+      · rw [Set.indicator_of_mem (hsmooth x hxu hx0)]
+    calc ∑ x ∈ u, Norm.norm (zOmegaHom s z x)
+        ≤ ∑ x ∈ u, Set.indicator (N.smoothNumbers)
+            (fun n : ℕ => Norm.norm (zOmegaHom s z n)) x := Finset.sum_le_sum hle
+      _ ≤ ∑' x : ℕ, Set.indicator (N.smoothNumbers)
+            (fun n : ℕ => Norm.norm (zOmegaHom s z n)) x := by
+          apply hsm'.sum_le_tsum
+          intro i _
+          apply Set.indicator_nonneg
+          intro a _
+          exact norm_nonneg _
   have hval : (∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m))
       = ∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹ := hgeo.2.tsum_eq
   have hfin : (∏ i ∈ Finset.range N, G i) ≤ ∏' i : ℕ, G i := by
