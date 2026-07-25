@@ -5229,6 +5229,33 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
   have hnn : ∀ n : ℕ, (0:ℝ) ≤ ‖zOmegaHom s z n‖ := fun n => norm_nonneg _
   apply summable_of_sum_le (c := ∏' i : ℕ, G i) hnn
   intro u
+  set N := u.sup id + 1 with hN
+  have hsmooth : ∀ x ∈ u, x ≠ 0 → x ∈ N.smoothNumbers := by
+    intro x hxu hx0
+    apply mem_smoothNumbers_of_lt N x (Nat.pos_of_ne_zero hx0)
+    have : x ≤ u.sup id := Finset.le_sup (f := id) hxu
+    omega
+  have hgeo := EulerProduct.summable_and_hasSum_smoothNumbers_prod_primesBelow_geometric
+    (f := (zOmegaNormHom s z).toMonoidHom)
+    (fun {p} hp => zOmegaNorm_prime_lt_one s hs z hz hp) N
+  have hbridge : (∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹)
+      = ∏ i ∈ Finset.range N, G i := by
+    rw [hG]
+    have hmi := Finset.prod_mulIndicator_eq_prod_filter (Finset.range N)
+      (fun (_ : ℕ) (p : ℕ) => (1 - ‖z‖ * ((p:ℝ) ^ (-s)))⁻¹)
+      (fun (_ : ℕ) => ({p : ℕ | p.Prime} : Set ℕ)) (id : ℕ → ℕ)
+    simp only [id_eq] at hmi
+    rw [hmi]
+    rw [Nat.primesBelow]
+    apply Finset.prod_congr
+    · ext q
+      simp [Nat.primesBelow, Set.mem_setOf_eq]
+    · intro q hq
+      simp only [Finset.mem_filter] at hq
+      have hqp : q.Prime := hq.2
+      have h1 := zOmegaNorm_prime_pow s z hqp 1
+      rw [pow_one, pow_one] at h1
+      rw [h1]
   sorry
 
 /-- A2: the Euler product for the z-weighted family. -/
