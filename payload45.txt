@@ -1,0 +1,37 @@
+/-- The truncated Euler integral converges to the full one as c -> infinity. -/
+theorem expLog_partial_tendsto :
+    Filter.Tendsto (fun c : <<R>> => <<INT>> v in Set.Ioc (0:<<R>>) c, Real.exp (-v) * Real.log v)
+      Filter.atTop (nhds (<<INT>> v in Set.Ioi (0:<<R>>), Real.exp (-v) * Real.log v)) := by
+  have hint : MeasureTheory.IntegrableOn
+      (fun v : <<R>> => Real.exp (-v) * Real.log v) (Set.Ioi 0) := by
+    apply MeasureTheory.Integrable.mono gammaDeriv_dom_integrable
+    <<DOT>> apply Measurable.aestronglyMeasurable
+      fun_prop
+    <<DOT>> filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with v hv
+      have hv0 : (0:<<R>>) < v := hv
+      unfold gammaDeriv_dom
+      have hA : (0:<<R>>) < v ^ (-(1:<<R>>)/2) := Real.rpow_pos_of_pos hv0 _
+      have hB : (0:<<R>>) < v ^ ((1:<<R>>)/2) := Real.rpow_pos_of_pos hv0 _
+      have hE : (0:<<R>>) < Real.exp (-v) := Real.exp_pos _
+      have hone : (1:<<R>>) <<LE>> v ^ (-(1:<<R>>)/2) + v ^ ((1:<<R>>)/2) := by
+        rcases le_total v 1 with hv1 | hv1
+        <<DOT>> have hstep : v ^ (0:<<R>>) <<LE>> v ^ (-(1:<<R>>)/2) := by
+            apply Real.rpow_le_rpow_of_exponent_ge hv0 hv1
+            norm_num
+          rw [Real.rpow_zero] at hstep
+          linarith
+        <<DOT>> have hstep : v ^ (0:<<R>>) <<LE>> v ^ ((1:<<R>>)/2) := by
+            apply Real.rpow_le_rpow_of_exponent_le hv1
+            norm_num
+          rw [Real.rpow_zero] at hstep
+          linarith
+      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_of_pos hE]
+      rw [abs_of_nonneg (by positivity : (0:<<R>>) <<LE>>
+        Real.exp (-v) * (v ^ (-(1:<<R>>)/2) + v ^ ((1:<<R>>)/2)) * |Real.log v|)]
+      calc Real.exp (-v) * |Real.log v| = Real.exp (-v) * 1 * |Real.log v| := by ring
+        _ <<LE>> Real.exp (-v) * (v ^ (-(1:<<R>>)/2) + v ^ ((1:<<R>>)/2)) * |Real.log v| := by
+            apply mul_le_mul_of_nonneg_right _ (abs_nonneg _)
+            exact mul_le_mul_of_nonneg_left hone hE.le
+  exact MeasureTheory.tendsto_setIntegral_of_monotone
+    (fun n => measurableSet_Ioc) (fun m n hmn => Set.Ioc_subset_Ioc_right (by exact_mod_cast hmn))
+    hint |>.comp tendsto_natCast_atTop_atTop

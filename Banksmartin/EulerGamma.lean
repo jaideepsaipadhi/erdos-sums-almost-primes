@@ -800,6 +800,57 @@ theorem euler_parts_limit (c : ℝ) (hc : 0 < c) :
   have hconst := hlim.congr' heq
   exact tendsto_nhds_unique tendsto_const_nhds hconst
 
+/-- The truncated Euler integral converges to the full one as c -> infinity. -/
+theorem expLog_partial_tendsto :
+    Filter.Tendsto (fun n : ℕ => ∫ v in Set.Ioc (0:ℝ) (n:ℝ), Real.exp (-v) * Real.log v)
+      Filter.atTop (nhds (∫ v in Set.Ioi (0:ℝ), Real.exp (-v) * Real.log v)) := by
+  have hint : MeasureTheory.IntegrableOn
+      (fun v : ℝ => Real.exp (-v) * Real.log v) (Set.Ioi 0) := by
+    apply MeasureTheory.Integrable.mono gammaDeriv_dom_integrable
+    · apply Measurable.aestronglyMeasurable
+      fun_prop
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with v hv
+      have hv0 : (0:ℝ) < v := hv
+      unfold gammaDeriv_dom
+      have hA : (0:ℝ) < v ^ (-(1:ℝ)/2) := Real.rpow_pos_of_pos hv0 _
+      have hB : (0:ℝ) < v ^ ((1:ℝ)/2) := Real.rpow_pos_of_pos hv0 _
+      have hE : (0:ℝ) < Real.exp (-v) := Real.exp_pos _
+      have hone : (1:ℝ) ≤ v ^ (-(1:ℝ)/2) + v ^ ((1:ℝ)/2) := by
+        rcases le_total v 1 with hv1 | hv1
+        · have hstep : v ^ (0:ℝ) ≤ v ^ (-(1:ℝ)/2) := by
+            apply Real.rpow_le_rpow_of_exponent_ge hv0 hv1
+            norm_num
+          rw [Real.rpow_zero] at hstep
+          linarith
+        · have hstep : v ^ (0:ℝ) ≤ v ^ ((1:ℝ)/2) := by
+            apply Real.rpow_le_rpow_of_exponent_le hv1
+            norm_num
+          rw [Real.rpow_zero] at hstep
+          linarith
+      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_of_pos hE]
+      rw [abs_of_nonneg (by positivity : (0:ℝ) ≤
+        Real.exp (-v) * (v ^ (-(1:ℝ)/2) + v ^ ((1:ℝ)/2)) * |Real.log v|)]
+      calc Real.exp (-v) * |Real.log v| = Real.exp (-v) * 1 * |Real.log v| := by ring
+        _ ≤ Real.exp (-v) * (v ^ (-(1:ℝ)/2) + v ^ ((1:ℝ)/2)) * |Real.log v| := by
+            apply mul_le_mul_of_nonneg_right _ (abs_nonneg _)
+            exact mul_le_mul_of_nonneg_left hone hE.le
+  have hunion : (⋃ n : ℕ, Set.Ioc (0:ℝ) (n:ℝ)) = Set.Ioi 0 := by
+    ext x
+    simp only [Set.mem_iUnion, Set.mem_Ioc, Set.mem_Ioi]
+    constructor
+    · rintro ⟨n, hn, _⟩
+      exact hn
+    · intro hx
+      obtain ⟨n, hn⟩ := exists_nat_ge x
+      exact ⟨n, hx, hn⟩
+  have hmono : Monotone (fun n : ℕ => Set.Ioc (0:ℝ) (n:ℝ)) := by
+    intro m n hmn
+    exact Set.Ioc_subset_Ioc_right (by exact_mod_cast hmn)
+  have hnat := MeasureTheory.tendsto_setIntegral_of_monotone
+    (fun n : ℕ => measurableSet_Ioc) hmono (by rw [hunion]; exact hint)
+  rw [hunion] at hnat
+  exact hnat
+
 /-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
 identified via Euler's integral. -/
 theorem ein_eq (a : ℝ) (ha : 0 < a) :
