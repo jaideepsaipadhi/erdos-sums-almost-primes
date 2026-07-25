@@ -403,9 +403,40 @@ theorem hasDerivAt_Ein (a : ℝ) (ha : 0 < a) :
 noncomputable def EinTailFun (a : ℝ) : ℝ :=
   ∫ v in Set.Ici a, Real.exp (-v) / v
 
+/-- The tail function splits at any reference point: T(a) = T(1) - int_1^a e^-v/v. -/
+theorem EinTailFun_split (a : ℝ) (ha : 0 < a) :
+    EinTailFun a = EinTailFun 1 - ∫ v in (1:ℝ)..a, Real.exp (-v) / v := by
+  sorry
+
 theorem hasDerivAt_EinTailFun (a : ℝ) (ha : 0 < a) :
     HasDerivAt EinTailFun (-(Real.exp (-a) / a)) a := by
-  sorry
+  have hcont : ContinuousAt (fun v : ℝ => Real.exp (-v) / v) a := by
+    apply ContinuousAt.div
+    · exact (Real.continuous_exp.comp continuous_neg).continuousAt
+    · exact continuousAt_id
+    · exact ne_of_gt ha
+  have hmeas : StronglyMeasurableAtFilter
+      (fun v : ℝ => Real.exp (-v) / v) (nhds a) := by
+    refine ⟨Set.univ, Filter.univ_mem, ?_⟩
+    apply Measurable.aestronglyMeasurable
+    fun_prop
+  have hint : IntervalIntegrable (fun v : ℝ => Real.exp (-v) / v)
+      MeasureTheory.volume 1 a := by
+    rcases le_total (1:ℝ) a with h1 | h1
+    · rw [intervalIntegrable_iff_integrableOn_Ioc_of_le h1]
+      exact ((exp_div_integrableOn_Ici 1 (by norm_num)).mono
+        (fun x hx => Set.mem_Ici.mpr (le_of_lt hx.1)) le_rfl)
+    · rw [IntervalIntegrable.symm_iff, intervalIntegrable_iff_integrableOn_Ioc_of_le h1]
+      exact ((exp_div_integrableOn_Ici a ha).mono
+        (fun x hx => Set.mem_Ici.mpr (le_of_lt hx.1)) le_rfl)
+  have hFTC := intervalIntegral.integral_hasDerivAt_right hint hmeas hcont
+  have hEq : EinTailFun =ᶠ[nhds a]
+      fun t : ℝ => EinTailFun 1 - ∫ v in (1:ℝ)..t, Real.exp (-v) / v := by
+    filter_upwards [Ioi_mem_nhds ha] with t ht
+    exact EinTailFun_split t ht
+  have hderiv := (hasDerivAt_const a (EinTailFun 1)).sub hFTC
+  rw [zero_sub] at hderiv
+  exact hderiv.congr_of_eventuallyEq hEq
 
 /-- The combination Ein(a) - log a - T(a) has zero derivative on (0, infty). -/
 theorem hasDerivAt_einCombo (a : ℝ) (ha : 0 < a) :
