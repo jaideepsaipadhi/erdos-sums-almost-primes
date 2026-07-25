@@ -1,0 +1,6 @@
+/-- The regularised family is multipliable over primes >= 3, from the p >= 5 case. -/
+theorem prime_factor_multipliable_three (s : RR) (hs : 1 LEQ s) (z : CC) (hz : Norm.norm z LEQ 2) :
+    Multipliable (fun p : {p : NN // p.Prime AND 3 LEQ p} =>
+      (1 - z * ((((p:NN):RR) ^ (-s) : RR) : CC))INV
+        * (((1 - ((p:NN):RR) ^ (-s) : RR) : CC)) ^ z) := by
+  sorry

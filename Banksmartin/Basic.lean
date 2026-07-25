@@ -5567,6 +5567,29 @@ def primesGE3_ne_equiv :
     apply Subtype.ext
     rfl
 
+/-- If the p >= 5 tail is multipliable, so is the p >= 3 family, and the
+product splits off the p = 3 factor. -/
+theorem tprod_split_three {M : Type*} [CommMonoid M] [TopologicalSpace M] [T2Space M]
+    [ContinuousMul M] (f : ℕ → M)
+    (hf5 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => f p)) :
+    Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => f p)
+      ∧ (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, f p)
+        = f 3 * ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p}, f p := by
+  classical
+  set b3 : {p : ℕ // p.Prime ∧ 3 ≤ p} := ⟨ 3, Nat.prime_three, le_refl 3 ⟩ with hb3
+  set g : {p : ℕ // p.Prime ∧ 3 ≤ p} → M := fun p => f p with hg
+  have hsingle : HasProd ((({b3} : Set {p : ℕ // p.Prime ∧ 3 ≤ p}).restrict g)) (g b3) := by
+    have := hasProd_singleton b3 g
+    exact this
+  have hequiv : Multipliable (((({b3} : Set {p : ℕ // p.Prime ∧ 3 ≤ p})ᶜ).restrict g)) := by
+    sorry
+  have hcompl : HasProd (((({b3} : Set {p : ℕ // p.Prime ∧ 3 ≤ p})ᶜ).restrict g))
+      (∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p}, f p) := by
+    sorry
+  have hall := hsingle.mul_compl hcompl
+  refine ⟨ hall.multipliable, ?_⟩
+  rw [hall.tprod_eq]
+
 /-- B3: the p >= 3 tail regroups into cFac^z times G2C. -/
 theorem tail_regroup (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2) :
     (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - z * (((p:ℕ):ℝ) ^ (-s) : ℝ))⁻¹)
