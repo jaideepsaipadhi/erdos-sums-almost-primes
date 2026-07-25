@@ -52,7 +52,14 @@ theorem gammaDeriv_dominated (u : ℝ) (hu : 0 < u) (s : ℝ)
 theorem hasDerivAt_gamma_integrand (u : ℝ) (hu : 0 < u) (s : ℝ) :
     HasDerivAt (fun t : ℝ => Real.exp (-u) * u ^ (t - 1))
       (Real.exp (-u) * u ^ (s - 1) * Real.log u) s := by
-  sorry
+  have hbase : HasDerivAt (fun t : ℝ => u ^ (t - 1))
+      (u ^ (s - 1) * Real.log u) s := by
+    have hsub : HasDerivAt (fun t : ℝ => t - 1) 1 s :=
+      (hasDerivAt_id s).sub_const 1
+    have h := hsub.const_rpow hu
+    simpa [mul_comm] using h
+  have := hbase.const_mul (Real.exp (-u))
+  simpa [mul_assoc] using this
 
 /-- OBLIGATION 4 (main construction): differentiation under the integral sign
 for the real Gamma function on the interval (1/2, 3/2). -/
@@ -64,7 +71,8 @@ theorem hasDerivAt_Gamma (s : ℝ) (hs : s ∈ Set.Ioo ((1:ℝ)/2) ((3:ℝ)/2)) 
 /-- OBLIGATION 5: Gamma'(1) = -gamma, from the pin's digamma_one. -/
 theorem deriv_Gamma_one :
     deriv Real.Gamma 1 = -Real.eulerMascheroniConstant := by
-  sorry
+  have h := Real.eulerMascheroniConstant_eq_neg_deriv
+  linarith [h]
 
 /-- TARGET: Euler's integral for gamma. Combine Obligations 4 and 5 at s = 1
 (where u ^ (1 - 1) = 1). -/
