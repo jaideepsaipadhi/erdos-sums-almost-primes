@@ -5001,6 +5001,25 @@ noncomputable def zOmegaNormHom (s : ℝ) (z : ℂ) : ℕ →*₀ ℝ where
 theorem zOmegaNormHom_apply (s : ℝ) (z : ℂ) (n : ℕ) :
     zOmegaNormHom s z n = Norm.norm (zOmegaHom s z n) := rfl
 
+/-- The norm of the family at a prime power is a geometric term. -/
+theorem zOmegaNorm_prime_pow (s : ℝ) (z : ℂ) {p : ℕ} (hp : p.Prime) (n : ℕ) :
+    zOmegaNormHom s z (p ^ n) = (Norm.norm z * ((p:ℝ) ^ (-s))) ^ n := by
+  rw [zOmegaNormHom_apply]
+  have hpn : (p:ℕ) ^ n ≠ 0 := pow_ne_zero n hp.pos.ne'
+  have hppos : 0 < (p:ℕ) ^ n := Nat.pos_of_ne_zero hpn
+  show Norm.norm (if (p:ℕ) ^ n = 0 then 0
+    else z ^ (bigOmega ((p:ℕ) ^ n)) * ((((p:ℕ) ^ n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+  rw [if_neg hpn, bigOmega_prime_pow hp n, norm_mul, norm_pow]
+  rw [Complex.norm_natCast_cpow_of_pos hppos]
+  rw [Complex.neg_re, Complex.ofReal_re]
+  rw [Nat.cast_pow]
+  rw [←  Real.rpow_natCast ((p:ℝ)) n, ←  Real.rpow_mul (Nat.cast_nonneg p)]
+  rw [mul_pow]
+  congr 1
+  rw [←  Real.rpow_natCast ((p:ℝ) ^ (-s)) n, ←  Real.rpow_mul (Nat.cast_nonneg p)]
+  congr 1
+  ring
+
 /-- A1 step 2: for each N, the family is summable over N-smooth numbers. -/
 theorem zOmega_smooth_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : Norm.norm z < (2:ℝ) ^ s) (N : ℕ) :
