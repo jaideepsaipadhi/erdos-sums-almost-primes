@@ -5211,6 +5211,19 @@ theorem zOmegaNorm_indicator_multipliable (s : ℝ) (hs : 1 < s) (z : ℂ)
   rw [← multipliable_subtype_iff_mulIndicator]
   exact zOmega_factors_multipliable s hs z
 
+
+/-- Pointwise: (1-x)^{-1} <= exp(2x) for 0 <= x <= 1/2. -/
+theorem inv_one_sub_le_exp (x : ℝ) (hx0 : 0 ≤ x) (hx : x ≤ 1/2) :
+    (1 - x)⁻¹ ≤ Real.exp (2 * x) := by
+  have hone : (0:ℝ) < 1 - x := by linarith
+  have hlog : -Real.log (1 - x) ≤ 2 * x := neg_log_one_sub_le x hx0 hx
+  have hkey : Real.log ((1 - x)⁻¹) ≤ 2 * x := by
+    rw [Real.log_inv]
+    exact hlog
+  have hpos : (0:ℝ) < (1 - x)⁻¹ := inv_pos.mpr hone
+  calc (1 - x)⁻¹ = Real.exp (Real.log ((1 - x)⁻¹)) := (Real.exp_log hpos).symm
+    _ ≤ Real.exp (2 * x) := Real.exp_le_exp.mpr hkey
+
 /-- A1: absolute summability of the z-weighted Dirichlet family. -/
 theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : ‖z‖ < (2:ℝ) ^ s) :
@@ -5256,7 +5269,18 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
       have h1 := zOmegaNorm_prime_pow s z hqp 1
       rw [pow_one, pow_one] at h1
       rw [h1]
-  sorry
+  have hsum_le : (∑ x ∈ u, Norm.norm (zOmegaHom s z x))
+      ≤ ∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m) := by
+    sorry
+  have hval : (∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m))
+      = ∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹ := hgeo.2.tsum_eq
+  have hfin : (∏ i ∈ Finset.range N, G i) ≤ ∏' i : ℕ, G i := by
+    sorry
+  calc (∑ x ∈ u, Norm.norm (zOmegaHom s z x))
+      ≤ ∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m) := hsum_le
+    _ = ∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹ := hval
+    _ = ∏ i ∈ Finset.range N, G i := hbridge
+    _ ≤ ∏' i : ℕ, G i := hfin
 
 /-- A2: the Euler product for the z-weighted family. -/
 theorem zOmega_eulerProduct (s : ℝ) (hs : 1 < s) (z : ℂ)
