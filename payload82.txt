@@ -1,0 +1,25 @@
+/-- The (s-1)^(-z) factor is ContDiff of all orders. -/
+theorem contDiffAt_factorA (s : <<R>>) (hs : 1 < s) (k : <<N>>) (z : <<C>>) :
+    ContDiffAt <<C>> k (fun w : <<C>> => ((s - 1 : <<R>>) : <<C>>) ^ (-w)) z := by
+  have hspos : (0:<<R>>) < s - 1 := by linarith
+  have hsne : ((s - 1 : <<R>>) : <<C>>) <<NE>> 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  have hrewrite : (fun w : <<C>> => ((s - 1 : <<R>>) : <<C>>) ^ (-w))
+      = fun w : <<C>> => Complex.exp ((-(Real.log (s - 1) : <<C>>)) * w) := by
+    funext w
+    rw [Complex.cpow_def_of_ne_zero hsne]
+    congr 1
+    rw [<<LARR>> Complex.ofReal_log (le_of_lt hspos)]
+    ring
+  rw [hrewrite]
+  apply ContDiff.contDiffAt
+  exact Complex.contDiff_exp.comp (contDiff_const.mul contDiff_id)
+
+/-- The geometric factor is ContDiff at points where the denominator is nonzero. -/
+theorem contDiffAt_factorB (s : <<R>>) (k : <<N>>) (z : <<C>>)
+    (hz : 1 - z / ((2:<<C>>) ^ (s:<<C>>)) <<NE>> 0) :
+    ContDiffAt <<C>> k (fun w : <<C>> => (1 - w / ((2:<<C>>) ^ (s:<<C>>)))<<INV>>) z := by
+  apply ContDiffAt.inv _ hz
+  apply ContDiffAt.sub contDiffAt_const
+  exact (contDiffAt_id).div_const _

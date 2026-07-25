@@ -4875,6 +4875,33 @@ theorem Fk_eq_coeff_Fbig (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
       = (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : ℂ) := by
   sorry
 
+/-- The (s-1)^(-z) factor is ContDiff of all orders. -/
+theorem contDiffAt_factorA (s : ℝ) (hs : 1 < s) (k : ℕ) (z : ℂ) :
+    ContDiffAt ℂ k (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) z := by
+  have hspos : (0:ℝ) < s - 1 := by linarith
+  have hsne : ((s - 1 : ℝ) : ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  have hrewrite : (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w))
+      = fun w : ℂ => Complex.exp ((-(Real.log (s - 1) : ℂ)) * w) := by
+    funext w
+    rw [Complex.cpow_def_of_ne_zero hsne]
+    congr 1
+    rw [← Complex.ofReal_log (le_of_lt hspos)]
+    ring
+  rw [hrewrite]
+  apply ContDiff.contDiffAt
+  exact Complex.contDiff_exp.comp (contDiff_const.mul contDiff_id)
+
+/-- The geometric factor is ContDiff at points where the denominator is nonzero. -/
+theorem contDiffAt_factorB (s : ℝ) (k : ℕ) (z : ℂ)
+    (hz : 1 - z / ((2:ℂ) ^ (s:ℂ)) ≠ 0) :
+    ContDiffAt ℂ k (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹) z := by
+  have hden : ContDiffAt ℂ (k:ℕ) (fun w : ℂ => 1 - w / ((2:ℂ) ^ (s:ℂ))) z := by
+    apply ContDiffAt.sub contDiffAt_const
+    exact ContDiffAt.div_const contDiffAt_id _
+  exact hden.inv hz
+
 /-- OBLIGATION L2b: the k-th coefficient of Fbig is the triple convolution
 of the three factors' coefficients. -/
 theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
