@@ -1,0 +1,18 @@
+    have hshift : MeasureTheory.IntegrableOn
+        (fun v : <<R>> => Real.exp (-v)) (Set.Ioi a) := by
+      have hconst : MeasureTheory.IntegrableOn
+          (fun v : <<R>> => Real.exp (-a) * Real.exp (-(v - a))) (Set.Ioi a) := by
+        have hbase : MeasureTheory.IntegrableOn
+            (fun u : <<R>> => Real.exp (-u)) (Set.Ioi 0) := by
+          have hG : MeasureTheory.IntegrableOn
+              (fun u : <<R>> => Real.exp (-u) * u ^ ((1:<<R>>) - 1)) (Set.Ioi 0) :=
+            Real.GammaIntegral_convergent (s := (1:<<R>>)) (by norm_num)
+          apply hG.congr_fun ?_ measurableSet_Ioi
+          intro u _
+          simp only
+          rw [show (1:<<R>>) - 1 = 0 by ring, Real.rpow_zero, mul_one]
+        have hmap := (MeasureTheory.measurePreserving_add_right
+          MeasureTheory.volume a).integrableOn_comp_preimage
+        sorry
+      sorry
+    exact hshift

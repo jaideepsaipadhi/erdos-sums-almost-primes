@@ -874,7 +874,7 @@ theorem expNeg_log_tendsto_zero :
   exact mul_le_mul_of_nonneg_left hL hE.le
 
 /-- The exponential tail integral evaluates: int_{Ioi a} e^(-v) dv = e^(-a). -/
-theorem integral_Ioi_exp_neg (a : ℝ) :
+theorem integral_Ioi_exp_neg (a : ℝ) (ha : 0 ≤ a) :
     (∫ v in Set.Ioi a, Real.exp (-v)) = Real.exp (-a) := by
   have hderiv : ∀ x ∈ Set.Ici a,
       HasDerivAt (fun t : ℝ => -Real.exp (-t)) (Real.exp (-x)) x := by
@@ -886,10 +886,15 @@ theorem integral_Ioi_exp_neg (a : ℝ) :
     have h3 := h2.neg
     simpa [Pi.neg_def] using h3
   have hint : MeasureTheory.IntegrableOn (fun v : ℝ => Real.exp (-v)) (Set.Ioi a) := by
-    have hbase : MeasureTheory.IntegrableOn
+    have hG : MeasureTheory.IntegrableOn
         (fun u : ℝ => Real.exp (-u) * u ^ ((1:ℝ) - 1)) (Set.Ioi 0) :=
       Real.GammaIntegral_convergent (s := (1:ℝ)) (by norm_num)
-    sorry
+    have hbase : MeasureTheory.IntegrableOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) := by
+      apply hG.congr_fun ?_ measurableSet_Ioi
+      intro u _
+      simp only
+      rw [show (1:ℝ) - 1 = 0 by ring, Real.rpow_zero, mul_one]
+    exact hbase.mono (fun x hx => Set.mem_Ioi.mpr (lt_of_le_of_lt ha hx)) le_rfl
   have htend : Filter.Tendsto (fun t : ℝ => -Real.exp (-t)) Filter.atTop (nhds 0) := by
     have h := Real.tendsto_exp_neg_atTop_nhds_zero
     simpa using h.neg
