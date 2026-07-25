@@ -4891,7 +4891,18 @@ theorem Fk_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
       ∑ q ∈ Finset.range (k - p + 1),
         (gCoeff q s).re * (2:ℝ) ^ (-((p:ℝ)) * s)
           * ((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q))) := by
-  sorry
+  have hC := (Fk_eq_coeff_Fbig k s hs hs2).trans (coeff_Fbig_eq_convolution k s hs hs2)
+  have hre : ((Fk k s : ℝ) : ℂ).re = Fk k s := Complex.ofReal_re _
+  rw [← hre, hC]
+  rw [Complex.re_sum]
+  apply Finset.sum_congr rfl
+  intro p _
+  rw [Complex.re_sum]
+  apply Finset.sum_congr rfl
+  intro q _
+  rw [Complex.mul_re, Complex.mul_re]
+  simp only [Complex.ofReal_re, Complex.ofReal_im]
+  ring
 
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
