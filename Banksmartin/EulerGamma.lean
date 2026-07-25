@@ -105,6 +105,57 @@ theorem gammaDeriv_dom_integrableOn_Ioo :
           + u ^ ((1:ℝ)/2) * (4 * u ^ (-(1:ℝ)/4)) := by ring
       _ = 4 * u ^ (-(3:ℝ)/4) + 4 * u ^ ((1:ℝ)/4) := by rw [hM1, hM2]
 
+/-- Obligation 1, tail half: on [1, infty) the dominating function is bounded
+by 2 exp(-u) u^(3/2), which is a Gamma integrand. -/
+theorem gammaDeriv_dom_integrableOn_Ici :
+    IntegrableOn gammaDeriv_dom (Set.Ici 1) := by
+  have hg : IntegrableOn (fun u : ℝ => Real.exp (-u) * u ^ ((3:ℝ)/2)) (Set.Ioi 0) := by
+    have h := Real.GammaIntegral_convergent (s := (5:ℝ)/2) (by norm_num)
+    apply h.congr_fun ?_ measurableSet_Ioi
+    intro u hu
+    simp only
+    rw [show (5:ℝ)/2 - 1 = (3:ℝ)/2 by ring]
+  have hsub : Set.Ici (1:ℝ) ⊆ Set.Ioi 0 := by
+    intro x hx
+    simp only [Set.mem_Ici] at hx
+    simp only [Set.mem_Ioi]
+    linarith
+  have hbound : IntegrableOn
+      (fun u : ℝ => 2 * (Real.exp (-u) * u ^ ((3:ℝ)/2))) (Set.Ici 1) :=
+    (hg.mono hsub le_rfl).const_mul 2
+  apply MeasureTheory.Integrable.mono hbound
+  · unfold gammaDeriv_dom
+    apply Measurable.aestronglyMeasurable
+    fun_prop
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ici] with u hu
+    have hu1 : (1:ℝ) ≤ u := hu
+    have hu0 : (0:ℝ) < u := by linarith
+    unfold gammaDeriv_dom
+    have hE : (0:ℝ) < Real.exp (-u) := Real.exp_pos _
+    have hA : (0:ℝ) < u ^ (-(1:ℝ)/2) := Real.rpow_pos_of_pos hu0 _
+    have hB : (0:ℝ) < u ^ ((1:ℝ)/2) := Real.rpow_pos_of_pos hu0 _
+    have hL : |Real.log u| ≤ u := abs_log_le_self u hu1
+    have hAle : u ^ (-(1:ℝ)/2) ≤ u ^ ((1:ℝ)/2) := by
+      apply Real.rpow_le_rpow_of_exponent_le hu1
+      norm_num
+    have hprod : u ^ ((1:ℝ)/2) * u = u ^ ((3:ℝ)/2) := by
+      have h1 : u ^ ((1:ℝ)/2) * u ^ (1:ℝ) = u ^ ((3:ℝ)/2) := by
+        rw [← Real.rpow_add hu0]
+        norm_num
+      rwa [Real.rpow_one] at h1
+    rw [Real.norm_eq_abs, Real.norm_eq_abs]
+    rw [abs_of_nonneg (by positivity : (0:ℝ) ≤
+      2 * (Real.exp (-u) * u ^ ((3:ℝ)/2)))]
+    rw [abs_of_nonneg (by positivity : (0:ℝ) ≤
+      Real.exp (-u) * (u ^ (-(1:ℝ)/2) + u ^ ((1:ℝ)/2)) * |Real.log u|)]
+    calc Real.exp (-u) * (u ^ (-(1:ℝ)/2) + u ^ ((1:ℝ)/2)) * |Real.log u|
+        ≤ Real.exp (-u) * (u ^ ((1:ℝ)/2) + u ^ ((1:ℝ)/2)) * u := by
+          apply mul_le_mul _ hL (abs_nonneg _) (by positivity)
+          apply mul_le_mul_of_nonneg_left _ hE.le
+          linarith
+      _ = 2 * (Real.exp (-u) * (u ^ ((1:ℝ)/2) * u)) := by ring
+      _ = 2 * (Real.exp (-u) * u ^ ((3:ℝ)/2)) := by rw [hprod]
+
 /-- OBLIGATION 1: the dominating function is integrable on (0, infty). -/
 theorem gammaDeriv_dom_integrable :
     IntegrableOn gammaDeriv_dom (Set.Ioi 0) := by
