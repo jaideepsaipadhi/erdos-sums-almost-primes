@@ -4620,6 +4620,25 @@ theorem deltaM_upper_bound (m : ℕ) (hm : 1 ≤ m) :
       _ ≤ _ := hgap
   linarith [hfinal]
 
+/-- The manuscript's c1* = log2 (log log2 + gamma - 1 - 1/4) = -0.720386... -/
+noncomputable def cStarOne : ℝ :=
+  Real.log 2 * (Real.log (Real.log 2) + Real.eulerMascheroniConstant - 1 - 1/4)
+
+/-- MANUSCRIPT THEOREM 4.1 (upper bound, manuscript form):
+delta_m <= (log 2) m log m + c1* m, for m >= 1. -/
+theorem deltaM_upper_bound_manuscript (m : ℕ) (hm : 1 ≤ m) :
+    deltaM m ≤ Real.log 2 * (m : ℝ) * Real.log (m : ℝ) + cStarOne * (m : ℝ) := by
+  have hl2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hmR : (1:ℝ) ≤ ((m:ℕ):ℝ) := by exact_mod_cast hm
+  have hmpos : (0:ℝ) < ((m:ℕ):ℝ) := by linarith
+  have hub := deltaM_upper_bound m hm
+  have hlogsplit : Real.log (((m:ℕ):ℝ) * Real.log 2)
+      = Real.log ((m:ℕ):ℝ) + Real.log (Real.log 2) := by
+    rw [Real.log_mul (ne_of_gt hmpos) (ne_of_gt hl2)]
+  rw [hlogsplit] at hub
+  unfold cStarOne
+  nlinarith [hub, hl2, hmpos]
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
