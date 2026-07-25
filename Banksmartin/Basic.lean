@@ -4924,6 +4924,23 @@ A4  Coefficient extraction: F_k(s) (a tsum over k-almost-primes) is the
     analyticity of the tsum in z on |z| < 2^s.
 -/
 
+/-- Omega(p^n) = n for p prime. -/
+lemma bigOmega_prime_pow {p : ℕ} (hp : p.Prime) (n : ℕ) : bigOmega (p ^ n) = n := by
+  induction n with
+  | zero =>
+    simp only [pow_zero]
+    unfold bigOmega
+    simp
+  | succ N ih =>
+    have hpn : p ^ N ≠ 0 := pow_ne_zero N hp.pos.ne'
+    have hp0 : p ≠ 0 := hp.pos.ne'
+    rw [pow_succ, bigOmega_mul (p ^ N) p hpn hp0, ih]
+    have hO : bigOmega p = 1 := by
+      unfold bigOmega
+      rw [hp.factorization]
+      simp
+    rw [hO]
+
 theorem zOmega_prime_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : Norm.norm z < (2:ℝ) ^ s) {p : ℕ} (hp : p.Prime) :
     Summable (fun n : ℕ => Norm.norm (zOmegaHom s z (p ^ n))) := by
