@@ -5270,7 +5270,7 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
       exact zOmega_factor_ge_one s hs z hz2 i hp
     · rw [Set.mulIndicator_of_notMem hp]
   have hnn : ∀ n : ℕ, (0:ℝ) ≤ ‖zOmegaHom s z n‖ := fun n => norm_nonneg _
-  apply summable_of_sum_le (c := ∏' i : ℕ, G i) hnn
+  apply summable_of_sum_le (c := ((1 - ‖z‖ * ((2:ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' p : Nat.Primes, ‖z‖ * ((p:ℝ) ^ (-s))))) hnn
   intro u
   set N := u.sup id + 1 with hN
   have hsmooth : ∀ x ∈ u, x ≠ 0 → x ∈ N.smoothNumbers := by
@@ -5333,13 +5333,13 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
           exact norm_nonneg _
   have hval : (∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m))
       = ∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹ := hgeo.2.tsum_eq
-  have hfin : (∏ i ∈ Finset.range N, G i) ≤ ∏' i : ℕ, G i := by
+  have hfin : (∏ i ∈ Finset.range N, G i) ≤ ((1 - ‖z‖ * ((2:ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' p : Nat.Primes, ‖z‖ * ((p:ℝ) ^ (-s)))) := by
     sorry
   calc (∑ x ∈ u, Norm.norm (zOmegaHom s z x))
       ≤ ∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m) := hsum_le
     _ = ∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹ := hval
     _ = ∏ i ∈ Finset.range N, G i := hbridge
-    _ ≤ ∏' i : ℕ, G i := hfin
+    _ ≤ ((1 - ‖z‖ * ((2:ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' p : Nat.Primes, ‖z‖ * ((p:ℝ) ^ (-s)))) := hfin
 
 /-- A2: the Euler product for the z-weighted family. -/
 theorem zOmega_eulerProduct (s : ℝ) (hs : 1 < s) (z : ℂ)
