@@ -1,0 +1,5 @@
+/-- The family (1 - p^-s)^(-z) is multipliable over primes >= 3. -/
+theorem cpow_neg_multipliable_three (s : RR) (hs : 1 LEQ s) (z : CC) (hz : Norm.norm z LEQ 2) :
+    Multipliable (fun p : {p : NN // p.Prime AND 3 LEQ p} =>
+      (((1 - ((p:NN):RR) ^ (-s) : RR) : CC)) ^ (-z)) := by
+  sorry

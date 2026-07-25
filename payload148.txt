@@ -1,0 +1,12 @@
+  have hreg := reg_multipliable_three s hs z hz
+  have hcf : Multipliable (fun p : {p : NN // p.Prime AND 3 LEQ p} =>
+      (((1 - ((p:NN):RR) ^ (-s) : RR) : CC)) ^ (-z)) := by
+    sorry
+  have hpoint : FORALL p : {p : NN // p.Prime AND 3 LEQ p},
+      (1 - z * ((((p:NN):RR) ^ (-s) : RR) : CC))INV
+        = ((((1 - ((p:NN):RR) ^ (-s) : RR) : CC)) ^ (-z))
+          * ((1 - z * ((((p:NN):RR) ^ (-s) : RR) : CC))INV
+            * (((1 - ((p:NN):RR) ^ (-s) : RR) : CC)) ^ z) := by
+    intro p
+    sorry
+  sorry
