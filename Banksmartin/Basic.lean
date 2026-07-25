@@ -4409,6 +4409,54 @@ theorem sum_betaCirc_eq_integral (m : ℕ) :
     rw [heq]
     exact hb.const_mul _
 
+/-- e^u * Bfun m u is integrable on (0, infty): it equals
+(e^(-(m log2) e^-u) - 1) e^u + m log2, times... -- bounded via the Bfun
+decomposition against integrable pieces. -/
+theorem integrable_exp_Bfun (m : ℕ) :
+    MeasureTheory.IntegrableOn (fun u : ℝ => Real.exp u * Bfun m u) (Set.Ioi 0) := by
+  sorry
+
+/-- The key bound: sum 2^i betaCirc i m <= int e^u Bfun m u. -/
+theorem sum_betaCirc_le_integral (m : ℕ) :
+    ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i m
+      ≤ ∫ u in Set.Ioi (0:ℝ), Real.exp u * Bfun m u := by
+  rw [sum_betaCirc_eq_integral m]
+  apply MeasureTheory.setIntegral_mono_on
+  · have heq : (fun u : ℝ =>
+        (∑ i ∈ Finset.range (m + 1), (2 * u) ^ i / (Nat.factorial i))
+          * (Real.exp (-u) * Bfun m u))
+        = fun u : ℝ => ∑ i ∈ Finset.range (m + 1),
+          ((2:ℝ) ^ i / (Nat.factorial i)) * (u ^ i * Real.exp (-u) * Bfun m u) := by
+      funext u
+      rw [Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro i _
+      simp only [mul_pow]
+      ring
+    rw [heq]
+    apply MeasureTheory.integrable_finsetSum
+    intro i _
+    exact (integrable_betaCirc_integrand i m).const_mul _
+  · exact integrable_exp_Bfun m
+  · exact measurableSet_Ioi
+  · intro u hu
+    have hu0 : (0:ℝ) < u := hu
+    have hsum := sum_pow_div_factorial_le_exp (2 * u) (by linarith) m
+    have hB := Bfun_nonneg m u
+    have hE : (0:ℝ) < Real.exp (-u) := Real.exp_pos _
+    have hfac : Real.exp (2 * u) * (Real.exp (-u) * Bfun m u)
+        = Real.exp u * Bfun m u := by
+      rw [show Real.exp (2 * u) * (Real.exp (-u) * Bfun m u)
+          = (Real.exp (2 * u) * Real.exp (-u)) * Bfun m u by ring,
+        ← Real.exp_add]
+      ring_nf
+    calc (∑ i ∈ Finset.range (m + 1), (2 * u) ^ i / (Nat.factorial i))
+          * (Real.exp (-u) * Bfun m u)
+        ≤ Real.exp (2 * u) * (Real.exp (-u) * Bfun m u) := by
+          apply mul_le_mul_of_nonneg_right hsum
+          positivity
+      _ = Real.exp u * Bfun m u := hfac
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
