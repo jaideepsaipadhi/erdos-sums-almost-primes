@@ -1,0 +1,17 @@
+/-- Change of variables s = 1 + e^(-u): integrals over (1, 2] become
+e^(-u)-weighted integrals over (0, infty). Workhorse for manuscript eq (5). -/
+theorem integral_Ioc_subst (g : <<R>> <<TO>> <<R>>) :
+    <<INT>> s in Set.Ioc (1:<<R>>) 2, g s
+      = <<INT>> u in Set.Ioi (0:<<R>>), Real.exp (-u) * g (1 + Real.exp (-u)) := by
+  have hderiv : <<ALL>> u <<IN>> Set.Ioi (0:<<R>>),
+      HasDerivWithinAt (fun u : <<R>> => 1 + Real.exp (-u))
+        (Real.exp (-u) * (-1)) (Set.Ioi 0) u := by
+    intro u _
+    exact (((hasDerivAt_neg u).exp).const_add 1).hasDerivWithinAt
+  have himg := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
+    measurableSet_Ioi hderiv subst_injOn g
+  rw [subst_image] at himg
+  rw [MeasureTheory.integral_Ioc_eq_integral_Ioo, himg]
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+  intro u _
+  rw [smul_eq_mul, mul_neg_one, abs_neg, abs_of_pos (Real.exp_pos _)]

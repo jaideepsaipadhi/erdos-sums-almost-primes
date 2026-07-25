@@ -3920,6 +3920,54 @@ theorem Jint_zero : Jint 0 0 = 1 := by
   rw [integral_exp_neg_mul_pow 0]
   norm_num
 
+/-- The substitution map s = 1 + e^(-u) sends (0, infty) onto (1, 2). -/
+theorem subst_image :
+    (fun u : ℝ => 1 + Real.exp (-u)) '' Set.Ioi 0 = Set.Ioo 1 2 := by
+  ext s
+  simp only [Set.mem_image, Set.mem_Ioi, Set.mem_Ioo]
+  constructor
+  · rintro ⟨u, hu, rfl⟩
+    constructor
+    · have h := Real.exp_pos (-u)
+      linarith
+    · have h1 : Real.exp (-u) < Real.exp 0 := Real.exp_lt_exp.mpr (by linarith)
+      rw [Real.exp_zero] at h1
+      linarith
+  · rintro ⟨h1, h2⟩
+    refine ⟨-Real.log (s - 1), ?_, ?_⟩
+    · have hlog : Real.log (s - 1) < 0 :=
+        Real.log_neg (by linarith) (by linarith)
+      linarith
+    · show 1 + Real.exp (-(-Real.log (s - 1))) = s
+      rw [neg_neg, Real.exp_log (by linarith)]
+      ring
+
+/-- The substitution map is injective on (0, infty). -/
+theorem subst_injOn :
+    Set.InjOn (fun u : ℝ => 1 + Real.exp (-u)) (Set.Ioi 0) := by
+  intro u _ v _ huv
+  simp only [add_right_inj] at huv
+  have h3 := Real.exp_injective huv
+  linarith
+
+/-- Change of variables s = 1 + e^(-u): integrals over (1, 2] become
+e^(-u)-weighted integrals over (0, infty). Workhorse for manuscript eq (5). -/
+theorem integral_Ioc_subst (g : ℝ → ℝ) :
+    ∫ s in Set.Ioc (1:ℝ) 2, g s
+      = ∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * g (1 + Real.exp (-u)) := by
+  have hderiv : ∀ u ∈ Set.Ioi (0:ℝ),
+      HasDerivWithinAt (fun u : ℝ => 1 + Real.exp (-u))
+        (Real.exp (-u) * (-1)) (Set.Ioi 0) u := by
+    intro u _
+    exact (((hasDerivAt_neg u).exp).const_add 1).hasDerivWithinAt
+  have himg := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
+    measurableSet_Ioi hderiv subst_injOn g
+  rw [subst_image] at himg
+  rw [MeasureTheory.integral_Ioc_eq_integral_Ioo, himg]
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+  intro u _
+  simp only [smul_eq_mul, mul_neg_one, abs_neg, abs_of_pos (Real.exp_pos _)]
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
