@@ -1,0 +1,31 @@
+theorem iteratedDeriv_geom (c : <<C>>) (hc : c <<NE>> 0) (n : <<N>>) :
+    iteratedDeriv n (fun z : <<C>> => (1 - z / c)<<INV>>) 0
+      = (Nat.factorial n : <<C>>) / c ^ n := by
+  have hopen : IsOpen {z : <<C>> | 1 - z / c <<NE>> 0} := by
+    have hcont : Continuous (fun z : <<C>> => 1 - z / c) := by fun_prop
+    exact isOpen_ne_fun hcont continuous_const
+  have hmem : (0:<<C>>) <<IN>> {z : <<C>> | 1 - z / c <<NE>> 0} := by
+    simp
+  have hfam : <<ALL>> k : <<N>>, <<ALL>> z <<IN>> {z : <<C>> | 1 - z / c <<NE>> 0},
+      iteratedDeriv k (fun w : <<C>> => (1 - w / c)<<INV>>) z
+        = (Nat.factorial k : <<C>>) / (c ^ k * (1 - z / c) ^ (k + 1)) := by
+    intro k
+    induction k with
+    | zero =>
+      intro z hz
+      simp only [iteratedDeriv_zero, Nat.factorial_zero, Nat.cast_one, pow_zero, one_mul,
+        zero_add, pow_one]
+      rw [one_div]
+    | succ K ih =>
+      intro z hz
+      rw [iteratedDeriv_succ]
+      have hloc : <<ALLF>> w in nhds z,
+          iteratedDeriv K (fun v : <<C>> => (1 - v / c)<<INV>>) w
+            = (Nat.factorial K : <<C>>) / (c ^ K * (1 - w / c) ^ (K + 1)) := by
+        filter_upwards [hopen.mem_nhds hz] with w hw
+        exact ih w hw
+      rw [Filter.EventuallyEq.deriv_eq hloc]
+      exact deriv_geom_family_at c hc K z hz
+  have := hfam n 0 hmem
+  rw [this]
+  simp
