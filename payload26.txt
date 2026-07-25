@@ -1,0 +1,10 @@
+theorem sum_pow_div_factorial_le_exp (x : <<R>>) (hx : 0 <<LE>> x) (m : <<N>>) :
+    <<SUM>> i <<IN>> Finset.range (m + 1), x ^ i / (Nat.factorial i) <<LE>> Real.exp x := by
+  have hsum : Summable (fun i : <<N>> => x ^ i / (Nat.factorial i : <<R>>)) :=
+    Real.summable_pow_div_factorial x
+  have hexp : Real.exp x = <<SUM>>' i : <<N>>, x ^ i / (Nat.factorial i : <<R>>) := by
+    rw [Real.exp_eq_exp_<<RSUB>>, NormedSpace.exp_eq_tsum_div]
+  rw [hexp]
+  apply hsum.sum_le_tsum
+  intro i _
+  positivity

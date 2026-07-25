@@ -4265,6 +4265,70 @@ theorem deltaM_lower_bound (m : ℕ) :
     exact mul_nonneg (by positivity) (betaCirc_nonneg i (m - i))
   linarith
 
+/-- Manuscript Thm 4.1: B_j is increasing in j (the 2^(-j e^-u) factor shrinks
+faster than the linear term grows). Stated as the comparison needed there. -/
+theorem Bfun_mono (j m : ℕ) (hjm : j ≤ m) (u : ℝ) :
+    Bfun j u ≤ Bfun m u := by
+  unfold Bfun
+  have hE : (0:ℝ) < Real.exp (-u) := Real.exp_pos _
+  have hjR : ((j:ℕ):ℝ) ≤ ((m:ℕ):ℝ) := by exact_mod_cast hjm
+  have hgap : (2:ℝ) ^ (-((m:ℕ):ℝ) * Real.exp (-u))
+      - (2:ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u))
+      + (((m:ℕ):ℝ) - ((j:ℕ):ℝ)) * Real.log 2 * Real.exp (-u) ≥ 0 := by
+    set c := ((m:ℕ):ℝ) - ((j:ℕ):ℝ) with hc
+    have hc0 : (0:ℝ) ≤ c := by rw [hc]; linarith
+    have hrw1 : (2:ℝ) ^ (-((m:ℕ):ℝ) * Real.exp (-u))
+        = (2:ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u)) *
+          (2:ℝ) ^ (-c * Real.exp (-u)) := by
+      rw [← Real.rpow_add (by norm_num : (0:ℝ) < 2)]
+      congr 1
+      rw [hc]
+      ring
+    have hbase : (0:ℝ) < (2:ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u)) :=
+      Real.rpow_pos_of_pos (by norm_num) _
+    have hbase_le : (2:ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u)) ≤ 1 := by
+      apply Real.rpow_le_one_of_one_le_of_nonpos (by norm_num)
+      have : (0:ℝ) ≤ ((j:ℕ):ℝ) * Real.exp (-u) :=
+        mul_nonneg (Nat.cast_nonneg j) hE.le
+      linarith
+    have hB := Bfun_nonneg 0 u
+    have hkey : (1:ℝ) - (2:ℝ) ^ (-c * Real.exp (-u))
+        ≤ c * Real.log 2 * Real.exp (-u) := by
+      have hexp : (2:ℝ) ^ (-c * Real.exp (-u))
+          = Real.exp (-c * Real.exp (-u) * Real.log 2) := by
+        rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]
+        ring_nf
+      rw [hexp]
+      have h := Real.add_one_le_exp (-c * Real.exp (-u) * Real.log 2)
+      linarith
+    rw [hrw1]
+    have hA : (0:ℝ) < (2:ℝ) ^ (-c * Real.exp (-u)) :=
+      Real.rpow_pos_of_pos (by norm_num) _
+    have hstep : (2:ℝ) ^ (-(↑j) * Real.exp (-u)) *
+        (1 - (2:ℝ) ^ (-c * Real.exp (-u)))
+        ≤ 1 - (2:ℝ) ^ (-c * Real.exp (-u)) := by
+      have hnn : (0:ℝ) ≤ 1 - (2:ℝ) ^ (-c * Real.exp (-u)) := by
+        have : (2:ℝ) ^ (-c * Real.exp (-u)) ≤ 1 := by
+          apply rpow_le_one_of_one_le_of_nonpos (by norm_num)
+          nlinarith [hc0, hE]
+        linarith
+      nlinarith [hbase_le, hnn]
+    nlinarith [hstep, hkey]
+  linarith [hgap]
+
+/-- Partial sums of the exponential series are bounded by the exponential. -/
+theorem sum_pow_div_factorial_le_exp (x : ℝ) (hx : 0 ≤ x) (m : ℕ) :
+    ∑ i ∈ Finset.range (m + 1), x ^ i / (Nat.factorial i) ≤ Real.exp x := by
+  have hsum : Summable (fun i : ℕ => x ^ i / (Nat.factorial i : ℝ)) :=
+    Real.summable_pow_div_factorial x
+  have hexp : Real.exp x = ∑' i : ℕ, x ^ i / (Nat.factorial i : ℝ) := by
+    rw [Real.exp_eq_exp_ℝ, NormedSpace.exp_eq_tsum_div]
+  rw [hexp]
+  apply hsum.sum_le_tsum
+  intro i _
+  positivity
+
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
