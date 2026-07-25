@@ -4902,6 +4902,25 @@ theorem contDiffAt_factorB (s : ℝ) (k : ℕ) (z : ℂ)
     exact ContDiffAt.div_const contDiffAt_id _
   exact hden.inv hz
 
+/-- G2C is ContDiff at 0 (from holomorphy on ball 0 2). -/
+theorem contDiffAt_factorC (s : ℝ) (hs : 1 ≤ s) (k : ℕ) :
+    ContDiffAt ℂ k (fun w : ℂ => G2C s w) 0 := by
+  have hball : Metric.ball (0:ℂ) 2 ∈ nhds (0:ℂ) :=
+    Metric.ball_mem_nhds _ (by norm_num)
+  have han : AnalyticAt ℂ (fun w : ℂ => G2C s w) 0 :=
+    (G2C_differentiableOn s hs).analyticAt hball
+  exact han.contDiffAt
+
+/-- Fbig factors as (A * B) * C as functions. -/
+theorem Fbig_eq_prod (s : ℝ) :
+    (fun z : ℂ => Fbig s z)
+      = ((fun z : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-z))
+          * (fun z : ℂ => (1 - z / ((2:ℂ) ^ (s:ℂ)))⁻¹))
+        * (fun z : ℂ => G2C s z) := by
+  funext z
+  unfold Fbig
+  simp only [Pi.mul_apply]
+
 /-- OBLIGATION L2b: the k-th coefficient of Fbig is the triple convolution
 of the three factors' coefficients. -/
 theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
