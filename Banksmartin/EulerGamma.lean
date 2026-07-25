@@ -294,6 +294,47 @@ theorem eulerMascheroni_eq_integral :
   rw [deriv_Gamma_one] at hderiv
   linarith [hderiv]
 
+/-- Ein(a) = int_0^a (1 - e^(-v))/v dv (the entire exponential integral).
+The integrand extends continuously by 1 at v = 0. -/
+noncomputable def Ein (a : ℝ) : ℝ :=
+  ∫ v in Set.Ioc (0:ℝ) a, (1 - Real.exp (-v)) / v
+
+/-- The Ein integrand is bounded by 1 on positives: 0 <= (1-e^(-v))/v <= 1. -/
+theorem ein_integrand_bounds (v : ℝ) (hv : 0 < v) :
+    0 ≤ (1 - Real.exp (-v)) / v ∧ (1 - Real.exp (-v)) / v ≤ 1 := by
+  have h1 : Real.exp (-v) ≤ 1 := by
+    apply Real.exp_le_one_iff.mpr
+    linarith
+  have h2 : (1:ℝ) - v ≤ Real.exp (-v) := by
+    have := Real.add_one_le_exp (-v)
+    linarith
+  constructor
+  · apply div_nonneg _ hv.le
+    linarith
+  · rw [div_le_one hv]
+    linarith
+
+/-- The Ein integrand is integrable on any (0, a]. -/
+theorem ein_integrable (a : ℝ) (ha : 0 < a) :
+    MeasureTheory.IntegrableOn (fun v : ℝ => (1 - Real.exp (-v)) / v)
+      (Set.Ioc 0 a) := by
+  have hmeas : MeasureTheory.AEStronglyMeasurable
+      (fun v : ℝ => (1 - Real.exp (-v)) / v)
+      (MeasureTheory.volume.restrict (Set.Ioc 0 a)) := by
+    apply Measurable.aestronglyMeasurable
+    fun_prop
+  have hbound : MeasureTheory.IntegrableOn (fun _ : ℝ => (1:ℝ)) (Set.Ioc 0 a) := by
+    have hfin : MeasureTheory.volume (Set.Ioc (0:ℝ) a) ≠ ⊤ := by
+      rw [Real.volume_Ioc]
+      exact ENNReal.ofReal_ne_top
+    exact integrableOn_const hfin
+  apply MeasureTheory.Integrable.mono hbound hmeas
+  filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with v hv
+  obtain ⟨hv0, _⟩ := hv
+  obtain ⟨hlow, hhigh⟩ := ein_integrand_bounds v hv0
+  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hlow, abs_one]
+  exact hhigh
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of
