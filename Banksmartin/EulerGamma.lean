@@ -905,7 +905,45 @@ theorem integral_Ioi_exp_neg (a : ℝ) (ha : 0 ≤ a) :
 /-- The tail integral vanishes at infinity. -/
 theorem EinTailFun_tendsto_zero :
     Filter.Tendsto (fun n : ℕ => EinTailFun (n:ℝ)) Filter.atTop (nhds 0) := by
-  sorry
+  have hmaj : Filter.Tendsto (fun n : ℕ => Real.exp (-(n:ℝ)))
+      Filter.atTop (nhds 0) := by
+    have h := Real.tendsto_exp_neg_atTop_nhds_zero
+    exact h.comp tendsto_natCast_atTop_atTop
+  apply squeeze_zero_norm' _ hmaj
+  filter_upwards [Filter.eventually_ge_atTop 1] with n hn
+  have hn1 : (1:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn
+  have hn0 : (0:ℝ) < (n:ℝ) := by linarith
+  unfold EinTailFun
+  have hIci : (∫ v in Set.Ici (n:ℝ), Real.exp (-v) / v)
+      = ∫ v in Set.Ioi (n:ℝ), Real.exp (-v) / v := by
+    apply MeasureTheory.setIntegral_congr_set
+    exact (MeasureTheory.Ioi_ae_eq_Ici).symm
+  rw [hIci]
+  have hle : |∫ v in Set.Ioi (n:ℝ), Real.exp (-v) / v|
+      ≤ ∫ v in Set.Ioi (n:ℝ), Real.exp (-v) := by
+    apply MeasureTheory.abs_integral_le_integral_abs.trans
+    apply MeasureTheory.setIntegral_mono_on
+    · exact ((exp_div_integrableOn_Ici (n:ℝ) hn0).congr_set_ae
+        MeasureTheory.Ioi_ae_eq_Ici).abs
+    · have hbase : MeasureTheory.IntegrableOn
+          (fun u : ℝ => Real.exp (-u) * u ^ ((1:ℝ) - 1)) (Set.Ioi 0) :=
+        Real.GammaIntegral_convergent (s := (1:ℝ)) (by norm_num)
+      have hb2 : MeasureTheory.IntegrableOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) := by
+        apply hbase.congr_fun ?_ measurableSet_Ioi
+        intro u _
+        simp only
+        rw [show (1:ℝ) - 1 = 0 by ring, Real.rpow_zero, mul_one]
+      exact hb2.mono (fun x hx => Set.mem_Ioi.mpr (by linarith [Set.mem_Ioi.mp hx])) le_rfl
+    · exact measurableSet_Ioi
+    · intro v hv
+      have hvn : (n:ℝ) < v := hv
+      have hv0 : (0:ℝ) < v := by linarith
+      have hE : (0:ℝ) < Real.exp (-v) := Real.exp_pos _
+      rw [abs_of_nonneg (by positivity : (0:ℝ) ≤ Real.exp (-v) / v)]
+      rw [div_le_iff₀ hv0]
+      nlinarith [hE, hv0, hn1, hvn]
+  rw [integral_Ioi_exp_neg (n:ℝ) (by linarith)] at hle
+  exact hle
 
 /-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
 identified via Euler's integral. -/
