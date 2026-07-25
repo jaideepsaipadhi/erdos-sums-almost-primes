@@ -1117,6 +1117,31 @@ theorem gap_parts_finite (b a : ℝ) (hb : 0 < b) (hba : b ≤ a) :
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint]
   ring
 
+/-- The gap-five boundary term vanishes at 0: (e^(-b) - 1 + b)/b -> 0. -/
+theorem gapBoundary_tendsto_zero :
+    Filter.Tendsto (fun b : ℝ => (Real.exp (-b) - 1 + b) / b)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+  have hmaj : Filter.Tendsto (fun b : ℝ => b) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) :=
+    Filter.tendsto_id.mono_left nhdsWithin_le_nhds
+  apply squeeze_zero_norm' _ hmaj
+  filter_upwards [self_mem_nhdsWithin] with b hb
+  have hb0 : (0:ℝ) < b := hb
+  have hupper : Real.exp (-b) - 1 + b ≤ b * b := by
+    have hkey : Real.exp (-b) * (1 + b) ≤ 1 := by
+      have h1 : 1 + b ≤ Real.exp b := by linarith [Real.add_one_le_exp b]
+      have h2 : Real.exp (-b) * Real.exp b = 1 := by
+        rw [← Real.exp_add]
+        simp
+      nlinarith [Real.exp_pos (-b), h1, h2]
+    have hbpos : (0:ℝ) < 1 + b := by linarith
+    nlinarith [hkey, hbpos, Real.exp_pos (-b)]
+  have hlower : (0:ℝ) ≤ Real.exp (-b) - 1 + b := by
+    nlinarith [Real.add_one_le_exp (-b)]
+  rw [Real.norm_eq_abs,
+    abs_of_nonneg (by positivity : (0:ℝ) ≤ (Real.exp (-b) - 1 + b) / b),
+    div_le_iff₀ hb0]
+  nlinarith [hupper]
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of
