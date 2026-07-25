@@ -1,0 +1,26 @@
+/-- Product monotonicity for nonnegative reals over a finset. -/
+theorem finset_prod_le_prod_nonneg {s : Finset NN} {f g : NN ARROW RR}
+    (h0 : FORALL i IN s, (0:RR) LEQ f i) (h1 : FORALL i IN s, f i LEQ g i) :
+    PRODF i IN s, f i LEQ PRODF i IN s, g i := by
+  classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert a t ha ih =>
+    rw [Finset.prod_insert ha, Finset.prod_insert ha]
+    have hfa0 : (0:RR) LEQ f a := h0 a (Finset.mem_insert_self a t)
+    have hfa : f a LEQ g a := h1 a (Finset.mem_insert_self a t)
+    have hrest : PRODF i IN t, f i LEQ PRODF i IN t, g i := by
+      apply ih
+      DOT intro i hi
+        exact h0 i (Finset.mem_insert_of_mem hi)
+      DOT intro i hi
+        exact h1 i (Finset.mem_insert_of_mem hi)
+    have hprodnn : (0:RR) LEQ PRODF i IN t, f i := by
+      apply Finset.prod_nonneg
+      intro i hi
+      exact h0 i (Finset.mem_insert_of_mem hi)
+    calc f a * PRODF i IN t, f i LEQ g a * PRODF i IN t, f i :=
+          mul_le_mul_of_nonneg_right hfa hprodnn
+      _ LEQ g a * PRODF i IN t, g i := by
+          apply mul_le_mul_of_nonneg_left hrest
+          linarith
