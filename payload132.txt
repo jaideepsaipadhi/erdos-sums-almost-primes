@@ -1,0 +1,10 @@
+theorem cFac_cpow (s : RR) (hc : 0 < cFac s) (z : CC) :
+    ((cFac s : RR) : CC) ^ z
+      = Complex.exp (z * ((Real.log (cFac s) : RR) : CC)) := by
+  have hne : ((cFac s : RR) : CC) NEQ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    exact ne_of_gt hc
+  rw [Complex.cpow_def_of_ne_zero hne]
+  congr 1
+  rw [LARR Complex.ofReal_log (le_of_lt hc)]
+  ring
