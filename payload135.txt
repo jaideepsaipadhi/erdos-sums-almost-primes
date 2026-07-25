@@ -1,0 +1,17 @@
+/-- Primes >= 3 excluding 3 correspond to primes >= 5. -/
+def primesGE3_ne_equiv :
+    {q : {p : NN // p.Prime AND 3 LEQ p} // q.1 NEQ 3} EQUIV {p : NN // p.Prime AND 5 LEQ p} where
+  toFun q := ANGL q.1.1, q.1.2.1,
+    five_le_of_prime_ne_three q.1.2.1 q.1.2.2 q.2 ANGR
+  invFun r := ANGL ANGL r.1, r.2.1, by omega ANGR, by
+    have := r.2.2
+    omega ANGR
+  left_inv := by
+    intro q
+    apply Subtype.ext
+    apply Subtype.ext
+    rfl
+  right_inv := by
+    intro r
+    apply Subtype.ext
+    rfl
