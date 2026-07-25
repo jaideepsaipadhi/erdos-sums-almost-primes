@@ -4932,9 +4932,9 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
 
 /-- A2: the Euler product for the z-weighted family. -/
 theorem zOmega_eulerProduct (s : ℝ) (hs : 1 < s) (z : ℂ)
-    (hz : ‖z‖ < (2:ℝ) ^ s) :
-    (∏' p : Nat.Primes, (1 - zOmegaHom s z p)⁻¹) = ∑' n : ℕ, zOmegaHom s z n := by
-  sorry
+    (hsum : Summable (fun n : ℕ => ‖zOmegaHom s z n‖)) :
+    (∏' p : Nat.Primes, (1 - zOmegaHom s z p)⁻¹) = ∑' n : ℕ, zOmegaHom s z n :=
+  (EulerProduct.eulerProduct_completely_multiplicative_hasProd hsum).tprod_eq
 
 /-- A3: the Euler product equals the factored form Fbig. -/
 theorem eulerProduct_eq_Fbig (s : ℝ) (hs : 1 < s) (z : ℂ)
