@@ -4539,6 +4539,42 @@ theorem expNeg_injOn : Set.InjOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) := b
   have := Real.exp_injective huv
   linarith
 
+/-- The change of variables t = e^(-u): int_{(0,inf)} e^u Bfun m u du
+= int_{(0,1)} (e^(-at) - 1 + at)/t^2 dt with a = m log 2. -/
+theorem exp_Bfun_integral_eq (m : ℕ) :
+    (∫ u in Set.Ioi (0:ℝ), Real.exp u * Bfun m u)
+      = ∫ t in Set.Ioo (0:ℝ) 1,
+        (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * t)) - 1
+          + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := by
+  have hderiv : ∀ u ∈ Set.Ioi (0:ℝ),
+      HasDerivWithinAt (fun u : ℝ => Real.exp (-u))
+        (Real.exp (-u) * (-1)) (Set.Ioi 0) u := by
+    intro u _
+    exact (((hasDerivAt_neg u).exp)).hasDerivWithinAt
+  have himg := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
+    measurableSet_Ioi hderiv expNeg_injOn
+    (fun t : ℝ => (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * t)) - 1
+      + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2)
+  rw [expNeg_image] at himg
+  rw [himg]
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+  intro u hu
+  have hu0 : (0:ℝ) < u := hu
+  have hE : (0:ℝ) < Real.exp (-u) := Real.exp_pos _
+  simp only [smul_eq_mul, mul_neg_one, abs_neg, abs_of_pos hE]
+  have hBeq : Bfun m u
+      = (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * Real.exp (-u))) - 1
+        + ((m:ℕ):ℝ) * Real.log 2 * Real.exp (-u)) := by
+    unfold Bfun
+    rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]
+    ring_nf
+  rw [hBeq]
+  have hsq : Real.exp (-u) ^ 2 ≠ 0 := by positivity
+  field_simp
+  rw [← Real.exp_add]
+  ring_nf
+  simp [Real.exp_zero]
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
