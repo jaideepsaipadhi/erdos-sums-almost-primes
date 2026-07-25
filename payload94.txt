@@ -1,0 +1,25 @@
+/-- c(s) = prod_{p >= 3} (1 - p^(-s))^(-1) = zeta(s)(1 - 2^(-s)).
+This is the constant whose z-th power is the first factor of F(s,z)
+when G2 is normalised as our G2C (product over p >= 3 of the
+regularised factors). -/
+noncomputable def cFac (s : RR) : RR :=
+  TPROD p : {p : NN // p.Prime AND 3 LEQ p}, (1 - (p:RR) ^ (-s))INV
+
+/-- Coefficients of the factor c^z: the l-th is (log c)^l / l!. -/
+theorem coeff_cpow (s : RR) (hc : 0 < cFac s) (l : NN) :
+    (iteratedDeriv l (fun z : CC => ((cFac s : RR) : CC) ^ z) 0) / (Nat.factorial l : CC)
+      = (((Real.log (cFac s)) ^ l / (Nat.factorial l) : RR) : CC) := by
+  have hcne : ((cFac s : RR) : CC) NEQ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    exact ne_of_gt hc
+  have hrewrite : (fun z : CC => ((cFac s : RR) : CC) ^ z)
+      = fun z : CC => Complex.exp (((Real.log (cFac s) : RR) : CC) * z) := by
+    funext z
+    rw [Complex.cpow_def_of_ne_zero hcne]
+    congr 1
+    rw [LARR Complex.ofReal_log (le_of_lt hc)]
+    ring
+  rw [hrewrite, iteratedDeriv_cexp_const_mul l ((Real.log (cFac s) : RR) : CC)]
+  simp only [mul_zero, Complex.exp_zero, mul_one]
+  push_cast
+  ring
