@@ -4662,7 +4662,44 @@ theorem iteratedDeriv_eq_factorial_smul_coeff
 theorem deriv_geom_family (c : ℂ) (hc : c ≠ 0) (k : ℕ) :
     deriv (fun z : ℂ => (Nat.factorial k : ℂ) / (c ^ k * (1 - z / c) ^ (k + 1)))
       = fun z : ℂ => (Nat.factorial (k + 1) : ℂ) / (c ^ (k + 1) * (1 - z / c) ^ (k + 2)) := by
-  sorry
+  funext z
+  by_cases hz : (1 : ℂ) - z / c = 0
+  · sorry
+  · have hbase : HasDerivAt (fun w : ℂ => 1 - w / c) (-(1 / c)) z := by
+      have h1 : HasDerivAt (fun w : ℂ => w / c) (1 / c) z := by
+        simpa using (hasDerivAt_id z).div_const c
+      simpa [Pi.sub_def] using (hasDerivAt_const z (1:ℂ)).sub h1
+    have hpow : HasDerivAt (fun w : ℂ => (1 - w / c) ^ (k + 1))
+        (((k:ℂ) + 1) * (1 - z / c) ^ k * (-(1 / c))) z := by
+      have hp := hbase.pow (k + 1)
+      simpa [Pi.pow_def] using hp
+    have hden : c ^ k * (1 - z / c) ^ (k + 1) ≠ 0 := by
+      apply mul_ne_zero (pow_ne_zero _ hc)
+      exact pow_ne_zero _ hz
+    have hmul : HasDerivAt (fun w : ℂ => c ^ k * (1 - w / c) ^ (k + 1))
+        (c ^ k * (((k:ℂ) + 1) * (1 - z / c) ^ k * (-(1 / c)))) z :=
+      hpow.const_mul _
+    have hdiv0 := (hasDerivAt_const z ((Nat.factorial k : ℂ))).div hmul hden
+    have hdiv : HasDerivAt (fun w : ℂ => (Nat.factorial k : ℂ) / (c ^ k * (1 - w / c) ^ (k + 1)))
+        ((0 * (c ^ k * (1 - z / c) ^ (k + 1))
+          - (Nat.factorial k : ℂ) * (c ^ k * (((k:ℂ) + 1) * (1 - z / c) ^ k * (-(1 / c)))))
+          / (c ^ k * (1 - z / c) ^ (k + 1)) ^ 2) z := by
+      simpa [Pi.div_def] using hdiv0
+    rw [hdiv.deriv]
+    set w := 1 - z / c with hw
+    have hwnz : w ≠ 0 := hz
+    have hcnz : c ≠ 0 := hc
+    have hnum : (0 * (c ^ k * w ^ (k + 1))
+        - (Nat.factorial k : ℂ) * (c ^ k * (((k:ℂ) + 1) * w ^ k * (-(1 / c)))))
+        / (c ^ k * w ^ (k + 1)) ^ 2
+        = ((Nat.factorial k : ℂ) * ((k:ℂ) + 1)) / (c ^ (k + 1) * w ^ (k + 2)) := by
+      rw [div_eq_div_iff (by positivity) (by positivity)]
+      field_simp
+      ring
+    rw [hnum]
+    congr 1
+    push_cast [Nat.factorial_succ]
+    ring
 
 /-- L3b core: the n-th derivative of (1 - z/c)^(-1) at 0 is n!/c^n. -/
 theorem iteratedDeriv_geom (c : ℂ) (hc : c ≠ 0) (n : ℕ) :
