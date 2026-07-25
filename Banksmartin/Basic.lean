@@ -5692,6 +5692,23 @@ theorem cpow_neg_sub_one_bound (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     _ ≤ 2 * (4 * a) := by linarith
     _ = 8 * a := by ring
 
+/-- Summability of the correction for the (1 - p^-s)^(-z) family, p >= 5. -/
+theorem cpow_neg_sub_one_summable (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
+    Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      Norm.norm ((((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z) - 1)) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 8 * (((p:ℕ):ℝ) ^ (-s))) := by
+    have hbase : Summable (fun n : ℕ => ((n:ℝ) ^ (-s))) := by
+      rw [Real.summable_nat_rpow]
+      linarith
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => (((p:ℕ):ℝ) ^ (-s))) :=
+      hbase.subtype _
+    exact hsub.mul_left 8
+  apply Summable.of_nonneg_of_le
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      cpow_neg_sub_one_bound (p:ℕ) p.property.2 s (le_of_lt hs) z hz)
+    hcomp
+
 /-- The family (1 - p^-s)^(-z) is multipliable over primes >= 3. -/
 theorem cpow_neg_multipliable_three (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
