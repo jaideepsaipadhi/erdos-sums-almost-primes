@@ -172,7 +172,18 @@ lemma geom_tail_bound (t : ℕ → ℝ) (n₀ : ℕ)
     _ = |t (n₀ + 1)| * 2 := h3
     _ = 2 * |t (n₀ + 1)| := by ring
 
-noncomputable def dConst : ℝ := 0.3786950
+/-- The density constant d from Gorodetsky-Lichtman-Wong, "On Erdos sums of
+almost primes", C. R. Math. 362 (2024), eq. (1):
+d = (1/4) * prod_{p > 2} (1 - 2/p)^(-1) (1 - 1/p)^2 = 0.37869...
+Defined as the genuine Euler product (tprod over primes; factors at p = 2
+are set to 1). The numerical enclosure is carried by NumericalFacts. -/
+noncomputable def dConst : ℝ :=
+  (1 / 4) * ∏' p : Nat.Primes,
+    (if 2 < (p : ℕ) then (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 else 1)
+
+/-- The secondary-term constant a1 = d * log 2 / 4 from GLW Theorem 2:
+f_k = 1 - 2^(-k) (a1 k^2 + O(k log(k+1))). -/
+noncomputable def aOneConst : ℝ := dConst * Real.log 2 / 4
 noncomputable def rhoConst : ℝ := -0.1749323
 noncomputable def SstarConst : ℝ := 6.9763
 noncomputable def alphaConst : ℝ := 15.5716
