@@ -727,7 +727,53 @@ theorem euler_parts_limit (c : ℝ) (hc : 0 < c) :
     have h3 : Filter.Tendsto
         (fun b : ℝ => ∫ v in Set.Ioc (0:ℝ) b, Real.exp (-v) * Real.log v)
         (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
-      sorry
+      have hmaj : Filter.Tendsto (fun b : ℝ => (16/3) * b ^ ((3:ℝ)/4))
+          (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+        have hrpow : Filter.Tendsto (fun b : ℝ => b ^ ((3:ℝ)/4))
+            (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+          have hcont := Real.continuousAt_rpow_const (0:ℝ) ((3:ℝ)/4) (by norm_num)
+          have h0 : (0:ℝ) ^ ((3:ℝ)/4) = 0 := Real.zero_rpow (by norm_num)
+          have ht := hcont.continuousWithinAt (s := Set.Ioi (0:ℝ))
+          rw [ContinuousWithinAt, h0] at ht
+          exact ht
+        simpa using hrpow.const_mul ((16:ℝ)/3)
+      have hsmall : ∀ᶠ b in nhdsWithin (0:ℝ) (Set.Ioi 0), b ≤ 1 := by
+        have hIio : Set.Iio (1:ℝ) ∈ nhds (0:ℝ) := Iio_mem_nhds (by norm_num)
+        filter_upwards [nhdsWithin_le_nhds hIio] with b hb
+        exact le_of_lt hb
+      apply squeeze_zero_norm' _ hmaj
+      filter_upwards [self_mem_nhdsWithin, hsmall] with b hb hb1
+      have hb0 : (0:ℝ) < b := hb
+      have hbound : |∫ v in Set.Ioc (0:ℝ) b, Real.exp (-v) * Real.log v|
+          ≤ ∫ v in Set.Ioc (0:ℝ) b, 4 * v ^ (-(1:ℝ)/4) := by
+        apply MeasureTheory.abs_integral_le_integral_abs.trans
+        apply MeasureTheory.setIntegral_mono_on
+        · exact (expLog_integrableOn_Ioc b hb0).abs
+        · have hb2 : MeasureTheory.IntegrableOn
+              (fun v : ℝ => v ^ (-(1:ℝ)/4)) (Set.Ioc 0 b) := by
+            have hIoo : MeasureTheory.IntegrableOn
+                (fun v : ℝ => v ^ (-(1:ℝ)/4)) (Set.Ioo 0 b) := by
+              rw [intervalIntegral.integrableOn_Ioo_rpow_iff hb0]
+              norm_num
+            exact hIoo.congr_set_ae (MeasureTheory.Ioo_ae_eq_Ioc).symm
+          exact hb2.const_mul 4
+        · exact measurableSet_Ioc
+        · intro v hv
+          have hv0 : (0:ℝ) < v := hv.1
+          have hv1 : v ≤ 1 := le_trans hv.2 hb1
+          have hE : Real.exp (-v) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
+          have hEp : (0:ℝ) < Real.exp (-v) := Real.exp_pos _
+          have hL := abs_log_le_rpow_near_zero v hv0 hv1
+          rw [abs_mul, abs_of_pos hEp]
+          calc Real.exp (-v) * |Real.log v| ≤ 1 * (4 * v ^ (-(1:ℝ)/4)) :=
+                mul_le_mul hE hL (abs_nonneg _) (by norm_num)
+            _ = 4 * v ^ (-(1:ℝ)/4) := by ring
+      have hcalc : (∫ v in Set.Ioc (0:ℝ) b, 4 * v ^ (-(1:ℝ)/4))
+          = (16/3) * b ^ ((3:ℝ)/4) := by
+        sorry
+      rw [hcalc] at hbound
+      rw [Real.norm_eq_abs]
+      exact hbound
     have hc0 : Filter.Tendsto (fun _ : ℝ => (1 - Real.exp (-c)) * Real.log c)
         (nhdsWithin 0 (Set.Ioi 0)) (nhds ((1 - Real.exp (-c)) * Real.log c)) :=
       tendsto_const_nhds

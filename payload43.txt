@@ -1,0 +1,52 @@
+    have h3 : Filter.Tendsto
+        (fun b : <<R>> => <<INT>> v in Set.Ioc (0:<<R>>) b, Real.exp (-v) * Real.log v)
+        (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      have hmaj : Filter.Tendsto (fun b : <<R>> => (16/3) * b ^ ((3:<<R>>)/4))
+          (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+        have hrpow : Filter.Tendsto (fun b : <<R>> => b ^ ((3:<<R>>)/4))
+            (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+          have hcont := Real.continuousAt_rpow_const (0:<<R>>) ((3:<<R>>)/4) (by norm_num)
+          have h0 : (0:<<R>>) ^ ((3:<<R>>)/4) = 0 := Real.zero_rpow (by norm_num)
+          rw [h0] at hcont
+          exact hcont.continuousWithinAt.tendsto.mono_left nhdsWithin_le_nhds
+        simpa using hrpow.const_mul ((16:<<R>>)/3)
+      have hsmall : <<ALLF>> b in nhdsWithin (0:<<R>>) (Set.Ioi 0), b <<LE>> 1 := by
+        have hIio : Set.Iio (1:<<R>>) <<IN>> nhds (0:<<R>>) := Iio_mem_nhds (by norm_num)
+        filter_upwards [nhdsWithin_le_nhds hIio] with b hb
+        exact le_of_lt hb
+      apply squeeze_zero_norm' _ hmaj
+      filter_upwards [self_mem_nhdsWithin, hsmall] with b hb hb1
+      have hb0 : (0:<<R>>) < b := hb
+      have hbound : |<<INT>> v in Set.Ioc (0:<<R>>) b, Real.exp (-v) * Real.log v|
+          <<LE>> <<INT>> v in Set.Ioc (0:<<R>>) b, 4 * v ^ (-(1:<<R>>)/4) := by
+        apply MeasureTheory.abs_integral_le_integral_abs.trans
+        apply MeasureTheory.setIntegral_mono_on
+        <<DOT>> exact (expLog_integrableOn_Ioc b hb0).abs
+        <<DOT>> have hb2 : MeasureTheory.IntegrableOn
+              (fun v : <<R>> => v ^ (-(1:<<R>>)/4)) (Set.Ioc 0 b) := by
+            have hIoo : MeasureTheory.IntegrableOn
+                (fun v : <<R>> => v ^ (-(1:<<R>>)/4)) (Set.Ioo 0 b) := by
+              rw [intervalIntegral.integrableOn_Ioo_rpow_iff hb0]
+              norm_num
+            exact hIoo.congr_set_ae Set.Ioo_ae_eq_Ioc
+          exact hb2.const_mul 4
+        <<DOT>> exact measurableSet_Ioc
+        <<DOT>> intro v hv
+          have hv0 : (0:<<R>>) < v := hv.1
+          have hv1 : v <<LE>> 1 := le_trans hv.2 hb1
+          have hE : Real.exp (-v) <<LE>> 1 := Real.exp_le_one_iff.mpr (by linarith)
+          have hEp : (0:<<R>>) < Real.exp (-v) := Real.exp_pos _
+          have hL := abs_log_le_rpow_near_zero v hv0 hv1
+          rw [abs_mul, abs_of_pos hEp]
+          calc Real.exp (-v) * |Real.log v| <<LE>> 1 * (4 * v ^ (-(1:<<R>>)/4)) :=
+                mul_le_mul hE hL (abs_nonneg _) (by norm_num)
+            _ = 4 * v ^ (-(1:<<R>>)/4) := by ring
+      have hcalc : (<<INT>> v in Set.Ioc (0:<<R>>) b, 4 * v ^ (-(1:<<R>>)/4))
+          = (16/3) * b ^ ((3:<<R>>)/4) := by
+        sorry
+      rw [hcalc] at hbound
+      rw [Real.norm_eq_abs]
+      calc |<<INT>> v in Set.Ioc (0:<<R>>) b, Real.exp (-v) * Real.log v|
+          <<LE>> (16/3) * b ^ ((3:<<R>>)/4) := hbound
+        _ = |(16/3) * b ^ ((3:<<R>>)/4)| := by
+            rw [abs_of_nonneg (by positivity)]
