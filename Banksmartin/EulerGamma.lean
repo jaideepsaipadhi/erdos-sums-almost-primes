@@ -558,7 +558,26 @@ theorem euler_parts_reg (b c : ℝ) (hb : 0 < b) (hbc : b ≤ c) :
 theorem regBoundary_tendsto_zero :
     Filter.Tendsto (fun b : ℝ => (1 - Real.exp (-b)) * Real.log b)
       (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
-  sorry
+  have hxlogx : Filter.Tendsto (fun b : ℝ => b * Real.log b)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    have h := tendsto_log_mul_rpow_nhdsGT_zero (r := (1:ℝ)) zero_lt_one
+    simp only [Real.rpow_one] at h
+    simpa [mul_comm] using h
+  have habs : Filter.Tendsto (fun b : ℝ => |b * Real.log b|)
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    simpa using hxlogx.abs
+  apply squeeze_zero_norm' _ habs
+  filter_upwards [self_mem_nhdsWithin] with b hb
+  have hb0 : (0:ℝ) < b := hb
+  have h1 : 1 - Real.exp (-b) ≤ b := by
+    have := Real.add_one_le_exp (-b)
+    linarith
+  have h2 : (0:ℝ) ≤ 1 - Real.exp (-b) := by
+    have hle : Real.exp (-b) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
+    linarith
+  rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg h2]
+  rw [abs_mul, abs_of_nonneg hb0.le]
+  exact mul_le_mul_of_nonneg_right h1 (abs_nonneg _)
 
 /-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
 identified via Euler's integral. -/
