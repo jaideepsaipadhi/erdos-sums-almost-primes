@@ -612,6 +612,62 @@ theorem Ein_tendsto_zero :
   rw [hconst] at hle
   exact hle
 
+/-- Ein additivity: Ein c - Ein b = int_b^c (1 - e^-v)/v, for 0 < b <= c. -/
+theorem Ein_sub (b c : ℝ) (hb : 0 < b) (hbc : b ≤ c) :
+    Ein c - Ein b = ∫ v in Set.Ioc b c, (1 - Real.exp (-v)) / v := by
+  unfold Ein
+  have hunion : Set.Ioc (0:ℝ) c = Set.Ioc 0 b ∪ Set.Ioc b c :=
+    (Set.Ioc_union_Ioc_eq_Ioc hb.le hbc).symm
+  have hdisj : Disjoint (Set.Ioc (0:ℝ) b) (Set.Ioc b c) := by
+    rw [Set.disjoint_left]
+    intro x hx hx2
+    exact absurd hx2.1 (not_lt.mpr hx.2)
+  have hint1 : MeasureTheory.IntegrableOn
+      (fun v : ℝ => (1 - Real.exp (-v)) / v) (Set.Ioc 0 b) := ein_integrable b hb
+  have hint2 : MeasureTheory.IntegrableOn
+      (fun v : ℝ => (1 - Real.exp (-v)) / v) (Set.Ioc b c) :=
+    (ein_integrable c (by linarith)).mono
+      (fun x hx => Set.mem_Ioc.mpr ⟨by linarith [hx.1], hx.2⟩) le_rfl
+  rw [hunion, MeasureTheory.setIntegral_union hdisj measurableSet_Ioc hint1 hint2]
+  ring
+
+/-- e^(-v) log v is integrable on (0, c] for c > 0, dominated by the
+gammaDeriv_dom envelope. -/
+theorem expLog_integrableOn_Ioc (c : ℝ) (hc : 0 < c) :
+    MeasureTheory.IntegrableOn (fun v : ℝ => Real.exp (-v) * Real.log v)
+      (Set.Ioc 0 c) := by
+  have hdom : MeasureTheory.IntegrableOn gammaDeriv_dom (Set.Ioc 0 c) :=
+    gammaDeriv_dom_integrable.mono
+      (fun x hx => Set.mem_Ioi.mpr hx.1) le_rfl
+  apply MeasureTheory.Integrable.mono hdom
+  · apply Measurable.aestronglyMeasurable
+    fun_prop
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with v hv
+    have hv0 : (0:ℝ) < v := hv.1
+    unfold gammaDeriv_dom
+    have hA : (0:ℝ) < v ^ (-(1:ℝ)/2) := Real.rpow_pos_of_pos hv0 _
+    have hB : (0:ℝ) < v ^ ((1:ℝ)/2) := Real.rpow_pos_of_pos hv0 _
+    have hE : (0:ℝ) < Real.exp (-v) := Real.exp_pos _
+    have hone : (1:ℝ) ≤ v ^ (-(1:ℝ)/2) + v ^ ((1:ℝ)/2) := by
+      rcases le_total v 1 with hv1 | hv1
+      · have hstep : v ^ (0:ℝ) ≤ v ^ (-(1:ℝ)/2) := by
+          apply Real.rpow_le_rpow_of_exponent_ge hv0 hv1
+          norm_num
+        rw [Real.rpow_zero] at hstep
+        linarith
+      · have : (1:ℝ) ≤ v ^ ((1:ℝ)/2) := by
+          apply Real.one_le_rpow hv1
+          norm_num
+        linarith
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_of_pos hE]
+    rw [abs_of_nonneg (by positivity : (0:ℝ) ≤
+      Real.exp (-v) * (v ^ (-(1:ℝ)/2) + v ^ ((1:ℝ)/2)) * |Real.log v|)]
+    calc Real.exp (-v) * |Real.log v|
+        = Real.exp (-v) * 1 * |Real.log v| := by ring
+      _ ≤ Real.exp (-v) * (v ^ (-(1:ℝ)/2) + v ^ ((1:ℝ)/2)) * |Real.log v| := by
+          apply mul_le_mul_of_nonneg_right _ (abs_nonneg _)
+          exact mul_le_mul_of_nonneg_left hone hE.le
+
 /-- The b -> 0+ limit of the regularized identity: for c > 0,
 int_0^c e^-v log v dv + Ein c = (1 - e^-c) log c. -/
 theorem euler_parts_limit (c : ℝ) (hc : 0 < c) :
