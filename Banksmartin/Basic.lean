@@ -4120,6 +4120,76 @@ theorem integrable_Jint_integrand (c : ℝ) (hc : 0 ≤ c) (i : ℕ) :
           (mul_nonneg (pow_nonneg hu0.le i) (Real.exp_pos _).le)
     _ = u ^ i * Real.exp (-u) := mul_one _
 
+/-- The J-split (manuscript Thm 4.1 engine): J(i) decomposes exactly into the
+Bfun piece, the Gamma piece, and the log2-weighted scaled piece. -/
+theorem Jint_split (m i : ℕ) :
+    Jint m i = (Nat.factorial i : ℝ) * betaCirc i (m - i)
+      + (Nat.factorial i : ℝ)
+      - ((m - i : ℕ) : ℝ) * Real.log 2 * ((Nat.factorial i : ℝ) / 2 ^ (i + 1)) := by
+  have hfacne : ((Nat.factorial i : ℕ) : ℝ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
+  have hpt : ∀ u : ℝ,
+      u ^ i * Real.exp (-u) * (2:ℝ) ^ (-(((m - i : ℕ)):ℝ) * Real.exp (-u))
+        = u ^ i * Real.exp (-u) * Bfun (m - i) u
+          + u ^ i * Real.exp (-u)
+          - ((m - i : ℕ) : ℝ) * Real.log 2 * (u ^ i * Real.exp (-(2 * u))) := by
+    intro u
+    have hexp : Real.exp (-u) * Real.exp (-u) = Real.exp (-(2 * u)) := by
+      rw [← Real.exp_add]
+      ring_nf
+    unfold Bfun
+    rw [show Real.exp (-(2 * u)) = Real.exp (-u) * Real.exp (-u) from hexp.symm]
+    ring
+  have hI1 := integrable_pow_exp i
+  have hI2 := integrable_pow_exp_two i
+  have hI3 := integrable_Jint_integrand (((m - i : ℕ)):ℝ) (by positivity) i
+  have hIB : MeasureTheory.IntegrableOn
+      (fun u : ℝ => u ^ i * Real.exp (-u) * Bfun (m - i) u) (Set.Ioi 0) := by
+    have hfeq : (fun u : ℝ => u ^ i * Real.exp (-u) * Bfun (m - i) u)
+        = fun u : ℝ =>
+          (u ^ i * Real.exp (-u) * (2:ℝ) ^ (-(((m - i : ℕ)):ℝ) * Real.exp (-u))
+            - u ^ i * Real.exp (-u))
+          + ((m - i : ℕ) : ℝ) * Real.log 2 * (u ^ i * Real.exp (-(2 * u))) := by
+      funext u
+      have h := hpt u
+      linarith [h]
+    rw [hfeq]
+    exact (hI3.sub hI1).add (hI2.const_mul _)
+  have hbase : ∫ u in Set.Ioi (0:ℝ), u ^ i * Real.exp (-u)
+      = (Nat.factorial i : ℝ) := by
+    rw [← integral_exp_neg_mul_pow i]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro u _
+    simp only
+    ring
+  have hbeta : ∫ u in Set.Ioi (0:ℝ), u ^ i * Real.exp (-u) * Bfun (m - i) u
+      = (Nat.factorial i : ℝ) * betaCirc i (m - i) := by
+    unfold betaCirc
+    field_simp
+  unfold Jint
+  calc ∫ u in Set.Ioi (0:ℝ),
+        u ^ i * Real.exp (-u) * (2:ℝ) ^ (-(((m - i : ℕ)):ℝ) * Real.exp (-u))
+      = ∫ u in Set.Ioi (0:ℝ),
+        (u ^ i * Real.exp (-u) * Bfun (m - i) u + u ^ i * Real.exp (-u)
+          - ((m - i : ℕ) : ℝ) * Real.log 2 * (u ^ i * Real.exp (-(2 * u)))) := by
+        apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+        intro u _
+        simp only [hpt u]
+    _ = (∫ u in Set.Ioi (0:ℝ), u ^ i * Real.exp (-u) * Bfun (m - i) u)
+        + (∫ u in Set.Ioi (0:ℝ), u ^ i * Real.exp (-u))
+        - ∫ u in Set.Ioi (0:ℝ),
+            ((m - i : ℕ) : ℝ) * Real.log 2 * (u ^ i * Real.exp (-(2 * u))) := by
+        have hIsum : MeasureTheory.IntegrableOn
+            (fun u : ℝ => u ^ i * Real.exp (-u) * Bfun (m - i) u + u ^ i * Real.exp (-u))
+            (Set.Ioi 0) := hIB.add hI1
+        have hIc : MeasureTheory.IntegrableOn
+            (fun u : ℝ => ((m - i : ℕ) : ℝ) * Real.log 2 * (u ^ i * Real.exp (-(2 * u))))
+            (Set.Ioi 0) := hI2.const_mul _
+        rw [MeasureTheory.integral_sub hIsum hIc, MeasureTheory.integral_add hIB hI1]
+    _ = (Nat.factorial i : ℝ) * betaCirc i (m - i) + (Nat.factorial i : ℝ)
+        - ((m - i : ℕ) : ℝ) * Real.log 2 * ((Nat.factorial i : ℝ) / 2 ^ (i + 1)) := by
+        rw [hbeta, hbase, MeasureTheory.integral_const_mul, integral_pow_exp_neg_two_mul]
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
