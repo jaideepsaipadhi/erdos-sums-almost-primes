@@ -1,0 +1,25 @@
+      have hsummable_nat : Summable (fun n : NN => Norm.norm z * ((n:RR) ^ (-s))) := by
+        have hb : Summable (fun n : NN => ((n:RR) ^ (-s))) := by
+          rw [Real.summable_nat_rpow]
+          linarith
+        exact hb.mul_left _
+      have hnn_nat : FORALL n : NN, (0:RR) LEQ Norm.norm z * ((n:RR) ^ (-s)) := by
+        intro n
+        positivity
+      calc PRODF i IN (Finset.range N).erase 2, G i
+          LEQ PRODF i IN (Finset.range N).erase 2,
+              Real.exp (2 * (Norm.norm z * ((i:RR) ^ (-s)))) := by
+            apply finset_prod_le_prod_nonneg
+            DOT intro i _
+              exact hGnn i
+            DOT intro i hi
+              have hi2 : i NEQ 2 := (Finset.mem_erase.mp hi).1
+              have hiN : i IN Finset.range N := (Finset.mem_erase.mp hi).2
+              exact hGle i hiN hi2
+        _ = Real.exp (SUMF i IN (Finset.range N).erase 2,
+              2 * (Norm.norm z * ((i:RR) ^ (-s)))) := (Real.exp_sum _ _).symm
+        _ LEQ Real.exp (2 * TSUMN n : NN, Norm.norm z * ((n:RR) ^ (-s))) := by
+            apply Real.exp_le_exp.mpr
+            rw [LARR Finset.mul_sum]
+            apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:RR) LEQ 2)
+            exact hsummable_nat.sum_le_tsum _ (fun i _ => hnn_nat i)
