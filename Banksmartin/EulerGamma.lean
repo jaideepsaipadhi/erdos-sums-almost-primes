@@ -873,6 +873,30 @@ theorem expNeg_log_tendsto_zero :
   rw [Real.norm_eq_abs, abs_mul, abs_of_pos hE]
   exact mul_le_mul_of_nonneg_left hL hE.le
 
+/-- The exponential tail integral evaluates: int_{Ioi a} e^(-v) dv = e^(-a). -/
+theorem integral_Ioi_exp_neg (a : ℝ) :
+    (∫ v in Set.Ioi a, Real.exp (-v)) = Real.exp (-a) := by
+  have hderiv : ∀ x ∈ Set.Ici a,
+      HasDerivAt (fun t : ℝ => -Real.exp (-t)) (Real.exp (-x)) x := by
+    intro x _
+    have h : HasDerivAt (fun t : ℝ => Real.exp (-t)) (Real.exp (-x) * -1) x :=
+      (Real.hasDerivAt_exp (-x)).comp x (hasDerivAt_neg x)
+    have h2 : HasDerivAt (fun t : ℝ => Real.exp (-t)) (-(Real.exp (-x))) x := by
+      simpa using h
+    have h3 := h2.neg
+    simpa [Pi.neg_def] using h3
+  have hint : MeasureTheory.IntegrableOn (fun v : ℝ => Real.exp (-v)) (Set.Ioi a) := by
+    have hbase : MeasureTheory.IntegrableOn
+        (fun u : ℝ => Real.exp (-u) * u ^ ((1:ℝ) - 1)) (Set.Ioi 0) :=
+      Real.GammaIntegral_convergent (s := (1:ℝ)) (by norm_num)
+    sorry
+  have htend : Filter.Tendsto (fun t : ℝ => -Real.exp (-t)) Filter.atTop (nhds 0) := by
+    have h := Real.tendsto_exp_neg_atTop_nhds_zero
+    simpa using h.neg
+  have hmain := MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto' hderiv hint htend
+  rw [hmain]
+  ring
+
 /-- The tail integral vanishes at infinity. -/
 theorem EinTailFun_tendsto_zero :
     Filter.Tendsto (fun n : ℕ => EinTailFun (n:ℝ)) Filter.atTop (nhds 0) := by

@@ -1,0 +1,22 @@
+/-- The exponential tail integral evaluates: int_{Ioi a} e^(-v) dv = e^(-a). -/
+theorem integral_Ioi_exp_neg (a : <<R>>) :
+    (<<INT>> v in Set.Ioi a, Real.exp (-v)) = Real.exp (-a) := by
+  have hderiv : <<ALL>> x <<IN>> Set.Ici a,
+      HasDerivAt (fun t : <<R>> => -Real.exp (-t)) (Real.exp (-x)) x := by
+    intro x _
+    have h : HasDerivAt (fun t : <<R>> => Real.exp (-t)) (Real.exp (-x) * -1) x :=
+      (Real.hasDerivAt_exp (-x)).comp x (hasDerivAt_neg x)
+    have h2 : HasDerivAt (fun t : <<R>> => Real.exp (-t)) (-(Real.exp (-x))) x := by
+      simpa using h
+    simpa using h2.neg
+  have hint : MeasureTheory.IntegrableOn (fun v : <<R>> => Real.exp (-v)) (Set.Ioi a) := by
+    have hbase : MeasureTheory.IntegrableOn
+        (fun u : <<R>> => Real.exp (-u) * u ^ ((1:<<R>>) - 1)) (Set.Ioi 0) :=
+      Real.GammaIntegral_convergent (s := (1:<<R>>)) (by norm_num)
+    sorry
+  have htend : Filter.Tendsto (fun t : <<R>> => -Real.exp (-t)) Filter.atTop (nhds 0) := by
+    have h := Real.tendsto_exp_neg_atTop_nhds_zero
+    simpa using h.neg
+  have hmain := MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto' hderiv hint htend
+  rw [hmain]
+  ring
