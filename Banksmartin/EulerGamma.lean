@@ -46,7 +46,25 @@ integrand, uniformly for s in (1/2, 3/2). -/
 theorem gammaDeriv_dominated (u : ℝ) (hu : 0 < u) (s : ℝ)
     (hs : s ∈ Set.Ioo ((1:ℝ)/2) ((3:ℝ)/2)) :
     |Real.exp (-u) * u ^ (s - 1) * Real.log u| ≤ gammaDeriv_dom u := by
-  sorry
+  obtain ⟨hs1, hs2⟩ := hs
+  unfold gammaDeriv_dom
+  have hexp : (0:ℝ) < Real.exp (-u) := Real.exp_pos _
+  have hrpow : (0:ℝ) < u ^ (s - 1) := Real.rpow_pos_of_pos hu _
+  have hkey : u ^ (s - 1) ≤ u ^ (-(1:ℝ)/2) + u ^ ((1:ℝ)/2) := by
+    rcases le_total u 1 with hu1 | hu1
+    · have hmono : u ^ (s - 1) ≤ u ^ (-(1:ℝ)/2) := by
+        apply Real.rpow_le_rpow_of_exponent_ge hu hu1
+        linarith
+      have hpos : (0:ℝ) < u ^ ((1:ℝ)/2) := Real.rpow_pos_of_pos hu _
+      linarith
+    · have hmono : u ^ (s - 1) ≤ u ^ ((1:ℝ)/2) := by
+        apply Real.rpow_le_rpow_of_exponent_le hu1
+        linarith
+      have hpos : (0:ℝ) < u ^ (-(1:ℝ)/2) := Real.rpow_pos_of_pos hu _
+      linarith
+  rw [abs_mul, abs_of_pos (mul_pos hexp hrpow)]
+  apply mul_le_mul_of_nonneg_right _ (abs_nonneg _)
+  exact mul_le_mul_of_nonneg_left hkey hexp.le
 
 /-- OBLIGATION 3: the pointwise derivative in s of the Gamma integrand. -/
 theorem hasDerivAt_gamma_integrand (u : ℝ) (hu : 0 < u) (s : ℝ) :
