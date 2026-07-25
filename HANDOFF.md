@@ -19,3 +19,21 @@ T3 (do NOT formalize): Arb computations (delta-table, prime tails, box sweeps,
    unlocks Lem 2.2/2.4/Prop 2.5 statements simultaneously.
 END STATE: Lean-verified reduction + Arb-certified hypothesis = machine-checked
 conditional theorem, trust surface = FLINT/Arb only.
+
+SESSION 2 (2026-07-25 evening): Tier 1 foundation poured, all green:
+- Def 2.3 objects (Sm/Am/deltaM) + anchors (delta_0 = -1 proven)
+- Gamma evaluation integral_exp_neg_mul_pow; Jint defined
+- Substitution keystone: subst_image, subst_injOn, integral_Ioc_subst
+  (integral_image_eq_integral_abs_deriv_smul works in pin)
+- MANUSCRIPT EQ (5) MACHINE-VERIFIED: Am_eq_sum_Jint
+- Bfun + Bfun_nonneg, betaCirc, integral_pow_exp_neg_two_mul
+- Integrability: integrable_pow_exp (via Real.GammaIntegral_convergent),
+  integrable_pow_exp_two, integrable_Jint_integrand
+NEXT SESSION OPENER: the J-split — J(i) as Jint via integral_add over the
+three pieces (betaCirc part + Gamma part - log2-weighted scaled part), then
+identity (11) as Finset algebra over Am_eq_sum_Jint, then Thm 4.1 LOWER bound
+(needs only Bfun_nonneg + the split). Upper bound = the gap-5/gamma wall,
+digamma_one available; still needs Gamma differentiation under integral.
+PIN LESSONS TONIGHT: inside setIntegral_congr_fun bodies use simp only never
+rw (lambda-blindness); every ring after field_simp is try ring; ae arguments
+via filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu.
