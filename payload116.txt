@@ -1,0 +1,18 @@
+theorem zOmega_summable (s : RR) (hs : 1 < s) (z : CC)
+    (hz : Norm.norm z < (2:RR) ^ s) :
+    Summable (fun n : NN => Norm.norm (zOmegaHom s z n)) := by
+  classical
+  set G : NN ARROW RR := Set.mulIndicator {p : NN | p.Prime}
+    (fun p : NN => (1 - Norm.norm z * ((p:RR) ^ (-s)))INV) with hG
+  have hGmult : Multipliable G := zOmegaNorm_indicator_multipliable s hs z hz
+  have hGone : FORALL i : NN, (1:RR) LEQ G i := by
+    intro i
+    rw [hG]
+    by_cases hp : i IN {p : NN | p.Prime}
+    DOT rw [Set.mulIndicator_of_mem hp]
+      exact zOmega_factor_ge_one s hs z hz i hp
+    DOT rw [Set.mulIndicator_of_notMem hp]
+  have hnn : FORALL n : NN, (0:RR) LEQ Norm.norm (zOmegaHom s z n) := fun n => norm_nonneg _
+  apply summable_of_sum_le hnn
+  intro u
+  sorry
