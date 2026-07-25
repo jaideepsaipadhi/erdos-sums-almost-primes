@@ -4999,6 +4999,13 @@ theorem choose_mul_choose_div_factorial (k n i : ℕ) (hnk : n ≤ k) (hin : i �
         rw [← hkC]
         ring
 
+/-- The Leibniz double sum, flattened to a sum over the sigma set. -/
+theorem leibniz_flatten (k : ℕ) (f : ℕ → ℕ → ℂ) :
+    ∑ n ∈ Finset.range (k + 1), ∑ i ∈ Finset.range (n + 1), f n i
+      = ∑ x ∈ (Finset.range (k + 1)).sigma (fun n => Finset.range (n + 1)),
+          f x.1 x.2 := by
+  rw [Finset.sum_sigma]
+
 /-- OBLIGATION L2b: the k-th coefficient of Fbig is the triple convolution
 of the three factors' coefficients. -/
 theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
