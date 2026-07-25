@@ -4414,7 +4414,66 @@ theorem sum_betaCirc_eq_integral (m : ℕ) :
 decomposition against integrable pieces. -/
 theorem integrable_exp_Bfun (m : ℕ) :
     MeasureTheory.IntegrableOn (fun u : ℝ => Real.exp u * Bfun m u) (Set.Ioi 0) := by
-  sorry
+  have hbase : MeasureTheory.IntegrableOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) := by
+    have hG : MeasureTheory.IntegrableOn
+        (fun u : ℝ => Real.exp (-u) * u ^ ((1:ℝ) - 1)) (Set.Ioi 0) :=
+      Real.GammaIntegral_convergent (s := (1:ℝ)) (by norm_num)
+    apply hG.congr_fun ?_ measurableSet_Ioi
+    intro u _
+    simp only
+    rw [show (1:ℝ) - 1 = 0 by ring, Real.rpow_zero, mul_one]
+  have hdom : MeasureTheory.IntegrableOn
+      (fun u : ℝ => (((m:ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u))
+      (Set.Ioi 0) := hbase.const_mul _
+  apply MeasureTheory.Integrable.mono hdom
+  · apply Measurable.aestronglyMeasurable
+    unfold Bfun
+    fun_prop
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu0 : (0:ℝ) < u := hu
+    set x := ((m:ℕ):ℝ) * Real.log 2 * Real.exp (-u) with hx
+    have hxnn : (0:ℝ) ≤ x := by
+      rw [hx]
+      positivity
+    have hBeq : Bfun m u = Real.exp (-x) - 1 + x := by
+      unfold Bfun
+      rw [hx]
+      rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]
+      ring_nf
+    have hquad : Real.exp (-x) - 1 + x ≤ x ^ 2 := by
+      rcases le_total x 1 with hx1 | hx1
+      · have habs : |(-x)| ≤ 1 := by
+          rw [abs_neg, abs_of_nonneg hxnn]
+          exact hx1
+        have hb := Real.abs_exp_sub_one_sub_id_le habs
+        have hb2 : Real.exp (-x) - 1 - (-x) ≤ (-x) ^ 2 :=
+          le_trans (le_abs_self _) hb
+        nlinarith [hb2]
+      · have hle1 : Real.exp (-x) ≤ 1 := by
+          apply Real.exp_le_one_iff.mpr
+          linarith
+        nlinarith [hle1, hx1]
+    have hBnn : (0:ℝ) ≤ Bfun m u := Bfun_nonneg m u
+    have hxsq : x ^ 2 = (((m:ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u) ^ 2 := by
+      rw [hx]
+      ring
+    have hexpsq : Real.exp u * Real.exp (-u) ^ 2 = Real.exp (-u) := by
+      rw [show Real.exp (-u) ^ 2 = Real.exp (-u) * Real.exp (-u) by ring,
+        ← mul_assoc, ← Real.exp_add]
+      ring_nf
+      rw [Real.exp_zero, one_mul]
+    rw [Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg (by positivity : (0:ℝ) ≤ Real.exp u * Bfun m u),
+      abs_of_nonneg (by positivity : (0:ℝ) ≤
+        (((m:ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u))]
+    calc Real.exp u * Bfun m u ≤ Real.exp u * x ^ 2 := by
+          apply mul_le_mul_of_nonneg_left _ (Real.exp_pos u).le
+          rw [hBeq]
+          exact le_trans hquad (by nlinarith [sq_nonneg x])
+      _ = (((m:ℕ):ℝ) * Real.log 2) ^ 2 * (Real.exp u * Real.exp (-u) ^ 2) := by
+          rw [hxsq]
+          ring
+      _ = (((m:ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u) := by rw [hexpsq]
 
 /-- The key bound: sum 2^i betaCirc i m <= int e^u Bfun m u. -/
 theorem sum_betaCirc_le_integral (m : ℕ) :

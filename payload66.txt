@@ -1,0 +1,51 @@
+theorem integrable_exp_Bfun (m : <<N>>) :
+    MeasureTheory.IntegrableOn (fun u : <<R>> => Real.exp u * Bfun m u) (Set.Ioi 0) := by
+  have hbase : MeasureTheory.IntegrableOn (fun u : <<R>> => Real.exp (-u)) (Set.Ioi 0) := by
+    have hG : MeasureTheory.IntegrableOn
+        (fun u : <<R>> => Real.exp (-u) * u ^ ((1:<<R>>) - 1)) (Set.Ioi 0) :=
+      Real.GammaIntegral_convergent (s := (1:<<R>>)) (by norm_num)
+    apply hG.congr_fun ?_ measurableSet_Ioi
+    intro u _
+    simp only
+    rw [show (1:<<R>>) - 1 = 0 by ring, Real.rpow_zero, mul_one]
+  have hdom : MeasureTheory.IntegrableOn
+      (fun u : <<R>> => (((m:<<N>>):<<R>>) * Real.log 2) ^ 2 / 2 * Real.exp (-u))
+      (Set.Ioi 0) := hbase.const_mul _
+  apply MeasureTheory.Integrable.mono hdom
+  <<DOT>> apply Measurable.aestronglyMeasurable
+    unfold Bfun
+    fun_prop
+  <<DOT>> filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu0 : (0:<<R>>) < u := hu
+    set x := ((m:<<N>>):<<R>>) * Real.log 2 * Real.exp (-u) with hx
+    have hxnn : (0:<<R>>) <<LE>> x := by
+      rw [hx]
+      positivity
+    have hBeq : Bfun m u = Real.exp (-x) - 1 + x := by
+      unfold Bfun
+      rw [hx]
+      rw [Real.rpow_def_of_pos (by norm_num : (0:<<R>>) < 2)]
+      ring_nf
+    have hquad : Real.exp (-x) - 1 + x <<LE>> x ^ 2 / 2 := by
+      nlinarith [Real.add_one_le_exp (-x), Real.exp_pos (-x), sq_nonneg x,
+        Real.add_one_le_exp x, sq_nonneg (Real.exp (-x) - 1 + x)]
+    have hBnn : (0:<<R>>) <<LE>> Bfun m u := Bfun_nonneg m u
+    have hxsq : x ^ 2 = (((m:<<N>>):<<R>>) * Real.log 2) ^ 2 * Real.exp (-u) ^ 2 := by
+      rw [hx]
+      ring
+    have hexpsq : Real.exp u * Real.exp (-u) ^ 2 = Real.exp (-u) := by
+      rw [show Real.exp (-u) ^ 2 = Real.exp (-u) * Real.exp (-u) by ring,
+        <<LARR>> mul_assoc, <<LARR>> Real.exp_add]
+      ring_nf
+    rw [Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg (by positivity : (0:<<R>>) <<LE>> Real.exp u * Bfun m u),
+      abs_of_nonneg (by positivity : (0:<<R>>) <<LE>>
+        (((m:<<N>>):<<R>>) * Real.log 2) ^ 2 / 2 * Real.exp (-u))]
+    calc Real.exp u * Bfun m u <<LE>> Real.exp u * (x ^ 2 / 2) := by
+          apply mul_le_mul_of_nonneg_left _ (Real.exp_pos u).le
+          rw [hBeq]
+          exact hquad
+      _ = (((m:<<N>>):<<R>>) * Real.log 2) ^ 2 / 2 * (Real.exp u * Real.exp (-u) ^ 2) := by
+          rw [hxsq]
+          ring
+      _ = (((m:<<N>>):<<R>>) * Real.log 2) ^ 2 / 2 * Real.exp (-u) := by rw [hexpsq]
