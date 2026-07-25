@@ -1,0 +1,38 @@
+/-- The gap-five integrand (e^-v - 1 + v)/v^2 is bounded by 1 on positives. -/
+theorem gap_integrand_bounds (v : <<R>>) (hv : 0 < v) :
+    0 <<LE>> (Real.exp (-v) - 1 + v) / v ^ 2 <<AND>>
+      (Real.exp (-v) - 1 + v) / v ^ 2 <<LE>> 1 := by
+  have hlow : (0:<<R>>) <<LE>> Real.exp (-v) - 1 + v := by
+    nlinarith [Real.add_one_le_exp (-v)]
+  have hkey : Real.exp (-v) * (1 + v) <<LE>> 1 := by
+    have h1 : 1 + v <<LE>> Real.exp v := by linarith [Real.add_one_le_exp v]
+    have h2 : Real.exp (-v) * Real.exp v = 1 := by
+      rw [<<LARR>> Real.exp_add]
+      simp
+    nlinarith [Real.exp_pos (-v), h1, h2]
+  have hup : Real.exp (-v) - 1 + v <<LE>> v ^ 2 := by
+    nlinarith [hkey, Real.exp_pos (-v)]
+  constructor
+  <<DOT>> positivity
+  <<DOT>> rw [div_le_one (by positivity)]
+    exact hup
+
+/-- The gap integrand is integrable on (0, a]. -/
+theorem gap_integrable (a : <<R>>) (ha : 0 < a) :
+    MeasureTheory.IntegrableOn (fun v : <<R>> => (Real.exp (-v) - 1 + v) / v ^ 2)
+      (Set.Ioc 0 a) := by
+  have hmeas : MeasureTheory.AEStronglyMeasurable
+      (fun v : <<R>> => (Real.exp (-v) - 1 + v) / v ^ 2)
+      (MeasureTheory.volume.restrict (Set.Ioc 0 a)) := by
+    apply Measurable.aestronglyMeasurable
+    fun_prop
+  have hbound : MeasureTheory.IntegrableOn (fun _ : <<R>> => (1:<<R>>)) (Set.Ioc 0 a) := by
+    have hfin : MeasureTheory.volume (Set.Ioc (0:<<R>>) a) <<NE>> <<TOP>> := by
+      rw [Real.volume_Ioc]
+      exact ENNReal.ofReal_ne_top
+    exact integrableOn_const hfin
+  apply MeasureTheory.Integrable.mono hbound hmeas
+  filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with v hv
+  obtain <<LA>>hlow, hhigh<<RA>> := gap_integrand_bounds v hv.1
+  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hlow, abs_one]
+  exact hhigh
