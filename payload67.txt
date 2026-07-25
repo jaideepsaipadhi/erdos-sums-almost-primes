@@ -1,0 +1,22 @@
+/-- The map u -> e^(-u) sends (0, infty) onto (0, 1). -/
+theorem expNeg_image : (fun u : <<R>> => Real.exp (-u)) '' Set.Ioi 0 = Set.Ioo 0 1 := by
+  ext t
+  simp only [Set.mem_image, Set.mem_Ioi, Set.mem_Ioo]
+  constructor
+  <<DOT>> rintro <<LA>>u, hu, rfl<<RA>>
+    refine <<LA>>Real.exp_pos _, ?_<<RA>>
+    have h1 : Real.exp (-u) < Real.exp 0 := Real.exp_lt_exp.mpr (by linarith)
+    rwa [Real.exp_zero] at h1
+  <<DOT>> rintro <<LA>>h0, h1<<RA>>
+    refine <<LA>>-Real.log t, ?_, ?_<<RA>>
+    <<DOT>> have hlog : Real.log t < 0 := Real.log_neg h0 h1
+      linarith
+    <<DOT>> show Real.exp (-(-Real.log t)) = t
+      rw [neg_neg, Real.exp_log h0]
+
+/-- The map is injective on (0, infty). -/
+theorem expNeg_injOn : Set.InjOn (fun u : <<R>> => Real.exp (-u)) (Set.Ioi 0) := by
+  intro u _ v _ huv
+  simp only at huv
+  have := Real.exp_injective huv
+  linarith

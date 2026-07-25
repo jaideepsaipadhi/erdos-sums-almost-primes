@@ -4516,6 +4516,29 @@ theorem sum_betaCirc_le_integral (m : ℕ) :
           positivity
       _ = Real.exp u * Bfun m u := hfac
 
+/-- The map u -> e^(-u) sends (0, infty) onto (0, 1). -/
+theorem expNeg_image : (fun u : ℝ => Real.exp (-u)) '' Set.Ioi 0 = Set.Ioo 0 1 := by
+  ext t
+  simp only [Set.mem_image, Set.mem_Ioi, Set.mem_Ioo]
+  constructor
+  · rintro ⟨u, hu, rfl⟩
+    refine ⟨Real.exp_pos _, ?_⟩
+    have h1 : Real.exp (-u) < Real.exp 0 := Real.exp_lt_exp.mpr (by linarith)
+    rwa [Real.exp_zero] at h1
+  · rintro ⟨h0, h1⟩
+    refine ⟨-Real.log t, ?_, ?_⟩
+    · have hlog : Real.log t < 0 := Real.log_neg h0 h1
+      linarith
+    · show Real.exp (-(-Real.log t)) = t
+      rw [neg_neg, Real.exp_log h0]
+
+/-- The map is injective on (0, infty). -/
+theorem expNeg_injOn : Set.InjOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) := by
+  intro u _ v _ huv
+  simp only at huv
+  have := Real.exp_injective huv
+  linarith
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
