@@ -1,0 +1,6 @@
+/-- G2C as a single product over p >= 3 (rather than p=3 split off from p>=5). -/
+theorem G2C_eq_tprod_three (s : RR) (hs : 1 LEQ s) (z : CC) (hz : Norm.norm z LEQ 2) :
+    G2C s z = TPRODN p : {p : NN // p.Prime AND 3 LEQ p},
+      (1 - z * ((((p:NN):RR) ^ (-s) : RR) : CC))INV
+        * (((1 - ((p:NN):RR) ^ (-s) : RR) : CC)) ^ z := by
+  sorry

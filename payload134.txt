@@ -1,0 +1,8 @@
+/-- A prime p with 3 <= p and p != 3 satisfies 5 <= p (4 is not prime). -/
+theorem five_le_of_prime_ne_three {p : NN} (hp : p.Prime) (h3 : 3 LEQ p) (hne : p NEQ 3) :
+    5 LEQ p := by
+  rcases Nat.lt_or_ge p 5 with h | h
+  DOT interval_cases p
+    DOT exact absurd rfl hne
+    DOT exact absurd hp (by norm_num)
+  DOT exact h

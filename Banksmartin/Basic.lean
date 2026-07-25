@@ -5539,6 +5539,15 @@ theorem cFac_cpow (s : ℝ) (hc : 0 < cFac s) (z : ℂ) :
   rw [←  Complex.ofReal_log (le_of_lt hc)]
   ring
 
+/-- A prime p with 3 <= p and p != 3 satisfies 5 <= p (4 is not prime). -/
+theorem five_le_of_prime_ne_three {p : ℕ} (hp : p.Prime) (h3 : 3 ≤ p) (hne : p ≠ 3) :
+    5 ≤ p := by
+  rcases Nat.lt_or_ge p 5 with h | h
+  · interval_cases p
+    · exact absurd rfl hne
+    · exact absurd hp (by norm_num)
+  · exact h
+
 /-- B3: the p >= 3 tail regroups into cFac^z times G2C. -/
 theorem tail_regroup (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2) :
     (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - z * (((p:ℕ):ℝ) ^ (-s) : ℝ))⁻¹)
