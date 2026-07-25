@@ -50,3 +50,14 @@ REMAINING: Obl 1 (dominating fn integrable — hardest of the small ones,
 u^(-1/2)|log u| near 0), Obl 2 (pointwise domination), Obl 4 (THE WALL:
 differentiation under the integral via
 hasDerivAt_integral_of_dominated_loc_of_deriv_le), Target, and gap_five.
+
+CFAC REFACTOR (2026-07-26): our G2C is the product over p>=3 of the REGULARISED
+factors only — it is NOT the manuscript's G2 (which carries an extra
+(1-2^-s)^z and (zeta(s)(s-1))^z). Rather than change G2C, Fbig was redefined:
+  Fbig s z = (cFac s)^z * (1 - z/2^s)^(-1) * G2C s z
+  cFac s   = prod_{p>=3} (1 - p^-s)^(-1)   [ = zeta(s)(1-2^-s) ]
+CONSEQUENCE: Fk_expansion's third factor is now (log (cFac s))^l / l!, NOT the
+manuscript's (-log(s-1))^l / l!.  Lemma 2.4 / Prop 2.5 must be stated against
+OUR normalisation, or a bridge lemma proved. Flag this when resuming.
+All Theorem 4.1 machinery verified intact after the refactor (sentinels:
+dyadic_term_bound, sum_ratio_log_dyadic', deltaM_upper_bound_manuscript).
