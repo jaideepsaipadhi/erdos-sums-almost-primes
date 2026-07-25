@@ -368,6 +368,42 @@ theorem exp_div_integrableOn_Ici (a : ℝ) (ha : 0 < a) :
       abs_of_nonneg (by positivity : (0:ℝ) ≤ Real.exp (-v) / a)]
     apply div_le_div_of_nonneg_left hE.le ha hva
 
+/-- Ein has derivative (1 - e^(-a))/a at each a > 0, by FTC. -/
+theorem hasDerivAt_Ein (a : ℝ) (ha : 0 < a) :
+    HasDerivAt Ein ((1 - Real.exp (-a)) / a) a := by
+  sorry
+
+/-- The tail function T(a) = int_{[a,inf)} e^(-v)/v has derivative -e^(-a)/a. -/
+noncomputable def EinTailFun (a : ℝ) : ℝ :=
+  ∫ v in Set.Ici a, Real.exp (-v) / v
+
+theorem hasDerivAt_EinTailFun (a : ℝ) (ha : 0 < a) :
+    HasDerivAt EinTailFun (-(Real.exp (-a) / a)) a := by
+  sorry
+
+/-- The combination Ein(a) - log a - T(a) has zero derivative on (0, infty). -/
+theorem hasDerivAt_einCombo (a : ℝ) (ha : 0 < a) :
+    HasDerivAt (fun t : ℝ => Ein t - Real.log t - EinTailFun t) 0 a := by
+  have h1 := hasDerivAt_Ein a ha
+  have h2 := Real.hasDerivAt_log (ne_of_gt ha)
+  have h3 := hasDerivAt_EinTailFun a ha
+  have hcomb := (h1.sub h2).sub h3
+  have harith : (1 - Real.exp (-a)) / a - a⁻¹ - -(Real.exp (-a) / a) = 0 := by
+    field_simp
+    try ring
+  rw [harith] at hcomb
+  exact hcomb
+
+/-- Hence the combination is constant on (0, infty). -/
+theorem einCombo_const (a b : ℝ) (ha : 0 < a) (hb : 0 < b) :
+    Ein a - Real.log a - EinTailFun a = Ein b - Real.log b - EinTailFun b := by
+  sorry
+
+/-- STEP C: the constant is gamma. -/
+theorem ein_eq (a : ℝ) (ha : 0 < a) :
+    Ein a = Real.eulerMascheroniConstant + Real.log a + EinTailFun a := by
+  sorry
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of
