@@ -1,0 +1,24 @@
+/-- The gap-five antiderivative: d/dv [-(e^(-v) - 1 + v)/v]
+= (e^(-v) - 1 + v)/v^2 - (1 - e^(-v))/v, for v > 0. Verified symbolically. -/
+theorem hasDerivAt_gapAntideriv (v : <<R>>) (hv : 0 < v) :
+    HasDerivAt (fun t : <<R>> => -((Real.exp (-t) - 1 + t) / t))
+      ((Real.exp (-v) - 1 + v) / v ^ 2 - (1 - Real.exp (-v)) / v) v := by
+  have hne : v <<NE>> 0 := ne_of_gt hv
+  have hnum : HasDerivAt (fun t : <<R>> => Real.exp (-t) - 1 + t)
+      (-(Real.exp (-v)) + 1) v := by
+    have h1 : HasDerivAt (fun t : <<R>> => Real.exp (-t)) (Real.exp (-v) * -1) v :=
+      (Real.hasDerivAt_exp (-v)).comp v (hasDerivAt_neg v)
+    have h2 : HasDerivAt (fun t : <<R>> => Real.exp (-t)) (-(Real.exp (-v))) v := by
+      simpa using h1
+    have h3 := (h2.sub_const 1).add (hasDerivAt_id v)
+    simpa using h3
+  have hden : HasDerivAt (fun t : <<R>> => t) 1 v := hasDerivAt_id v
+  have hdiv := hnum.div hden hne
+  have hneg := hdiv.neg
+  have harith : -((-(Real.exp (-v)) + 1) * v - (Real.exp (-v) - 1 + v) * 1) / v ^ 2
+      = (Real.exp (-v) - 1 + v) / v ^ 2 - (1 - Real.exp (-v)) / v := by
+    field_simp
+    ring
+  rw [<<LARR>> harith]
+  convert hneg using 1
+  field_simp

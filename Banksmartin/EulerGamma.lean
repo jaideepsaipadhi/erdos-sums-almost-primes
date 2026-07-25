@@ -1058,6 +1058,34 @@ theorem ein_eq (a : ℝ) (ha : 0 < a) :
   rw [← hgamma] at hCa
   linarith [hCa]
 
+/-- The gap-five antiderivative: d/dv [-(e^(-v) - 1 + v)/v]
+= (e^(-v) - 1 + v)/v^2 - (1 - e^(-v))/v, for v > 0. Verified symbolically. -/
+theorem hasDerivAt_gapAntideriv (v : ℝ) (hv : 0 < v) :
+    HasDerivAt (fun t : ℝ => -((Real.exp (-t) - 1 + t) / t))
+      ((Real.exp (-v) - 1 + v) / v ^ 2 - (1 - Real.exp (-v)) / v) v := by
+  have hne : v ≠ 0 := ne_of_gt hv
+  have hnum : HasDerivAt (fun t : ℝ => Real.exp (-t) - 1 + t)
+      (-(Real.exp (-v)) + 1) v := by
+    have h1 : HasDerivAt (fun t : ℝ => Real.exp (-t)) (Real.exp (-v) * -1) v :=
+      (Real.hasDerivAt_exp (-v)).comp v (hasDerivAt_neg v)
+    have h2 : HasDerivAt (fun t : ℝ => Real.exp (-t)) (-(Real.exp (-v))) v := by
+      simpa using h1
+    have h3 := (h2.sub_const 1).add (hasDerivAt_id v)
+    simpa [Pi.add_def, id_eq] using h3
+  have hden : HasDerivAt (fun t : ℝ => t) 1 v := hasDerivAt_id v
+  have hdiv := hnum.div hden hne
+  have hneg := hdiv.neg
+  have harith : -((-(Real.exp (-v)) + 1) * v - (Real.exp (-v) - 1 + v) * 1) / v ^ 2
+      = (Real.exp (-v) - 1 + v) / v ^ 2 - (1 - Real.exp (-v)) / v := by
+    field_simp
+    ring
+  rw [← harith]
+  have hn2 : HasDerivAt (fun t : ℝ => -((Real.exp (-t) - 1 + t) / t))
+      (-(((-Real.exp (-v) + 1) * v - (Real.exp (-v) - 1 + v)) / v ^ 2)) v := by
+    simpa [Pi.neg_def, Pi.div_def] using hneg
+  convert hn2 using 1
+  ring
+
 /-- CONSEQUENCE (manuscript Thm 4.1, upper bound input): the exact evaluation
 int_0^1 (exp(-a t) - 1 + a t)/t^2 dt = a log a + gamma a - a + 1 + a E1(a) - exp(-a).
 Only the inequality version is needed downstream; see the manuscript proof of
