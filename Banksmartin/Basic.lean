@@ -3968,6 +3968,47 @@ theorem integral_Ioc_subst (g : ℝ → ℝ) :
   intro u _
   simp only [smul_eq_mul, mul_neg_one, abs_neg, abs_of_pos (Real.exp_pos _)]
 
+/-- Manuscript eq (5): A_m = sum_{i <= m} 2^i / i! * J(i), by the substitution
+s = 1 + e^(-u) applied termwise and reflecting the sum index. -/
+theorem Am_eq_sum_Jint (m : ℕ) :
+    Am m = ∑ i ∈ Finset.range (m + 1),
+      (2:ℝ) ^ i / (Nat.factorial i) * Jint m i := by
+  have hterm : ∀ j ∈ Finset.range (m + 1),
+      (2:ℝ) ^ m * ∫ s in Set.Ioc (1:ℝ) 2,
+          (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2:ℝ) ^ (-(j:ℝ) * s)
+        = (2:ℝ) ^ (m - j) / (Nat.factorial (m - j)) * Jint m (m - j) := by
+    intro j hjm
+    have hj : j ≤ m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hjm)
+    have h2mj : (2:ℝ) ^ (m:ℕ) * (2:ℝ) ^ (-(j:ℝ)) = (2:ℝ) ^ ((m - j : ℕ)) := by
+      rw [← Real.rpow_natCast (2:ℝ) m, ← Real.rpow_natCast (2:ℝ) (m - j),
+        ← Real.rpow_add (by norm_num : (0:ℝ) < 2), Nat.cast_sub hj]
+      try congr 1
+      try ring
+    rw [integral_Ioc_subst]
+    unfold Jint
+    rw [Nat.sub_sub_self hj]
+    rw [← MeasureTheory.integral_const_mul]
+    conv_rhs => rw [← MeasureTheory.integral_const_mul]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro u _
+    simp only [add_sub_cancel_left, Real.log_exp, neg_neg]
+    rw [show -(j:ℝ) * (1 + Real.exp (-u)) = -(j:ℝ) + -(j:ℝ) * Real.exp (-u) by ring]
+    rw [Real.rpow_add (by norm_num : (0:ℝ) < 2)]
+    field_simp
+    rw [← h2mj]
+    ring
+  calc Am m = ∑ j ∈ Finset.range (m + 1),
+        (2:ℝ) ^ m * ∫ s in Set.Ioc (1:ℝ) 2,
+          (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2:ℝ) ^ (-(j:ℝ) * s) := by
+        unfold Am Sm
+        rw [Finset.mul_sum]
+    _ = ∑ j ∈ Finset.range (m + 1),
+        (2:ℝ) ^ (m - j) / (Nat.factorial (m - j)) * Jint m (m - j) :=
+        Finset.sum_congr rfl hterm
+    _ = ∑ i ∈ Finset.range (m + 1),
+        (2:ℝ) ^ i / (Nat.factorial i) * Jint m i := by
+        exact Finset.sum_range_reflect (fun i => (2:ℝ) ^ i / (Nat.factorial i) * Jint m i) (m + 1)
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O

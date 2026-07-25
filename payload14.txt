@@ -1,0 +1,40 @@
+/-- Manuscript eq (5): A_m = sum_{i <= m} 2^i / i! * J(i), by the substitution
+s = 1 + e^(-u) applied termwise and reflecting the sum index. -/
+theorem Am_eq_sum_Jint (m : <<N>>) :
+    Am m = <<SUM>> i <<IN>> Finset.range (m + 1),
+      (2:<<R>>) ^ i / (Nat.factorial i) * Jint m i := by
+  have hterm : <<ALL>> j <<IN>> Finset.range (m + 1),
+      (2:<<R>>) ^ m * <<INT>> s in Set.Ioc (1:<<R>>) 2,
+          (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2:<<R>>) ^ (-(j:<<R>>) * s)
+        = (2:<<R>>) ^ (m - j) / (Nat.factorial (m - j)) * Jint m (m - j) := by
+    intro j hjm
+    have hj : j <<LE>> m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hjm)
+    have h2mj : (2:<<R>>) ^ (m:<<N>>) * (2:<<R>>) ^ (-(j:<<R>>)) = (2:<<R>>) ^ ((m - j : <<N>>)) := by
+      rw [<<LARR>> Real.rpow_natCast (2:<<R>>) m, <<LARR>> Real.rpow_natCast (2:<<R>>) (m - j),
+        <<LARR>> Real.rpow_add (by norm_num : (0:<<R>>) < 2), Nat.cast_sub hj]
+      congr 1
+      ring
+    rw [integral_Ioc_subst]
+    unfold Jint
+    rw [Nat.sub_sub_self hj]
+    rw [<<LARR>> MeasureTheory.integral_const_mul]
+    conv_rhs => rw [<<LARR>> MeasureTheory.integral_const_mul]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro u _
+    simp only [add_sub_cancel_left, Real.log_exp, neg_neg]
+    rw [show -(j:<<R>>) * (1 + Real.exp (-u)) = -(j:<<R>>) + -(j:<<R>>) * Real.exp (-u) by ring]
+    rw [Real.rpow_add (by norm_num : (0:<<R>>) < 2)]
+    field_simp
+    rw [<<LARR>> h2mj]
+    ring
+  calc Am m = <<SUM>> j <<IN>> Finset.range (m + 1),
+        (2:<<R>>) ^ m * <<INT>> s in Set.Ioc (1:<<R>>) 2,
+          (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2:<<R>>) ^ (-(j:<<R>>) * s) := by
+        unfold Am Sm
+        rw [Finset.mul_sum]
+    _ = <<SUM>> j <<IN>> Finset.range (m + 1),
+        (2:<<R>>) ^ (m - j) / (Nat.factorial (m - j)) * Jint m (m - j) :=
+        Finset.sum_congr rfl hterm
+    _ = <<SUM>> i <<IN>> Finset.range (m + 1),
+        (2:<<R>>) ^ i / (Nat.factorial i) * Jint m i := by
+        exact Finset.sum_range_reflect (fun i => (2:<<R>>) ^ i / (Nat.factorial i) * Jint m i) (m + 1)
