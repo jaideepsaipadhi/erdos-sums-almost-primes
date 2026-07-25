@@ -673,7 +673,78 @@ int_0^c e^-v log v dv + Ein c = (1 - e^-c) log c. -/
 theorem euler_parts_limit (c : ℝ) (hc : 0 < c) :
     (∫ v in Set.Ioc (0:ℝ) c, Real.exp (-v) * Real.log v) + Ein c
       = (1 - Real.exp (-c)) * Real.log c := by
-  sorry
+  have hfin : ∀ b ∈ Set.Ioc (0:ℝ) c,
+      (∫ v in Set.Ioc (0:ℝ) c, Real.exp (-v) * Real.log v) + Ein c
+        = (1 - Real.exp (-c)) * Real.log c - (1 - Real.exp (-b)) * Real.log b
+          + ((∫ v in Set.Ioc (0:ℝ) b, Real.exp (-v) * Real.log v) + Ein b) := by
+    intro b hb
+    have hb0 : (0:ℝ) < b := hb.1
+    have hbc : b ≤ c := hb.2
+    have hreg := euler_parts_reg b c hb0 hbc
+    have hsplit : (∫ v in Set.Ioc (0:ℝ) c, Real.exp (-v) * Real.log v)
+        = (∫ v in Set.Ioc (0:ℝ) b, Real.exp (-v) * Real.log v)
+          + ∫ v in Set.Ioc b c, Real.exp (-v) * Real.log v := by
+      have hunion : Set.Ioc (0:ℝ) c = Set.Ioc 0 b ∪ Set.Ioc b c :=
+        (Set.Ioc_union_Ioc_eq_Ioc hb0.le hbc).symm
+      have hdisj : Disjoint (Set.Ioc (0:ℝ) b) (Set.Ioc b c) := by
+        rw [Set.disjoint_left]
+        intro x hx hx2
+        exact absurd hx2.1 (not_lt.mpr hx.2)
+      have hi1 := expLog_integrableOn_Ioc b hb0
+      have hi2 : MeasureTheory.IntegrableOn
+          (fun v : ℝ => Real.exp (-v) * Real.log v) (Set.Ioc b c) :=
+        (expLog_integrableOn_Ioc c hc).mono
+          (fun x hx => Set.mem_Ioc.mpr ⟨by linarith [hx.1], hx.2⟩) le_rfl
+      rw [hunion, MeasureTheory.setIntegral_union hdisj measurableSet_Ioc hi1 hi2]
+    have hinterval : (∫ v in b..c,
+        (Real.exp (-v) * Real.log v - (Real.exp (-v) - 1) / v))
+        = (∫ v in Set.Ioc b c, Real.exp (-v) * Real.log v)
+          + ∫ v in Set.Ioc b c, (1 - Real.exp (-v)) / v := by
+      rw [intervalIntegral.integral_of_le hbc]
+      have hi2 : MeasureTheory.IntegrableOn
+          (fun v : ℝ => Real.exp (-v) * Real.log v) (Set.Ioc b c) :=
+        (expLog_integrableOn_Ioc c hc).mono
+          (fun x hx => Set.mem_Ioc.mpr ⟨by linarith [hx.1], hx.2⟩) le_rfl
+      have hi3 : MeasureTheory.IntegrableOn
+          (fun v : ℝ => (1 - Real.exp (-v)) / v) (Set.Ioc b c) :=
+        (ein_integrable c hc).mono
+          (fun x hx => Set.mem_Ioc.mpr ⟨by linarith [hx.1], hx.2⟩) le_rfl
+      rw [← MeasureTheory.integral_add hi2 hi3]
+      apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioc
+      intro v hv
+      have hv0 : (0:ℝ) < v := by linarith [hv.1]
+      field_simp
+      ring
+    rw [hinterval, ← Ein_sub b c hb0 hbc] at hreg
+    rw [hsplit]
+    linarith [hreg]
+  have hlim : Filter.Tendsto
+      (fun b : ℝ => (1 - Real.exp (-c)) * Real.log c - (1 - Real.exp (-b)) * Real.log b
+        + ((∫ v in Set.Ioc (0:ℝ) b, Real.exp (-v) * Real.log v) + Ein b))
+      (nhdsWithin 0 (Set.Ioi 0)) (nhds ((1 - Real.exp (-c)) * Real.log c)) := by
+    have h1 := regBoundary_tendsto_zero
+    have h2 := Ein_tendsto_zero
+    have h3 : Filter.Tendsto
+        (fun b : ℝ => ∫ v in Set.Ioc (0:ℝ) b, Real.exp (-v) * Real.log v)
+        (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      sorry
+    have hc0 : Filter.Tendsto (fun _ : ℝ => (1 - Real.exp (-c)) * Real.log c)
+        (nhdsWithin 0 (Set.Ioi 0)) (nhds ((1 - Real.exp (-c)) * Real.log c)) :=
+      tendsto_const_nhds
+    have hsum := (hc0.sub h1).add (h3.add h2)
+    simpa using hsum
+  have heq : (fun b : ℝ => (1 - Real.exp (-c)) * Real.log c - (1 - Real.exp (-b)) * Real.log b
+      + ((∫ v in Set.Ioc (0:ℝ) b, Real.exp (-v) * Real.log v) + Ein b))
+      =ᶠ[nhdsWithin 0 (Set.Ioi 0)]
+      fun _ => (∫ v in Set.Ioc (0:ℝ) c, Real.exp (-v) * Real.log v) + Ein c := by
+    have hev : ∀ᶠ b in nhdsWithin (0:ℝ) (Set.Ioi 0), b < c := by
+      have hIio : Set.Iio c ∈ nhds (0:ℝ) := Iio_mem_nhds hc
+      filter_upwards [nhdsWithin_le_nhds hIio] with b hb
+      exact hb
+    filter_upwards [self_mem_nhdsWithin, hev] with b hb1 hb2
+    exact (hfin b (Set.mem_Ioc.mpr ⟨hb1, le_of_lt hb2⟩)).symm
+  have hconst := hlim.congr' heq
+  exact tendsto_nhds_unique tendsto_const_nhds hconst
 
 /-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
 identified via Euler's integral. -/
