@@ -4373,6 +4373,42 @@ theorem sum_betaCirc_le_uniform (m : ℕ) :
   apply mul_le_mul_of_nonneg_left _ (by positivity)
   exact betaCirc_mono i (m - i) m (Nat.sub_le m i)
 
+/-- The sum of 2^i betaCirc i m is the integral of the partial exponential sum. -/
+theorem sum_betaCirc_eq_integral (m : ℕ) :
+    ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * betaCirc i m
+      = ∫ u in Set.Ioi (0:ℝ),
+        (∑ i ∈ Finset.range (m + 1), (2 * u) ^ i / (Nat.factorial i))
+          * (Real.exp (-u) * Bfun m u) := by
+  have hterm : ∀ i ∈ Finset.range (m + 1),
+      (2:ℝ) ^ i * betaCirc i m
+        = ∫ u in Set.Ioi (0:ℝ),
+          ((2 * u) ^ i / (Nat.factorial i)) * (Real.exp (-u) * Bfun m u) := by
+    intro i _
+    unfold betaCirc
+    rw [← MeasureTheory.integral_const_mul, ← MeasureTheory.integral_const_mul]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro u _
+    have hfac : ((Nat.factorial i : ℕ) : ℝ) ≠ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
+    simp only [mul_pow]
+    field_simp
+    try ring
+  rw [Finset.sum_congr rfl hterm]
+  rw [← MeasureTheory.integral_finsetSum]
+  · apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro u _
+    simp only [Finset.sum_mul]
+  · intro i _
+    have hb := integrable_betaCirc_integrand i m
+    have heq : (fun u : ℝ => ((2 * u) ^ i / (Nat.factorial i)) * (Real.exp (-u) * Bfun m u))
+        = fun u : ℝ => ((2:ℝ) ^ i / (Nat.factorial i)) *
+          (u ^ i * Real.exp (-u) * Bfun m u) := by
+      funext u
+      rw [mul_pow]
+      ring
+    rw [heq]
+    exact hb.const_mul _
+
 /-- DEEP FACT (Landau, elementary form; now formalized via piKFrom_bound): the count of
     k-almost-primes up to x is O(x (log log x)^(k-1) / log x). Stated with
     an explicit witness constant C_k rather than raw big-O, since the O
