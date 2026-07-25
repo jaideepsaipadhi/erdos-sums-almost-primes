@@ -5250,18 +5250,24 @@ theorem zOmega_half_of_three_le (s : ℝ) (hs : 1 < s) (z : ℂ)
 
 /-- A1: absolute summability of the z-weighted Dirichlet family. -/
 theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
-    (hz : ‖z‖ < (2:ℝ) ^ s) :
+    (hz : ‖z‖ ≤ 3/2) :
     Summable (fun n : ℕ => ‖zOmegaHom s z n‖) := by
   classical
+  have hz2 : ‖z‖ < (2:ℝ) ^ s := by
+    have h2 : (2:ℝ) ^ (1:ℝ) ≤ (2:ℝ) ^ s := by
+      apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+      linarith
+    rw [Real.rpow_one] at h2
+    linarith
   set G : ℕ → ℝ := Set.mulIndicator {p : ℕ | p.Prime}
     (fun p : ℕ => (1 - ‖z‖ * ((p:ℝ) ^ (-s)))⁻¹) with hG
-  have hGmult : Multipliable G := zOmegaNorm_indicator_multipliable s hs z hz
+  have hGmult : Multipliable G := zOmegaNorm_indicator_multipliable s hs z hz2
   have hGone : ∀ i : ℕ, (1:ℝ) ≤ G i := by
     intro i
     rw [hG]
     by_cases hp : i ∈ {p : ℕ | p.Prime}
     · rw [Set.mulIndicator_of_mem hp]
-      exact zOmega_factor_ge_one s hs z hz i hp
+      exact zOmega_factor_ge_one s hs z hz2 i hp
     · rw [Set.mulIndicator_of_notMem hp]
   have hnn : ∀ n : ℕ, (0:ℝ) ≤ ‖zOmegaHom s z n‖ := fun n => norm_nonneg _
   apply summable_of_sum_le (c := ∏' i : ℕ, G i) hnn
@@ -5274,7 +5280,7 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     omega
   have hgeo := EulerProduct.summable_and_hasSum_smoothNumbers_prod_primesBelow_geometric
     (f := (zOmegaNormHom s z).toMonoidHom)
-    (fun {p} hp => zOmegaNorm_prime_lt_one s hs z hz hp) N
+    (fun {p} hp => zOmegaNorm_prime_lt_one s hs z hz2 hp) N
   have hbridge : (∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹)
       = ∏ i ∈ Finset.range N, G i := by
     rw [hG]
