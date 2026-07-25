@@ -579,6 +579,46 @@ theorem regBoundary_tendsto_zero :
   rw [abs_mul, abs_of_nonneg hb0.le]
   exact mul_le_mul_of_nonneg_right h1 (abs_nonneg _)
 
+/-- Ein tends to 0 at 0+ (the integral over a shrinking interval). -/
+theorem Ein_tendsto_zero :
+    Filter.Tendsto Ein (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+  have hid : Filter.Tendsto (fun b : ℝ => b) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    exact Filter.tendsto_id.mono_left nhdsWithin_le_nhds
+  apply squeeze_zero_norm' _ hid
+  filter_upwards [self_mem_nhdsWithin] with b hb
+  have hb0 : (0:ℝ) < b := hb
+  unfold Ein
+  have hle : |∫ v in Set.Ioc (0:ℝ) b, (1 - Real.exp (-v)) / v|
+      ≤ ∫ v in Set.Ioc (0:ℝ) b, (1:ℝ) := by
+    apply MeasureTheory.abs_integral_le_integral_abs.trans
+    apply MeasureTheory.setIntegral_mono_on
+    · exact (ein_integrable b hb0).abs
+    · have hfin : MeasureTheory.volume (Set.Ioc (0:ℝ) b) ≠ ⊤ := by
+        rw [Real.volume_Ioc]
+        exact ENNReal.ofReal_ne_top
+      exact integrableOn_const hfin
+    · exact measurableSet_Ioc
+    · intro v hv
+      obtain ⟨hlow, hhigh⟩ := ein_integrand_bounds v hv.1
+      rw [abs_of_nonneg hlow]
+      exact hhigh
+  have hconst : (∫ v in Set.Ioc (0:ℝ) b, (1:ℝ)) = b := by
+    rw [MeasureTheory.setIntegral_const]
+    have hvol : MeasureTheory.volume.real (Set.Ioc (0:ℝ) b) = b := by
+      rw [MeasureTheory.measureReal_def, Real.volume_Ioc]
+      simp [ENNReal.toReal_ofReal hb0.le]
+    rw [hvol]
+    ring
+  rw [hconst] at hle
+  exact hle
+
+/-- The b -> 0+ limit of the regularized identity: for c > 0,
+int_0^c e^-v log v dv + Ein c = (1 - e^-c) log c. -/
+theorem euler_parts_limit (c : ℝ) (hc : 0 < c) :
+    (∫ v in Set.Ioc (0:ℝ) c, Real.exp (-v) * Real.log v) + Ein c
+      = (1 - Real.exp (-c)) * Real.log c := by
+  sorry
+
 /-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
 identified via Euler's integral. -/
 theorem ein_eq (a : ℝ) (ha : 0 < a) :

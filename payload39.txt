@@ -1,0 +1,11 @@
+/-- Ein tends to 0 at 0+ (the integral over a shrinking interval). -/
+theorem Ein_tendsto_zero :
+    Filter.Tendsto Ein (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+  sorry
+
+/-- The b -> 0+ limit of the regularized identity: for c > 0,
+int_0^c e^-v log v dv + Ein c = (1 - e^-c) log c. -/
+theorem euler_parts_limit (c : <<R>>) (hc : 0 < c) :
+    (<<INT>> v in Set.Ioc (0:<<R>>) c, Real.exp (-v) * Real.log v) + Ein c
+      = (1 - Real.exp (-c)) * Real.log c := by
+  sorry
