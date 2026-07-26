@@ -1486,6 +1486,33 @@ theorem reg_factor_at_one (y : ℝ) (hy : (1:ℝ) - y ≠ 0) :
     exact hy
   field_simp
 
+/-- G2tailC(1,1) = 1: every factor collapses. -/
+theorem G2tailC_one_one : G2tailC 1 1 = 1 := by
+  unfold G2tailC
+  have hone : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      (1 - (1:ℂ) * ((((p:ℕ):ℝ) ^ (-(1:ℝ)) : ℝ) : ℂ))⁻¹
+        * (((1 - ((p:ℕ):ℝ) ^ (-(1:ℝ)) : ℝ) : ℂ)) ^ (1:ℂ) = 1 := by
+    intro p
+    have hp5 : (5:ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
+    have hlt : ((p:ℕ):ℝ) ^ (-(1:ℝ)) < 1 := by
+      rw [Real.rpow_neg_one]
+      rw [inv_lt_one_iff₀]
+      right
+      linarith
+    exact reg_factor_at_one (((p:ℕ):ℝ) ^ (-(1:ℝ))) (by linarith)
+  rw [funext hone, tprod_one]
+
+/-- G2C(1,1) = 1 (manuscript section 1). -/
+theorem G2C_one_one : G2C 1 1 = 1 := by
+  unfold G2C
+  rw [G2tailC_one_one, mul_one]
+  have h3 : ((3:ℝ)) ^ (-(1:ℝ)) < 1 := by
+    rw [Real.rpow_neg_one]
+    norm_num
+  have := reg_factor_at_one (((3:ℝ)) ^ (-(1:ℝ))) (by linarith)
+  rw [← this]
+  norm_num
+
 /-- Each G₂ per-prime factor is differentiable in z on |z|<2. -/
 theorem prime_factor_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z : ℂ => (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
