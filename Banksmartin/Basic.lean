@@ -5355,6 +5355,41 @@ theorem Fbig_eq_manuscript (s : ℝ) (hs : 1 < s) (hc : 0 < cFac s) (z : ℂ) :
   rw [← hkey]
   ring
 
+/-- The manuscript's G2 at s = 1, section 3.2, defined explicitly:
+G2(1,z) = 2^(-z) * prod_{p>2} (1 - z/p)^(-1) (1 - 1/p)^z.
+NOT obtained as a limit of G2manu: cFac 1 diverges, so kappaFac 1 is a junk
+value (0) and G2manu s z at s = 1 would collapse.  Anchors (checked
+numerically): G2at1 1 = 1/2 (section 1), G2at1 2 = d (equation (1)). -/
+noncomputable def G2at1 (z : ℂ) : ℂ :=
+  (((1/2 : ℝ)) : ℂ) ^ z * G2C 1 z
+
+/-- Manuscript section 3.2: c_i = [z^i] G2(1,z). -/
+noncomputable def cCoeff (i : ℕ) : ℂ :=
+  iteratedDeriv i G2at1 0 / (Nat.factorial i : ℂ)
+
+/-- S(m) recovered from A_m: Definition 2.3 read backwards. -/
+theorem Sm_eq_Am_div (m : ℕ) : Sm m = Am m / 2 ^ m := by
+  unfold Am
+  have h2 : ((2:ℝ) ^ m) ≠ 0 := by positivity
+  field_simp
+
+/-- Manuscript (3): the frozen integral, with g_i(s) replaced by c_i = g_i(1). -/
+noncomputable def Ikfrozen (k : ℕ) : ℂ :=
+  ∑ i ∈ Finset.range (k + 1), cCoeff i * ((Sm (k - i) : ℝ) : ℂ)
+
+/-- MANUSCRIPT LEMMA 2.4 (exactness).  I'_k = sum_i c_i 2^(i-k) A_(k-i).
+Every error term downstream is therefore exactly a value of the deterministic
+delta, not a bound. -/
+theorem Ikfrozen_eq_sum_Am (k : ℕ) :
+    Ikfrozen k = ∑ i ∈ Finset.range (k + 1),
+      cCoeff i * ((Am (k - i) : ℝ) : ℂ) / (2:ℂ) ^ (k - i) := by
+  unfold Ikfrozen
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [Sm_eq_Am_div]
+  push_cast
+  ring
+
 /-- A1: absolute summability of the z-weighted Dirichlet family. -/
 theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
     (hr3 : r * ((3:ℝ) ^ (-s)) ≤ 1/2) (hr2 : r < (2:ℝ) ^ s) (z : ℂ) (hz : ‖z‖ ≤ r) :
