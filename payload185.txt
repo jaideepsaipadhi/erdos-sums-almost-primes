@@ -1,0 +1,17 @@
+/-- The k-th derivative at 0 of a single term, in collapsed form. -/
+theorem iteratedDeriv_term_at_zero (s : RR) (k : NN) (hk : 1 LEQ k) (n : NN) :
+    iteratedDeriv k (fun z : CC => zOmegaHom s z n) 0
+      = if bigOmega n = k then (Nat.factorial k : CC) * (((n:CC)) ^ (-(s:CC))) else 0 := by
+  by_cases hn : n = 0
+  DOT subst hn
+    rw [iteratedDeriv_term_zero s k 0]
+    have hO : bigOmega 0 NEQ k := by
+      have : bigOmega 0 = 0 := by unfold bigOmega; simp
+      omega
+    rw [if_neg hO]
+  DOT have hterm : (fun z : CC => zOmegaHom s z n)
+        = fun z : CC => z ^ (bigOmega n) * (((n:CC)) ^ (-(s:CC))) := by
+      funext z
+      show (if n = 0 then 0 else z ^ (bigOmega n) * (((n : NN) : CC) ^ (-(s:CC)))) = _
+      rw [if_neg hn]
+    rw [hterm, iteratedDeriv_monomial_zero]
