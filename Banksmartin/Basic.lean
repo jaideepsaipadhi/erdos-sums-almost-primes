@@ -200,6 +200,19 @@ def primesEquivSubtypeGE (k : ℕ) :
   left_inv := by intro q; rfl
   right_inv := by intro q; rfl
 
+/-- The `if 2 < p` in dConst is the indicator of {p >= 3} (for primes). -/
+theorem dConst_if_eq_indicator :
+    (fun p : Nat.Primes =>
+        (if 2 < (p : ℕ) then (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 else 1))
+      = Set.mulIndicator {p : Nat.Primes | (3:ℕ) ≤ (p : ℕ)}
+          (fun p : Nat.Primes => (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2) := by
+  funext p
+  by_cases h : p ∈ {q : Nat.Primes | (3:ℕ) ≤ (q : ℕ)}
+  · have h3 : (3:ℕ) ≤ (p : ℕ) := h
+    rw [Set.mulIndicator_of_mem h, if_pos (by omega)]
+  · have h3 : ¬((3:ℕ) ≤ (p : ℕ)) := h
+    rw [Set.mulIndicator_of_notMem h, if_neg (by omega)]
+
 /-- The secondary-term constant a1 = d * log 2 / 4 from GLW Theorem 2:
 f_k = 1 - 2^(-k) (a1 k^2 + O(k log(k+1))). -/
 noncomputable def aOneConst : ℝ := dConst * Real.log 2 / 4
