@@ -1,0 +1,13 @@
+/-- Radius version of the p=2 factor bound: ||z|| * 2^(-s) < 1 when ||z|| <= r < 2^s. -/
+theorem two_factor_lt_one_radius (s : RR) (r : RR) (hr0 : 0 LEQ r) (hrs : r < (2:RR) ^ s)
+    (z : CC) (hz : Norm.norm z LEQ r) :
+    Norm.norm z * ((2:RR) ^ (-s)) < 1 := by
+  have h2s : (0:RR) < (2:RR) ^ s := Real.rpow_pos_of_pos (by norm_num) s
+  have hinv : (2:RR) ^ (-s) = ((2:RR) ^ s)INV := by
+    rw [Real.rpow_neg (by norm_num)]
+  have hznn : (0:RR) LEQ Norm.norm z := norm_nonneg z
+  rw [hinv]
+  have hlt : Norm.norm z < (2:RR) ^ s := lt_of_le_of_lt hz hrs
+  have hinvpos : (0:RR) < ((2:RR) ^ s)INV := inv_pos.mpr h2s
+  have hkey := mul_lt_mul_of_pos_right hlt hinvpos
+  rwa [mul_inv_cancelZ (ne_of_gt h2s)] at hkey
