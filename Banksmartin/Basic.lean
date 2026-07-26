@@ -5745,6 +5745,29 @@ theorem euler_factor_split (a : ℝ) (ha : 0 < 1 - a) (z w : ℂ) :
   rw [Complex.cpow_neg]
   field_simp
 
+/-- Exponentiating a HasSum gives a HasProd (complex, with a scalar factor). -/
+theorem hasProd_cexp_of_hasSum {ι : Type*} {f : ι → ℂ} {a c : ℂ}
+    (h : HasSum f a) :
+    HasProd (fun i => Complex.exp (c * f i)) (Complex.exp (c * a)) := by
+  have hmul : HasSum (fun i => c * f i) (c * a) := h.mul_left c
+  have hcont := (Complex.continuous_exp.tendsto (c * a)).comp hmul
+  apply hcont.congr
+  intro t
+  rw [Function.comp_apply, Complex.exp_sum]
+
+/-- The cpow-negative product equals cFac^z. Bridges the complex product to
+the real log-sum via reg_factors_tprod. -/
+theorem cpow_neg_tprod_eq_cFac (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 2)
+    (hc : 0 < cFac s)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+    HasProd (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+        (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z))
+      (((cFac s : ℝ) : ℂ) ^ z) := by
+  sorry
+
 /-- B3 (HasProd form): the p >= 3 family has the factored value.
 Stated with HasProd rather than tprod because HasProd composes with
 mul_compl and Equiv.hasProd_iff, which tprod does not. -/
