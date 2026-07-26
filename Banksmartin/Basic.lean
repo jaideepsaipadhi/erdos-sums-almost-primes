@@ -5496,8 +5496,9 @@ theorem ofReal_cpow_eq_exp (a : ℝ) (ha : 0 < a) (w : ℂ) :
 /-- The manuscript's decomposition: Fbig = (s-1)^(-z) (1 - z/2^s)^(-1) G2manu.
 This is the same F as our cFac form, resplit so that the z-power of the first
 factor contributes (-log(s-1))^l / l! -- the form Definition 2.3 consumes. -/
-theorem Fbig_eq_manuscript (s : ℝ) (hs : 1 < s) (hc : 0 < cFac s) (z : ℂ) :
+theorem Fbig_eq_manuscript (s : ℝ) (hs : 1 < s) (z : ℂ) :
     Fbig s z = ((s - 1 : ℝ) : ℂ) ^ (-z) * (1 - z / ((2:ℂ) ^ (s:ℂ)))⁻¹ * G2manu s z := by
+  have hc : 0 < cFac s := cFac_pos s hs
   have hs1 : (0:ℝ) < s - 1 := by linarith
   have hk : (0:ℝ) < kappaFac s := kappaFac_pos s hs hc
   unfold Fbig G2manu
@@ -6800,13 +6801,13 @@ theorem contDiffAt_factorCmanu (s : ℝ) (hs : 1 ≤ s) (hk : 0 < kappaFac s) (k
 /-- Fbig factors as (A * B) * C in the MANUSCRIPT normalisation:
 A = (s-1)^(-z), B = (1 - z/2^s)^(-1), C = G2manu.  Parallel to Fbig_eq_prod,
 which uses the cFac normalisation; both expand the same Fbig. -/
-theorem Fbig_eq_prod_manu (s : ℝ) (hs : 1 < s) (hc : 0 < cFac s) :
+theorem Fbig_eq_prod_manu (s : ℝ) (hs : 1 < s) :
     (fun z : ℂ => Fbig s z)
       = ((fun z : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-z))
           * (fun z : ℂ => (1 - z / ((2:ℂ) ^ (s:ℂ)))⁻¹))
         * (fun z : ℂ => G2manu s z) := by
   funext z
-  rw [Fbig_eq_manuscript s hs hc z]
+  rw [Fbig_eq_manuscript s hs z]
   simp only [Pi.mul_apply]
 
 /-- Fbig factors as (A * B) * C as functions. -/
@@ -6860,7 +6861,7 @@ theorem iteratedDeriv_Fbig (k : ℕ) (s : ℝ) (hs : 1 < s) (hc : 0 < cFac s) :
 /-- Double Leibniz for Fbig in the MANUSCRIPT normalisation.
 Parallel to iteratedDeriv_Fbig; factor A is (s-1)^(-z) and factor C is G2manu,
 so the coefficients that emerge are (-log(s-1))^l / l! as in Lemma 2.2. -/
-theorem iteratedDeriv_Fbig_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hc : 0 < cFac s) :
+theorem iteratedDeriv_Fbig_manu (k : ℕ) (s : ℝ) (hs : 1 < s) :
     iteratedDeriv k (fun z => Fbig s z) 0
       = ∑ n ∈ Finset.range (k + 1),
           (Nat.choose k n : ℂ) *
@@ -6869,6 +6870,7 @@ theorem iteratedDeriv_Fbig_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hc : 0 < cFac 
                 * iteratedDeriv i (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0
                 * iteratedDeriv (n - i) (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹) 0)
             * iteratedDeriv (k - n) (fun w : ℂ => G2manu s w) 0 := by
+  have hc : 0 < cFac s := cFac_pos s hs
   have hs1 : (1:ℝ) ≤ s := le_of_lt hs
   have hsm1 : (0:ℝ) < s - 1 := by linarith
   have hk : (0:ℝ) < kappaFac s := kappaFac_pos s hs hc
@@ -6886,7 +6888,7 @@ theorem iteratedDeriv_Fbig_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hc : 0 < cFac 
       ((fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w))
         * (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹)) 0 :=
     fun j => (hA j).mul (hB j)
-  rw [Fbig_eq_prod_manu s hs hc]
+  rw [Fbig_eq_prod_manu s hs]
   rw [iteratedDeriv_mul (hAB k) (hC k)]
   apply Finset.sum_congr rfl
   intro n hn
@@ -7122,8 +7124,7 @@ theorem L2b_summand_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (n i : ℕ) (hin : i �
 
 /-- Coefficient convolution for Fbig in the MANUSCRIPT normalisation:
 [z^k] Fbig = sum over p,q of g_q(s) 2^(-ps) (-log(s-1))^(k-p-q)/(k-p-q)!. -/
-theorem coeff_Fbig_eq_convolution_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
-    (hc : 0 < cFac s) :
+theorem coeff_Fbig_eq_convolution_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
     (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : ℂ)
       = ∑ p ∈ Finset.range (k + 1),
           ∑ q ∈ Finset.range (k - p + 1),
@@ -7155,7 +7156,7 @@ theorem coeff_Fbig_eq_convolution_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s
     have hfq : ((Nat.factorial q : ℕ) : ℂ) ≠ 0 :=
       Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero q)
     field_simp
-  rw [iteratedDeriv_Fbig_manu k s hs hc]
+  rw [iteratedDeriv_Fbig_manu k s hs]
   simp only [hAval, hBval, hCval]
   rw [Finset.sum_div]
   have hdist : ∀ n ∈ Finset.range (k + 1),
@@ -7190,17 +7191,19 @@ theorem coeff_Fbig_eq_convolution_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s
 /-- MANUSCRIPT LEMMA 2.2 (manuscript normalisation):
 F_k(s) = sum_{i+j+l=k} g_i(s) 2^(-js) (-log(s-1))^l / l!.
 This is the form Definition 2.3 and Lemma 2.4 consume. -/
-theorem Fk_expansion_manu (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
-    (hc : 0 < cFac s)
-    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
-    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
-    (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+theorem Fk_expansion_manu (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
     Fk k s = ∑ p ∈ Finset.range (k + 1),
       ∑ q ∈ Finset.range (k - p + 1),
         (gManu q s).re * (2:ℝ) ^ (-((p:ℝ)) * s)
           * ((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q))) := by
-  have hC := (Fk_eq_coeff_Fbig k hk s hs hs2 hc hmulR hposR hlogR).trans (coeff_Fbig_eq_convolution_manu k s hs hs2 hc)
+  have hc : 0 < cFac s := cFac_pos s hs
+  have hmulR := cFac_multipliable s hs
+  have hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ := by
+    intro p
+    obtain ⟨h3, hp⟩ := cFac_factor_le_third s hs p
+    exact inv_pos.mpr (by linarith)
+  have hlogR := cFac_log_summable s hs
+  have hC := (Fk_eq_coeff_Fbig k hk s hs hs2 hc hmulR hposR hlogR).trans (coeff_Fbig_eq_convolution_manu k s hs hs2)
   have hre : ((Fk k s : ℝ) : ℂ).re = Fk k s := Complex.ofReal_re _
   rw [← hre, hC]
   rw [Complex.re_sum]
