@@ -185,7 +185,13 @@ noncomputable def dConst : ℝ :=
 /-- The secondary-term constant a1 = d * log 2 / 4 from GLW Theorem 2:
 f_k = 1 - 2^(-k) (a1 k^2 + O(k log(k+1))). -/
 noncomputable def aOneConst : ℝ := dConst * Real.log 2 / 4
-noncomputable def rhoConst : ℝ := -0.1749323
+/-- Manuscript Lemma 3.6: rho = Res_{z=3} G2(1,z)
+      = -(1/9) * prod_{p >= 5} (1 - 3/p)^(-1) (1 - 1/p)^3 = -0.1749323...
+Same Euler-product convention as dConst (factors below the threshold set
+to 1).  Previously a bare literal, which left rho_enclosure vacuous. -/
+noncomputable def rhoConst : ℝ :=
+  -(1 / 9) * ∏' p : Nat.Primes,
+    (if 5 ≤ (p : ℕ) then (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 else 1)
 noncomputable def SstarConst : ℝ := 6.9763
 noncomputable def alphaConst : ℝ := 15.5716
 noncomputable def GammaConst : ℝ := 105.41
