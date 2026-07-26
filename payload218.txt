@@ -1,0 +1,21 @@
+/-- D3: the complex p >= 3 product at z = 2 is the cast of the real one. -/
+theorem G2C_at_two_ofReal :
+    (TPRODN p : {p : NN // p.Prime AND 3 LEQ p},
+        (1 - (2:CC) * ((((p:NN):RR) ^ (-(1:RR)) : RR) : CC))INV
+          * (((1 - ((p:NN):RR) ^ (-(1:RR)) : RR) : CC)) ^ (2:CC))
+      = TPRODN p : {p : NN // p.Prime AND 3 LEQ p},
+          (((((1 - 2 * ((p:NN):RR) ^ (-(1:RR)) : RR))INV
+            * ((1 - ((p:NN):RR) ^ (-(1:RR)) : RR)) ^ 2 : RR)) : CC) := by
+  apply tprod_congr
+  intro p
+  have hp3 : (3:RR) LEQ ((p:NN):RR) := by exact_mod_cast p.2.2
+  have hle : ((p:NN):RR) ^ (-(1:RR)) LEQ 1/3 := by
+    rw [Real.rpow_neg_one]
+    rw [inv_le_comm0 (by linarith) (by norm_num)]
+    linarith
+  have hpos : (0:RR) < ((p:NN):RR) ^ (-(1:RR)) := by positivity
+  have hne : (1:RR) - 2 * (((p:NN):RR) ^ (-(1:RR))) NEQ 0 := by
+    have : 2 * (((p:NN):RR) ^ (-(1:RR))) LEQ 2/3 := by linarith
+    intro hcon
+    linarith
+  exact reg_factor_at_two (((p:NN):RR) ^ (-(1:RR))) hne
