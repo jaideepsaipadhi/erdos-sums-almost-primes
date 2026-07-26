@@ -6140,6 +6140,18 @@ theorem iteratedDeriv_monomial_zero (m k : ℕ) (c : ℂ) :
   · rw [if_pos h, if_pos h]
   · rw [if_neg h, if_neg h, zero_mul]
 
+/-- The j-th derivative of a single term. -/
+theorem iteratedDeriv_zOmega_term (s : ℝ) (n : ℕ) (hn : n ≠ 0) (j : ℕ) (w : ℂ) :
+    iteratedDeriv j (fun z : ℂ => zOmegaHom s z n) w
+      = ((Nat.descFactorial (bigOmega n) j : ℕ) : ℂ) * w ^ (bigOmega n - j)
+        * (((n:ℂ)) ^ (-(s:ℂ))) := by
+  have hterm : (fun z : ℂ => zOmegaHom s z n)
+      = fun z : ℂ => z ^ (bigOmega n) * (((n:ℂ)) ^ (-(s:ℂ))) := by
+    funext z
+    show (if n = 0 then 0 else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+    rw [if_neg hn]
+  rw [hterm, iteratedDeriv_mul_const_field, iteratedDeriv_pow]
+
 /-- C2: term-by-term differentiation, j times, on the ball of radius 3/2. -/
 theorem iteratedDeriv_tsum_eq (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
     (hr00 : 0 < r0) (hr0r : r0 < r) (hr0 : 0 ≤ r)
