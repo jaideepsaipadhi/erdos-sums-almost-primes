@@ -5722,10 +5722,13 @@ theorem cpow_neg_multipliable_five (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.n
   ring
 
 /-- The family (1 - p^-s)^(-z) is multipliable over primes >= 3. -/
-theorem cpow_neg_multipliable_three (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
+theorem cpow_neg_multipliable_three (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
       (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z)) := by
-  sorry
+  have h5 := cpow_neg_multipliable_five s hs z hz
+  have hsplit := tprod_split_three
+    (fun n : ℕ => (((1 - (n:ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z)) h5
+  exact hsplit.1
 
 /-- B3 (HasProd form): the p >= 3 family has the factored value.
 Stated with HasProd rather than tprod because HasProd composes with
