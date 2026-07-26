@@ -1,0 +1,31 @@
+/-- For s > 1 there is a radius strictly between 3/2 and the summability threshold. -/
+theorem exists_radius_gap (s : RR) (hs : 1 < s) :
+    EXISTS r : RR, 3/2 < r AND r * ((3:RR) ^ (-s)) LEQ 1/2 AND r < (2:RR) ^ s := by
+  have h3s : (3:RR) < (3:RR) ^ s := by
+    have h1 : (3:RR) ^ (1:RR) < (3:RR) ^ s := by
+      apply Real.rpow_lt_rpow_of_exponent_lt (by norm_num) hs
+    rwa [Real.rpow_one] at h1
+  have h2s : (2:RR) LEQ (2:RR) ^ s := by
+    have h1 : (2:RR) ^ (1:RR) LEQ (2:RR) ^ s := by
+      apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+      linarith
+    rwa [Real.rpow_one] at h1
+  set M : RR := min ((3:RR) ^ s / 2) ((2:RR) ^ s) with hM
+  have hMgt : 3/2 < M := by
+    rw [hM, lt_min_iff]
+    constructor
+    DOT linarith
+    DOT linarith
+  refine ANGL (3/2 + M) / 2, by linarith, ?_, ?_ANGR
+  DOT have hle : (3/2 + M) / 2 LEQ (3:RR) ^ s / 2 := by
+      have : M LEQ (3:RR) ^ s / 2 := min_le_left _ _
+      linarith
+    have h3pos : (0:RR) < (3:RR) ^ (-s) := Real.rpow_pos_of_pos (by norm_num) _
+    have hinv : (3:RR) ^ (-s) = ((3:RR) ^ s)INV := by
+      rw [Real.rpow_neg (by norm_num)]
+    have h3spos : (0:RR) < (3:RR) ^ s := Real.rpow_pos_of_pos (by norm_num) s
+    rw [hinv]
+    rw [mul_inv_le_iff0 h3spos]
+    linarith
+  DOT have : M LEQ (2:RR) ^ s := min_le_right _ _
+    linarith
