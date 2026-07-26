@@ -6375,7 +6375,24 @@ theorem Fk_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
     · rw [if_neg h, if_neg h, mul_zero]
   rw [hpull]
   field_simp
-  sorry
+  unfold Fk
+  rw [Complex.ofReal_tsum]
+  show (∑' x : ({n : ℕ | 2 ≤ n ∧ bigOmega n = k} : Set ℕ),
+      ((((x:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) = _
+  rw [tsum_subtype {n : ℕ | 2 ≤ n ∧ bigOmega n = k}
+    (fun n : ℕ => (((n:ℝ) ^ (-s) : ℝ) : ℂ))]
+  apply tsum_congr
+  intro n
+  by_cases h : bigOmega n = k
+  · have hmem : n ∈ {n : ℕ | 2 ≤ n ∧ bigOmega n = k} := by
+      refine ⟨ two_le_of_bigOmega_eq k hk h, h ⟩
+    rw [Set.indicator_of_mem hmem, if_pos h]
+    rw [show (-(s:ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
+    rw [← Complex.ofReal_natCast, ← Complex.ofReal_cpow (Nat.cast_nonneg n)]
+  · have hnmem : n ∉ {n : ℕ | 2 ≤ n ∧ bigOmega n = k} := by
+      intro hcon
+      exact h hcon.2
+    rw [Set.indicator_of_notMem hnmem, if_neg h]
 
 /-- OBLIGATION L2a: F_k(s) is the k-th Taylor coefficient of Fbig.
 This is the number-theoretic step (Dirichlet series = Euler product). -/

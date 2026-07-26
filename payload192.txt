@@ -1,0 +1,17 @@
+  unfold Fk
+  rw [Complex.ofReal_tsum]
+  rw [tsum_subtype]
+  apply tsum_congr
+  intro n
+  by_cases h : bigOmega n = k
+  DOT have hmem : n IN {n : NN | 2 LEQ n AND bigOmega n = k} := by
+      refine ANGL two_le_of_bigOmega_eq k hk h, h ANGR
+    rw [Set.indicator_of_mem hmem, if_pos h]
+    push_cast
+    rw [LARR Complex.ofReal_cpow (Nat.cast_nonneg n)]
+    norm_num
+  DOT have hnmem : n NOTIN {n : NN | 2 LEQ n AND bigOmega n = k} := by
+      intro hcon
+      exact h hcon.2
+    rw [Set.indicator_of_notMem hnmem, if_neg h]
+    simp
