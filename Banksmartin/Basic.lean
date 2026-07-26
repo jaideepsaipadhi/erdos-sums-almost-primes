@@ -6264,7 +6264,16 @@ theorem iteratedDeriv_tsum_eq (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
         rw [iteratedDeriv_term_zero s J v, norm_zero]
         positivity
       · exact iteratedDeriv_term_bound s hs r0 (by linarith : (0:ℝ) < r0) J n hn v (le_of_lt hv)
-    sorry
+    have hmain := Complex.hasSum_deriv_of_summable_norm hbound hdiff hball hle hwmem
+    have hIHball : (fun v : ℂ => iteratedDeriv J (fun z : ℂ => ∑' n : ℕ, zOmegaHom s z n) v)
+        =ᶠ[nhds w] fun v : ℂ => ∑' n : ℕ, iteratedDeriv J (fun z : ℂ => zOmegaHom s z n) v := by
+      filter_upwards [hball.mem_nhds hwmem] with v hv
+      rw [Metric.mem_ball, dist_zero_right] at hv
+      exact IH v hv
+    rw [iteratedDeriv_succ, Filter.EventuallyEq.deriv_eq hIHball, ← hmain.tsum_eq]
+    apply tsum_congr
+    intro n
+    rw [iteratedDeriv_succ]
 
 /-- A4: F_k is the k-th coefficient of the Dirichlet series. -/
 theorem Fk_eq_coeff_tsum (k : ℕ) (s : ℝ) (hs : 1 < s) :
