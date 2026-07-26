@@ -6276,7 +6276,7 @@ theorem iteratedDeriv_tsum_eq (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
     rw [iteratedDeriv_succ]
 
 /-- A4: F_k is the k-th coefficient of the Dirichlet series. -/
-theorem Fk_eq_coeff_tsum (k : ℕ) (s : ℝ) (hs : 1 < s) :
+theorem Fk_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
     ((Fk k s : ℝ) : ℂ)
       = iteratedDeriv k (fun z => ∑' n : ℕ, zOmegaHom s z n) 0 / (Nat.factorial k : ℂ) := by
   sorry
