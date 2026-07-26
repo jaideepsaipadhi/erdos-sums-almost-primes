@@ -1,0 +1,11 @@
+/-- Manuscript (4): the S1 source, D_k = I_k - I'_k.
+Ikfrozen is C-valued (built from cCoeff), so take the real part. -/
+noncomputable def Dk (k : NN) : RR := Ik k - (Ikfrozen k).re
+
+/-- Manuscript section 2.3: E1(k) = 2^k D_k. -/
+noncomputable def E1k (k : NN) : RR := (2:RR) ^ k * Dk k
+
+/-- Manuscript section 2.3: the exponentially small source
+Eexp(k) = 2^(k+1) w_k - q k^2 W_k - 2^k T_k, with q = log 2 / 4. -/
+noncomputable def Eexpk (k : NN) : RR :=
+  (2:RR) ^ (k + 1) * wk k - (Real.log 2 / 4) * (k : RR) ^ 2 * Wk k - (2:RR) ^ k * Tk k
