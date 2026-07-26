@@ -5614,6 +5614,33 @@ theorem G2at1_differentiableOn :
   unfold G2at1
   exact hcpow.mul hG2C
 
+/-- MANUSCRIPT section 1: sum_i c_i = 1/2.
+The series converges at z = 1 (radius 3/2 > 1), and G2at1 1 = (1/2) G2C(1,1) = 1/2. -/
+theorem cCoeff_sum : HasSum (fun n : ℕ => cCoeff n) (1/2 : ℂ) := by
+  have hR : (0:NNReal) < 3/2 := by norm_num
+  have hser := G2at1_differentiableOn.hasFPowerSeriesOnBall hR
+  have hmem : (1 : ℂ) ∈ EMetric.ball (0 : ℂ) ((3/2 : NNReal) : ENNReal) := by
+    show edist (1 : ℂ) 0 < ((3/2 : NNReal) : ENNReal)
+    rw [edist_dist, dist_zero_right, norm_one, ENNReal.ofReal_one]
+    rw [show (1 : ENNReal) = ((1 : NNReal) : ENNReal) by simp]
+    rw [ENNReal.coe_lt_coe]
+    norm_num
+  have hsum := hser.hasSum_sub hmem
+  simp only [sub_zero] at hsum
+  have hval : G2at1 1 = (1/2 : ℂ) := by
+    unfold G2at1
+    rw [G2C_one_one, mul_one, Complex.cpow_one]
+    norm_num
+  rw [hval] at hsum
+  apply hsum.congr_fun
+  intro n
+  have hbridge := iteratedDeriv_eq_factorial_smul_coeff' hser n
+  unfold cCoeff
+  rw [hbridge]
+  have hfac : ((Nat.factorial n : ℕ) : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
+  field_simp
+  rfl
 /-- S(m) recovered from A_m: Definition 2.3 read backwards. -/
 theorem Sm_eq_Am_div (m : ℕ) : Sm m = Am m / 2 ^ m := by
   unfold Am
