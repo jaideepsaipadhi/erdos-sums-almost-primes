@@ -1,0 +1,15 @@
+/-- Radius version of the p >= 3 half-bound: with ||z|| <= r and
+r * 3^(-s) <= 1/2, every prime p >= 3 gives ||z|| p^(-s) <= 1/2.
+Stated alongside the 3/2 version so nothing already proven changes. -/
+theorem zOmega_half_of_three_le_radius (s : RR) (r : RR) (hr0 : 0 LEQ r) (z : CC)
+    (hz : Norm.norm z LEQ r) (hrs : r * ((3:RR) ^ (-s)) LEQ 1/2) {p : NN} (hp3 : 3 LEQ p) :
+    Norm.norm z * ((p:RR) ^ (-s)) LEQ 1/2 := by
+  have hp3R : (3:RR) LEQ (p:RR) := by exact_mod_cast hp3
+  have hps : (p:RR) ^ (-s) LEQ (3:RR) ^ (-s) := by
+    rw [Real.rpow_neg (by linarith : (0:RR) LEQ (p:RR)),
+      Real.rpow_neg (by norm_num : (0:RR) LEQ (3:RR))]
+    gcongr
+  have hznn : (0:RR) LEQ Norm.norm z := norm_nonneg z
+  calc Norm.norm z * ((p:RR) ^ (-s)) LEQ r * ((3:RR) ^ (-s)) := by
+        apply mul_le_mul hz hps (by positivity) hr0
+    _ LEQ 1/2 := hrs
