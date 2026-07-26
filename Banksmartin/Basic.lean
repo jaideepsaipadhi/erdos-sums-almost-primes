@@ -5909,11 +5909,21 @@ theorem zOmegaHom_prime (s : ℝ) (z : ℂ) {p : ℕ} (hp : p.Prime) :
   rw [← Complex.ofReal_natCast, ← Complex.ofReal_cpow (Nat.cast_nonneg p)]
 
 /-- B4: split the prime product at p = 2. -/
-theorem split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2) :
+theorem split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2)
+    (hmul3 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹)) :
     (∏' p : Nat.Primes, (1 - zOmegaHom s z p)⁻¹)
       = (1 - z * (((2:ℕ):ℝ) ^ (-s) : ℝ))⁻¹
         * ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - z * (((p:ℕ):ℝ) ^ (-s) : ℝ))⁻¹ := by
-  sorry
+  have hcongr : (∏' p : Nat.Primes, (1 - zOmegaHom s z p)⁻¹)
+      = ∏' p : {p : ℕ // p.Prime}, (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
+    apply tprod_congr
+    intro p
+    rw [zOmegaHom_prime s z p.2]
+  rw [hcongr]
+  have hsplit := tprod_split_two
+    (fun n : ℕ => (1 - z * (((n:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹) hmul3
+  rw [hsplit.2]
 
 /-- A3: the Euler product equals the factored form Fbig. -/
 theorem eulerProduct_eq_Fbig (s : ℝ) (hs : 1 < s) (z : ℂ)
