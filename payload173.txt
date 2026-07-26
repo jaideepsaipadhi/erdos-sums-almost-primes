@@ -1,0 +1,35 @@
+/-- Polynomial growth is dominated by geometric growth, with a uniform constant. -/
+theorem pow_le_const_mul_geom (j : NN) {c : RR} (hc : 1 < c) :
+    EXISTS C : RR, 0 < C AND FORALL m : NN, ((m:NN):RR) ^ j LEQ C * c ^ m := by
+  have hlo := isLittleO_pow_const_const_pow_of_one_lt (R := RR) j hc
+  obtain ANGL C0, hC0 ANGR := hlo.isBigO.bound
+  obtain ANGL N, hN ANGR := Filter.eventually_atTop.mp hC0
+  refine ANGL max (max C0 1) (((N:NN):RR) ^ j + 1), ?_, ?_ANGR
+  DOT have h1 : (0:RR) < 1 := one_pos
+    have : (1:RR) LEQ max C0 1 := le_max_right _ _
+    calc (0:RR) < 1 := h1
+      _ LEQ max C0 1 := this
+      _ LEQ max (max C0 1) (((N:NN):RR) ^ j + 1) := le_max_left _ _
+  DOT intro m
+    have hcm : (0:RR) < c ^ m := by positivity
+    have hcm1 : (1:RR) LEQ c ^ m := one_le_pow_of_le_of_nonneg (le_of_lt hc) m
+    rcases Nat.lt_or_ge m N with hlt | hge
+    DOT have hmN : ((m:NN):RR) ^ j LEQ ((N:NN):RR) ^ j := by
+        apply pow_le_pow_left (by positivity)
+        exact_mod_cast le_of_lt hlt
+      calc ((m:NN):RR) ^ j LEQ ((N:NN):RR) ^ j := hmN
+        _ LEQ (((N:NN):RR) ^ j + 1) * 1 := by linarith
+        _ LEQ (((N:NN):RR) ^ j + 1) * c ^ m := by
+            apply mul_le_mul_of_nonneg_left hcm1 (by positivity)
+        _ LEQ max (max C0 1) (((N:NN):RR) ^ j + 1) * c ^ m := by
+            apply mul_le_mul_of_nonneg_right (le_max_right _ _) (le_of_lt hcm)
+    DOT have hb := hN m hge
+      simp only [Real.norm_eq_abs] at hb
+      have habs : ((m:NN):RR) ^ j LEQ C0 * c ^ m := by
+        calc ((m:NN):RR) ^ j LEQ |((m:NN):RR) ^ j| := le_abs_self _
+          _ LEQ C0 * |c ^ m| := hb
+          _ = C0 * c ^ m := by rw [abs_of_pos hcm]
+      calc ((m:NN):RR) ^ j LEQ C0 * c ^ m := habs
+        _ LEQ max (max C0 1) (((N:NN):RR) ^ j + 1) * c ^ m := by
+            apply mul_le_mul_of_nonneg_right _ (le_of_lt hcm)
+            exact le_trans (le_max_left C0 1) (le_max_left _ _)
