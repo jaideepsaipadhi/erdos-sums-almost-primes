@@ -273,6 +273,14 @@ theorem dConst_family_multipliable :
   intro p
   ring
 
+/-- The complex product of casts at z = 2 is the cast of the real product. -/
+theorem dConst_prod_ofReal :
+    (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+        ((((1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 : ℝ)) : ℂ))
+      = (((∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+          (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 : ℝ)) : ℂ) := by
+  exact (dConst_family_multipliable.map_tprod Complex.ofRealHom Complex.continuous_ofReal).symm
+
 /-- The secondary-term constant a1 = d * log 2 / 4 from GLW Theorem 2:
 f_k = 1 - 2^(-k) (a1 k^2 + O(k log(k+1))). -/
 noncomputable def aOneConst : ℝ := dConst * Real.log 2 / 4
