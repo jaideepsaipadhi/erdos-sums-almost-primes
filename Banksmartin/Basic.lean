@@ -6338,6 +6338,14 @@ theorem exists_radius_gap (s : ℝ) (hs : 1 < s) :
   · have : M ≤ (2:ℝ) ^ s := min_le_right _ _
     linarith
 
+/-- The Fk family is summable (real form). -/
+theorem Fk_summable_subtype (k : ℕ) (s : ℝ) (hs : 1 < s) :
+    Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} => ((n:ℕ):ℝ) ^ (-s)) := by
+  have hbase : Summable (fun n : ℕ => ((n:ℝ) ^ (-s))) := by
+    rw [Real.summable_nat_rpow]
+    linarith
+  exact hbase.subtype _
+
 /-- A4: F_k is the k-th coefficient of the Dirichlet series. -/
 theorem Fk_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
     ((Fk k s : ℝ) : ℂ)
