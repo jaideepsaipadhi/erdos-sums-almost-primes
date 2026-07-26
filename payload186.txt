@@ -1,0 +1,9 @@
+/-- Terms with Omega(n) = k >= 1 automatically have n >= 2. -/
+theorem two_le_of_bigOmega_eq (k : NN) (hk : 1 LEQ k) {n : NN} (h : bigOmega n = k) : 2 LEQ n := by
+  by_contra hcon
+  push_neg at hcon
+  interval_cases n
+  DOT have : bigOmega 0 = 0 := by unfold bigOmega; simp
+    omega
+  DOT have : bigOmega 1 = 0 := by unfold bigOmega; simp
+    omega
