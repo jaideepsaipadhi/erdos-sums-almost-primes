@@ -6200,6 +6200,28 @@ theorem iteratedDeriv_term_differentiable (s : ℝ) (n : ℕ) (hn : n ≠ 0) (j 
   apply Differentiable.const_mul
   exact differentiable_pow _
 
+/-- All iterated derivatives of the n = 0 term vanish. -/
+theorem iteratedDeriv_term_zero (s : ℝ) (j : ℕ) (w : ℂ) :
+    iteratedDeriv j (fun z : ℂ => zOmegaHom s z 0) w = 0 := by
+  have hz : (fun z : ℂ => zOmegaHom s z 0) = fun _ : ℂ => (0:ℂ) := by
+    funext z
+    exact map_zero _
+  rw [hz]
+  have hgen : ∀ J : ℕ, (fun v : ℂ => iteratedDeriv J (fun _ : ℂ => (0:ℂ)) v)
+      = fun _ : ℂ => (0:ℂ) := by
+    intro J
+    induction J with
+    | zero =>
+      funext v
+      simp
+    | succ K IH =>
+      funext v
+      rw [iteratedDeriv_succ]
+      have hfun : (iteratedDeriv K fun _ : ℂ => (0:ℂ)) = fun _ : ℂ => (0:ℂ) := IH
+      rw [hfun, deriv_const]
+  have := hgen j
+  exact congrFun this w
+
 /-- C2: term-by-term differentiation, j times, on the ball of radius 3/2. -/
 theorem iteratedDeriv_tsum_eq (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
     (hr00 : 0 < r0) (hr0r : r0 < r) (hr0 : 0 ≤ r)

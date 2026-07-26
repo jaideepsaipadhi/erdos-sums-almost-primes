@@ -1,0 +1,41 @@
+  intro j
+  induction j with
+  | zero =>
+    intro w hw
+    simp only [iteratedDeriv_zero]
+  | succ J IH =>
+    intro w hw
+    have hball : IsOpen (Metric.ball (0:CC) r0) := Metric.isOpen_ball
+    have hwmem : w IN Metric.ball (0:CC) r0 := by
+      rw [Metric.mem_ball, dist_zero_right]
+      exact hw
+    have hbound := deriv_bound_summable s hs J r0 r hr01 hr0r hr0 hr3 hr2
+    have hdiff : FORALL n : NN, DifferentiableOn CC
+        (fun w : CC => iteratedDeriv J (fun z : CC => zOmegaHom s z n) w)
+        (Metric.ball (0:CC) r0) := by
+      intro n
+      by_cases hn : n = 0
+      DOT subst hn
+        have : (fun w : CC => iteratedDeriv J (fun z : CC => zOmegaHom s z 0) w)
+            = fun _ : CC => 0 := by
+          funext w
+          have hz : (fun z : CC => zOmegaHom s z 0) = fun _ : CC => 0 := by
+            funext z
+            exact map_zero _
+          rw [hz, iteratedDeriv_const_zero]
+          sorry
+        rw [this]
+        exact differentiableOn_const 0
+      DOT exact (iteratedDeriv_term_differentiable s n hn J).differentiableOn
+    have hle : FORALL (n : NN) (v : CC), v IN Metric.ball (0:CC) r0 TO
+        Norm.norm (iteratedDeriv J (fun z : CC => zOmegaHom s z n) v)
+          LEQ ((bigOmega n : NN) : RR) ^ J * r0 ^ (bigOmega n - J) * ((n:RR) ^ (-s)) := by
+      intro n v hv
+      by_cases hn : n = 0
+      DOT sorry
+      DOT apply iteratedDeriv_term_bound s hs r0 (by linarith) J n hn v
+        rw [Metric.mem_ball, dist_zero_right] at hv
+        exact le_of_lt hv
+    have hmain := hasSum_deriv_of_summable_norm hbound hdiff hball hle hwmem
+    rw [iteratedDeriv_succ]
+    sorry
