@@ -4909,6 +4909,18 @@ theorem coeff_cpow (s : ℝ) (hc : 0 < cFac s) (l : ℕ) :
   push_cast
   ring
 
+/-- The regularised zeta factor: (s-1) * zeta(s), extended by 1 at s = 1.
+Smooth on [1, infinity) by GLW Lemma 11 / the standard pole structure; here we
+only need the value at 1, which holds definitionally.  Real-valued because
+zeta is real on the real axis for s > 1. -/
+noncomputable def zetaTilde (s : ℝ) : ℝ :=
+  if s = 1 then 1 else (s - 1) * (riemannZeta (s : ℂ)).re
+
+/-- The extension is by the residue: zetaTilde 1 = 1 definitionally. -/
+theorem zetaTilde_one : zetaTilde 1 = 1 := by
+  unfold zetaTilde
+  simp
+
 /-- Manuscript normalisation bridge: kappa s = (s-1) * cFac s.
 Then the manuscript's G2(s,z) = kappa(s)^z * G2C(s,z), and kappa(1) = 1/2,
 recovering G2(1,z) = 2^(-z) * prod_{p>2} (...) of section 3.2. -/
