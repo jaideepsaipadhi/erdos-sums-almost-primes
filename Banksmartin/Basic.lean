@@ -7088,6 +7088,12 @@ theorem cCoeff_two_pow_partial_sum (k : ℕ) :
   unfold Wk
   exact sum_range_eq_total_sub_tail cCoeff_re_two_pow_sum k
 
+/-- Definition 2.3 read as a formula for A_m in terms of delta_m. -/
+theorem Am_eq_delta (m : ℕ) :
+    Am m = (2:ℝ) ^ (m + 1) - (Real.log 2 / 4) * (m : ℝ) ^ 2 + deltaM m := by
+  unfold deltaM
+  ring
+
 /-- B3 (HasProd form): the p >= 3 family has the factored value.
 Stated with HasProd rather than tprod because HasProd composes with
 mul_compl and Equiv.hasProd_iff, which tprod does not. -/
