@@ -6396,10 +6396,29 @@ theorem Fk_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
 
 /-- OBLIGATION L2a: F_k(s) is the k-th Taylor coefficient of Fbig.
 This is the number-theoretic step (Dirichlet series = Euler product). -/
-theorem Fk_eq_coeff_Fbig (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
+theorem Fk_eq_coeff_Fbig (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
+    (hc : 0 < cFac s)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
     ((Fk k s : ℝ) : ℂ)
       = (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : ℂ) := by
-  sorry
+  have hA4 := Fk_eq_coeff_tsum k hk s hs
+  rw [hA4]
+  congr 1
+  apply Filter.EventuallyEq.iteratedDeriv_eq
+  have hball : Metric.ball (0:ℂ) (3/2) ∈ nhds (0:ℂ) := by
+    apply Metric.isOpen_ball.mem_nhds
+    rw [Metric.mem_ball, dist_self]
+    norm_num
+  filter_upwards [hball] with z hz
+  rw [Metric.mem_ball, dist_zero_right] at hz
+  have hzle : Norm.norm z ≤ 3/2 := le_of_lt hz
+  have hsum := zOmega_summable s hs z hzle
+  have hA2 := zOmega_eulerProduct s hs z hsum
+  have hA3 := eulerProduct_eq_Fbig s hs z hzle hc hmulR hposR hlogR
+  rw [← hA2, hA3]
 
 /-- The (s-1)^(-z) factor is ContDiff of all orders. -/
 theorem contDiffAt_factorA (s : ℝ) (hc : 0 < cFac s) (k : ℕ) (z : ℂ) :
@@ -6669,12 +6688,17 @@ theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 
     (fun n i hin hnk => L2b_summand k s hs n i hin hnk)
 
 /-- MANUSCRIPT LEMMA 2.2: the exact expansion of F_k(s). -/
-theorem Fk_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) (hc : 0 < cFac s) :
+theorem Fk_expansion (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
+    (hc : 0 < cFac s)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
     Fk k s = ∑ p ∈ Finset.range (k + 1),
       ∑ q ∈ Finset.range (k - p + 1),
         (gCoeff q s).re * (2:ℝ) ^ (-((p:ℝ)) * s)
           * ((Real.log (cFac s)) ^ (k - p - q) / (Nat.factorial (k - p - q))) := by
-  have hC := (Fk_eq_coeff_Fbig k s hs hs2).trans (coeff_Fbig_eq_convolution k s hs hs2 hc)
+  have hC := (Fk_eq_coeff_Fbig k hk s hs hs2 hc hmulR hposR hlogR).trans (coeff_Fbig_eq_convolution k s hs hs2 hc)
   have hre : ((Fk k s : ℝ) : ℂ).re = Fk k s := Complex.ofReal_re _
   rw [← hre, hC]
   rw [Complex.re_sum]
