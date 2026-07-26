@@ -1,0 +1,21 @@
+/-- Real form of the first coefficient identity: sum (c_i).re = 1/2. -/
+theorem cCoeff_re_sum : HasSum (fun i : NN => (cCoeff i).re) (1/2 : RR) := by
+  have h := Complex.hasSum_re cCoeff_sum
+  simpa using h
+
+/-- Real form of the second: sum 2^i (c_i).re = d. -/
+theorem cCoeff_re_two_pow_sum :
+    HasSum (fun i : NN => (2:RR) ^ i * (cCoeff i).re) dConst := by
+  have h := Complex.hasSum_re cCoeff_two_pow_sum
+  simp only [Complex.ofReal_re] at h
+  apply h.congr_fun
+  intro i
+  rw [Complex.mul_re]
+  have h2 : ((2:CC) ^ i).im = 0 := by
+    rw [show ((2:CC)) = (((2:RR)) : CC) by norm_num, LARR Complex.ofReal_pow]
+    exact Complex.ofReal_im _
+  have h2r : ((2:CC) ^ i).re = (2:RR) ^ i := by
+    rw [show ((2:CC)) = (((2:RR)) : CC) by norm_num, LARR Complex.ofReal_pow]
+    exact Complex.ofReal_re _
+  rw [h2, h2r]
+  ring
