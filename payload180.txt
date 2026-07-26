@@ -1,0 +1,12 @@
+/-- Each iterated derivative of a term is differentiable everywhere. -/
+theorem iteratedDeriv_term_differentiable (s : RR) (n : NN) (hn : n NEQ 0) (j : NN) :
+    Differentiable CC (fun w : CC => iteratedDeriv j (fun z : CC => zOmegaHom s z n) w) := by
+  have heq : (fun w : CC => iteratedDeriv j (fun z : CC => zOmegaHom s z n) w)
+      = fun w : CC => ((Nat.descFactorial (bigOmega n) j : NN) : CC) * w ^ (bigOmega n - j)
+        * (((n:CC)) ^ (-(s:CC))) := by
+    funext w
+    exact iteratedDeriv_zOmega_term s n hn j w
+  rw [heq]
+  apply Differentiable.mul_const
+  apply Differentiable.const_mul
+  exact differentiable_pow _

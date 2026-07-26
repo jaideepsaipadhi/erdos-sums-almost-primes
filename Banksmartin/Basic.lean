@@ -6187,6 +6187,19 @@ theorem deriv_bound_summable (s : ℝ) (hs : 1 < s) (j : ℕ)
     gcongr
     exact Nat.sub_le _ _
 
+/-- Each iterated derivative of a term is differentiable everywhere. -/
+theorem iteratedDeriv_term_differentiable (s : ℝ) (n : ℕ) (hn : n ≠ 0) (j : ℕ) :
+    Differentiable ℂ (fun w : ℂ => iteratedDeriv j (fun z : ℂ => zOmegaHom s z n) w) := by
+  have heq : (fun w : ℂ => iteratedDeriv j (fun z : ℂ => zOmegaHom s z n) w)
+      = fun w : ℂ => ((Nat.descFactorial (bigOmega n) j : ℕ) : ℂ) * w ^ (bigOmega n - j)
+        * (((n:ℂ)) ^ (-(s:ℂ))) := by
+    funext w
+    exact iteratedDeriv_zOmega_term s n hn j w
+  rw [heq]
+  apply Differentiable.mul_const
+  apply Differentiable.const_mul
+  exact differentiable_pow _
+
 /-- C2: term-by-term differentiation, j times, on the ball of radius 3/2. -/
 theorem iteratedDeriv_tsum_eq (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
     (hr00 : 0 < r0) (hr0r : r0 < r) (hr0 : 0 ≤ r)
