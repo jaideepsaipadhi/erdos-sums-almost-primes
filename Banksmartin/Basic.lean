@@ -5730,6 +5730,21 @@ theorem cpow_neg_multipliable_three (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.
     (fun n : ℕ => (((1 - (n:ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z)) h5
   exact hsplit.1
 
+/-- Pointwise factorisation: the plain Euler factor splits into the
+cpow-negative factor times the regularised factor. -/
+theorem euler_factor_split (a : ℝ) (ha : 0 < 1 - a) (z w : ℂ) :
+    (1 - w)⁻¹ = ((((1 - a : ℝ)) : ℂ)) ^ (-z)
+      * ((1 - w)⁻¹ * (((1 - a : ℝ)) : ℂ) ^ z) := by
+  have hane : (((1 - a : ℝ)) : ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  have hpow : (((1 - a : ℝ)) : ℂ) ^ z ≠ 0 := by
+    rw [Ne, Complex.cpow_eq_zero_iff]
+    intro hcon
+    exact hane hcon.1
+  rw [Complex.cpow_neg]
+  field_simp
+
 /-- B3 (HasProd form): the p >= 3 family has the factored value.
 Stated with HasProd rather than tprod because HasProd composes with
 mul_compl and Equiv.hasProd_iff, which tprod does not. -/
