@@ -5306,16 +5306,11 @@ theorem finset_prod_le_prod_nonneg {s : Finset ℕ} {f g : ℕ → ℝ}
           linarith
 
 /-- A1: absolute summability of the z-weighted Dirichlet family. -/
-theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
-    (hz : ‖z‖ ≤ 3/2) :
+theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
+    (hr3 : r * ((3:ℝ) ^ (-s)) ≤ 1/2) (hr2 : r < (2:ℝ) ^ s) (z : ℂ) (hz : ‖z‖ ≤ r) :
     Summable (fun n : ℕ => ‖zOmegaHom s z n‖) := by
   classical
-  have hz2 : ‖z‖ < (2:ℝ) ^ s := by
-    have h2 : (2:ℝ) ^ (1:ℝ) ≤ (2:ℝ) ^ s := by
-      apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
-      linarith
-    rw [Real.rpow_one] at h2
-    linarith
+  have hz2 : ‖z‖ < (2:ℝ) ^ s := lt_of_le_of_lt hz hr2
   set G : ℕ → ℝ := Set.mulIndicator {p : ℕ | p.Prime}
     (fun p : ℕ => (1 - ‖z‖ * ((p:ℝ) ^ (-s)))⁻¹) with hG
   have hGmult : Multipliable G := zOmegaNorm_indicator_multipliable s hs z hz2
@@ -5405,7 +5400,7 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
           omega
         apply inv_one_sub_le_exp
         · positivity
-        · exact zOmega_half_of_three_le s hs z hz hi3
+        · exact zOmega_half_of_three_le_radius s (by linarith) r hr0 z hz hr3 hi3
       · rw [Set.mulIndicator_of_notMem hp]
         have : (0:ℝ) ≤ 2 * (Norm.norm z * ((i:ℝ) ^ (-s))) := by positivity
         calc (1:ℝ) = Real.exp 0 := (Real.exp_zero).symm
@@ -5456,19 +5451,8 @@ theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
           omega
         rw [hG, Set.mulIndicator_of_notMem hnp]
       rw [hprod1]
-      have hx34 : Norm.norm z * ((2:ℝ) ^ (-s)) ≤ 3/4 := by
-        have h2s : (2:ℝ) ^ (-s) ≤ (2:ℝ) ^ (-(1:ℝ)) := by
-          apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
-          linarith
-        have h2one : (2:ℝ) ^ (-(1:ℝ)) = 1/2 := by
-          rw [Real.rpow_neg_one]
-          norm_num
-        calc Norm.norm z * ((2:ℝ) ^ (-s)) ≤ (3/2) * ((2:ℝ) ^ (-s)) :=
-              mul_le_mul_of_nonneg_right hz (by positivity)
-          _ ≤ (3/2) * (1/2) := by
-              rw [←  h2one]
-              exact mul_le_mul_of_nonneg_left h2s (by norm_num)
-          _ = 3/4 := by norm_num
+      have hx34 : Norm.norm z * ((2:ℝ) ^ (-s)) < 1 :=
+        two_factor_lt_one_radius s r hr0 hr2 z hz
       have hxnn : (0:ℝ) ≤ Norm.norm z * ((2:ℝ) ^ (-s)) := by positivity
       have hinv1 : (1:ℝ) ≤ (1 - Norm.norm z * ((2:ℝ) ^ (-s)))⁻¹ := by
         rw [le_inv_comm₀ (by norm_num) (by linarith)]
