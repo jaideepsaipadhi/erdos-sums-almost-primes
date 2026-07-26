@@ -5358,6 +5358,18 @@ theorem cFac_multipliable_complex (s : ℝ) (hs : 1 < s) :
   push_cast
   ring
 
+/-- Probe: does Mathlib's Nat.Primes-indexed Euler product typecheck against
+tprod_split_two's {p // p.Prime} spelling without a bridge? -/
+theorem zeta_split_probe (s : ℝ) (hs : 1 < s) :
+    (∏' p : {p : ℕ // p.Prime}, (1 - (((p:ℕ):ℝ) : ℂ) ^ (-(s:ℂ)))⁻¹)
+      = riemannZeta (s : ℂ) := by
+  have hre : (1:ℝ) < ((s : ℂ)).re := by simpa using hs
+  have h := riemannZeta_eulerProduct_tprod hre
+  rw [← h]
+  apply tprod_congr
+  intro p
+  congr 1
+
 theorem zOmega_factors_multipliable (s : ℝ) (hs : 1 < s) (z : ℂ) :
     Multipliable (fun p : Nat.Primes =>
       (1 - Norm.norm z * (((p:ℕ):ℝ) ^ (-s)))⁻¹) := by
