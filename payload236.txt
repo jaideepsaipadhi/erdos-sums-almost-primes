@@ -1,0 +1,15 @@
+/-- D4: dConst's indicator-over-all-primes product equals the p >= 3 subtype
+product.  For naturals 2 < p is 3 <= p, so the `if` is exactly the indicator. -/
+theorem dConst_prod_eq_subtype :
+    (TPRODN p : Nat.Primes,
+        (if 2 < (p : NN) then (1 - 2 / ((p : NN) : RR))INV * (1 - 1 / ((p : NN) : RR)) ^ 2 else 1))
+      = TPRODN p : {p : Nat.Primes // (3:NN) LEQ (p : NN)},
+          (1 - 2 / (((p : Nat.Primes) : NN) : RR))INV
+            * (1 - 1 / (((p : Nat.Primes) : NN) : RR)) ^ 2 := by
+  rw [tprod_subtype {p : Nat.Primes | (3:NN) LEQ (p : NN)}
+    (fun p : Nat.Primes => (1 - 2 / ((p : NN) : RR))INV * (1 - 1 / ((p : NN) : RR)) ^ 2)]
+  apply tprod_congr
+  intro p
+  by_cases h : (3:NN) LEQ (p : NN)
+  DOT rw [Set.mulIndicator_of_mem h, if_pos (by omega)]
+  DOT rw [Set.mulIndicator_of_notMem h, if_neg (by omega)]

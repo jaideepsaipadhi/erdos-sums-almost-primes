@@ -182,6 +182,24 @@ noncomputable def dConst : ℝ :=
   (1 / 4) * ∏' p : Nat.Primes,
     (if 2 < (p : ℕ) then (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 else 1)
 
+/-- Nat.Primes is definitionally {p : N // p.Prime}, but Lean treats the two
+spellings as distinct for instance resolution.  This equiv (and the transport
+lemma below) let products move between them once, rather than needing a bespoke
+equiv at each site. -/
+def primesEquivSubtype : Nat.Primes ≃ {p : ℕ // p.Prime} where
+  toFun p := ⟨ p.1, p.2 ⟩
+  invFun p := ⟨ p.1, p.2 ⟩
+  left_inv := by intro p; rfl
+  right_inv := by intro p; rfl
+
+/-- Restricting the equiv to a threshold condition. -/
+def primesEquivSubtypeGE (k : ℕ) :
+    {p : Nat.Primes // k ≤ (p : ℕ)} ≃ {p : ℕ // p.Prime ∧ k ≤ p} where
+  toFun q := ⟨ q.1.1, q.1.2, q.2 ⟩
+  invFun q := ⟨ ⟨ q.1, q.2.1 ⟩, q.2.2 ⟩
+  left_inv := by intro q; rfl
+  right_inv := by intro q; rfl
+
 /-- The secondary-term constant a1 = d * log 2 / 4 from GLW Theorem 2:
 f_k = 1 - 2^(-k) (a1 k^2 + O(k log(k+1))). -/
 noncomputable def aOneConst : ℝ := dConst * Real.log 2 / 4
