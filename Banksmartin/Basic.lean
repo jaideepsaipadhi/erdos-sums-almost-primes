@@ -6027,6 +6027,16 @@ A4 follows: apply C2 at j = k, evaluate at 0 with C3, and the surviving
 terms are exactly those with Omega n = k, i.e. Fk k s.
 -/
 
+/-- The norm of the z-weighted term at any n. -/
+theorem zOmegaHom_norm (s : ℝ) (z : ℂ) {n : ℕ} (hn : n ≠ 0) :
+    Norm.norm (zOmegaHom s z n) = Norm.norm z ^ (bigOmega n) * ((n:ℝ) ^ (-s)) := by
+  have hnpos : 0 < n := Nat.pos_of_ne_zero hn
+  show Norm.norm (if n = 0 then 0
+    else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+  rw [if_neg hn, norm_mul, norm_pow]
+  congr 1
+  rw [Complex.norm_natCast_cpow_of_pos hnpos, Complex.neg_re, Complex.ofReal_re]
+
 /-- C1: the polynomially-weighted family is summable. -/
 theorem omega_pow_summable (s : ℝ) (hs : 1 < s) (j : ℕ) :
     Summable (fun n : ℕ => ((bigOmega n : ℕ) : ℝ) ^ j * (3/2) ^ (bigOmega n) * ((n:ℝ) ^ (-s))) := by
