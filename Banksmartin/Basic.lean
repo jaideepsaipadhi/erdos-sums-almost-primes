@@ -6941,6 +6941,73 @@ theorem L2b_summand_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (n i : ℕ) (hin : i �
   field_simp
   try ring
 
+/-- Coefficient convolution for Fbig in the MANUSCRIPT normalisation:
+[z^k] Fbig = sum over p,q of g_q(s) 2^(-ps) (-log(s-1))^(k-p-q)/(k-p-q)!. -/
+theorem coeff_Fbig_eq_convolution_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
+    (hc : 0 < cFac s) :
+    (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : ℂ)
+      = ∑ p ∈ Finset.range (k + 1),
+          ∑ q ∈ Finset.range (k - p + 1),
+            gManu q s * (((2:ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
+              * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ) := by
+  have hAval : ∀ i : ℕ,
+      iteratedDeriv i (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0
+        = (Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ) := by
+    intro i
+    have h := coeff_pow_neg s hs i
+    have hfi : ((Nat.factorial i : ℕ) : ℂ) ≠ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
+    field_simp at h
+    linear_combination h
+  have hBval : ∀ j : ℕ,
+      iteratedDeriv j (fun w : ℂ => (1 - w / ((2:ℂ) ^ (s:ℂ)))⁻¹) 0
+        = (Nat.factorial j : ℂ) * ((((2:ℝ) ^ (-(j:ℝ) * s) : ℝ)) : ℂ) := by
+    intro j
+    have h := coeff_geom s hs j
+    have hfj : ((Nat.factorial j : ℕ) : ℂ) ≠ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero j)
+    rw [div_eq_iff hfj] at h
+    rw [h]
+    ring
+  have hCval : ∀ q : ℕ,
+      iteratedDeriv q (fun w : ℂ => G2manu s w) 0 = (Nat.factorial q : ℂ) * gManu q s := by
+    intro q
+    unfold gManu
+    have hfq : ((Nat.factorial q : ℕ) : ℂ) ≠ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero q)
+    field_simp
+  rw [iteratedDeriv_Fbig_manu k s hs hc]
+  simp only [hAval, hBval, hCval]
+  rw [Finset.sum_div]
+  have hdist : ∀ n ∈ Finset.range (k + 1),
+      ((Nat.choose k n : ℂ) *
+        (∑ i ∈ Finset.range (n + 1),
+          (Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+            * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))) *
+        ((Nat.factorial (k - n) : ℂ) * gManu (k - n) s) / (Nat.factorial k : ℂ)
+      = ∑ i ∈ Finset.range (n + 1), (Nat.choose k n : ℂ) *
+          ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+            * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
+          * ((Nat.factorial (k - n) : ℂ) * gManu (k - n) s) / (Nat.factorial k : ℂ) := by
+    intro n _
+    rw [Finset.mul_sum, Finset.sum_mul, Finset.sum_div]
+  rw [Finset.sum_congr rfl hdist]
+  rw [leibniz_flatten k (fun n i => (Nat.choose k n : ℂ) *
+    ((Nat.choose n i : ℂ)
+      * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+      * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
+    * ((Nat.factorial (k - n) : ℂ) * gManu (k - n) s) / (Nat.factorial k : ℂ))]
+  rw [conv_flatten k (fun p q => gManu q s * (((2:ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
+    * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))]
+  exact sigma_reindex k
+    (fun n i => (Nat.choose k n : ℂ) *
+      ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
+        * ((Nat.factorial (n - i) : ℂ) * ((((2:ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
+      * ((Nat.factorial (k - n) : ℂ) * gManu (k - n) s) / (Nat.factorial k : ℂ))
+    (fun p q => gManu q s * (((2:ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
+      * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))
+    (fun n i hin hnk => L2b_summand_manu k s hs n i hin hnk)
+
 /-- MANUSCRIPT LEMMA 2.2: the exact expansion of F_k(s). -/
 theorem Fk_expansion (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
     (hc : 0 < cFac s)
