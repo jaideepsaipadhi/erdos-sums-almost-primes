@@ -1,0 +1,6 @@
+/-- The real cFac product, cast to C, is the complex product over p >= 3. -/
+theorem cFac_ofReal (s : RR) (hs : 1 < s) :
+    ((cFac s : RR) : CC)
+      = TPRODN p : {p : NN // p.Prime AND 3 LEQ p},
+          (1 - (((p:NN):RR) : CC) ^ (-(s:CC)))INV := by
+  sorry
