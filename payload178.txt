@@ -1,0 +1,21 @@
+  rw [iteratedDeriv_zOmega_term s n hn j w]
+  have hnpos : 0 < n := Nat.pos_of_ne_zero hn
+  have hnorm_n : Norm.norm (((n:CC)) ^ (-(s:CC))) = ((n:RR) ^ (-s)) := by
+    rw [Complex.norm_natCast_cpow_of_pos hnpos, Complex.neg_re, Complex.ofReal_re]
+  rw [norm_mul, norm_mul, norm_pow, hnorm_n]
+  have hdesc : ((Nat.descFactorial (bigOmega n) j : NN) : RR) LEQ ((bigOmega n : NN) : RR) ^ j := by
+    have h := Nat.descFactorial_le_pow (bigOmega n) j
+    exact_mod_cast h
+  have hdescnorm : Norm.norm (((Nat.descFactorial (bigOmega n) j : NN) : CC))
+      = ((Nat.descFactorial (bigOmega n) j : NN) : RR) := by
+    rw [Complex.norm_natCast]
+  rw [hdescnorm]
+  have hwpow : Norm.norm w ^ (bigOmega n - j) LEQ r0 ^ (bigOmega n - j) := by
+    apply pow_le_pow_left (norm_nonneg _) hw
+  have hnn : (0:RR) LEQ ((n:RR) ^ (-s)) := by positivity
+  have hkey : ((Nat.descFactorial (bigOmega n) j : NN) : RR) * Norm.norm w ^ (bigOmega n - j)
+      LEQ ((bigOmega n : NN) : RR) ^ j * r0 ^ (bigOmega n - j) := by
+    apply mul_le_mul hdesc hwpow (by positivity) (by positivity)
+  have hr0j : (0:RR) < r0 ^ j := by positivity
+  rw [ge_iff_le, div_le_iff hr0j] at *
+  sorry
