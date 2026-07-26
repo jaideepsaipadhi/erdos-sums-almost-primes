@@ -1,0 +1,25 @@
+  have hsumR : HasSum (fun p : {p : NN // p.Prime AND 3 LEQ p} =>
+      Real.log ((1 - ((p:NN):RR) ^ (-s))INV)) (Real.log (cFac s)) := by
+    have hlogeq : Real.log (cFac s)
+        = TSUMN p : {p : NN // p.Prime AND 3 LEQ p},
+            Real.log ((1 - ((p:NN):RR) ^ (-s))INV) := by
+      unfold cFac
+      exact log_tprod_real hposR hmulR hlogR
+    rw [hlogeq]
+    exact hlogR.hasSum
+  have hsumC : HasSum (fun p : {p : NN // p.Prime AND 3 LEQ p} =>
+      ((Real.log ((1 - ((p:NN):RR) ^ (-s))INV) : RR) : CC))
+      ((Real.log (cFac s) : RR) : CC) := hsumR.ofReal
+  have hbridge := hasProd_cexp_of_hasSum (c := z) hsumC
+  rw [cFac_cpow s hc z]
+  apply hbridge.congr_fun
+  intro p
+  have hpos : (0:RR) < 1 - ((p:NN):RR) ^ (-s) := hposR p |> inv_pos.mp
+  have hane : (((1 - ((p:NN):RR) ^ (-s) : RR)) : CC) NEQ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  rw [Complex.cpow_def_of_ne_zero hane, LARR Complex.ofReal_log hpos.le]
+  congr 1
+  rw [Real.log_inv]
+  push_cast
+  ring
