@@ -7008,6 +7008,32 @@ theorem coeff_Fbig_eq_convolution_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s
       * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))
     (fun n i hin hnk => L2b_summand_manu k s hs n i hin hnk)
 
+/-- MANUSCRIPT LEMMA 2.2 (manuscript normalisation):
+F_k(s) = sum_{i+j+l=k} g_i(s) 2^(-js) (-log(s-1))^l / l!.
+This is the form Definition 2.3 and Lemma 2.4 consume. -/
+theorem Fk_expansion_manu (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
+    (hc : 0 < cFac s)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+    Fk k s = ∑ p ∈ Finset.range (k + 1),
+      ∑ q ∈ Finset.range (k - p + 1),
+        (gManu q s).re * (2:ℝ) ^ (-((p:ℝ)) * s)
+          * ((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q))) := by
+  have hC := (Fk_eq_coeff_Fbig k hk s hs hs2 hc hmulR hposR hlogR).trans (coeff_Fbig_eq_convolution_manu k s hs hs2 hc)
+  have hre : ((Fk k s : ℝ) : ℂ).re = Fk k s := Complex.ofReal_re _
+  rw [← hre, hC]
+  rw [Complex.re_sum]
+  apply Finset.sum_congr rfl
+  intro p _
+  rw [Complex.re_sum]
+  apply Finset.sum_congr rfl
+  intro q _
+  rw [Complex.mul_re, Complex.mul_re]
+  simp only [Complex.ofReal_re, Complex.ofReal_im]
+  ring
+
 /-- MANUSCRIPT LEMMA 2.2: the exact expansion of F_k(s). -/
 theorem Fk_expansion (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
     (hc : 0 < cFac s)
