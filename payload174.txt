@@ -1,0 +1,39 @@
+theorem omega_pow_summable_radius (s : RR) (hs : 1 < s) (j : NN)
+    (r0 r : RR) (hr00 : 0 < r0) (hr0r : r0 < r)
+    (hr0 : 0 LEQ r) (hr3 : r * ((3:RR) ^ (-s)) LEQ 1/2) (hr2 : r < (2:RR) ^ s) :
+    Summable (fun n : NN =>
+      ((bigOmega n : NN) : RR) ^ j * r0 ^ (bigOmega n) * ((n:RR) ^ (-s))) := by
+  have hratio : 1 < r / r0 := (one_lt_div hr00).mpr hr0r
+  obtain ANGL C, hCpos, hC ANGR := pow_le_const_mul_geom j hratio
+  have hbig : Summable (fun n : NN => Norm.norm (zOmegaHom s ((r:RR) : CC) n)) := by
+    apply zOmega_summable_radius s hs r hr0 hr3 hr2
+    rw [Complex.norm_real, abs_of_nonneg hr0]
+  have hscaled : Summable (fun n : NN => C * Norm.norm (zOmegaHom s ((r:RR) : CC) n)) :=
+    hbig.mul_left C
+  apply Summable.of_nonneg_of_le _ _ hscaled
+  DOT intro n
+    positivity
+  DOT intro n
+    by_cases hn : n = 0
+    DOT subst hn
+      simp [bigOmega]
+      positivity
+    DOT have hnorm : Norm.norm (zOmegaHom s ((r:RR) : CC) n)
+          = r ^ (bigOmega n) * ((n:RR) ^ (-s)) := by
+        rw [zOmegaHom_norm s _ hn, Complex.norm_real, abs_of_nonneg hr0]
+      rw [hnorm]
+      have hkey : ((bigOmega n : NN) : RR) ^ j * r0 ^ (bigOmega n)
+          LEQ C * r ^ (bigOmega n) := by
+        have h1 := hC (bigOmega n)
+        have hr0pow : (0:RR) < r0 ^ (bigOmega n) := by positivity
+        calc ((bigOmega n : NN) : RR) ^ j * r0 ^ (bigOmega n)
+            LEQ (C * (r / r0) ^ (bigOmega n)) * r0 ^ (bigOmega n) := by
+              apply mul_le_mul_of_nonneg_right h1 (le_of_lt hr0pow)
+          _ = C * r ^ (bigOmega n) := by
+              rw [div_pow]
+              field_simp
+      have hnn : (0:RR) LEQ ((n:RR) ^ (-s)) := by positivity
+      calc ((bigOmega n : NN) : RR) ^ j * r0 ^ (bigOmega n) * ((n:RR) ^ (-s))
+          LEQ (C * r ^ (bigOmega n)) * ((n:RR) ^ (-s)) := by
+            apply mul_le_mul_of_nonneg_right hkey hnn
+        _ = C * (r ^ (bigOmega n) * ((n:RR) ^ (-s))) := by ring
