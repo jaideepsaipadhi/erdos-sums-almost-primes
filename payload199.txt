@@ -1,0 +1,22 @@
+/-- A positive real base to a complex power is ContDiff of all orders. -/
+theorem contDiffAt_ofReal_cpow (a : RR) (ha : 0 < a) (k : NN) (z : CC) :
+    ContDiffAt CC k (fun w : CC => ((a : RR) : CC) ^ w) z := by
+  have hrewrite : (fun w : CC => ((a : RR) : CC) ^ w)
+      = fun w : CC => Complex.exp (w * ((Real.log a : RR) : CC)) := by
+    funext w
+    exact ofReal_cpow_eq_exp a ha w
+  rw [hrewrite]
+  apply ContDiff.contDiffAt
+  apply ContDiff.cexp
+  exact contDiff_id.mul contDiff_const
+
+/-- Factor C in the manuscript decomposition: G2manu is ContDiff of all orders. -/
+theorem contDiffAt_factorCmanu (s : RR) (hs : 1 LEQ s) (hk : 0 < kappaFac s) (k : NN) :
+    ContDiffAt CC k (fun w : CC => G2manu s w) 0 := by
+  have heq : (fun w : CC => G2manu s w)
+      = (fun w : CC => ((kappaFac s : RR) : CC) ^ w) * (fun w : CC => G2C s w) := by
+    funext w
+    unfold G2manu
+    simp only [Pi.mul_apply]
+  rw [heq]
+  exact (contDiffAt_ofReal_cpow (kappaFac s) hk k 0).mul (contDiffAt_factorC s hs k)
