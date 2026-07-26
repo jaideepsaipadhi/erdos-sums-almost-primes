@@ -6116,10 +6116,6 @@ theorem omega_pow_summable_radius (s : ℝ) (hs : 1 < s) (j : ℕ)
             apply mul_le_mul_of_nonneg_right hkey hnn
         _ = C * (r ^ (bigOmega n) * ((n:ℝ) ^ (-s))) := by ring
 
-/-- C1: the polynomially-weighted family is summable. -/
-theorem omega_pow_summable (s : ℝ) (hs : 1 < s) (j : ℕ) :
-    Summable (fun n : ℕ => ((bigOmega n : ℕ) : ℝ) ^ j * (3/2) ^ (bigOmega n) * ((n:ℝ) ^ (-s))) := by
-  sorry
 
 /-- C3: the k-th derivative of a monomial at 0. -/
 theorem iteratedDeriv_monomial_zero (m k : ℕ) (c : ℂ) :
