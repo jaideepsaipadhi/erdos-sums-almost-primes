@@ -5832,10 +5832,16 @@ theorem tail_regroup_hasProd (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z 
   exact euler_factor_split (((p:ℕ):ℝ) ^ (-s)) hpos z (z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))
 
 /-- B3: the p >= 3 tail regroups into cFac^z times G2C. -/
-theorem tail_regroup (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2) :
-    (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - z * (((p:ℕ):ℝ) ^ (-s) : ℝ))⁻¹)
-      = ((cFac s : ℝ) : ℂ) ^ z * G2C s z := by
-  sorry
+theorem tail_regroup (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2)
+    (hc : 0 < cFac s)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+    (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+        (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹)
+      = ((cFac s : ℝ) : ℂ) ^ z * G2C s z :=
+  (tail_regroup_hasProd s hs z (by linarith) hc hmulR hposR hlogR).tprod_eq
 
 /-- B4: split the prime product at p = 2. -/
 theorem split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2) :
