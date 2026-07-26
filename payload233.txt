@@ -1,0 +1,6 @@
+/-- Wide-radius variant: the tail product converges for ||z|| <= 5/2. -/
+theorem G2tailC_hasProd_wide (s : RR) (hs : 1 LEQ s) (z : CC) (hz : Norm.norm z LEQ 5/2) :
+    HasProd (fun p : {p : NN // p.Prime AND 5 LEQ p} =>
+      (1 - z * ((((p:NN):RR) ^ (-s) : RR) : CC))INV * ((((1 - ((p:NN):RR) ^ (-s) : RR)) : CC)) ^ z)
+      (G2tailC s z) :=
+  (prime_factor_multipliable_complex_wide s hs z hz).hasProd
