@@ -1,0 +1,36 @@
+  intro j
+  induction j with
+  | zero =>
+    intro w hw
+    simp only [iteratedDeriv_zero]
+  | succ J IH =>
+    intro w hw
+    have hball : IsOpen (Metric.ball (0:CC) r0) := Metric.isOpen_ball
+    have hwmem : w IN Metric.ball (0:CC) r0 := by
+      rw [Metric.mem_ball, dist_zero_right]
+      exact hw
+    have hbound := deriv_bound_summable s hs J r0 r hr01 hr0r hr0 hr3 hr2
+    have hdiff : FORALL n : NN, DifferentiableOn CC
+        (fun v : CC => iteratedDeriv J (fun z : CC => zOmegaHom s z n) v)
+        (Metric.ball (0:CC) r0) := by
+      intro n
+      by_cases hn : n = 0
+      DOT subst hn
+        have hzero : (fun v : CC => iteratedDeriv J (fun z : CC => zOmegaHom s z 0) v)
+            = fun _ : CC => (0:CC) := by
+          funext v
+          exact iteratedDeriv_term_zero s J v
+        rw [hzero]
+        exact differentiableOn_const 0
+      DOT exact (iteratedDeriv_term_differentiable s n hn J).differentiableOn
+    have hle : FORALL (n : NN) (v : CC), v IN Metric.ball (0:CC) r0 TO
+        Norm.norm (iteratedDeriv J (fun z : CC => zOmegaHom s z n) v)
+          LEQ ((bigOmega n : NN) : RR) ^ J * r0 ^ (bigOmega n - J) * ((n:RR) ^ (-s)) := by
+      intro n v hv
+      rw [Metric.mem_ball, dist_zero_right] at hv
+      by_cases hn : n = 0
+      DOT subst hn
+        rw [iteratedDeriv_term_zero s J v, norm_zero]
+        positivity
+      DOT exact iteratedDeriv_term_bound s hs r0 (by linarith) J n hn v (le_of_lt hv)
+    sorry
