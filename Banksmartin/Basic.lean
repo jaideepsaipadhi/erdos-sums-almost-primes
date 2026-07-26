@@ -192,8 +192,21 @@ to 1).  Previously a bare literal, which left rho_enclosure vacuous. -/
 noncomputable def rhoConst : ℝ :=
   -(1 / 9) * ∏' p : Nat.Primes,
     (if 5 ≤ (p : ℕ) then (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 else 1)
+/-- Manuscript section 3.4: S* = sum_{i>=0} 2^i |c_i|, the unsigned bound
+constant for the convolution Delta(k).  STILL A LITERAL: the real definition
+needs cCoeff, which is defined far below this point; moving it here would
+require relocating G2at1/G2C.  Sstar_bound is vacuous until then. -/
 noncomputable def SstarConst : ℝ := 6.9763
+
+/-- Manuscript section 3.5: alpha_+ is the constant in B_1(k) <= alpha_+ (k+1).
+STILL A LITERAL: the real definition needs the beta_i interval sweep of
+section 3.5, which is not yet formalised.  alpha_bound is vacuous until then. -/
 noncomputable def alphaConst : ℝ := 15.5716
+
+/-- Manuscript Theorem 6.1: Gamma = (1/2) sum_{i>=1} gammahat_i 2^i, the
+k-independent remainder bound.  STILL A LITERAL: needs gammahat_i, i.e. the
+second s-derivative G2^(2,0) and its interval sweep.  Gamma_bound is vacuous
+until then. -/
 noncomputable def GammaConst : ℝ := 105.41
 
 structure NumericalFacts : Prop where
