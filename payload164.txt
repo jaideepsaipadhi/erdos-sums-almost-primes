@@ -1,0 +1,26 @@
+theorem eulerProduct_eq_Fbig (s : RR) (hs : 1 < s) (z : CC) (hz : Norm.norm z LEQ 3/2)
+    (hc : 0 < cFac s)
+    (hmulR : Multipliable (fun p : {p : NN // p.Prime AND 3 LEQ p} => (1 - ((p:NN):RR) ^ (-s))INV))
+    (hposR : FORALL p : {p : NN // p.Prime AND 3 LEQ p}, 0 < (1 - ((p:NN):RR) ^ (-s))INV)
+    (hlogR : Summable (fun p : {p : NN // p.Prime AND 3 LEQ p} =>
+      Real.log ((1 - ((p:NN):RR) ^ (-s))INV))) :
+    (TPRODN p : Nat.Primes, (1 - zOmegaHom s z p)INV) = Fbig s z := by
+  have hmul3 : Multipliable (fun p : {p : NN // p.Prime AND 3 LEQ p} =>
+      (1 - z * ((((p:NN):RR) ^ (-s) : RR) : CC))INV) :=
+    (tail_regroup_hasProd s hs z (by linarith) hc hmulR hposR hlogR).multipliable
+  rw [split_two s hs z hz hmul3]
+  rw [tail_regroup s hs z hz hc hmulR hposR hlogR]
+  unfold Fbig
+  have h2 : ((2:CC) ^ (s:CC)) NEQ 0 := by
+    rw [Ne, Complex.cpow_eq_zero_iff]
+    intro hcon
+    exact absurd hcon.1 (by norm_num)
+  have hbridge : (1 - z * (((2:NN):RR) ^ (-s) : RR))INV
+      = (1 - z / ((2:CC) ^ (s:CC)))INV := by
+    congr 1
+    congr 1
+    rw [eq_div_iff h2]
+    rw [LARR Complex.ofReal_natCast, LARR Complex.ofReal_cpow (by norm_num : (0:RR) LEQ 2)]
+    sorry
+  rw [hbridge]
+  ring
