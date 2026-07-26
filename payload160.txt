@@ -1,0 +1,31 @@
+/-- A prime p with p != 2 satisfies 3 <= p. -/
+theorem three_le_of_prime_ne_two {p : NN} (hp : p.Prime) (hne : p NEQ 2) : 3 LEQ p := by
+  have h2 : 2 LEQ p := hp.two_le
+  omega
+
+/-- The complement of {2} in the primes corresponds to the primes >= 3. -/
+def compl_two_equiv :
+    (({ANGL 2, Nat.prime_two ANGR} : Set Nat.Primes)COMPL : Set Nat.Primes)
+      EQUIV {p : NN // p.Prime AND 3 LEQ p} where
+  toFun q := ANGL q.1.1, q.1.2, by
+    have hne : q.1.1 NEQ 2 := by
+      intro h
+      apply q.2
+      apply Subtype.ext
+      exact h
+    exact three_le_of_prime_ne_two q.1.2 hne ANGR
+  invFun r := ANGL ANGL r.1, r.2.1 ANGR, by
+    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+    intro h
+    have h3 := r.2.2
+    have : r.1 = 2 := congrArg Subtype.val h
+    omega ANGR
+  left_inv := by
+    intro q
+    apply Subtype.ext
+    apply Subtype.ext
+    rfl
+  right_inv := by
+    intro r
+    apply Subtype.ext
+    rfl
