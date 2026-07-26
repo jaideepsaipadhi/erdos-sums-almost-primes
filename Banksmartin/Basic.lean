@@ -5813,11 +5813,23 @@ theorem reg_tprod_eq_G2C (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.norm z �
 /-- B3 (HasProd form): the p >= 3 family has the factored value.
 Stated with HasProd rather than tprod because HasProd composes with
 mul_compl and Equiv.hasProd_iff, which tprod does not. -/
-theorem tail_regroup_hasProd (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
+theorem tail_regroup_hasProd (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 2)
+    (hc : 0 < cFac s)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
     HasProd (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
         (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹)
       (((cFac s : ℝ) : ℂ) ^ z * G2C s z) := by
-  sorry
+  have hcpow := cpow_neg_tprod_eq_cFac s hs z hz hc hmulR hposR hlogR
+  have hreg := (reg_multipliable_three s (le_of_lt hs) z hz).hasProd
+  have hmul := hcpow.mul hreg
+  rw [reg_tprod_eq_G2C s (le_of_lt hs) z hz] at hmul
+  apply hmul.congr_fun
+  intro p
+  have hpos : (0:ℝ) < 1 - ((p:ℕ):ℝ) ^ (-s) := hposR p |> inv_pos.mp
+  exact euler_factor_split (((p:ℕ):ℝ) ^ (-s)) hpos z (z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))
 
 /-- B3: the p >= 3 tail regroups into cFac^z times G2C. -/
 theorem tail_regroup (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2) :
