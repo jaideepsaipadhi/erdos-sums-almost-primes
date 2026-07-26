@@ -5370,6 +5370,24 @@ theorem zeta_split_probe (s : ℝ) (hs : 1 < s) :
   intro p
   congr 1
 
+/-- For s > 1 the p = 2 Euler factor is nonzero. -/
+theorem two_factor_ne_one (s : ℝ) (hs : 1 < s) :
+    (1 : ℂ) - ((2:ℂ)) ^ (-(s:ℂ)) ≠ 0 := by
+  have hlt : Norm.norm (((2:ℂ)) ^ (-(s:ℂ))) < 1 := by
+    rw [show ((2:ℂ)) = (((2:ℝ)) : ℂ) by norm_num]
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0:ℝ) < 2)]
+    simp only [Complex.neg_re, Complex.ofReal_re]
+    rw [Real.rpow_neg (by norm_num), inv_lt_one_iff₀]
+    right
+    have h2 : (2:ℝ) ^ (1:ℝ) < (2:ℝ) ^ s :=
+      Real.rpow_lt_rpow_of_exponent_lt (by norm_num) hs
+    rw [Real.rpow_one] at h2
+    linarith
+  intro hcon
+  have heq : ((2:ℂ)) ^ (-(s:ℂ)) = 1 := (sub_eq_zero.mp hcon).symm
+  rw [heq] at hlt
+  simp at hlt
+
 theorem zOmega_factors_multipliable (s : ℝ) (hs : 1 < s) (z : ℂ) :
     Multipliable (fun p : Nat.Primes =>
       (1 - Norm.norm z * (((p:ℕ):ℝ) ^ (-s)))⁻¹) := by
