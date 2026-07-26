@@ -6576,6 +6576,18 @@ theorem contDiffAt_ofReal_cpow (a : ℝ) (ha : 0 < a) (k : ℕ) (z : ℂ) :
   apply ContDiff.cexp
   exact contDiff_id.mul contDiff_const
 
+/-- Factor A in the manuscript normalisation: (s-1)^(-z) is ContDiff of all orders. -/
+theorem contDiffAt_factorAmanu (s : ℝ) (hs1 : 0 < s - 1) (k : ℕ) (z : ℂ) :
+    ContDiffAt ℂ k (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) z := by
+  have hrewrite : (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w))
+      = fun w : ℂ => Complex.exp ((-w) * ((Real.log (s - 1) : ℝ) : ℂ)) := by
+    funext w
+    exact ofReal_cpow_eq_exp (s - 1) hs1 (-w)
+  rw [hrewrite]
+  apply ContDiff.contDiffAt
+  apply ContDiff.cexp
+  exact (contDiff_id.neg).mul contDiff_const
+
 /-- Factor C in the manuscript decomposition: G2manu is ContDiff of all orders. -/
 theorem contDiffAt_factorCmanu (s : ℝ) (hs : 1 ≤ s) (hk : 0 < kappaFac s) (k : ℕ) :
     ContDiffAt ℂ k (fun w : ℂ => G2manu s w) 0 := by
