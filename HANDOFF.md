@@ -61,3 +61,37 @@ manuscript's (-log(s-1))^l / l!.  Lemma 2.4 / Prop 2.5 must be stated against
 OUR normalisation, or a bridge lemma proved. Flag this when resuming.
 All Theorem 4.1 machinery verified intact after the refactor (sentinels:
 dyadic_term_bound, sum_ratio_log_dyadic', deltaM_upper_bound_manuscript).
+
+=== LEMMA 2.2 COMPLETE (2026-07-27) ===
+Fk_expansion is proven unconditionally on its hypotheses.
+  L2b (triple Cauchy product) - was already done
+  L2a - PROVEN today via:
+    A1 zOmega_summable / zOmega_summable_radius
+       (smooth-number machinery + Euler-factor bound; needed TWO Mathlib
+        gaps filled: finset_prod_le_prod_nonneg, since Mathlib's ordered
+        product API requires IsOrderedMonoid which R lacks under mult.)
+    A2 zOmega_eulerProduct  (one line from EulerProduct)
+    A3 eulerProduct_eq_Fbig (B1-B4: log_tprod_real [Mathlib gap],
+       cFac_cpow, tail_regroup, split_two)
+    A4 Fk_eq_coeff_tsum (C1 omega_pow_summable_radius, C2
+       iteratedDeriv_tsum_eq, C3 iteratedDeriv_monomial_zero)
+
+HYPOTHESES NOW THREADED through L2a / Fk_expansion (discharge later):
+  hk : 1 <= k        -- A4 is FALSE at k=0 (n=1 has Omega=0 but Fk excludes it)
+  hc : 0 < cFac s
+  hmulR / hposR / hlogR : convergence facts for the p>=3 factor family
+These are all true for s in (1,2]; proving them is a separate task.
+
+MATHLIB GAPS FILLED (reusable, in Basic.lean):
+  finset_prod_le_prod_nonneg   - product monotonicity for nonneg reals
+  log_tprod_real               - log of an infinite product (any index type)
+  hasProd_cexp_of_hasSum       - exp of a HasSum is a HasProd
+  pow_le_const_mul_geom        - uniform polynomial-vs-geometric bound
+
+WHAT REMAINS: the file has ONE sorry, erdos_sums_increase_from_six, and
+NOTHING connects Lemma 2.2 to it yet.  Still to formalise:
+  Lemma 2.4, Prop 2.5, Theorem 6.1 (Taylor-remainder variant of L2b),
+  Theorem 7.1 (far range), the range decomposition, and real definitions
+  for S*, alpha_+, Gamma.  Also: discharge the hc/hmulR/hposR/hlogR
+  hypotheses, and note the cFac normalisation means Fk_expansion's third
+  factor is (log (cFac s))^l / l!, NOT the manuscript's (-log(s-1))^l / l!.
