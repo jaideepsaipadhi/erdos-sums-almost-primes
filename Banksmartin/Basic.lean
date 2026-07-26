@@ -1474,6 +1474,18 @@ noncomputable def G2C (s : ℝ) (z : ℂ) : ℂ :=
   (1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
     (((1 - (3:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z * G2tailC s z
 
+/-- The regularised factor collapses at z = 1. -/
+theorem reg_factor_at_one (y : ℝ) (hy : (1:ℝ) - y ≠ 0) :
+    (1 - (1:ℂ) * ((y : ℝ) : ℂ))⁻¹ * (((1 - y : ℝ)) : ℂ) ^ (1:ℂ) = 1 := by
+  rw [one_mul, Complex.cpow_one]
+  have hcast : ((1 - y : ℝ) : ℂ) = 1 - ((y : ℝ) : ℂ) := by push_cast; ring
+  rw [hcast]
+  have hne : (1 : ℂ) - ((y : ℝ) : ℂ) ≠ 0 := by
+    rw [← hcast]
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    exact hy
+  field_simp
+
 /-- Each G₂ per-prime factor is differentiable in z on |z|<2. -/
 theorem prime_factor_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z : ℂ => (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *

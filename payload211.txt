@@ -1,0 +1,11 @@
+/-- The regularised factor collapses at z = 1. -/
+theorem reg_factor_at_one (y : RR) (hy : (1:RR) - y NEQ 0) :
+    (1 - (1:CC) * ((y : RR) : CC))INV * (((1 - y : RR)) : CC) ^ (1:CC) = 1 := by
+  rw [one_mul, Complex.cpow_one]
+  have hcast : ((1 - y : RR) : CC) = 1 - ((y : RR) : CC) := by push_cast; ring
+  rw [hcast]
+  have hne : (1 : CC) - ((y : RR) : CC) NEQ 0 := by
+    rw [LARR hcast]
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    exact hy
+  field_simp
