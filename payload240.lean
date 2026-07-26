@@ -1,0 +1,6 @@
+/-- D5: G2at1 2 = d (manuscript section 1, second identity).
+Function-value half; the series half needs the wide radius, now available. -/
+theorem G2at1_two_eq_dConst : G2at1 2 = ((dConst : ℝ) : ℂ) := by
+  unfold G2at1 dConst
+  rw [dConst_prod_eq_subtype]
+  sorry
