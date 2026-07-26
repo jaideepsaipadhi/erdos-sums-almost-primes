@@ -6135,6 +6135,15 @@ theorem reg_multipliable_three (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.nor
       * (((1 - (n:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) h5
   exact hsplit.1
 
+/-- D2: the regularised family at z = 2, s = 1 is multipliable.
+Immediate from reg_multipliable_three, since ||(2:C)|| = 2 <= 2. -/
+theorem reg_multipliable_three_at_two :
+    Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - (2:ℂ) * ((((p:ℕ):ℝ) ^ (-(1:ℝ)) : ℝ) : ℂ))⁻¹
+        * (((1 - ((p:ℕ):ℝ) ^ (-(1:ℝ)) : ℝ) : ℂ)) ^ (2:ℂ)) := by
+  have h := reg_multipliable_three 1 (le_refl 1) 2 (by norm_num)
+  exact h
+
 /-- Bound on the correction for the (1 - p^-s)^(-z) family. -/
 theorem cpow_neg_sub_one_bound (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :

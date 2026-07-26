@@ -1,0 +1,8 @@
+/-- D2: the regularised family at z = 2, s = 1 is multipliable.
+Immediate from reg_multipliable_three, since ||(2:C)|| = 2 <= 2. -/
+theorem reg_multipliable_three_at_two :
+    Multipliable (fun p : {p : NN // p.Prime AND 3 LEQ p} =>
+      (1 - (2:CC) * ((((p:NN):RR) ^ (-(1:RR)) : RR) : CC))INV
+        * (((1 - ((p:NN):RR) ^ (-(1:RR)) : RR) : CC)) ^ (2:CC)) := by
+  have h := reg_multipliable_three 1 (le_refl 1) 2 (by norm_num)
+  exact h
