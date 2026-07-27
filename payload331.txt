@@ -1,0 +1,16 @@
+/-- The z-scaled r=2 per-prime derivative, matching the convention of
+lemma_3_9_complex's terms (which carry z(z-1), not (z-1)). -/
+theorem deriv2_clog_prime_term_z (p : NN) (hp : 3 LEQ p) (s : RR) (hs : 1 LEQ s)
+    (z : CC) (hz : Norm.norm z LEQ 2) :
+    HasDerivAt (fun t : RR =>
+        -(z * (z - 1) * ((Real.log (p:RR) : RR) : CC))
+          / (((((p:RR)) ^ t : RR) : CC) - 1) / (((((p:RR)) ^ t : RR) : CC) - z))
+      (z * ((z - 1) * ((Real.log (p:RR) : RR) : CC) ^ 2 * ((((p:RR)) ^ s : RR) : CC)
+        * ((((((p:RR)) ^ s : RR) : CC) - z) + (((((p:RR)) ^ s : RR) : CC) - 1))
+        / ((((((p:RR)) ^ s : RR) : CC) - 1) ^ 2
+          * ((((((p:RR)) ^ s : RR) : CC) - z) ^ 2)))) s := by
+  have hbase := (deriv2_clog_prime_term p hp s hs z hz).const_mul z
+  apply hbase.congr_of_eventuallyEq
+  filter_upwards with t
+  field_simp
+  ring
