@@ -1,0 +1,26 @@
+/-- Complex analogue of deriv_log_one_sub_const_rpow:
+d/ds Complex.log(1 - c*p^(-s)) = c*log p*p^(-s)/(1 - c*p^(-s)) for complex c.
+The inner function is real-valued (the exponent is real), so its derivative
+comes from hasDerivAt_rpow_neg cast to C; only the outer log is complex, and
+one_sub_mem_slitPlane supplies its side condition. -/
+theorem deriv_clog_one_sub_const_rpow (p : NN) (hp : 3 LEQ p) (s : RR) (hs : 1 LEQ s)
+    (c : CC) (hc : Norm.norm c LEQ 2) :
+    HasDerivAt (fun t : RR => Complex.log (1 - c * (((((p:NN):RR)) ^ (-t) : RR) : CC)))
+      (c * ((Real.log ((p:NN):RR) : RR) : CC) * ((((((p:NN):RR)) ^ (-s) : RR)) : CC)
+        / (1 - c * (((((p:NN):RR)) ^ (-s) : RR) : CC))) s := by
+  have hslit := one_sub_mem_slitPlane p hp s hs c hc
+  have hreal := hasDerivAt_rpow_neg p hp s
+  have hcast : HasDerivAt (fun t : RR => (((((p:NN):RR)) ^ (-t) : RR) : CC))
+      (((-((((p:NN):RR)) ^ (-s) * Real.log ((p:NN):RR)) : RR) : CC)) s :=
+    hreal.ofReal_comp
+  have hin : HasDerivAt (fun t : RR => 1 - c * (((((p:NN):RR)) ^ (-t) : RR) : CC))
+      (c * (((((((p:NN):RR)) ^ (-s) * Real.log ((p:NN):RR)) : RR)) : CC)) s := by
+    have h := (hcast.const_mul c).const_sub 1
+    have hval : c * (((((((p:NN):RR)) ^ (-s) * Real.log ((p:NN):RR)) : RR)) : CC)
+        = -(c * ((-((((p:NN):RR)) ^ (-s) * Real.log ((p:NN):RR)) : RR) : CC)) := by
+      push_cast
+      ring
+    rw [hval]
+    exact h
+  have h := (Complex.hasDerivAt_log hslit).comp_ofReal (e := s) (hin)
+  sorry
