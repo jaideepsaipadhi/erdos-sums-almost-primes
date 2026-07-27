@@ -9317,6 +9317,93 @@ theorem deriv2_prime_term (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
   rw [hval]
   exact hstep2
 
+/-- Uniform bound for the r=2 per-prime derivative:
+|d/ds term| <= 200 log^2 p p^(-2), s-free for s >= 1.
+Crude route: |z-1| <= 3, (p^s-z)+(p^s-1) <= 2p^s, (p^s-1)^2 >= (4/9)p^(2s),
+(p^s-z)^2 >= (1/9)p^(2s), giving 9/(4/81) = 182.25; 200 leaves margin. -/
+theorem deriv2_prime_term_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
+    (z : ℝ) (hz : |z| ≤ 2) :
+    |(z - 1) * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ s)
+        * (((((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)))
+        / ((((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2)|
+      ≤ 200 * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ (-(2:ℝ))) := by
+  have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+  have hp0 : (0:ℝ) < (p:ℝ) := by linarith
+  have hps : (3:ℝ) ≤ ((p:ℝ)) ^ s := by
+    calc (3:ℝ) = (3:ℝ) ^ (1:ℝ) := by norm_num
+      _ ≤ (3:ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
+      _ ≤ ((p:ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hps0 : (0:ℝ) < ((p:ℝ)) ^ s := by linarith
+  have hzabs := abs_le.mp hz
+  have hlog0 : (0:ℝ) ≤ (Real.log (p:ℝ)) ^ 2 := sq_nonneg _
+  have hnum : |(z - 1) * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ s)
+        * (((((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)))|
+      ≤ 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by
+    rw [abs_mul, abs_mul, abs_mul, abs_of_nonneg hlog0, abs_of_pos hps0]
+    have h1 : |z - 1| ≤ 3 := by rw [abs_le]; constructor <;> linarith [hzabs.1, hzabs.2]
+    have h2 : |(((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)| ≤ 3 * ((p:ℝ)) ^ s := by
+      rw [abs_le]
+      constructor
+      · linarith [hzabs.2, hps]
+      · linarith [hzabs.1, hps]
+    calc |z - 1| * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ s
+          * |(((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)|
+        ≤ 3 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ s * (3 * ((p:ℝ)) ^ s) := by
+          apply mul_le_mul _ h2 (abs_nonneg _) (by positivity)
+          apply mul_le_mul_of_nonneg_right _ (le_of_lt hps0)
+          exact mul_le_mul_of_nonneg_right h1 hlog0
+      _ = 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by ring
+  have hd1 : (2/3) * ((p:ℝ)) ^ s ≤ ((p:ℝ)) ^ s - 1 := by linarith
+  have hd2 : (1/3) * ((p:ℝ)) ^ s ≤ ((p:ℝ)) ^ s - z := by linarith [hzabs.2]
+  have hd1pos : (0:ℝ) < ((p:ℝ)) ^ s - 1 := by linarith
+  have hd2pos : (0:ℝ) < ((p:ℝ)) ^ s - z := by linarith [hzabs.2]
+  have hsq1 : (4/9) * ((((p:ℝ)) ^ s)) ^ 2 ≤ (((p:ℝ)) ^ s - 1) ^ 2 := by
+    nlinarith [hd1, hps0]
+  have hsq2 : (1/9) * ((((p:ℝ)) ^ s)) ^ 2 ≤ ((((p:ℝ)) ^ s - z)) ^ 2 := by
+    nlinarith [hd2, hps0]
+  have hden : (4/81) * ((((p:ℝ)) ^ s)) ^ 4
+      ≤ (((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2 := by
+    nlinarith [hsq1, hsq2, hps0, sq_nonneg (((p:ℝ)) ^ s)]
+  have hdenpos : (0:ℝ) < (((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2 :=
+    mul_pos (pow_pos hd1pos 2) (pow_pos hd2pos 2)
+  rw [abs_div, abs_of_pos hdenpos, div_le_iff₀ hdenpos]
+  have hpow : ((p:ℝ)) ^ (-(2:ℝ)) * ((((p:ℝ)) ^ s)) ^ 2 ≥ 1 := by
+    have hsq : ((((p:ℝ)) ^ s)) ^ 2 = ((p:ℝ)) ^ (2*s) := by
+      rw [← Real.rpow_natCast (((p:ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
+      norm_num
+      ring_nf
+    rw [hsq, ← Real.rpow_add hp0]
+    calc (1:ℝ) = ((p:ℝ)) ^ (0:ℝ) := by rw [Real.rpow_zero]
+      _ ≤ ((p:ℝ)) ^ (-(2:ℝ) + 2*s) :=
+          Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+  have hkey : 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2:ℝ))
+        * ((4/81) * ((((p:ℝ)) ^ s)) ^ 4)
+      ≥ 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by
+    have hexp : ((p:ℝ)) ^ (-(2:ℝ)) * ((((p:ℝ)) ^ s)) ^ 2 ≥ 1 := hpow
+    have h4 : ((((p:ℝ)) ^ s)) ^ 4 = ((((p:ℝ)) ^ s)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by ring
+    rw [h4]
+    have hLQ : (0:ℝ) ≤ (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by positivity
+    have hstep : (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2
+          * (((p:ℝ)) ^ (-(2:ℝ)) * ((((p:ℝ)) ^ s)) ^ 2)
+        ≥ (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 * 1 :=
+      mul_le_mul_of_nonneg_left hexp hLQ
+    calc 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2:ℝ))
+          * ((4/81) * (((((p:ℝ)) ^ s)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2))
+        = (800/81) * ((Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2
+            * (((p:ℝ)) ^ (-(2:ℝ)) * ((((p:ℝ)) ^ s)) ^ 2)) := by ring
+      _ ≥ (800/81) * ((Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 * 1) := by
+          apply mul_le_mul_of_nonneg_left hstep (by norm_num)
+      _ = (800/81) * ((Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2) := by ring
+      _ ≥ 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by nlinarith [hLQ]
+  have hmul : 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2:ℝ))
+        * ((((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2)
+      ≥ 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2:ℝ))
+        * ((4/81) * ((((p:ℝ)) ^ s)) ^ 4) := by
+    apply mul_le_mul_of_nonneg_left hden
+    have : (0:ℝ) < ((p:ℝ)) ^ (-(2:ℝ)) := Real.rpow_pos_of_pos hp0 _
+    positivity
+  linarith [hnum, hkey, hmul]
+
 /-- Complex analogue of deriv_log_one_sub_const_rpow:
 d/ds Complex.log(1 - c*p^(-s)) = c*log p*p^(-s)/(1 - c*p^(-s)) for complex c.
 The inner function is real-valued (the exponent is real), so its derivative
