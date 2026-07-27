@@ -1,0 +1,54 @@
+/-- Complex per-prime term of Lemma 3.9:
+d/ds [-Complex.log(1 - z p^(-s)) + z Complex.log(1 - p^(-s))]
+  = -z(z-1) log p / ((p^s - 1)(p^s - z)).
+Complex analogue of deriv_log_prime_factor; the cancellation between the two
+logs is again what produces the p^(-2s) decay. -/
+theorem deriv_clog_prime_factor (p : NN) (hp : 3 LEQ p) (s : RR) (hs : 1 LEQ s)
+    (z : CC) (hz : Norm.norm z LEQ 2) :
+    HasDerivAt (fun t : RR =>
+        -Complex.log (1 - z * (((((p:NN):RR)) ^ (-t) : RR) : CC))
+          + z * Complex.log (1 - (((((p:NN):RR)) ^ (-t) : RR) : CC)))
+      (-(z * (z - 1) * ((Real.log ((p:NN):RR) : RR) : CC))
+        / (((((((p:NN):RR)) ^ s : RR)) : CC) - 1)
+          / (((((((p:NN):RR)) ^ s : RR)) : CC) - z)) s := by
+  have hp3 : (3:RR) LEQ (((p:NN):RR)) := by exact_mod_cast hp
+  have hp0 : (0:RR) < (((p:NN):RR)) := by linarith
+  have hps : (3:RR) LEQ (((p:NN):RR)) ^ s := by
+    calc (3:RR) = (3:RR) ^ (1:RR) := by norm_num
+      _ LEQ (3:RR) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
+      _ LEQ (((p:NN):RR)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hneg : (((p:NN):RR)) ^ (-s) = ((((p:NN):RR)) ^ s)INV := Real.rpow_neg (le_of_lt hp0) s
+  have hone : Norm.norm (1 : CC) LEQ 2 := by simp; norm_num
+  have hA := (deriv_clog_one_sub_const_rpow p hp s hs z hz).neg
+  have hB := (deriv_clog_one_sub_const_rpow p hp s hs 1 hone).const_mul z
+  simp only [one_mul] at hB
+  have hsum := hA.add hB
+  have hslitz := Complex.slitPlane_ne_zero (one_sub_mem_slitPlane p hp s hs z hz)
+  have hslit1 := Complex.slitPlane_ne_zero (one_sub_mem_slitPlane p hp s hs 1 hone)
+  simp only [one_mul] at hslit1
+  have hpsC : (((((p:NN):RR)) ^ s : RR) : CC) NEQ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    intro hcon
+    rw [hcon] at hps
+    linarith
+  have hval : -(z * (z - 1) * ((Real.log ((p:NN):RR) : RR) : CC))
+        / (((((((p:NN):RR)) ^ s : RR)) : CC) - 1)
+          / (((((((p:NN):RR)) ^ s : RR)) : CC) - z)
+      = -(z * ((Real.log ((p:NN):RR) : RR) : CC)
+            * ((((((p:NN):RR)) ^ (-s) : RR)) : CC)
+            / (1 - z * (((((p:NN):RR)) ^ (-s) : RR) : CC)))
+        + z * (((Real.log ((p:NN):RR) : RR) : CC)
+            * ((((((p:NN):RR)) ^ (-s) : RR)) : CC)
+            / (1 - (((((p:NN):RR)) ^ (-s) : RR) : CC))) := by
+    rw [hneg]
+    push_cast
+    rw [show (1 : CC) - z * ((((((p:NN):RR)) ^ s : RR) : CC))INV
+        = (((((((p:NN):RR)) ^ s : RR) : CC)) - z) / ((((((p:NN):RR)) ^ s : RR) : CC)) by
+      field_simp]
+    rw [show (1 : CC) - ((((((p:NN):RR)) ^ s : RR) : CC))INV
+        = (((((((p:NN):RR)) ^ s : RR) : CC)) - 1) / ((((((p:NN):RR)) ^ s : RR) : CC)) by
+      field_simp]
+    field_simp
+    ring
+  rw [hval]
+  exact hsum
