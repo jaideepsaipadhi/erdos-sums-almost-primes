@@ -9257,6 +9257,87 @@ theorem deriv_clog_prime_factor (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s
   rw [hval]
   exact hsum
 
+/-- Complex analogue of deriv_prime_term_bound_uniform: the s-free dominating
+bound for the per-prime derivative.  Same constant 27, same crude route, with
+norms in place of absolute values. -/
+theorem deriv_clog_term_bound_uniform (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
+    (z : ℂ) (hz : Norm.norm z ≤ 2) :
+    Norm.norm (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
+        / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+          / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))
+      ≤ 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2:ℝ)) := by
+  have hp3 : (3:ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
+  have hp0 : (0:ℝ) < (((p:ℕ):ℝ)) := by linarith
+  have hps : (3:ℝ) ≤ (((p:ℕ):ℝ)) ^ s := by
+    calc (3:ℝ) = (3:ℝ) ^ (1:ℝ) := by norm_num
+      _ ≤ (3:ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
+      _ ≤ (((p:ℕ):ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hps0 : (0:ℝ) < (((p:ℕ):ℝ)) ^ s := by linarith
+  have hlogpos : (0:ℝ) ≤ Real.log ((p:ℕ):ℝ) := Real.log_nonneg (by linarith)
+  have hnum : Norm.norm (z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
+      ≤ 6 * Real.log ((p:ℕ):ℝ) := by
+    rw [norm_mul, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hlogpos]
+    have h1 : Norm.norm (z - 1) ≤ 3 := by
+      calc Norm.norm (z - 1) ≤ Norm.norm z + Norm.norm (1:ℂ) := norm_sub_le z 1
+        _ ≤ 2 + 1 := by simp only [norm_one]; linarith
+        _ = 3 := by norm_num
+    have hprod6 : Norm.norm z * Norm.norm (z - 1) ≤ 6 := by
+      nlinarith [norm_nonneg z, norm_nonneg (z - 1), hz, h1]
+    nlinarith [hprod6, hlogpos]
+  have hd1 : (2/3) * (((p:ℕ):ℝ)) ^ s
+      ≤ Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1) := by
+    have hre : ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
+        = (((((((p:ℕ):ℝ)) ^ s - 1 : ℝ))) : ℂ) := by push_cast; ring
+    rw [hre, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
+    linarith
+  have hd2 : (1/3) * (((p:ℕ):ℝ)) ^ s
+      ≤ Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
+    have hge : Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z)
+        ≥ Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ))) - Norm.norm z :=
+      norm_sub_norm_le _ _
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hps0] at hge
+    linarith
+  rw [norm_div, norm_div]
+  rw [div_div]
+  have hdpos : (0:ℝ) < Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
+      * Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
+    have h1 : (0:ℝ) < Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1) := by
+      linarith [hd1, hps0]
+    have h2 : (0:ℝ) < Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
+      linarith [hd2, hps0]
+    positivity
+  rw [div_le_iff₀ hdpos]
+  have hprod : (2/9) * ((((p:ℕ):ℝ)) ^ s) ^ 2
+      ≤ Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
+          * Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
+    nlinarith [hd1, hd2, hps0, norm_nonneg ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)]
+  rw [norm_neg]
+  have hkey : 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2:ℝ))
+        * ((2/9) * ((((p:ℕ):ℝ)) ^ s) ^ 2)
+      ≥ 6 * Real.log ((p:ℕ):ℝ) := by
+    have hsq : ((((p:ℕ):ℝ)) ^ s) ^ 2 = (((p:ℕ):ℝ)) ^ (2*s) := by
+      rw [← Real.rpow_natCast ((((p:ℕ):ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
+      norm_num
+      ring_nf
+    rw [hsq]
+    have hge : (((p:ℕ):ℝ)) ^ (-(2:ℝ)) * (((p:ℕ):ℝ)) ^ (2*s) ≥ 1 := by
+      rw [← Real.rpow_add hp0]
+      have hexp : (0:ℝ) ≤ -(2:ℝ) + 2*s := by linarith
+      calc (1:ℝ) = (((p:ℕ):ℝ)) ^ (0:ℝ) := by rw [Real.rpow_zero]
+        _ ≤ (((p:ℕ):ℝ)) ^ (-(2:ℝ) + 2*s) :=
+            Real.rpow_le_rpow_of_exponent_le (by linarith) hexp
+    nlinarith [hge, hlogpos]
+  have hmul : 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2:ℝ))
+        * (Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
+          * Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z))
+      ≥ 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2:ℝ))
+        * ((2/9) * ((((p:ℕ):ℝ)) ^ s) ^ 2) := by
+    have hc : (0:ℝ) ≤ 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2:ℝ)) := by
+      have : (0:ℝ) < (((p:ℕ):ℝ)) ^ (-(2:ℝ)) := Real.rpow_pos_of_pos hp0 _
+      positivity
+    exact mul_le_mul_of_nonneg_left hprod hc
+  linarith [hnum, hkey, hmul]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
