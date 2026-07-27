@@ -9341,7 +9341,7 @@ theorem deriv_clog_term_bound_uniform (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1
 /-- File-canonical form of the complex per-prime derivative: second term as a
 real log cast to C (matching G2tailC_eq_exp_sum and
 prime_correction_summable_complex), indexed from p >= 5 to match G2tailC. -/
-theorem deriv_clog_prime_factor_canon (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
+theorem deriv_clog_prime_factor_canon (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
     HasDerivAt (fun t : ℝ =>
         -Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
@@ -9349,8 +9349,7 @@ theorem deriv_clog_prime_factor_canon (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1
       (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
         / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
           / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)) s := by
-  have hp3 : (3:ℕ) ≤ p := by omega
-  have hbase := deriv_clog_prime_factor p hp3 s hs z hz
+  have hbase := deriv_clog_prime_factor p hp s hs z hz
   apply hbase.congr_of_eventuallyEq
   have hnhds : Set.Ioi (0:ℝ) ∈ nhds s := by
     apply Ioi_mem_nhds
@@ -9358,7 +9357,7 @@ theorem deriv_clog_prime_factor_canon (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1
   filter_upwards [hnhds] with t ht
   congr 1
   congr 1
-  have hpr : (3:ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp3
+  have hpr : (3:ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
   have hp0 : (0:ℝ) < (((p:ℕ):ℝ)) := by linarith
   have ht0 : (0:ℝ) < t := ht
   have hlt : (((p:ℕ):ℝ)) ^ (-t) < 1 :=
@@ -9453,7 +9452,7 @@ theorem hasDerivAt_clog_series (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
     deriv_bound_uniform_summable_five isOpen_Ioo isPreconnected_Ioo
     _ _ hy0 (clog_series_summable_at_basepoint z hz) hsmem
   · intro p y hy
-    exact deriv_clog_prime_factor_canon (p:ℕ) p.2.2 y (le_of_lt hy.1) z hz
+    exact deriv_clog_prime_factor_canon (p:ℕ) (by omega) y (le_of_lt hy.1) z hz
   · intro p y hy
     exact deriv_clog_term_bound_uniform (p:ℕ) (by omega) y (le_of_lt hy.1) z hz
 
