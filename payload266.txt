@@ -1,0 +1,22 @@
+/-- kappa(s) = zetaTilde(s) * (1 - 2^(-s)) for s > 1.
+Real-part projection of cFac_eq_zeta.  This is what lets Lemma 3.9's kappa-part
+split into f(s) + log 2/(2^s - 1), with f = (log zetaTilde)' carried opaquely
+(the manuscript certifies f numerically via Stieltjes constants). -/
+theorem kappaFac_eq_zetaTilde (s : RR) (hs : 1 < s) :
+    kappaFac s = zetaTilde s * (1 - (2:RR) ^ (-s)) := by
+  have hne : s NEQ 1 := ne_of_gt hs
+  have hcast : ((1 : CC) - ((2:CC)) ^ (-(s:CC))) = (((1 - (2:RR) ^ (-s) : RR)) : CC) := by
+    push_cast
+    rw [show ((2:CC)) = (((2:RR)) : CC) by norm_num]
+    rw [show (-(s:CC)) = (((-s : RR)) : CC) by push_cast; ring]
+    rw [LARR Complex.ofReal_cpow (by norm_num : (0:RR) LEQ 2)]
+    push_cast
+    ring
+  have hz := cFac_eq_zeta s hs
+  rw [hcast] at hz
+  have hre : cFac s = (riemannZeta (s:CC)).re * (1 - (2:RR) ^ (-s)) := by
+    have := congrArg Complex.re hz
+    simpa [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im] using this
+  unfold kappaFac zetaTilde
+  rw [if_neg hne, hre]
+  ring
