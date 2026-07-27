@@ -9671,10 +9671,27 @@ theorem gManu_eq_circleIntegral (s : ℝ) (hs : 1 ≤ s) (hk : 0 < kappaFac s) (
     gManu i s
       = (2 * ((Real.pi : ℝ) : ℂ) * Complex.I)⁻¹
         • (circleIntegral (fun z : ℂ => (1 / z) ^ i • z⁻¹ • G2manu s z)
-          0 (12/5 : ℝ)) := by
-  rw [gManu_eq_cauchy_coeff s hs hk i]
-  have h := cauchyPowerSeries_apply (fun z : ℂ => G2manu s z) 0 ((12/5 : NNReal) : ℝ) i 1
-  show ((cauchyPowerSeries (fun z : ℂ => G2manu s z) 0 ((12/5 : NNReal) : ℝ) i) fun _ => 1) = _
+          0 (2 : ℝ)) := by
+  have hcoeff : gManu i s
+      = (cauchyPowerSeries (fun z : ℂ => G2manu s z) 0 ((2 : NNReal) : ℝ)).coeff i := by
+    have hdiff : DifferentiableOn ℂ (fun z : ℂ => G2manu s z)
+        (Metric.closedBall (0:ℂ) ((2 : NNReal) : ℝ)) := by
+      apply (G2manu_differentiableOn_wide s hs hk).mono
+      intro w hw
+      rw [Metric.mem_closedBall, dist_zero_right] at hw ⊢
+      norm_num at hw ⊢
+      linarith
+    have hR : (0:NNReal) < 2 := by norm_num
+    have hser := hdiff.hasFPowerSeriesOnBall hR
+    have hbridge := iteratedDeriv_eq_factorial_smul_coeff' hser i
+    unfold gManu
+    rw [hbridge]
+    have hfac : ((Nat.factorial i : ℕ) : ℂ) ≠ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
+    field_simp
+  rw [hcoeff]
+  have h := cauchyPowerSeries_apply (fun z : ℂ => G2manu s z) 0 ((2 : NNReal) : ℝ) i 1
+  show ((cauchyPowerSeries (fun z : ℂ => G2manu s z) 0 ((2 : NNReal) : ℝ) i) fun _ => 1) = _
   rw [h]
   norm_num
 
@@ -9685,26 +9702,31 @@ factor (1/z)^i * z^(-1) is continuous (z never vanishes) and G2manu s . is
 continuous there by G2manu_differentiableOn_wide. -/
 theorem contour_integrand_continuous (s : ℝ) (hs : 1 ≤ s) (hk : 0 < kappaFac s) (i : ℕ) :
     Continuous (fun t : ℝ =>
-      deriv (circleMap 0 (12/5 : ℝ)) t
-        • ((1 / circleMap 0 (12/5 : ℝ) t) ^ i
-          • (circleMap 0 (12/5 : ℝ) t)⁻¹ • G2manu s (circleMap 0 (12/5 : ℝ) t))) := by
-  have hR : (0:ℝ) < 12/5 := by norm_num
-  have hne : ∀ t : ℝ, circleMap 0 (12/5 : ℝ) t ≠ 0 :=
+      deriv (circleMap 0 (2 : ℝ)) t
+        • ((1 / circleMap 0 (2 : ℝ) t) ^ i
+          • (circleMap 0 (2 : ℝ) t)⁻¹ • G2manu s (circleMap 0 (2 : ℝ) t))) := by
+  have hR : (0:ℝ) < 2 := by norm_num
+  have hne : ∀ t : ℝ, circleMap 0 (2 : ℝ) t ≠ 0 :=
     fun t => circleMap_ne_center (ne_of_gt hR)
-  have hcm : Continuous (circleMap 0 (12/5 : ℝ)) := continuous_circleMap 0 _
-  have hdcm : Continuous (deriv (circleMap 0 (12/5 : ℝ))) := by
-    have : deriv (circleMap 0 (12/5 : ℝ))
-        = fun t => circleMap 0 (12/5 : ℝ) t * Complex.I := by
+  have hcm : Continuous (circleMap 0 (2 : ℝ)) := continuous_circleMap 0 _
+  have hdcm : Continuous (deriv (circleMap 0 (2 : ℝ))) := by
+    have : deriv (circleMap 0 (2 : ℝ))
+        = fun t => circleMap 0 (2 : ℝ) t * Complex.I := by
       funext t
-      exact deriv_circleMap 0 (12/5 : ℝ) t
+      exact deriv_circleMap 0 (2 : ℝ) t
     rw [this]
     exact hcm.mul continuous_const
-  have hmem : ∀ t : ℝ, circleMap 0 (12/5 : ℝ) t ∈ Metric.closedBall (0:ℂ) (12/5 : ℝ) := by
+  have hmem : ∀ t : ℝ, circleMap 0 (2 : ℝ) t ∈ Metric.closedBall (0:ℂ) (2 : ℝ) := by
     intro t
     rw [Metric.mem_closedBall, dist_zero_right]
     simp [circleMap]
-  have hG2 : Continuous (fun t : ℝ => G2manu s (circleMap 0 (12/5 : ℝ) t)) := by
-    have hcont := (G2manu_differentiableOn_wide s hs hk).continuousOn
+  have hG2 : Continuous (fun t : ℝ => G2manu s (circleMap 0 (2 : ℝ) t)) := by
+    have hsub : Metric.closedBall (0:ℂ) (2:ℝ)
+        ⊆ Metric.closedBall (0:ℂ) ((12:ℝ)/5) := by
+      intro w hw
+      rw [Metric.mem_closedBall, dist_zero_right] at hw ⊢
+      linarith
+    have hcont := ((G2manu_differentiableOn_wide s hs hk).mono hsub).continuousOn
     exact hcont.comp_continuous hcm hmem
   simp only [smul_eq_mul]
   apply hdcm.mul
@@ -9724,39 +9746,39 @@ the analogue of the manuscript's M1 = 2544 but at radius 12/5 rather than 2.9
 use its own radius). -/
 theorem contour_integrand_deriv_bound (i : ℕ) (M : ℝ) (hM0 : 0 ≤ M)
     (t : ℝ) (theta : ℝ)
-    (hbound : Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (12/5 : ℝ) theta)) t) ≤ M) :
-    Norm.norm (deriv (circleMap 0 (12/5 : ℝ)) theta
-        * ((1 / circleMap 0 (12/5 : ℝ) theta) ^ i
-          * ((circleMap 0 (12/5 : ℝ) theta)⁻¹
-            * deriv (fun u : ℝ => G2manu u (circleMap 0 (12/5 : ℝ) theta)) t)))
+    (hbound : Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) t) ≤ M) :
+    Norm.norm (deriv (circleMap 0 (2 : ℝ)) theta
+        * ((1 / circleMap 0 (2 : ℝ) theta) ^ i
+          * ((circleMap 0 (2 : ℝ) theta)⁻¹
+            * deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) t)))
       ≤ M := by
-  have hR : (0:ℝ) < 12/5 := by norm_num
-  have hnorm : Norm.norm (circleMap 0 (12/5 : ℝ) theta) = 12/5 := by
+  have hR : (0:ℝ) < 2 := by norm_num
+  have hnorm : Norm.norm (circleMap 0 (2 : ℝ) theta) = 2 := by
     simp [circleMap]
-  have hne : circleMap 0 (12/5 : ℝ) theta ≠ 0 := circleMap_ne_center (ne_of_gt hR)
-  have hdcm : Norm.norm (deriv (circleMap 0 (12/5 : ℝ)) theta) = 12/5 := by
+  have hne : circleMap 0 (2 : ℝ) theta ≠ 0 := circleMap_ne_center (ne_of_gt hR)
+  have hdcm : Norm.norm (deriv (circleMap 0 (2 : ℝ)) theta) = 2 := by
     rw [deriv_circleMap]
     rw [norm_mul, hnorm, Complex.norm_I]
     ring
   rw [norm_mul, norm_mul, norm_mul, hdcm, norm_pow, norm_div, norm_one, hnorm, norm_inv, hnorm]
-  have hpow : ((12:ℝ)/5)⁻¹ ^ i ≤ 1 := by
+  have hpow : ((2:ℝ))⁻¹ ^ i ≤ 1 := by
     apply pow_le_one₀ (by positivity)
     rw [inv_le_one_iff₀]
     right
     norm_num
-  have hMnn : (0:ℝ) ≤ Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (12/5 : ℝ) theta)) t) :=
+  have hMnn : (0:ℝ) ≤ Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) t) :=
     norm_nonneg _
-  calc (12/5 : ℝ) * ((1 / (12/5 : ℝ)) ^ i
-        * (((12/5 : ℝ))⁻¹
-          * Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (12/5 : ℝ) theta)) t)))
-      = ((1 / (12/5 : ℝ)) ^ i)
-          * Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (12/5 : ℝ) theta)) t) := by
+  calc (2 : ℝ) * ((1 / (2 : ℝ)) ^ i
+        * (((2 : ℝ))⁻¹
+          * Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) t)))
+      = ((1 / (2 : ℝ)) ^ i)
+          * Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) t) := by
         field_simp
-    _ ≤ 1 * Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (12/5 : ℝ) theta)) t) := by
+    _ ≤ 1 * Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) t) := by
         apply mul_le_mul_of_nonneg_right _ hMnn
         rw [one_div]
         exact hpow
-    _ = Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (12/5 : ℝ) theta)) t) := one_mul _
+    _ = Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) t) := one_mul _
     _ ≤ M := hbound
 
 /-- d/ds G2manu exists at every point of (1,2) on the contour: this is what
