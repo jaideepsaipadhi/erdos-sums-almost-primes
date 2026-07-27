@@ -8627,6 +8627,22 @@ theorem gManu_eq_cauchy_coeff (s : ℝ) (hs : 1 ≤ s) (hk : 0 < kappaFac s) (i 
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero i)
   field_simp
 
+/-- log p <= sqrt p for p >= 3.  Lets the differentiated log-series be
+compared against a plain p-series rather than needing sum log p / p^2. -/
+theorem log_le_sqrt (x : ℝ) (hx : 3 ≤ x) : Real.log x ≤ x ^ ((1:ℝ)/2) := by
+  have hx0 : (0:ℝ) < x := by linarith
+  have hsq : (0:ℝ) < x ^ ((1:ℝ)/2) := Real.rpow_pos_of_pos hx0 _
+  have hq : (0:ℝ) < x ^ ((1:ℝ)/4) := Real.rpow_pos_of_pos hx0 _
+  have hkey : Real.log x = 4 * Real.log (x ^ ((1:ℝ)/4)) := by
+    rw [Real.log_rpow hx0]
+    ring
+  have hy := Real.log_le_sub_one_of_pos hq
+  have hsplit : x ^ ((1:ℝ)/2) = (x ^ ((1:ℝ)/4)) ^ (2:ℕ) := by
+    rw [← Real.rpow_natCast (x ^ ((1:ℝ)/4)) 2, ← Real.rpow_mul (le_of_lt hx0)]
+    norm_num
+  rw [hkey, hsplit]
+  nlinarith [hy, sq_nonneg (x ^ ((1:ℝ)/4) - 2)]
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
