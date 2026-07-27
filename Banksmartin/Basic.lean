@@ -10349,6 +10349,13 @@ theorem gManu_bounded (i : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
     _ ≤ beta + Norm.norm (cCoeff i) := by linarith [hbs]
     _ = Norm.norm (cCoeff i) + beta := by ring
 
+/-- gManu i is continuous on (1,2), from differentiability there. -/
+theorem gManu_continuousOn (i : ℕ)
+    (hderiv : ∀ x ∈ Set.Ioo (1:ℝ) 2,
+      HasDerivAt (fun t : ℝ => gManu i t) (deriv (fun t : ℝ => gManu i t) x) x) :
+    ContinuousOn (fun t : ℝ => gManu i t) (Set.Ioo (1:ℝ) 2) :=
+  fun x hx => ((hderiv x hx).continuousAt).continuousWithinAt
+
 /-- MANUSCRIPT section 3.5: the exact evaluation
   int_1^2 (-log(s-1))^l / l! * (s-1) ds = 2^(-l-1).
 Substitution s = 1 + e^(-t) (integral_Ioc_subst) turns it into
