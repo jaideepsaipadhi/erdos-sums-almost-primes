@@ -8545,6 +8545,48 @@ theorem prop_2_5 (k : ℕ) (hk : 1 ≤ k) :
   ring
 
 
+/-- The p = 2 half of Lemma 3.9's c: d/ds log(1 - 2^(-s)) = log 2 / (2^s - 1). -/
+theorem deriv_log_one_sub_two_pow (s : ℝ) (hs : 1 < s) :
+    HasDerivAt (fun t : ℝ => Real.log (1 - (2:ℝ) ^ (-t)))
+      (Real.log 2 / ((2:ℝ) ^ s - 1)) s := by
+  have h2s : (0:ℝ) < (2:ℝ) ^ s := Real.rpow_pos_of_pos (by norm_num) s
+  have hlt : (2:ℝ) ^ (-s) < 1 := by
+    rw [Real.rpow_neg (by norm_num), inv_lt_one_iff₀]
+    right
+    have h1 : (2:ℝ) ^ (1:ℝ) < (2:ℝ) ^ s :=
+      Real.rpow_lt_rpow_of_exponent_lt (by norm_num) hs
+    rw [Real.rpow_one] at h1
+    linarith
+  have hpos : (0:ℝ) < 1 - (2:ℝ) ^ (-s) := by linarith
+  have hinner : HasDerivAt (fun t : ℝ => 1 - (2:ℝ) ^ (-t))
+      ((2:ℝ) ^ (-s) * Real.log 2) s := by
+    have hbase : HasDerivAt (fun t : ℝ => (2:ℝ) ^ (-t))
+        (-((2:ℝ) ^ (-s) * Real.log 2)) s := by
+      have hrw : (fun t : ℝ => (2:ℝ) ^ (-t))
+          = fun t : ℝ => Real.exp ((-t) * Real.log 2) := by
+        funext t
+        rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]
+        ring_nf
+      rw [hrw]
+      have hinner : HasDerivAt (fun t : ℝ => (-t) * Real.log 2) (-Real.log 2) s := by
+        simpa using (hasDerivAt_neg s).mul_const (Real.log 2)
+      have h := hinner.exp
+      convert h using 1
+      rw [show Real.exp (-s * Real.log 2) = (2:ℝ) ^ (-s) by
+        rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]
+        ring_nf]
+      ring
+    simpa using hbase.const_sub 1
+  have h := (Real.hasDerivAt_log (ne_of_gt hpos)).comp s hinner
+  simp only [Function.comp_def] at h
+  have hval : Real.log 2 / ((2:ℝ) ^ s - 1)
+      = (1 - (2:ℝ) ^ (-s))⁻¹ * ((2:ℝ) ^ (-s) * Real.log 2) := by
+    rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2)]
+    have h2 : ((2:ℝ) ^ s) ≠ 0 := ne_of_gt h2s
+    field_simp
+  rw [hval]
+  exact h
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by

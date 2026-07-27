@@ -1,0 +1,27 @@
+/-- The p = 2 half of Lemma 3.9's c: d/ds log(1 - 2^(-s)) = log 2 / (2^s - 1). -/
+theorem deriv_log_one_sub_two_pow (s : RR) (hs : 1 < s) :
+    HasDerivAt (fun t : RR => Real.log (1 - (2:RR) ^ (-t)))
+      (Real.log 2 / ((2:RR) ^ s - 1)) s := by
+  have h2s : (0:RR) < (2:RR) ^ s := Real.rpow_pos_of_pos (by norm_num) s
+  have hlt : (2:RR) ^ (-s) < 1 := by
+    rw [Real.rpow_neg (by norm_num), inv_lt_one_iff0]
+    right
+    have h1 : (2:RR) ^ (1:RR) < (2:RR) ^ s :=
+      Real.rpow_lt_rpow_of_exponent_lt (by norm_num) hs
+    rw [Real.rpow_one] at h1
+    linarith
+  have hpos : (0:RR) < 1 - (2:RR) ^ (-s) := by linarith
+  have hinner : HasDerivAt (fun t : RR => 1 - (2:RR) ^ (-t))
+      ((2:RR) ^ (-s) * Real.log 2) s := by
+    have hbase : HasDerivAt (fun t : RR => (2:RR) ^ (-t))
+        (-((2:RR) ^ (-s) * Real.log 2)) s := by
+      have h := (Real.hasDerivAt_const_rpow (by norm_num : (0:RR) < 2) s).comp s
+        (hasDerivAt_neg s)
+      simpa using h
+    simpa using hbase.const_sub 1
+  have h := (Real.hasDerivAt_log (ne_of_gt hpos)).comp s hinner
+  convert h using 1
+  field_simp
+  rw [Real.rpow_neg (by norm_num)]
+  field_simp
+  ring
