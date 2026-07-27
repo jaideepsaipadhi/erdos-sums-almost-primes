@@ -1,0 +1,18 @@
+/-- d/dt p^t = p^t log p.  Positive-exponent mirror of hasDerivAt_rpow_neg,
+needed for the r=2 per-prime derivative where p^s appears in the denominators. -/
+theorem hasDerivAt_rpow_pos (p : NN) (hp : 3 LEQ p) (s : RR) :
+    HasDerivAt (fun t : RR => ((p:RR)) ^ t)
+      (((p:RR)) ^ s * Real.log (p:RR)) s := by
+  have hp3 : (3:RR) LEQ (p:RR) := by exact_mod_cast hp
+  have hp0 : (0:RR) < (p:RR) := by linarith
+  have hrw : (fun t : RR => ((p:RR)) ^ t)
+      = fun t : RR => Real.exp (t * Real.log (p:RR)) := by
+    funext t
+    rw [Real.rpow_def_of_pos hp0, mul_comm]
+  rw [hrw]
+  have hinner : HasDerivAt (fun t : RR => t * Real.log (p:RR)) (Real.log (p:RR)) s := by
+    simpa using (hasDerivAt_id s).mul_const (Real.log (p:RR))
+  have h := hinner.exp
+  convert h using 1
+  rw [show Real.exp (s * Real.log (p:RR)) = ((p:RR)) ^ s by
+    rw [Real.rpow_def_of_pos hp0, mul_comm]]
