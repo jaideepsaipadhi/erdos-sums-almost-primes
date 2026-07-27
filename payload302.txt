@@ -1,0 +1,18 @@
+/-- The contour integral converges as s -> 1+, by dominated convergence.
+M0 is a hypothesis: sup over s in (1,2), |z| = 2 of ||G2manu s z||, the
+analogue of the manuscript's M = 326 (Lemma 3.7) at our radius.  Certified
+numerically there, so assumed here, as with M1. -/
+theorem contour_integral_tendsto (i : NN) (M0 : RR) (hM00 : 0 LEQ M0)
+    (hM0 : FORALL s : RR, s IN Set.Ioi (1:RR) ARROW FORALL theta : RR,
+      Norm.norm (G2manu s (circleMap 0 (2:RR) theta)) LEQ M0) :
+    Filter.Tendsto (fun s : RR =>
+        INTEGRAL theta in Set.Ioc (0:RR) (2 * Real.pi),
+          deriv (circleMap 0 (2:RR)) theta
+            * ((1 / circleMap 0 (2:RR) theta) ^ i
+              * ((circleMap 0 (2:RR) theta)INV * G2manu s (circleMap 0 (2:RR) theta))))
+      (nhdsWithin 1 (Set.Ioi (1:RR)))
+      (nhds (INTEGRAL theta in Set.Ioc (0:RR) (2 * Real.pi),
+        deriv (circleMap 0 (2:RR)) theta
+          * ((1 / circleMap 0 (2:RR) theta) ^ i
+            * ((circleMap 0 (2:RR) theta)INV * G2at1 (circleMap 0 (2:RR) theta))))) := by
+  sorry
