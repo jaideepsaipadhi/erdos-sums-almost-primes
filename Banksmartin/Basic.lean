@@ -9869,6 +9869,19 @@ theorem deriv_bound_uniform_summable_five :
     rw [hcomb] at hstep
     nlinarith [hstep]
 
+theorem deriv2_series_summable_at_basepoint (z : ℂ) (hz : Norm.norm z ≤ 2) :
+    Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      -(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
+        / ((((((p:ℕ):ℝ)) ^ (3/2:ℝ) : ℝ) : ℂ) - 1)
+        / ((((((p:ℕ):ℝ)) ^ (3/2:ℝ) : ℝ) : ℂ) - z)) := by
+  apply Summable.of_norm
+  apply Summable.of_nonneg_of_le
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
+    _ (deriv_bound_uniform_summable_five)
+  intro p
+  exact deriv_clog_term_bound_uniform (p:ℕ) (by omega) (3/2) (by norm_num) z hz
+
+
 /-- Basepoint summability at s = 3/2 over p >= 5, for the complex log-series.
 Same shape as prime_factor_sub_one_summable: restrict the N-indexed p-series,
 then compare termwise against prime_correction_bound_complex. -/
