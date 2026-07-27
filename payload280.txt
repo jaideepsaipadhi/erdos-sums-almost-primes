@@ -1,0 +1,21 @@
+/-- Termwise differentiation of the complex p >= 5 log-series.
+Complex analogue of hasDerivAt_log_series; hasDerivAt_tsum_of_isPreconnected
+takes F in any complete normed space, so C works unchanged. -/
+theorem hasDerivAt_clog_series (z : CC) (hz : Norm.norm z LEQ 2) (s : RR)
+    (hsmem : s IN Set.Ioo (1:RR) 2) :
+    HasDerivAt (fun t : RR => TSUMN p : {p : NN // p.Prime AND 5 LEQ p},
+        (-Complex.log (1 - z * (((((p:NN):RR)) ^ (-t) : RR) : CC))
+          + z * ((Real.log (1 - (((p:NN):RR)) ^ (-t)) : RR) : CC)))
+      (TSUMN p : {p : NN // p.Prime AND 5 LEQ p},
+        (-(z * (z - 1) * ((Real.log ((p:NN):RR) : RR) : CC))
+          / (((((((p:NN):RR)) ^ s : RR)) : CC) - 1)
+            / (((((((p:NN):RR)) ^ s : RR)) : CC) - z))) s := by
+  have hy0 : (3/2 : RR) IN Set.Ioo (1:RR) 2 := by
+    constructor <;> norm_num
+  apply hasDerivAt_tsum_of_isPreconnected
+    deriv_bound_uniform_summable_five isOpen_Ioo isPreconnected_Ioo
+    _ _ hy0 (clog_series_summable_at_basepoint z hz) hsmem
+  DOT intro p y hy
+    exact deriv_clog_prime_factor_canon (p:NN) p.2.2 y (le_of_lt hy.1) z hz
+  DOT intro p y hy
+    exact deriv_clog_term_bound_uniform (p:NN) (by omega) y (le_of_lt hy.1) z hz
