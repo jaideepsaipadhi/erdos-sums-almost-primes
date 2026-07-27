@@ -1,0 +1,14 @@
+theorem prop_2_5 (k : NN) (hk : 1 LEQ k) :
+    Ek k = -(Real.log 2 / 4) * (2 * (k : RR) * Uk k - Vk k)
+             - DeltaConv k - E1k k + Eexpk k := by
+  have hlem21 : f k = Ik k + Tk k := lemma1_foundation k hk (fk_summable k hk)
+  have hexp := Ikfrozen_re_expand k
+  have h2k : ((2:RR) ^ k) NEQ 0 := by positivity
+  have hIk : Ik k = Dk k + (Ikfrozen k).re := by
+    unfold Dk
+    ring
+  unfold Ek E1k Eexpk aOneConst
+  rw [hlem21, hIk, hexp]
+  unfold Dk
+  field_simp
+  ring

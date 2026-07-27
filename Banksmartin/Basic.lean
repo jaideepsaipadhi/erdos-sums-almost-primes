@@ -8525,6 +8525,26 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
     (s := {n : ℕ | 2 ≤ n ∧ bigOmega n = k})
     (f := fun n : ℕ => 1 / ((n:ℝ) * Real.log n))).mpr hind
 
+/-- MANUSCRIPT PROPOSITION 2.5 (exact decomposition).
+E(k) = -q(2k U_k - V_k) - Delta(k) - E_1(k) + E_exp(k), q = log 2 / 4.
+Every term is deterministic; no estimates enter.  Verified symbolically
+before encoding. -/
+theorem prop_2_5 (k : ℕ) (hk : 1 ≤ k) :
+    Ek k = -(Real.log 2 / 4) * (2 * (k : ℝ) * Uk k - Vk k)
+             - DeltaConv k - E1k k + Eexpk k := by
+  have hlem21 : f k = Ik k + Tk k := lemma1_foundation k hk (fk_summable k hk)
+  have hexp := Ikfrozen_re_expand k
+  have h2k : ((2:ℝ) ^ k) ≠ 0 := by positivity
+  have hIk : Ik k = Dk k + (Ikfrozen k).re := by
+    unfold Dk
+    ring
+  unfold Ek E1k Eexpk aOneConst
+  rw [hlem21, hIk, hexp]
+  unfold Dk
+  field_simp
+  ring
+
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
