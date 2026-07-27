@@ -1,0 +1,31 @@
+/-- The correction term is continuous in s on {s // 1 <= s}.
+The subtype domain is what makes continuous_tsum applicable: continuity fails
+for small s (1 - p^(-s) -> 0 there) and the bound 18 p^(-2) needs s >= 1, so
+both hold unconditionally only after restricting. -/
+theorem correction_continuous_s (p : NN) (hp : 3 LEQ p) (z : CC) (hz : Norm.norm z LEQ 2) :
+    Continuous (fun s : {s : RR // 1 LEQ s} =>
+      -Complex.log (1 - z * (((((p:NN):RR)) ^ (-(s:RR)) : RR) : CC))
+        + z * ((Real.log (1 - (((p:NN):RR)) ^ (-(s:RR))) : RR) : CC)) := by
+  have hp3 : (3:RR) LEQ (((p:NN):RR)) := by exact_mod_cast hp
+  have hp0 : (0:RR) < (((p:NN):RR)) := by linarith
+  have hsub : Continuous (fun s : {s : RR // 1 LEQ s} => (s:RR)) := continuous_subtype_val
+  have hrpow : Continuous (fun s : {s : RR // 1 LEQ s} => (((p:NN):RR)) ^ (-(s:RR))) :=
+    (continuous_const_rpow (ne_of_gt hp0)).comp hsub.neg
+  have hlt : FORALL s : {s : RR // 1 LEQ s}, (((p:NN):RR)) ^ (-(s:RR)) < 1 :=
+    fun s => Real.rpow_lt_one_of_one_lt_of_neg (by linarith) (by linarith [s.2])
+  have hden : FORALL s : {s : RR // 1 LEQ s},
+      (0:RR) < 1 - (((p:NN):RR)) ^ (-(s:RR)) := fun s => by linarith [hlt s]
+  have hlogr : Continuous (fun s : {s : RR // 1 LEQ s} =>
+      Real.log (1 - (((p:NN):RR)) ^ (-(s:RR)))) :=
+    Real.continuousOn_log.comp_continuous (continuous_const.sub hrpow)
+      (fun s => ne_of_gt (hden s))
+  have hinner : Continuous (fun s : {s : RR // 1 LEQ s} =>
+      (1 : CC) - z * (((((p:NN):RR)) ^ (-(s:RR)) : RR) : CC)) :=
+    continuous_const.sub (continuous_const.mul (Complex.continuous_ofReal.comp hrpow))
+  have hslit : FORALL s : {s : RR // 1 LEQ s},
+      (1 : CC) - z * (((((p:NN):RR)) ^ (-(s:RR)) : RR) : CC) IN Complex.slitPlane :=
+    fun s => one_sub_mem_slitPlane p hp (s:RR) s.2 z hz
+  have hlogc : Continuous (fun s : {s : RR // 1 LEQ s} =>
+      Complex.log (1 - z * (((((p:NN):RR)) ^ (-(s:RR)) : RR) : CC))) :=
+    Complex.continuousOn_log.comp_continuous hinner hslit
+  exact hlogc.neg.add (continuous_const.mul (Complex.continuous_ofReal.comp hlogr))
