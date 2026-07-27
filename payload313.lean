@@ -16,4 +16,22 @@ theorem Dk_eq_triple_sum (k : ℕ) (hk : 1 ≤ k) (beta : ℕ → ℝ)
       (∫ s in Set.Ioc (1:ℝ) 2,
         ((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
           * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
-  sorry
+  unfold Dk
+  rw [Ik_eq_double_sum k hk beta hbeta0 hderiv hbound M0 hM00 hM0,
+    Ikfrozen_re_eq_double_sum k]
+  rw [← Finset.sum_sub_distrib]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [← Finset.sum_sub_distrib]
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [← MeasureTheory.integral_sub]
+  · apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioc
+    intro s _
+    ring
+  · exact integrable_Ik_term i j (k - i - j) (beta i) (hbeta0 i) (hderiv i) (hbound i)
+      M0 hM00 hM0
+  · have h := (integrable_Sm_integrand (k - i - j) j).const_mul ((cCoeff i).re)
+    apply MeasureTheory.IntegrableOn.congr_fun h _ measurableSet_Ioc
+    intro s _
+    ring
