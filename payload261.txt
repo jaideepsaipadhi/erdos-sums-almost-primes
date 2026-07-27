@@ -1,0 +1,35 @@
+/-- The single derivative computation behind Lemma 3.9's per-prime term:
+d/ds log(1 - c*p^(-s)) = c*log p*p^(-s)/(1 - c*p^(-s)).
+Applied at c = z and c = 1 to get the two halves of the log-factor.
+Verified numerically at (p,s,c) = (3,1.4,1.3),(5,1.7,0.9),(11,1.2,1),(3,1,2). -/
+theorem deriv_log_one_sub_const_rpow (p : NN) (hp : 3 LEQ p) (c s : RR)
+    (hne : (1:RR) - c * ((p:RR)) ^ (-s) NEQ 0) :
+    HasDerivAt (fun t : RR => Real.log (1 - c * ((p:RR)) ^ (-t)))
+      (c * Real.log (p:RR) * ((p:RR)) ^ (-s) / (1 - c * ((p:RR)) ^ (-s))) s := by
+  have hp3 : (3:RR) LEQ (p:RR) := by exact_mod_cast hp
+  have hp0 : (0:RR) < (p:RR) := by linarith
+  have hbase : HasDerivAt (fun t : RR => ((p:RR)) ^ (-t))
+      (-(((p:RR)) ^ (-s) * Real.log (p:RR))) s := by
+    have hrw : (fun t : RR => ((p:RR)) ^ (-t))
+        = fun t : RR => Real.exp ((-t) * Real.log (p:RR)) := by
+      funext t
+      rw [Real.rpow_def_of_pos hp0]
+      ring_nf
+    rw [hrw]
+    have hinner : HasDerivAt (fun t : RR => (-t) * Real.log (p:RR))
+        (-Real.log (p:RR)) s := by
+      simpa using (hasDerivAt_neg s).mul_const (Real.log (p:RR))
+    have h := hinner.exp
+    convert h using 1
+    rw [show Real.exp (-s * Real.log (p:RR)) = ((p:RR)) ^ (-s) by
+      rw [Real.rpow_def_of_pos hp0]; ring_nf]
+    ring
+  have hin : HasDerivAt (fun t : RR => 1 - c * ((p:RR)) ^ (-t))
+      (c * (((p:RR)) ^ (-s) * Real.log (p:RR))) s := by
+    have h := (hbase.const_mul c).const_sub 1
+    convert h using 1
+    ring
+  have h := (Real.hasDerivAt_log hne).comp s hin
+  simp only [Function.comp_def] at h
+  convert h using 1
+  field_simp
