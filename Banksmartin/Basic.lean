@@ -10509,6 +10509,27 @@ theorem Ik_eq_double_sum (k : ℕ) (hk : 1 ≤ k) (beta : ℕ → ℝ)
     exact integrable_Ik_term i j (k - i - j) (beta i) (hbeta0 i) (hderiv i) (hbound i)
       M0 hM00 hM0
 
+/-- The frozen side as a triangular double sum of integrals.
+Simpler than the Ik side: cCoeff is constant in s, and integrability is
+integrable_Sm_integrand. -/
+theorem Ikfrozen_re_eq_double_sum (k : ℕ) :
+    (Ikfrozen k).re
+      = ∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
+        (∫ s in Set.Ioc (1:ℝ) 2,
+          (cCoeff i).re * (2:ℝ) ^ (-(j:ℝ) * s)
+            * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
+  rw [Ikfrozen_re_eq]
+  apply Finset.sum_congr rfl
+  intro i _
+  unfold Sm
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [← MeasureTheory.integral_const_mul]
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioc
+  intro s _
+  ring
+
 /-- MANUSCRIPT section 3.5: the exact evaluation
   int_1^2 (-log(s-1))^l / l! * (s-1) ds = 2^(-l-1).
 Substitution s = 1 + e^(-t) (integral_Ioc_subst) turns it into
