@@ -1,0 +1,25 @@
+/-- zetaTilde is positive on (1,2]: kappa = zetaTilde * (1 - 2^-s) is positive
+and the second factor is. -/
+theorem zetaTilde_pos (s : RR) (hs : 1 < s) : 0 < zetaTilde s := by
+  have hk := kappaFac_pos s hs (cFac_pos s hs)
+  rw [kappaFac_eq_zetaTilde s hs] at hk
+  have hlt : (2:RR) ^ (-s) < 1 := by
+    rw [Real.rpow_neg (by norm_num), inv_lt_one_iff0]
+    right
+    have h1 : (2:RR) ^ (1:RR) < (2:RR) ^ s :=
+      Real.rpow_lt_rpow_of_exponent_lt (by norm_num) hs
+    rw [Real.rpow_one] at h1
+    linarith
+  have h2 : (0:RR) < 1 - (2:RR) ^ (-s) := by linarith
+  nlinarith [hk, h2]
+
+/-- The p = 2 factor is positive on (1,2]. -/
+theorem one_sub_two_pow_pos (s : RR) (hs : 1 < s) : (0:RR) < 1 - (2:RR) ^ (-s) := by
+  have hlt : (2:RR) ^ (-s) < 1 := by
+    rw [Real.rpow_neg (by norm_num), inv_lt_one_iff0]
+    right
+    have h1 : (2:RR) ^ (1:RR) < (2:RR) ^ s :=
+      Real.rpow_lt_rpow_of_exponent_lt (by norm_num) hs
+    rw [Real.rpow_one] at h1
+    linarith
+  linarith
