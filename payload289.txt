@@ -1,0 +1,38 @@
+/-- MANUSCRIPT LEMMA 3.8 (r = 1): differentiation under the contour.
+d/ds of the contour integral equals the contour integral of d/ds.
+
+f, hf : the log-derivative of zetaTilde on the whole interval -- the
+  differentiation lemma needs the derivative at every point of a neighbourhood.
+M, hM : sup over the contour of ||d_s G2manu||, the analogue of the
+  manuscript's M1 at radius 2 (the proven analyticity radius is 5/2, and
+  lemma_3_9_complex holds for ||z|| <= 2, so the contour sits at 2). -/
+theorem lemma_3_8_integral_r1 (i : NN) (s : RR) (hsmem : s IN Set.Ioo (1:RR) 2)
+    (f : RR ARROW RR)
+    (hf : FORALL x IN Set.Ioo (1:RR) 2,
+      HasDerivAt (fun t : RR => Real.log (zetaTilde t)) (f x) x)
+    (M : RR) (hM0 : 0 LEQ M)
+    (hM : FORALL x IN Set.Ioo (1:RR) 2, FORALL theta : RR,
+      Norm.norm (deriv (fun u : RR => G2manu u (circleMap 0 (2:RR) theta)) x) LEQ M) :
+    HasDerivAt (fun t : RR => INTEGRAL theta in (0:RR)..(2 * Real.pi),
+        deriv (circleMap 0 (2:RR)) theta
+          * ((1 / circleMap 0 (2:RR) theta) ^ i
+            * ((circleMap 0 (2:RR) theta)INV * G2manu t (circleMap 0 (2:RR) theta))))
+      (INTEGRAL theta in (0:RR)..(2 * Real.pi),
+        deriv (circleMap 0 (2:RR)) theta
+          * ((1 / circleMap 0 (2:RR) theta) ^ i
+            * ((circleMap 0 (2:RR) theta)INV
+              * deriv (fun u : RR => G2manu u (circleMap 0 (2:RR) theta)) s))) s := by
+  have hkap : FORALL x IN Set.Ioo (1:RR) 2, 0 < kappaFac x :=
+    fun x hx => kappaFac_pos x hx.1 (cFac_pos x hx.1)
+  have hnorm2 : FORALL theta : RR, Norm.norm (circleMap 0 (2:RR) theta) = 2 := by
+    intro theta
+    simp [circleMap]
+  have hnhds : Set.Ioo (1:RR) 2 IN nhds s := Ioo_mem_nhds hsmem.1 hsmem.2
+  have hmeas : FORALLE x in nhds s, MeasureTheory.AEStronglyMeasurable
+      (fun theta : RR => deriv (circleMap 0 (2:RR)) theta
+        * ((1 / circleMap 0 (2:RR) theta) ^ i
+          * ((circleMap 0 (2:RR) theta)INV * G2manu x (circleMap 0 (2:RR) theta))))
+      (MeasureTheory.volume.restrict (Set.uIoc (0:RR) (2 * Real.pi))) := by
+    filter_upwards [hnhds] with x hx
+    exact (contour_integrand_continuous x (le_of_lt hx.1) (hkap x hx) i).aestronglyMeasurable
+  sorry

@@ -9790,6 +9790,65 @@ theorem G2manu_differentiableAt_s (w : ℂ) (hw : Norm.norm w ≤ 2) (x : ℝ)
     DifferentiableAt ℝ (fun u : ℝ => G2manu u w) x :=
   (lemma_3_9_complex w hw x hx f hf).differentiableAt
 
+/-- MANUSCRIPT LEMMA 3.8 (r = 1): differentiation under the contour.
+d/ds of the contour integral equals the contour integral of d/ds.
+
+f, hf : the log-derivative of zetaTilde on the whole interval -- the
+  differentiation lemma needs the derivative at every point of a neighbourhood.
+M, hM : sup over the contour of ||d_s G2manu||, the analogue of the
+  manuscript's M1 at radius 2 (the proven analyticity radius is 5/2, and
+  lemma_3_9_complex holds for ||z|| <= 2, so the contour sits at 2). -/
+theorem lemma_3_8_integral_r1 (i : ℕ) (s : ℝ) (hsmem : s ∈ Set.Ioo (1:ℝ) 2)
+    (f : ℝ → ℝ)
+    (hf : ∀ x ∈ Set.Ioo (1:ℝ) 2,
+      HasDerivAt (fun t : ℝ => Real.log (zetaTilde t)) (f x) x)
+    (M : ℝ) (hM0 : 0 ≤ M)
+    (hM : ∀ x ∈ Set.Ioo (1:ℝ) 2, ∀ theta : ℝ,
+      Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2:ℝ) theta)) x) ≤ M) :
+    HasDerivAt (fun t : ℝ => ∫ theta in (0:ℝ)..(2 * Real.pi),
+        deriv (circleMap 0 (2:ℝ)) theta
+          * ((1 / circleMap 0 (2:ℝ) theta) ^ i
+            * ((circleMap 0 (2:ℝ) theta)⁻¹ * G2manu t (circleMap 0 (2:ℝ) theta))))
+      (∫ theta in (0:ℝ)..(2 * Real.pi),
+        deriv (circleMap 0 (2:ℝ)) theta
+          * ((1 / circleMap 0 (2:ℝ) theta) ^ i
+            * ((circleMap 0 (2:ℝ) theta)⁻¹
+              * deriv (fun u : ℝ => G2manu u (circleMap 0 (2:ℝ) theta)) s))) s := by
+  have hkap : ∀ x ∈ Set.Ioo (1:ℝ) 2, 0 < kappaFac x :=
+    fun x hx => kappaFac_pos x hx.1 (cFac_pos x hx.1)
+  have hnhds : Set.Ioo (1:ℝ) 2 ∈ nhds s := Ioo_mem_nhds hsmem.1 hsmem.2
+  have hcont : ∀ x ∈ Set.Ioo (1:ℝ) 2, Continuous (fun theta : ℝ =>
+      deriv (circleMap 0 (2:ℝ)) theta
+        * ((1 / circleMap 0 (2:ℝ) theta) ^ i
+          * ((circleMap 0 (2:ℝ) theta)⁻¹ * G2manu x (circleMap 0 (2:ℝ) theta)))) :=
+    fun x hx => contour_integrand_continuous x (le_of_lt hx.1) (hkap x hx) i
+  have hnorm2 : ∀ theta : ℝ, Norm.norm (circleMap 0 (2:ℝ) theta) ≤ 2 := by
+    intro theta
+    simp [circleMap]
+  refine (intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (F := fun (x : ℝ) (theta : ℝ) =>
+      deriv (circleMap 0 (2:ℝ)) theta
+        * ((1 / circleMap 0 (2:ℝ) theta) ^ i
+          * ((circleMap 0 (2:ℝ) theta)⁻¹ * G2manu x (circleMap 0 (2:ℝ) theta))))
+    (F' := fun (x : ℝ) (theta : ℝ) =>
+      deriv (circleMap 0 (2:ℝ)) theta
+        * ((1 / circleMap 0 (2:ℝ) theta) ^ i
+          * ((circleMap 0 (2:ℝ) theta)⁻¹
+            * deriv (fun u : ℝ => G2manu u (circleMap 0 (2:ℝ) theta)) x)))
+    (bound := fun _ => M) (x₀ := s) (s := Set.Ioo (1:ℝ) 2)
+    hnhds ?_ ?_ ?_ ?_ ?_ ?_).2
+  · filter_upwards [hnhds] with x hx
+    exact (hcont x hx).aestronglyMeasurable
+  · exact ((hcont s hsmem).intervalIntegrable 0 (2 * Real.pi))
+  · sorry
+  · filter_upwards with theta _ x hx
+    exact contour_integrand_deriv_bound i M hM0 x theta (hM x hx theta)
+  · exact intervalIntegrable_const
+  · filter_upwards with theta _ x hx
+    have hd := lemma_3_9_complex (circleMap 0 (2:ℝ) theta) (hnorm2 theta) x hx f (hf x hx)
+    rw [hd.deriv]
+    exact ((hd.const_mul _).const_mul _).const_mul _
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
