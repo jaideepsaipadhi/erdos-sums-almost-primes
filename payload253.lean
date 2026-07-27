@@ -11,9 +11,8 @@ theorem Ikfrozen_re_expand (k : ℕ) :
   · congr 1
     · rw [← Finset.mul_sum, cCoeff_partial_sum]
     · rw [← Finset.sum_div, ← Finset.mul_sum]
-      congr 1
-      rw [← Finset.sum_div]
-      sorry
+      congr 2
+      exact sum_two_pow_sq_expand k
   · rw [← Finset.sum_div]
     unfold DeltaConv
     apply Finset.sum_congr rfl
