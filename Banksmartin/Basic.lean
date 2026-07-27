@@ -8877,10 +8877,7 @@ theorem deriv_bound_uniform_summable :
   ring
 
 theorem hasDerivAt_log_series (z : ℝ) (hz : |z| ≤ 2) (s : ℝ)
-    (hsmem : s ∈ Set.Ioo (1:ℝ) 2)
-    (hconv : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      -Real.log (1 - z * (((p:ℕ):ℝ)) ^ (-(3/2:ℝ)))
-        + z * Real.log (1 - (((p:ℕ):ℝ)) ^ (-(3/2:ℝ))))) :
+    (hsmem : s ∈ Set.Ioo (1:ℝ) 2) :
     HasDerivAt (fun t : ℝ => ∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
         (-Real.log (1 - z * (((p:ℕ):ℝ)) ^ (-t))
           + z * Real.log (1 - (((p:ℕ):ℝ)) ^ (-t))))
@@ -8889,6 +8886,10 @@ theorem hasDerivAt_log_series (z : ℝ) (hz : |z| ≤ 2) (s : ℝ)
           / (((((p:ℕ):ℝ)) ^ s - 1) * ((((p:ℕ):ℝ)) ^ s - z)))) s := by
   have hy0 : (3/2 : ℝ) ∈ Set.Ioo (1:ℝ) 2 := by
     constructor <;> norm_num
+  have hconv : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      -Real.log (1 - z * (((p:ℕ):ℝ)) ^ (-(3/2:ℝ)))
+        + z * Real.log (1 - (((p:ℕ):ℝ)) ^ (-(3/2:ℝ)))) :=
+    (prime_correction_summable (3/2) (by norm_num) z hz).of_abs
   have hshape : (∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
         (-(z * (z - 1) * Real.log ((p:ℕ):ℝ))
           / ((((p:ℕ):ℝ)) ^ s - 1) / ((((p:ℕ):ℝ)) ^ s - z)))
