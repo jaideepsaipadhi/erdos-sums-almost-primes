@@ -1,0 +1,19 @@
+/-- MANUSCRIPT (4): D_k as a triple sum.
+D_k = sum_{i+j+l=k} int_1^2 (g_i(s) - c_i) 2^(-js) (-log(s-1))^l/l! ds.
+Both Ik and Ikfrozen become triangular double sums over the same region; the
+index orders differ (triangular_sum_comm reconciles them) and the finite sums
+pass through the integral (integrable_Ik_term and integrable_Sm_integrand). -/
+theorem Dk_eq_triple_sum (k : NN) (hk : 1 LEQ k) (beta : NN ARROW RR)
+    (hbeta0 : FORALL i, 0 LEQ beta i)
+    (hderiv : FORALL i : NN, FORALL x IN Set.Ioo (1:RR) 2,
+      HasDerivAt (fun t : RR => gManu i t) (deriv (fun t : RR => gManu i t) x) x)
+    (hbound : FORALL i : NN, FORALL x IN Set.Ioo (1:RR) 2,
+      Norm.norm (deriv (fun t : RR => gManu i t) x) LEQ beta i)
+    (M0 : RR) (hM00 : 0 LEQ M0)
+    (hM0 : FORALL u : RR, u IN Set.Ioi (1:RR) ARROW FORALL theta : RR,
+      Norm.norm (G2manu u (circleMap 0 (2:RR) theta)) LEQ M0) :
+    Dk k = SUMF i IN Finset.range (k + 1), SUMF j IN Finset.range (k - i + 1),
+      (INTEGRAL s in Set.Ioc (1:RR) 2,
+        ((gManu i s).re - (cCoeff i).re) * (2:RR) ^ (-(j:RR) * s)
+          * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
+  sorry
