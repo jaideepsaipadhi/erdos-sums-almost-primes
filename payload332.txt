@@ -1,0 +1,22 @@
+/-- The z-scaled r=2 bound: ||z|| <= 2 doubles the constant to 400. -/
+theorem deriv2_clog_term_bound_z (p : NN) (hp : 3 LEQ p) (s : RR) (hs : 1 LEQ s)
+    (z : CC) (hz : Norm.norm z LEQ 2) :
+    Norm.norm (z * ((z - 1) * ((Real.log (p:RR) : RR) : CC) ^ 2 * ((((p:RR)) ^ s : RR) : CC)
+        * ((((((p:RR)) ^ s : RR) : CC) - z) + (((((p:RR)) ^ s : RR) : CC) - 1))
+        / ((((((p:RR)) ^ s : RR) : CC) - 1) ^ 2
+          * ((((((p:RR)) ^ s : RR) : CC) - z) ^ 2))))
+      LEQ 400 * (Real.log (p:RR)) ^ 2 * (((p:RR)) ^ (-(2:RR))) := by
+  have hbase := deriv2_clog_term_bound p hp s hs z hz
+  have hnn : (0:RR) LEQ 200 * (Real.log (p:RR)) ^ 2 * (((p:RR)) ^ (-(2:RR))) := by
+    have hp3 : (3:RR) LEQ (p:RR) := by exact_mod_cast hp
+    have : (0:RR) < (((p:RR)) ^ (-(2:RR))) := Real.rpow_pos_of_pos (by linarith) _
+    positivity
+  rw [norm_mul]
+  calc Norm.norm z * Norm.norm ((z - 1) * ((Real.log (p:RR) : RR) : CC) ^ 2
+        * ((((p:RR)) ^ s : RR) : CC)
+        * ((((((p:RR)) ^ s : RR) : CC) - z) + (((((p:RR)) ^ s : RR) : CC) - 1))
+        / ((((((p:RR)) ^ s : RR) : CC) - 1) ^ 2
+          * ((((((p:RR)) ^ s : RR) : CC) - z) ^ 2)))
+      LEQ 2 * (200 * (Real.log (p:RR)) ^ 2 * (((p:RR)) ^ (-(2:RR)))) := by
+        apply mul_le_mul hz hbase (norm_nonneg _) (by norm_num)
+    _ = 400 * (Real.log (p:RR)) ^ 2 * (((p:RR)) ^ (-(2:RR))) := by ring
