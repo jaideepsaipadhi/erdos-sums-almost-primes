@@ -1,0 +1,14 @@
+/-- Lemma 3.8's contour representation, unfolded to an explicit circle integral.
+Combines gManu_eq_cauchy_coeff with cauchyPowerSeries_apply at w = 1, c = 0.
+The s-dependence sits entirely in G2manu s z; the (1/z)^i * z^(-1) factor is
+s-free, which is what makes differentiation under the integral clean. -/
+theorem gManu_eq_circleIntegral (s : RR) (hs : 1 LEQ s) (hk : 0 < kappaFac s) (i : NN) :
+    gManu i s
+      = (2 * ((Real.pi : RR) : CC) * Complex.I)INV
+        SMUL (circleIntegral (fun z : CC => (1 / z) ^ i SMUL zINV SMUL G2manu s z)
+          0 (12/5 : RR)) := by
+  rw [gManu_eq_cauchy_coeff s hs hk i]
+  have h := cauchyPowerSeries_apply (fun z : CC => G2manu s z) 0 ((12/5 : NNReal) : RR) i 1
+  unfold FormalMultilinearSeries.coeff
+  rw [h]
+  norm_num
