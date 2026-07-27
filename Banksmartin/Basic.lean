@@ -9759,6 +9759,15 @@ theorem contour_integrand_deriv_bound (i : ℕ) (M : ℝ) (hM0 : 0 ≤ M)
     _ = Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (12/5 : ℝ) theta)) t) := one_mul _
     _ ≤ M := hbound
 
+/-- d/ds G2manu exists at every point of (1,2) on the contour: this is what
+makes `deriv (fun u => G2manu u w) x` in Lemma 3.8 denote a real derivative
+rather than a junk value. -/
+theorem G2manu_differentiableAt_s (w : ℂ) (hw : Norm.norm w ≤ 2) (x : ℝ)
+    (hx : x ∈ Set.Ioo (1:ℝ) 2) (f : ℝ → ℝ)
+    (hf : HasDerivAt (fun t : ℝ => Real.log (zetaTilde t)) (f x) x) :
+    DifferentiableAt ℝ (fun u : ℝ => G2manu u w) x :=
+  (lemma_3_9_complex w hw x hx f hf).differentiableAt
+
 theorem erdos_sums_increase_from_six
     (hnum : NumericalFacts) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
