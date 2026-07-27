@@ -1,0 +1,34 @@
+/-- MANUSCRIPT section 3.5, the mean value step:
+||g_i(s) - c_i|| <= (s-1) * beta_i for s in (1,2).
+The endpoint is reached by a limit rather than by evaluation: gManu i 1 is a
+junk value (kappaFac 1 = 0), so c_i enters through gManu_tendsto_cCoeff. -/
+theorem gManu_sub_cCoeff_bound (i : NN) (beta : RR) (hbeta0 : 0 LEQ beta)
+    (hderiv : FORALL x IN Set.Ioo (1:RR) 2,
+      HasDerivAt (fun t : RR => gManu i t) (deriv (fun t : RR => gManu i t) x) x)
+    (hbound : FORALL x IN Set.Ioo (1:RR) 2,
+      Norm.norm (deriv (fun t : RR => gManu i t) x) LEQ beta)
+    (M0 : RR) (hM00 : 0 LEQ M0)
+    (hM0 : FORALL u : RR, u IN Set.Ioi (1:RR) ARROW FORALL theta : RR,
+      Norm.norm (G2manu u (circleMap 0 (2:RR) theta)) LEQ M0)
+    (s : RR) (hs : s IN Set.Ioo (1:RR) 2) :
+    Norm.norm (gManu i s - cCoeff i) LEQ beta * (s - 1) := by
+  have hlim := gManu_tendsto_cCoeff i M0 hM00 hM0
+  have hsublim : Filter.Tendsto (fun t : RR => Norm.norm (gManu i s - gManu i t))
+      (nhdsWithin 1 (Set.Ioi (1:RR))) (nhds (Norm.norm (gManu i s - cCoeff i))) := by
+    apply Filter.Tendsto.norm
+    exact tendsto_const_nhds.sub hlim
+  have hmem : Set.Ioo (1:RR) s IN nhdsWithin (1:RR) (Set.Ioi (1:RR)) :=
+    Ioo_mem_nhdsWithin_Ioi (Set.mem_Ico.mpr (ANGL le_refl 1, hs.1 ANGR))
+  have hbnd : FORALLE t in nhdsWithin 1 (Set.Ioi (1:RR)),
+      Norm.norm (gManu i s - gManu i t) LEQ beta * (s - 1) := by
+    filter_upwards [hmem] with t ht
+    have ht2 : t IN Set.Ioo (1:RR) 2 :=
+      Set.mem_Ioo.mpr (ANGL ht.1, lt_trans ht.2 hs.2 ANGR)
+    have hlip := gManu_lipschitz_interior i beta hderiv hbound t s ht2 hs
+    have hst : Norm.norm (s - t) LEQ s - 1 := by
+      rw [Real.norm_eq_abs, abs_of_pos (by linarith [ht.2])]
+      linarith [ht.1]
+    calc Norm.norm (gManu i s - gManu i t) LEQ beta * Norm.norm (s - t) := hlip
+      _ LEQ beta * (s - 1) := by
+          apply mul_le_mul_of_nonneg_left hst hbeta0
+  exact le_of_tendsto hsublim hbnd
