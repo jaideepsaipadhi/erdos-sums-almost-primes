@@ -1,0 +1,16 @@
+/-- Per-term bound for (10): each triple-sum term is at most
+beta_i * 2^(-j) * 2^(-l-1) after using |g_i(s) - c_i| <= beta_i (s-1),
+2^(-js) <= 2^(-j) on [1,2], and integral_log_pow_sub_one. -/
+theorem Dk_term_bound (i j l : NN) (beta : RR) (hbeta0 : 0 LEQ beta)
+    (hderiv : FORALL x IN Set.Ioo (1:RR) 2,
+      HasDerivAt (fun t : RR => gManu i t) (deriv (fun t : RR => gManu i t) x) x)
+    (hbound : FORALL x IN Set.Ioo (1:RR) 2,
+      Norm.norm (deriv (fun t : RR => gManu i t) x) LEQ beta)
+    (M0 : RR) (hM00 : 0 LEQ M0)
+    (hM0 : FORALL u : RR, u IN Set.Ioi (1:RR) ARROW FORALL theta : RR,
+      Norm.norm (G2manu u (circleMap 0 (2:RR) theta)) LEQ M0) :
+    |INTEGRAL s in Set.Ioc (1:RR) 2,
+        ((gManu i s).re - (cCoeff i).re) * (2:RR) ^ (-(j:RR) * s)
+          * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))|
+      LEQ beta * (2:RR) ^ (-(j:RR)) * (1 / (2:RR) ^ (l + 1)) := by
+  sorry
