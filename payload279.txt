@@ -1,0 +1,26 @@
+/-- Basepoint summability at s = 3/2 over p >= 5, for the complex log-series.
+Same shape as prime_factor_sub_one_summable: restrict the N-indexed p-series,
+then compare termwise against prime_correction_bound_complex. -/
+theorem clog_series_summable_at_basepoint (z : CC) (hz : Norm.norm z LEQ 2) :
+    Summable (fun p : {p : NN // p.Prime AND 5 LEQ p} =>
+      -Complex.log (1 - z * (((((p:NN):RR)) ^ (-(3/2:RR)) : RR) : CC))
+        + z * ((Real.log (1 - (((p:NN):RR)) ^ (-(3/2:RR))) : RR) : CC)) := by
+  have hcomp : Summable (fun p : {p : NN // p.Prime AND 5 LEQ p} =>
+      18 * (((p:NN):RR)) ^ (-2*(3/2:RR))) := by
+    have h2s : -(2*(3/2:RR)) < -1 := by norm_num
+    have hbase : Summable (fun n : NN => (n:RR) ^ (-(2*(3/2:RR)))) :=
+      Real.summable_nat_rpow.mpr h2s
+    have hsub : Summable (fun p : {p : NN // p.Prime AND 5 LEQ p} =>
+        (((p:NN):RR)) ^ (-(2*(3/2:RR)))) := hbase.subtype _
+    have heq : FORALL p : {p : NN // p.Prime AND 5 LEQ p},
+        (18:RR) * (((p:NN):RR)) ^ (-2*(3/2:RR))
+          = 18 * (((p:NN):RR)) ^ (-(2*(3/2:RR))) := by
+      intro p; ring_nf
+    simp_rw [heq]
+    exact hsub.mul_left 18
+  apply Summable.of_norm
+  apply Summable.of_nonneg_of_le
+    (fun p : {p : NN // p.Prime AND 5 LEQ p} => norm_nonneg _)
+    (fun p : {p : NN // p.Prime AND 5 LEQ p} =>
+      prime_correction_bound_complex (p:NN) (by omega) (3/2) (by norm_num) z hz)
+    hcomp
