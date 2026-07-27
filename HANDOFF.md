@@ -95,3 +95,69 @@ NOTHING connects Lemma 2.2 to it yet.  Still to formalise:
   for S*, alpha_+, Gamma.  Also: discharge the hc/hmulR/hposR/hlogR
   hypotheses, and note the cFac normalisation means Fk_expansion's third
   factor is (log (cFac s))^l / l!, NOT the manuscript's (-log(s-1))^l / l!.
+
+=== LEMMA 3.9 COMPLETE (real and complex) ===
+lemma_3_9_complex : d/ds G2manu = G2manu * (z*(f s + log2/(2^s-1)) + sum_{p>=3} ...)
+  -- the manuscript's G2^(1,0) = z G2 c, in MULTIPLIED form (not logarithmic).
+lemma_3_9_real    : the same for real z, via log_reg_tprod_real.
+f = (log zetaTilde)' is a HYPOTHESIS in both (manuscript certifies it from
+FLINT Stieltjes constants; Mathlib's zeta is complex so its reality on the
+real axis would be a separate obligation).
+
+THE KEY DESIGN DECISION: never take Complex.log of the product.
+Branch cuts make log(prod) = sum(log) false in general, so the real proof's
+route (log_tprod_real) has NO complex analogue.  Instead every step goes
+through exp of a sum:
+  G2tailC_eq_exp_sum / prime_factor_eq_exp_complex  express factors as exp
+  HasDerivAt.cexp                                    differentiates them
+This is why hasDerivAt_G2tailC and hasDerivAt_prime_three_factor look the way
+they do.  Do not try to "simplify" them back to a log formulation.
+
+CHAIN (all proven, in dependency order):
+  one_sub_mem_slitPlane            side condition for Complex.hasDerivAt_log
+  hasDerivAt_rpow_neg              d/dt p^(-t), shared real/complex
+  deriv_clog_one_sub_const_rpow    via HasDerivAt.scomp (R-param, C-valued)
+  deriv_clog_prime_factor          per-prime, Complex.log second term
+  deriv_clog_prime_factor_canon    per-prime, REAL log second term (p >= 3)
+  deriv_clog_term_bound_uniform    ||.|| <= 27 log p p^(-2)
+  deriv_bound_uniform_summable_five, clog_series_summable_at_basepoint
+  hasDerivAt_clog_series           termwise, via hasDerivAt_tsum_of_isPreconnected
+  hasDerivAt_G2tailC               cexp step: d/ds tail = tail * sum
+  hasDerivAt_prime_three_factor    same for the p=3 factor
+  hasDerivAt_G2C                   product rule
+  hasDerivAt_kappa_cpow            d/ds kappa^z
+  lemma_3_9_complex                product rule again
+
+LEAN LESSONS FROM THIS SESSION (each cost multiple rounds):
+  * convert h using 1 on a HasDerivAt goal splits into INSTANCE goals
+    (Semiring.toModule = ...).  ALWAYS use instead:
+       have hval : <target> = <what h has> := by field_simp / ring
+       rw [hval]; exact h
+  * push_cast rewrites |(Real.log x) into Complex.log |x -- equal but NOT
+    syntactically interchangeable.  Do not push_cast in the complex chain.
+    Complex.ofReal_inv and Complex.ofReal_log are the safe targeted moves.
+  * hasDerivAt_tsum_of_isPreconnected TIMES OUT unless g and g' are supplied
+    explicitly with (g := ...) (g' := ...).
+  * to_additive-generated names (HasSum.add_compl, hasSum_subtype_iff_indicator)
+    do NOT appear in Mathlib source -- grep finds nothing.  Find the
+    multiplicative name, then mechanically drop mul_->add_, prod->sum.
+  * A two-line "#check @name" probe appended to the file settles a name in ONE
+    round.  Far cheaper than grepping.
+  * When nlinarith fails on products: name each intermediate with
+    mul_le_mul_of_nonneg_left, then close with linarith.
+
+=== NEXT: LEMMA 3.8 (contour differentiation) ===
+Have: gManu_eq_cauchy_coeff (g_i as a Cauchy coefficient at R = 12/5),
+      G2manu_differentiableOn_wide, and now lemma_3_9_complex as the
+      pointwise s-derivative.
+Need: differentiate the contour integral in s.
+  cauchyPowerSeries f c R n = (2 pi I)^-1 . contour (z-c)^-1^n (z-c)^-1 f z
+  (Mathlib/MeasureTheory/Integral/CircleIntegral.lean:592)
+  so unfold circleIntegral to an integral over [0, 2pi] and apply
+  hasDerivAt_integral_of_dominated_loc_of_deriv_le (the EulerGamma pattern).
+DECISION: M1 = 2544 >= sup_{s in [1,2], |z|=2.9} |G2^(1,0)| enters as a
+  HYPOTHESIS, matching section 3.5 (certified by interval-arc evaluation in
+  Arb, not by hand).  With M1 assumed, 3.8 is differentiation-under-the-
+  integral MECHANICS, not a new estimate.
+Only r <= 2 is ever used (section 3.5 needs r=1, Theorem 6.1 needs r=2);
+C^infinity is never consumed.
