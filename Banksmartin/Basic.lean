@@ -4880,6 +4880,69 @@ theorem integrable_log_pow_sub_one_sq (l : ℕ) :
     rw [← Real.exp_add, ← Real.exp_add]; ring_nf]
   field_simp
 
+/-- Per-term remainder bound: the Taylor remainder integrates to at most
+gh_i/2 * 2^(-j) * 3^(-l-1).  Mirrors S2_term_le with the (s-1)^2 weight. -/
+theorem Dk_remainder_term_le (j l : ℕ) (gh_i : ℝ) (hgh0 : 0 ≤ gh_i) :
+    (∫ s in Set.Ioc (1:ℝ) 2,
+      gh_i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
+        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))))
+      ≤ gh_i / 2 * ((2:ℝ) ^ (-(j:ℝ)) * (1 / (3:ℝ) ^ (l + 1))) := by
+  have hL : ∀ s ∈ Set.Ioc (1:ℝ) 2,
+      (0:ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) ^ 2 := by
+    intro s hs
+    apply mul_nonneg _ (by positivity)
+    apply div_nonneg _ (by positivity)
+    apply pow_nonneg
+    simp only [neg_nonneg]
+    exact Real.log_nonpos (by linarith [hs.1]) (by linarith [hs.2])
+  have hright := ((integrable_log_pow_sub_one_sq l).const_mul
+    (gh_i / 2 * (2:ℝ) ^ (-(j:ℝ))))
+  have hmono : (∫ s in Set.Ioc (1:ℝ) 2,
+        gh_i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
+          * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))))
+      ≤ ∫ s in Set.Ioc (1:ℝ) 2,
+        (gh_i / 2 * (2:ℝ) ^ (-(j:ℝ)))
+          * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) ^ 2) := by
+    refine MeasureTheory.integral_mono_of_nonneg ?_ hright ?_
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with s hs
+      have h2 : (0:ℝ) < (2:ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+      have hLl : (0:ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) := by
+        apply div_nonneg _ (by positivity)
+        apply pow_nonneg
+        simp only [neg_nonneg]
+        exact Real.log_nonpos (by linarith [hs.1]) (by linarith [hs.2])
+      simp only [Pi.zero_apply]
+      apply mul_nonneg
+      · apply div_nonneg _ (by norm_num)
+        exact mul_nonneg hgh0 (sq_nonneg _)
+      · exact mul_nonneg (le_of_lt h2) hLl
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with s hs
+      have hmonoexp : (2:ℝ) ^ (-(j:ℝ) * s) ≤ (2:ℝ) ^ (-(j:ℝ)) := by
+        apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+        have hj : (0:ℝ) ≤ (j:ℝ) := by positivity
+        nlinarith [hs.1]
+      have hLs := hL s hs
+      have hLl : (0:ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) := by
+        apply div_nonneg _ (by positivity)
+        apply pow_nonneg
+        simp only [neg_nonneg]
+        exact Real.log_nonpos (by linarith [hs.1]) (by linarith [hs.2])
+      have hsq : (0:ℝ) ≤ (s - 1) ^ 2 := sq_nonneg _
+      calc gh_i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
+            * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
+          ≤ gh_i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ))
+            * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) := by
+            apply mul_le_mul_of_nonneg_left _ (by positivity)
+            exact mul_le_mul_of_nonneg_right hmonoexp hLl
+        _ = (gh_i / 2 * (2:ℝ) ^ (-(j:ℝ)))
+            * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) ^ 2) := by ring
+  rw [MeasureTheory.integral_const_mul, integral_log_pow_sub_one_sq] at hmono
+  calc (∫ s in Set.Ioc (1:ℝ) 2,
+        gh_i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
+          * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))))
+      ≤ (gh_i / 2 * (2:ℝ) ^ (-(j:ℝ))) * (1 / (3:ℝ) ^ (l + 1)) := hmono
+    _ = gh_i / 2 * ((2:ℝ) ^ (-(j:ℝ)) * (1 / (3:ℝ) ^ (l + 1))) := by ring
+
 /-- Integrability of the J-integrand: the damping factor is at most 1. -/
 theorem integrable_Jint_integrand (c : ℝ) (hc : 0 ≤ c) (i : ℕ) :
     MeasureTheory.IntegrableOn
