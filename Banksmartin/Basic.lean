@@ -12037,6 +12037,10 @@ noncomputable def S2m (m : ℕ) : ℝ :=
 /-- MANUSCRIPT Theorem 6.1: A^(2)_m = 2^m S_2(m). -/
 noncomputable def A2m (m : ℕ) : ℝ := (2:ℝ) ^ m * S2m m
 
+/-- MANUSCRIPT Theorem 6.1: M_2(k) = sum_{i=1}^k bHat_i 2^i A^(2)_(k-i). -/
+noncomputable def M2k (f1 : ℝ) (k : ℕ) : ℂ :=
+  ∑ i ∈ Finset.Icc 1 k, bHat f1 i * (2:ℂ) ^ i * ((A2m (k - i) : ℝ) : ℂ)
+
 /-- S_2's integrand is integrable on (1,2], dominated by the (s-1)-weighted
 integrand of integrable_log_pow_sub_one since 2^(-js) <= 1 there. -/
 theorem integrable_S2_integrand (l j : ℕ) :
