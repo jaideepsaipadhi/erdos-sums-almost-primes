@@ -1,0 +1,21 @@
+/-- Lemma 3.9's bracket C(s,z) = z c(s,z), as a function of s and z.
+Naming it lets the s -> 1 limit and the coefficient extraction be stated
+without repeating the three-part expression. f is the log-derivative of
+zetaTilde, carried as a parameter. -/
+noncomputable def cBracket (fs : RR) (s : RR) (z : CC) : CC :=
+  z * (((fs + Real.log 2 / ((2:RR) ^ s - 1) : RR)) : CC)
+    + ((-(z * (z - 1) * ((Real.log ((3:NN):RR) : RR) : CC))
+        / ((((((3:NN):RR)) ^ s : RR) : CC) - 1)
+          / ((((((3:NN):RR)) ^ s : RR) : CC) - z))
+      + TSUMN p : {p : NN // p.Prime AND 5 LEQ p},
+          (-(z * (z - 1) * ((Real.log ((p:NN):RR) : RR) : CC))
+            / ((((((p:NN):RR)) ^ s : RR) : CC) - 1)
+              / ((((((p:NN):RR)) ^ s : RR) : CC) - z)))
+
+/-- Lemma 3.9 restated with the bracket named. -/
+theorem lemma_3_9_bracket (z : CC) (hz : Norm.norm z LEQ 2) (s : RR)
+    (hsmem : s IN Set.Ioo (1:RR) 2) (f : RR ARROW RR)
+    (hf : HasDerivAt (fun t : RR => Real.log (zetaTilde t)) (f s) s) :
+    HasDerivAt (fun t : RR => G2manu t z) (G2manu s z * cBracket (f s) s z) s := by
+  unfold cBracket
+  exact lemma_3_9_complex z hz s hsmem f hf
