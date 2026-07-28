@@ -1,0 +1,17 @@
+/-- MANUSCRIPT section 6.1's input: G2^(2,0) = G2 * (C^2 + C'), where C = z c.
+This is the manuscript's G2(z^2 c^2 + z c') -- "a formula derived, not read:
+differentiate d_s G2 = z c G2 once more".
+Both f and its derivative fp are hypotheses, as in Lemma 3.9. -/
+theorem hasDerivAt_G2manu_second (z : CC) (hz : Norm.norm z LEQ 2) (s : RR)
+    (hsmem : s IN Set.Ioo (1:RR) 2) (f fp : RR ARROW RR)
+    (hf : FORALL x IN Set.Ioo (1:RR) 2,
+      HasDerivAt (fun t : RR => Real.log (zetaTilde t)) (f x) x)
+    (hfp : HasDerivAt f (fp s) s)
+    (C : RR ARROW CC) (Cp : CC)
+    (hC : FORALL x IN Set.Ioo (1:RR) 2,
+      HasDerivAt (fun t : RR => G2manu t z) (G2manu x z * C x) x)
+    (hCp : HasDerivAt C Cp s) :
+    HasDerivAt (fun t : RR => G2manu t z * C t)
+      (G2manu s z * C s * C s + G2manu s z * Cp) s := by
+  have hG2 := hC s hsmem
+  exact hG2.mul hCp
