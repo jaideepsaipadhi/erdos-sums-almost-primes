@@ -12411,7 +12411,35 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
             - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))))|
       ≤ gh i / 2 * (2:ℝ) ^ i := by
-    sorry
+    intro i hi
+    have hik : i ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+    apply le_trans (Finset.abs_sum_le_sum_abs _ _)
+    have hterm : ∀ j ∈ Finset.range (k - i + 1),
+        |(2:ℝ) ^ k * (∫ s in Set.Ioc (1:ℝ) 2,
+            (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
+            - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))))|
+        ≤ gh i / 2 * ((2:ℝ) ^ k
+          * ((2:ℝ) ^ (-(j:ℝ)) * (1 / (3:ℝ) ^ ((k - i - j) + 1)))) := by
+      intro j hj
+      sorry
+    calc ∑ j ∈ Finset.range (k - i + 1),
+          |(2:ℝ) ^ k * (∫ s in Set.Ioc (1:ℝ) 2,
+              (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+                * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
+              - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+                * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))))|
+        ≤ ∑ j ∈ Finset.range (k - i + 1),
+            gh i / 2 * ((2:ℝ) ^ k
+              * ((2:ℝ) ^ (-(j:ℝ)) * (1 / (3:ℝ) ^ ((k - i - j) + 1)))) :=
+          Finset.sum_le_sum hterm
+      _ = gh i / 2 * ∑ j ∈ Finset.range (k - i + 1),
+            ((2:ℝ) ^ k * ((2:ℝ) ^ (-(j:ℝ)) * (1 / (3:ℝ) ^ ((k - i - j) + 1)))) := by
+          rw [Finset.mul_sum]
+      _ ≤ gh i / 2 * (2:ℝ) ^ i := by
+          apply mul_le_mul_of_nonneg_left (remainder_inner_le k i hik)
+          linarith [hgh0 i]
   calc |∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
         ((2:ℝ) ^ k * (∫ s in Set.Ioc (1:ℝ) 2,
             (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
