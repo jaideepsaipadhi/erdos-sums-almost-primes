@@ -12423,7 +12423,59 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
         ≤ gh i / 2 * ((2:ℝ) ^ k
           * ((2:ℝ) ^ (-(j:ℝ)) * (1 / (3:ℝ) ^ ((k - i - j) + 1)))) := by
       intro j hj
-      sorry
+      have hAdiff : MeasureTheory.IntegrableOn
+          (fun s : ℝ => ((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
+            - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
+          (Set.Ioc (1:ℝ) 2) := by
+        sorry
+      have hdom : MeasureTheory.IntegrableOn
+          (fun s : ℝ => gh i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
+            * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
+          (Set.Ioc (1:ℝ) 2) := by
+        sorry
+      have hint : |∫ s in Set.Ioc (1:ℝ) 2,
+            (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
+            - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))|
+          ≤ ∫ s in Set.Ioc (1:ℝ) 2,
+            gh i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
+        rw [← Real.norm_eq_abs]
+        apply MeasureTheory.norm_integral_le_of_norm_le hdom
+        have hnull : (MeasureTheory.volume.restrict (Set.Ioc (1:ℝ) 2))
+            (Set.Ioc (1:ℝ) 2 \ Set.Ioo (1:ℝ) 2) = 0 := by
+          have hsing : Set.Ioc (1:ℝ) 2 \ Set.Ioo (1:ℝ) 2 ⊆ {(2:ℝ)} := by
+            intro x hx
+            simp only [Set.mem_diff, Set.mem_Ioc, Set.mem_Ioo,
+              Set.mem_singleton_iff] at hx ⊢
+            rcases hx with ⟨⟨h1, h2⟩, h3⟩
+            by_contra hne
+            exact h3 ⟨h1, lt_of_le_of_ne h2 hne⟩
+          exact MeasureTheory.measure_mono_null hsing (by simp)
+        filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc,
+          MeasureTheory.compl_mem_ae_iff.mpr hnull] with s hs hs2
+        have hsIoo : s ∈ Set.Ioo (1:ℝ) 2 := by
+          by_contra hcon
+          exact hs2 (Set.mem_diff_of_mem hs hcon)
+        rw [Real.norm_eq_abs]
+        exact Dk_term_split i j (k - i - j) f1 (gh i) (hgh0 i) (htaylor i) s hsIoo
+      have hrem := Dk_remainder_term_le j (k - i - j) (gh i) (hgh0 i)
+      have h2k : (0:ℝ) ≤ (2:ℝ) ^ k := by positivity
+      rw [abs_mul, abs_of_nonneg h2k]
+      calc (2:ℝ) ^ k * |∫ s in Set.Ioc (1:ℝ) 2,
+              (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+                * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
+              - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+                * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))|
+          ≤ (2:ℝ) ^ k * (gh i / 2 * ((2:ℝ) ^ (-(j:ℝ))
+              * (1 / (3:ℝ) ^ ((k - i - j) + 1)))) := by
+            apply mul_le_mul_of_nonneg_left _ h2k
+            exact le_trans hint hrem
+        _ = gh i / 2 * ((2:ℝ) ^ k
+            * ((2:ℝ) ^ (-(j:ℝ)) * (1 / (3:ℝ) ^ ((k - i - j) + 1)))) := by ring
     calc ∑ j ∈ Finset.range (k - i + 1),
           |(2:ℝ) ^ k * (∫ s in Set.Ioc (1:ℝ) 2,
               (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
