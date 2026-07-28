@@ -10482,6 +10482,30 @@ noncomputable def cBracket (fs : ℝ) (s : ℝ) (z : ℂ) : ℂ :=
             / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1)
               / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - z)))
 
+theorem cBracket_continuous_s (fs : ℝ) (z : ℂ) (hz : Norm.norm z ≤ 2) :
+    Continuous (fun s : {s : ℝ // 1 ≤ s} => cBracket fs (s:ℝ) z) := by
+  have hsub : Continuous (fun s : {s : ℝ // 1 ≤ s} => (s:ℝ)) := continuous_subtype_val
+  have hrpow2 : Continuous (fun s : {s : ℝ // 1 ≤ s} => (2:ℝ) ^ (s:ℝ)) :=
+    (continuous_const_rpow (by norm_num)).comp hsub
+  have h2ge : ∀ s : {s : ℝ // 1 ≤ s}, (2:ℝ) ≤ (2:ℝ) ^ (s:ℝ) := by
+    intro s
+    calc (2:ℝ) = (2:ℝ) ^ (1:ℝ) := by norm_num
+      _ ≤ (2:ℝ) ^ (s:ℝ) := Real.rpow_le_rpow_of_exponent_le (by norm_num) s.2
+  have hne : ∀ s : {s : ℝ // 1 ≤ s}, (2:ℝ) ^ (s:ℝ) - 1 ≠ 0 := by
+    intro s hcon
+    linarith [h2ge s]
+  have hkap : Continuous (fun s : {s : ℝ // 1 ≤ s} =>
+      z * (((fs + Real.log 2 / ((2:ℝ) ^ (s:ℝ) - 1) : ℝ)) : ℂ)) := by
+    apply continuous_const.mul
+    apply Complex.continuous_ofReal.comp
+    exact continuous_const.add (continuous_const.div (hrpow2.sub continuous_const) hne)
+  unfold cBracket
+  apply hkap.add
+  apply Continuous.add
+  · exact cBracket_term_continuous_s 3 (le_refl 3) z hz
+  · exact cBracket_series_continuous_s z hz
+
+
 noncomputable def G2deriv1 (f1 : ℝ) (z : ℂ) : ℂ := G2at1 z * cBracket f1 1 z
 
 /-- MANUSCRIPT Theorem 6.1: bHat_i = [z^i] G2^(1,0)(1,z), as a contour
