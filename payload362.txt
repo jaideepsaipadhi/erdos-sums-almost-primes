@@ -1,0 +1,20 @@
+/-- The derivative integrand converges pointwise in theta as s -> 1+. -/
+theorem deriv_integrand_tendsto (i : NN) (theta : RR)
+    (f : RR ARROW RR) (f1 : RR)
+    (hfc : Filter.Tendsto f (nhdsWithin 1 (Set.Ioi (1:RR))) (nhds f1)) :
+    Filter.Tendsto (fun s : RR =>
+        deriv (circleMap 0 (2:RR)) theta
+          * ((1 / circleMap 0 (2:RR) theta) ^ i
+            * ((circleMap 0 (2:RR) theta)INV
+              * (G2manu s (circleMap 0 (2:RR) theta)
+                * cBracket (f s) s (circleMap 0 (2:RR) theta)))))
+      (nhdsWithin 1 (Set.Ioi (1:RR)))
+      (nhds (deriv (circleMap 0 (2:RR)) theta
+        * ((1 / circleMap 0 (2:RR) theta) ^ i
+          * ((circleMap 0 (2:RR) theta)INV
+            * G2deriv1 f1 (circleMap 0 (2:RR) theta))))) := by
+  have hnorm : Norm.norm (circleMap 0 (2:RR) theta) LEQ 2 := by
+    simp [circleMap]
+  have hbr := cBracket_tendsto_two_arg (circleMap 0 (2:RR) theta) hnorm f f1 hfc
+  have hG2 := G2deriv_tendsto_at_one (circleMap 0 (2:RR) theta) hnorm f f1 hfc hbr
+  exact (hG2.const_mul _).const_mul _ |>.const_mul _
