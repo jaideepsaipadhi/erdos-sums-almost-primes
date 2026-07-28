@@ -61,7 +61,7 @@ theorem lemma_3_8_integral_r2 (i : ℕ) (s : ℝ) (hsmem : s ∈ Set.Ioo (1:ℝ)
   · exact ((hsfree _ (hDcont s)).intervalIntegrable 0 (2 * Real.pi))
   · exact (hsfree _ (hD2cont s)).aestronglyMeasurable
   · filter_upwards with theta _ x hx
-    exact contour_integrand_deriv_bound_gen i M2 hM20 theta (D2 x theta) (hM2 x hx theta)
+    exact contour_integrand_bound_gen i M2 hM20 theta (D2 x theta) (hM2 x hx theta)
   · exact intervalIntegrable_const
   · filter_upwards with theta _ x hx
     exact ((hD2 x hx theta).const_mul _).const_mul _ |>.const_mul _
