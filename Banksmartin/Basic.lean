@@ -11632,6 +11632,57 @@ theorem quadratic_remainder_bound (phi : ℝ → ℂ) (g : ℝ) (hg0 : 0 ≤ g)
   have h := hlin t ht
   nlinarith [h, sq_nonneg (t - 1), hg0]
 
+/-- MANUSCRIPT Theorem 6.1's Taylor step, abstracted:
+if D is twice differentiable on (1,2) with ||D''|| <= g, and D -> c, D' -> b
+as s -> 1+, then ||D s - c - (s-1) b|| <= g (s-1)^2 / 2.
+
+Applied with D = g_i, c = c_i, b = bHat_i, g = gammahat_i this is exactly
+g_i(s) = c_i + (s-1) bHat_i + R_i(s) with |R_i(s)| <= (s-1)^2 gammahat_i/2. -/
+theorem taylor_second_bound (D : ℝ → ℂ) (c b : ℂ) (g : ℝ) (hg0 : 0 ≤ g)
+    (hD : ∀ x ∈ Set.Ioo (1:ℝ) 2, HasDerivAt D (deriv D x) x)
+    (hD2 : ∀ x ∈ Set.Ioo (1:ℝ) 2,
+      HasDerivAt (fun u : ℝ => deriv D u) (deriv (fun u : ℝ => deriv D u) x) x)
+    (hbound2 : ∀ x ∈ Set.Ioo (1:ℝ) 2,
+      Norm.norm (deriv (fun u : ℝ => deriv D u) x) ≤ g)
+    (hlimD : Filter.Tendsto D (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds c))
+    (hlimD1 : Filter.Tendsto (fun u : ℝ => deriv D u)
+      (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds b))
+    (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
+    Norm.norm (D s - c - (((s - 1 : ℝ)) : ℂ) * b) ≤ g * (s - 1) ^ 2 / 2 := by
+  set phi : ℝ → ℂ := fun x : ℝ => D x - c - (((x - 1 : ℝ)) : ℂ) * b with hphi
+  have hphider : ∀ x ∈ Set.Ioo (1:ℝ) 2, HasDerivAt phi (deriv D x - b) x := by
+    intro x hx
+    have h1 := hD x hx
+    have h2 : HasDerivAt (fun u : ℝ => (((u - 1 : ℝ)) : ℂ) * b) b x := by
+      have hb : HasDerivAt (fun u : ℝ => (((u - 1 : ℝ)) : ℂ)) 1 x := by
+        have := ((hasDerivAt_id x).sub_const 1).ofReal_comp
+        simpa using this
+      simpa using hb.mul_const b
+    exact (h1.sub_const c).sub h2
+  have hderivEq : ∀ x ∈ Set.Ioo (1:ℝ) 2, deriv phi x = deriv D x - b :=
+    fun x hx => (hphider x hx).deriv
+  have hlin : ∀ x ∈ Set.Ioo (1:ℝ) 2, Norm.norm (deriv phi x) ≤ g * (x - 1) := by
+    intro x hx
+    rw [hderivEq x hx]
+    exact deriv_sub_limit_bound (fun u : ℝ => deriv D u) b g hg0 hD2 hbound2 hlimD1 x hx
+  have hlim0 : Filter.Tendsto phi (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds 0) := by
+    have hcont : Continuous (fun x : ℝ => (((x - 1 : ℝ)) : ℂ)) :=
+      Complex.continuous_ofReal.comp (continuous_id.sub continuous_const)
+    have hx : Filter.Tendsto (fun x : ℝ => (((x - 1 : ℝ)) : ℂ))
+        (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds 0) := by
+      have h : Filter.Tendsto (fun x : ℝ => (((x - 1 : ℝ)) : ℂ))
+          (nhdsWithin (1:ℝ) (Set.Ioi (1:ℝ))) (nhds ((((1:ℝ) - 1 : ℝ)) : ℂ)) :=
+        (hcont.tendsto 1).mono_left nhdsWithin_le_nhds
+      simpa using h
+    have hsb := hx.mul_const b
+    simp only [zero_mul] at hsb
+    have hcomb := (hlimD.sub (tendsto_const_nhds (x := c))).sub hsb
+    simp only [sub_self, sub_zero] at hcomb
+    rw [hphi]
+    exact hcomb
+  exact quadratic_remainder_bound phi g hg0
+    (fun x hx => by rw [hderivEq x hx]; exact hphider x hx) hlin hlim0 s hs
+
 /-- gManu i is bounded on (1,2) by ||c_i|| + beta_i, from the mean value step.
 This is what makes the Ik-side integrands dominated, hence integrable, hence
 the sum-integral interchange of Dk_eq_triple_sum available. -/
