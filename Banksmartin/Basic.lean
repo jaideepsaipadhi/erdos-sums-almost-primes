@@ -12383,6 +12383,51 @@ theorem E1k_sub_M2k_eq (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
     ring
   exact term_diff_eq i j (k - i - j) f1 ((2:ℝ) ^ k) hAdiff
 
+/-- MANUSCRIPT THEOREM 6.1 (refined enclosure):
+E_1(k) = M_2(k) + rho_2(k) with |rho_2(k)| <= Gamma, Gamma k-independent.
+The k-independence is geom_two_three: sum_l 2^l 3^(-l-1) = 1 exactly. -/
+theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
+    (hbeta0 : ∀ i, 0 ≤ beta i)
+    (hderiv : ∀ i : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
+      HasDerivAt (fun t : ℝ => gManu i t) (deriv (fun t : ℝ => gManu i t) x) x)
+    (hbnd : ∀ i : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
+      Norm.norm (deriv (fun t : ℝ => gManu i t) x) ≤ beta i)
+    (M0 : ℝ) (hM00 : 0 ≤ M0)
+    (hM0 : ∀ u : ℝ, u ∈ Set.Ioi (1:ℝ) → ∀ theta : ℝ,
+      Norm.norm (G2manu u (circleMap 0 (2:ℝ) theta)) ≤ M0)
+    (gh : ℕ → ℝ) (hgh0 : ∀ i, 0 ≤ gh i)
+    (htaylor : ∀ i : ℕ, ∀ s ∈ Set.Ioo (1:ℝ) 2,
+      Norm.norm (gManu i s - cCoeff i - (((s - 1 : ℝ)) : ℂ) * bHat f1 i)
+        ≤ gh i * (s - 1) ^ 2 / 2)
+    (Gam : ℝ) (hGam : ∀ m : ℕ,
+      (1/2) * ∑ i ∈ Finset.range (m + 1), gh i * (2:ℝ) ^ i ≤ Gam) :
+    |E1k k - M2k f1 k| ≤ Gam := by
+  rw [E1k_sub_M2k_eq k hk f1 beta hbeta0 hderiv hbnd M0 hM00 hM0]
+  have hstep : ∀ i ∈ Finset.range (k + 1),
+      |∑ j ∈ Finset.range (k - i + 1),
+        ((2:ℝ) ^ k * (∫ s in Set.Ioc (1:ℝ) 2,
+            (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
+            - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))))|
+      ≤ gh i / 2 * (2:ℝ) ^ i := by
+    sorry
+  calc |∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
+        ((2:ℝ) ^ k * (∫ s in Set.Ioc (1:ℝ) 2,
+            (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
+            - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))))|
+      ≤ ∑ i ∈ Finset.range (k + 1), gh i / 2 * (2:ℝ) ^ i := by
+        apply le_trans (Finset.abs_sum_le_sum_abs _ _)
+        exact Finset.sum_le_sum hstep
+    _ = (1/2) * ∑ i ∈ Finset.range (k + 1), gh i * (2:ℝ) ^ i := by
+        rw [Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro i _
+        ring
+    _ ≤ Gam := hGam k
+
 /-- Per-term bound for S_2: the j-th term is at most 2^(-j) 2^(-l-1).
 Uses 2^(-js) <= 2^(-j) on [1,2] and the exact integral
 integral_log_pow_sub_one. -/
