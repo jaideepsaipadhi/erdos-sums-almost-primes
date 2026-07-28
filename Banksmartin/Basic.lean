@@ -12234,9 +12234,33 @@ theorem inner_s2_group (k i : ℕ) (hik : i ≤ k) :
 /-- MANUSCRIPT Theorem 6.1: A^(2)_m = 2^m S_2(m). -/
 noncomputable def A2m (m : ℕ) : ℝ := (2:ℝ) ^ m * S2m m
 
-/-- MANUSCRIPT Theorem 6.1: M_2(k) = sum_{i=1}^k bHat_i 2^i A^(2)_(k-i). -/
+/-- MANUSCRIPT Theorem 6.1: M_2(k) = sum bHat_i 2^i A^(2)_(k-i).
+
+INDEXING DEVIATION: the manuscript sums i = 1..k, this sums i = 0..k.  The two
+agree because bHat_0 = 0 -- every term of cBracket carries a factor of z
+(the kappa part is z*(...), the prime terms are -z(z-1)log p/(...)), so
+G2deriv1 f1 0 = 0.  That fact is TRUE but NOT PROVED here; proving it would
+need the Cauchy formula in the direction we did not set up.  Anyone checking
+these values against the Arb output should know the sums are indexed
+differently. -/
 noncomputable def M2k (f1 : ℝ) (k : ℕ) : ℝ :=
-  ∑ i ∈ Finset.Icc 1 k, (bHat f1 i).re * (2:ℝ) ^ i * A2m (k - i)
+  ∑ i ∈ Finset.range (k + 1), (bHat f1 i).re * (2:ℝ) ^ i * A2m (k - i)
+
+/-- M_2(k) in the S_2 form: 2^i A^(2)_(k-i) = 2^k S_2(k-i) for i <= k. -/
+theorem M2k_eq_S2 (f1 : ℝ) (k : ℕ) :
+    M2k f1 k = ∑ i ∈ Finset.range (k + 1),
+      (2:ℝ) ^ k * ((bHat f1 i).re * S2m (k - i)) := by
+  unfold M2k A2m
+  apply Finset.sum_congr rfl
+  intro i hi
+  have hik : i ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+  have hpow : (2:ℝ) ^ i * (2:ℝ) ^ (k - i) = (2:ℝ) ^ k := by
+    rw [← pow_add]
+    congr 1
+    omega
+  calc (bHat f1 i).re * (2:ℝ) ^ i * ((2:ℝ) ^ (k - i) * S2m (k - i))
+      = ((2:ℝ) ^ i * (2:ℝ) ^ (k - i)) * ((bHat f1 i).re * S2m (k - i)) := by ring
+    _ = (2:ℝ) ^ k * ((bHat f1 i).re * S2m (k - i)) := by rw [hpow]
 
 /-- S_2's integrand is integrable on (1,2], dominated by the (s-1)-weighted
 integrand of integrable_log_pow_sub_one since 2^(-js) <= 1 there. -/
