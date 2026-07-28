@@ -10433,9 +10433,15 @@ noncomputable def cBracket (fs : ℝ) (s : ℝ) (z : ℂ) : ℂ :=
 
 noncomputable def G2deriv1 (f1 : ℝ) (z : ℂ) : ℂ := G2at1 z * cBracket f1 1 z
 
-/-- The coefficients bHat_i. -/
+/-- MANUSCRIPT Theorem 6.1: bHat_i = [z^i] G2^(1,0)(1,z), as a contour
+integral at radius 2 rather than as a Taylor coefficient.
+
+The contour form is what the Taylor argument consumes, and it avoids needing
+z-analyticity of cBracket: the s -> 1 limit is taken under the integral by
+dominated convergence, exactly as gManu_tendsto_cCoeff does for cCoeff. -/
 noncomputable def bHat (f1 : ℝ) (i : ℕ) : ℂ :=
-  iteratedDeriv i (G2deriv1 f1) 0 / (Nat.factorial i)
+  (2 * ((Real.pi : ℝ) : ℂ) * Complex.I)⁻¹
+    • (circleIntegral (fun z : ℂ => (1 / z) ^ i • z⁻¹ • G2deriv1 f1 z) 0 (2 : ℝ))
 
 
 /-- Lemma 3.9 restated with the bracket named. -/
