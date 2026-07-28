@@ -1,0 +1,26 @@
+/-- The (s-1)^2-weighted integral: int_1^2 (-log(s-1))^l/l! (s-1)^2 ds
+= 3^(-l-1).  Under s = 1 + e^(-t) it becomes int_0^inf t^l/l! e^(-3t) dt.
+This is Theorem 6.1's remainder integral; the manuscript's factor 1/2 comes
+from the Taylor remainder (s-1)^2/2, not from here.
+Verified numerically at l = 0, 1, 3. -/
+theorem integral_log_pow_sub_one_sq (l : ℕ) :
+    (∫ s in Set.Ioc (1:ℝ) 2,
+      (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) ^ 2)
+      = 1 / (3:ℝ) ^ (l + 1) := by
+  rw [integral_Ioc_subst (fun s : ℝ =>
+    (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) ^ 2)]
+  have hsimp : ∀ u : ℝ, u ∈ Set.Ioi (0:ℝ) →
+      Real.exp (-u) * ((-Real.log ((1 + Real.exp (-u)) - 1)) ^ l / (Nat.factorial l)
+          * ((1 + Real.exp (-u)) - 1) ^ 2)
+        = ((Nat.factorial l : ℝ))⁻¹ * (u ^ l * Real.exp (-(3 * u))) := by
+    intro u _
+    simp only [add_sub_cancel_left, Real.log_exp, neg_neg]
+    rw [show Real.exp (-(3 * u)) = Real.exp (-u) * (Real.exp (-u) * Real.exp (-u)) by
+      rw [← Real.exp_add, ← Real.exp_add]; ring_nf]
+    field_simp
+    ring
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi hsimp]
+  rw [MeasureTheory.integral_const_mul, integral_pow_exp_neg_three_mul]
+  have hfac : ((Nat.factorial l : ℕ) : ℝ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero l)
+  field_simp
