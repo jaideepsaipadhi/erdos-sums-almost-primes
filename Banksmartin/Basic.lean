@@ -12034,6 +12034,18 @@ noncomputable def S2m (m : ℕ) : ℝ :=
       (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (s - 1)
         * (2:ℝ) ^ (-(j:ℝ) * s)
 
+/-- The (s-1)-weighted inner sum of Dk at fixed i is exactly S2m (k-i).
+S2m's definition sums over j <= m with log-index m - j; Dk's inner sum at
+fixed i runs j <= k-i with log-index k-i-j.  With m = k-i these agree. -/
+theorem inner_s2_group (k i : ℕ) (hik : i ≤ k) :
+    ∑ j ∈ Finset.range (k - i + 1),
+        (∫ s in Set.Ioc (1:ℝ) 2,
+          (-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)) * (s - 1)
+            * (2:ℝ) ^ (-(j:ℝ) * s))
+      = S2m (k - i) := by
+  unfold S2m
+  rfl
+
 /-- MANUSCRIPT Theorem 6.1: A^(2)_m = 2^m S_2(m). -/
 noncomputable def A2m (m : ℕ) : ℝ := (2:ℝ) ^ m * S2m m
 
