@@ -10574,6 +10574,45 @@ noncomputable def bHat (f1 : ℝ) (i : ℕ) : ℂ :=
     • (circleIntegral (fun z : ℂ => (1 / z) ^ i • z⁻¹ • G2deriv1 f1 z) 0 (2 : ℝ))
 
 
+/-- Per-term split for Theorem 6.1: the Dk integrand decomposes into the
+(s-1)-weighted bHat term plus a remainder bounded by gh_i (s-1)^2/2. -/
+theorem Dk_term_split (i j l : ℕ) (f1 : ℝ) (gh_i : ℝ) (hgh0 : 0 ≤ gh_i)
+    (htaylor : ∀ s ∈ Set.Ioo (1:ℝ) 2,
+      Norm.norm (gManu i s - cCoeff i - (((s - 1 : ℝ)) : ℂ) * bHat f1 i)
+        ≤ gh_i * (s - 1) ^ 2 / 2)
+    (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
+    |((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))
+      - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))|
+      ≤ gh_i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
+        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) := by
+  have hL : (0:ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) := by
+    apply div_nonneg _ (by positivity)
+    apply pow_nonneg
+    simp only [neg_nonneg]
+    exact Real.log_nonpos (by linarith [hs.1]) (by linarith [hs.2])
+  have h2 : (0:ℝ) < (2:ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+  have hW : (0:ℝ) ≤ (2:ℝ) ^ (-(j:ℝ) * s)
+      * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)) := by positivity
+  have hre : ((gManu i s).re - (cCoeff i).re) - (bHat f1 i).re * (s - 1)
+      = (gManu i s - cCoeff i - (((s - 1 : ℝ)) : ℂ) * bHat f1 i).re := by
+    simp [Complex.sub_re, Complex.mul_re]
+    ring
+  have hbound : |((gManu i s).re - (cCoeff i).re) - (bHat f1 i).re * (s - 1)|
+      ≤ gh_i * (s - 1) ^ 2 / 2 := by
+    rw [hre]
+    exact le_trans (Complex.abs_re_le_norm _) (htaylor s hs)
+  have hfactor : ((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))
+      - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
+      = (((gManu i s).re - (cCoeff i).re) - (bHat f1 i).re * (s - 1))
+        * ((2:ℝ) ^ (-(j:ℝ) * s)
+          * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) := by ring
+  rw [hfactor, abs_mul, abs_of_nonneg hW]
+  exact mul_le_mul_of_nonneg_right hbound hW
+
 /-- Lemma 3.9 restated with the bracket named. -/
 theorem lemma_3_9_bracket (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
     (hsmem : s ∈ Set.Ioo (1:ℝ) 2) (f : ℝ → ℝ)
