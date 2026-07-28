@@ -4822,6 +4822,13 @@ theorem geom_two_three : HasSum (fun l : ℕ => (2:ℝ) ^ l * (1 / (3:ℝ) ^ (l 
   field_simp
   ring
 
+/-- Partial sums of the geometric series are at most its total, 1. -/
+theorem geom_partial_le (m : ℕ) :
+    ∑ l ∈ Finset.range (m + 1), (2:ℝ) ^ l * (1 / (3:ℝ) ^ (l + 1)) ≤ 1 := by
+  apply sum_le_hasSum _ _ geom_two_three
+  intro l _
+  positivity
+
 /-- Integrability of the Gamma integrand u^i e^(-u) on (0, infty). -/
 theorem integrable_pow_exp (i : ℕ) :
     MeasureTheory.IntegrableOn (fun u : ℝ => u ^ i * Real.exp (-u)) (Set.Ioi 0) := by
