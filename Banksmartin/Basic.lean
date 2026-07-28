@@ -4829,6 +4829,48 @@ theorem geom_partial_le (m : ℕ) :
   intro l _
   positivity
 
+/-- The remainder inner sum is at most 2^i.
+Reflecting j -> l = (k-i) - j turns 2^k 2^(-j) 3^(-(k-i-j)-1) into
+2^i * 2^l 3^(-l-1), and the partial geometric sum is at most 1. -/
+theorem remainder_inner_le (k i : ℕ) (hik : i ≤ k) :
+    ∑ j ∈ Finset.range (k - i + 1),
+        (2:ℝ) ^ k * ((2:ℝ) ^ (-(j:ℝ)) * (1 / (3:ℝ) ^ ((k - i - j) + 1)))
+      ≤ (2:ℝ) ^ i := by
+  have hrefl := Finset.sum_range_reflect
+    (fun j => (2:ℝ) ^ k * ((2:ℝ) ^ (-(j:ℝ))
+      * (1 / (3:ℝ) ^ ((k - i - j) + 1)))) (k - i + 1)
+  rw [← hrefl]
+  have hterm : ∀ l ∈ Finset.range (k - i + 1),
+      (2:ℝ) ^ k * ((2:ℝ) ^ (-((k - i + 1 - 1 - l : ℕ) : ℝ))
+        * (1 / (3:ℝ) ^ ((k - i - (k - i + 1 - 1 - l)) + 1)))
+      = (2:ℝ) ^ i * ((2:ℝ) ^ l * (1 / (3:ℝ) ^ (l + 1))) := by
+    intro l hl
+    have hlk : l ≤ k - i := Nat.lt_succ_iff.mp (Finset.mem_range.mp hl)
+    have hidx : k - i + 1 - 1 - l = k - i - l := by omega
+    rw [hidx]
+    have hidx2 : k - i - (k - i - l) = l := by omega
+    rw [hidx2]
+    have hpow : (2:ℝ) ^ k * (2:ℝ) ^ (-((k - i - l : ℕ) : ℝ))
+        = (2:ℝ) ^ i * (2:ℝ) ^ l := by
+      rw [← Real.rpow_natCast (2:ℝ) k, ← Real.rpow_natCast (2:ℝ) i,
+        ← Real.rpow_natCast (2:ℝ) l, ← Real.rpow_add (by norm_num : (0:ℝ) < 2),
+        ← Real.rpow_add (by norm_num : (0:ℝ) < 2)]
+      congr 1
+      have : ((k - i - l : ℕ) : ℝ) = (k:ℝ) - (i:ℝ) - (l:ℝ) := by
+        rw [Nat.cast_sub (by omega : l ≤ k - i), Nat.cast_sub hik]
+      rw [this]
+      ring
+    calc (2:ℝ) ^ k * ((2:ℝ) ^ (-((k - i - l : ℕ) : ℝ))
+          * (1 / (3:ℝ) ^ (l + 1)))
+        = ((2:ℝ) ^ k * (2:ℝ) ^ (-((k - i - l : ℕ) : ℝ)))
+          * (1 / (3:ℝ) ^ (l + 1)) := by ring
+      _ = ((2:ℝ) ^ i * (2:ℝ) ^ l) * (1 / (3:ℝ) ^ (l + 1)) := by rw [hpow]
+      _ = (2:ℝ) ^ i * ((2:ℝ) ^ l * (1 / (3:ℝ) ^ (l + 1))) := by ring
+  rw [Finset.sum_congr rfl hterm, ← Finset.mul_sum]
+  have hgeom := geom_partial_le (k - i)
+  have h2i : (0:ℝ) ≤ (2:ℝ) ^ i := by positivity
+  nlinarith [hgeom, h2i]
+
 /-- Integrability of the Gamma integrand u^i e^(-u) on (0, infty). -/
 theorem integrable_pow_exp (i : ℕ) :
     MeasureTheory.IntegrableOn (fun u : ℝ => u ^ i * Real.exp (-u)) (Set.Ioi 0) := by
