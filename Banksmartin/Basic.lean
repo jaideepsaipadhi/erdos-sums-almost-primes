@@ -4846,6 +4846,40 @@ theorem integrable_pow_exp_two (i : ℕ) :
   apply Real.exp_le_exp.mpr
   linarith
 
+/-- Integrability of u^i e^(-3u) on (0, infty), by comparison with the
+exponent-2 version: e^(-3u) <= e^(-2u) for u > 0. -/
+theorem integrable_pow_exp_three (i : ℕ) :
+    MeasureTheory.IntegrableOn (fun u : ℝ => u ^ i * Real.exp (-(3 * u)))
+      (Set.Ioi (0:ℝ)) := by
+  apply MeasureTheory.Integrable.mono (integrable_pow_exp_two i)
+  · apply Continuous.aestronglyMeasurable
+    exact (continuous_pow i).mul
+      (Real.continuous_exp.comp (continuous_const.mul continuous_id).neg)
+  · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with u hu
+    have hu0 : (0:ℝ) < u := hu
+    have hexp : Real.exp (-(3 * u)) ≤ Real.exp (-(2 * u)) := by
+      apply Real.exp_le_exp.mpr
+      linarith
+    have hpow : (0:ℝ) ≤ u ^ i := by positivity
+    rw [Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg (by positivity : (0:ℝ) ≤ u ^ i * Real.exp (-(3 * u))),
+      abs_of_nonneg (by positivity : (0:ℝ) ≤ u ^ i * Real.exp (-(2 * u)))]
+    exact mul_le_mul_of_nonneg_left hexp hpow
+
+/-- Integrability of the (s-1)^2-weighted integrand on (1,2]. -/
+theorem integrable_log_pow_sub_one_sq (l : ℕ) :
+    MeasureTheory.IntegrableOn
+      (fun s : ℝ => (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) ^ 2)
+      (Set.Ioc (1:ℝ) 2) := by
+  apply integrableOn_Ioc_subst
+  have hconst := (integrable_pow_exp_three l).const_mul (((Nat.factorial l : ℝ))⁻¹)
+  apply MeasureTheory.IntegrableOn.congr_fun hconst _ measurableSet_Ioi
+  intro u hu
+  simp only [add_sub_cancel_left, Real.log_exp, neg_neg]
+  rw [show Real.exp (-(3 * u)) = Real.exp (-u) * (Real.exp (-u) * Real.exp (-u)) by
+    rw [← Real.exp_add, ← Real.exp_add]; ring_nf]
+  field_simp
+
 /-- Integrability of the J-integrand: the damping factor is at most 1. -/
 theorem integrable_Jint_integrand (c : ℝ) (hc : 0 ≤ c) (i : ℕ) :
     MeasureTheory.IntegrableOn
