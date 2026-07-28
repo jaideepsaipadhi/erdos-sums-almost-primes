@@ -12335,6 +12335,54 @@ theorem term_diff_eq (i j l : ℕ) (f1 : ℝ) (K : ℝ)
     ring
   rw [hpull, ← mul_sub, ← MeasureTheory.integral_sub hA hB]
 
+/-- The difference E_1(k) - M_2(k) as a double sum of per-term integrals. -/
+theorem E1k_sub_M2k_eq (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
+    (hbeta0 : ∀ i, 0 ≤ beta i)
+    (hderiv : ∀ i : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
+      HasDerivAt (fun t : ℝ => gManu i t) (deriv (fun t : ℝ => gManu i t) x) x)
+    (hbnd : ∀ i : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
+      Norm.norm (deriv (fun t : ℝ => gManu i t) x) ≤ beta i)
+    (M0 : ℝ) (hM00 : 0 ≤ M0)
+    (hM0 : ∀ u : ℝ, u ∈ Set.Ioi (1:ℝ) → ∀ theta : ℝ,
+      Norm.norm (G2manu u (circleMap 0 (2:ℝ) theta)) ≤ M0) :
+    E1k k - M2k f1 k
+      = ∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
+        ((2:ℝ) ^ k * (∫ s in Set.Ioc (1:ℝ) 2,
+            (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
+            - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))))) := by
+  unfold E1k
+  rw [Dk_eq_triple_sum k hk beta hbeta0 hderiv hbnd M0 hM00 hM0, M2k_eq_S2]
+  rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
+  apply Finset.sum_congr rfl
+  intro i hi
+  have hik : i ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+  rw [← inner_s2_group k i hik, Finset.mul_sum, Finset.mul_sum, Finset.mul_sum,
+    ← Finset.sum_sub_distrib]
+  apply Finset.sum_congr rfl
+  intro j hj
+  have hAdiff : MeasureTheory.IntegrableOn
+      (fun s : ℝ => ((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+        * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))
+      (Set.Ioc (1:ℝ) 2) := by
+    have hI := integrable_Ik_term i j (k - i - j) (beta i) (hbeta0 i) (hderiv i)
+      (hbnd i) M0 hM00 hM0
+    have hF := (integrable_Sm_integrand (k - i - j) j).const_mul ((cCoeff i).re)
+    have hFc : MeasureTheory.IntegrableOn
+        (fun s : ℝ => (cCoeff i).re * (2:ℝ) ^ (-(j:ℝ) * s)
+          * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))
+        (Set.Ioc (1:ℝ) 2) := by
+      apply MeasureTheory.IntegrableOn.congr_fun hF _ measurableSet_Ioc
+      intro s _
+      ring
+    have hsub := hI.sub hFc
+    apply MeasureTheory.IntegrableOn.congr_fun hsub _ measurableSet_Ioc
+    intro s _
+    simp only [Pi.sub_apply]
+    ring
+  exact term_diff_eq i j (k - i - j) f1 ((2:ℝ) ^ k) hAdiff
+
 /-- Per-term bound for S_2: the j-th term is at most 2^(-j) 2^(-l-1).
 Uses 2^(-js) <= 2^(-j) on [1,2] and the exact integral
 integral_log_pow_sub_one. -/
