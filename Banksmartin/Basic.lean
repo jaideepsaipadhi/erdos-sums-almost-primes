@@ -12299,6 +12299,42 @@ theorem integrable_S2_integrand (l j : ℕ) :
     / (Nat.factorial l) * (s - 1) * (2:ℝ) ^ (-(j:ℝ) * s))]
   exact mul_le_of_le_one_right hLpos h2
 
+/-- Per-term identity: the E_1 term minus the M_2 term is 2^k times the
+integral of the pointwise difference. -/
+theorem term_diff_eq (i j l : ℕ) (f1 : ℝ) (K : ℝ)
+    (hA : MeasureTheory.IntegrableOn
+      (fun s : ℝ => ((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) (Set.Ioc (1:ℝ) 2)) :
+    K * (∫ s in Set.Ioc (1:ℝ) 2,
+        ((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+          * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
+      - K * ((bHat f1 i).re * (∫ s in Set.Ioc (1:ℝ) 2,
+          (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)
+            * (2:ℝ) ^ (-(j:ℝ) * s)))
+      = K * (∫ s in Set.Ioc (1:ℝ) 2,
+          (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
+            * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))
+          - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+            * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))))) := by
+  have hB : MeasureTheory.IntegrableOn
+      (fun s : ℝ => (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))) (Set.Ioc (1:ℝ) 2) := by
+    have h := (integrable_S2_integrand l j).const_mul ((bHat f1 i).re)
+    apply MeasureTheory.IntegrableOn.congr_fun h _ measurableSet_Ioc
+    intro s _
+    ring
+  have hpull : (bHat f1 i).re * (∫ s in Set.Ioc (1:ℝ) 2,
+        (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)
+          * (2:ℝ) ^ (-(j:ℝ) * s))
+      = ∫ s in Set.Ioc (1:ℝ) 2,
+        (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+          * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) := by
+    rw [← MeasureTheory.integral_const_mul]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioc
+    intro s _
+    ring
+  rw [hpull, ← mul_sub, ← MeasureTheory.integral_sub hA hB]
+
 /-- Per-term bound for S_2: the j-th term is at most 2^(-j) 2^(-l-1).
 Uses 2^(-js) <= 2^(-j) on [1,2] and the exact integral
 integral_log_pow_sub_one. -/
