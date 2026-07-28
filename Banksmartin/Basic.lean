@@ -10050,6 +10050,11 @@ theorem cBracket_series_summable_at_one (z : ℂ) (hz : Norm.norm z ≤ 2) :
   intro p
   exact deriv_clog_term_bound_uniform (p:ℕ) (by omega) 1 (le_refl 1) z hz
 
+/-- MANUSCRIPT Theorem 6.1: bHat_i = [z^i] G2^(1,0)(1,z).
+Defined through the explicit s = 1 product G2at1 z * cBracket f1 1 z rather
+than by evaluating G2manu at s = 1, which is a junk value (kappaFac 1 = 0).
+f1 = f 1 is the log-derivative of zetaTilde at 1; the manuscript has
+f(1) = -gamma via the Stieltjes expansion, certified from FLINT. -/
 theorem deriv2_series_summable_at_basepoint (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
       -(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
@@ -10425,6 +10430,13 @@ noncomputable def cBracket (fs : ℝ) (s : ℝ) (z : ℂ) : ℂ :=
           (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
             / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1)
               / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - z)))
+
+noncomputable def G2deriv1 (f1 : ℝ) (z : ℂ) : ℂ := G2at1 z * cBracket f1 1 z
+
+/-- The coefficients bHat_i. -/
+noncomputable def bHat (f1 : ℝ) (i : ℕ) : ℂ :=
+  iteratedDeriv i (G2deriv1 f1) 0 / (Nat.factorial i)
+
 
 /-- Lemma 3.9 restated with the bracket named. -/
 theorem lemma_3_9_bracket (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
