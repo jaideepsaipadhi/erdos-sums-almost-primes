@@ -10534,6 +10534,33 @@ theorem cBracket_tendsto_at_one (fs : ℝ) (z : ℂ) (hz : Norm.norm z ≤ 2) :
   intro x hx
   exact le_of_lt (Set.mem_Ioi.mp hx)
 
+/-- The two-argument limit: cBracket (f s) s z -> cBracket f1 1 z as s -> 1+.
+Splits via cBracket_sub_first into f's convergence and the fixed-fs limit. -/
+theorem cBracket_tendsto_two_arg (z : ℂ) (hz : Norm.norm z ≤ 2)
+    (f : ℝ → ℝ) (f1 : ℝ)
+    (hfc : Filter.Tendsto f (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds f1)) :
+    Filter.Tendsto (fun s : ℝ => cBracket (f s) s z)
+      (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds (cBracket f1 1 z)) := by
+  have hfix := cBracket_tendsto_at_one f1 z hz
+  have hdiff : Filter.Tendsto (fun s : ℝ => z * (((f s - f1 : ℝ)) : ℂ))
+      (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds 0) := by
+    have hz0 : Filter.Tendsto (fun s : ℝ => ((f s - f1 : ℝ) : ℂ))
+        (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds 0) := by
+      have hs : Filter.Tendsto (fun s : ℝ => f s - f1)
+          (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds (f1 - f1)) :=
+        hfc.sub (tendsto_const_nhds (x := f1))
+      rw [sub_self] at hs
+      exact (Complex.continuous_ofReal.continuousAt).tendsto.comp hs
+    have := hz0.const_mul z
+    simpa using this
+  have hsum := hdiff.add hfix
+  simp only [zero_add] at hsum
+  apply hsum.congr
+  intro s
+  have h := cBracket_sub_first (f s) f1 s z
+  rw [← h]
+  ring
+
 noncomputable def G2deriv1 (f1 : ℝ) (z : ℂ) : ℂ := G2at1 z * cBracket f1 1 z
 
 /-- MANUSCRIPT Theorem 6.1: bHat_i = [z^i] G2^(1,0)(1,z), as a contour
