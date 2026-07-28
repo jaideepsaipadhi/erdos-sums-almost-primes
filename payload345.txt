@@ -1,0 +1,31 @@
+/-- Generalised contour bound: the s-free factors contribute at most 1, so the
+integrand is bounded by whatever bounds the varying factor.  The r=1 version
+contour_integrand_deriv_bound is this at w = the first derivative; r=2 uses it
+at w = the second. -/
+theorem contour_integrand_bound_gen (i : NN) (M : RR) (hM0 : 0 LEQ M)
+    (theta : RR) (w : CC) (hbound : Norm.norm w LEQ M) :
+    Norm.norm (deriv (circleMap 0 (2 : RR)) theta
+        * ((1 / circleMap 0 (2 : RR) theta) ^ i
+          * ((circleMap 0 (2 : RR) theta)INV * w)))
+      LEQ M := by
+  have hR : (0:RR) < 2 := by norm_num
+  have hnorm : Norm.norm (circleMap 0 (2 : RR) theta) = 2 := by
+    simp [circleMap]
+  have hne : circleMap 0 (2 : RR) theta NEQ 0 := circleMap_ne_center (ne_of_gt hR)
+  have hdcm : Norm.norm (deriv (circleMap 0 (2 : RR)) theta) = 2 := by
+    rw [deriv_circleMap, norm_mul, hnorm, Complex.norm_I]
+    ring
+  rw [norm_mul, norm_mul, norm_mul, hdcm, norm_pow, norm_div, norm_one, hnorm,
+    norm_inv, hnorm]
+  have hpow : ((2:RR))INV ^ i LEQ 1 := by
+    apply pow_le_one0 (by positivity)
+    rw [inv_le_one_iff0]
+    right; norm_num
+  have hwnn : (0:RR) LEQ Norm.norm w := norm_nonneg _
+  calc (2:RR) * ((1 / (2:RR)) ^ i * (((2:RR))INV * Norm.norm w))
+      = ((1 / (2:RR)) ^ i) * Norm.norm w := by field_simp
+    _ LEQ 1 * Norm.norm w := by
+        apply mul_le_mul_of_nonneg_right _ hwnn
+        rw [one_div]; exact hpow
+    _ = Norm.norm w := one_mul _
+    _ LEQ M := hbound
