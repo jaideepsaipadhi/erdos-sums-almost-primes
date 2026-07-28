@@ -11556,6 +11556,82 @@ theorem deriv_sub_limit_bound (D : ℝ → ℂ) (b : ℂ) (g : ℝ) (hg0 : 0 ≤
       _ ≤ g * (s - 1) := mul_le_mul_of_nonneg_left hst hg0
   exact le_of_tendsto hsublim hbnd
 
+/-- Second-order Taylor bound: if phi is differentiable on (1,2) with
+||phi'(x)|| <= g (x-1) there, and phi(t) -> 0 as t -> 1+, then
+||phi(s)|| <= g (s-1)^2 / 2.
+
+This is the step that turns the first-order bound of deriv_sub_limit_bound
+into the quadratic remainder of Theorem 6.1.  Proved by the same
+interior-plus-limit route, with the interior step bounding
+||phi(s) - phi(t)|| by the integral of the linear bound. -/
+theorem quadratic_remainder_bound (phi : ℝ → ℂ) (g : ℝ) (hg0 : 0 ≤ g)
+    (hderiv : ∀ x ∈ Set.Ioo (1:ℝ) 2, HasDerivAt phi (deriv phi x) x)
+    (hbound : ∀ x ∈ Set.Ioo (1:ℝ) 2, Norm.norm (deriv phi x) ≤ g * (x - 1))
+    (hlim : Filter.Tendsto phi (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds 0))
+    (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
+    Norm.norm (phi s) ≤ g * (s - 1) ^ 2 / 2 := by
+  have hlin : ∀ t : ℝ, t ∈ Set.Ioo (1:ℝ) s →
+      Norm.norm (phi s - phi t) ≤ g * ((s - 1) ^ 2 - (t - 1) ^ 2) / 2 := by
+    intro t ht
+    have hts : t ≤ s := le_of_lt ht.2
+    have hsub : Set.uIcc t s ⊆ Set.Ioo (1:ℝ) 2 := by
+      rw [Set.uIcc_of_le hts]
+      intro x hx
+      exact Set.mem_Ioo.mpr ⟨ lt_of_lt_of_le ht.1 hx.1, lt_of_le_of_lt hx.2 hs.2 ⟩
+    have hgcont : Continuous (fun x : ℝ => g * (x - 1)) :=
+      continuous_const.mul (continuous_id.sub continuous_const)
+    have hint : IntervalIntegrable (fun x : ℝ => deriv phi x) MeasureTheory.volume t s := by
+      rw [intervalIntegrable_iff_integrableOn_Ioc_of_le hts]
+      have hgi : MeasureTheory.IntegrableOn (fun x : ℝ => g * (x - 1)) (Set.Ioc t s) :=
+        (hgcont.integrableOn_Icc).mono_set Set.Ioc_subset_Icc_self
+      apply MeasureTheory.Integrable.mono hgi
+        (measurable_deriv phi).aestronglyMeasurable.restrict
+      filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with y hy
+      have hyIoo : y ∈ Set.Ioo (1:ℝ) 2 := by
+        apply hsub
+        rw [Set.uIcc_of_le hts]
+        exact ⟨ le_of_lt hy.1, hy.2 ⟩
+      have hnn : (0:ℝ) ≤ g * (y - 1) := by
+        apply mul_nonneg hg0
+        linarith [hyIoo.1]
+      rw [Real.norm_eq_abs, abs_of_nonneg hnn]
+      exact hbound y hyIoo
+    have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (fun x hx => hderiv x (hsub hx)) hint
+    rw [← hftc]
+    have hbnd : Norm.norm (∫ y in t..s, deriv phi y)
+        ≤ ∫ y in t..s, g * (y - 1) := by
+      apply intervalIntegral.norm_integral_le_of_norm_le hts
+      · filter_upwards with y hy
+        exact hbound y (hsub (by rw [Set.uIcc_of_le hts]; exact ⟨ le_of_lt hy.1, hy.2 ⟩))
+      · exact hgcont.intervalIntegrable t s
+    have heval : (∫ y in t..s, g * (y - 1))
+        = g * ((s - 1) ^ 2 - (t - 1) ^ 2) / 2 := by
+      rw [intervalIntegral.integral_const_mul]
+      have hanti : ∀ y ∈ Set.uIcc t s,
+          HasDerivAt (fun x : ℝ => (x - 1) ^ 2 / 2) (y - 1) y := by
+        intro y _
+        have hb : HasDerivAt (fun x : ℝ => x - 1) 1 y := (hasDerivAt_id y).sub_const 1
+        have hp : HasDerivAt (fun x : ℝ => (x - 1) ^ 2) (2 * (y - 1) ^ 1 * 1) y := hb.pow 2
+        have hq := hp.div_const 2
+        have hval : y - 1 = 2 * (y - 1) ^ 1 * 1 / 2 := by ring
+        rw [hval]
+        exact hq
+      rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hanti
+        ((continuous_id.sub continuous_const).intervalIntegrable t s)]
+      ring
+    rw [heval] at hbnd
+    exact hbnd
+  have hsublim : Filter.Tendsto (fun t : ℝ => Norm.norm (phi s - phi t))
+      (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds (Norm.norm (phi s - 0))) := by
+    apply Filter.Tendsto.norm
+    exact tendsto_const_nhds.sub hlim
+  simp only [sub_zero] at hsublim
+  apply le_of_tendsto hsublim
+  filter_upwards [Ioo_mem_nhdsGT hs.1] with t ht
+  have h := hlin t ht
+  nlinarith [h, sq_nonneg (t - 1), hg0]
+
 /-- gManu i is bounded on (1,2) by ||c_i|| + beta_i, from the mean value step.
 This is what makes the Ik-side integrands dominated, hence integrable, hence
 the sum-integral interchange of Dk_eq_triple_sum available. -/

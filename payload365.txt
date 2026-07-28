@@ -1,0 +1,15 @@
+/-- Second-order Taylor bound: if phi is differentiable on (1,2) with
+||phi'(x)|| <= g (x-1) there, and phi(t) -> 0 as t -> 1+, then
+||phi(s)|| <= g (s-1)^2 / 2.
+
+This is the step that turns the first-order bound of deriv_sub_limit_bound
+into the quadratic remainder of Theorem 6.1.  Proved by the same
+interior-plus-limit route, with the interior step bounding
+||phi(s) - phi(t)|| by the integral of the linear bound. -/
+theorem quadratic_remainder_bound (phi : RR ARROW CC) (g : RR) (hg0 : 0 LEQ g)
+    (hderiv : FORALL x IN Set.Ioo (1:RR) 2, HasDerivAt phi (deriv phi x) x)
+    (hbound : FORALL x IN Set.Ioo (1:RR) 2, Norm.norm (deriv phi x) LEQ g * (x - 1))
+    (hlim : Filter.Tendsto phi (nhdsWithin 1 (Set.Ioi (1:RR))) (nhds 0))
+    (s : RR) (hs : s IN Set.Ioo (1:RR) 2) :
+    Norm.norm (phi s) LEQ g * (s - 1) ^ 2 / 2 := by
+  sorry
