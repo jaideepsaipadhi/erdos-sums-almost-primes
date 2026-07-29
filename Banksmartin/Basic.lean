@@ -140,6 +140,29 @@ D(m) = (log 2) m log(m+1) + 1, the bound with |delta_m| <= D(m). -/
 noncomputable def DBound (m : ℕ) : ℝ :=
   Real.log 2 * (m : ℝ) * Real.log ((m : ℝ) + 1) + 1
 
+/-- MANUSCRIPT section 7: R(k), the total of the certified source bounds. -/
+noncomputable def RBound (Umax Vmax Sstar alph : ℝ) (k : ℕ) : ℝ :=
+  (Real.log 2 / 4) * ((2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax)
+    + Sstar * (2 * DBound k + DBound (k + 1))
+    + alph * (3 * (k : ℝ) + 4)
+    + 3 * (1.45 / (k : ℝ) + 1e-3)
+
+/-- MANUSCRIPT Theorem 7.1: phi(k) = a1(k^2 - 2k - 1) - R(k), the certified
+lower bound on Crit(k). -/
+noncomputable def phiBound (aa Umax Vmax Sstar alph : ℝ) (k : ℕ) : ℝ :=
+  aa * ((k : ℝ) ^ 2 - 2 * (k : ℝ) - 1) - RBound Umax Vmax Sstar alph k
+
+/-- Crit(k) >= phi(k), given the certified bound on the total error sources.
+The hypothesis hE bundles the four bullets of section 7 (convolution, S3, S1,
+Eexp) into a single bound on |2E(k) - E(k+1)|; each is certified separately in
+the manuscript. -/
+theorem crit_ge_phi (aa Umax Vmax Sstar alph : ℝ) (k : ℕ)
+    (hE : |2 * E aa k - E aa (k + 1)| ≤ RBound Umax Vmax Sstar alph k) :
+    phiBound aa Umax Vmax Sstar alph k ≤ Crit aa k := by
+  unfold phiBound Crit
+  have h := abs_le.mp hE
+  linarith [h.1]
+
 /-- D is nonnegative. -/
 theorem DBound_nonneg (m : ℕ) : 0 ≤ DBound m := by
   unfold DBound
