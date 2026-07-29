@@ -604,12 +604,12 @@ lemma Fk_summable (k : ℕ) (s : ℝ) (hs : 1 < s) :
 
 /-- ∫₁^∞ n^{-s} ds = 1/(n log n) for n ≥ 2. -/
 lemma integral_n_neg_s (n : ℕ) (hn : 2 ≤ n) :
-    ∫ s in Set.Ioi (1 : ℝ), (n:ℝ) ^ (-s) =
+    ∫ s in Set.Ioi (1 : ℝ), (n : ℝ) ^ (-s) =
       1 / ((n : ℝ) * Real.log n) := by
-  have hn1 : (1 : ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < n)
+  have hn1 : (1 : ℝ) < (n : ℝ) := by exact_mod_cast (by omega : 1 < n)
   have hlogn : 0 < Real.log n := Real.log_pos hn1
-  have hnpos : (0 : ℝ) < (n:ℝ) := by positivity
-  have hpteq : ∀ s : ℝ, (n:ℝ) ^ (-s) = Real.exp (-(Real.log n * s)) := by
+  have hnpos : (0 : ℝ) < (n : ℝ) := by positivity
+  have hpteq : ∀ s : ℝ, (n : ℝ) ^ (-s) = Real.exp (-(Real.log n * s)) := by
     intro s
     rw [Real.rpow_def_of_pos hnpos]
     congr 1; ring
@@ -627,27 +627,27 @@ lemma fk_eq_integral_Fk (k : ℕ) (hk : 1 ≤ k)
     f k = ∫ s in Set.Ioi (1 : ℝ), Fk k s := by
   unfold f Fk
   have habs : ∀ (n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k}) (s : ℝ),
-      ‖(n:ℝ) ^ (-s)‖ = (n:ℝ) ^ (-s) := by
+      ‖(n : ℝ) ^ (-s)‖ = (n : ℝ) ^ (-s) := by
     intro n s
     rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
   have hnorm_eq : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
-      ∫ s in Set.Ioi (1 : ℝ), ‖(n:ℝ) ^ (-s)‖ = 1 / ((n:ℝ) * Real.log n) := by
+      ∫ s in Set.Ioi (1 : ℝ), ‖(n : ℝ) ^ (-s)‖ = 1 / ((n : ℝ) * Real.log n) := by
     intro n
     simp_rw [habs]
     exact integral_n_neg_s n n.2.1
   have hsummable_norm : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
-      ∫ s in Set.Ioi (1 : ℝ), ‖(n:ℝ) ^ (-s)‖) := by
+      ∫ s in Set.Ioi (1 : ℝ), ‖(n : ℝ) ^ (-s)‖) := by
     simp_rw [hnorm_eq]; exact hsum1
   have hint : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
-      MeasureTheory.Integrable (fun s => (n:ℝ) ^ (-s))
+      MeasureTheory.Integrable (fun s => (n : ℝ) ^ (-s))
         (MeasureTheory.volume.restrict (Set.Ioi (1 : ℝ))) := by
     intro n
     by_contra hni
     have hz := MeasureTheory.integral_undef hni
     rw [integral_n_neg_s n n.2.1] at hz
-    have : (0 : ℝ) < 1 / ((n:ℝ) * Real.log n) := by
-      have hn2 : 2 ≤ (n:ℕ) := n.2.1
-      have : (1 : ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < (n:ℕ))
+    have : (0 : ℝ) < 1 / ((n : ℝ) * Real.log n) := by
+      have hn2 : 2 ≤ (n : ℕ) := n.2.1
+      have : (1 : ℝ) < (n : ℝ) := by exact_mod_cast (by omega : 1 < (n : ℕ))
       have := Real.log_pos this
       positivity
     linarith [hz ▸ this]
@@ -655,35 +655,35 @@ lemma fk_eq_integral_Fk (k : ℕ) (hk : 1 ≤ k)
   exact MeasureTheory.integral_tsum_of_summable_integral_norm hint hsummable_norm
 
 /-- The function s ↦ n^{-s} is continuous. -/
-lemma continuous_n_neg_s (n : ℕ) (hn : 2 ≤ n) : Continuous (fun s : ℝ => (n:ℝ) ^ (-s)) := by
-  have hnpos : (0 : ℝ) < (n:ℝ) := by positivity
+lemma continuous_n_neg_s (n : ℕ) (hn : 2 ≤ n) : Continuous (fun s : ℝ => (n : ℝ) ^ (-s)) := by
+  have hnpos : (0 : ℝ) < (n : ℝ) := by positivity
   exact (Real.continuous_const_rpow hnpos.ne').comp continuous_neg
 
 /-- n^{-s} is integrable on Ioi 1. -/
 lemma integrable_n_neg_s_Ioi1 (n : ℕ) (hn : 2 ≤ n) :
-    MeasureTheory.Integrable (fun s : ℝ => (n:ℝ) ^ (-s))
+    MeasureTheory.Integrable (fun s : ℝ => (n : ℝ) ^ (-s))
       (MeasureTheory.volume.restrict (Set.Ioi (1 : ℝ))) := by
   by_contra hni
   have hz := MeasureTheory.integral_undef hni
   rw [integral_n_neg_s n hn] at hz
-  have : (0 : ℝ) < 1 / ((n:ℝ) * Real.log n) := by
-    have hn1 : (1 : ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < n)
+  have : (0 : ℝ) < 1 / ((n : ℝ) * Real.log n) := by
+    have hn1 : (1 : ℝ) < (n : ℝ) := by exact_mod_cast (by omega : 1 < n)
     have := Real.log_pos hn1
     positivity
   linarith [hz ▸ this]
 
 /-- n^{-s} is integrable on Ioi 2 (via Ioi 2 ⊆ Ioi 1). -/
 lemma integrable_n_neg_s_Ioi2 (n : ℕ) (hn : 2 ≤ n) :
-    MeasureTheory.Integrable (fun s : ℝ => (n:ℝ) ^ (-s))
+    MeasureTheory.Integrable (fun s : ℝ => (n : ℝ) ^ (-s))
       (MeasureTheory.volume.restrict (Set.Ioi (2 : ℝ))) := by
   have hsub : Set.Ioi (2 : ℝ) ⊆ Set.Ioi (1 : ℝ) := fun x hx => lt_trans (by norm_num : (1 : ℝ) < 2) hx
   exact MeasureTheory.IntegrableOn.mono_set (integrable_n_neg_s_Ioi1 n hn) hsub
 
 /-- Splitting the improper integral at s=2. -/
 lemma integral_n_neg_s_split (n : ℕ) (hn : 2 ≤ n) :
-    ∫ s in Set.Ioi (1 : ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume =
-      ∫ s in Set.Ioc (1 : ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume +
-        ∫ s in Set.Ioi (2 : ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume := by
+    ∫ s in Set.Ioi (1 : ℝ), (n : ℝ) ^ (-s) ∂MeasureTheory.volume =
+      ∫ s in Set.Ioc (1 : ℝ) 2, (n : ℝ) ^ (-s) ∂MeasureTheory.volume +
+        ∫ s in Set.Ioi (2 : ℝ), (n : ℝ) ^ (-s) ∂MeasureTheory.volume := by
   have hunion : Set.Ioi (1 : ℝ) = Set.Ioc (1 : ℝ) 2 ∪ Set.Ioi (2 : ℝ) := by
     rw [Set.Ioc_union_Ioi_eq_Ioi (by norm_num : (1 : ℝ) ≤ 2)]
   have hdisj : Disjoint (Set.Ioc (1 : ℝ) 2) (Set.Ioi (2 : ℝ)) := by
@@ -697,12 +697,12 @@ lemma integral_n_neg_s_split (n : ℕ) (hn : 2 ≤ n) :
 
 /-- ∫₂^∞ n^{-s} ds = 1/(n² log n) for n ≥ 2. -/
 lemma integral_n_neg_s_Ioi2_value (n : ℕ) (hn : 2 ≤ n) :
-    ∫ s in Set.Ioi (2 : ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume =
-      1 / ((n:ℝ) ^ 2 * Real.log n) := by
-  have hnpos : (0 : ℝ) < (n:ℝ) := by positivity
-  have hn1 : (1 : ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < n)
+    ∫ s in Set.Ioi (2 : ℝ), (n : ℝ) ^ (-s) ∂MeasureTheory.volume =
+      1 / ((n : ℝ) ^ 2 * Real.log n) := by
+  have hnpos : (0 : ℝ) < (n : ℝ) := by positivity
+  have hn1 : (1 : ℝ) < (n : ℝ) := by exact_mod_cast (by omega : 1 < n)
   have hlogn : 0 < Real.log n := Real.log_pos hn1
-  have hpteq : ∀ s : ℝ, (n:ℝ) ^ (-s) = Real.exp (-(Real.log n * s)) := by
+  have hpteq : ∀ s : ℝ, (n : ℝ) ^ (-s) = Real.exp (-(Real.log n * s)) := by
     intro s
     rw [Real.rpow_def_of_pos hnpos]
     congr 1; ring
@@ -710,8 +710,8 @@ lemma integral_n_neg_s_Ioi2_value (n : ℕ) (hn : 2 ≤ n) :
   rw [MeasureTheory.integral_comp_mul_left_Ioi (fun u => Real.exp (-u)) 2 hlogn]
   simp only [smul_eq_mul]
   rw [integral_exp_neg_Ioi, Real.exp_neg]
-  have hexp2 : Real.exp (Real.log n * 2) = (n:ℝ) ^ 2 := by
-    have heq : Real.log (n:ℝ) * 2 = Real.log n + Real.log n := by ring
+  have hexp2 : Real.exp (Real.log n * 2) = (n : ℝ) ^ 2 := by
+    have heq : Real.log (n : ℝ) * 2 = Real.log n + Real.log n := by ring
     rw [heq, Real.exp_add, Real.exp_log hnpos]
     ring
   rw [hexp2]
@@ -732,65 +732,65 @@ theorem lemma1_foundation (k : ℕ) (hk : 1 ≤ k)
     f k = Ik k + Tk k := by
   have hn2 : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k}, 2 ≤ (n : ℕ) := fun n => n.2.1
   have hIoc_le : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
-      0 ≤ ∫ s in Set.Ioc (1 : ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume ∧
-      ∫ s in Set.Ioc (1 : ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume
-        ≤ 1 / ((n:ℝ) * Real.log n) := by
+      0 ≤ ∫ s in Set.Ioc (1 : ℝ) 2, (n : ℝ) ^ (-s) ∂MeasureTheory.volume ∧
+      ∫ s in Set.Ioc (1 : ℝ) 2, (n : ℝ) ^ (-s) ∂MeasureTheory.volume
+        ≤ 1 / ((n : ℝ) * Real.log n) := by
     intro n
     have hsplit := integral_n_neg_s_split n (hn2 n)
     have hpt := integral_n_neg_s n (hn2 n)
-    have hIoi2nonneg : 0 ≤ ∫ s in Set.Ioi (2 : ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume := by
+    have hIoi2nonneg : 0 ≤ ∫ s in Set.Ioi (2 : ℝ), (n : ℝ) ^ (-s) ∂MeasureTheory.volume := by
       apply MeasureTheory.integral_nonneg; intro s; positivity
-    have hIocnonneg : 0 ≤ ∫ s in Set.Ioc (1 : ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume := by
+    have hIocnonneg : 0 ≤ ∫ s in Set.Ioc (1 : ℝ) 2, (n : ℝ) ^ (-s) ∂MeasureTheory.volume := by
       apply MeasureTheory.integral_nonneg; intro s; positivity
     refine ⟨hIocnonneg, ?_⟩
     rw [← hpt]
     linarith [hsplit, hIoi2nonneg]
   have hsummable_Ioc : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
-      ∫ s in Set.Ioc (1 : ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume) :=
+      ∫ s in Set.Ioc (1 : ℝ) 2, (n : ℝ) ^ (-s) ∂MeasureTheory.volume) :=
     Summable.of_nonneg_of_le (fun n => (hIoc_le n).1) (fun n => (hIoc_le n).2) hsum1
   have hTk_le : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
-      0 ≤ 1 / ((n:ℝ) ^ 2 * Real.log n) ∧
-        1 / ((n:ℝ) ^ 2 * Real.log n) ≤ 1 / ((n:ℝ) * Real.log n) := by
+      0 ≤ 1 / ((n : ℝ) ^ 2 * Real.log n) ∧
+        1 / ((n : ℝ) ^ 2 * Real.log n) ≤ 1 / ((n : ℝ) * Real.log n) := by
     intro n
-    have hnpos : (0 : ℝ) < (n:ℝ) :=
+    have hnpos : (0 : ℝ) < (n : ℝ) :=
       by exact_mod_cast (lt_of_lt_of_le (by norm_num : (0 : ℕ) < 2) (hn2 n))
-    have hn1 : (1 : ℝ) < (n:ℝ) := by exact_mod_cast (by omega : 1 < (n:ℕ))
+    have hn1 : (1 : ℝ) < (n : ℝ) := by exact_mod_cast (by omega : 1 < (n : ℕ))
     have hlogn := Real.log_pos hn1
-    have hnpos2 : (0 : ℝ) < (n:ℝ) ^ 2 := pow_pos hnpos 2
-    have hprod : 0 < (n:ℝ) ^ 2 * Real.log n := mul_pos hnpos2 hlogn
-    have hprod1 : 0 < (n:ℝ) * Real.log n := mul_pos hnpos hlogn
+    have hnpos2 : (0 : ℝ) < (n : ℝ) ^ 2 := pow_pos hnpos 2
+    have hprod : 0 < (n : ℝ) ^ 2 * Real.log n := mul_pos hnpos2 hlogn
+    have hprod1 : 0 < (n : ℝ) * Real.log n := mul_pos hnpos hlogn
     constructor
     · exact le_of_lt (div_pos (by norm_num) hprod)
     · apply div_le_div_of_nonneg_left (by norm_num) hprod1
-      nlinarith [sq_nonneg ((n:ℝ) - 1)]
+      nlinarith [sq_nonneg ((n : ℝ) - 1)]
   have hsummable_Tk : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
-      1 / ((n:ℝ) ^ 2 * Real.log n)) :=
+      1 / ((n : ℝ) ^ 2 * Real.log n)) :=
     Summable.of_nonneg_of_le (fun n => (hTk_le n).1) (fun n => (hTk_le n).2) hsum1
   unfold f
   rw [tsum_congr (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
     (integral_n_neg_s n (hn2 n)).symm)]
   have hpt_split2 : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
-      ∫ s in Set.Ioi (1 : ℝ), (n:ℝ) ^ (-s) ∂MeasureTheory.volume =
-        ∫ s in Set.Ioc (1 : ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume +
-          1 / ((n:ℝ) ^ 2 * Real.log n) := by
+      ∫ s in Set.Ioi (1 : ℝ), (n : ℝ) ^ (-s) ∂MeasureTheory.volume =
+        ∫ s in Set.Ioc (1 : ℝ) 2, (n : ℝ) ^ (-s) ∂MeasureTheory.volume +
+          1 / ((n : ℝ) ^ 2 * Real.log n) := by
     intro n
     rw [integral_n_neg_s_split n (hn2 n), integral_n_neg_s_Ioi2_value n (hn2 n)]
   rw [tsum_congr hpt_split2, Summable.tsum_add hsummable_Ioc hsummable_Tk]
   congr 1
   · have hint : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
-        MeasureTheory.Integrable (fun s : ℝ => (n:ℝ) ^ (-s))
+        MeasureTheory.Integrable (fun s : ℝ => (n : ℝ) ^ (-s))
           (MeasureTheory.volume.restrict (Set.Ioc (1 : ℝ) 2)) :=
       fun n => (continuous_n_neg_s n (hn2 n)).integrableOn_Ioc
     unfold Ik Fk
     have hnorm_eq : ∀ n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k},
-        ∫ s in Set.Ioc (1 : ℝ) 2, ‖(n:ℝ) ^ (-s)‖ ∂MeasureTheory.volume =
-          ∫ s in Set.Ioc (1 : ℝ) 2, (n:ℝ) ^ (-s) ∂MeasureTheory.volume := by
+        ∫ s in Set.Ioc (1 : ℝ) 2, ‖(n : ℝ) ^ (-s)‖ ∂MeasureTheory.volume =
+          ∫ s in Set.Ioc (1 : ℝ) 2, (n : ℝ) ^ (-s) ∂MeasureTheory.volume := by
       intro n
       congr 1
       funext s
       exact Real.norm_of_nonneg (by positivity)
     have hsummable_norm2 : Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} =>
-        ∫ s in Set.Ioc (1 : ℝ) 2, ‖(n:ℝ) ^ (-s)‖ ∂MeasureTheory.volume) :=
+        ∫ s in Set.Ioc (1 : ℝ) 2, ‖(n : ℝ) ^ (-s)‖ ∂MeasureTheory.volume) :=
       hsummable_Ioc.congr (fun n => (hnorm_eq n).symm)
     exact MeasureTheory.integral_tsum_of_summable_integral_norm hint hsummable_norm2
 
@@ -798,28 +798,28 @@ theorem lemma1_foundation (k : ℕ) (hk : 1 ≤ k)
 theorem assembly_identity (k : ℕ) (c δ : ℕ → ℝ) (q : ℝ) :
     ∑ i ∈ Finset.range (k + 1), c i * 2 ^ i * (2 ^ (k - i + 1) - q * ((k - i : ℕ):ℝ) ^ 2 + δ (k - i)) =
       2 ^ (k + 1) * (∑ i ∈ Finset.range (k + 1), c i) -
-        q * ((k:ℝ) ^ 2 * (∑ i ∈ Finset.range (k + 1), 2 ^ i * c i) -
-          2 * k * (∑ i ∈ Finset.range (k + 1), (i:ℝ) * 2 ^ i * c i) +
-          (∑ i ∈ Finset.range (k + 1), (i:ℝ) ^ 2 * 2 ^ i * c i)) +
+        q * ((k : ℝ) ^ 2 * (∑ i ∈ Finset.range (k + 1), 2 ^ i * c i) -
+          2 * k * (∑ i ∈ Finset.range (k + 1), (i : ℝ) * 2 ^ i * c i) +
+          (∑ i ∈ Finset.range (k + 1), (i : ℝ) ^ 2 * 2 ^ i * c i)) +
         (∑ i ∈ Finset.range (k + 1), 2 ^ i * c i * δ (k - i)) := by
   have hterm : ∀ i ∈ Finset.range (k + 1),
       c i * 2 ^ i * (2 ^ (k - i + 1) - q * ((k - i : ℕ):ℝ) ^ 2 + δ (k - i)) =
         c i * 2 ^ (k + 1) -
-          q * (c i * 2 ^ i * (k:ℝ) ^ 2 - 2 * k * (c i * 2 ^ i * (i:ℝ)) + c i * 2 ^ i * (i:ℝ) ^ 2) +
+          q * (c i * 2 ^ i * (k : ℝ) ^ 2 - 2 * k * (c i * 2 ^ i * (i : ℝ)) + c i * 2 ^ i * (i : ℝ) ^ 2) +
           c i * 2 ^ i * δ (k - i) := by
     intro i hi
     have hik : i ≤ k := by
       have := Finset.mem_range.mp hi; omega
-    have hcast : ((k - i : ℕ):ℝ) = (k:ℝ) - (i:ℝ) := Nat.cast_sub hik
+    have hcast : ((k - i : ℕ):ℝ) = (k : ℝ) - (i : ℝ) := Nat.cast_sub hik
     have hexp : (2 : ℝ) ^ i * 2 ^ (k - i + 1) = 2 ^ (k + 1) := by
       rw [← pow_add]
       congr 1
       omega
     rw [hcast]
     have expand :
-        c i * 2 ^ i * ((2 : ℝ) ^ (k - i + 1) - q * ((k:ℝ) - i) ^ 2 + δ (k - i)) =
+        c i * 2 ^ i * ((2 : ℝ) ^ (k - i + 1) - q * ((k : ℝ) - i) ^ 2 + δ (k - i)) =
           c i * (2 ^ i * 2 ^ (k - i + 1)) -
-            q * (c i * 2 ^ i * ((k:ℝ) - i) ^ 2) + c i * 2 ^ i * δ (k - i) := by
+            q * (c i * 2 ^ i * ((k : ℝ) - i) ^ 2) + c i * 2 ^ i * δ (k - i) := by
       ring
     rw [expand, hexp]
     ring
@@ -1058,23 +1058,23 @@ theorem log_bound_combined (x : ℝ) (hx : |x| ≤ 2/3) :
     |{-log(1-z p^{-s})} + z log(1-p^{-s})| ≤ 18 p^{-2s}. -/
 theorem prime_correction_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℝ) (hz : |z| ≤ 2) :
-    |(-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))|
-      ≤ 18 * (p:ℝ) ^ (-2*s) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    |(-Real.log (1 - z * (p : ℝ) ^ (-s))) + z * Real.log (1 - (p : ℝ) ^ (-s))|
+      ≤ 18 * (p : ℝ) ^ (-2*s) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/3 := by
     rw [ha_def]
-    have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/3 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/3 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
   have hza_le : |z * a| ≤ 2/3 := by
@@ -1104,33 +1104,33 @@ theorem prime_correction_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
   have hbound : 3 * (z*a)^2 + |z| * (3 * a^2) ≤ 18 * a^2 := by
     have hz2 : z^2 ≤ 4 := by nlinarith [abs_le.mp hz]
     nlinarith [sq_nonneg a, hz2, hz, sq_abs z]
-  have heq : (18 : ℝ) * a^2 = 18 * (p:ℝ) ^ (-2*s) := by
-    rw [ha_def, ← Real.rpow_natCast ((p:ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
+  have heq : (18 : ℝ) * a^2 = 18 * (p : ℝ) ^ (-2*s) := by
+    rw [ha_def, ← Real.rpow_natCast ((p : ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
     ring_nf
   calc |(-(Real.log (1 - z * a) + z * a) + z * (Real.log (1 - a) + a))|
       ≤ |Real.log (1 - z * a) + z * a| + |z * (Real.log (1 - a) + a)| := hstep1
     _ ≤ 3 * (z*a)^2 + |z| * (3 * a^2) := hfinal
     _ ≤ 18 * a^2 := hbound
-    _ = 18 * (p:ℝ) ^ (-2*s) := heq
+    _ = 18 * (p : ℝ) ^ (-2*s) := heq
 
 /-- Summability of the per-prime correction terms. -/
 theorem prime_correction_summable (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      |(-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))|) := by
-  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => 18 * (p:ℝ) ^ (-2*s)) := by
+      |(-Real.log (1 - z * (p : ℝ) ^ (-s))) + z * Real.log (1 - (p : ℝ) ^ (-s))|) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => 18 * (p : ℝ) ^ (-2*s)) := by
     have h2s : -(2*s) < -1 := by linarith
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
       Real.summable_nat_rpow.mpr h2s
-    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
       hbase.subtype _
-    have heq : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (18 : ℝ) * (p:ℝ) ^ (-2*s) =
-        18 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (18 : ℝ) * (p : ℝ) ^ (-2*s) =
+        18 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
       intro p; ring_nf
     simp_rw [heq]
     exact hsub.mul_left 18
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => abs_nonneg _)
-    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => prime_correction_bound (p:ℕ) p.property.2 s hs z hz)
+    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => prime_correction_bound (p : ℕ) p.property.2 s hs z hz)
     hcomp
 
 /-- |exp(x)-1| ≤ 2|x| for |x| ≤ 1. -/
@@ -1201,110 +1201,110 @@ theorem abs_exp_sub_one_le (x : ℝ) (hx : |x| ≤ 1) : |Real.exp x - 1| ≤ 2 *
 /-- For p ≥ 5, s ≥ 1: 18p^{-2s} ≤ 1. p=3 handled separately later
     as an ordinary finite factor, not through Multipliable machinery. -/
 theorem correction_le_one (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
-    18 * (p:ℝ) ^ (-2*s) ≤ 1 := by
-  have hp5 : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hpos : (0 : ℝ) < (p:ℝ) := by linarith
-  have h1 : (p:ℝ) ^ (-2*s) ≤ (p:ℝ) ^ (-2:ℝ) := by
+    18 * (p : ℝ) ^ (-2*s) ≤ 1 := by
+  have hp5 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hpos : (0 : ℝ) < (p : ℝ) := by linarith
+  have h1 : (p : ℝ) ^ (-2*s) ≤ (p : ℝ) ^ (-2:ℝ) := by
     apply Real.rpow_le_rpow_of_exponent_le (by linarith)
     linarith
-  have hpow : (5 : ℝ) ^ (2 : ℝ) ≤ (p:ℝ) ^ (2 : ℝ) :=
+  have hpow : (5 : ℝ) ^ (2 : ℝ) ≤ (p : ℝ) ^ (2 : ℝ) :=
     Real.rpow_le_rpow (by norm_num) hp5 (by norm_num)
   have heq5 : (5 : ℝ) ^ (-2:ℝ) = ((5 : ℝ) ^ (2 : ℝ))⁻¹ :=
     Real.rpow_neg (by norm_num) 2
-  have heqp : (p:ℝ) ^ (-2:ℝ) = ((p:ℝ) ^ (2 : ℝ))⁻¹ :=
+  have heqp : (p : ℝ) ^ (-2:ℝ) = ((p : ℝ) ^ (2 : ℝ))⁻¹ :=
     Real.rpow_neg hpos.le 2
-  have h2 : (p:ℝ) ^ (-2:ℝ) ≤ (5 : ℝ) ^ (-2:ℝ) := by
+  have h2 : (p : ℝ) ^ (-2:ℝ) ≤ (5 : ℝ) ^ (-2:ℝ) := by
     rw [heqp, heq5]
     gcongr
   have h5val : (5 : ℝ) ^ (-2:ℝ) = 1/25 := by
     rw [heq5]
     norm_num [Real.rpow_natCast]
-  have hchain : (p:ℝ) ^ (-2*s) ≤ 1/25 := le_trans h1 (h2.trans_eq h5val)
+  have hchain : (p : ℝ) ^ (-2*s) ≤ 1/25 := le_trans h1 (h2.trans_eq h5val)
   linarith [hchain]
 
 /-- Wide-radius variant: 20 p^(-2s) <= 1 for p >= 5 (20/25 = 0.8). -/
 theorem correction_le_one_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
-    20 * (p:ℝ) ^ (-2*s) ≤ 1 := by
-  have hp5 : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hpos : (0 : ℝ) < (p:ℝ) := by linarith
-  have h1 : (p:ℝ) ^ (-2*s) ≤ (p:ℝ) ^ (-2:ℝ) := by
+    20 * (p : ℝ) ^ (-2*s) ≤ 1 := by
+  have hp5 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hpos : (0 : ℝ) < (p : ℝ) := by linarith
+  have h1 : (p : ℝ) ^ (-2*s) ≤ (p : ℝ) ^ (-2:ℝ) := by
     apply Real.rpow_le_rpow_of_exponent_le (by linarith)
     linarith
-  have hpow : (5 : ℝ) ^ (2 : ℝ) ≤ (p:ℝ) ^ (2 : ℝ) :=
+  have hpow : (5 : ℝ) ^ (2 : ℝ) ≤ (p : ℝ) ^ (2 : ℝ) :=
     Real.rpow_le_rpow (by norm_num) hp5 (by norm_num)
   have heq5 : (5 : ℝ) ^ (-2:ℝ) = ((5 : ℝ) ^ (2 : ℝ))⁻¹ :=
     Real.rpow_neg (by norm_num) 2
-  have heqp : (p:ℝ) ^ (-2:ℝ) = ((p:ℝ) ^ (2 : ℝ))⁻¹ :=
+  have heqp : (p : ℝ) ^ (-2:ℝ) = ((p : ℝ) ^ (2 : ℝ))⁻¹ :=
     Real.rpow_neg hpos.le 2
-  have h2 : (p:ℝ) ^ (-2:ℝ) ≤ (5 : ℝ) ^ (-2:ℝ) := by
+  have h2 : (p : ℝ) ^ (-2:ℝ) ≤ (5 : ℝ) ^ (-2:ℝ) := by
     rw [heqp, heq5]
     gcongr
   have h5val : (5 : ℝ) ^ (-2:ℝ) = 1/25 := by
     rw [heq5]
     norm_num [Real.rpow_natCast]
-  have hchain : (p:ℝ) ^ (-2*s) ≤ 1/25 := le_trans h1 (h2.trans_eq h5val)
+  have hchain : (p : ℝ) ^ (-2*s) ≤ 1/25 := le_trans h1 (h2.trans_eq h5val)
   linarith [hchain]
 
 /-- |exp(correction_p) - 1| ≤ 36 p^{-2s} for p ≥ 5. -/
 theorem prime_factor_sub_one_bound (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℝ) (hz : |z| ≤ 2) :
-    |Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1|
-      ≤ 36 * (p:ℝ) ^ (-2*s) := by
-  set c : ℝ := (-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))
+    |Real.exp ((-Real.log (1 - z * (p : ℝ) ^ (-s))) + z * Real.log (1 - (p : ℝ) ^ (-s))) - 1|
+      ≤ 36 * (p : ℝ) ^ (-2*s) := by
+  set c : ℝ := (-Real.log (1 - z * (p : ℝ) ^ (-s))) + z * Real.log (1 - (p : ℝ) ^ (-s))
     with hc_def
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by
     have : (5 : ℕ) ≤ p := hp
-    have : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast this
+    have : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast this
     linarith
   have hp3nat : 3 ≤ p := by omega
-  have hbound : |c| ≤ 18 * (p:ℝ) ^ (-2*s) := prime_correction_bound p hp3nat s hs z hz
-  have hle1 : 18 * (p:ℝ) ^ (-2*s) ≤ 1 := correction_le_one p hp s hs
+  have hbound : |c| ≤ 18 * (p : ℝ) ^ (-2*s) := prime_correction_bound p hp3nat s hs z hz
+  have hle1 : 18 * (p : ℝ) ^ (-2*s) ≤ 1 := correction_le_one p hp s hs
   have hc1 : |c| ≤ 1 := le_trans hbound hle1
   have hexp := abs_exp_sub_one_le c hc1
   calc |Real.exp c - 1| ≤ 2 * |c| := hexp
-    _ ≤ 2 * (18 * (p:ℝ) ^ (-2*s)) := by linarith
-    _ = 36 * (p:ℝ) ^ (-2*s) := by ring
+    _ ≤ 2 * (18 * (p : ℝ) ^ (-2*s)) := by linarith
+    _ = 36 * (p : ℝ) ^ (-2*s) := by ring
 
 /-- Summability of |factor_p - 1| over primes p ≥ 5. -/
 theorem prime_factor_sub_one_summable (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      |Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1|) := by
-  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 36 * (p:ℝ) ^ (-2*s)) := by
+      |Real.exp ((-Real.log (1 - z * (p : ℝ) ^ (-s))) + z * Real.log (1 - (p : ℝ) ^ (-s))) - 1|) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 36 * (p : ℝ) ^ (-2*s)) := by
     have h2s : -(2*s) < -1 := by linarith
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
       Real.summable_nat_rpow.mpr h2s
-    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
       hbase.subtype _
-    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (36 : ℝ) * (p:ℝ) ^ (-2*s) =
-        36 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (36 : ℝ) * (p : ℝ) ^ (-2*s) =
+        36 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
       intro p; ring_nf
     simp_rw [heq]
     exact hsub.mul_left 36
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => abs_nonneg _)
-    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => prime_factor_sub_one_bound (p:ℕ) p.property.2 s hs z hz)
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => prime_factor_sub_one_bound (p : ℕ) p.property.2 s hs z hz)
     hcomp
 
 /-- The G₂ per-prime factor equals exp(correction_p). -/
 theorem prime_factor_eq_exp (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℝ) (hz : |z| ≤ 2) :
-    (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z =
-      Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    (1 - z * (p : ℝ) ^ (-s))⁻¹ * (1 - (p : ℝ) ^ (-s)) ^ z =
+      Real.exp ((-Real.log (1 - z * (p : ℝ) ^ (-s))) + z * Real.log (1 - (p : ℝ) ^ (-s))) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/3 := by
     rw [ha_def]
-    have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/3 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/3 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
   have hza_lt : z * a < 1 := by
@@ -1326,32 +1326,32 @@ theorem prime_factor_eq_exp (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
 /-- MULTIPLIABLE: the G₂ per-prime factor is Multipliable over primes p≥5. -/
 theorem prime_factor_multipliable (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z) := by
+      (1 - z * (p : ℝ) ^ (-s))⁻¹ * (1 - (p : ℝ) ^ (-s)) ^ z) := by
   have hsummable := prime_factor_sub_one_summable s hs z hz
   have hmult : Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      1 + (Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1)) := by
+      1 + (Real.exp ((-Real.log (1 - z * (p : ℝ) ^ (-s))) + z * Real.log (1 - (p : ℝ) ^ (-s))) - 1)) := by
     first
     | exact multipliable_one_add_of_summable hsummable
     | exact multipliable_one_add_of_summable_norm hsummable
-    | exact multipliable_one_add_of_summable (f := fun p => Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1) hsummable
+    | exact multipliable_one_add_of_summable (f := fun p => Real.exp ((-Real.log (1 - z * (p : ℝ) ^ (-s))) + z * Real.log (1 - (p : ℝ) ^ (-s))) - 1) hsummable
   have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-      (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z =
-        1 + (Real.exp ((-Real.log (1 - z * (p:ℝ) ^ (-s))) + z * Real.log (1 - (p:ℝ) ^ (-s))) - 1) := by
+      (1 - z * (p : ℝ) ^ (-s))⁻¹ * (1 - (p : ℝ) ^ (-s)) ^ z =
+        1 + (Real.exp ((-Real.log (1 - z * (p : ℝ) ^ (-s))) + z * Real.log (1 - (p : ℝ) ^ (-s))) - 1) := by
     intro p
-    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
-    rw [prime_factor_eq_exp (p:ℕ) hp3 s hs z hz]
+    have hp3 : 3 ≤ (p : ℕ) := by have := p.property.2; omega
+    rw [prime_factor_eq_exp (p : ℕ) hp3 s hs z hz]
     ring
   simpa only [heq] using hmult
 
 /-- The tail of G₂: infinite product over primes p≥5. -/
 noncomputable def G2tail (s z : ℝ) : ℝ :=
-  ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z
+  ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (1 - z * (p : ℝ) ^ (-s))⁻¹ * (1 - (p : ℝ) ^ (-s)) ^ z
 
 /-- G2tail actually has this product as its value, since the family is
     genuinely Multipliable. -/
 theorem G2tail_hasProd (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
     HasProd (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (1 - z * (p:ℝ) ^ (-s))⁻¹ * (1 - (p:ℝ) ^ (-s)) ^ z) (G2tail s z) :=
+      (1 - z * (p : ℝ) ^ (-s))⁻¹ * (1 - (p : ℝ) ^ (-s)) ^ z) (G2tail s z) :=
   (prime_factor_multipliable s hs z hz).hasProd
 
 /-- The full G₂(s,z): p=3 factor times the convergent tail over p≥5. -/
@@ -1376,9 +1376,9 @@ theorem complex_log_bound (w : ℂ) (hw : ‖w‖ < 1) :
       | rw [Complex.norm_def, Real.sq_sqrt (Complex.normSq_nonneg v)]
     have : v.re^2 ≤ ‖v‖^2 := by rw [hnormsq]; exact hns
     nlinarith [abs_nonneg v.re, norm_nonneg v, sq_abs v.re, this]
-  have hslit : ∀ t ∈ Set.Icc (0 : ℝ) 1, (1 - (t:ℂ) * w) ∈ Complex.slitPlane := by
+  have hslit : ∀ t ∈ Set.Icc (0 : ℝ) 1, (1 - (t : ℂ) * w) ∈ Complex.slitPlane := by
     intro t ht
-    have hre : (0 : ℝ) < (1 - (t:ℂ) * w).re := by
+    have hre : (0 : ℝ) < (1 - (t : ℂ) * w).re := by
       simp only [Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
         Complex.ofReal_im]
       have h1 : t ≤ 1 := ht.2
@@ -1390,25 +1390,25 @@ theorem complex_log_bound (w : ℂ) (hw : ‖w‖ < 1) :
       nlinarith [hw, h3]
     left; exact hre
   have hderiv : ∀ t ∈ Set.Icc (0 : ℝ) 1,
-      HasDerivAt (fun s : ℝ => -Complex.log (1 - (s:ℂ) * w)) (w / (1 - (t:ℂ) * w)) t := by
+      HasDerivAt (fun s : ℝ => -Complex.log (1 - (s : ℂ) * w)) (w / (1 - (t : ℂ) * w)) t := by
     intro t ht
-    have h1 : HasDerivAt (fun s : ℝ => (1 : ℂ) - (s:ℂ) * w) (-w) t := by
-      have hid : HasDerivAt (fun s : ℝ => (s:ℂ)) (1 : ℂ) t := by
+    have h1 : HasDerivAt (fun s : ℝ => (1 : ℂ) - (s : ℂ) * w) (-w) t := by
+      have hid : HasDerivAt (fun s : ℝ => (s : ℂ)) (1 : ℂ) t := by
         first
         | exact Complex.hasDerivAt_ofReal t
         | simpa using (Complex.ofRealCLM.hasDerivAt (x := t))
         | exact (hasDerivAt_id t).ofReal_comp
       simpa using (hid.mul_const w).const_sub (1 : ℂ)
     have hslit_t := hslit t ht
-    have hlogderiv : HasDerivAt Complex.log (1 - (t:ℂ) * w)⁻¹ (1 - (t:ℂ) * w) :=
+    have hlogderiv : HasDerivAt Complex.log (1 - (t : ℂ) * w)⁻¹ (1 - (t : ℂ) * w) :=
       Complex.hasDerivAt_log hslit_t
     have h2 := hlogderiv.comp t h1
-    have h3 : HasDerivAt (fun s : ℝ => -Complex.log (1 - (s:ℂ) * w))
-        (-((1 - (t:ℂ) * w)⁻¹ * -w)) t := h2.neg
-    have heq : -((1 - (t:ℂ) * w)⁻¹ * -w) = w / (1 - (t:ℂ) * w) := by
+    have h3 : HasDerivAt (fun s : ℝ => -Complex.log (1 - (s : ℂ) * w))
+        (-((1 - (t : ℂ) * w)⁻¹ * -w)) t := h2.neg
+    have heq : -((1 - (t : ℂ) * w)⁻¹ * -w) = w / (1 - (t : ℂ) * w) := by
       rw [div_eq_mul_inv]; ring
     rwa [heq] at h3
-  have hcont : ContinuousOn (fun t : ℝ => w / (1 - (t:ℂ) * w)) (Set.Icc 0 1) := by
+  have hcont : ContinuousOn (fun t : ℝ => w / (1 - (t : ℂ) * w)) (Set.Icc 0 1) := by
     apply ContinuousOn.div continuousOn_const
     · fun_prop
     · intro t ht
@@ -1416,11 +1416,11 @@ theorem complex_log_bound (w : ℂ) (hw : ‖w‖ < 1) :
       intro heq
       rw [heq] at this
       simp [Complex.slitPlane] at this
-  have hFTC : ∫ t in (0 : ℝ)..1, w / (1 - (t:ℂ) * w) =
+  have hFTC : ∫ t in (0 : ℝ)..1, w / (1 - (t : ℂ) * w) =
       (-Complex.log (1 - (1 : ℝ) * w)) - (-Complex.log (1 - (0 : ℝ) * w)) := by
     apply intervalIntegral.integral_eq_sub_of_hasDerivAt
-      (f := fun s : ℝ => -Complex.log (1 - (s:ℂ) * w))
-      (f' := fun t : ℝ => w / (1 - (t:ℂ) * w))
+      (f := fun s : ℝ => -Complex.log (1 - (s : ℂ) * w))
+      (f' := fun t : ℝ => w / (1 - (t : ℂ) * w))
     · intro t ht
       rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at ht
       exact hderiv t ht
@@ -1429,57 +1429,57 @@ theorem complex_log_bound (w : ℂ) (hw : ‖w‖ < 1) :
       exact hcont
   simp only [Complex.ofReal_one, one_mul, Complex.ofReal_zero, zero_mul, sub_zero,
     Complex.log_one, neg_zero, sub_zero] at hFTC
-  have hintg : ∀ t ∈ Set.Icc (0 : ℝ) 1, w / (1 - (t:ℂ) * w) - w =
-      (t:ℂ) * w^2 / (1 - (t:ℂ) * w) := by
+  have hintg : ∀ t ∈ Set.Icc (0 : ℝ) 1, w / (1 - (t : ℂ) * w) - w =
+      (t : ℂ) * w^2 / (1 - (t : ℂ) * w) := by
     intro t ht
-    have hne : (1 : ℂ) - (t:ℂ) * w ≠ 0 := by
+    have hne : (1 : ℂ) - (t : ℂ) * w ≠ 0 := by
       intro heq
       have := hslit t ht
       rw [heq] at this
       simp [Complex.slitPlane] at this
     rw [← sub_eq_zero]
-    have step1 : w / (1 - (t:ℂ) * w) - (t:ℂ) * w^2 / (1 - (t:ℂ) * w) =
-        (w - (t:ℂ) * w^2) / (1 - (t:ℂ) * w) := div_sub_div_same w ((t:ℂ) * w^2) _
-    have step2 : w - (t:ℂ) * w^2 = w * (1 - (t:ℂ) * w) := by ring
-    have step3 : w / (1 - (t:ℂ) * w) - w - (t:ℂ) * w^2 / (1 - (t:ℂ) * w) =
-        (w / (1 - (t:ℂ) * w) - (t:ℂ) * w^2 / (1 - (t:ℂ) * w)) - w := by ring
+    have step1 : w / (1 - (t : ℂ) * w) - (t : ℂ) * w^2 / (1 - (t : ℂ) * w) =
+        (w - (t : ℂ) * w^2) / (1 - (t : ℂ) * w) := div_sub_div_same w ((t : ℂ) * w^2) _
+    have step2 : w - (t : ℂ) * w^2 = w * (1 - (t : ℂ) * w) := by ring
+    have step3 : w / (1 - (t : ℂ) * w) - w - (t : ℂ) * w^2 / (1 - (t : ℂ) * w) =
+        (w / (1 - (t : ℂ) * w) - (t : ℂ) * w^2 / (1 - (t : ℂ) * w)) - w := by ring
     rw [step3, step1, step2, mul_div_assoc, div_self hne, mul_one]
     ring
   have hintconst : ∫ t in (0 : ℝ)..1, w = w := by
     simp [intervalIntegral.integral_const]
-  have hsplit : ∫ t in (0 : ℝ)..1, (w / (1 - (t:ℂ) * w) - w) =
-      ∫ t in (0 : ℝ)..1, ((t:ℂ) * w^2 / (1 - (t:ℂ) * w)) := by
+  have hsplit : ∫ t in (0 : ℝ)..1, (w / (1 - (t : ℂ) * w) - w) =
+      ∫ t in (0 : ℝ)..1, ((t : ℂ) * w^2 / (1 - (t : ℂ) * w)) := by
     apply intervalIntegral.integral_congr
     intro t ht
     rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at ht
     exact hintg t ht
-  have hlhs : ∫ t in (0 : ℝ)..1, (w / (1 - (t:ℂ) * w) - w) = -Complex.log (1 - w) - w := by
+  have hlhs : ∫ t in (0 : ℝ)..1, (w / (1 - (t : ℂ) * w) - w) = -Complex.log (1 - w) - w := by
     rw [intervalIntegral.integral_sub]
     · rw [hFTC, hintconst]
     · exact (hcont.mono (Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1) ▸ Set.Subset.refl _)).intervalIntegrable
     · exact intervalIntegrable_const
-  have hkey : Complex.log (1 - w) + w = -(∫ t in (0 : ℝ)..1, ((t:ℂ) * w^2 / (1 - (t:ℂ) * w))) := by
-    have h1 : -Complex.log (1 - w) - w = ∫ t in (0 : ℝ)..1, ((t:ℂ) * w^2 / (1 - (t:ℂ) * w)) := by
+  have hkey : Complex.log (1 - w) + w = -(∫ t in (0 : ℝ)..1, ((t : ℂ) * w^2 / (1 - (t : ℂ) * w))) := by
+    have h1 : -Complex.log (1 - w) - w = ∫ t in (0 : ℝ)..1, ((t : ℂ) * w^2 / (1 - (t : ℂ) * w)) := by
       rw [← hlhs, hsplit]
     linear_combination -h1
   rw [hkey, norm_neg]
   have hbound : ∀ t ∈ Set.uIcc (0 : ℝ) 1,
-      ‖(t:ℂ) * w^2 / (1 - (t:ℂ) * w)‖ ≤ ‖w‖^2 / (1 - ‖w‖) := by
+      ‖(t : ℂ) * w^2 / (1 - (t : ℂ) * w)‖ ≤ ‖w‖^2 / (1 - ‖w‖) := by
     intro t ht
     rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at ht
     have ht0 : (0 : ℝ) ≤ t := ht.1
     have ht1 : t ≤ 1 := ht.2
-    have hne : (1 : ℂ) - (t:ℂ) * w ≠ 0 := by
+    have hne : (1 : ℂ) - (t : ℂ) * w ≠ 0 := by
       intro heq
       have := hslit t (Set.mem_Icc.mpr ⟨ht0, ht1⟩)
       rw [heq] at this
       simp [Complex.slitPlane] at this
-    have hdenom : 1 - ‖w‖ ≤ ‖(1 : ℂ) - (t:ℂ) * w‖ := by
-      have h1 : ((1 : ℂ) - (t:ℂ) * w).re ≤ ‖(1 : ℂ) - (t:ℂ) * w‖ := by
-        have := hre_le_norm ((1 : ℂ) - (t:ℂ) * w)
+    have hdenom : 1 - ‖w‖ ≤ ‖(1 : ℂ) - (t : ℂ) * w‖ := by
+      have h1 : ((1 : ℂ) - (t : ℂ) * w).re ≤ ‖(1 : ℂ) - (t : ℂ) * w‖ := by
+        have := hre_le_norm ((1 : ℂ) - (t : ℂ) * w)
         rw [abs_le] at this
         linarith [this.2]
-      have h2 : 1 - ‖w‖ ≤ ((1 : ℂ) - (t:ℂ) * w).re := by
+      have h2 : 1 - ‖w‖ ≤ ((1 : ℂ) - (t : ℂ) * w).re := by
         simp only [Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
           Complex.ofReal_im]
         have h3 : t * w.re ≤ ‖w‖ := by
@@ -1489,13 +1489,13 @@ theorem complex_log_bound (w : ℂ) (hw : ‖w‖ < 1) :
         nlinarith [h3]
       linarith
     have hdenom_pos : (0 : ℝ) < 1 - ‖w‖ := by linarith [hw]
-    have htnorm : ‖(t:ℂ)‖ = t := by
+    have htnorm : ‖(t : ℂ)‖ = t := by
       first
       | rw [Complex.norm_real]; exact abs_of_nonneg ht0
       | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ht0
       | simp [Complex.norm_eq_abs, abs_of_nonneg ht0]
-    calc ‖(t:ℂ) * w^2 / (1 - (t:ℂ) * w)‖
-        = t * ‖w‖^2 / ‖(1 : ℂ) - (t:ℂ) * w‖ := by
+    calc ‖(t : ℂ) * w^2 / (1 - (t : ℂ) * w)‖
+        = t * ‖w‖^2 / ‖(1 : ℂ) - (t : ℂ) * w‖ := by
           rw [norm_div, norm_mul, norm_pow, htnorm]
       _ ≤ t * ‖w‖^2 / (1 - ‖w‖) := by
           apply div_le_div_of_nonneg_left (by positivity) hdenom_pos hdenom
@@ -1505,7 +1505,7 @@ theorem complex_log_bound (w : ℂ) (hw : ‖w‖ < 1) :
       _ = ‖w‖^2 / (1 - ‖w‖) := by ring
   have hfinal := intervalIntegral.norm_integral_le_of_norm_le_const
       (a := (0 : ℝ)) (b := (1 : ℝ)) (C := ‖w‖^2 / (1 - ‖w‖))
-      (f := fun t : ℝ => (t:ℂ) * w^2 / (1 - (t:ℂ) * w))
+      (f := fun t : ℝ => (t : ℂ) * w^2 / (1 - (t : ℂ) * w))
       (fun t ht => hbound t (by
         rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)]
         rw [Set.uIoc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at ht
@@ -1515,80 +1515,80 @@ theorem complex_log_bound (w : ℂ) (hw : ‖w‖ < 1) :
 /-- Complex-z analogue of prime_correction_bound. -/
 theorem prime_correction_bound_complex (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : ‖z‖ ≤ 2) :
-    ‖(-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)‖
-      ≤ 18 * (p:ℝ) ^ (-2*s) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    ‖(-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)‖
+      ≤ 18 * (p : ℝ) ^ (-2*s) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/3 := by
     rw [ha_def]
-    have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/3 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/3 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
-  have hane : ‖(a:ℂ)‖ = a := by
+  have hane : ‖(a : ℂ)‖ = a := by
     first
     | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
-  have hza_le : ‖(z:ℂ) * (a:ℂ)‖ ≤ 2/3 := by
+  have hza_le : ‖(z : ℂ) * (a : ℂ)‖ ≤ 2/3 := by
     rw [norm_mul, hane]
     have hmm : ‖z‖ * a ≤ 2 * (1/3) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
     linarith
-  have hza_lt1 : ‖(z:ℂ) * (a:ℂ)‖ < 1 := by linarith
-  have hr1 := complex_log_bound ((z:ℂ) * (a:ℂ)) hza_lt1
+  have hza_lt1 : ‖(z : ℂ) * (a : ℂ)‖ < 1 := by linarith
+  have hr1 := complex_log_bound ((z : ℂ) * (a : ℂ)) hza_lt1
   have hr2 := log_bound_combined a (by rw [abs_of_pos ha_pos]; linarith)
-  have hr1bound : ‖z * (a:ℂ)‖^2 / (1 - ‖z * (a:ℂ)‖) ≤ 12 * a^2 := by
-    have h1 : ‖z * (a:ℂ)‖ ≤ 2 * a := by
+  have hr1bound : ‖z * (a : ℂ)‖^2 / (1 - ‖z * (a : ℂ)‖) ≤ 12 * a^2 := by
+    have h1 : ‖z * (a : ℂ)‖ ≤ 2 * a := by
       rw [norm_mul, hane]; nlinarith [hz]
-    have h2 : (1 : ℝ)/3 ≤ 1 - ‖z * (a:ℂ)‖ := by linarith [hza_le]
-    have h3 : ‖z * (a:ℂ)‖^2 ≤ 4 * a^2 := by
-      nlinarith [h1, norm_nonneg (z * (a:ℂ))]
-    calc ‖z * (a:ℂ)‖^2 / (1 - ‖z * (a:ℂ)‖) ≤ ‖z * (a:ℂ)‖^2 / (1/3) := by
+    have h2 : (1 : ℝ)/3 ≤ 1 - ‖z * (a : ℂ)‖ := by linarith [hza_le]
+    have h3 : ‖z * (a : ℂ)‖^2 ≤ 4 * a^2 := by
+      nlinarith [h1, norm_nonneg (z * (a : ℂ))]
+    calc ‖z * (a : ℂ)‖^2 / (1 - ‖z * (a : ℂ)‖) ≤ ‖z * (a : ℂ)‖^2 / (1/3) := by
           apply div_le_div_of_nonneg_left (sq_nonneg _) (by norm_num) h2
-      _ = 3 * ‖z * (a:ℂ)‖^2 := by ring
+      _ = 3 * ‖z * (a : ℂ)‖^2 := by ring
       _ ≤ 3 * (4 * a^2) := by linarith [h3]
       _ = 12 * a^2 := by ring
-  have hkey : (-Complex.log (1 - z * (a:ℂ))) + z * (Real.log (1 - a) : ℂ)
-      = -(Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)) +
-          z * ((Real.log (1 - a) : ℂ) + (a:ℂ)) := by ring
+  have hkey : (-Complex.log (1 - z * (a : ℂ))) + z * (Real.log (1 - a) : ℂ)
+      = -(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)) +
+          z * ((Real.log (1 - a) : ℂ) + (a : ℂ)) := by ring
   rw [hkey]
-  have hstep1 : ‖-(Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)) +
-        z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖
-      ≤ ‖Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)‖ +
-          ‖z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖ := by
-    have := norm_add_le (-(Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)))
-      (z * ((Real.log (1 - a) : ℂ) + (a:ℂ)))
+  have hstep1 : ‖-(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)) +
+        z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖
+      ≤ ‖Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)‖ +
+          ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ := by
+    have := norm_add_le (-(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)))
+      (z * ((Real.log (1 - a) : ℂ) + (a : ℂ)))
     rwa [norm_neg] at this
-  have hstep2 : ‖z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖ ≤ ‖z‖ * (3 * a^2) := by
+  have hstep2 : ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ ≤ ‖z‖ * (3 * a^2) := by
     rw [norm_mul]
     apply mul_le_mul_of_nonneg_left _ (norm_nonneg z)
-    have heq : ((Real.log (1 - a) : ℂ) + (a:ℂ)) = ((Real.log (1 - a) + a : ℝ):ℂ) := by
+    have heq : ((Real.log (1 - a) : ℂ) + (a : ℂ)) = ((Real.log (1 - a) + a : ℝ):ℂ) := by
       push_cast; ring
     rw [heq]
     first
     | rw [Complex.norm_real]; exact hr2
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact hr2
-  have hfinal_bound : ‖Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)‖ +
-      ‖z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖ ≤ 12 * a^2 + ‖z‖ * (3 * a^2) := by
+  have hfinal_bound : ‖Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)‖ +
+      ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ ≤ 12 * a^2 + ‖z‖ * (3 * a^2) := by
     linarith [hr1, hr1bound, hstep2]
-  calc ‖-(Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)) +
-        z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖
-      ≤ ‖Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)‖ +
-          ‖z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖ := hstep1
+  calc ‖-(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)) +
+        z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖
+      ≤ ‖Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)‖ +
+          ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ := hstep1
     _ ≤ 12 * a^2 + ‖z‖ * (3 * a^2) := hfinal_bound
     _ ≤ 12 * a^2 + 2 * (3 * a^2) := by nlinarith [hz, sq_nonneg a]
     _ = 18 * a^2 := by ring
-    _ = 18 * (p:ℝ) ^ (-2*s) := by
-        rw [ha_def, ← Real.rpow_natCast ((p:ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
+    _ = 18 * (p : ℝ) ^ (-2*s) := by
+        rw [ha_def, ← Real.rpow_natCast ((p : ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
         ring_nf
 
 /-- Wide-radius variant: ||z|| <= 5/2 for p >= 5, constant 20.
@@ -1596,195 +1596,195 @@ Needed to place z = 2 strictly inside the disc of analyticity, which is what
 sum 2^i c_i = d requires. -/
 theorem prime_correction_bound_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : ‖z‖ ≤ 5/2) :
-    ‖(-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)‖
-      ≤ 20 * (p:ℝ) ^ (-2*s) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    ‖(-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)‖
+      ≤ 20 * (p : ℝ) ^ (-2*s) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/5 := by
     rw [ha_def]
-    have hp3 : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/5 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/5 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
-  have hane : ‖(a:ℂ)‖ = a := by
+  have hane : ‖(a : ℂ)‖ = a := by
     first
     | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
-  have hza_le : ‖(z:ℂ) * (a:ℂ)‖ ≤ 1/2 := by
+  have hza_le : ‖(z : ℂ) * (a : ℂ)‖ ≤ 1/2 := by
     rw [norm_mul, hane]
     have hmm : ‖z‖ * a ≤ (5/2) * (1/5) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
     linarith
-  have hza_lt1 : ‖(z:ℂ) * (a:ℂ)‖ < 1 := by linarith
-  have hr1 := complex_log_bound ((z:ℂ) * (a:ℂ)) hza_lt1
+  have hza_lt1 : ‖(z : ℂ) * (a : ℂ)‖ < 1 := by linarith
+  have hr1 := complex_log_bound ((z : ℂ) * (a : ℂ)) hza_lt1
   have hr2 := log_bound_combined a (by rw [abs_of_pos ha_pos]; linarith)
-  have hr1bound : ‖z * (a:ℂ)‖^2 / (1 - ‖z * (a:ℂ)‖) ≤ 12.5 * a^2 := by
-    have h1 : ‖z * (a:ℂ)‖ ≤ (5/2) * a := by
+  have hr1bound : ‖z * (a : ℂ)‖^2 / (1 - ‖z * (a : ℂ)‖) ≤ 12.5 * a^2 := by
+    have h1 : ‖z * (a : ℂ)‖ ≤ (5/2) * a := by
       rw [norm_mul, hane]; nlinarith [hz]
-    have h2 : (1 : ℝ)/2 ≤ 1 - ‖z * (a:ℂ)‖ := by linarith [hza_le]
-    have h3 : ‖z * (a:ℂ)‖^2 ≤ 6.25 * a^2 := by
-      nlinarith [h1, norm_nonneg (z * (a:ℂ))]
-    calc ‖z * (a:ℂ)‖^2 / (1 - ‖z * (a:ℂ)‖) ≤ ‖z * (a:ℂ)‖^2 / (1/2) := by
+    have h2 : (1 : ℝ)/2 ≤ 1 - ‖z * (a : ℂ)‖ := by linarith [hza_le]
+    have h3 : ‖z * (a : ℂ)‖^2 ≤ 6.25 * a^2 := by
+      nlinarith [h1, norm_nonneg (z * (a : ℂ))]
+    calc ‖z * (a : ℂ)‖^2 / (1 - ‖z * (a : ℂ)‖) ≤ ‖z * (a : ℂ)‖^2 / (1/2) := by
           apply div_le_div_of_nonneg_left (sq_nonneg _) (by norm_num) h2
-      _ = 2 * ‖z * (a:ℂ)‖^2 := by ring
+      _ = 2 * ‖z * (a : ℂ)‖^2 := by ring
       _ ≤ 2 * (6.25 * a^2) := by linarith [h3]
       _ = 12.5 * a^2 := by ring
-  have hkey : (-Complex.log (1 - z * (a:ℂ))) + z * (Real.log (1 - a) : ℂ)
-      = -(Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)) +
-          z * ((Real.log (1 - a) : ℂ) + (a:ℂ)) := by ring
+  have hkey : (-Complex.log (1 - z * (a : ℂ))) + z * (Real.log (1 - a) : ℂ)
+      = -(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)) +
+          z * ((Real.log (1 - a) : ℂ) + (a : ℂ)) := by ring
   rw [hkey]
-  have hstep1 : ‖-(Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)) +
-        z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖
-      ≤ ‖Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)‖ +
-          ‖z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖ := by
-    have := norm_add_le (-(Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)))
-      (z * ((Real.log (1 - a) : ℂ) + (a:ℂ)))
+  have hstep1 : ‖-(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)) +
+        z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖
+      ≤ ‖Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)‖ +
+          ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ := by
+    have := norm_add_le (-(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)))
+      (z * ((Real.log (1 - a) : ℂ) + (a : ℂ)))
     rwa [norm_neg] at this
-  have hstep2 : ‖z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖ ≤ ‖z‖ * (3 * a^2) := by
+  have hstep2 : ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ ≤ ‖z‖ * (3 * a^2) := by
     rw [norm_mul]
     apply mul_le_mul_of_nonneg_left _ (norm_nonneg z)
-    have heq : ((Real.log (1 - a) : ℂ) + (a:ℂ)) = ((Real.log (1 - a) + a : ℝ):ℂ) := by
+    have heq : ((Real.log (1 - a) : ℂ) + (a : ℂ)) = ((Real.log (1 - a) + a : ℝ):ℂ) := by
       push_cast; ring
     rw [heq]
     first
     | rw [Complex.norm_real]; exact hr2
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact hr2
-  have hfinal_bound : ‖Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)‖ +
-      ‖z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖ ≤ 12.5 * a^2 + ‖z‖ * (3 * a^2) := by
+  have hfinal_bound : ‖Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)‖ +
+      ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ ≤ 12.5 * a^2 + ‖z‖ * (3 * a^2) := by
     linarith [hr1, hr1bound, hstep2]
-  calc ‖-(Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)) +
-        z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖
-      ≤ ‖Complex.log (1 - z * (a:ℂ)) + z * (a:ℂ)‖ +
-          ‖z * ((Real.log (1 - a) : ℂ) + (a:ℂ))‖ := hstep1
+  calc ‖-(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)) +
+        z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖
+      ≤ ‖Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)‖ +
+          ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ := hstep1
     _ ≤ 12.5 * a^2 + ‖z‖ * (3 * a^2) := hfinal_bound
     _ ≤ 12.5 * a^2 + (5/2) * (3 * a^2) := by nlinarith [hz, sq_nonneg a]
     _ = 20 * a^2 := by ring
-    _ = 20 * (p:ℝ) ^ (-2*s) := by
-        rw [ha_def, ← Real.rpow_natCast ((p:ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
+    _ = 20 * (p : ℝ) ^ (-2*s) := by
+        rw [ha_def, ← Real.rpow_natCast ((p : ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
         ring_nf
 
 /-- Complex-z analogue of prime_correction_summable. -/
 theorem prime_correction_summable_complex (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      ‖(-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)‖) := by
-  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => 18 * (p:ℝ) ^ (-2*s)) := by
+      ‖(-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)‖) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => 18 * (p : ℝ) ^ (-2*s)) := by
     have h2s : -(2*s) < -1 := by linarith
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
       Real.summable_nat_rpow.mpr h2s
-    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
       hbase.subtype _
-    have heq : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (18 : ℝ) * (p:ℝ) ^ (-2*s) =
-        18 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (18 : ℝ) * (p : ℝ) ^ (-2*s) =
+        18 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
       intro p; ring_nf
     simp_rw [heq]
     exact hsub.mul_left 18
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => norm_nonneg _)
     (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      prime_correction_bound_complex (p:ℕ) p.property.2 s hs z hz)
+      prime_correction_bound_complex (p : ℕ) p.property.2 s hs z hz)
     hcomp
 
 /-- Complex-z analogue of prime_factor_sub_one_bound. -/
 theorem prime_factor_sub_one_bound_complex (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : ‖z‖ ≤ 2) :
-    ‖Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖
-      ≤ 36 * (p:ℝ) ^ (-2*s) := by
-  set c : ℂ := (-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-    z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ) with hc_def
+    ‖Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖
+      ≤ 36 * (p : ℝ) ^ (-2*s) := by
+  set c : ℂ := (-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+    z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ) with hc_def
   have hp3 : 3 ≤ p := by omega
-  have hbound : ‖c‖ ≤ 18 * (p:ℝ) ^ (-2*s) := prime_correction_bound_complex p hp3 s hs z hz
-  have hle1 : 18 * (p:ℝ) ^ (-2*s) ≤ 1 := correction_le_one p hp s hs
+  have hbound : ‖c‖ ≤ 18 * (p : ℝ) ^ (-2*s) := prime_correction_bound_complex p hp3 s hs z hz
+  have hle1 : 18 * (p : ℝ) ^ (-2*s) ≤ 1 := correction_le_one p hp s hs
   have hc1 : ‖c‖ ≤ 1 := le_trans hbound hle1
   calc ‖Complex.exp c - 1‖ ≤ 2 * ‖c‖ := Complex.norm_exp_sub_one_le hc1
-    _ ≤ 2 * (18 * (p:ℝ) ^ (-2*s)) := by linarith [hbound]
-    _ = 36 * (p:ℝ) ^ (-2*s) := by ring
+    _ ≤ 2 * (18 * (p : ℝ) ^ (-2*s)) := by linarith [hbound]
+    _ = 36 * (p : ℝ) ^ (-2*s) := by ring
 
 /-- Wide-radius variant: ||z|| <= 5/2, constant 40. -/
 theorem prime_factor_sub_one_bound_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : ‖z‖ ≤ 5/2) :
-    ‖Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖
-      ≤ 40 * (p:ℝ) ^ (-2*s) := by
-  set c : ℂ := (-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-    z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ) with hc_def
+    ‖Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖
+      ≤ 40 * (p : ℝ) ^ (-2*s) := by
+  set c : ℂ := (-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+    z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ) with hc_def
   have hp3 : 5 ≤ p := by omega
-  have hbound : ‖c‖ ≤ 20 * (p:ℝ) ^ (-2*s) := prime_correction_bound_complex_wide p hp3 s hs z hz
-  have hle1 : 20 * (p:ℝ) ^ (-2*s) ≤ 1 := correction_le_one_wide p hp s hs
+  have hbound : ‖c‖ ≤ 20 * (p : ℝ) ^ (-2*s) := prime_correction_bound_complex_wide p hp3 s hs z hz
+  have hle1 : 20 * (p : ℝ) ^ (-2*s) ≤ 1 := correction_le_one_wide p hp s hs
   have hc1 : ‖c‖ ≤ 1 := le_trans hbound hle1
   calc ‖Complex.exp c - 1‖ ≤ 2 * ‖c‖ := Complex.norm_exp_sub_one_le hc1
-    _ ≤ 2 * (20 * (p:ℝ) ^ (-2*s)) := by linarith [hbound]
-    _ = 40 * (p:ℝ) ^ (-2*s) := by ring
+    _ ≤ 2 * (20 * (p : ℝ) ^ (-2*s)) := by linarith [hbound]
+    _ = 40 * (p : ℝ) ^ (-2*s) := by ring
 
 /-- Complex-z analogue of prime_factor_sub_one_summable. -/
 theorem prime_factor_sub_one_summable_complex (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      ‖Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖) := by
-  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 36 * (p:ℝ) ^ (-2*s)) := by
+      ‖Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 36 * (p : ℝ) ^ (-2*s)) := by
     have h2s : -(2*s) < -1 := by linarith
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
       Real.summable_nat_rpow.mpr h2s
-    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
       hbase.subtype _
-    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (36 : ℝ) * (p:ℝ) ^ (-2*s) =
-        36 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (36 : ℝ) * (p : ℝ) ^ (-2*s) =
+        36 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
       intro p; ring_nf
     simp_rw [heq]
     exact hsub.mul_left 36
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      prime_factor_sub_one_bound_complex (p:ℕ) p.property.2 s hs z hz)
+      prime_factor_sub_one_bound_complex (p : ℕ) p.property.2 s hs z hz)
     hcomp
 
 /-- Complex-z analogue of prime_factor_eq_exp. -/
 theorem prime_factor_eq_exp_complex (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : ‖z‖ ≤ 2) :
-    (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
-      Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
+      Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/3 := by
     rw [ha_def]
-    have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/3 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/3 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
-  have hane : ‖(a:ℂ)‖ = a := by
+  have hane : ‖(a : ℂ)‖ = a := by
     first
     | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
-  have hza_le : ‖(z:ℂ) * (a:ℂ)‖ ≤ 2/3 := by
+  have hza_le : ‖(z : ℂ) * (a : ℂ)‖ ≤ 2/3 := by
     rw [norm_mul, hane]
     have hmm : ‖z‖ * a ≤ 2 * (1/3) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
     linarith
-  have hza_lt : ‖(z:ℂ) * (a:ℂ)‖ < 1 := by linarith
-  have h1za_ne : (1 : ℂ) - z * (a:ℂ) ≠ 0 := by
+  have hza_lt : ‖(z : ℂ) * (a : ℂ)‖ < 1 := by linarith
+  have h1za_ne : (1 : ℂ) - z * (a : ℂ) ≠ 0 := by
     intro heq
     have h := sub_eq_zero.mp heq
-    have hn : (1 : ℝ) = ‖z * (a:ℂ)‖ := by rw [← h]; simp
+    have hn : (1 : ℝ) = ‖z * (a : ℂ)‖ := by rw [← h]; simp
     linarith [hza_lt]
   have h1a_pos : (0 : ℝ) < 1 - a := by linarith
   have hlog1a : Complex.log (((1 - a : ℝ)):ℂ) = ((Real.log (1-a) : ℝ):ℂ) := by
@@ -1795,9 +1795,9 @@ theorem prime_factor_eq_exp_complex (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 �
   have hcpow : (((1 - a : ℝ)):ℂ) ^ z =
       Complex.exp (Complex.log (((1 - a : ℝ)):ℂ) * z) := by
     rw [Complex.cpow_def_of_ne_zero h1a_ne]
-  have key : Complex.exp ((-Complex.log (1 - z * (a:ℂ))) +
+  have key : Complex.exp ((-Complex.log (1 - z * (a : ℂ))) +
       z * ((Real.log (1 - a) : ℝ):ℂ)) =
-      (1 - z * (a:ℂ))⁻¹ * (((1 - a : ℝ)):ℂ) ^ z := by
+      (1 - z * (a : ℂ))⁻¹ * (((1 - a : ℝ)):ℂ) ^ z := by
     rw [Complex.exp_add, Complex.exp_neg, Complex.exp_log h1za_ne, hcpow, ← hlog1a,
       show z * Complex.log (((1 - a : ℝ)):ℂ) = Complex.log (((1 - a : ℝ)):ℂ) * z
         from mul_comm _ _]
@@ -1806,40 +1806,40 @@ theorem prime_factor_eq_exp_complex (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 �
 /-- Wide-radius variant. -/
 theorem prime_factor_eq_exp_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : ‖z‖ ≤ 5/2) :
-    (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
-      Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
+      Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/5 := by
     rw [ha_def]
-    have hp3 : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/5 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/5 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
-  have hane : ‖(a:ℂ)‖ = a := by
+  have hane : ‖(a : ℂ)‖ = a := by
     first
     | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
-  have hza_le : ‖(z:ℂ) * (a:ℂ)‖ ≤ 1/2 := by
+  have hza_le : ‖(z : ℂ) * (a : ℂ)‖ ≤ 1/2 := by
     rw [norm_mul, hane]
     have hmm : ‖z‖ * a ≤ (5/2) * (1/5) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
     linarith
-  have hza_lt : ‖(z:ℂ) * (a:ℂ)‖ < 1 := by linarith
-  have h1za_ne : (1 : ℂ) - z * (a:ℂ) ≠ 0 := by
+  have hza_lt : ‖(z : ℂ) * (a : ℂ)‖ < 1 := by linarith
+  have h1za_ne : (1 : ℂ) - z * (a : ℂ) ≠ 0 := by
     intro heq
     have h := sub_eq_zero.mp heq
-    have hn : (1 : ℝ) = ‖z * (a:ℂ)‖ := by rw [← h]; simp
+    have hn : (1 : ℝ) = ‖z * (a : ℂ)‖ := by rw [← h]; simp
     linarith [hza_lt]
   have h1a_pos : (0 : ℝ) < 1 - a := by linarith
   have hlog1a : Complex.log (((1 - a : ℝ)):ℂ) = ((Real.log (1-a) : ℝ):ℂ) := by
@@ -1850,9 +1850,9 @@ theorem prime_factor_eq_exp_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs 
   have hcpow : (((1 - a : ℝ)):ℂ) ^ z =
       Complex.exp (Complex.log (((1 - a : ℝ)):ℂ) * z) := by
     rw [Complex.cpow_def_of_ne_zero h1a_ne]
-  have key : Complex.exp ((-Complex.log (1 - z * (a:ℂ))) +
+  have key : Complex.exp ((-Complex.log (1 - z * (a : ℂ))) +
       z * ((Real.log (1 - a) : ℝ):ℂ)) =
-      (1 - z * (a:ℂ))⁻¹ * (((1 - a : ℝ)):ℂ) ^ z := by
+      (1 - z * (a : ℂ))⁻¹ * (((1 - a : ℝ)):ℂ) ^ z := by
     rw [Complex.exp_add, Complex.exp_neg, Complex.exp_log h1za_ne, hcpow, ← hlog1a,
       show z * Complex.log (((1 - a : ℝ)):ℂ) = Complex.log (((1 - a : ℝ)):ℂ) * z
         from mul_comm _ _]
@@ -1861,87 +1861,87 @@ theorem prime_factor_eq_exp_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs 
 /-- Complex-z analogue of prime_factor_multipliable. -/
 theorem prime_factor_multipliable_complex (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
   have hsummable := prime_factor_sub_one_summable_complex s hs z hz
   have hmult : Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      1 + (Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1)) := by
+      1 + (Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1)) := by
     first
     | exact multipliable_one_add_of_summable hsummable
     | exact multipliable_one_add_of_summable_norm hsummable
   have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-          (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
-        1 + (Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-          z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1) := by
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+          (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
+        1 + (Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1) := by
     intro p
-    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
-    rw [prime_factor_eq_exp_complex (p:ℕ) hp3 s hs z hz]
+    have hp3 : 3 ≤ (p : ℕ) := by have := p.property.2; omega
+    rw [prime_factor_eq_exp_complex (p : ℕ) hp3 s hs z hz]
     ring
   simpa only [heq] using hmult
 
 /-- Wide-radius variant (||z|| <= 5/2). -/
 theorem prime_factor_sub_one_summable_complex_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 5/2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      ‖Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖) := by
-  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 40 * (p:ℝ) ^ (-2*s)) := by
+      ‖Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 40 * (p : ℝ) ^ (-2*s)) := by
     have h2s : -(2*s) < -1 := by linarith
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
       Real.summable_nat_rpow.mpr h2s
-    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
       hbase.subtype _
-    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (40 : ℝ) * (p:ℝ) ^ (-2*s) =
-        40 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (40 : ℝ) * (p : ℝ) ^ (-2*s) =
+        40 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
       intro p; ring_nf
     simp_rw [heq]
     exact hsub.mul_left 40
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      prime_factor_sub_one_bound_complex_wide (p:ℕ) p.property.2 s hs z hz)
+      prime_factor_sub_one_bound_complex_wide (p : ℕ) p.property.2 s hs z hz)
     hcomp
 
 /-- Wide-radius variant (||z|| <= 5/2). -/
 theorem prime_factor_multipliable_complex_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 5/2) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
   have hsummable := prime_factor_sub_one_summable_complex_wide s hs z hz
   have hmult : Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      1 + (Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1)) := by
+      1 + (Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1)) := by
     first
     | exact multipliable_one_add_of_summable hsummable
     | exact multipliable_one_add_of_summable_norm hsummable
   have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-          (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
-        1 + (Complex.exp ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-          z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) - 1) := by
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+          (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
+        1 + (Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1) := by
     intro p
-    have hp3 : 5 ≤ (p:ℕ) := p.property.2
-    rw [prime_factor_eq_exp_complex_wide (p:ℕ) hp3 s hs z hz]
+    have hp3 : 5 ≤ (p : ℕ) := p.property.2
+    rw [prime_factor_eq_exp_complex_wide (p : ℕ) hp3 s hs z hz]
     ring
   simpa only [heq] using hmult
 
 /-- The complex-z tail of G₂: product over primes p≥5. -/
 noncomputable def G2tailC (s : ℝ) (z : ℂ) : ℂ :=
   ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-    (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z
+    (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z
 
 /-- G2tailC genuinely has this product as its value. -/
 theorem G2tailC_hasProd (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
     HasProd (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z)
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z)
       (G2tailC s z) :=
   (prime_factor_multipliable_complex s hs z hz).hasProd
 
 /-- Wide-radius variant: the tail product converges for ||z|| <= 5/2. -/
 theorem G2tailC_hasProd_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.norm z ≤ 5/2) :
     HasProd (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * ((((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ)) : ℂ)) ^ z)
+      (1 - z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * ((((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ)) : ℂ)) ^ z)
       (G2tailC s z) :=
   (prime_factor_multipliable_complex_wide s hs z hz).hasProd
 
@@ -2004,16 +2004,16 @@ theorem reg_factor_at_two (y : ℝ) (hy : (1 : ℝ) - 2 * y ≠ 0) :
 theorem G2tailC_one_one : G2tailC 1 1 = 1 := by
   unfold G2tailC
   have hone : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-      (1 - (1 : ℂ) * ((((p:ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ))⁻¹
-        * (((1 - ((p:ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ)) ^ (1 : ℂ) = 1 := by
+      (1 - (1 : ℂ) * ((((p : ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ))⁻¹
+        * (((1 - ((p : ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ)) ^ (1 : ℂ) = 1 := by
     intro p
-    have hp5 : (5 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
-    have hlt : ((p:ℕ):ℝ) ^ (-(1 : ℝ)) < 1 := by
+    have hp5 : (5 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast p.2.2
+    have hlt : ((p : ℕ):ℝ) ^ (-(1 : ℝ)) < 1 := by
       rw [Real.rpow_neg_one]
       rw [inv_lt_one_iff₀]
       right
       linarith
-    exact reg_factor_at_one (((p:ℕ):ℝ) ^ (-(1 : ℝ))) (by linarith)
+    exact reg_factor_at_one (((p : ℕ):ℝ) ^ (-(1 : ℝ))) (by linarith)
   rw [funext hone, tprod_one]
 
 /-- G2C(1,1) = 1 (manuscript section 1). -/
@@ -2029,23 +2029,23 @@ theorem G2C_one_one : G2C 1 1 = 1 := by
 
 /-- Each G₂ per-prime factor is differentiable in z on |z|<2. -/
 theorem prime_factor_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
-    DifferentiableOn ℂ (fun z : ℂ => (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-      (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) (Metric.ball 0 2) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    DifferentiableOn ℂ (fun z : ℂ => (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+      (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) (Metric.ball 0 2) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/3 := by
     rw [ha_def]
-    have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/3 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/3 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
   have h1a_pos : (0 : ℝ) < 1 - a := by linarith
@@ -2054,24 +2054,24 @@ theorem prime_factor_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1
     linarith
   intro z hz
   rw [Metric.mem_ball, dist_zero_right] at hz
-  have hza_lt : ‖z * (a:ℂ)‖ < 1 := by
-    have hane : ‖(a:ℂ)‖ = a := by
+  have hza_lt : ‖z * (a : ℂ)‖ < 1 := by
+    have hane : ‖(a : ℂ)‖ = a := by
       first
       | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
       | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
     rw [norm_mul, hane]
     nlinarith [hz, ha_le, ha_pos]
-  have h1za_ne : (1 : ℂ) - z * (a:ℂ) ≠ 0 := by
+  have h1za_ne : (1 : ℂ) - z * (a : ℂ) ≠ 0 := by
     intro heq
     have h := sub_eq_zero.mp heq
-    have hn : (1 : ℝ) = ‖z * (a:ℂ)‖ := by rw [← h]; simp
+    have hn : (1 : ℝ) = ‖z * (a : ℂ)‖ := by rw [← h]; simp
     linarith [hza_lt]
   apply DifferentiableAt.differentiableWithinAt
   apply DifferentiableAt.mul
-  · have hlin : DifferentiableAt ℂ (fun w : ℂ => (1 : ℂ) - w * (a:ℂ)) z := by
+  · have hlin : DifferentiableAt ℂ (fun w : ℂ => (1 : ℂ) - w * (a : ℂ)) z := by
       first
-      | exact (differentiableAt_const (1 : ℂ)).sub (differentiableAt_id.mul_const (a:ℂ))
-      | exact (differentiableAt_const (1 : ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a:ℂ))
+      | exact (differentiableAt_const (1 : ℂ)).sub (differentiableAt_id.mul_const (a : ℂ))
+      | exact (differentiableAt_const (1 : ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a : ℂ))
     exact hlin.inv h1za_ne
   · first
     | exact differentiableAt_id.const_cpow (Or.inr h1a_ne)
@@ -2138,34 +2138,34 @@ theorem hasProd_exp_of_hasSum {ι : Type*} {g : ι → ℂ} {a : ℂ} (h : HasSu
 
 /-- Each per-prime correction term is differentiable in z. -/
 theorem correction_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
-    DifferentiableOn ℂ (fun z : ℂ => (-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-      z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) (Metric.ball 0 2) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    DifferentiableOn ℂ (fun z : ℂ => (-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+      z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) (Metric.ball 0 2) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/3 := by
     rw [ha_def]
-    have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/3 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/3 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
   intro z hz
   rw [Metric.mem_ball, dist_zero_right] at hz
-  have hane : ‖(a:ℂ)‖ = a := by
+  have hane : ‖(a : ℂ)‖ = a := by
     first
     | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
-  have hza_lt : ‖z * (a:ℂ)‖ < 1 := by
+  have hza_lt : ‖z * (a : ℂ)‖ < 1 := by
     rw [norm_mul, hane]; nlinarith [hz, ha_le, ha_pos]
-  have hre_pos : (0 : ℝ) < ((1 : ℂ) - z * (a:ℂ)).re := by
+  have hre_pos : (0 : ℝ) < ((1 : ℂ) - z * (a : ℂ)).re := by
     simp only [Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
       Complex.ofReal_im]
     have hre_le_norm : |z.re| ≤ ‖z‖ := by
@@ -2191,77 +2191,77 @@ theorem correction_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 �
   · apply DifferentiableAt.neg
     apply DifferentiableAt.clog
     · first
-      | exact (differentiableAt_const (1 : ℂ)).sub (differentiableAt_id.mul_const (a:ℂ))
-      | exact (differentiableAt_const (1 : ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a:ℂ))
+      | exact (differentiableAt_const (1 : ℂ)).sub (differentiableAt_id.mul_const (a : ℂ))
+      | exact (differentiableAt_const (1 : ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a : ℂ))
     · exact Or.inl hre_pos
   · exact differentiableAt_id.mul_const _
 
 /-- The sum of correction terms is differentiable in z on |z|<2. -/
 theorem correction_sum_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z : ℂ => ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-      ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)))
+      ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)))
       (Metric.ball 0 2) := by
   apply Complex.differentiableOn_tsum_of_summable_norm
-    (u := fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 18 * (p:ℝ) ^ (-2*s))
+    (u := fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 18 * (p : ℝ) ^ (-2*s))
   · have h2s : -(2*s) < -1 := by linarith
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
       Real.summable_nat_rpow.mpr h2s
-    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
       hbase.subtype _
-    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (18 : ℝ) * (p:ℝ) ^ (-2*s) =
-        18 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (18 : ℝ) * (p : ℝ) ^ (-2*s) =
+        18 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
       intro p; ring_nf
     simp_rw [heq]
     exact hsub.mul_left 18
   · intro p
-    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
-    exact correction_differentiableOn (p:ℕ) hp3 s hs
+    have hp3 : 3 ≤ (p : ℕ) := by have := p.property.2; omega
+    exact correction_differentiableOn (p : ℕ) hp3 s hs
   · exact Metric.isOpen_ball
   · intro p w hw
     rw [Metric.mem_ball, dist_zero_right] at hw
-    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
-    exact prime_correction_bound_complex (p:ℕ) hp3 s hs w hw.le
+    have hp3 : 3 ≤ (p : ℕ) := by have := p.property.2; omega
+    exact prime_correction_bound_complex (p : ℕ) hp3 s hs w hw.le
 
 /-- G2tailC equals exp of the sum of correction terms. -/
 theorem G2tailC_eq_exp_sum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
     G2tailC s z = Complex.exp (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-      ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ))) := by
+      ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ))) := by
   have hnormsum : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      ‖(-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)‖) := by
-    have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 18 * (p:ℝ) ^ (-2*s)) := by
+      ‖(-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)‖) := by
+    have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 18 * (p : ℝ) ^ (-2*s)) := by
       have h2s : -(2*s) < -1 := by linarith
-      have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+      have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
         Real.summable_nat_rpow.mpr h2s
-      have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+      have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
         hbase.subtype _
-      have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (18 : ℝ) * (p:ℝ) ^ (-2*s) =
-          18 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+      have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (18 : ℝ) * (p : ℝ) ^ (-2*s) =
+          18 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
         intro p; ring_nf
       simp_rw [heq]
       exact hsub.mul_left 18
     apply Summable.of_nonneg_of_le
       (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
       (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => by
-        have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
-        exact prime_correction_bound_complex (p:ℕ) hp3 s hs z hz)
+        have hp3 : 3 ≤ (p : ℕ) := by have := p.property.2; omega
+        exact prime_correction_bound_complex (p : ℕ) hp3 s hs z hz)
       hcomp
   have hsummable : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) :=
+      (-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) :=
     Summable.of_norm hnormsum
   have hhassum := hsummable.hasSum
   have hhasprod_exp := hasProd_exp_of_hasSum hhassum
   have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, Complex.exp
-      ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) =
-      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z := by
+      ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) =
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z := by
     intro p
-    have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
-    exact (prime_factor_eq_exp_complex (p:ℕ) hp3 s hs z hz).symm
+    have hp3 : 3 ≤ (p : ℕ) := by have := p.property.2; omega
+    exact (prime_factor_eq_exp_complex (p : ℕ) hp3 s hs z hz).symm
   simp only [heq] at hhasprod_exp
   have hhasprod_G2 := G2tailC_hasProd s hs z hz
   exact (hhasprod_G2.unique hhasprod_exp)
@@ -2271,8 +2271,8 @@ theorem G2tailC_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z => G2tailC s z) (Metric.ball 0 2) := by
   have heq : ∀ z ∈ Metric.ball (0 : ℂ) 2, G2tailC s z = Complex.exp
       (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-          z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ))) := by
+        ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ))) := by
     intro z hz
     rw [Metric.mem_ball, dist_zero_right] at hz
     exact G2tailC_eq_exp_sum s hs z hz.le
@@ -2289,23 +2289,23 @@ theorem G2C_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
 
 /-- Wide-radius variant (radius 5/2, p >= 5). -/
 theorem prime_factor_differentiableOn_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
-    DifferentiableOn ℂ (fun z : ℂ => (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-      (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) (Metric.ball 0 (5/2)) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    DifferentiableOn ℂ (fun z : ℂ => (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+      (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) (Metric.ball 0 (5/2)) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/5 := by
     rw [ha_def]
-    have hp3 : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/5 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/5 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
   have h1a_pos : (0 : ℝ) < 1 - a := by linarith
@@ -2314,24 +2314,24 @@ theorem prime_factor_differentiableOn_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (h
     linarith
   intro z hz
   rw [Metric.mem_ball, dist_zero_right] at hz
-  have hza_lt : ‖z * (a:ℂ)‖ < 1 := by
-    have hane : ‖(a:ℂ)‖ = a := by
+  have hza_lt : ‖z * (a : ℂ)‖ < 1 := by
+    have hane : ‖(a : ℂ)‖ = a := by
       first
       | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
       | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
     rw [norm_mul, hane]
     nlinarith [hz, ha_le, ha_pos]
-  have h1za_ne : (1 : ℂ) - z * (a:ℂ) ≠ 0 := by
+  have h1za_ne : (1 : ℂ) - z * (a : ℂ) ≠ 0 := by
     intro heq
     have h := sub_eq_zero.mp heq
-    have hn : (1 : ℝ) = ‖z * (a:ℂ)‖ := by rw [← h]; simp
+    have hn : (1 : ℝ) = ‖z * (a : ℂ)‖ := by rw [← h]; simp
     linarith [hza_lt]
   apply DifferentiableAt.differentiableWithinAt
   apply DifferentiableAt.mul
-  · have hlin : DifferentiableAt ℂ (fun w : ℂ => (1 : ℂ) - w * (a:ℂ)) z := by
+  · have hlin : DifferentiableAt ℂ (fun w : ℂ => (1 : ℂ) - w * (a : ℂ)) z := by
       first
-      | exact (differentiableAt_const (1 : ℂ)).sub (differentiableAt_id.mul_const (a:ℂ))
-      | exact (differentiableAt_const (1 : ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a:ℂ))
+      | exact (differentiableAt_const (1 : ℂ)).sub (differentiableAt_id.mul_const (a : ℂ))
+      | exact (differentiableAt_const (1 : ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a : ℂ))
     exact hlin.inv h1za_ne
   · first
     | exact differentiableAt_id.const_cpow (Or.inr h1a_ne)
@@ -2340,34 +2340,34 @@ theorem prime_factor_differentiableOn_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (h
 
 /-- Wide-radius variant (radius 5/2, p >= 5). -/
 theorem correction_differentiableOn_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
-    DifferentiableOn ℂ (fun z : ℂ => (-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-      z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) (Metric.ball 0 (5/2)) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    DifferentiableOn ℂ (fun z : ℂ => (-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+      z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) (Metric.ball 0 (5/2)) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/5 := by
     rw [ha_def]
-    have hp3 : (5 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/5 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/5 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
   intro z hz
   rw [Metric.mem_ball, dist_zero_right] at hz
-  have hane : ‖(a:ℂ)‖ = a := by
+  have hane : ‖(a : ℂ)‖ = a := by
     first
     | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
-  have hza_lt : ‖z * (a:ℂ)‖ < 1 := by
+  have hza_lt : ‖z * (a : ℂ)‖ < 1 := by
     rw [norm_mul, hane]; nlinarith [hz, ha_le, ha_pos]
-  have hre_pos : (0 : ℝ) < ((1 : ℂ) - z * (a:ℂ)).re := by
+  have hre_pos : (0 : ℝ) < ((1 : ℂ) - z * (a : ℂ)).re := by
     simp only [Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
       Complex.ofReal_im]
     have hre_le_norm : |z.re| ≤ ‖z‖ := by
@@ -2393,77 +2393,77 @@ theorem correction_differentiableOn_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs 
   · apply DifferentiableAt.neg
     apply DifferentiableAt.clog
     · first
-      | exact (differentiableAt_const (1 : ℂ)).sub (differentiableAt_id.mul_const (a:ℂ))
-      | exact (differentiableAt_const (1 : ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a:ℂ))
+      | exact (differentiableAt_const (1 : ℂ)).sub (differentiableAt_id.mul_const (a : ℂ))
+      | exact (differentiableAt_const (1 : ℂ)).sub (DifferentiableAt.mul_const differentiableAt_id (a : ℂ))
     · exact Or.inl hre_pos
   · exact differentiableAt_id.mul_const _
 
 /-- Wide-radius variant (radius 5/2, p >= 5). -/
 theorem correction_sum_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z : ℂ => ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-      ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)))
+      ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)))
       (Metric.ball 0 (5/2)) := by
   apply Complex.differentiableOn_tsum_of_summable_norm
-    (u := fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 20 * (p:ℝ) ^ (-2*s))
+    (u := fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 20 * (p : ℝ) ^ (-2*s))
   · have h2s : -(2*s) < -1 := by linarith
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
       Real.summable_nat_rpow.mpr h2s
-    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
       hbase.subtype _
-    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (20 : ℝ) * (p:ℝ) ^ (-2*s) =
-        20 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (20 : ℝ) * (p : ℝ) ^ (-2*s) =
+        20 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
       intro p; ring_nf
     simp_rw [heq]
     exact hsub.mul_left 20
   · intro p
-    have hp3 : 5 ≤ (p:ℕ) := p.property.2
-    exact correction_differentiableOn_wide (p:ℕ) hp3 s hs
+    have hp3 : 5 ≤ (p : ℕ) := p.property.2
+    exact correction_differentiableOn_wide (p : ℕ) hp3 s hs
   · exact Metric.isOpen_ball
   · intro p w hw
     rw [Metric.mem_ball, dist_zero_right] at hw
-    have hp3 : 5 ≤ (p:ℕ) := p.property.2
-    exact prime_correction_bound_complex_wide (p:ℕ) hp3 s hs w hw.le
+    have hp3 : 5 ≤ (p : ℕ) := p.property.2
+    exact prime_correction_bound_complex_wide (p : ℕ) hp3 s hs w hw.le
 
 /-- Wide-radius variant (radius 5/2, p >= 5). -/
 theorem G2tailC_eq_exp_sum_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 5/2) :
     G2tailC s z = Complex.exp (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-      ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ))) := by
+      ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ))) := by
   have hnormsum : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      ‖(-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)‖) := by
-    have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 20 * (p:ℝ) ^ (-2*s)) := by
+      ‖(-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)‖) := by
+    have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 20 * (p : ℝ) ^ (-2*s)) := by
       have h2s : -(2*s) < -1 := by linarith
-      have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*s))) :=
+      have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
         Real.summable_nat_rpow.mpr h2s
-      have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p:ℕ):ℝ) ^ (-(2*s))) :=
+      have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
         hbase.subtype _
-      have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (20 : ℝ) * (p:ℝ) ^ (-2*s) =
-          20 * ((p:ℕ):ℝ) ^ (-(2*s)) := by
+      have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (20 : ℝ) * (p : ℝ) ^ (-2*s) =
+          20 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
         intro p; ring_nf
       simp_rw [heq]
       exact hsub.mul_left 20
     apply Summable.of_nonneg_of_le
       (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
       (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => by
-        have hp3 : 5 ≤ (p:ℕ) := p.property.2
-        exact prime_correction_bound_complex_wide (p:ℕ) hp3 s hs z hz)
+        have hp3 : 5 ≤ (p : ℕ) := p.property.2
+        exact prime_correction_bound_complex_wide (p : ℕ) hp3 s hs z hz)
       hcomp
   have hsummable : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) :=
+      (-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) :=
     Summable.of_norm hnormsum
   have hhassum := hsummable.hasSum
   have hhasprod_exp := hasProd_exp_of_hasSum hhassum
   have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, Complex.exp
-      ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) =
-      (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z := by
+      ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) =
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z := by
     intro p
-    have hp3 : 5 ≤ (p:ℕ) := p.property.2
-    exact (prime_factor_eq_exp_complex_wide (p:ℕ) hp3 s hs z hz).symm
+    have hp3 : 5 ≤ (p : ℕ) := p.property.2
+    exact (prime_factor_eq_exp_complex_wide (p : ℕ) hp3 s hs z hz).symm
   simp only [heq] at hhasprod_exp
   have hhasprod_G2 := G2tailC_hasProd_wide s hs z hz
   exact (hhasprod_G2.unique hhasprod_exp)
@@ -2473,8 +2473,8 @@ theorem G2tailC_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z => G2tailC s z) (Metric.ball 0 (5/2)) := by
   have heq : ∀ z ∈ Metric.ball (0 : ℂ) (5/2), G2tailC s z = Complex.exp
       (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-          z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ))) := by
+        ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ))) := by
     intro z hz
     rw [Metric.mem_ball, dist_zero_right] at hz
     exact G2tailC_eq_exp_sum_wide s hs z hz.le
@@ -2544,25 +2544,25 @@ theorem hasDerivAt_conj_of_symm {U : Set ℂ} (hUopen : IsOpen U)
 
 /-- Each per-prime factor satisfies conjugate-reflection symmetry. -/
 theorem prime_factor_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) (z : ℂ) :
-    (1 - (starRingEnd ℂ) z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ ((starRingEnd ℂ) z) =
-      (starRingEnd ℂ) ((1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-        (((1 - (p:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    (1 - (starRingEnd ℂ) z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ ((starRingEnd ℂ) z) =
+      (starRingEnd ℂ) ((1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/3 := by
     rw [ha_def]
-    have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/3 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/3 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
   have h1a_pos : (0 : ℝ) < 1 - a := by linarith
@@ -2573,15 +2573,15 @@ theorem prime_factor_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
   have hlog1a_real : (starRingEnd ℂ) (Complex.log (((1 - a : ℝ)):ℂ)) =
       Complex.log (((1 - a : ℝ)):ℂ) := by
     rw [hlog1a]; exact Complex.conj_ofReal _
-  have hane_conj : (starRingEnd ℂ) ((a:ℂ)) = (a:ℂ) := Complex.conj_ofReal _
+  have hane_conj : (starRingEnd ℂ) ((a : ℂ)) = (a : ℂ) := Complex.conj_ofReal _
   have hcpow_symm : (((1 - a : ℝ)):ℂ) ^ ((starRingEnd ℂ) z) =
       (starRingEnd ℂ) ((((1 - a : ℝ)):ℂ) ^ z) := by
     rw [Complex.cpow_def_of_ne_zero h1a_ne, Complex.cpow_def_of_ne_zero h1a_ne,
       ← Complex.exp_conj]
     congr 1
     rw [map_mul, hlog1a_real]
-  have hinv_symm : (1 - (starRingEnd ℂ) z * (a:ℂ))⁻¹ =
-      (starRingEnd ℂ) ((1 - z * (a:ℂ))⁻¹) := by
+  have hinv_symm : (1 - (starRingEnd ℂ) z * (a : ℂ))⁻¹ =
+      (starRingEnd ℂ) ((1 - z * (a : ℂ))⁻¹) := by
     rw [map_inv₀, map_sub, map_one, map_mul, hane_conj]
   rw [hcpow_symm, hinv_symm, ← map_mul]
 
@@ -2589,32 +2589,32 @@ theorem prime_factor_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     on the ball |z|<2. -/
 theorem correction_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : ‖z‖ < 2) :
-    (-Complex.log (1 - (starRingEnd ℂ) z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        (starRingEnd ℂ) z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ) =
-      (starRingEnd ℂ) ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
-    have : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    (-Complex.log (1 - (starRingEnd ℂ) z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        (starRingEnd ℂ) z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ) =
+      (starRingEnd ℂ) ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
+    have : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
-  set a : ℝ := (p:ℝ) ^ (-s) with ha_def
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
   have ha_pos : 0 < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1/3 := by
     rw [ha_def]
-    have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have h1 : (p:ℝ) ^ (-s) ≤ (p:ℝ) ^ (-1:ℝ) := by
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-1:ℝ) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : (p:ℝ) ^ (-1:ℝ) = 1 / (p:ℝ) := by
+    have h2 : (p : ℝ) ^ (-1:ℝ) = 1 / (p : ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / (p:ℝ) ≤ 1/3 := by
+    have h3 : (1 : ℝ) / (p : ℝ) ≤ 1/3 := by
       apply div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3
     linarith
   have h1a_pos : (0 : ℝ) < 1 - a := by linarith
   have hlog1a_real : (starRingEnd ℂ) ((Real.log (1 - a) : ℝ):ℂ) =
       ((Real.log (1 - a) : ℝ):ℂ) := Complex.conj_ofReal _
-  have hane_conj : (starRingEnd ℂ) ((a:ℂ)) = (a:ℂ) := Complex.conj_ofReal _
-  have hre_pos : ∀ w : ℂ, ‖w‖ < 2 → (0 : ℝ) < ((1 : ℂ) - w * (a:ℂ)).re := by
+  have hane_conj : (starRingEnd ℂ) ((a : ℂ)) = (a : ℂ) := Complex.conj_ofReal _
+  have hre_pos : ∀ w : ℂ, ‖w‖ < 2 → (0 : ℝ) < ((1 : ℂ) - w * (a : ℂ)).re := by
     intro w hw
     simp only [Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
       Complex.ofReal_im]
@@ -2637,15 +2637,15 @@ theorem correction_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
       nlinarith [hre_le_norm.2, ha_pos]
     nlinarith [hw, ha_pos, hre_le]
   have harg_ne : ∀ w : ℂ, ‖w‖ < 2 →
-      ((1 : ℂ) - w * (a:ℂ)).arg ≠ Real.pi := by
+      ((1 : ℂ) - w * (a : ℂ)).arg ≠ Real.pi := by
     intro w hw harg
     have := hre_pos w hw
     rw [Complex.arg_eq_pi_iff] at harg
     linarith [harg.1]
-  have hlog_conj : Complex.log ((starRingEnd ℂ) (1 - z * (a:ℂ))) =
-      (starRingEnd ℂ) (Complex.log (1 - z * (a:ℂ))) := by
-    rw [Complex.log_conj (1 - z * (a:ℂ)) (harg_ne z hz)]
-  have hconj_sub : (starRingEnd ℂ) (1 - z * (a:ℂ)) = 1 - (starRingEnd ℂ) z * (a:ℂ) := by
+  have hlog_conj : Complex.log ((starRingEnd ℂ) (1 - z * (a : ℂ))) =
+      (starRingEnd ℂ) (Complex.log (1 - z * (a : ℂ))) := by
+    rw [Complex.log_conj (1 - z * (a : ℂ)) (harg_ne z hz)]
+  have hconj_sub : (starRingEnd ℂ) (1 - z * (a : ℂ)) = 1 - (starRingEnd ℂ) z * (a : ℂ) := by
     rw [map_sub, map_one, map_mul, hane_conj]
   rw [← hconj_sub, hlog_conj]
   simp only [map_neg, map_add, map_mul, hlog1a_real]
@@ -2653,16 +2653,16 @@ theorem correction_conj_symm (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
 /-- The correction-term sum satisfies conjugate-reflection symmetry. -/
 theorem correction_sum_conj_symm (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 2) :
     ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-      ((-Complex.log (1 - (starRingEnd ℂ) z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-        (starRingEnd ℂ) z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ)) =
+      ((-Complex.log (1 - (starRingEnd ℂ) z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        (starRingEnd ℂ) z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) =
       (starRingEnd ℂ) (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        ((-Complex.log (1 - z * (((p:ℝ) ^ (-s) : ℝ) : ℂ))) +
-          z * ((Real.log (1 - (p:ℝ) ^ (-s)) : ℝ) : ℂ))) := by
+        ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ))) := by
   rw [RCLike.conj_tsum]
   apply tsum_congr
   intro p
-  have hp3 : 3 ≤ (p:ℕ) := by have := p.property.2; omega
-  exact correction_conj_symm (p:ℕ) hp3 s hs z hz
+  have hp3 : 3 ≤ (p : ℕ) := by have := p.property.2; omega
+  exact correction_conj_symm (p : ℕ) hp3 s hs z hz
 
 /-- G2tailC satisfies conjugate-reflection symmetry on the ball |z|<2. -/
 theorem G2tailC_conj_symm (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 2) :
@@ -2817,11 +2817,11 @@ theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 
         · have : bigOmega 1 = 0 := by simp [bigOmega]
           omega
       refine Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr ⟨hnp2, ?_⟩, hnpk, ?_⟩
-      · have hcast : ((n / p : ℕ) : ℝ) = (n:ℝ) / p := by
+      · have hcast : ((n / p : ℕ) : ℝ) = (n : ℝ) / p := by
           rw [eq_div_iff (by positivity)]
           exact_mod_cast Nat.div_mul_cancel hpdvd
         rw [Nat.le_floor_iff (by positivity), hcast]
-        calc (n:ℝ)/p ≤ (⌊x⌋₊:ℝ)/p := by
+        calc (n : ℝ)/p ≤ (⌊x⌋₊:ℝ)/p := by
               apply div_le_div_of_nonneg_right _ (by positivity)
               exact_mod_cast hnx
           _ ≤ x / p := by
@@ -2851,7 +2851,7 @@ theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 
       refine Finset.mem_filter.mpr ⟨Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr
         ⟨by nlinarith [hpp.two_le], ?_⟩, hOmegapm, ?_⟩, hminFacpm⟩
       · rw [Nat.le_floor_iff (by positivity)] at hmx ⊢
-        have : (m:ℝ) ≤ x / p := hmx
+        have : (m : ℝ) ≤ x / p := hmx
         have hpm : (p * m : ℝ) ≤ x := by
           rw [le_div_iff₀ (by positivity)] at this
           nlinarith
@@ -2979,7 +2979,7 @@ theorem sum_log_prime_ge_sqrt_range (n : ℕ) (hn : 4 ≤ n) :
     have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast (by omega : 1 ≤ n)
     calc Real.sqrt n ≤ Real.sqrt (n*n) := by
           apply Real.sqrt_le_sqrt; nlinarith [hn1]
-      _ = n := by rw [show (n:ℝ)*n = n^2 by ring, Real.sqrt_sq (by positivity)]
+      _ = n := by rw [show (n : ℝ)*n = n^2 by ring, Real.sqrt_sq (by positivity)]
   have hfloor_le : ⌊Real.sqrt n⌋₊ ≤ n := by
     have h1 : (⌊Real.sqrt n⌋₊ : ℝ) ≤ Real.sqrt n := Nat.floor_le (by positivity)
     have h2 : (⌊Real.sqrt n⌋₊ : ℝ) ≤ n := h1.trans hsqrt_le
@@ -3456,10 +3456,10 @@ theorem primeCounting_two_pow_bound (j : ℕ) (hj : 1 ≤ j) :
   have hcast : ((2 ^ (j + 1) : ℕ) : ℝ) = (2 : ℝ) ^ (j + 1) := by norm_cast
   rw [hcast] at hmain
   have h2pos : (0 : ℝ) < (2 : ℝ) ^ (j + 1) := by positivity
-  have hj1pos : (0 : ℝ) < (j:ℝ) + 1 := by positivity
+  have hj1pos : (0 : ℝ) < (j : ℝ) + 1 := by positivity
   have hlog2pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
   have hlogsqrt : Real.log (Real.sqrt ((2 : ℝ) ^ (j + 1)))
-      = ((j:ℝ) + 1) * Real.log 2 / 2 := by
+      = ((j : ℝ) + 1) * Real.log 2 / 2 := by
     rw [Real.log_sqrt h2pos.le, Real.log_pow]
     push_cast
     try ring
@@ -3467,9 +3467,9 @@ theorem primeCounting_two_pow_bound (j : ℕ) (hj : 1 ≤ j) :
     rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
     norm_num
   have hterm2 : (2 : ℝ) ^ (j + 1) * Real.log 4 / Real.log (Real.sqrt ((2 : ℝ) ^ (j + 1)))
-      = 4 * (2 : ℝ) ^ (j + 1) / ((j:ℝ) + 1) := by
+      = 4 * (2 : ℝ) ^ (j + 1) / ((j : ℝ) + 1) := by
     rw [hlogsqrt, hlog4]
-    have hne1 : ((j:ℝ) + 1) ≠ 0 := hj1pos.ne'
+    have hne1 : ((j : ℝ) + 1) ≠ 0 := hj1pos.ne'
     have hne2 : Real.log 2 ≠ 0 := hlog2pos.ne'
     field_simp
     try ring
@@ -3477,12 +3477,12 @@ theorem primeCounting_two_pow_bound (j : ℕ) (hj : 1 ≤ j) :
   have hlog2_half : (1 : ℝ)/2 ≤ Real.log 2 := by
     linarith [Real.log_two_gt_d9]
   have hsqrt_bound : Real.sqrt ((2 : ℝ) ^ (j + 1))
-      ≤ 4 * (2 : ℝ) ^ (j + 1) / ((j:ℝ) + 1) := by
+      ≤ 4 * (2 : ℝ) ^ (j + 1) / ((j : ℝ) + 1) := by
     have hlog_le : Real.log (Real.sqrt ((2 : ℝ) ^ (j + 1)))
         ≤ Real.sqrt ((2 : ℝ) ^ (j + 1)) := Real.log_le_self hs_nonneg
     have hsq : Real.sqrt ((2 : ℝ) ^ (j + 1)) * Real.sqrt ((2 : ℝ) ^ (j + 1))
         = (2 : ℝ) ^ (j + 1) := Real.mul_self_sqrt h2pos.le
-    have hkey : Real.sqrt ((2 : ℝ) ^ (j + 1)) * (((j:ℝ) + 1) * Real.log 2 / 2)
+    have hkey : Real.sqrt ((2 : ℝ) ^ (j + 1)) * (((j : ℝ) + 1) * Real.log 2 / 2)
         ≤ (2 : ℝ) ^ (j + 1) := by
       rw [← hlogsqrt]
       calc Real.sqrt ((2 : ℝ) ^ (j + 1)) * Real.log (Real.sqrt ((2 : ℝ) ^ (j + 1)))
@@ -3493,8 +3493,8 @@ theorem primeCounting_two_pow_bound (j : ℕ) (hj : 1 ≤ j) :
     nlinarith [hkey, hs_nonneg, hj1pos, hlog2_half,
       mul_nonneg (mul_nonneg hs_nonneg hj1pos.le) (sub_nonneg.mpr hlog2_half)]
   rw [hterm2] at hmain
-  have h48 : 4 * (2 : ℝ) ^ (j + 1) / ((j:ℝ) + 1) + 4 * (2 : ℝ) ^ (j + 1) / ((j:ℝ) + 1)
-      = 8 * (2 : ℝ) ^ (j + 1) / ((j:ℝ) + 1) := by ring
+  have h48 : 4 * (2 : ℝ) ^ (j + 1) / ((j : ℝ) + 1) + 4 * (2 : ℝ) ^ (j + 1) / ((j : ℝ) + 1)
+      = 8 * (2 : ℝ) ^ (j + 1) / ((j : ℝ) + 1) := by ring
   linarith [hmain, hsqrt_bound, h48]
 
 /-- Per-fiber constant simplification:
@@ -3503,7 +3503,7 @@ theorem dyadic_term_bound (x : ℝ) (j : ℕ) (hj : 1 ≤ j) (hx : 9 ≤ x)
     (h2j : (2 : ℝ) ^ j ≤ x / 3) :
     ((x / (2 : ℝ) ^ j) / Real.log (x / (2 : ℝ) ^ j)) *
         (Nat.primeCounting (2 ^ (j + 1)) : ℝ) ≤
-      16 * x / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
+      16 * x / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
   have hxpos : (0 : ℝ) < x := by linarith
   have h2jpos : (0 : ℝ) < (2 : ℝ) ^ j := by positivity
   have hx2j3 : (3 : ℝ) ≤ x / (2 : ℝ) ^ j := by
@@ -3512,14 +3512,14 @@ theorem dyadic_term_bound (x : ℝ) (j : ℕ) (hj : 1 ≤ j) (hx : 9 ≤ x)
       div_le_div_of_nonneg_left hxpos.le h2jpos h2j
     linarith [heq3 ▸ hge]
   have hlogpos : (0 : ℝ) < Real.log (x / (2 : ℝ) ^ j) := Real.log_pos (by linarith)
-  have hj1pos : (0 : ℝ) < (j:ℝ) + 1 := by positivity
+  have hj1pos : (0 : ℝ) < (j : ℝ) + 1 := by positivity
   have hh_nonneg : (0 : ℝ) ≤ (x / (2 : ℝ) ^ j) / Real.log (x / (2 : ℝ) ^ j) :=
     div_nonneg (by positivity) hlogpos.le
   have hpc := primeCounting_two_pow_bound j hj
   have hid : ((x / (2 : ℝ) ^ j) / Real.log (x / (2 : ℝ) ^ j)) *
-      (8 * (2 : ℝ) ^ (j + 1) / ((j:ℝ) + 1))
-      = 16 * x / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
-    have hne1 : ((j:ℝ) + 1) ≠ 0 := hj1pos.ne'
+      (8 * (2 : ℝ) ^ (j + 1) / ((j : ℝ) + 1))
+      = 16 * x / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
+    have hne1 : ((j : ℝ) + 1) ≠ 0 := hj1pos.ne'
     have hne2 : Real.log (x / (2 : ℝ) ^ j) ≠ 0 := hlogpos.ne'
     have hne3 : (2 : ℝ) ^ j ≠ 0 := h2jpos.ne'
     rw [pow_succ]
@@ -3528,9 +3528,9 @@ theorem dyadic_term_bound (x : ℝ) (j : ℕ) (hj : 1 ≤ j) (hx : 9 ≤ x)
   calc ((x / (2 : ℝ) ^ j) / Real.log (x / (2 : ℝ) ^ j)) *
       (Nat.primeCounting (2 ^ (j + 1)) : ℝ)
       ≤ ((x / (2 : ℝ) ^ j) / Real.log (x / (2 : ℝ) ^ j)) *
-        (8 * (2 : ℝ) ^ (j + 1) / ((j:ℝ) + 1)) :=
+        (8 * (2 : ℝ) ^ (j + 1) / ((j : ℝ) + 1)) :=
         mul_le_mul_of_nonneg_left hpc hh_nonneg
-    _ = 16 * x / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := hid
+    _ = 16 * x / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := hid
 
 /-- On the low dyadic range ((2^j)^2 ≤ x): log(x/2^j) ≥ (log x)/2. -/
 theorem log_ratio_low (x : ℝ) (j : ℕ) (hx : 9 ≤ x)
@@ -3553,9 +3553,9 @@ theorem log_ratio_low (x : ℝ) (j : ℕ) (hx : 9 ≤ x)
 
 /-- Harmonic sum bound, real form: sum_(i<n) 1/(i+1) ≤ 1 + log n. -/
 theorem harmonic_sum_le (n : ℕ) :
-    ∑ i ∈ Finset.range n, (1 : ℝ) / ((i:ℝ) + 1) ≤ 1 + Real.log n := by
+    ∑ i ∈ Finset.range n, (1 : ℝ) / ((i : ℝ) + 1) ≤ 1 + Real.log n := by
   have heq : ((harmonic n : ℚ) : ℝ)
-      = ∑ i ∈ Finset.range n, (1 : ℝ) / ((i:ℝ) + 1) := by
+      = ∑ i ∈ Finset.range n, (1 : ℝ) / ((i : ℝ) + 1) := by
     unfold harmonic
     push_cast
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -3616,7 +3616,7 @@ theorem dyadic_log_bounds (x : ℝ) (hx : 9 ≤ x) :
 /-- If x/3 ≤ 2^(J+1) then (J+1)*log 2 ≥ (log x)/2, via sqrt x ≤ x/3 for x ≥ 9. -/
 theorem log_x_half_le (x : ℝ) (J : ℕ) (hx : 9 ≤ x)
     (hJ : x / 3 ≤ (2 : ℝ) ^ (J + 1)) :
-    Real.log x / 2 ≤ ((J:ℝ) + 1) * Real.log 2 := by
+    Real.log x / 2 ≤ ((J : ℝ) + 1) * Real.log 2 := by
   have hxpos : (0 : ℝ) < x := by linarith
   have h3sqrt : (3 : ℝ) ≤ Real.sqrt x := by
     rw [show (3 : ℝ) = Real.sqrt 9 by
@@ -3630,34 +3630,34 @@ theorem log_x_half_le (x : ℝ) (J : ℕ) (hx : 9 ≤ x)
   calc Real.log x / 2 = Real.log (Real.sqrt x) := (Real.log_sqrt hxpos.le).symm
     _ ≤ Real.log ((2 : ℝ) ^ (J + 1)) :=
         Real.log_le_log (Real.sqrt_pos.mpr hxpos) (le_trans hsqrt_le hJ)
-    _ = ((J:ℝ) + 1) * Real.log 2 := by
+    _ = ((J : ℝ) + 1) * Real.log 2 := by
         rw [Real.log_pow]
         push_cast
         try ring
 
 /-- If 2^J ≤ x then J+1 ≤ 2*log x, for x ≥ 9. -/
 theorem J_le_two_log (x : ℝ) (J : ℕ) (hx : 9 ≤ x)
-    (hJ : (2 : ℝ) ^ J ≤ x) : ((J:ℝ) + 1) ≤ 2 * Real.log x := by
+    (hJ : (2 : ℝ) ^ J ≤ x) : ((J : ℝ) + 1) ≤ 2 * Real.log x := by
   have hlogx2 := two_le_log x hx
-  have hJlog : (J:ℝ) * Real.log 2 ≤ Real.log x := by
-    calc (J:ℝ) * Real.log 2 = Real.log ((2 : ℝ) ^ J) := by rw [Real.log_pow]
+  have hJlog : (J : ℝ) * Real.log 2 ≤ Real.log x := by
+    calc (J : ℝ) * Real.log 2 = Real.log ((2 : ℝ) ^ J) := by rw [Real.log_pow]
       _ ≤ Real.log x := Real.log_le_log (by positivity) hJ
   have hlog2_23 : (2 : ℝ) / 3 ≤ Real.log 2 := by linarith [Real.log_two_gt_d9]
-  have hJle : (J:ℝ) ≤ (3 / 2) * Real.log x := by
-    have h1 : (J:ℝ) * ((2 : ℝ) / 3) ≤ (J:ℝ) * Real.log 2 :=
+  have hJle : (J : ℝ) ≤ (3 / 2) * Real.log x := by
+    have h1 : (J : ℝ) * ((2 : ℝ) / 3) ≤ (J : ℝ) * Real.log 2 :=
       mul_le_mul_of_nonneg_left hlog2_23 (by positivity)
     nlinarith [hJlog]
   linarith [hJle, hlogx2]
 
 /-- The final constant absorption: 1 + log(J+1) ≤ 4*loglog x when J+1 ≤ 2*log x. -/
 theorem one_add_log_le_loglog (x : ℝ) (J : ℕ) (hx : 9 ≤ x)
-    (hJ2 : ((J:ℝ) + 1) ≤ 2 * Real.log x) :
-    1 + Real.log ((J:ℝ) + 1) ≤ 4 * Real.log (Real.log x) := by
+    (hJ2 : ((J : ℝ) + 1) ≤ 2 * Real.log x) :
+    1 + Real.log ((J : ℝ) + 1) ≤ 4 * Real.log (Real.log x) := by
   have hlogx2 := two_le_log x hx
   have hloglog := loglog_ge_log_two x hx
-  have hJ1pos : (0 : ℝ) < (J:ℝ) + 1 := by positivity
-  have hA : Real.log ((J:ℝ) + 1) ≤ Real.log 2 + Real.log (Real.log x) := by
-    calc Real.log ((J:ℝ) + 1) ≤ Real.log (2 * Real.log x) :=
+  have hJ1pos : (0 : ℝ) < (J : ℝ) + 1 := by positivity
+  have hA : Real.log ((J : ℝ) + 1) ≤ Real.log 2 + Real.log (Real.log x) := by
+    calc Real.log ((J : ℝ) + 1) ≤ Real.log (2 * Real.log x) :=
           Real.log_le_log hJ1pos hJ2
       _ = Real.log 2 + Real.log (Real.log x) := Real.log_mul (by norm_num) (by linarith)
   have hB : (1 : ℝ) ≤ 2 * Real.log 2 := by
@@ -3673,14 +3673,14 @@ theorem one_add_log_le_loglog (x : ℝ) (J : ℕ) (hx : 9 ≤ x)
 /-- Low dyadic range (j ≤ M, 2M ≤ J): harmonic bound with the (log x)/2 floor. -/
 theorem dyadic_low_sum (x : ℝ) (J M : ℕ) (hx : 9 ≤ x) (hM : 2 * M ≤ J)
     (hJ : (2 : ℝ) ^ J ≤ x) :
-    ∑ j ∈ Finset.range (M + 1), 1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
-      ≤ 2 / Real.log x * (1 + Real.log ((M:ℝ) + 1)) := by
+    ∑ j ∈ Finset.range (M + 1), 1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+      ≤ 2 / Real.log x * (1 + Real.log ((M : ℝ) + 1)) := by
   have hxpos : (0 : ℝ) < x := by linarith
   have hlogx_pos : (0 : ℝ) < Real.log x := Real.log_pos (by linarith)
   have hc_nonneg : (0 : ℝ) ≤ 2 / Real.log x := by positivity
   have hterm : ∀ j ∈ Finset.range (M + 1),
-      1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
-        ≤ 2 / Real.log x * (1 / ((j:ℝ) + 1)) := by
+      1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+        ≤ 2 / Real.log x * (1 / ((j : ℝ) + 1)) := by
     intro j hj
     simp only [Finset.mem_range, Nat.lt_succ_iff] at hj
     have hsq : ((2 : ℝ) ^ j) ^ 2 ≤ x := by
@@ -3691,50 +3691,50 @@ theorem dyadic_low_sum (x : ℝ) (J M : ℕ) (hx : 9 ≤ x) (hM : 2 * M ≤ J)
             omega
         _ ≤ x := hJ
     have hlow := log_ratio_low x j hx hsq
-    have hj1 : (0 : ℝ) < (j:ℝ) + 1 := by positivity
-    have hden1 : (0 : ℝ) < ((j:ℝ) + 1) * (Real.log x / 2) := by positivity
-    have hmono : ((j:ℝ) + 1) * (Real.log x / 2)
-        ≤ ((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j) :=
+    have hj1 : (0 : ℝ) < (j : ℝ) + 1 := by positivity
+    have hden1 : (0 : ℝ) < ((j : ℝ) + 1) * (Real.log x / 2) := by positivity
+    have hmono : ((j : ℝ) + 1) * (Real.log x / 2)
+        ≤ ((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j) :=
       mul_le_mul_of_nonneg_left hlow hj1.le
     have h1 := one_div_le_one_div_of_le hden1 hmono
-    have h2 : 1 / (((j:ℝ) + 1) * (Real.log x / 2))
-        = 2 / Real.log x * (1 / ((j:ℝ) + 1)) := by
-      have hne1 : ((j:ℝ) + 1) ≠ 0 := hj1.ne'
+    have h2 : 1 / (((j : ℝ) + 1) * (Real.log x / 2))
+        = 2 / Real.log x * (1 / ((j : ℝ) + 1)) := by
+      have hne1 : ((j : ℝ) + 1) ≠ 0 := hj1.ne'
       have hne2 : Real.log x ≠ 0 := hlogx_pos.ne'
       field_simp
       try ring
-    calc 1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
-        ≤ 1 / (((j:ℝ) + 1) * (Real.log x / 2)) := h1
-      _ = 2 / Real.log x * (1 / ((j:ℝ) + 1)) := h2
+    calc 1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+        ≤ 1 / (((j : ℝ) + 1) * (Real.log x / 2)) := h1
+      _ = 2 / Real.log x * (1 / ((j : ℝ) + 1)) := h2
   have hsum1 := Finset.sum_le_sum hterm
-  have hsum2 : ∑ j ∈ Finset.range (M + 1), 2 / Real.log x * (1 / ((j:ℝ) + 1))
-      = 2 / Real.log x * ∑ j ∈ Finset.range (M + 1), (1 / ((j:ℝ) + 1)) := by
+  have hsum2 : ∑ j ∈ Finset.range (M + 1), 2 / Real.log x * (1 / ((j : ℝ) + 1))
+      = 2 / Real.log x * ∑ j ∈ Finset.range (M + 1), (1 / ((j : ℝ) + 1)) := by
     rw [Finset.mul_sum]
   have hharm := harmonic_sum_le (M + 1)
-  have hcastlog : Real.log ((M + 1 : ℕ) : ℝ) = Real.log ((M:ℝ) + 1) := by norm_cast
+  have hcastlog : Real.log ((M + 1 : ℕ) : ℝ) = Real.log ((M : ℝ) + 1) := by norm_cast
   calc ∑ j ∈ Finset.range (M + 1),
-      1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
-      ≤ ∑ j ∈ Finset.range (M + 1), 2 / Real.log x * (1 / ((j:ℝ) + 1)) := hsum1
-    _ = 2 / Real.log x * ∑ j ∈ Finset.range (M + 1), (1 / ((j:ℝ) + 1)) := hsum2
-    _ ≤ 2 / Real.log x * (1 + Real.log ((M:ℝ) + 1)) := by
+      1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+      ≤ ∑ j ∈ Finset.range (M + 1), 2 / Real.log x * (1 / ((j : ℝ) + 1)) := hsum1
+    _ = 2 / Real.log x * ∑ j ∈ Finset.range (M + 1), (1 / ((j : ℝ) + 1)) := hsum2
+    _ ≤ 2 / Real.log x * (1 + Real.log ((M : ℝ) + 1)) := by
         apply mul_le_mul_of_nonneg_left _ hc_nonneg
-        calc ∑ i ∈ Finset.range (M + 1), (1 : ℝ) / ((i:ℝ) + 1)
+        calc ∑ i ∈ Finset.range (M + 1), (1 : ℝ) / ((i : ℝ) + 1)
             ≤ 1 + Real.log ((M + 1 : ℕ) : ℝ) := hharm
-          _ = 1 + Real.log ((M:ℝ) + 1) := by rw [hcastlog]
+          _ = 1 + Real.log ((M : ℝ) + 1) := by rw [hcastlog]
 
 /-- High dyadic range (M < j ≤ J, J ≤ 2M+1): reflected harmonic bound. -/
 theorem dyadic_high_sum (x : ℝ) (J M : ℕ) (hx : 9 ≤ x) (hJM : J ≤ 2 * M + 1)
     (hJ3 : (2 : ℝ) ^ J ≤ x / 3) :
     ∑ j ∈ Finset.Ico (M + 1) (J + 1),
-        1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
-      ≤ 2 / (((J:ℝ) + 1) * Real.log 2) * (1 + Real.log ((J:ℝ) + 1)) := by
+        1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+      ≤ 2 / (((J : ℝ) + 1) * Real.log 2) * (1 + Real.log ((J : ℝ) + 1)) := by
   have hxpos : (0 : ℝ) < x := by linarith
   have hlog2_pos : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
-  have hJ1pos : (0 : ℝ) < (J:ℝ) + 1 := by positivity
-  have hc_nonneg : (0 : ℝ) ≤ 2 / (((J:ℝ) + 1) * Real.log 2) := by positivity
+  have hJ1pos : (0 : ℝ) < (J : ℝ) + 1 := by positivity
+  have hc_nonneg : (0 : ℝ) ≤ 2 / (((J : ℝ) + 1) * Real.log 2) := by positivity
   have hterm : ∀ j ∈ Finset.Ico (M + 1) (J + 1),
-      1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
-        ≤ 2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := by
+      1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+        ≤ 2 / (((J : ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := by
     intro j hj
     simp only [Finset.mem_Ico] at hj
     have hjJ : j ≤ J := by omega
@@ -3766,7 +3766,7 @@ theorem dyadic_high_sum (x : ℝ) (J M : ℕ) (hx : 9 ≤ x) (hJM : J ≤ 2 * M 
       calc ((((J - j : ℕ) : ℝ)) + 1) * Real.log 2
           = Real.log ((2 : ℝ) ^ ((J - j) + 1)) := h1.symm
         _ ≤ Real.log (x / (2 : ℝ) ^ j) := Real.log_le_log (by positivity) hx2j_ge
-    have hfrac : ((J:ℝ) + 1) / 2 ≤ (j:ℝ) + 1 := by
+    have hfrac : ((J : ℝ) + 1) / 2 ≤ (j : ℝ) + 1 := by
       have hn : J + 1 ≤ 2 * (j + 1) := by omega
       have hcast := (Nat.cast_le (α := ℝ)).mpr hn
       push_cast at hcast
@@ -3775,26 +3775,26 @@ theorem dyadic_high_sum (x : ℝ) (J M : ℕ) (hx : 9 ≤ x) (hJM : J ≤ 2 * M 
       have h1 : (0 : ℝ) < ((((J - j : ℕ) : ℝ)) + 1) * Real.log 2 := by positivity
       linarith [hlog_ge]
     have hden_lower : (0 : ℝ) <
-        ((J:ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2) := by
+        ((J : ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2) := by
       positivity
-    have hden_ge : ((J:ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2)
-        ≤ ((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j) :=
+    have hden_ge : ((J : ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2)
+        ≤ ((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j) :=
       mul_le_mul hfrac hlog_ge (by positivity) (by positivity)
     have h1 := one_div_le_one_div_of_le hden_lower hden_ge
-    have h2 : 1 / (((J:ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2))
-        = 2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := by
-      have hne1 : ((J:ℝ) + 1) ≠ 0 := hJ1pos.ne'
+    have h2 : 1 / (((J : ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2))
+        = 2 / (((J : ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := by
+      have hne1 : ((J : ℝ) + 1) ≠ 0 := hJ1pos.ne'
       have hne2 : Real.log 2 ≠ 0 := hlog2_pos.ne'
       have hne3 : ((((J - j : ℕ) : ℝ)) + 1) ≠ 0 := by positivity
       field_simp
       try ring
-    calc 1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
-        ≤ 1 / (((J:ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2)) := h1
-      _ = 2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := h2
+    calc 1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+        ≤ 1 / (((J : ℝ) + 1) / 2 * (((((J - j : ℕ) : ℝ)) + 1) * Real.log 2)) := h1
+      _ = 2 / (((J : ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := h2
   have hsum1 := Finset.sum_le_sum hterm
   have hsum2 : ∑ j ∈ Finset.Ico (M + 1) (J + 1),
-      2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1))
-      = 2 / (((J:ℝ) + 1) * Real.log 2) *
+      2 / (((J : ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1))
+      = 2 / (((J : ℝ) + 1) * Real.log 2) *
         ∑ j ∈ Finset.Ico (M + 1) (J + 1), (1 / (((J - j : ℕ) : ℝ) + 1)) := by
     rw [Finset.mul_sum]
   have hsub : Finset.Ico (M + 1) (J + 1) ⊆ Finset.range (J + 1) := by
@@ -3807,29 +3807,29 @@ theorem dyadic_high_sum (x : ℝ) (J M : ℕ) (hx : 9 ≤ x) (hJM : J ≤ 2 * M 
     positivity
   have hreflect : ∑ j ∈ Finset.range (J + 1),
       (1 : ℝ) / (((J - j : ℕ) : ℝ) + 1)
-      = ∑ i ∈ Finset.range (J + 1), (1 : ℝ) / ((i:ℝ) + 1) := by
-    rw [← Finset.sum_range_reflect (fun i => (1 : ℝ) / ((i:ℝ) + 1)) (J + 1)]
+      = ∑ i ∈ Finset.range (J + 1), (1 : ℝ) / ((i : ℝ) + 1) := by
+    rw [← Finset.sum_range_reflect (fun i => (1 : ℝ) / ((i : ℝ) + 1)) (J + 1)]
     refine Finset.sum_congr rfl fun j hj => ?_
     have hjj : J + 1 - 1 - j = J - j := by omega
     rw [hjj]
   have hharm := harmonic_sum_le (J + 1)
-  have hcastlog : Real.log ((J + 1 : ℕ) : ℝ) = Real.log ((J:ℝ) + 1) := by norm_cast
+  have hcastlog : Real.log ((J + 1 : ℕ) : ℝ) = Real.log ((J : ℝ) + 1) := by norm_cast
   calc ∑ j ∈ Finset.Ico (M + 1) (J + 1),
-      1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+      1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
       ≤ ∑ j ∈ Finset.Ico (M + 1) (J + 1),
-        2 / (((J:ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := hsum1
-    _ = 2 / (((J:ℝ) + 1) * Real.log 2) *
+        2 / (((J : ℝ) + 1) * Real.log 2) * (1 / (((J - j : ℕ) : ℝ) + 1)) := hsum1
+    _ = 2 / (((J : ℝ) + 1) * Real.log 2) *
         ∑ j ∈ Finset.Ico (M + 1) (J + 1), (1 / (((J - j : ℕ) : ℝ) + 1)) := hsum2
-    _ ≤ 2 / (((J:ℝ) + 1) * Real.log 2) *
+    _ ≤ 2 / (((J : ℝ) + 1) * Real.log 2) *
         ∑ j ∈ Finset.range (J + 1), (1 / (((J - j : ℕ) : ℝ) + 1)) :=
         mul_le_mul_of_nonneg_left hsum3 hc_nonneg
-    _ = 2 / (((J:ℝ) + 1) * Real.log 2) *
-        ∑ i ∈ Finset.range (J + 1), (1 / ((i:ℝ) + 1)) := by rw [hreflect]
-    _ ≤ 2 / (((J:ℝ) + 1) * Real.log 2) * (1 + Real.log ((J:ℝ) + 1)) := by
+    _ = 2 / (((J : ℝ) + 1) * Real.log 2) *
+        ∑ i ∈ Finset.range (J + 1), (1 / ((i : ℝ) + 1)) := by rw [hreflect]
+    _ ≤ 2 / (((J : ℝ) + 1) * Real.log 2) * (1 + Real.log ((J : ℝ) + 1)) := by
         apply mul_le_mul_of_nonneg_left _ hc_nonneg
-        calc ∑ i ∈ Finset.range (J + 1), (1 : ℝ) / ((i:ℝ) + 1)
+        calc ∑ i ∈ Finset.range (J + 1), (1 : ℝ) / ((i : ℝ) + 1)
             ≤ 1 + Real.log ((J + 1 : ℕ) : ℝ) := hharm
-          _ = 1 + Real.log ((J:ℝ) + 1) := by rw [hcastlog]
+          _ = 1 + Real.log ((J : ℝ) + 1) := by rw [hcastlog]
 
 
 /-- Core of the dyadic bound, parametrized by the bracketing index J:
@@ -3849,7 +3849,7 @@ theorem sum_ratio_log_dyadic_core (x : ℝ) (p₀ J : ℕ) (hp₀ : 1 ≤ p₀)
   have hterm : ∀ j ∈ Finset.range (J + 1),
       ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
           ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) ≤
-        16 * x / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
+        16 * x / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
     intro j hj
     simp only [Finset.mem_range, Nat.lt_succ_iff] at hj
     have h2j : (2 : ℝ) ^ j ≤ x / 3 := by
@@ -3870,18 +3870,18 @@ theorem sum_ratio_log_dyadic_core (x : ℝ) (p₀ J : ℕ) (hp₀ : 1 ≤ p₀)
         (dyadic_term_bound x j hjpos hx h2j)
   have hsum1 := Finset.sum_le_sum hterm
   have hfactor : ∑ j ∈ Finset.range (J + 1),
-      16 * x / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+      16 * x / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
       = 16 * x * ∑ j ∈ Finset.range (J + 1),
-          1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
+          1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun j _ => ?_
     ring
   have hsplit : ∑ j ∈ Finset.range (J + 1),
-      (1 : ℝ) / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+      (1 : ℝ) / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
       = (∑ j ∈ Finset.range (J / 2 + 1),
-          (1 : ℝ) / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)))
+          (1 : ℝ) / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)))
         + ∑ j ∈ Finset.Ico (J / 2 + 1) (J + 1),
-            (1 : ℝ) / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
+            (1 : ℝ) / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := by
     simp only [Finset.range_eq_Ico]
     exact (Finset.sum_Ico_consecutive _ (Nat.zero_le (J / 2 + 1)) (by omega)).symm
   have hlow := dyadic_low_sum x J (J / 2) hx (by omega) h2J
@@ -3891,20 +3891,20 @@ theorem sum_ratio_log_dyadic_core (x : ℝ) (p₀ J : ℕ) (hp₀ : 1 ≤ p₀)
   have habs := one_add_log_le_loglog x J hx hJ2
   have hM_log : 1 + Real.log (((J / 2 : ℕ):ℝ) + 1) ≤ 4 * Real.log (Real.log x) := by
     have hle : (J / 2 : ℕ) ≤ J := Nat.div_le_self J 2
-    have h1 : (((J / 2 : ℕ):ℝ) + 1) ≤ ((J:ℝ) + 1) := by
+    have h1 : (((J / 2 : ℕ):ℝ) + 1) ≤ ((J : ℝ) + 1) := by
       have hc := (Nat.cast_le (α := ℝ)).mpr hle
       linarith
-    have h2 : Real.log (((J / 2 : ℕ):ℝ) + 1) ≤ Real.log ((J:ℝ) + 1) :=
+    have h2 : Real.log (((J / 2 : ℕ):ℝ) + 1) ≤ Real.log ((J : ℝ) + 1) :=
       Real.log_le_log (by positivity) h1
     linarith [habs]
-  have hhigh_coef : 2 / (((J:ℝ) + 1) * Real.log 2) ≤ 4 / Real.log x := by
+  have hhigh_coef : 2 / (((J : ℝ) + 1) * Real.log 2) ≤ 4 / Real.log x := by
     have hlogx_ne : Real.log x ≠ 0 := hlogx_pos.ne'
-    have h1 : 2 / (((J:ℝ) + 1) * Real.log 2) ≤ 2 / (Real.log x / 2) :=
+    have h1 : 2 / (((J : ℝ) + 1) * Real.log 2) ≤ 2 / (Real.log x / 2) :=
       div_le_div_of_nonneg_left (by norm_num) (by linarith) hhalf
     have h2 : 2 / (Real.log x / 2) = 4 / Real.log x := by
       field_simp
       try ring
-    calc 2 / (((J:ℝ) + 1) * Real.log 2) ≤ 2 / (Real.log x / 2) := h1
+    calc 2 / (((J : ℝ) + 1) * Real.log 2) ≤ 2 / (Real.log x / 2) := h1
       _ = 4 / Real.log x := h2
   have hc_low : (0 : ℝ) ≤ 2 / Real.log x := div_nonneg (by norm_num) hlogx_pos.le
   have hL2 : 2 / Real.log x * (1 + Real.log (((J / 2 : ℕ):ℝ) + 1))
@@ -3913,20 +3913,20 @@ theorem sum_ratio_log_dyadic_core (x : ℝ) (p₀ J : ℕ) (hp₀ : 1 ≤ p₀)
         ≤ 2 / Real.log x * (4 * Real.log (Real.log x)) :=
           mul_le_mul_of_nonneg_left hM_log hc_low
       _ = 8 * Real.log (Real.log x) / Real.log x := by ring
-  have hH2 : 2 / (((J:ℝ) + 1) * Real.log 2) * (1 + Real.log ((J:ℝ) + 1))
+  have hH2 : 2 / (((J : ℝ) + 1) * Real.log 2) * (1 + Real.log ((J : ℝ) + 1))
       ≤ 16 * Real.log (Real.log x) / Real.log x := by
-    have h1pl : (0 : ℝ) ≤ 1 + Real.log ((J:ℝ) + 1) := by
-      have hln : (0 : ℝ) ≤ Real.log ((J:ℝ) + 1) :=
+    have h1pl : (0 : ℝ) ≤ 1 + Real.log ((J : ℝ) + 1) := by
+      have hln : (0 : ℝ) ≤ Real.log ((J : ℝ) + 1) :=
         Real.log_nonneg (le_add_of_nonneg_left (Nat.cast_nonneg J))
       linarith
-    calc 2 / (((J:ℝ) + 1) * Real.log 2) * (1 + Real.log ((J:ℝ) + 1))
-        ≤ 4 / Real.log x * (1 + Real.log ((J:ℝ) + 1)) :=
+    calc 2 / (((J : ℝ) + 1) * Real.log 2) * (1 + Real.log ((J : ℝ) + 1))
+        ≤ 4 / Real.log x * (1 + Real.log ((J : ℝ) + 1)) :=
           mul_le_mul_of_nonneg_right hhigh_coef h1pl
       _ ≤ 4 / Real.log x * (4 * Real.log (Real.log x)) :=
           mul_le_mul_of_nonneg_left habs (div_nonneg (by norm_num) hlogx_pos.le)
       _ = 16 * Real.log (Real.log x) / Real.log x := by ring
   have hU : ∑ j ∈ Finset.range (J + 1),
-      (1 : ℝ) / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
+      (1 : ℝ) / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j))
       ≤ 24 * Real.log (Real.log x) / Real.log x := by
     have h824 : 8 * Real.log (Real.log x) / Real.log x
         + 16 * Real.log (Real.log x) / Real.log x
@@ -3936,9 +3936,9 @@ theorem sum_ratio_log_dyadic_core (x : ℝ) (p₀ J : ℕ) (hp₀ : 1 ≤ p₀)
       ∑ k ∈ (Finset.Ioc p₀ ⌊x / 3⌋₊).filter (fun k => Nat.log 2 k = j),
         ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ)
       ≤ ∑ j ∈ Finset.range (J + 1),
-        16 * x / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := hsum1
+        16 * x / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := hsum1
     _ = 16 * x * ∑ j ∈ Finset.range (J + 1),
-        1 / (((j:ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := hfactor
+        1 / (((j : ℝ) + 1) * Real.log (x / (2 : ℝ) ^ j)) := hfactor
     _ ≤ 16 * x * (24 * Real.log (Real.log x) / Real.log x) :=
         mul_le_mul_of_nonneg_left hU (by linarith)
     _ = 384 * x * Real.log (Real.log x) / Real.log x := by ring
@@ -3963,16 +3963,16 @@ theorem sum_ratio_log_dyadic :
 
 /-- h(p₀) ≤ h(1) = x/logx, since h is antitone on [1,p₀]. -/
 theorem h_p0_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos : 0 < x)
-    (hx3 : (p₀:ℝ) ≤ x/3) :
-    (x/(p₀:ℝ)) / Real.log (x/(p₀:ℝ)) ≤ x / Real.log x := by
+    (hx3 : (p₀ : ℝ) ≤ x/3) :
+    (x/(p₀ : ℝ)) / Real.log (x/(p₀ : ℝ)) ≤ x / Real.log x := by
   rcases eq_or_lt_of_le hp₀ with heq | hlt
   · simp [← heq]
-  · have ha : 0 < (p₀:ℝ) := by exact_mod_cast hp₀
-    have h1lt : (1 : ℝ) < (p₀:ℝ) := by exact_mod_cast hlt
-    have hconv : Convex ℝ (Set.Icc (1 : ℝ) (p₀:ℝ)) := convex_Icc _ _
-    have hint_eq : interior (Set.Icc (1 : ℝ) (p₀:ℝ)) = Set.Ioo (1 : ℝ) (p₀:ℝ) :=
+  · have ha : 0 < (p₀ : ℝ) := by exact_mod_cast hp₀
+    have h1lt : (1 : ℝ) < (p₀ : ℝ) := by exact_mod_cast hlt
+    have hconv : Convex ℝ (Set.Icc (1 : ℝ) (p₀ : ℝ)) := convex_Icc _ _
+    have hint_eq : interior (Set.Icc (1 : ℝ) (p₀ : ℝ)) = Set.Ioo (1 : ℝ) (p₀ : ℝ) :=
       interior_Icc
-    have hxt3_of : ∀ t, 1 ≤ t → t ≤ (p₀:ℝ) → (3 : ℝ) ≤ x / t := by
+    have hxt3_of : ∀ t, 1 ≤ t → t ≤ (p₀ : ℝ) → (3 : ℝ) ≤ x / t := by
       intro t ht1 ht2
       have htle3 : t ≤ x/3 := le_trans ht2 hx3
       have htpos : 0 < t := lt_of_lt_of_le one_pos ht1
@@ -3980,21 +3980,21 @@ theorem h_p0_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos : 0 < x)
       have hge : x / (x/3) ≤ x / t := by
         apply div_le_div_of_nonneg_left hxpos.le htpos htle3
       linarith [heq3 ▸ hge]
-    have hcont : ContinuousOn (fun s => (x/s)/Real.log (x/s)) (Set.Icc (1 : ℝ) (p₀:ℝ)) := by
+    have hcont : ContinuousOn (fun s => (x/s)/Real.log (x/s)) (Set.Icc (1 : ℝ) (p₀ : ℝ)) := by
       intro t ht
       simp only [Set.mem_Icc] at ht
       have htpos : 0 < t := lt_of_lt_of_le one_pos ht.1
       have hxt3 := hxt3_of t ht.1 ht.2
       exact (differentiableAt_ratio_log x t htpos (by linarith)).continuousAt.continuousWithinAt
     have hdiff : DifferentiableOn ℝ (fun s => (x/s)/Real.log (x/s))
-        (interior (Set.Icc (1 : ℝ) (p₀:ℝ))) := by
+        (interior (Set.Icc (1 : ℝ) (p₀ : ℝ))) := by
       rw [hint_eq]
       intro t ht
       simp only [Set.mem_Ioo] at ht
       have htpos : 0 < t := lt_trans one_pos ht.1
       have hxt3 := hxt3_of t ht.1.le ht.2.le
       exact (differentiableAt_ratio_log x t htpos (by linarith)).differentiableWithinAt
-    have hderiv_np : ∀ t ∈ interior (Set.Icc (1 : ℝ) (p₀:ℝ)),
+    have hderiv_np : ∀ t ∈ interior (Set.Icc (1 : ℝ) (p₀ : ℝ)),
         deriv (fun s => (x/s)/Real.log (x/s)) t ≤ 0 := by
       rw [hint_eq]
       intro t ht
@@ -4016,8 +4016,8 @@ theorem h_p0_bound (x : ℝ) (p₀ : ℕ) (hp₀ : 1 ≤ p₀) (hxpos : 0 < x)
       have hprod_neg : x/t^2 * (1 - Real.log (x/t)) < 0 := mul_neg_of_pos_of_neg hxt2_pos hnum_neg
       exact div_nonpos_of_nonpos_of_nonneg hprod_neg.le hden_pos.le
     have hanti := antitoneOn_of_deriv_nonpos hconv hcont hdiff hderiv_np
-    have h1mem : (1 : ℝ) ∈ Set.Icc (1 : ℝ) (p₀:ℝ) := ⟨le_refl _, h1lt.le⟩
-    have hpmem : (p₀:ℝ) ∈ Set.Icc (1 : ℝ) (p₀:ℝ) := ⟨h1lt.le, le_refl _⟩
+    have h1mem : (1 : ℝ) ∈ Set.Icc (1 : ℝ) (p₀ : ℝ) := ⟨le_refl _, h1lt.le⟩
+    have hpmem : (p₀ : ℝ) ∈ Set.Icc (1 : ℝ) (p₀ : ℝ) := ⟨h1lt.le, le_refl _⟩
     have := hanti h1mem hpmem h1lt.le
     simpa using this
 
@@ -4074,7 +4074,7 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
         apply Real.log_le_log hlogxp_pos
         exact Real.log_le_log (by linarith) hxp_le
       have hterm_bound2 : ∀ p ∈ (Finset.Icc p₀ ⌊x⌋₊).filter (fun p => p.Prime),
-          (p:ℝ) ≥ 1 → x / p ≥ 3 → (piKFrom n (x / p) p : ℝ) ≤
+          (p : ℝ) ≥ 1 → x / p ≥ 3 → (piKFrom n (x / p) p : ℝ) ≤
             C * (Real.log (Real.log x)) ^ (n - 1) * ((x / p) / Real.log (x / p)) := by
         intro p hp hp1 hge3
         have h1 := hterm_bound p hp hge3
@@ -4123,8 +4123,8 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
             _ ≤ 2 ^ n := by
               apply pow_le_pow_right₀ (by norm_num)
               omega
-        have hmle : (m:ℝ) ≤ x / p := by
-          have h1 : (m:ℝ) ≤ (⌊x/p⌋₊ : ℝ) := by exact_mod_cast hm.2
+        have hmle : (m : ℝ) ≤ x / p := by
+          have h1 : (m : ℝ) ≤ (⌊x/p⌋₊ : ℝ) := by exact_mod_cast hm.2
           have h2 : (⌊x/p⌋₊ : ℝ) ≤ x / p := Nat.floor_le (by positivity)
           linarith
         linarith
@@ -4150,7 +4150,7 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
             subst hn1'
             obtain ⟨hpmem, hpprime⟩ := Finset.mem_filter.mp hp
             have hp2le : 2 ≤ p := hpprime.two_le
-            have hppos : (0 : ℝ) < (p:ℝ) := by exact_mod_cast (by omega : 0 < p)
+            have hppos : (0 : ℝ) < (p : ℝ) := by exact_mod_cast (by omega : 0 < p)
             unfold piKFrom
             apply Finset.card_eq_zero.mpr
             apply Finset.filter_eq_empty_iff.mpr
@@ -4160,13 +4160,13 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
             obtain ⟨hmO, hmin_⟩ := hcontra
             have hmprime : m.Prime := (bigOmega_eq_one_iff m).mp hmO
             have hpm : p ≤ m := hmin_ m hmprime dvd_rfl
-            have hmle : (m:ℝ) ≤ x / p := by
-              have h1 : (m:ℝ) ≤ (⌊x / p⌋₊ : ℝ) := by exact_mod_cast hm.2
+            have hmle : (m : ℝ) ≤ x / p := by
+              have h1 : (m : ℝ) ≤ (⌊x / p⌋₊ : ℝ) := by exact_mod_cast hm.2
               have h2 : (⌊x / p⌋₊ : ℝ) ≤ x / p :=
                 Nat.floor_le (div_nonneg (by linarith) hppos.le)
               linarith
             have hm3 : m < 3 := by
-              have hmr : (m:ℝ) < 3 := lt_of_le_of_lt hmle hlt
+              have hmr : (m : ℝ) < 3 := lt_of_le_of_lt hmle hlt
               exact_mod_cast hmr
             have hp2 : p = 2 := by omega
             rw [hp2] at hlt
@@ -4185,9 +4185,9 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
           have hgt : ⌊x / 3⌋₊ < p := by omega
           obtain ⟨hpmem, hpprime⟩ := Finset.mem_filter.mp hp
           have hp2le : 2 ≤ p := hpprime.two_le
-          have hppos : (0 : ℝ) < (p:ℝ) := by exact_mod_cast (by omega : 0 < p)
-          have hxp3 : x / (p:ℝ) < 3 := by
-            have h3 : (⌊x / 3⌋₊ : ℝ) + 1 ≤ (p:ℝ) := by
+          have hppos : (0 : ℝ) < (p : ℝ) := by exact_mod_cast (by omega : 0 < p)
+          have hxp3 : x / (p : ℝ) < 3 := by
+            have h3 : (⌊x / 3⌋₊ : ℝ) + 1 ≤ (p : ℝ) := by
               exact_mod_cast Nat.succ_le_of_lt hgt
             have h2 : x / 3 < (⌊x / 3⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one _
             rw [div_lt_iff₀ hppos]
@@ -4205,15 +4205,15 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
           obtain ⟨_, hple⟩ := Finset.mem_filter.mp hpT
           obtain ⟨hpmem, hpprime⟩ := Finset.mem_filter.mp hp
           have hp2le : 2 ≤ p := hpprime.two_le
-          have hppos : (0 : ℝ) < (p:ℝ) := by exact_mod_cast (by omega : 0 < p)
-          have hpleR : (p:ℝ) ≤ x / 3 := by
-            have h1 : (p:ℝ) ≤ (⌊x / 3⌋₊ : ℝ) := by exact_mod_cast hple
+          have hppos : (0 : ℝ) < (p : ℝ) := by exact_mod_cast (by omega : 0 < p)
+          have hpleR : (p : ℝ) ≤ x / 3 := by
+            have h1 : (p : ℝ) ≤ (⌊x / 3⌋₊ : ℝ) := by exact_mod_cast hple
             have h2 : (⌊x / 3⌋₊ : ℝ) ≤ x / 3 := Nat.floor_le (by linarith)
             linarith
-          have hge3 : x / (p:ℝ) ≥ 3 :=
-            div_ge_three_of_le_third x (p:ℝ) (by linarith) hppos hpleR
-          have hp1R : (1 : ℝ) ≤ (p:ℝ) := by
-            have h2r : (2 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp2le
+          have hge3 : x / (p : ℝ) ≥ 3 :=
+            div_ge_three_of_le_third x (p : ℝ) (by linarith) hppos hpleR
+          have hp1R : (1 : ℝ) ≤ (p : ℝ) := by
+            have h2r : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp2le
             linarith
           have h1 := hterm_bound2 p hp hp1R hge3
           rw [if_pos hpprime, mul_one]
@@ -4241,14 +4241,14 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
             0 ≤ ((x / k) / Real.log (x / k)) * (if Nat.Prime k then 1 else 0 : ℝ) := by
           intro k hk _
           simp only [Finset.mem_Ioc] at hk
-          have hkpos : (0 : ℝ) < (k:ℝ) := by exact_mod_cast (by omega : 0 < k)
-          have hkleR : (k:ℝ) ≤ x / 3 := by
-            have h1 : (k:ℝ) ≤ (⌊x / 3⌋₊ : ℝ) := by exact_mod_cast hk.2
+          have hkpos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (by omega : 0 < k)
+          have hkleR : (k : ℝ) ≤ x / 3 := by
+            have h1 : (k : ℝ) ≤ (⌊x / 3⌋₊ : ℝ) := by exact_mod_cast hk.2
             have h2 : (⌊x / 3⌋₊ : ℝ) ≤ x / 3 := Nat.floor_le (by linarith)
             linarith
-          have hge3 : (3 : ℝ) ≤ x / (k:ℝ) :=
-            div_ge_three_of_le_third x (k:ℝ) (by linarith) hkpos hkleR
-          have hlogk : (0 : ℝ) < Real.log (x / (k:ℝ)) := Real.log_pos (by linarith)
+          have hge3 : (3 : ℝ) ≤ x / (k : ℝ) :=
+            div_ge_three_of_le_third x (k : ℝ) (by linarith) hkpos hkleR
+          have hlogk : (0 : ℝ) < Real.log (x / (k : ℝ)) := Real.log_pos (by linarith)
           apply mul_nonneg
           · exact div_nonneg (by linarith) hlogk.le
           · split_ifs <;> norm_num
@@ -4407,11 +4407,11 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
             have h16 : 16 ≤ 2 ^ (n + 1) := by
               calc (16 : ℕ) = 2 ^ 4 := by norm_num
                 _ ≤ 2 ^ (n + 1) := Nat.pow_le_pow_right (by norm_num) (by omega)
-            have hmle : (m:ℝ) ≤ x := by
-              have h1 : (m:ℝ) ≤ (⌊x⌋₊ : ℝ) := by exact_mod_cast hm.2
+            have hmle : (m : ℝ) ≤ x := by
+              have h1 : (m : ℝ) ≤ (⌊x⌋₊ : ℝ) := by exact_mod_cast hm.2
               have h2 : (⌊x⌋₊ : ℝ) ≤ x := Nat.floor_le (by linarith)
               linarith
-            have h16r : (16 : ℝ) ≤ (m:ℝ) := by
+            have h16r : (16 : ℝ) ≤ (m : ℝ) := by
               exact_mod_cast le_trans h16 hmge
             linarith
           rw [hzero]
@@ -4424,10 +4424,10 @@ theorem piKFrom_bound (k : ℕ) (hk : 1 ≤ k) :
 
 /-- Telescoping bound: partial sums of 1/(j*sqrt j) over [2,N] never exceed 2. -/
 theorem telescope_sqrt (N : ℕ) :
-    ∑ j ∈ Finset.Icc 2 N, (1 : ℝ) / ((j:ℝ) * Real.sqrt j) ≤ 2 := by
+    ∑ j ∈ Finset.Icc 2 N, (1 : ℝ) / ((j : ℝ) * Real.sqrt j) ≤ 2 := by
   have hstep : ∀ M : ℕ,
-      ∑ j ∈ Finset.Icc 2 M, (1 : ℝ) / ((j:ℝ) * Real.sqrt j)
-        ≤ 2 * (1 - 1 / Real.sqrt (M:ℝ)) := by
+      ∑ j ∈ Finset.Icc 2 M, (1 : ℝ) / ((j : ℝ) * Real.sqrt j)
+        ≤ 2 * (1 - 1 / Real.sqrt (M : ℝ)) := by
     intro M
     induction M with
     | zero => simp
@@ -4438,89 +4438,89 @@ theorem telescope_sqrt (N : ℕ) :
         rw [show Finset.Icc 2 1 = (∅ : Finset ℕ) by decide]
         simp
       · rw [Finset.sum_Icc_succ_top (by omega : 2 ≤ M + 1)]
-        have hMR : (1 : ℝ) ≤ (M:ℝ) := by exact_mod_cast hM1
-        have hsM : (0 : ℝ) < Real.sqrt (M:ℝ) := Real.sqrt_pos.mpr (by linarith)
-        have hsM1 : (0 : ℝ) < Real.sqrt ((M:ℝ) + 1) := Real.sqrt_pos.mpr (by linarith)
-        have hmulM : Real.sqrt (M:ℝ) * Real.sqrt (M:ℝ) = (M:ℝ) :=
+        have hMR : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM1
+        have hsM : (0 : ℝ) < Real.sqrt (M : ℝ) := Real.sqrt_pos.mpr (by linarith)
+        have hsM1 : (0 : ℝ) < Real.sqrt ((M : ℝ) + 1) := Real.sqrt_pos.mpr (by linarith)
+        have hmulM : Real.sqrt (M : ℝ) * Real.sqrt (M : ℝ) = (M : ℝ) :=
           Real.mul_self_sqrt (by linarith)
-        have hmulM1 : Real.sqrt ((M:ℝ) + 1) * Real.sqrt ((M:ℝ) + 1) = (M:ℝ) + 1 :=
+        have hmulM1 : Real.sqrt ((M : ℝ) + 1) * Real.sqrt ((M : ℝ) + 1) = (M : ℝ) + 1 :=
           Real.mul_self_sqrt (by linarith)
-        have hle : Real.sqrt (M:ℝ) ≤ Real.sqrt ((M:ℝ) + 1) :=
+        have hle : Real.sqrt (M : ℝ) ≤ Real.sqrt ((M : ℝ) + 1) :=
           Real.sqrt_le_sqrt (by linarith)
-        have hkey : (Real.sqrt ((M:ℝ) + 1) - Real.sqrt (M:ℝ)) *
-            (Real.sqrt ((M:ℝ) + 1) + Real.sqrt (M:ℝ)) = 1 := by
+        have hkey : (Real.sqrt ((M : ℝ) + 1) - Real.sqrt (M : ℝ)) *
+            (Real.sqrt ((M : ℝ) + 1) + Real.sqrt (M : ℝ)) = 1 := by
           nlinarith [hmulM, hmulM1]
-        have hcast : (((M + 1 : ℕ)):ℝ) = (M:ℝ) + 1 := by push_cast; ring
+        have hcast : (((M + 1 : ℕ)):ℝ) = (M : ℝ) + 1 := by push_cast; ring
         have htail : (1 : ℝ) / (((M + 1 : ℕ):ℝ) * Real.sqrt ((M + 1 : ℕ):ℝ))
-            ≤ 2 * (1 / Real.sqrt (M:ℝ) - 1 / Real.sqrt ((M:ℝ) + 1)) := by
+            ≤ 2 * (1 / Real.sqrt (M : ℝ) - 1 / Real.sqrt ((M : ℝ) + 1)) := by
           rw [hcast]
-          have hdenom : (0 : ℝ) < ((M:ℝ) + 1) * Real.sqrt ((M:ℝ) + 1) := by positivity
+          have hdenom : (0 : ℝ) < ((M : ℝ) + 1) * Real.sqrt ((M : ℝ) + 1) := by positivity
           rw [div_le_iff₀ hdenom]
-          have hdiff : 1 / Real.sqrt (M:ℝ) - 1 / Real.sqrt ((M:ℝ) + 1)
-              = (Real.sqrt ((M:ℝ) + 1) - Real.sqrt (M:ℝ)) /
-                (Real.sqrt (M:ℝ) * Real.sqrt ((M:ℝ) + 1)) := by
+          have hdiff : 1 / Real.sqrt (M : ℝ) - 1 / Real.sqrt ((M : ℝ) + 1)
+              = (Real.sqrt ((M : ℝ) + 1) - Real.sqrt (M : ℝ)) /
+                (Real.sqrt (M : ℝ) * Real.sqrt ((M : ℝ) + 1)) := by
             field_simp
             try ring
           rw [hdiff]
-          have hab_pos : (0 : ℝ) < Real.sqrt (M:ℝ) * Real.sqrt ((M:ℝ) + 1) := by
+          have hab_pos : (0 : ℝ) < Real.sqrt (M : ℝ) * Real.sqrt ((M : ℝ) + 1) := by
             positivity
-          have hform : 2 * ((Real.sqrt ((M:ℝ) + 1) - Real.sqrt (M:ℝ)) /
-                (Real.sqrt (M:ℝ) * Real.sqrt ((M:ℝ) + 1))) * (((M:ℝ) + 1) * Real.sqrt ((M:ℝ) + 1))
-              = (2 * (Real.sqrt ((M:ℝ) + 1) - Real.sqrt (M:ℝ)) * (((M:ℝ) + 1) * Real.sqrt ((M:ℝ) + 1))) /
-                (Real.sqrt (M:ℝ) * Real.sqrt ((M:ℝ) + 1)) := by
+          have hform : 2 * ((Real.sqrt ((M : ℝ) + 1) - Real.sqrt (M : ℝ)) /
+                (Real.sqrt (M : ℝ) * Real.sqrt ((M : ℝ) + 1))) * (((M : ℝ) + 1) * Real.sqrt ((M : ℝ) + 1))
+              = (2 * (Real.sqrt ((M : ℝ) + 1) - Real.sqrt (M : ℝ)) * (((M : ℝ) + 1) * Real.sqrt ((M : ℝ) + 1))) /
+                (Real.sqrt (M : ℝ) * Real.sqrt ((M : ℝ) + 1)) := by
             ring
           rw [hform, le_div_iff₀ hab_pos]
           nlinarith [hkey, hle, hsM, hsM1, hmulM1, hmulM,
             mul_pos hsM hsM1,
             mul_nonneg (mul_nonneg hsM1.le hsM1.le) (sub_nonneg.mpr hle),
             mul_nonneg hsM1.le (sub_nonneg.mpr hle)]
-        have hfinal : 2 * (1 - 1 / Real.sqrt (M:ℝ)) +
-            2 * (1 / Real.sqrt (M:ℝ) - 1 / Real.sqrt ((M:ℝ) + 1))
-            = 2 * (1 - 1 / Real.sqrt ((M:ℝ) + 1)) := by ring
-        calc ∑ j ∈ Finset.Icc 2 M, (1 : ℝ) / ((j:ℝ) * Real.sqrt j)
+        have hfinal : 2 * (1 - 1 / Real.sqrt (M : ℝ)) +
+            2 * (1 / Real.sqrt (M : ℝ) - 1 / Real.sqrt ((M : ℝ) + 1))
+            = 2 * (1 - 1 / Real.sqrt ((M : ℝ) + 1)) := by ring
+        calc ∑ j ∈ Finset.Icc 2 M, (1 : ℝ) / ((j : ℝ) * Real.sqrt j)
               + (1 : ℝ) / (((M + 1 : ℕ):ℝ) * Real.sqrt ((M + 1 : ℕ):ℝ))
-            ≤ 2 * (1 - 1 / Real.sqrt (M:ℝ)) +
-              2 * (1 / Real.sqrt (M:ℝ) - 1 / Real.sqrt ((M:ℝ) + 1)) :=
+            ≤ 2 * (1 - 1 / Real.sqrt (M : ℝ)) +
+              2 * (1 / Real.sqrt (M : ℝ) - 1 / Real.sqrt ((M : ℝ) + 1)) :=
               add_le_add ih htail
-          _ = 2 * (1 - 1 / Real.sqrt ((M:ℝ) + 1)) := hfinal
+          _ = 2 * (1 - 1 / Real.sqrt ((M : ℝ) + 1)) := hfinal
           _ = 2 * (1 - 1 / Real.sqrt (((M + 1 : ℕ)):ℝ)) := by rw [hcast]
-  calc ∑ j ∈ Finset.Icc 2 N, (1 : ℝ) / ((j:ℝ) * Real.sqrt j)
-      ≤ 2 * (1 - 1 / Real.sqrt (N:ℝ)) := hstep N
+  calc ∑ j ∈ Finset.Icc 2 N, (1 : ℝ) / ((j : ℝ) * Real.sqrt j)
+      ≤ 2 * (1 - 1 / Real.sqrt (N : ℝ)) := hstep N
     _ ≤ 2 := by
-        have h1 : (0 : ℝ) ≤ 1 / Real.sqrt (N:ℝ) := by positivity
+        have h1 : (0 : ℝ) ≤ 1 / Real.sqrt (N : ℝ) := by positivity
         linarith
 
 /-- Power-of-log bound: (log y)^m ≤ (2m)^m * sqrt y for y >= 1, m >= 1. -/
 theorem log_pow_le_sqrt (m : ℕ) (hm : 1 ≤ m) (y : ℝ) (hy : 1 ≤ y) :
-    (Real.log y) ^ m ≤ (2 * (m:ℝ)) ^ m * Real.sqrt y := by
+    (Real.log y) ^ m ≤ (2 * (m : ℝ)) ^ m * Real.sqrt y := by
   have hypos : (0 : ℝ) < y := by linarith
-  have hm_pos : (0 : ℝ) < (m:ℝ) := by exact_mod_cast (by omega : 0 < m)
-  have hm_ne : (m:ℝ) ≠ 0 := hm_pos.ne'
-  have h1 : Real.log (y ^ ((1 : ℝ) / (2 * (m:ℝ)))) = (1 / (2 * (m:ℝ))) * Real.log y :=
+  have hm_pos : (0 : ℝ) < (m : ℝ) := by exact_mod_cast (by omega : 0 < m)
+  have hm_ne : (m : ℝ) ≠ 0 := hm_pos.ne'
+  have h1 : Real.log (y ^ ((1 : ℝ) / (2 * (m : ℝ)))) = (1 / (2 * (m : ℝ))) * Real.log y :=
     Real.log_rpow hypos _
-  have h2 : Real.log (y ^ ((1 : ℝ) / (2 * (m:ℝ)))) ≤ y ^ ((1 : ℝ) / (2 * (m:ℝ))) :=
+  have h2 : Real.log (y ^ ((1 : ℝ) / (2 * (m : ℝ)))) ≤ y ^ ((1 : ℝ) / (2 * (m : ℝ))) :=
     Real.log_le_self (Real.rpow_nonneg hypos.le _)
-  have h3 : (1 / (2 * (m:ℝ))) * Real.log y ≤ y ^ ((1 : ℝ) / (2 * (m:ℝ))) := by
+  have h3 : (1 / (2 * (m : ℝ))) * Real.log y ≤ y ^ ((1 : ℝ) / (2 * (m : ℝ))) := by
     rw [← h1]
     exact h2
-  have hlog_le : Real.log y ≤ 2 * (m:ℝ) * y ^ ((1 : ℝ) / (2 * (m:ℝ))) := by
-    calc Real.log y = 2 * (m:ℝ) * ((1 / (2 * (m:ℝ))) * Real.log y) := by
+  have hlog_le : Real.log y ≤ 2 * (m : ℝ) * y ^ ((1 : ℝ) / (2 * (m : ℝ))) := by
+    calc Real.log y = 2 * (m : ℝ) * ((1 / (2 * (m : ℝ))) * Real.log y) := by
           field_simp
-      _ ≤ 2 * (m:ℝ) * y ^ ((1 : ℝ) / (2 * (m:ℝ))) :=
+      _ ≤ 2 * (m : ℝ) * y ^ ((1 : ℝ) / (2 * (m : ℝ))) :=
           mul_le_mul_of_nonneg_left h3 (by positivity)
   have hlog_nn : (0 : ℝ) ≤ Real.log y := Real.log_nonneg hy
-  have hp : (Real.log y) ^ m ≤ (2 * (m:ℝ) * y ^ ((1 : ℝ) / (2 * (m:ℝ)))) ^ m := by
+  have hp : (Real.log y) ^ m ≤ (2 * (m : ℝ) * y ^ ((1 : ℝ) / (2 * (m : ℝ)))) ^ m := by
     apply pow_le_pow_left₀ hlog_nn hlog_le
-  have hsplit : (2 * (m:ℝ) * y ^ ((1 : ℝ) / (2 * (m:ℝ)))) ^ m
-      = (2 * (m:ℝ)) ^ m * (y ^ ((1 : ℝ) / (2 * (m:ℝ)))) ^ m := mul_pow _ _ _
-  have hrpow : (y ^ ((1 : ℝ) / (2 * (m:ℝ)))) ^ m = Real.sqrt y := by
-    rw [← Real.rpow_natCast (y ^ ((1 : ℝ) / (2 * (m:ℝ)))) m,
+  have hsplit : (2 * (m : ℝ) * y ^ ((1 : ℝ) / (2 * (m : ℝ)))) ^ m
+      = (2 * (m : ℝ)) ^ m * (y ^ ((1 : ℝ) / (2 * (m : ℝ)))) ^ m := mul_pow _ _ _
+  have hrpow : (y ^ ((1 : ℝ) / (2 * (m : ℝ)))) ^ m = Real.sqrt y := by
+    rw [← Real.rpow_natCast (y ^ ((1 : ℝ) / (2 * (m : ℝ)))) m,
       ← Real.rpow_mul hypos.le]
-    rw [show (1 : ℝ) / (2 * (m:ℝ)) * (m:ℝ) = 1 / 2 by field_simp; try ring]
+    rw [show (1 : ℝ) / (2 * (m : ℝ)) * (m : ℝ) = 1 / 2 by field_simp; try ring]
     rw [Real.sqrt_eq_rpow]
-  calc (Real.log y) ^ m ≤ (2 * (m:ℝ) * y ^ ((1 : ℝ) / (2 * (m:ℝ)))) ^ m := hp
-    _ = (2 * (m:ℝ)) ^ m * (y ^ ((1 : ℝ) / (2 * (m:ℝ)))) ^ m := hsplit
-    _ = (2 * (m:ℝ)) ^ m * Real.sqrt y := by rw [hrpow]
+  calc (Real.log y) ^ m ≤ (2 * (m : ℝ) * y ^ ((1 : ℝ) / (2 * (m : ℝ)))) ^ m := hp
+    _ = (2 * (m : ℝ)) ^ m * (y ^ ((1 : ℝ) / (2 * (m : ℝ)))) ^ m := hsplit
+    _ = (2 * (m : ℝ)) ^ m * Real.sqrt y := by rw [hrpow]
 
 /-- The summand 1/(t log t) is antitone past 2. -/
 theorem inv_mul_log_le (a b : ℝ) (ha : 2 ≤ a) (hab : a ≤ b) :
@@ -4550,7 +4550,7 @@ in block j is at most K / (j * sqrt j), with K explicit. -/
 theorem block_arith (C : ℝ) (hC : 0 < C) (m j : ℕ) (hj : 1 ≤ j) :
     C * (2 : ℝ) ^ (j + 1) * (Real.log (Real.log ((2 : ℝ) ^ (j + 1)))) ^ m /
         Real.log ((2 : ℝ) ^ (j + 1)) * (1 / ((2 : ℝ) ^ j * Real.log ((2 : ℝ) ^ j)))
-      ≤ 4 * C * (2 * (m:ℝ)) ^ m / (Real.log 2) ^ 2 * (1 / ((j:ℝ) * Real.sqrt j)) := by
+      ≤ 4 * C * (2 * (m : ℝ)) ^ m / (Real.log 2) ^ 2 * (1 / ((j : ℝ) * Real.sqrt j)) := by
   have hl2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
   have hl2' : Real.log 2 ≤ 1 := by
     have := Real.log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)
@@ -4565,99 +4565,99 @@ theorem block_arith (C : ℝ) (hC : 0 < C) (m j : ℕ) (hj : 1 ≤ j) :
     have h2' : Real.log (Real.exp ((1 : ℝ) / 2)) ≤ Real.log 2 :=
       Real.log_le_log (Real.exp_pos _) h2
     rwa [Real.log_exp] at h2'
-  have hjpos : (0 : ℝ) < (j:ℝ) := by exact_mod_cast (by omega : 0 < j)
-  have hjR : (1 : ℝ) ≤ (j:ℝ) := by exact_mod_cast hj
-  have hj1pos : (0 : ℝ) < (j:ℝ) + 1 := by linarith
+  have hjpos : (0 : ℝ) < (j : ℝ) := by exact_mod_cast (by omega : 0 < j)
+  have hjR : (1 : ℝ) ≤ (j : ℝ) := by exact_mod_cast hj
+  have hj1pos : (0 : ℝ) < (j : ℝ) + 1 := by linarith
   have hsj : (0 : ℝ) < Real.sqrt j := Real.sqrt_pos.mpr hjpos
-  have hjj : Real.sqrt j * Real.sqrt j = (j:ℝ) := Real.mul_self_sqrt hjpos.le
+  have hjj : Real.sqrt j * Real.sqrt j = (j : ℝ) := Real.mul_self_sqrt hjpos.le
   have hA : (0 : ℝ) < (2 : ℝ) ^ j := by positivity
-  have hlogj : Real.log ((2 : ℝ) ^ j) = (j:ℝ) * Real.log 2 := by
+  have hlogj : Real.log ((2 : ℝ) ^ j) = (j : ℝ) * Real.log 2 := by
     rw [Real.log_pow]
-  have hlogj1 : Real.log ((2 : ℝ) ^ (j + 1)) = ((j:ℝ) + 1) * Real.log 2 := by
+  have hlogj1 : Real.log ((2 : ℝ) ^ (j + 1)) = ((j : ℝ) + 1) * Real.log 2 := by
     rw [Real.log_pow]
     push_cast
     ring
   rw [hlogj, hlogj1]
-  have hll_ub : Real.log (((j:ℝ) + 1) * Real.log 2) ≤ Real.log ((j:ℝ) + 1) := by
+  have hll_ub : Real.log (((j : ℝ) + 1) * Real.log 2) ≤ Real.log ((j : ℝ) + 1) := by
     apply Real.log_le_log (mul_pos hj1pos hl2)
     nlinarith [hl2', hj1pos]
-  have hll_nn : (0 : ℝ) ≤ Real.log (((j:ℝ) + 1) * Real.log 2) := by
+  have hll_nn : (0 : ℝ) ≤ Real.log (((j : ℝ) + 1) * Real.log 2) := by
     apply Real.log_nonneg
-    nlinarith [hl2h, hjR, mul_nonneg (by linarith : (0 : ℝ) ≤ (j:ℝ) - 1) hl2.le]
-  have hpow1 : (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m ≤ (Real.log ((j:ℝ) + 1)) ^ m := by
+    nlinarith [hl2h, hjR, mul_nonneg (by linarith : (0 : ℝ) ≤ (j : ℝ) - 1) hl2.le]
+  have hpow1 : (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m ≤ (Real.log ((j : ℝ) + 1)) ^ m := by
     apply pow_le_pow_left₀ hll_nn hll_ub
-  have hLP : (Real.log ((j:ℝ) + 1)) ^ m ≤ (2 * (m:ℝ)) ^ m * Real.sqrt ((j:ℝ) + 1) := by
+  have hLP : (Real.log ((j : ℝ) + 1)) ^ m ≤ (2 * (m : ℝ)) ^ m * Real.sqrt ((j : ℝ) + 1) := by
     rcases Nat.eq_zero_or_pos m with hm0 | hm1
     · subst hm0
       simp only [pow_zero, one_mul]
-      have h1 : Real.sqrt 1 ≤ Real.sqrt ((j:ℝ) + 1) := Real.sqrt_le_sqrt (by linarith)
+      have h1 : Real.sqrt 1 ≤ Real.sqrt ((j : ℝ) + 1) := Real.sqrt_le_sqrt (by linarith)
       rw [Real.sqrt_one] at h1
       linarith
-    · exact log_pow_le_sqrt m hm1 ((j:ℝ) + 1) (by linarith)
-  have hsq1 : Real.sqrt ((j:ℝ) + 1) ≤ 2 * Real.sqrt j := by
-    have h4 : Real.sqrt ((j:ℝ) + 1) ≤ Real.sqrt (4 * (j:ℝ)) :=
+    · exact log_pow_le_sqrt m hm1 ((j : ℝ) + 1) (by linarith)
+  have hsq1 : Real.sqrt ((j : ℝ) + 1) ≤ 2 * Real.sqrt j := by
+    have h4 : Real.sqrt ((j : ℝ) + 1) ≤ Real.sqrt (4 * (j : ℝ)) :=
       Real.sqrt_le_sqrt (by linarith)
-    have h5 : Real.sqrt (4 * (j:ℝ)) = 2 * Real.sqrt j := by
-      rw [show (4 : ℝ) * (j:ℝ) = (2 : ℝ) ^ 2 * (j:ℝ) by ring,
+    have h5 : Real.sqrt (4 * (j : ℝ)) = 2 * Real.sqrt j := by
+      rw [show (4 : ℝ) * (j : ℝ) = (2 : ℝ) ^ 2 * (j : ℝ) by ring,
         Real.sqrt_mul (by positivity), Real.sqrt_sq (by norm_num)]
     rw [h5] at h4
     exact h4
-  have hX : (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m
-      ≤ (2 * (m:ℝ)) ^ m * (2 * Real.sqrt j) := by
-    have h3 : (2 * (m:ℝ)) ^ m * Real.sqrt ((j:ℝ) + 1)
-        ≤ (2 * (m:ℝ)) ^ m * (2 * Real.sqrt j) :=
+  have hX : (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m
+      ≤ (2 * (m : ℝ)) ^ m * (2 * Real.sqrt j) := by
+    have h3 : (2 * (m : ℝ)) ^ m * Real.sqrt ((j : ℝ) + 1)
+        ≤ (2 * (m : ℝ)) ^ m * (2 * Real.sqrt j) :=
       mul_le_mul_of_nonneg_left hsq1 (pow_nonneg (by positivity) m)
     linarith [hpow1, hLP, h3]
-  have hE1 : C * (2 : ℝ) ^ (j + 1) * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
-        (((j:ℝ) + 1) * Real.log 2) * (1 / ((2 : ℝ) ^ j * ((j:ℝ) * Real.log 2)))
-      = 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
-        (((j:ℝ) + 1) * (j:ℝ) * (Real.log 2) ^ 2) := by
+  have hE1 : C * (2 : ℝ) ^ (j + 1) * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m /
+        (((j : ℝ) + 1) * Real.log 2) * (1 / ((2 : ℝ) ^ j * ((j : ℝ) * Real.log 2)))
+      = 2 * C * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m /
+        (((j : ℝ) + 1) * (j : ℝ) * (Real.log 2) ^ 2) := by
     rw [pow_succ]
     field_simp
     try ring
-  have hEL : 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
-        (((j:ℝ) + 1) * (j:ℝ) * (Real.log 2) ^ 2)
-      = 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m *
-        (1 / (((j:ℝ) + 1) * (j:ℝ))) * (1 / (Real.log 2) ^ 2) := by
+  have hEL : 2 * C * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m /
+        (((j : ℝ) + 1) * (j : ℝ) * (Real.log 2) ^ 2)
+      = 2 * C * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m *
+        (1 / (((j : ℝ) + 1) * (j : ℝ))) * (1 / (Real.log 2) ^ 2) := by
     field_simp [hl2.ne', hjpos.ne', hj1pos.ne']
     try ring
-  have hinv : 1 / (((j:ℝ) + 1) * (j:ℝ)) ≤ 1 / ((j:ℝ) * (j:ℝ)) := by
+  have hinv : 1 / (((j : ℝ) + 1) * (j : ℝ)) ≤ 1 / ((j : ℝ) * (j : ℝ)) := by
     apply one_div_le_one_div_of_le (mul_pos hjpos hjpos)
     nlinarith [hjpos]
-  have hK0 : (0 : ℝ) ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) := by
+  have hK0 : (0 : ℝ) ≤ 2 * C * ((2 * (m : ℝ)) ^ m * (2 * Real.sqrt j)) := by
     apply mul_nonneg (by linarith)
     apply mul_nonneg (pow_nonneg (by positivity) m)
     positivity
-  have hstep1 : 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m
-      ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) :=
+  have hstep1 : 2 * C * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m
+      ≤ 2 * C * ((2 * (m : ℝ)) ^ m * (2 * Real.sqrt j)) :=
     mul_le_mul_of_nonneg_left hX (by linarith)
-  have hstep2 : 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m *
-        (1 / (((j:ℝ) + 1) * (j:ℝ)))
-      ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:ℝ) * (j:ℝ))) :=
+  have hstep2 : 2 * C * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m *
+        (1 / (((j : ℝ) + 1) * (j : ℝ)))
+      ≤ 2 * C * ((2 * (m : ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j : ℝ) * (j : ℝ))) :=
     mul_le_mul hstep1 hinv (le_of_lt (one_div_pos.mpr (mul_pos hj1pos hjpos))) hK0
-  have hstep3 : 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m *
-        (1 / (((j:ℝ) + 1) * (j:ℝ))) * (1 / (Real.log 2) ^ 2)
-      ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:ℝ) * (j:ℝ))) *
+  have hstep3 : 2 * C * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m *
+        (1 / (((j : ℝ) + 1) * (j : ℝ))) * (1 / (Real.log 2) ^ 2)
+      ≤ 2 * C * ((2 * (m : ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j : ℝ) * (j : ℝ))) *
         (1 / (Real.log 2) ^ 2) :=
     mul_le_mul_of_nonneg_right hstep2 (le_of_lt (one_div_pos.mpr (pow_pos hl2 2)))
-  have hER : 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:ℝ) * (j:ℝ))) *
+  have hER : 2 * C * ((2 * (m : ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j : ℝ) * (j : ℝ))) *
         (1 / (Real.log 2) ^ 2)
-      = 4 * C * (2 * (m:ℝ)) ^ m / (Real.log 2) ^ 2 * (Real.sqrt j / ((j:ℝ) * (j:ℝ))) := by
+      = 4 * C * (2 * (m : ℝ)) ^ m / (Real.log 2) ^ 2 * (Real.sqrt j / ((j : ℝ) * (j : ℝ))) := by
     ring
-  have hfrac : Real.sqrt j / ((j:ℝ) * (j:ℝ)) = 1 / ((j:ℝ) * Real.sqrt j) := by
+  have hfrac : Real.sqrt j / ((j : ℝ) * (j : ℝ)) = 1 / ((j : ℝ) * Real.sqrt j) := by
     rw [div_eq_div_iff (mul_pos hjpos hjpos).ne' (mul_pos hjpos hsj).ne']
-    linear_combination (j:ℝ) * hjj
-  calc C * (2 : ℝ) ^ (j + 1) * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
-        (((j:ℝ) + 1) * Real.log 2) * (1 / ((2 : ℝ) ^ j * ((j:ℝ) * Real.log 2)))
-      = 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m /
-        (((j:ℝ) + 1) * (j:ℝ) * (Real.log 2) ^ 2) := hE1
-    _ = 2 * C * (Real.log (((j:ℝ) + 1) * Real.log 2)) ^ m *
-        (1 / (((j:ℝ) + 1) * (j:ℝ))) * (1 / (Real.log 2) ^ 2) := hEL
-    _ ≤ 2 * C * ((2 * (m:ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j:ℝ) * (j:ℝ))) *
+    linear_combination (j : ℝ) * hjj
+  calc C * (2 : ℝ) ^ (j + 1) * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m /
+        (((j : ℝ) + 1) * Real.log 2) * (1 / ((2 : ℝ) ^ j * ((j : ℝ) * Real.log 2)))
+      = 2 * C * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m /
+        (((j : ℝ) + 1) * (j : ℝ) * (Real.log 2) ^ 2) := hE1
+    _ = 2 * C * (Real.log (((j : ℝ) + 1) * Real.log 2)) ^ m *
+        (1 / (((j : ℝ) + 1) * (j : ℝ))) * (1 / (Real.log 2) ^ 2) := hEL
+    _ ≤ 2 * C * ((2 * (m : ℝ)) ^ m * (2 * Real.sqrt j)) * (1 / ((j : ℝ) * (j : ℝ))) *
         (1 / (Real.log 2) ^ 2) := hstep3
-    _ = 4 * C * (2 * (m:ℝ)) ^ m / (Real.log 2) ^ 2 *
-        (Real.sqrt j / ((j:ℝ) * (j:ℝ))) := hER
-    _ = 4 * C * (2 * (m:ℝ)) ^ m / (Real.log 2) ^ 2 * (1 / ((j:ℝ) * Real.sqrt j)) := by
+    _ = 4 * C * (2 * (m : ℝ)) ^ m / (Real.log 2) ^ 2 *
+        (Real.sqrt j / ((j : ℝ) * (j : ℝ))) := hER
+    _ = 4 * C * (2 * (m : ℝ)) ^ m / (Real.log 2) ^ 2 * (1 / ((j : ℝ) * Real.sqrt j)) := by
         rw [hfrac]
 
 /-- Manuscript Definition 2.3: S(m) = sum_{j+l=m} int_1^2 (-log(s-1))^l/l! * 2^(-js) ds.
@@ -4665,7 +4665,7 @@ Indexed by j in range (m+1), with l = m - j. -/
 noncomputable def Sm (m : ℕ) : ℝ :=
   ∑ j ∈ Finset.range (m + 1),
     ∫ s in Set.Ioc (1 : ℝ) 2,
-      (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2 : ℝ) ^ (-(j:ℝ) * s)
+      (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2 : ℝ) ^ (-(j : ℝ) * s)
       ∂MeasureTheory.volume
 
 /-- Manuscript Definition 2.3: A_m = 2^m S(m). -/
@@ -4711,11 +4711,11 @@ substitution identity (manuscript eq (5)) and Theorem 4.1. -/
 theorem integral_exp_neg_mul_pow (i : ℕ) :
     ∫ u in Set.Ioi (0 : ℝ), Real.exp (-u) * u ^ i = (Nat.factorial i : ℝ) := by
   calc ∫ u in Set.Ioi (0 : ℝ), Real.exp (-u) * u ^ i
-      = ∫ u in Set.Ioi (0 : ℝ), Real.exp (-u) * u ^ (((i:ℝ) + 1) - 1) := by
+      = ∫ u in Set.Ioi (0 : ℝ), Real.exp (-u) * u ^ (((i : ℝ) + 1) - 1) := by
         apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
         intro u _
-        simp only [show ((i:ℝ) + 1) - 1 = (i:ℝ) by ring, Real.rpow_natCast]
-    _ = Real.Gamma ((i:ℝ) + 1) := (Real.Gamma_eq_integral (by positivity)).symm
+        simp only [show ((i : ℝ) + 1) - 1 = (i : ℝ) by ring, Real.rpow_natCast]
+    _ = Real.Gamma ((i : ℝ) + 1) := (Real.Gamma_eq_integral (by positivity)).symm
     _ = (Nat.factorial i : ℝ) := Real.Gamma_nat_eq_factorial i
 
 /-- Manuscript eq (5): J(i) for block m, as an integral over u > 0. -/
@@ -4813,11 +4813,11 @@ theorem Am_eq_sum_Jint (m : ℕ) :
       (2 : ℝ) ^ i / (Nat.factorial i) * Jint m i := by
   have hterm : ∀ j ∈ Finset.range (m + 1),
       (2 : ℝ) ^ m * ∫ s in Set.Ioc (1 : ℝ) 2,
-          (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2 : ℝ) ^ (-(j:ℝ) * s)
+          (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2 : ℝ) ^ (-(j : ℝ) * s)
         = (2 : ℝ) ^ (m - j) / (Nat.factorial (m - j)) * Jint m (m - j) := by
     intro j hjm
     have hj : j ≤ m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hjm)
-    have h2mj : (2 : ℝ) ^ (m:ℕ) * (2 : ℝ) ^ (-(j:ℝ)) = (2 : ℝ) ^ ((m - j : ℕ)) := by
+    have h2mj : (2 : ℝ) ^ (m : ℕ) * (2 : ℝ) ^ (-(j : ℝ)) = (2 : ℝ) ^ ((m - j : ℕ)) := by
       rw [← Real.rpow_natCast (2 : ℝ) m, ← Real.rpow_natCast (2 : ℝ) (m - j),
         ← Real.rpow_add (by norm_num : (0 : ℝ) < 2), Nat.cast_sub hj]
       try congr 1
@@ -4830,14 +4830,14 @@ theorem Am_eq_sum_Jint (m : ℕ) :
     apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
     intro u _
     simp only [add_sub_cancel_left, Real.log_exp, neg_neg]
-    rw [show -(j:ℝ) * (1 + Real.exp (-u)) = -(j:ℝ) + -(j:ℝ) * Real.exp (-u) by ring]
+    rw [show -(j : ℝ) * (1 + Real.exp (-u)) = -(j : ℝ) + -(j : ℝ) * Real.exp (-u) by ring]
     rw [Real.rpow_add (by norm_num : (0 : ℝ) < 2)]
     field_simp
     rw [← h2mj]
     ring
   calc Am m = ∑ j ∈ Finset.range (m + 1),
         (2 : ℝ) ^ m * ∫ s in Set.Ioc (1 : ℝ) 2,
-          (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2 : ℝ) ^ (-(j:ℝ) * s) := by
+          (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (2 : ℝ) ^ (-(j : ℝ) * s) := by
         unfold Am Sm
         rw [Finset.mul_sum]
     _ = ∑ j ∈ Finset.range (m + 1),
@@ -4850,17 +4850,17 @@ theorem Am_eq_sum_Jint (m : ℕ) :
 /-- Manuscript Thm 4.1: B_j(u) = 2^(-j e^(-u)) - 1 + j log 2 e^(-u), the
 convexity gap driving identity (11). -/
 noncomputable def Bfun (j : ℕ) (u : ℝ) : ℝ :=
-  (2 : ℝ) ^ (-(j:ℝ) * Real.exp (-u)) - 1 + (j:ℝ) * Real.log 2 * Real.exp (-u)
+  (2 : ℝ) ^ (-(j : ℝ) * Real.exp (-u)) - 1 + (j : ℝ) * Real.log 2 * Real.exp (-u)
 
 /-- B_j(u) >= 0: from e^x >= 1 + x at x = -(j log 2) e^(-u). -/
 theorem Bfun_nonneg (j : ℕ) (u : ℝ) : 0 ≤ Bfun j u := by
   unfold Bfun
-  have hrw : (2 : ℝ) ^ (-(j:ℝ) * Real.exp (-u))
-      = Real.exp (-(j:ℝ) * Real.exp (-u) * Real.log 2) := by
+  have hrw : (2 : ℝ) ^ (-(j : ℝ) * Real.exp (-u))
+      = Real.exp (-(j : ℝ) * Real.exp (-u) * Real.log 2) := by
     rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2)]
     ring_nf
   rw [hrw]
-  have h := Real.add_one_le_exp (-(j:ℝ) * Real.exp (-u) * Real.log 2)
+  have h := Real.add_one_le_exp (-(j : ℝ) * Real.exp (-u) * Real.log 2)
   nlinarith [h]
 
 /-- Manuscript (11): beta-circle, the nonnegative integral coefficient. -/
@@ -4981,10 +4981,10 @@ Reflecting j -> l = (k-i) - j turns 2^k 2^(-j) 3^(-(k-i-j)-1) into
 2^i * 2^l 3^(-l-1), and the partial geometric sum is at most 1. -/
 theorem remainder_inner_le (k i : ℕ) (hik : i ≤ k) :
     ∑ j ∈ Finset.range (k - i + 1),
-        (2 : ℝ) ^ k * ((2 : ℝ) ^ (-(j:ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))
+        (2 : ℝ) ^ k * ((2 : ℝ) ^ (-(j : ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))
       ≤ (2 : ℝ) ^ i := by
   have hrefl := Finset.sum_range_reflect
-    (fun j => (2 : ℝ) ^ k * ((2 : ℝ) ^ (-(j:ℝ))
+    (fun j => (2 : ℝ) ^ k * ((2 : ℝ) ^ (-(j : ℝ))
       * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) (k - i + 1)
   rw [← hrefl]
   have hterm : ∀ l ∈ Finset.range (k - i + 1),
@@ -5003,7 +5003,7 @@ theorem remainder_inner_le (k i : ℕ) (hik : i ≤ k) :
         ← Real.rpow_natCast (2 : ℝ) l, ← Real.rpow_add (by norm_num : (0 : ℝ) < 2),
         ← Real.rpow_add (by norm_num : (0 : ℝ) < 2)]
       congr 1
-      have : ((k - i - l : ℕ) : ℝ) = (k:ℝ) - (i:ℝ) - (l:ℝ) := by
+      have : ((k - i - l : ℕ) : ℝ) = (k : ℝ) - (i : ℝ) - (l : ℝ) := by
         rw [Nat.cast_sub (by omega : l ≤ k - i), Nat.cast_sub hik]
       rw [this]
       ring
@@ -5021,11 +5021,11 @@ theorem remainder_inner_le (k i : ℕ) (hik : i ≤ k) :
 /-- Integrability of the Gamma integrand u^i e^(-u) on (0, infty). -/
 theorem integrable_pow_exp (i : ℕ) :
     MeasureTheory.IntegrableOn (fun u : ℝ => u ^ i * Real.exp (-u)) (Set.Ioi 0) := by
-  have h := Real.GammaIntegral_convergent (s := (i:ℝ) + 1) (by positivity)
+  have h := Real.GammaIntegral_convergent (s := (i : ℝ) + 1) (by positivity)
   apply h.congr_fun ?_ measurableSet_Ioi
   intro u hu
   simp only
-  rw [show ((i:ℝ) + 1) - 1 = (i:ℝ) by ring, Real.rpow_natCast]
+  rw [show ((i : ℝ) + 1) - 1 = (i : ℝ) by ring, Real.rpow_natCast]
   ring
 
 /-- Integrability of u^i e^(-2u) on (0, infty), by domination. -/
@@ -5080,9 +5080,9 @@ theorem integrable_log_pow_sub_one_sq (l : ℕ) :
 gh_i/2 * 2^(-j) * 3^(-l-1).  Mirrors S2_term_le with the (s-1)^2 weight. -/
 theorem Dk_remainder_term_le (j l : ℕ) (gh_i : ℝ) (hgh0 : 0 ≤ gh_i) :
     (∫ s in Set.Ioc (1 : ℝ) 2,
-      gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ) * s)
+      gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))))
-      ≤ gh_i / 2 * ((2 : ℝ) ^ (-(j:ℝ)) * (1 / (3 : ℝ) ^ (l + 1))) := by
+      ≤ gh_i / 2 * ((2 : ℝ) ^ (-(j : ℝ)) * (1 / (3 : ℝ) ^ (l + 1))) := by
   have hL : ∀ s ∈ Set.Ioc (1 : ℝ) 2,
       (0 : ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) ^ 2 := by
     intro s hs
@@ -5092,16 +5092,16 @@ theorem Dk_remainder_term_le (j l : ℕ) (gh_i : ℝ) (hgh0 : 0 ≤ gh_i) :
     simp only [neg_nonneg]
     exact Real.log_nonpos (by linarith [hs.1]) (by linarith [hs.2])
   have hright := ((integrable_log_pow_sub_one_sq l).const_mul
-    (gh_i / 2 * (2 : ℝ) ^ (-(j:ℝ))))
+    (gh_i / 2 * (2 : ℝ) ^ (-(j : ℝ))))
   have hmono : (∫ s in Set.Ioc (1 : ℝ) 2,
-        gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ) * s)
+        gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))))
       ≤ ∫ s in Set.Ioc (1 : ℝ) 2,
-        (gh_i / 2 * (2 : ℝ) ^ (-(j:ℝ)))
+        (gh_i / 2 * (2 : ℝ) ^ (-(j : ℝ)))
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) ^ 2) := by
     refine MeasureTheory.integral_mono_of_nonneg ?_ hright ?_
     · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with s hs
-      have h2 : (0 : ℝ) < (2 : ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+      have h2 : (0 : ℝ) < (2 : ℝ) ^ (-(j : ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
       have hLl : (0 : ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) := by
         apply div_nonneg _ (by positivity)
         apply pow_nonneg
@@ -5113,9 +5113,9 @@ theorem Dk_remainder_term_le (j l : ℕ) (gh_i : ℝ) (hgh0 : 0 ≤ gh_i) :
         exact mul_nonneg hgh0 (sq_nonneg _)
       · exact mul_nonneg (le_of_lt h2) hLl
     · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with s hs
-      have hmonoexp : (2 : ℝ) ^ (-(j:ℝ) * s) ≤ (2 : ℝ) ^ (-(j:ℝ)) := by
+      have hmonoexp : (2 : ℝ) ^ (-(j : ℝ) * s) ≤ (2 : ℝ) ^ (-(j : ℝ)) := by
         apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
-        have hj : (0 : ℝ) ≤ (j:ℝ) := by positivity
+        have hj : (0 : ℝ) ≤ (j : ℝ) := by positivity
         nlinarith [hs.1]
       have hLs := hL s hs
       have hLl : (0 : ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) := by
@@ -5124,20 +5124,20 @@ theorem Dk_remainder_term_le (j l : ℕ) (gh_i : ℝ) (hgh0 : 0 ≤ gh_i) :
         simp only [neg_nonneg]
         exact Real.log_nonpos (by linarith [hs.1]) (by linarith [hs.2])
       have hsq : (0 : ℝ) ≤ (s - 1) ^ 2 := sq_nonneg _
-      calc gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ) * s)
+      calc gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ) * s)
             * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
-          ≤ gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ))
+          ≤ gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ))
             * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) := by
             apply mul_le_mul_of_nonneg_left _ (by positivity)
             exact mul_le_mul_of_nonneg_right hmonoexp hLl
-        _ = (gh_i / 2 * (2 : ℝ) ^ (-(j:ℝ)))
+        _ = (gh_i / 2 * (2 : ℝ) ^ (-(j : ℝ)))
             * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) ^ 2) := by ring
   rw [MeasureTheory.integral_const_mul, integral_log_pow_sub_one_sq] at hmono
   calc (∫ s in Set.Ioc (1 : ℝ) 2,
-        gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ) * s)
+        gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))))
-      ≤ (gh_i / 2 * (2 : ℝ) ^ (-(j:ℝ))) * (1 / (3 : ℝ) ^ (l + 1)) := hmono
-    _ = gh_i / 2 * ((2 : ℝ) ^ (-(j:ℝ)) * (1 / (3 : ℝ) ^ (l + 1))) := by ring
+      ≤ (gh_i / 2 * (2 : ℝ) ^ (-(j : ℝ))) * (1 / (3 : ℝ) ^ (l + 1)) := hmono
+    _ = gh_i / 2 * ((2 : ℝ) ^ (-(j : ℝ)) * (1 / (3 : ℝ) ^ (l + 1))) := by ring
 
 /-- Integrability of the J-integrand: the damping factor is at most 1. -/
 theorem integrable_Jint_integrand (c : ℝ) (hc : 0 ≤ c) (i : ℕ) :
@@ -5180,16 +5180,16 @@ Without this, Sm would be Lean's junk value for a non-integrable integral, and
 Am, deltaM and Theorem 4.1 would all be vacuous. -/
 theorem integrable_Sm_integrand (l j : ℕ) :
     MeasureTheory.IntegrableOn
-      (fun s : ℝ => (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (2 : ℝ) ^ (-(j:ℝ) * s))
+      (fun s : ℝ => (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (2 : ℝ) ^ (-(j : ℝ) * s))
       (Set.Ioc (1 : ℝ) 2) := by
   apply integrableOn_Ioc_subst
-  have hJ := integrable_Jint_integrand (j:ℝ) (by positivity) l
-  have hconst := hJ.const_mul (((Nat.factorial l : ℝ))⁻¹ * (2 : ℝ) ^ (-(j:ℝ)))
+  have hJ := integrable_Jint_integrand (j : ℝ) (by positivity) l
+  have hconst := hJ.const_mul (((Nat.factorial l : ℝ))⁻¹ * (2 : ℝ) ^ (-(j : ℝ)))
   apply MeasureTheory.IntegrableOn.congr_fun hconst _ measurableSet_Ioi
   intro u hu
   have hexp : (0 : ℝ) < Real.exp (-u) := Real.exp_pos _
   simp only [add_sub_cancel_left, Real.log_exp, neg_neg]
-  rw [show (-(j:ℝ)) * (1 + Real.exp (-u)) = -(j:ℝ) + -(j:ℝ) * Real.exp (-u) by ring]
+  rw [show (-(j : ℝ)) * (1 + Real.exp (-u)) = -(j : ℝ) + -(j : ℝ) * Real.exp (-u) by ring]
   rw [Real.rpow_add (by norm_num : (0 : ℝ) < 2)]
   field_simp
 
@@ -5344,24 +5344,24 @@ theorem Bfun_mono (j m : ℕ) (hjm : j ≤ m) (u : ℝ) :
     Bfun j u ≤ Bfun m u := by
   unfold Bfun
   have hE : (0 : ℝ) < Real.exp (-u) := Real.exp_pos _
-  have hjR : ((j:ℕ):ℝ) ≤ ((m:ℕ):ℝ) := by exact_mod_cast hjm
-  have hgap : (2 : ℝ) ^ (-((m:ℕ):ℝ) * Real.exp (-u))
-      - (2 : ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u))
-      + (((m:ℕ):ℝ) - ((j:ℕ):ℝ)) * Real.log 2 * Real.exp (-u) ≥ 0 := by
-    set c := ((m:ℕ):ℝ) - ((j:ℕ):ℝ) with hc
+  have hjR : ((j : ℕ):ℝ) ≤ ((m : ℕ):ℝ) := by exact_mod_cast hjm
+  have hgap : (2 : ℝ) ^ (-((m : ℕ):ℝ) * Real.exp (-u))
+      - (2 : ℝ) ^ (-((j : ℕ):ℝ) * Real.exp (-u))
+      + (((m : ℕ):ℝ) - ((j : ℕ):ℝ)) * Real.log 2 * Real.exp (-u) ≥ 0 := by
+    set c := ((m : ℕ):ℝ) - ((j : ℕ):ℝ) with hc
     have hc0 : (0 : ℝ) ≤ c := by rw [hc]; linarith
-    have hrw1 : (2 : ℝ) ^ (-((m:ℕ):ℝ) * Real.exp (-u))
-        = (2 : ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u)) *
+    have hrw1 : (2 : ℝ) ^ (-((m : ℕ):ℝ) * Real.exp (-u))
+        = (2 : ℝ) ^ (-((j : ℕ):ℝ) * Real.exp (-u)) *
           (2 : ℝ) ^ (-c * Real.exp (-u)) := by
       rw [← Real.rpow_add (by norm_num : (0 : ℝ) < 2)]
       congr 1
       rw [hc]
       ring
-    have hbase : (0 : ℝ) < (2 : ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u)) :=
+    have hbase : (0 : ℝ) < (2 : ℝ) ^ (-((j : ℕ):ℝ) * Real.exp (-u)) :=
       Real.rpow_pos_of_pos (by norm_num) _
-    have hbase_le : (2 : ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u)) ≤ 1 := by
+    have hbase_le : (2 : ℝ) ^ (-((j : ℕ):ℝ) * Real.exp (-u)) ≤ 1 := by
       apply Real.rpow_le_one_of_one_le_of_nonpos (by norm_num)
-      have : (0 : ℝ) ≤ ((j:ℕ):ℝ) * Real.exp (-u) :=
+      have : (0 : ℝ) ≤ ((j : ℕ):ℝ) * Real.exp (-u) :=
         mul_nonneg (Nat.cast_nonneg j) hE.le
       linarith
     have hB := Bfun_nonneg 0 u
@@ -5408,12 +5408,12 @@ theorem integrable_betaCirc_integrand (i j : ℕ) :
       (fun u : ℝ => u ^ i * Real.exp (-u) * Bfun j u) (Set.Ioi 0) := by
   have hI1 := integrable_pow_exp i
   have hI2 := integrable_pow_exp_two i
-  have hI3 := integrable_Jint_integrand ((j:ℕ):ℝ) (by positivity) i
+  have hI3 := integrable_Jint_integrand ((j : ℕ):ℝ) (by positivity) i
   have hfeq : (fun u : ℝ => u ^ i * Real.exp (-u) * Bfun j u)
       = fun u : ℝ =>
-        (u ^ i * Real.exp (-u) * (2 : ℝ) ^ (-((j:ℕ):ℝ) * Real.exp (-u))
+        (u ^ i * Real.exp (-u) * (2 : ℝ) ^ (-((j : ℕ):ℝ) * Real.exp (-u))
           - u ^ i * Real.exp (-u))
-        + ((j:ℕ):ℝ) * Real.log 2 * (u ^ i * Real.exp (-(2 * u))) := by
+        + ((j : ℕ):ℝ) * Real.log 2 * (u ^ i * Real.exp (-(2 * u))) := by
     funext u
     unfold Bfun
     have hexp : Real.exp (-u) * Real.exp (-u) = Real.exp (-(2 * u)) := by
@@ -5496,7 +5496,7 @@ theorem integrable_exp_Bfun (m : ℕ) :
     simp only
     rw [show (1 : ℝ) - 1 = 0 by ring, Real.rpow_zero, mul_one]
   have hdom : MeasureTheory.IntegrableOn
-      (fun u : ℝ => (((m:ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u))
+      (fun u : ℝ => (((m : ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u))
       (Set.Ioi 0) := hbase.const_mul _
   apply MeasureTheory.Integrable.mono hdom
   · apply Measurable.aestronglyMeasurable
@@ -5504,7 +5504,7 @@ theorem integrable_exp_Bfun (m : ℕ) :
     fun_prop
   · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with u hu
     have hu0 : (0 : ℝ) < u := hu
-    set x := ((m:ℕ):ℝ) * Real.log 2 * Real.exp (-u) with hx
+    set x := ((m : ℕ):ℝ) * Real.log 2 * Real.exp (-u) with hx
     have hxnn : (0 : ℝ) ≤ x := by
       rw [hx]
       positivity
@@ -5527,7 +5527,7 @@ theorem integrable_exp_Bfun (m : ℕ) :
           linarith
         nlinarith [hle1, hx1]
     have hBnn : (0 : ℝ) ≤ Bfun m u := Bfun_nonneg m u
-    have hxsq : x ^ 2 = (((m:ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u) ^ 2 := by
+    have hxsq : x ^ 2 = (((m : ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u) ^ 2 := by
       rw [hx]
       ring
     have hexpsq : Real.exp u * Real.exp (-u) ^ 2 = Real.exp (-u) := by
@@ -5538,15 +5538,15 @@ theorem integrable_exp_Bfun (m : ℕ) :
     rw [Real.norm_eq_abs, Real.norm_eq_abs,
       abs_of_nonneg (by positivity : (0 : ℝ) ≤ Real.exp u * Bfun m u),
       abs_of_nonneg (by positivity : (0 : ℝ) ≤
-        (((m:ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u))]
+        (((m : ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u))]
     calc Real.exp u * Bfun m u ≤ Real.exp u * x ^ 2 := by
           apply mul_le_mul_of_nonneg_left _ (Real.exp_pos u).le
           rw [hBeq]
           exact le_trans hquad (by nlinarith [sq_nonneg x])
-      _ = (((m:ℕ):ℝ) * Real.log 2) ^ 2 * (Real.exp u * Real.exp (-u) ^ 2) := by
+      _ = (((m : ℕ):ℝ) * Real.log 2) ^ 2 * (Real.exp u * Real.exp (-u) ^ 2) := by
           rw [hxsq]
           ring
-      _ = (((m:ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u) := by rw [hexpsq]
+      _ = (((m : ℕ):ℝ) * Real.log 2) ^ 2 * Real.exp (-u) := by rw [hexpsq]
 
 /-- The key bound: sum 2^i betaCirc i m <= int e^u Bfun m u. -/
 theorem sum_betaCirc_le_integral (m : ℕ) :
@@ -5617,8 +5617,8 @@ theorem expNeg_injOn : Set.InjOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) := b
 theorem exp_Bfun_integral_eq (m : ℕ) :
     (∫ u in Set.Ioi (0 : ℝ), Real.exp u * Bfun m u)
       = ∫ t in Set.Ioo (0 : ℝ) 1,
-        (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * t)) - 1
-          + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := by
+        (Real.exp (-(((m : ℕ):ℝ) * Real.log 2 * t)) - 1
+          + ((m : ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := by
   have hderiv : ∀ u ∈ Set.Ioi (0 : ℝ),
       HasDerivWithinAt (fun u : ℝ => Real.exp (-u))
         (Real.exp (-u) * (-1)) (Set.Ioi 0) u := by
@@ -5626,8 +5626,8 @@ theorem exp_Bfun_integral_eq (m : ℕ) :
     exact (((hasDerivAt_neg u).exp)).hasDerivWithinAt
   have himg := MeasureTheory.integral_image_eq_integral_abs_deriv_smul
     measurableSet_Ioi hderiv expNeg_injOn
-    (fun t : ℝ => (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * t)) - 1
-      + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2)
+    (fun t : ℝ => (Real.exp (-(((m : ℕ):ℝ) * Real.log 2 * t)) - 1
+      + ((m : ℕ):ℝ) * Real.log 2 * t) / t ^ 2)
   rw [expNeg_image] at himg
   rw [himg]
   apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
@@ -5636,8 +5636,8 @@ theorem exp_Bfun_integral_eq (m : ℕ) :
   have hE : (0 : ℝ) < Real.exp (-u) := Real.exp_pos _
   simp only [smul_eq_mul, mul_neg_one, abs_neg, abs_of_pos hE]
   have hBeq : Bfun m u
-      = (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * Real.exp (-u))) - 1
-        + ((m:ℕ):ℝ) * Real.log 2 * Real.exp (-u)) := by
+      = (Real.exp (-(((m : ℕ):ℝ) * Real.log 2 * Real.exp (-u))) - 1
+        + ((m : ℕ):ℝ) * Real.log 2 * Real.exp (-u)) := by
     unfold Bfun
     rw [Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2)]
     ring_nf
@@ -5652,43 +5652,43 @@ theorem exp_Bfun_integral_eq (m : ℕ) :
 - 1 - (log2/4) m, where a = m log 2. -/
 theorem deltaM_upper_bound (m : ℕ) (hm : 1 ≤ m) :
     deltaM m ≤ -1 - (Real.log 2 / 4) * (m : ℝ)
-      + (((m:ℕ):ℝ) * Real.log 2) * Real.log (((m:ℕ):ℝ) * Real.log 2)
-      + Real.eulerMascheroniConstant * (((m:ℕ):ℝ) * Real.log 2)
-      - ((m:ℕ):ℝ) * Real.log 2 + 1 := by
+      + (((m : ℕ):ℝ) * Real.log 2) * Real.log (((m : ℕ):ℝ) * Real.log 2)
+      + Real.eulerMascheroniConstant * (((m : ℕ):ℝ) * Real.log 2)
+      - ((m : ℕ):ℝ) * Real.log 2 + 1 := by
   have hl2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
-  have hmpos : (0 : ℝ) < ((m:ℕ):ℝ) := by
-    have : (1 : ℝ) ≤ ((m:ℕ):ℝ) := by exact_mod_cast hm
+  have hmpos : (0 : ℝ) < ((m : ℕ):ℝ) := by
+    have : (1 : ℝ) ≤ ((m : ℕ):ℝ) := by exact_mod_cast hm
     linarith
-  have hapos : (0 : ℝ) < ((m:ℕ):ℝ) * Real.log 2 := by positivity
+  have hapos : (0 : ℝ) < ((m : ℕ):ℝ) * Real.log 2 := by positivity
   have hIooIoc : (∫ t in Set.Ioo (0 : ℝ) 1,
-      (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * t)) - 1
-        + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2)
+      (Real.exp (-(((m : ℕ):ℝ) * Real.log 2 * t)) - 1
+        + ((m : ℕ):ℝ) * Real.log 2 * t) / t ^ 2)
       = ∫ t in Set.Ioc (0 : ℝ) 1,
-        (Real.exp (-(((m:ℕ):ℝ) * Real.log 2) * t) - 1
-          + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := by
+        (Real.exp (-(((m : ℕ):ℝ) * Real.log 2) * t) - 1
+          + ((m : ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := by
     rw [MeasureTheory.integral_Ioc_eq_integral_Ioo]
     apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioo
     intro t _
     simp only
-    rw [show -(((m:ℕ):ℝ) * Real.log 2) * t = -(((m:ℕ):ℝ) * Real.log 2 * t) by ring]
-  have hgap := BanksMartin.gap_five_evaluation (((m:ℕ):ℝ) * Real.log 2) hapos
+    rw [show -(((m : ℕ):ℝ) * Real.log 2) * t = -(((m : ℕ):ℝ) * Real.log 2 * t) by ring]
+  have hgap := BanksMartin.gap_five_evaluation (((m : ℕ):ℝ) * Real.log 2) hapos
   have hchain := sum_betaCirc_le_uniform m
   have hchain2 := sum_betaCirc_le_integral m
   have hsubst := exp_Bfun_integral_eq m
   rw [deltaM_identity m]
   have hfinal : ∑ i ∈ Finset.range (m + 1), (2 : ℝ) ^ i * betaCirc i (m - i)
-      ≤ (((m:ℕ):ℝ) * Real.log 2) * Real.log (((m:ℕ):ℝ) * Real.log 2)
-        + Real.eulerMascheroniConstant * (((m:ℕ):ℝ) * Real.log 2)
-        - ((m:ℕ):ℝ) * Real.log 2 + 1 := by
+      ≤ (((m : ℕ):ℝ) * Real.log 2) * Real.log (((m : ℕ):ℝ) * Real.log 2)
+        + Real.eulerMascheroniConstant * (((m : ℕ):ℝ) * Real.log 2)
+        - ((m : ℕ):ℝ) * Real.log 2 + 1 := by
     calc ∑ i ∈ Finset.range (m + 1), (2 : ℝ) ^ i * betaCirc i (m - i)
         ≤ ∑ i ∈ Finset.range (m + 1), (2 : ℝ) ^ i * betaCirc i m := hchain
       _ ≤ ∫ u in Set.Ioi (0 : ℝ), Real.exp u * Bfun m u := hchain2
       _ = ∫ t in Set.Ioo (0 : ℝ) 1,
-          (Real.exp (-(((m:ℕ):ℝ) * Real.log 2 * t)) - 1
-            + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := hsubst
+          (Real.exp (-(((m : ℕ):ℝ) * Real.log 2 * t)) - 1
+            + ((m : ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := hsubst
       _ = ∫ t in Set.Ioc (0 : ℝ) 1,
-          (Real.exp (-(((m:ℕ):ℝ) * Real.log 2) * t) - 1
-            + ((m:ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := hIooIoc
+          (Real.exp (-(((m : ℕ):ℝ) * Real.log 2) * t) - 1
+            + ((m : ℕ):ℝ) * Real.log 2 * t) / t ^ 2 := hIooIoc
       _ ≤ _ := hgap
   linarith [hfinal]
 
@@ -5701,11 +5701,11 @@ delta_m <= (log 2) m log m + c1* m, for m >= 1. -/
 theorem deltaM_upper_bound_manuscript (m : ℕ) (hm : 1 ≤ m) :
     deltaM m ≤ Real.log 2 * (m : ℝ) * Real.log (m : ℝ) + cStarOne * (m : ℝ) := by
   have hl2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
-  have hmR : (1 : ℝ) ≤ ((m:ℕ):ℝ) := by exact_mod_cast hm
-  have hmpos : (0 : ℝ) < ((m:ℕ):ℝ) := by linarith
+  have hmR : (1 : ℝ) ≤ ((m : ℕ):ℝ) := by exact_mod_cast hm
+  have hmpos : (0 : ℝ) < ((m : ℕ):ℝ) := by linarith
   have hub := deltaM_upper_bound m hm
-  have hlogsplit : Real.log (((m:ℕ):ℝ) * Real.log 2)
-      = Real.log ((m:ℕ):ℝ) + Real.log (Real.log 2) := by
+  have hlogsplit : Real.log (((m : ℕ):ℝ) * Real.log 2)
+      = Real.log ((m : ℕ):ℝ) + Real.log (Real.log 2) := by
     rw [Real.log_mul (ne_of_gt hmpos) (ne_of_gt hl2)]
   rw [hlogsplit] at hub
   unfold cStarOne
@@ -5760,28 +5760,28 @@ theorem deriv_geom_family_at (c : ℂ) (hc : c ≠ 0) (k : ℕ) (z : ℂ)
       simpa using (hasDerivAt_id z).div_const c
     simpa [Pi.sub_def] using (hasDerivAt_const z (1 : ℂ)).sub h1
   have hpow : HasDerivAt (fun w : ℂ => (1 - w / c) ^ (k + 1))
-      (((k:ℂ) + 1) * (1 - z / c) ^ k * (-(1 / c))) z := by
+      (((k : ℂ) + 1) * (1 - z / c) ^ k * (-(1 / c))) z := by
     have hp := hbase.pow (k + 1)
     simpa [Pi.pow_def] using hp
   have hden : c ^ k * (1 - z / c) ^ (k + 1) ≠ 0 := by
     apply mul_ne_zero (pow_ne_zero _ hc)
     exact pow_ne_zero _ hz
   have hmul : HasDerivAt (fun w : ℂ => c ^ k * (1 - w / c) ^ (k + 1))
-      (c ^ k * (((k:ℂ) + 1) * (1 - z / c) ^ k * (-(1 / c)))) z :=
+      (c ^ k * (((k : ℂ) + 1) * (1 - z / c) ^ k * (-(1 / c)))) z :=
     hpow.const_mul _
   have hdiv0 := (hasDerivAt_const z ((Nat.factorial k : ℂ))).div hmul hden
   have hdiv : HasDerivAt (fun w : ℂ => (Nat.factorial k : ℂ) / (c ^ k * (1 - w / c) ^ (k + 1)))
       ((0 * (c ^ k * (1 - z / c) ^ (k + 1))
-        - (Nat.factorial k : ℂ) * (c ^ k * (((k:ℂ) + 1) * (1 - z / c) ^ k * (-(1 / c)))))
+        - (Nat.factorial k : ℂ) * (c ^ k * (((k : ℂ) + 1) * (1 - z / c) ^ k * (-(1 / c)))))
         / (c ^ k * (1 - z / c) ^ (k + 1)) ^ 2) z := by
     simpa [Pi.div_def] using hdiv0
   rw [hdiv.deriv]
   set w := 1 - z / c with hw
   have hwnz : w ≠ 0 := hz
   have hnum : (0 * (c ^ k * w ^ (k + 1))
-      - (Nat.factorial k : ℂ) * (c ^ k * (((k:ℂ) + 1) * w ^ k * (-(1 / c)))))
+      - (Nat.factorial k : ℂ) * (c ^ k * (((k : ℂ) + 1) * w ^ k * (-(1 / c)))))
       / (c ^ k * w ^ (k + 1)) ^ 2
-      = ((Nat.factorial k : ℂ) * ((k:ℂ) + 1)) / (c ^ (k + 1) * w ^ (k + 2)) := by
+      = ((Nat.factorial k : ℂ) * ((k : ℂ) + 1)) / (c ^ (k + 1) * w ^ (k + 2)) := by
     rw [div_eq_div_iff (by positivity) (by positivity)]
     field_simp
     ring
@@ -5851,7 +5851,7 @@ L4 (Cauchy product): the coefficient of z^k in a product of three power series
 /-- The z-weighted completely multiplicative function n -> z^Omega(n) n^(-s),
 bundled as a monoid-with-zero hom for Mathlib's Euler product machinery. -/
 noncomputable def zOmegaHom (s : ℝ) (z : ℂ) : ℕ →*₀ ℂ where
-  toFun n := if n = 0 then 0 else z ^ (bigOmega n) * ((n : ℂ) ^ (-(s:ℂ)))
+  toFun n := if n = 0 then 0 else z ^ (bigOmega n) * ((n : ℂ) ^ (-(s : ℂ)))
   map_zero' := by simp
   map_one' := by
     simp only [if_neg (one_ne_zero)]
@@ -5873,8 +5873,8 @@ noncomputable def zOmegaHom (s : ℝ) (z : ℂ) : ℕ →*₀ ℂ where
           push_cast
           ring
         rw [hcast]
-        have hbridge : ((a : ℂ) * (b : ℂ)) ^ (-(s:ℂ))
-            = (a : ℂ) ^ (-(s:ℂ)) * (b : ℂ) ^ (-(s:ℂ)) := by
+        have hbridge : ((a : ℂ) * (b : ℂ)) ^ (-(s : ℂ))
+            = (a : ℂ) ^ (-(s : ℂ)) * (b : ℂ) ^ (-(s : ℂ)) := by
           have hA : ((a : ℕ) : ℂ) = (((a : ℕ) : ℝ) : ℂ) := by push_cast; ring
           have hB : ((b : ℕ) : ℂ) = (((b : ℕ) : ℝ) : ℂ) := by push_cast; ring
           rw [hA, hB]
@@ -5908,19 +5908,19 @@ theorem coeff_pow_neg (s : ℝ) (hs : 1 < s) (l : ℕ) :
 
 /-- OBLIGATION L3b: the (1 - z/2^s)^(-1) factor's coefficients. -/
 theorem coeff_geom (s : ℝ) (hs : 1 < s) (j : ℕ) :
-    (iteratedDeriv j (fun z : ℂ => (1 - z / ((2 : ℂ) ^ (s:ℂ)))⁻¹) 0)
+    (iteratedDeriv j (fun z : ℂ => (1 - z / ((2 : ℂ) ^ (s : ℂ)))⁻¹) 0)
         / (Nat.factorial j : ℂ)
-      = ((2 : ℝ) ^ (-(j:ℝ) * s) : ℝ) := by
-  have hcnz : ((2 : ℂ) ^ (s:ℂ)) ≠ 0 := by
+      = ((2 : ℝ) ^ (-(j : ℝ) * s) : ℝ) := by
+  have hcnz : ((2 : ℂ) ^ (s : ℂ)) ≠ 0 := by
     rw [Ne, Complex.cpow_eq_zero_iff]
     intro hcon
     exact absurd hcon.1 (by norm_num)
-  rw [iteratedDeriv_geom ((2 : ℂ) ^ (s:ℂ)) hcnz j]
+  rw [iteratedDeriv_geom ((2 : ℂ) ^ (s : ℂ)) hcnz j]
   have hfacnz : ((Nat.factorial j : ℕ) : ℂ) ≠ 0 :=
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero j)
   rw [div_div, mul_comm, ← div_div, div_self hfacnz]
   rw [one_div]
-  have hreal : ((2 : ℂ) ^ (s:ℂ)) = (((2 : ℝ) ^ s : ℝ) : ℂ) := by
+  have hreal : ((2 : ℂ) ^ (s : ℂ)) = (((2 : ℝ) ^ s : ℝ) : ℂ) := by
     rw [Complex.ofReal_cpow (by norm_num : (0 : ℝ) ≤ 2)]
     norm_num
   rw [hreal]
@@ -5961,7 +5961,7 @@ This is the constant whose z-th power is the first factor of F(s,z)
 when G2 is normalised as our G2C (product over p >= 3 of the
 regularised factors). -/
 noncomputable def cFac (s : ℝ) : ℝ :=
-  ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - (p:ℝ) ^ (-s))⁻¹
+  ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - (p : ℝ) ^ (-s))⁻¹
 
 /-- Coefficients of the factor c^z: the l-th is (log c)^l / l!. -/
 theorem coeff_cpow (s : ℝ) (hc : 0 < cFac s) (l : ℕ) :
@@ -5987,44 +5987,44 @@ Needed because 0 < cFac s has been threaded as a hypothesis throughout;
 without multipliability that would be an assumption about a tprod junk value. -/
 theorem cFac_multipliable (s : ℝ) (hs : 1 < s) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹) := by
+      (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹) := by
   have hthird : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-      ((p:ℕ):ℝ) ^ (-s) ≤ 1/3 := by
+      ((p : ℕ):ℝ) ^ (-s) ≤ 1/3 := by
     intro p
-    have hp3 : (3 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
-    have h1 : ((p:ℕ):ℝ) ^ (-s) ≤ ((p:ℕ):ℝ) ^ (-(1 : ℝ)) := by
+    have hp3 : (3 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast p.2.2
+    have h1 : ((p : ℕ):ℝ) ^ (-s) ≤ ((p : ℕ):ℝ) ^ (-(1 : ℝ)) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
     rw [Real.rpow_neg_one] at h1
-    have h2 : (((p:ℕ):ℝ))⁻¹ ≤ 1/3 := by
+    have h2 : (((p : ℕ):ℝ))⁻¹ ≤ 1/3 := by
       rw [inv_le_comm₀ (by linarith) (by norm_num)]
       linarith
     linarith
   have hpos : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-      (0 : ℝ) < ((p:ℕ):ℝ) ^ (-s) := by
+      (0 : ℝ) < ((p : ℕ):ℝ) ^ (-s) := by
     intro p
-    have hp3 : (3 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
+    have hp3 : (3 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast p.2.2
     positivity
   have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (3/2) * (((p:ℕ):ℝ) ^ (-s))) := by
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-s)) :=
+      (3/2) * (((p : ℕ):ℝ) ^ (-s))) := by
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-s)) :=
       Real.summable_nat_rpow.mpr (by linarith)
     exact (hbase.subtype _).mul_left _
   have hsum : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ - 1) := by
+      (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹ - 1) := by
     apply Summable.of_nonneg_of_le _ _ hcomp
     · intro p
       have h3 := hthird p
       have hp := hpos p
-      have hden : (0 : ℝ) < 1 - ((p:ℕ):ℝ) ^ (-s) := by linarith
+      have hden : (0 : ℝ) < 1 - ((p : ℕ):ℝ) ^ (-s) := by linarith
       rw [sub_nonneg, le_inv_comm₀ (by norm_num) hden]
       linarith
     · intro p
       have h3 := hthird p
       have hp := hpos p
-      have hden : (0 : ℝ) < 1 - ((p:ℕ):ℝ) ^ (-s) := by linarith
-      have hkey : (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ - 1
-          = ((p:ℕ):ℝ) ^ (-s) / (1 - ((p:ℕ):ℝ) ^ (-s)) := by
+      have hden : (0 : ℝ) < 1 - ((p : ℕ):ℝ) ^ (-s) := by linarith
+      have hkey : (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹ - 1
+          = ((p : ℕ):ℝ) ^ (-s) / (1 - ((p : ℕ):ℝ) ^ (-s)) := by
         field_simp
         ring
       rw [hkey, div_le_iff₀ hden]
@@ -6063,7 +6063,7 @@ noncomputable def G2manu (s : ℝ) (z : ℂ) : ℂ :=
 
 /-- The full generating function, as the product of its three factors. -/
 noncomputable def Fbig (s : ℝ) (z : ℂ) : ℂ :=
-  ((cFac s : ℝ) : ℂ) ^ z * (1 - z / ((2 : ℂ) ^ (s:ℂ)))⁻¹ * G2C s z
+  ((cFac s : ℝ) : ℂ) ^ z * (1 - z / ((2 : ℂ) ^ (s : ℂ)))⁻¹ * G2C s z
 
 
 /-!
@@ -6115,20 +6115,20 @@ lemma bigOmega_prime_pow {p : ℕ} (hp : p.Prime) (n : ℕ) : bigOmega (p ^ n) =
 theorem zOmega_prime_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : Norm.norm z < (2 : ℝ) ^ s) {p : ℕ} (hp : p.Prime) :
     Summable (fun n : ℕ => Norm.norm (zOmegaHom s z (p ^ n))) := by
-  have hp0 : (0 : ℝ) < (p:ℝ) := by
+  have hp0 : (0 : ℝ) < (p : ℝ) := by
     exact_mod_cast hp.pos
-  have hp2 : (2 : ℝ) ≤ (p:ℝ) := by
+  have hp2 : (2 : ℝ) ≤ (p : ℝ) := by
     exact_mod_cast hp.two_le
-  have hratio : Norm.norm z * ((p:ℝ) ^ (-s)) < 1 := by
+  have hratio : Norm.norm z * ((p : ℝ) ^ (-s)) < 1 := by
     have h2s : (0 : ℝ) < (2 : ℝ) ^ s := Real.rpow_pos_of_pos (by norm_num) s
-    have hps : (p:ℝ) ^ (-s) ≤ (2 : ℝ) ^ (-s) := by
-      rw [Real.rpow_neg (by linarith : (0 : ℝ) ≤ (p:ℝ)),
+    have hps : (p : ℝ) ^ (-s) ≤ (2 : ℝ) ^ (-s) := by
+      rw [Real.rpow_neg (by linarith : (0 : ℝ) ≤ (p : ℝ)),
         Real.rpow_neg (by norm_num : (0 : ℝ) ≤ (2 : ℝ))]
       gcongr
     have hinv : (2 : ℝ) ^ (-s) = ((2 : ℝ) ^ s)⁻¹ := by
       rw [Real.rpow_neg (by norm_num)]
     have hznn : (0 : ℝ) ≤ Norm.norm z := norm_nonneg z
-    calc Norm.norm z * ((p:ℝ) ^ (-s)) ≤ Norm.norm z * ((2 : ℝ) ^ (-s)) := by
+    calc Norm.norm z * ((p : ℝ) ^ (-s)) ≤ Norm.norm z * ((2 : ℝ) ^ (-s)) := by
           apply mul_le_mul_of_nonneg_left hps hznn
       _ = Norm.norm z * ((2 : ℝ) ^ s)⁻¹ := by rw [hinv]
       _ < 1 := by
@@ -6137,23 +6137,23 @@ theorem zOmega_prime_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
             exact mul_lt_mul_of_pos_right hz hinvpos
           rwa [mul_inv_cancel₀ (ne_of_gt h2s)] at hkey
   have hterm : ∀ n : ℕ,
-      Norm.norm (zOmegaHom s z (p ^ n)) = (Norm.norm z * ((p:ℝ) ^ (-s))) ^ n := by
+      Norm.norm (zOmegaHom s z (p ^ n)) = (Norm.norm z * ((p : ℝ) ^ (-s))) ^ n := by
     intro n
-    have hpn : (p:ℕ) ^ n ≠ 0 := pow_ne_zero n hp.pos.ne'
-    have hppos : 0 < (p:ℕ) ^ n := Nat.pos_of_ne_zero hpn
-    change Norm.norm (if (p:ℕ) ^ n = 0 then 0
-      else z ^ (bigOmega ((p:ℕ) ^ n)) * ((((p:ℕ) ^ n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+    have hpn : (p : ℕ) ^ n ≠ 0 := pow_ne_zero n hp.pos.ne'
+    have hppos : 0 < (p : ℕ) ^ n := Nat.pos_of_ne_zero hpn
+    change Norm.norm (if (p : ℕ) ^ n = 0 then 0
+      else z ^ (bigOmega ((p : ℕ) ^ n)) * ((((p : ℕ) ^ n : ℕ) : ℂ) ^ (-(s : ℂ)))) = _
     rw [if_neg hpn, bigOmega_prime_pow hp n, norm_mul, norm_pow]
     rw [Complex.norm_natCast_cpow_of_pos hppos]
     rw [Complex.neg_re, Complex.ofReal_re]
     rw [Nat.cast_pow]
-    rw [← Real.rpow_natCast ((p:ℝ)) n, ← Real.rpow_mul (Nat.cast_nonneg p)]
+    rw [← Real.rpow_natCast ((p : ℝ)) n, ← Real.rpow_mul (Nat.cast_nonneg p)]
     rw [mul_pow]
     congr 1
-    rw [← Real.rpow_natCast ((p:ℝ) ^ (-s)) n, ← Real.rpow_mul (Nat.cast_nonneg p)]
+    rw [← Real.rpow_natCast ((p : ℝ) ^ (-s)) n, ← Real.rpow_mul (Nat.cast_nonneg p)]
     congr 1
     ring
-  have hgeo : Summable (fun n : ℕ => (Norm.norm z * ((p:ℝ) ^ (-s))) ^ n) :=
+  have hgeo : Summable (fun n : ℕ => (Norm.norm z * ((p : ℝ) ^ (-s))) ^ n) :=
     summable_geometric_of_lt_one (by positivity) hratio
   exact hgeo.congr (fun n => (hterm n).symm)
 
@@ -6174,20 +6174,20 @@ theorem zOmegaNormHom_apply (s : ℝ) (z : ℂ) (n : ℕ) :
 
 /-- The norm of the family at a prime power is a geometric term. -/
 theorem zOmegaNorm_prime_pow (s : ℝ) (z : ℂ) {p : ℕ} (hp : p.Prime) (n : ℕ) :
-    zOmegaNormHom s z (p ^ n) = (Norm.norm z * ((p:ℝ) ^ (-s))) ^ n := by
+    zOmegaNormHom s z (p ^ n) = (Norm.norm z * ((p : ℝ) ^ (-s))) ^ n := by
   rw [zOmegaNormHom_apply]
-  have hpn : (p:ℕ) ^ n ≠ 0 := pow_ne_zero n hp.pos.ne'
-  have hppos : 0 < (p:ℕ) ^ n := Nat.pos_of_ne_zero hpn
-  change Norm.norm (if (p:ℕ) ^ n = 0 then 0
-    else z ^ (bigOmega ((p:ℕ) ^ n)) * ((((p:ℕ) ^ n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+  have hpn : (p : ℕ) ^ n ≠ 0 := pow_ne_zero n hp.pos.ne'
+  have hppos : 0 < (p : ℕ) ^ n := Nat.pos_of_ne_zero hpn
+  change Norm.norm (if (p : ℕ) ^ n = 0 then 0
+    else z ^ (bigOmega ((p : ℕ) ^ n)) * ((((p : ℕ) ^ n : ℕ) : ℂ) ^ (-(s : ℂ)))) = _
   rw [if_neg hpn, bigOmega_prime_pow hp n, norm_mul, norm_pow]
   rw [Complex.norm_natCast_cpow_of_pos hppos]
   rw [Complex.neg_re, Complex.ofReal_re]
   rw [Nat.cast_pow]
-  rw [←  Real.rpow_natCast ((p:ℝ)) n, ←  Real.rpow_mul (Nat.cast_nonneg p)]
+  rw [←  Real.rpow_natCast ((p : ℝ)) n, ←  Real.rpow_mul (Nat.cast_nonneg p)]
   rw [mul_pow]
   congr 1
-  rw [←  Real.rpow_natCast ((p:ℝ) ^ (-s)) n, ←  Real.rpow_mul (Nat.cast_nonneg p)]
+  rw [←  Real.rpow_natCast ((p : ℝ) ^ (-s)) n, ←  Real.rpow_mul (Nat.cast_nonneg p)]
   congr 1
   ring
 
@@ -6209,8 +6209,8 @@ theorem zOmega_smooth_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
 
 /-- A1 step 3a: the scaled prime sum converges. -/
 theorem zOmega_prime_sum_summable (s : ℝ) (hs : 1 < s) (z : ℂ) :
-    Summable (fun p : Nat.Primes => Norm.norm z * ((p:ℝ) ^ (-s))) := by
-  have hbase : Summable (fun p : Nat.Primes => ((p:ℝ) ^ (-s))) := by
+    Summable (fun p : Nat.Primes => Norm.norm z * ((p : ℝ) ^ (-s))) := by
+  have hbase : Summable (fun p : Nat.Primes => ((p : ℝ) ^ (-s))) := by
     rw [Nat.Primes.summable_rpow]
     linarith
   exact hbase.mul_left _
@@ -6240,14 +6240,14 @@ theorem neg_log_one_sub_le (x : ℝ) (hx0 : 0 ≤ x) (hx : x ≤ 1/2) :
 
 /-- Each cFac factor is positive, and its argument is at most 1/3, for s > 1. -/
 theorem cFac_factor_le_third (s : ℝ) (hs : 1 < s) (p : {p : ℕ // p.Prime ∧ 3 ≤ p}) :
-    ((p:ℕ):ℝ) ^ (-s) ≤ 1/3 ∧ 0 < ((p:ℕ):ℝ) ^ (-s) := by
-  have hp3 : (3 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
+    ((p : ℕ):ℝ) ^ (-s) ≤ 1/3 ∧ 0 < ((p : ℕ):ℝ) ^ (-s) := by
+  have hp3 : (3 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast p.2.2
   constructor
-  · have h1 : ((p:ℕ):ℝ) ^ (-s) ≤ ((p:ℕ):ℝ) ^ (-(1 : ℝ)) := by
+  · have h1 : ((p : ℕ):ℝ) ^ (-s) ≤ ((p : ℕ):ℝ) ^ (-(1 : ℝ)) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
     rw [Real.rpow_neg_one] at h1
-    have h2 : (((p:ℕ):ℝ))⁻¹ ≤ 1/3 := by
+    have h2 : (((p : ℕ):ℝ))⁻¹ ≤ 1/3 := by
       rw [inv_le_comm₀ (by linarith) (by norm_num)]
       linarith
     linarith
@@ -6257,10 +6257,10 @@ theorem cFac_factor_le_third (s : ℝ) (hs : 1 < s) (p : {p : ℕ // p.Prime ∧
 and x = p^(-s) is p-series summable. -/
 theorem cFac_log_summable (s : ℝ) (hs : 1 < s) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)) := by
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)) := by
   have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      2 * (((p:ℕ):ℝ) ^ (-s))) := by
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-s)) :=
+      2 * (((p : ℕ):ℝ) ^ (-s))) := by
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-s)) :=
       Real.summable_nat_rpow.mpr (by linarith)
     exact (hbase.subtype _).mul_left _
   apply Summable.of_nonneg_of_le _ _ hcomp
@@ -6272,16 +6272,16 @@ theorem cFac_log_summable (s : ℝ) (hs : 1 < s) :
   · intro p
     obtain ⟨ h3, hp ⟩ := cFac_factor_le_third s hs p
     rw [Real.log_inv]
-    have hkey := neg_log_one_sub_le (((p:ℕ):ℝ) ^ (-s)) (le_of_lt hp) (by linarith)
+    have hkey := neg_log_one_sub_le (((p : ℕ):ℝ) ^ (-s)) (le_of_lt hp) (by linarith)
     linarith
 
 /-- cFac s = exp of the convergent sum of logs, hence positive.
 DISCHARGES the hc : 0 < cFac s hypothesis threaded through A3 and Lemma 2.2. -/
 theorem cFac_eq_exp_log_sum (s : ℝ) (hs : 1 < s) :
     cFac s = Real.exp (∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)) := by
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)) := by
   have hpos : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-      0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ := by
+      0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹ := by
     intro p
     obtain ⟨ h3, hp ⟩ := cFac_factor_le_third s hs p
     apply inv_pos.mpr
@@ -6299,21 +6299,21 @@ theorem cFac_pos (s : ℝ) (hs : 1 < s) : 0 < cFac s := by
 theorem cFac_ofReal (s : ℝ) (hs : 1 < s) :
     ((cFac s : ℝ) : ℂ)
       = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-          (1 - (((p:ℕ):ℝ) : ℂ) ^ (-(s:ℂ)))⁻¹ := by
+          (1 - (((p : ℕ):ℝ) : ℂ) ^ (-(s : ℂ)))⁻¹ := by
   have hm := cFac_multipliable s hs
   unfold cFac
-  have hmap : ((∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ : ℝ) : ℂ)
-      = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, ((((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ : ℝ)) : ℂ) :=
+  have hmap : ((∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹ : ℝ) : ℂ)
+      = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, ((((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹ : ℝ)) : ℂ) :=
     hm.map_tprod Complex.ofRealHom Complex.continuous_ofReal
   rw [hmap]
   apply tprod_congr
   intro p
-  have hp3 : (3 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
+  have hp3 : (3 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast p.2.2
   have h3 := (cFac_factor_le_third s hs p).1
-  have hden : (0 : ℝ) < 1 - ((p:ℕ):ℝ) ^ (-s) := by linarith
+  have hden : (0 : ℝ) < 1 - ((p : ℕ):ℝ) ^ (-s) := by linarith
   push_cast
   congr 1
-  rw [Complex.ofReal_cpow (by linarith : (0 : ℝ) ≤ ((p:ℕ):ℝ))]
+  rw [Complex.ofReal_cpow (by linarith : (0 : ℝ) ≤ ((p : ℕ):ℝ))]
   push_cast
   ring
 
@@ -6321,23 +6321,23 @@ theorem cFac_ofReal (s : ℝ) (hs : 1 < s) :
 by mapping the real one through the ofReal ring hom. -/
 theorem cFac_multipliable_complex (s : ℝ) (hs : 1 < s) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (1 - (((p:ℕ):ℝ) : ℂ) ^ (-(s:ℂ)))⁻¹) := by
+      (1 - (((p : ℕ):ℝ) : ℂ) ^ (-(s : ℂ)))⁻¹) := by
   have hm := cFac_multipliable s hs
   have hmap := hm.map Complex.ofRealHom Complex.continuous_ofReal
   apply hmap.congr
   intro p
-  have hp3 : (3 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
-  change ((((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ : ℝ)) : ℂ) = _
+  have hp3 : (3 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast p.2.2
+  change ((((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹ : ℝ)) : ℂ) = _
   push_cast
   congr 1
-  rw [Complex.ofReal_cpow (by linarith : (0 : ℝ) ≤ ((p:ℕ):ℝ))]
+  rw [Complex.ofReal_cpow (by linarith : (0 : ℝ) ≤ ((p : ℕ):ℝ))]
   push_cast
   ring
 
 /-- Probe: does Mathlib's Nat.Primes-indexed Euler product typecheck against
 tprod_split_two's {p // p.Prime} spelling without a bridge? -/
 theorem zeta_split_probe (s : ℝ) (hs : 1 < s) :
-    (∏' p : {p : ℕ // p.Prime}, (1 - (((p:ℕ):ℝ) : ℂ) ^ (-(s:ℂ)))⁻¹)
+    (∏' p : {p : ℕ // p.Prime}, (1 - (((p : ℕ):ℝ) : ℂ) ^ (-(s : ℂ)))⁻¹)
       = riemannZeta (s : ℂ) := by
   have hre : (1 : ℝ) < ((s : ℂ)).re := by simpa using hs
   have h := riemannZeta_eulerProduct_tprod hre
@@ -6348,8 +6348,8 @@ theorem zeta_split_probe (s : ℝ) (hs : 1 < s) :
 
 /-- For s > 1 the p = 2 Euler factor is nonzero. -/
 theorem two_factor_ne_one (s : ℝ) (hs : 1 < s) :
-    (1 : ℂ) - ((2 : ℂ)) ^ (-(s:ℂ)) ≠ 0 := by
-  have hlt : Norm.norm (((2 : ℂ)) ^ (-(s:ℂ))) < 1 := by
+    (1 : ℂ) - ((2 : ℂ)) ^ (-(s : ℂ)) ≠ 0 := by
+  have hlt : Norm.norm (((2 : ℂ)) ^ (-(s : ℂ))) < 1 := by
     rw [show ((2 : ℂ)) = (((2 : ℝ)) : ℂ) by norm_num]
     rw [Complex.norm_cpow_eq_rpow_re_of_pos (by norm_num : (0 : ℝ) < 2)]
     simp only [Complex.neg_re, Complex.ofReal_re]
@@ -6360,38 +6360,38 @@ theorem two_factor_ne_one (s : ℝ) (hs : 1 < s) :
     rw [Real.rpow_one] at h2
     linarith
   intro hcon
-  have heq : ((2 : ℂ)) ^ (-(s:ℂ)) = 1 := (sub_eq_zero.mp hcon).symm
+  have heq : ((2 : ℂ)) ^ (-(s : ℂ)) = 1 := (sub_eq_zero.mp hcon).symm
   rw [heq] at hlt
   simp at hlt
 
 theorem zOmega_factors_multipliable (s : ℝ) (hs : 1 < s) (z : ℂ) :
     Multipliable (fun p : Nat.Primes =>
-      (1 - Norm.norm z * (((p:ℕ):ℝ) ^ (-s)))⁻¹) := by
+      (1 - Norm.norm z * (((p : ℕ):ℝ) ^ (-s)))⁻¹) := by
   have hsum := zOmega_prime_sum_summable s hs z
-  have hnn : ∀ p : Nat.Primes, (0 : ℝ) ≤ Norm.norm z * (((p:ℕ):ℝ) ^ (-s)) := by
+  have hnn : ∀ p : Nat.Primes, (0 : ℝ) ≤ Norm.norm z * (((p : ℕ):ℝ) ^ (-s)) := by
     intro p
     positivity
   have hhalf : ∀ᶠ p : Nat.Primes in Filter.cofinite,
-      Norm.norm z * (((p:ℕ):ℝ) ^ (-s)) ≤ 1/2 :=
+      Norm.norm z * (((p : ℕ):ℝ) ^ (-s)) ≤ 1/2 :=
     hsum.tendsto_cofinite_zero.eventually_le_const (by norm_num : (0 : ℝ) < 1/2)
   have hpos : ∀ᶠ p : Nat.Primes in Filter.cofinite,
-      (0 : ℝ) < (1 - Norm.norm z * (((p:ℕ):ℝ) ^ (-s)))⁻¹ := by
+      (0 : ℝ) < (1 - Norm.norm z * (((p : ℕ):ℝ) ^ (-s)))⁻¹ := by
     filter_upwards [hhalf] with p hp
     apply inv_pos.mpr
     linarith
   have hlogsum : Summable (fun p : Nat.Primes =>
-      Real.log ((1 - Norm.norm z * (((p:ℕ):ℝ) ^ (-s)))⁻¹)) := by
+      Real.log ((1 - Norm.norm z * (((p : ℕ):ℝ) ^ (-s)))⁻¹)) := by
     have hbound : ∀ᶠ p : Nat.Primes in Filter.cofinite,
-        Norm.norm (Real.log ((1 - Norm.norm z * (((p:ℕ):ℝ) ^ (-s)))⁻¹))
-          ≤ 2 * (Norm.norm z * (((p:ℕ):ℝ) ^ (-s))) := by
+        Norm.norm (Real.log ((1 - Norm.norm z * (((p : ℕ):ℝ) ^ (-s)))⁻¹))
+          ≤ 2 * (Norm.norm z * (((p : ℕ):ℝ) ^ (-s))) := by
       filter_upwards [hhalf] with p hp
-      have hx0 : (0 : ℝ) ≤ Norm.norm z * (((p:ℕ):ℝ) ^ (-s)) := hnn p
-      have hone : (0 : ℝ) < 1 - Norm.norm z * (((p:ℕ):ℝ) ^ (-s)) := by linarith
+      have hx0 : (0 : ℝ) ≤ Norm.norm z * (((p : ℕ):ℝ) ^ (-s)) := hnn p
+      have hone : (0 : ℝ) < 1 - Norm.norm z * (((p : ℕ):ℝ) ^ (-s)) := by linarith
       rw [Real.log_inv, Real.norm_eq_abs, abs_neg,
         abs_of_nonpos (Real.log_nonpos (by linarith) (by linarith))]
       exact neg_log_one_sub_le _ hx0 hp
     have hsum2 : Summable (fun p : Nat.Primes =>
-        2 * (Norm.norm z * (((p:ℕ):ℝ) ^ (-s)))) := hsum.mul_left 2
+        2 * (Norm.norm z * (((p : ℕ):ℝ) ^ (-s)))) := hsum.mul_left 2
     exact Summable.of_norm_bounded_eventually hsum2 hbound
   exact Real.multipliable_of_summable_log' hpos hlogsum
 
@@ -6407,23 +6407,23 @@ theorem mem_smoothNumbers_of_lt (N m : ℕ) (hm : 0 < m) (hlt : m < N) :
 /-- A1 step 4b: each Euler factor is at least 1. -/
 theorem zOmega_factor_ge_one (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : Norm.norm z < (2 : ℝ) ^ s) (p : ℕ) (hp : p.Prime) :
-    (1 : ℝ) ≤ (1 - Norm.norm z * ((p:ℝ) ^ (-s)))⁻¹ := by
-  have hlt : Norm.norm z * ((p:ℝ) ^ (-s)) < 1 := by
-    have hp2 : (2 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp.two_le
+    (1 : ℝ) ≤ (1 - Norm.norm z * ((p : ℝ) ^ (-s)))⁻¹ := by
+  have hlt : Norm.norm z * ((p : ℝ) ^ (-s)) < 1 := by
+    have hp2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.two_le
     have h2s : (0 : ℝ) < (2 : ℝ) ^ s := Real.rpow_pos_of_pos (by norm_num) s
-    have hps : (p:ℝ) ^ (-s) ≤ (2 : ℝ) ^ (-s) := by
-      rw [Real.rpow_neg (by linarith : (0 : ℝ) ≤ (p:ℝ)),
+    have hps : (p : ℝ) ^ (-s) ≤ (2 : ℝ) ^ (-s) := by
+      rw [Real.rpow_neg (by linarith : (0 : ℝ) ≤ (p : ℝ)),
         Real.rpow_neg (by norm_num : (0 : ℝ) ≤ (2 : ℝ))]
       gcongr
     have hznn : (0 : ℝ) ≤ Norm.norm z := norm_nonneg z
     have hinvpos : (0 : ℝ) < ((2 : ℝ) ^ s)⁻¹ := inv_pos.mpr h2s
-    calc Norm.norm z * ((p:ℝ) ^ (-s)) ≤ Norm.norm z * ((2 : ℝ) ^ (-s)) :=
+    calc Norm.norm z * ((p : ℝ) ^ (-s)) ≤ Norm.norm z * ((2 : ℝ) ^ (-s)) :=
           mul_le_mul_of_nonneg_left hps hznn
       _ = Norm.norm z * ((2 : ℝ) ^ s)⁻¹ := by rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ (2 : ℝ))]
       _ < 1 := by
           have hkey := mul_lt_mul_of_pos_right hz hinvpos
           rwa [mul_inv_cancel₀ (ne_of_gt h2s)] at hkey
-  have hnn : (0 : ℝ) ≤ Norm.norm z * ((p:ℝ) ^ (-s)) := by positivity
+  have hnn : (0 : ℝ) ≤ Norm.norm z * ((p : ℝ) ^ (-s)) := by positivity
   rw [le_inv_comm₀ (by norm_num) (by linarith)]
   linarith
 
@@ -6453,24 +6453,24 @@ theorem zOmegaNorm_smooth_hasSum (s : ℝ) (hs : 1 < s) (z : ℂ)
 theorem zOmegaNorm_inner_tsum (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : Norm.norm z < (2 : ℝ) ^ s) {p : ℕ} (hp : p.Prime) :
     (∑' n : ℕ, zOmegaNormHom s z (p ^ n))
-      = (1 - Norm.norm z * ((p:ℝ) ^ (-s)))⁻¹ := by
-  have hratio : Norm.norm z * ((p:ℝ) ^ (-s)) < 1 := by
-    have hp2 : (2 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp.two_le
+      = (1 - Norm.norm z * ((p : ℝ) ^ (-s)))⁻¹ := by
+  have hratio : Norm.norm z * ((p : ℝ) ^ (-s)) < 1 := by
+    have hp2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.two_le
     have h2s : (0 : ℝ) < (2 : ℝ) ^ s := Real.rpow_pos_of_pos (by norm_num) s
-    have hps : (p:ℝ) ^ (-s) ≤ (2 : ℝ) ^ (-s) := by
-      rw [Real.rpow_neg (by positivity : (0 : ℝ) ≤ (p:ℝ)),
+    have hps : (p : ℝ) ^ (-s) ≤ (2 : ℝ) ^ (-s) := by
+      rw [Real.rpow_neg (by positivity : (0 : ℝ) ≤ (p : ℝ)),
         Real.rpow_neg (by norm_num : (0 : ℝ) ≤ (2 : ℝ))]
       gcongr
     have hznn : (0 : ℝ) ≤ Norm.norm z := norm_nonneg z
     have hinvpos : (0 : ℝ) < ((2 : ℝ) ^ s)⁻¹ := inv_pos.mpr h2s
-    calc Norm.norm z * ((p:ℝ) ^ (-s)) ≤ Norm.norm z * ((2 : ℝ) ^ (-s)) :=
+    calc Norm.norm z * ((p : ℝ) ^ (-s)) ≤ Norm.norm z * ((2 : ℝ) ^ (-s)) :=
           mul_le_mul_of_nonneg_left hps hznn
       _ = Norm.norm z * ((2 : ℝ) ^ s)⁻¹ := by
           rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ (2 : ℝ))]
       _ < 1 := by
           have hkey := mul_lt_mul_of_pos_right hz hinvpos
           rwa [mul_inv_cancel₀ (ne_of_gt h2s)] at hkey
-  have hnn : (0 : ℝ) ≤ Norm.norm z * ((p:ℝ) ^ (-s)) := by positivity
+  have hnn : (0 : ℝ) ≤ Norm.norm z * ((p : ℝ) ^ (-s)) := by positivity
   rw [tsum_congr (fun n => zOmegaNorm_prime_pow s z hp n)]
   exact tsum_geometric_of_lt_one hnn hratio
 
@@ -6478,21 +6478,21 @@ theorem zOmegaNorm_inner_tsum (s : ℝ) (hs : 1 < s) (z : ℂ)
 theorem zOmegaNorm_prime_lt_one (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : Norm.norm z < (2 : ℝ) ^ s) {p : ℕ} (hp : p.Prime) :
     Norm.norm (zOmegaNormHom s z p) < 1 := by
-  have hval : zOmegaNormHom s z p = Norm.norm z * ((p:ℝ) ^ (-s)) := by
+  have hval : zOmegaNormHom s z p = Norm.norm z * ((p : ℝ) ^ (-s)) := by
     have h := zOmegaNorm_prime_pow s z hp 1
     rw [pow_one, pow_one] at h
     exact h
-  have hnn : (0 : ℝ) ≤ Norm.norm z * ((p:ℝ) ^ (-s)) := by positivity
+  have hnn : (0 : ℝ) ≤ Norm.norm z * ((p : ℝ) ^ (-s)) := by positivity
   rw [hval, Real.norm_eq_abs, abs_of_nonneg hnn]
-  have hp2 : (2 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp.two_le
+  have hp2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.two_le
   have h2s : (0 : ℝ) < (2 : ℝ) ^ s := Real.rpow_pos_of_pos (by norm_num) s
-  have hps : (p:ℝ) ^ (-s) ≤ (2 : ℝ) ^ (-s) := by
-    rw [Real.rpow_neg (by positivity : (0 : ℝ) ≤ (p:ℝ)),
+  have hps : (p : ℝ) ^ (-s) ≤ (2 : ℝ) ^ (-s) := by
+    rw [Real.rpow_neg (by positivity : (0 : ℝ) ≤ (p : ℝ)),
       Real.rpow_neg (by norm_num : (0 : ℝ) ≤ (2 : ℝ))]
     gcongr
   have hznn : (0 : ℝ) ≤ Norm.norm z := norm_nonneg z
   have hinvpos : (0 : ℝ) < ((2 : ℝ) ^ s)⁻¹ := inv_pos.mpr h2s
-  calc Norm.norm z * ((p:ℝ) ^ (-s)) ≤ Norm.norm z * ((2 : ℝ) ^ (-s)) :=
+  calc Norm.norm z * ((p : ℝ) ^ (-s)) ≤ Norm.norm z * ((2 : ℝ) ^ (-s)) :=
         mul_le_mul_of_nonneg_left hps hznn
     _ = Norm.norm z * ((2 : ℝ) ^ s)⁻¹ := by
         rw [Real.rpow_neg (by norm_num : (0 : ℝ) ≤ (2 : ℝ))]
@@ -6504,7 +6504,7 @@ theorem zOmegaNorm_prime_lt_one (s : ℝ) (hs : 1 < s) (z : ℂ)
 theorem zOmegaNorm_indicator_multipliable (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : Norm.norm z < (2 : ℝ) ^ s) :
     Multipliable (Set.mulIndicator {p : ℕ | p.Prime}
-      (fun p : ℕ => (1 - Norm.norm z * ((p:ℝ) ^ (-s)))⁻¹)) := by
+      (fun p : ℕ => (1 - Norm.norm z * ((p : ℝ) ^ (-s)))⁻¹)) := by
   rw [← multipliable_subtype_iff_mulIndicator]
   exact zOmega_factors_multipliable s hs z
 
@@ -6540,25 +6540,25 @@ r * 3^(-s) <= 1/2, every prime p >= 3 gives ||z|| p^(-s) <= 1/2.
 Stated alongside the 3/2 version so nothing already proven changes. -/
 theorem zOmega_half_of_three_le_radius (s : ℝ) (hs0 : 0 ≤ s) (r : ℝ) (hr0 : 0 ≤ r) (z : ℂ)
     (hz : Norm.norm z ≤ r) (hrs : r * ((3 : ℝ) ^ (-s)) ≤ 1/2) {p : ℕ} (hp3 : 3 ≤ p) :
-    Norm.norm z * ((p:ℝ) ^ (-s)) ≤ 1/2 := by
-  have hp3R : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp3
-  have hps : (p:ℝ) ^ (-s) ≤ (3 : ℝ) ^ (-s) := by
-    rw [Real.rpow_neg (by linarith : (0 : ℝ) ≤ (p:ℝ)),
+    Norm.norm z * ((p : ℝ) ^ (-s)) ≤ 1/2 := by
+  have hp3R : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp3
+  have hps : (p : ℝ) ^ (-s) ≤ (3 : ℝ) ^ (-s) := by
+    rw [Real.rpow_neg (by linarith : (0 : ℝ) ≤ (p : ℝ)),
       Real.rpow_neg (by norm_num : (0 : ℝ) ≤ (3 : ℝ))]
     gcongr
   have hznn : (0 : ℝ) ≤ Norm.norm z := norm_nonneg z
-  calc Norm.norm z * ((p:ℝ) ^ (-s)) ≤ r * ((3 : ℝ) ^ (-s)) := by
+  calc Norm.norm z * ((p : ℝ) ^ (-s)) ≤ r * ((3 : ℝ) ^ (-s)) := by
         apply mul_le_mul hz hps (by positivity) hr0
     _ ≤ 1/2 := hrs
 
 /-- With ||z|| <= 3/2 and s > 1, every prime p >= 3 satisfies ||z|| p^(-s) <= 1/2. -/
 theorem zOmega_half_of_three_le (s : ℝ) (hs : 1 < s) (z : ℂ)
     (hz : Norm.norm z ≤ 3/2) {p : ℕ} (hp3 : 3 ≤ p) :
-    Norm.norm z * ((p:ℝ) ^ (-s)) ≤ 1/2 := by
-  have hp3R : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp3
-  have hppos : (0 : ℝ) < (p:ℝ) := by linarith
-  have hps : (p:ℝ) ^ (-s) ≤ (3 : ℝ) ^ (-s) := by
-    rw [Real.rpow_neg (by linarith : (0 : ℝ) ≤ (p:ℝ)),
+    Norm.norm z * ((p : ℝ) ^ (-s)) ≤ 1/2 := by
+  have hp3R : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp3
+  have hppos : (0 : ℝ) < (p : ℝ) := by linarith
+  have hps : (p : ℝ) ^ (-s) ≤ (3 : ℝ) ^ (-s) := by
+    rw [Real.rpow_neg (by linarith : (0 : ℝ) ≤ (p : ℝ)),
       Real.rpow_neg (by norm_num : (0 : ℝ) ≤ (3 : ℝ))]
     gcongr
   have h3s : (3 : ℝ) ^ (-s) ≤ (3 : ℝ) ^ (-(1 : ℝ)) := by
@@ -6568,7 +6568,7 @@ theorem zOmega_half_of_three_le (s : ℝ) (hs : 1 < s) (z : ℂ)
     rw [Real.rpow_neg_one]
     norm_num
   have hznn : (0 : ℝ) ≤ Norm.norm z := norm_nonneg z
-  calc Norm.norm z * ((p:ℝ) ^ (-s)) ≤ (3/2) * ((3 : ℝ) ^ (-s)) := by
+  calc Norm.norm z * ((p : ℝ) ^ (-s)) ≤ (3/2) * ((3 : ℝ) ^ (-s)) := by
         apply mul_le_mul hz hps (by positivity) (by norm_num)
     _ ≤ (3/2) * (1/3) := by
         rw [←  h3one]
@@ -6617,7 +6617,7 @@ theorem ofReal_cpow_eq_exp (a : ℝ) (ha : 0 < a) (w : ℂ) :
 This is the same F as our cFac form, resplit so that the z-power of the first
 factor contributes (-log(s-1))^l / l! -- the form Definition 2.3 consumes. -/
 theorem Fbig_eq_manuscript (s : ℝ) (hs : 1 < s) (z : ℂ) :
-    Fbig s z = ((s - 1 : ℝ) : ℂ) ^ (-z) * (1 - z / ((2 : ℂ) ^ (s:ℂ)))⁻¹ * G2manu s z := by
+    Fbig s z = ((s - 1 : ℝ) : ℂ) ^ (-z) * (1 - z / ((2 : ℂ) ^ (s : ℂ)))⁻¹ * G2manu s z := by
   have hc : 0 < cFac s := cFac_pos s hs
   have hs1 : (0 : ℝ) < s - 1 := by linarith
   have hk : (0 : ℝ) < kappaFac s := kappaFac_pos s hs hc
@@ -6846,7 +6846,7 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
   classical
   have hz2 : ‖z‖ < (2 : ℝ) ^ s := lt_of_le_of_lt hz hr2
   set G : ℕ → ℝ := Set.mulIndicator {p : ℕ | p.Prime}
-    (fun p : ℕ => (1 - ‖z‖ * ((p:ℝ) ^ (-s)))⁻¹) with hG
+    (fun p : ℕ => (1 - ‖z‖ * ((p : ℝ) ^ (-s)))⁻¹) with hG
   have hGmult : Multipliable G := zOmegaNorm_indicator_multipliable s hs z hz2
   have hGone : ∀ i : ℕ, (1 : ℝ) ≤ G i := by
     intro i
@@ -6856,7 +6856,7 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
       exact zOmega_factor_ge_one s hs z hz2 i hp
     · rw [Set.mulIndicator_of_notMem hp]
   have hnn : ∀ n : ℕ, (0 : ℝ) ≤ ‖zOmegaHom s z n‖ := fun n => norm_nonneg _
-  apply summable_of_sum_le (c := ((1 - ‖z‖ * ((2 : ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' n : ℕ, ‖z‖ * ((n:ℝ) ^ (-s))))) hnn
+  apply summable_of_sum_le (c := ((1 - ‖z‖ * ((2 : ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' n : ℕ, ‖z‖ * ((n : ℝ) ^ (-s))))) hnn
   intro u
   set N := u.sup id + 1 with hN
   have hsmooth : ∀ x ∈ u, x ≠ 0 → x ∈ N.smoothNumbers := by
@@ -6871,7 +6871,7 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
       = ∏ i ∈ Finset.range N, G i := by
     rw [hG]
     have hmi := Finset.prod_mulIndicator_eq_prod_filter (Finset.range N)
-      (fun (_ : ℕ) (p : ℕ) => (1 - ‖z‖ * ((p:ℝ) ^ (-s)))⁻¹)
+      (fun (_ : ℕ) (p : ℕ) => (1 - ‖z‖ * ((p : ℝ) ^ (-s)))⁻¹)
       (fun (_ : ℕ) => ({p : ℕ | p.Prime} : Set ℕ)) (id : ℕ → ℕ)
     simp only [id_eq] at hmi
     rw [hmi]
@@ -6919,11 +6919,11 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
           exact norm_nonneg _
   have hval : (∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m))
       = ∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹ := hgeo.2.tsum_eq
-  have hfin : (∏ i ∈ Finset.range N, G i) ≤ ((1 - ‖z‖ * ((2 : ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' n : ℕ, ‖z‖ * ((n:ℝ) ^ (-s)))) := by
-    have hprimes_sum : Summable (fun p : Nat.Primes => Norm.norm z * ((p:ℝ) ^ (-s))) :=
+  have hfin : (∏ i ∈ Finset.range N, G i) ≤ ((1 - ‖z‖ * ((2 : ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' n : ℕ, ‖z‖ * ((n : ℝ) ^ (-s)))) := by
+    have hprimes_sum : Summable (fun p : Nat.Primes => Norm.norm z * ((p : ℝ) ^ (-s))) :=
       zOmega_prime_sum_summable s hs z
     have hGle : ∀ i ∈ Finset.range N, i ≠ 2 →
-        G i ≤ Real.exp (2 * (Norm.norm z * ((i:ℝ) ^ (-s)))) := by
+        G i ≤ Real.exp (2 * (Norm.norm z * ((i : ℝ) ^ (-s)))) := by
       intro i _ hi2
       rw [hG]
       by_cases hp : i ∈ {p : ℕ | p.Prime}
@@ -6936,9 +6936,9 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
         · positivity
         · exact zOmega_half_of_three_le_radius s (by linarith) r hr0 z hz hr3 hi3
       · rw [Set.mulIndicator_of_notMem hp]
-        have : (0 : ℝ) ≤ 2 * (Norm.norm z * ((i:ℝ) ^ (-s))) := by positivity
+        have : (0 : ℝ) ≤ 2 * (Norm.norm z * ((i : ℝ) ^ (-s))) := by positivity
         calc (1 : ℝ) = Real.exp 0 := (Real.exp_zero).symm
-          _ ≤ Real.exp (2 * (Norm.norm z * ((i:ℝ) ^ (-s)))) := Real.exp_le_exp.mpr this
+          _ ≤ Real.exp (2 * (Norm.norm z * ((i : ℝ) ^ (-s)))) := Real.exp_le_exp.mpr this
     have hGnn : ∀ i : ℕ, (0 : ℝ) ≤ G i := fun i => le_trans zero_le_one (hGone i)
     by_cases hN2 : 2 ∈ Finset.range N
     · rw [←  Finset.mul_prod_erase (Finset.range N) G hN2]
@@ -6948,17 +6948,17 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
         · exact Nat.prime_two
       rw [hG2]
       apply mul_le_mul_of_nonneg_left _ (le_trans zero_le_one (by rw [←  hG2]; exact hGone 2))
-      have hsummable_nat : Summable (fun n : ℕ => Norm.norm z * ((n:ℝ) ^ (-s))) := by
-        have hb : Summable (fun n : ℕ => ((n:ℝ) ^ (-s))) := by
+      have hsummable_nat : Summable (fun n : ℕ => Norm.norm z * ((n : ℝ) ^ (-s))) := by
+        have hb : Summable (fun n : ℕ => ((n : ℝ) ^ (-s))) := by
           rw [Real.summable_nat_rpow]
           linarith
         exact hb.mul_left _
-      have hnn_nat : ∀ n : ℕ, (0 : ℝ) ≤ Norm.norm z * ((n:ℝ) ^ (-s)) := by
+      have hnn_nat : ∀ n : ℕ, (0 : ℝ) ≤ Norm.norm z * ((n : ℝ) ^ (-s)) := by
         intro n
         positivity
       calc ∏ i ∈ (Finset.range N).erase 2, G i
           ≤ ∏ i ∈ (Finset.range N).erase 2,
-              Real.exp (2 * (Norm.norm z * ((i:ℝ) ^ (-s)))) := by
+              Real.exp (2 * (Norm.norm z * ((i : ℝ) ^ (-s)))) := by
             apply finset_prod_le_prod_nonneg
             · intro i _
               exact hGnn i
@@ -6967,8 +6967,8 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
               have hiN : i ∈ Finset.range N := (Finset.mem_erase.mp hi).2
               exact hGle i hiN hi2
         _ = Real.exp (∑ i ∈ (Finset.range N).erase 2,
-              2 * (Norm.norm z * ((i:ℝ) ^ (-s)))) := (Real.exp_sum _ _).symm
-        _ ≤ Real.exp (2 * ∑' n : ℕ, Norm.norm z * ((n:ℝ) ^ (-s))) := by
+              2 * (Norm.norm z * ((i : ℝ) ^ (-s)))) := (Real.exp_sum _ _).symm
+        _ ≤ Real.exp (2 * ∑' n : ℕ, Norm.norm z * ((n : ℝ) ^ (-s))) := by
             apply Real.exp_le_exp.mpr
             rw [←  Finset.mul_sum]
             apply mul_le_mul_of_nonneg_left _ (by norm_num : (0 : ℝ) ≤ 2)
@@ -6991,14 +6991,14 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
       have hinv1 : (1 : ℝ) ≤ (1 - Norm.norm z * ((2 : ℝ) ^ (-s)))⁻¹ := by
         rw [le_inv_comm₀ (by norm_num) (by linarith)]
         linarith
-      have hexp1 : (1 : ℝ) ≤ Real.exp (2 * ∑' n : ℕ, Norm.norm z * ((n:ℝ) ^ (-s))) := by
+      have hexp1 : (1 : ℝ) ≤ Real.exp (2 * ∑' n : ℕ, Norm.norm z * ((n : ℝ) ^ (-s))) := by
         rw [Real.one_le_exp_iff]
-        have hsummable_nat : Summable (fun n : ℕ => Norm.norm z * ((n:ℝ) ^ (-s))) := by
-          have hb : Summable (fun n : ℕ => ((n:ℝ) ^ (-s))) := by
+        have hsummable_nat : Summable (fun n : ℕ => Norm.norm z * ((n : ℝ) ^ (-s))) := by
+          have hb : Summable (fun n : ℕ => ((n : ℝ) ^ (-s))) := by
             rw [Real.summable_nat_rpow]
             linarith
           exact hb.mul_left _
-        have : (0 : ℝ) ≤ ∑' n : ℕ, Norm.norm z * ((n:ℝ) ^ (-s)) := by
+        have : (0 : ℝ) ≤ ∑' n : ℕ, Norm.norm z * ((n : ℝ) ^ (-s)) := by
           apply tsum_nonneg
           intro n
           positivity
@@ -7008,7 +7008,7 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
       ≤ ∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m) := hsum_le
     _ = ∏ p ∈ N.primesBelow, (1 - zOmegaNormHom s z p)⁻¹ := hval
     _ = ∏ i ∈ Finset.range N, G i := hbridge
-    _ ≤ ((1 - ‖z‖ * ((2 : ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' n : ℕ, ‖z‖ * ((n:ℝ) ^ (-s)))) := hfin
+    _ ≤ ((1 - ‖z‖ * ((2 : ℝ) ^ (-s)))⁻¹ * Real.exp (2 * ∑' n : ℕ, ‖z‖ * ((n : ℝ) ^ (-s)))) := hfin
 
 /-- A1 at radius 3/2 (the form Lemma 2.2 uses). -/
 theorem zOmega_summable (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2) :
@@ -7183,18 +7183,18 @@ theorem tprod_split_three {M : Type*} [CommMonoid M] [TopologicalSpace M] [T2Spa
   rw [hall.tprod_eq]
 
 theorem reg_factors_tprod (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hc : 0 < cFac s)
-    (hmul : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
-    (hpos : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hmul : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))
+    (hpos : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)
     (hlog : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))) :
     ((cFac s : ℝ) : ℂ) ^ z
       = Complex.exp (z * ((∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-          Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹) : ℝ) : ℂ)) := by
+          Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹) : ℝ) : ℂ)) := by
   rw [cFac_cpow s hc z]
   congr 2
   have hlogeq : Real.log (cFac s)
       = ∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-          Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹) := by
+          Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹) := by
     unfold cFac
     exact log_tprod_real hpos hmul hlog
   rw [hlogeq]
@@ -7204,63 +7204,63 @@ p = 3 factor to the p >= 5 tail (the p=3 exp-log BOUND fails, but the single
 extra factor is harmless). -/
 theorem reg_multipliable_three (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
-        * (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
+      (1 - z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
+        * (((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
   have h5 := prime_factor_multipliable_complex s hs z hz
   have hsplit := tprod_split_three
-    (fun n : ℕ => (1 - z * (((n:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
-      * (((1 - (n:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) h5
+    (fun n : ℕ => (1 - z * (((n : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
+      * (((1 - (n : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) h5
   exact hsplit.1
 
 /-- D2: the regularised family at z = 2, s = 1 is multipliable.
 Immediate from reg_multipliable_three, since ||(2:C)|| = 2 <= 2. -/
 theorem reg_multipliable_three_at_two :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (1 - (2 : ℂ) * ((((p:ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ))⁻¹
-        * (((1 - ((p:ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ)) ^ (2 : ℂ)) := by
+      (1 - (2 : ℂ) * ((((p : ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ))⁻¹
+        * (((1 - ((p : ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ)) ^ (2 : ℂ)) := by
   have h := reg_multipliable_three 1 (le_refl 1) 2 (by norm_num)
   exact h
 
 /-- D3: the complex p >= 3 product at z = 2 is the cast of the real one. -/
 theorem G2C_at_two_ofReal :
     (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (1 - (2 : ℂ) * ((((p:ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ))⁻¹
-          * (((1 - ((p:ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ)) ^ (2 : ℂ))
+        (1 - (2 : ℂ) * ((((p : ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ))⁻¹
+          * (((1 - ((p : ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ)) ^ (2 : ℂ))
       = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-          (((((1 - 2 * ((p:ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ))⁻¹
-            * ((1 - ((p:ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ)) ^ 2 : ℝ)) : ℂ) := by
+          (((((1 - 2 * ((p : ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ))⁻¹
+            * ((1 - ((p : ℕ):ℝ) ^ (-(1 : ℝ)) : ℝ)) ^ 2 : ℝ)) : ℂ) := by
   apply tprod_congr
   intro p
-  have hp3 : (3 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
-  have hle : ((p:ℕ):ℝ) ^ (-(1 : ℝ)) ≤ 1/3 := by
+  have hp3 : (3 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast p.2.2
+  have hle : ((p : ℕ):ℝ) ^ (-(1 : ℝ)) ≤ 1/3 := by
     rw [Real.rpow_neg_one]
     rw [inv_le_comm₀ (by linarith) (by norm_num)]
     linarith
-  have hpos : (0 : ℝ) < ((p:ℕ):ℝ) ^ (-(1 : ℝ)) := by positivity
-  have hne : (1 : ℝ) - 2 * (((p:ℕ):ℝ) ^ (-(1 : ℝ))) ≠ 0 := by
-    have : 2 * (((p:ℕ):ℝ) ^ (-(1 : ℝ))) ≤ 2/3 := by linarith
+  have hpos : (0 : ℝ) < ((p : ℕ):ℝ) ^ (-(1 : ℝ)) := by positivity
+  have hne : (1 : ℝ) - 2 * (((p : ℕ):ℝ) ^ (-(1 : ℝ))) ≠ 0 := by
+    have : 2 * (((p : ℕ):ℝ) ^ (-(1 : ℝ))) ≤ 2/3 := by linarith
     intro hcon
     linarith
-  exact reg_factor_at_two (((p:ℕ):ℝ) ^ (-(1 : ℝ))) hne
+  exact reg_factor_at_two (((p : ℕ):ℝ) ^ (-(1 : ℝ))) hne
 
 /-- Bound on the correction for the (1 - p^-s)^(-z) family. -/
 theorem cpow_neg_sub_one_bound (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
-    Norm.norm ((((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z) - 1)
-      ≤ 8 * (((p:ℕ):ℝ) ^ (-s)) := by
-  have hp3R : (5 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast hp
-  have hppos : (0 : ℝ) < ((p:ℕ):ℝ) := by linarith
-  set a : ℝ := ((p:ℕ):ℝ) ^ (-s) with ha
+    Norm.norm ((((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z) - 1)
+      ≤ 8 * (((p : ℕ):ℝ) ^ (-s)) := by
+  have hp3R : (5 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast hp
+  have hppos : (0 : ℝ) < ((p : ℕ):ℝ) := by linarith
+  set a : ℝ := ((p : ℕ):ℝ) ^ (-s) with ha
   have hapos : (0 : ℝ) < a := by rw [ha]; positivity
   have hale : a ≤ 1/5 := by
     rw [ha]
-    have h1 : ((p:ℕ):ℝ) ^ (-s) ≤ ((p:ℕ):ℝ) ^ (-(1 : ℝ)) := by
+    have h1 : ((p : ℕ):ℝ) ^ (-s) ≤ ((p : ℕ):ℝ) ^ (-(1 : ℝ)) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
-    have h2 : ((p:ℕ):ℝ) ^ (-(1 : ℝ)) = 1 / ((p:ℕ):ℝ) := by
+    have h2 : ((p : ℕ):ℝ) ^ (-(1 : ℝ)) = 1 / ((p : ℕ):ℝ) := by
       rw [Real.rpow_neg_one, inv_eq_one_div]
     rw [h2] at h1
-    have h3 : (1 : ℝ) / ((p:ℕ):ℝ) ≤ 1/5 :=
+    have h3 : (1 : ℝ) / ((p : ℕ):ℝ) ≤ 1/5 :=
       div_le_div_of_nonneg_left (by norm_num) (by norm_num) hp3R
     linarith
   have h1a : (0 : ℝ) < 1 - a := by linarith
@@ -7292,26 +7292,26 @@ theorem cpow_neg_sub_one_bound (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
 /-- Summability of the correction for the (1 - p^-s)^(-z) family, p >= 5. -/
 theorem cpow_neg_sub_one_summable (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      Norm.norm ((((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z) - 1)) := by
-  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 8 * (((p:ℕ):ℝ) ^ (-s))) := by
-    have hbase : Summable (fun n : ℕ => ((n:ℝ) ^ (-s))) := by
+      Norm.norm ((((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z) - 1)) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 8 * (((p : ℕ):ℝ) ^ (-s))) := by
+    have hbase : Summable (fun n : ℕ => ((n : ℝ) ^ (-s))) := by
       rw [Real.summable_nat_rpow]
       linarith
-    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => (((p:ℕ):ℝ) ^ (-s))) :=
+    have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => (((p : ℕ):ℝ) ^ (-s))) :=
       hbase.subtype _
     exact hsub.mul_left 8
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      cpow_neg_sub_one_bound (p:ℕ) p.property.2 s (le_of_lt hs) z hz)
+      cpow_neg_sub_one_bound (p : ℕ) p.property.2 s (le_of_lt hs) z hz)
     hcomp
 
 theorem cpow_neg_multipliable_five (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z)) := by
+      (((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z)) := by
   have hsum := cpow_neg_sub_one_summable s hs z hz
   have hmult : Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      1 + ((((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z) - 1)) := by
+      1 + ((((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z) - 1)) := by
     apply Complex.multipliable_one_add_of_summable
     exact hsum.of_norm
   apply hmult.congr
@@ -7321,10 +7321,10 @@ theorem cpow_neg_multipliable_five (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.n
 /-- The family (1 - p^-s)^(-z) is multipliable over primes >= 3. -/
 theorem cpow_neg_multipliable_three (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z)) := by
+      (((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z)) := by
   have h5 := cpow_neg_multipliable_five s hs z hz
   have hsplit := tprod_split_three
-    (fun n : ℕ => (((1 - (n:ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z)) h5
+    (fun n : ℕ => (((1 - (n : ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z)) h5
   exact hsplit.1
 
 /-- Pointwise factorisation: the plain Euler factor splits into the
@@ -7356,24 +7356,24 @@ theorem hasProd_cexp_of_hasSum {ι : Type*} {f : ι → ℂ} {a c : ℂ}
 the real log-sum via reg_factors_tprod. -/
 theorem cpow_neg_tprod_eq_cFac (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 2)
     (hc : 0 < cFac s)
-    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
-    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)
     (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))) :
     HasProd (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-        (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z))
+        (((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ (-z))
       (((cFac s : ℝ) : ℂ) ^ z) := by
   have hsumR : HasSum (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)) (Real.log (cFac s)) := by
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)) (Real.log (cFac s)) := by
     have hlogeq : Real.log (cFac s)
         = ∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-            Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹) := by
+            Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹) := by
       unfold cFac
       exact log_tprod_real hposR hmulR hlogR
     rw [hlogeq]
     exact hlogR.hasSum
   have hsumC : HasSum (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      ((Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹) : ℝ) : ℂ))
+      ((Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹) : ℝ) : ℂ))
       ((Real.log (cFac s) : ℝ) : ℂ) := by
     have h := hsumR.ofReal
     apply h.congr
@@ -7383,8 +7383,8 @@ theorem cpow_neg_tprod_eq_cFac (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm 
   rw [cFac_cpow s hc z]
   apply hbridge.congr_fun
   intro p
-  have hpos : (0 : ℝ) < 1 - ((p:ℕ):ℝ) ^ (-s) := hposR p |> inv_pos.mp
-  have hane : (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ)) : ℂ) ≠ 0 := by
+  have hpos : (0 : ℝ) < 1 - ((p : ℕ):ℝ) ^ (-s) := hposR p |> inv_pos.mp
+  have hane : (((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ)) : ℂ) ≠ 0 := by
     simp only [ne_eq, Complex.ofReal_eq_zero]
     linarith
   rw [Complex.cpow_def_of_ne_zero hane, ←  Complex.ofReal_log hpos.le]
@@ -7396,13 +7396,13 @@ theorem cpow_neg_tprod_eq_cFac (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm 
 /-- The regularised product over p >= 3 is exactly G2C. -/
 theorem reg_tprod_eq_G2C (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.norm z ≤ 2) :
     (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
-          * (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ z)
+        (1 - z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
+          * (((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ^ z)
       = G2C s z := by
   have h5 := prime_factor_multipliable_complex s hs z hz
   have hsplit := tprod_split_three
-    (fun n : ℕ => (1 - z * (((n:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
-      * (((1 - (n:ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) h5
+    (fun n : ℕ => (1 - z * (((n : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
+      * (((1 - (n : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) h5
   rw [hsplit.2]
   unfold G2C G2tailC
   norm_num
@@ -7533,11 +7533,11 @@ theorem Am_eq_delta (m : ℕ) :
 theorem Ikfrozen_term (k i : ℕ) (hi : i ≤ k) :
     (cCoeff i).re * Sm (k - i)
       = 2 * (cCoeff i).re
-        - (Real.log 2 / 4) * ((2 : ℝ)^i * (cCoeff i).re * ((k:ℝ) - (i:ℝ))^2) / (2 : ℝ)^k
+        - (Real.log 2 / 4) * ((2 : ℝ)^i * (cCoeff i).re * ((k : ℝ) - (i : ℝ))^2) / (2 : ℝ)^k
         + ((2 : ℝ)^i * (cCoeff i).re * deltaM (k - i)) / (2 : ℝ)^k := by
   have hpow : (2 : ℝ)^(k-i) * (2 : ℝ)^i = (2 : ℝ)^k := by
     rw [← pow_add, Nat.sub_add_cancel hi]
-  have hcast : ((k - i : ℕ) : ℝ) = (k:ℝ) - (i:ℝ) := Nat.cast_sub hi
+  have hcast : ((k - i : ℕ) : ℝ) = (k : ℝ) - (i : ℝ) := Nat.cast_sub hi
   have h1 : ((2 : ℝ)^(k-i)) ≠ 0 := by positivity
   have h2 : ((2 : ℝ)^i) ≠ 0 := by positivity
   rw [Sm_eq_Am_div, Am_eq_delta, hcast, ← hpow]
@@ -7560,13 +7560,13 @@ theorem Ikfrozen_re_eq (k : ℕ) :
 three partial sums of section 2.3. -/
 theorem sum_two_pow_sq_expand (k : ℕ) :
     ∑ i ∈ Finset.range (k + 1),
-        (2 : ℝ)^i * (cCoeff i).re * ((k:ℝ) - (i:ℝ))^2
-      = (k:ℝ)^2 * (dConst - Wk k) - 2 * (k:ℝ) * Uk k + Vk k := by
+        (2 : ℝ)^i * (cCoeff i).re * ((k : ℝ) - (i : ℝ))^2
+      = (k : ℝ)^2 * (dConst - Wk k) - 2 * (k : ℝ) * Uk k + Vk k := by
   have hexp : ∀ i ∈ Finset.range (k + 1),
-      (2 : ℝ)^i * (cCoeff i).re * ((k:ℝ) - (i:ℝ))^2
-        = (k:ℝ)^2 * ((2 : ℝ)^i * (cCoeff i).re)
-          - 2 * (k:ℝ) * ((i:ℝ) * (2 : ℝ)^i * (cCoeff i).re)
-          + ((i:ℝ)^2 * (2 : ℝ)^i * (cCoeff i).re) := by
+      (2 : ℝ)^i * (cCoeff i).re * ((k : ℝ) - (i : ℝ))^2
+        = (k : ℝ)^2 * ((2 : ℝ)^i * (cCoeff i).re)
+          - 2 * (k : ℝ) * ((i : ℝ) * (2 : ℝ)^i * (cCoeff i).re)
+          + ((i : ℝ)^2 * (2 : ℝ)^i * (cCoeff i).re) := by
     intro i _
     ring
   rw [Finset.sum_congr rfl hexp]
@@ -7580,7 +7580,7 @@ theorem Ikfrozen_re_expand (k : ℕ) :
     (Ikfrozen k).re
       = 2 * (1/2 - wk k)
         - (Real.log 2 / 4)
-            * ((k:ℝ)^2 * (dConst - Wk k) - 2 * (k:ℝ) * Uk k + Vk k) / (2 : ℝ) ^ k
+            * ((k : ℝ)^2 * (dConst - Wk k) - 2 * (k : ℝ) * Uk k + Vk k) / (2 : ℝ) ^ k
         + DeltaConv k / (2 : ℝ) ^ k := by
   rw [Ikfrozen_re_eq]
   rw [Finset.sum_congr rfl (fun i hi => Ikfrozen_term k i (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)))]
@@ -7600,12 +7600,12 @@ Stated with HasProd rather than tprod because HasProd composes with
 mul_compl and Equiv.hasProd_iff, which tprod does not. -/
 theorem tail_regroup_hasProd (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 2)
     (hc : 0 < cFac s)
-    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
-    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)
     (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))) :
     HasProd (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-        (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹)
+        (1 - z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹)
       (((cFac s : ℝ) : ℂ) ^ z * G2C s z) := by
   have hcpow := cpow_neg_tprod_eq_cFac s hs z hz hc hmulR hposR hlogR
   have hreg := (reg_multipliable_three s (le_of_lt hs) z hz).hasProd
@@ -7613,18 +7613,18 @@ theorem tail_regroup_hasProd (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z 
   rw [reg_tprod_eq_G2C s (le_of_lt hs) z hz] at hmul
   apply hmul.congr_fun
   intro p
-  have hpos : (0 : ℝ) < 1 - ((p:ℕ):ℝ) ^ (-s) := hposR p |> inv_pos.mp
-  exact euler_factor_split (((p:ℕ):ℝ) ^ (-s)) hpos z (z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))
+  have hpos : (0 : ℝ) < 1 - ((p : ℕ):ℝ) ^ (-s) := hposR p |> inv_pos.mp
+  exact euler_factor_split (((p : ℕ):ℝ) ^ (-s)) hpos z (z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))
 
 /-- B3: the p >= 3 tail regroups into cFac^z times G2C. -/
 theorem tail_regroup (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2)
     (hc : 0 < cFac s)
-    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
-    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)
     (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))) :
     (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹)
+        (1 - z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹)
       = ((cFac s : ℝ) : ℂ) ^ z * G2C s z :=
   (tail_regroup_hasProd s hs z (by linarith) hc hmulR hposR hlogR).tprod_eq
 
@@ -7681,10 +7681,10 @@ theorem tprod_split_two {M : Type*} [CommMonoid M] [TopologicalSpace M] [T2Space
 /-- cFac s = zeta(s) * (1 - 2^(-s)) for s > 1. -/
 theorem cFac_eq_zeta (s : ℝ) (hs : 1 < s) :
     ((cFac s : ℝ) : ℂ)
-      = riemannZeta (s : ℂ) * (1 - ((2 : ℂ)) ^ (-(s:ℂ))) := by
+      = riemannZeta (s : ℂ) * (1 - ((2 : ℂ)) ^ (-(s : ℂ))) := by
   have hzeta := zeta_split_probe s hs
   have hsplit := (tprod_split_two
-    (fun n : ℕ => (1 - (((n:ℕ):ℝ) : ℂ) ^ (-(s:ℂ)))⁻¹)
+    (fun n : ℕ => (1 - (((n : ℕ):ℝ) : ℂ) ^ (-(s : ℂ)))⁻¹)
     (cFac_multipliable_complex s hs)).2
   rw [hzeta, ← cFac_ofReal s hs] at hsplit
   have hcast : (((2 : ℕ):ℝ) : ℂ) = ((2 : ℂ)) := by norm_num
@@ -7727,14 +7727,14 @@ theorem kappaFac_tendsto_half :
   have hres : Filter.Tendsto (fun s : ℝ => ((s : ℂ) - 1) * riemannZeta (s : ℂ))
       (nhdsWithin 1 (Set.Ioi (1 : ℝ))) (nhds 1) :=
     zeta_residue_halfplane.comp ofReal_tendsto_halfplane
-  have htwo : Filter.Tendsto (fun s : ℝ => 1 - ((2 : ℂ)) ^ (-(s:ℂ)))
+  have htwo : Filter.Tendsto (fun s : ℝ => 1 - ((2 : ℂ)) ^ (-(s : ℂ)))
       (nhdsWithin 1 (Set.Ioi (1 : ℝ))) (nhds (1/2 : ℂ)) := by
-    have hcont : ContinuousAt (fun s : ℝ => 1 - ((2 : ℂ)) ^ (-(s:ℂ))) 1 := by
+    have hcont : ContinuousAt (fun s : ℝ => 1 - ((2 : ℂ)) ^ (-(s : ℂ))) 1 := by
       apply ContinuousAt.sub continuousAt_const
       apply ContinuousAt.const_cpow
       · exact (Complex.continuous_ofReal.continuousAt).neg
       · left; norm_num
-    have hval : (fun s : ℝ => 1 - ((2 : ℂ)) ^ (-(s:ℂ))) 1 = (1/2 : ℂ) := by
+    have hval : (fun s : ℝ => 1 - ((2 : ℂ)) ^ (-(s : ℂ))) 1 = (1/2 : ℂ) := by
       have hkey : ((2 : ℂ)) ^ (-(((1 : ℝ)) : ℂ)) = (((2 : ℝ) ^ (-(1 : ℝ)) : ℝ) : ℂ) := by
         rw [show ((2 : ℂ)) = (((2 : ℝ)) : ℂ) by norm_num,
           show (-(((1 : ℝ)) : ℂ)) = (((-1 : ℝ)) : ℂ) by push_cast; ring,
@@ -7757,63 +7757,63 @@ theorem kappaFac_tendsto_half :
 
 /-- At a prime, the z-weighted hom is just z * p^(-s). -/
 theorem zOmegaHom_prime (s : ℝ) (z : ℂ) {p : ℕ} (hp : p.Prime) :
-    zOmegaHom s z p = z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ) := by
-  have hp0 : (p:ℕ) ≠ 0 := hp.pos.ne'
-  change (if (p:ℕ) = 0 then 0
-    else z ^ (bigOmega (p:ℕ)) * (((p:ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+    zOmegaHom s z p = z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ) := by
+  have hp0 : (p : ℕ) ≠ 0 := hp.pos.ne'
+  change (if (p : ℕ) = 0 then 0
+    else z ^ (bigOmega (p : ℕ)) * (((p : ℕ) : ℂ) ^ (-(s : ℂ)))) = _
   rw [if_neg hp0]
-  have hO : bigOmega (p:ℕ) = 1 := by
+  have hO : bigOmega (p : ℕ) = 1 := by
     have := bigOmega_prime_pow hp 1
     rwa [pow_one] at this
   rw [hO, pow_one]
   congr 1
-  rw [show (-(s:ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
+  rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
   rw [← Complex.ofReal_natCast, ← Complex.ofReal_cpow (Nat.cast_nonneg p)]
 
 /-- B4: split the prime product at p = 2. -/
 theorem split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2)
     (hmul3 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹)) :
+      (1 - z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹)) :
     (∏' p : Nat.Primes, (1 - zOmegaHom s z p)⁻¹)
       = (1 - z * (((2 : ℕ):ℝ) ^ (-s) : ℝ))⁻¹
-        * ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - z * (((p:ℕ):ℝ) ^ (-s) : ℝ))⁻¹ := by
+        * ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p}, (1 - z * (((p : ℕ):ℝ) ^ (-s) : ℝ))⁻¹ := by
   have hcongr : (∏' p : Nat.Primes, (1 - zOmegaHom s z p)⁻¹)
-      = ∏' p : {p : ℕ // p.Prime}, (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
+      = ∏' p : {p : ℕ // p.Prime}, (1 - z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
     apply tprod_congr
     intro p
     rw [zOmegaHom_prime s z p.2]
   rw [hcongr]
   have hsplit := tprod_split_two
-    (fun n : ℕ => (1 - z * (((n:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹) hmul3
+    (fun n : ℕ => (1 - z * (((n : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹) hmul3
   rw [hsplit.2]
 
 /-- A3: the Euler product equals the factored form Fbig. -/
 theorem eulerProduct_eq_Fbig (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : Norm.norm z ≤ 3/2)
     (hc : 0 < cFac s)
-    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
-    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)
     (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))) :
     (∏' p : Nat.Primes, (1 - zOmegaHom s z p)⁻¹) = Fbig s z := by
   have hmul3 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (1 - z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹) :=
+      (1 - z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹) :=
     (tail_regroup_hasProd s hs z (by linarith) hc hmulR hposR hlogR).multipliable
   rw [split_two s hs z hz hmul3]
   rw [tail_regroup s hs z hz hc hmulR hposR hlogR]
   unfold Fbig
-  have h2 : ((2 : ℂ) ^ (s:ℂ)) ≠ 0 := by
+  have h2 : ((2 : ℂ) ^ (s : ℂ)) ≠ 0 := by
     rw [Ne, Complex.cpow_eq_zero_iff]
     intro hcon
     exact absurd hcon.1 (by norm_num)
   have hbridge : (1 - z * (((2 : ℕ):ℝ) ^ (-s) : ℝ))⁻¹
-      = (1 - z / ((2 : ℂ) ^ (s:ℂ)))⁻¹ := by
+      = (1 - z / ((2 : ℂ) ^ (s : ℂ)))⁻¹ := by
     congr 1
     congr 1
     have hreal : (((2 : ℕ):ℝ) ^ (-s) : ℝ) = ((2 : ℝ) ^ s)⁻¹ := by
       norm_num
       rw [Real.rpow_neg (by norm_num)]
     rw [hreal]
-    have hcast : (((((2 : ℝ) ^ s)⁻¹ : ℝ)) : ℂ) = ((2 : ℂ) ^ (s:ℂ))⁻¹ := by
+    have hcast : (((((2 : ℝ) ^ s)⁻¹ : ℝ)) : ℂ) = ((2 : ℂ) ^ (s : ℂ))⁻¹ := by
       rw [Complex.ofReal_inv]
       congr 1
       rw [Complex.ofReal_cpow (by norm_num : (0 : ℝ) ≤ 2)]
@@ -7859,47 +7859,47 @@ terms are exactly those with Omega n = k, i.e. Fk k s.
 
 /-- The norm of the z-weighted term at any n. -/
 theorem zOmegaHom_norm (s : ℝ) (z : ℂ) {n : ℕ} (hn : n ≠ 0) :
-    Norm.norm (zOmegaHom s z n) = Norm.norm z ^ (bigOmega n) * ((n:ℝ) ^ (-s)) := by
+    Norm.norm (zOmegaHom s z n) = Norm.norm z ^ (bigOmega n) * ((n : ℝ) ^ (-s)) := by
   have hnpos : 0 < n := Nat.pos_of_ne_zero hn
   change Norm.norm (if n = 0 then 0
-    else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+    else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s : ℂ)))) = _
   rw [if_neg hn, norm_mul, norm_pow]
   congr 1
   rw [Complex.norm_natCast_cpow_of_pos hnpos, Complex.neg_re, Complex.ofReal_re]
 
 /-- Polynomial growth is dominated by geometric growth, with a uniform constant. -/
 theorem pow_le_const_mul_geom (j : ℕ) {c : ℝ} (hc : 1 < c) :
-    ∃ C : ℝ, 0 < C ∧ ∀ m : ℕ, ((m:ℕ):ℝ) ^ j ≤ C * c ^ m := by
+    ∃ C : ℝ, 0 < C ∧ ∀ m : ℕ, ((m : ℕ):ℝ) ^ j ≤ C * c ^ m := by
   have hlo := isLittleO_pow_const_const_pow_of_one_lt (R := ℝ) j hc
   obtain ⟨ C0, hC0 ⟩ := hlo.isBigO.bound
   obtain ⟨ N, hN ⟩ := Filter.eventually_atTop.mp hC0
-  refine ⟨ max (max C0 1) (((N:ℕ):ℝ) ^ j + 1), ?_, ?_⟩
+  refine ⟨ max (max C0 1) (((N : ℕ):ℝ) ^ j + 1), ?_, ?_⟩
   · have h1 : (0 : ℝ) < 1 := one_pos
     have : (1 : ℝ) ≤ max C0 1 := le_max_right _ _
     calc (0 : ℝ) < 1 := h1
       _ ≤ max C0 1 := this
-      _ ≤ max (max C0 1) (((N:ℕ):ℝ) ^ j + 1) := le_max_left _ _
+      _ ≤ max (max C0 1) (((N : ℕ):ℝ) ^ j + 1) := le_max_left _ _
   · intro m
     have hcm : (0 : ℝ) < c ^ m := by positivity
     have hcm1 : (1 : ℝ) ≤ c ^ m := one_le_pow₀ (le_of_lt hc)
     rcases Nat.lt_or_ge m N with hlt | hge
-    · have hmN : ((m:ℕ):ℝ) ^ j ≤ ((N:ℕ):ℝ) ^ j := by
-        have hmn : ((m:ℕ):ℝ) ≤ ((N:ℕ):ℝ) := by exact_mod_cast le_of_lt hlt
+    · have hmN : ((m : ℕ):ℝ) ^ j ≤ ((N : ℕ):ℝ) ^ j := by
+        have hmn : ((m : ℕ):ℝ) ≤ ((N : ℕ):ℝ) := by exact_mod_cast le_of_lt hlt
         gcongr
-      calc ((m:ℕ):ℝ) ^ j ≤ ((N:ℕ):ℝ) ^ j := hmN
-        _ ≤ (((N:ℕ):ℝ) ^ j + 1) * 1 := by linarith
-        _ ≤ (((N:ℕ):ℝ) ^ j + 1) * c ^ m := by
+      calc ((m : ℕ):ℝ) ^ j ≤ ((N : ℕ):ℝ) ^ j := hmN
+        _ ≤ (((N : ℕ):ℝ) ^ j + 1) * 1 := by linarith
+        _ ≤ (((N : ℕ):ℝ) ^ j + 1) * c ^ m := by
             apply mul_le_mul_of_nonneg_left hcm1 (by positivity)
-        _ ≤ max (max C0 1) (((N:ℕ):ℝ) ^ j + 1) * c ^ m := by
+        _ ≤ max (max C0 1) (((N : ℕ):ℝ) ^ j + 1) * c ^ m := by
             apply mul_le_mul_of_nonneg_right (le_max_right _ _) (le_of_lt hcm)
     · have hb := hN m hge
       simp only [Real.norm_eq_abs] at hb
-      have habs : ((m:ℕ):ℝ) ^ j ≤ C0 * c ^ m := by
-        calc ((m:ℕ):ℝ) ^ j ≤ |((m:ℕ):ℝ) ^ j| := le_abs_self _
+      have habs : ((m : ℕ):ℝ) ^ j ≤ C0 * c ^ m := by
+        calc ((m : ℕ):ℝ) ^ j ≤ |((m : ℕ):ℝ) ^ j| := le_abs_self _
           _ ≤ C0 * |c ^ m| := hb
           _ = C0 * c ^ m := by rw [abs_of_pos hcm]
-      calc ((m:ℕ):ℝ) ^ j ≤ C0 * c ^ m := habs
-        _ ≤ max (max C0 1) (((N:ℕ):ℝ) ^ j + 1) * c ^ m := by
+      calc ((m : ℕ):ℝ) ^ j ≤ C0 * c ^ m := habs
+        _ ≤ max (max C0 1) (((N : ℕ):ℝ) ^ j + 1) * c ^ m := by
             apply mul_le_mul_of_nonneg_right _ (le_of_lt hcm)
             exact le_trans (le_max_left C0 1) (le_max_left _ _)
 
@@ -7909,13 +7909,13 @@ theorem omega_pow_summable_radius (s : ℝ) (hs : 1 < s) (j : ℕ)
     (r0 r : ℝ) (hr00 : 0 < r0) (hr0r : r0 < r)
     (hr0 : 0 ≤ r) (hr3 : r * ((3 : ℝ) ^ (-s)) ≤ 1/2) (hr2 : r < (2 : ℝ) ^ s) :
     Summable (fun n : ℕ =>
-      ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n) * ((n:ℝ) ^ (-s))) := by
+      ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n) * ((n : ℝ) ^ (-s))) := by
   have hratio : 1 < r / r0 := (one_lt_div hr00).mpr hr0r
   obtain ⟨ C, hCpos, hC ⟩ := pow_le_const_mul_geom j hratio
-  have hbig : Summable (fun n : ℕ => Norm.norm (zOmegaHom s ((r:ℝ) : ℂ) n)) := by
+  have hbig : Summable (fun n : ℕ => Norm.norm (zOmegaHom s ((r : ℝ) : ℂ) n)) := by
     apply zOmega_summable_radius s hs r hr0 hr3 hr2
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hr0]
-  have hscaled : Summable (fun n : ℕ => C * Norm.norm (zOmegaHom s ((r:ℝ) : ℂ) n)) :=
+  have hscaled : Summable (fun n : ℕ => C * Norm.norm (zOmegaHom s ((r : ℝ) : ℂ) n)) :=
     hbig.mul_left C
   apply Summable.of_nonneg_of_le _ _ hscaled
   · intro n
@@ -7926,8 +7926,8 @@ theorem omega_pow_summable_radius (s : ℝ) (hs : 1 < s) (j : ℕ)
       norm_num
       rw [Real.zero_rpow (ne_of_lt (by linarith : (-s) < 0))]
       simp
-    · have hnorm : Norm.norm (zOmegaHom s ((r:ℝ) : ℂ) n)
-          = r ^ (bigOmega n) * ((n:ℝ) ^ (-s)) := by
+    · have hnorm : Norm.norm (zOmegaHom s ((r : ℝ) : ℂ) n)
+          = r ^ (bigOmega n) * ((n : ℝ) ^ (-s)) := by
         rw [zOmegaHom_norm s _ hn, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hr0]
       rw [hnorm]
       have hkey : ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n)
@@ -7940,11 +7940,11 @@ theorem omega_pow_summable_radius (s : ℝ) (hs : 1 < s) (j : ℕ)
           _ = C * r ^ (bigOmega n) := by
               rw [div_pow]
               field_simp
-      have hnn : (0 : ℝ) ≤ ((n:ℝ) ^ (-s)) := by positivity
-      calc ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n) * ((n:ℝ) ^ (-s))
-          ≤ (C * r ^ (bigOmega n)) * ((n:ℝ) ^ (-s)) := by
+      have hnn : (0 : ℝ) ≤ ((n : ℝ) ^ (-s)) := by positivity
+      calc ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n) * ((n : ℝ) ^ (-s))
+          ≤ (C * r ^ (bigOmega n)) * ((n : ℝ) ^ (-s)) := by
             apply mul_le_mul_of_nonneg_right hkey hnn
-        _ = C * (r ^ (bigOmega n) * ((n:ℝ) ^ (-s))) := by ring
+        _ = C * (r ^ (bigOmega n) * ((n : ℝ) ^ (-s))) := by ring
 
 
 /-- C3: the k-th derivative of a monomial at 0. -/
@@ -7974,11 +7974,11 @@ theorem iteratedDeriv_monomial_zero (m k : ℕ) (c : ℂ) :
 theorem iteratedDeriv_zOmega_term (s : ℝ) (n : ℕ) (hn : n ≠ 0) (j : ℕ) (w : ℂ) :
     iteratedDeriv j (fun z : ℂ => zOmegaHom s z n) w
       = ((Nat.descFactorial (bigOmega n) j : ℕ) : ℂ) * w ^ (bigOmega n - j)
-        * (((n:ℂ)) ^ (-(s:ℂ))) := by
+        * (((n : ℂ)) ^ (-(s : ℂ))) := by
   have hterm : (fun z : ℂ => zOmegaHom s z n)
-      = fun z : ℂ => z ^ (bigOmega n) * (((n:ℂ)) ^ (-(s:ℂ))) := by
+      = fun z : ℂ => z ^ (bigOmega n) * (((n : ℂ)) ^ (-(s : ℂ))) := by
     funext z
-    change (if n = 0 then 0 else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+    change (if n = 0 then 0 else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s : ℂ)))) = _
     rw [if_neg hn]
   rw [hterm, iteratedDeriv_mul_const_field, iteratedDeriv_pow]
 
@@ -7986,10 +7986,10 @@ theorem iteratedDeriv_zOmega_term (s : ℝ) (n : ℕ) (hn : n ≠ 0) (j : ℕ) (
 theorem iteratedDeriv_term_bound (s : ℝ) (hs : 1 < s) (r0 : ℝ) (hr00 : 0 < r0)
     (j : ℕ) (n : ℕ) (hn : n ≠ 0) (w : ℂ) (hw : Norm.norm w ≤ r0) :
     Norm.norm (iteratedDeriv j (fun z : ℂ => zOmegaHom s z n) w)
-      ≤ ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n - j) * ((n:ℝ) ^ (-s)) := by
+      ≤ ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n - j) * ((n : ℝ) ^ (-s)) := by
   rw [iteratedDeriv_zOmega_term s n hn j w]
   have hnpos : 0 < n := Nat.pos_of_ne_zero hn
-  have hnorm_n : Norm.norm (((n:ℂ)) ^ (-(s:ℂ))) = ((n:ℝ) ^ (-s)) := by
+  have hnorm_n : Norm.norm (((n : ℂ)) ^ (-(s : ℂ))) = ((n : ℝ) ^ (-s)) := by
     rw [Complex.norm_natCast_cpow_of_pos hnpos, Complex.neg_re, Complex.ofReal_re]
   rw [norm_mul, norm_mul, norm_pow, hnorm_n, Complex.norm_natCast]
   have hdesc : ((Nat.descFactorial (bigOmega n) j : ℕ) : ℝ) ≤ ((bigOmega n : ℕ) : ℝ) ^ j := by
@@ -7997,7 +7997,7 @@ theorem iteratedDeriv_term_bound (s : ℝ) (hs : 1 < s) (r0 : ℝ) (hr00 : 0 < r
     exact_mod_cast h
   have hwpow : Norm.norm w ^ (bigOmega n - j) ≤ r0 ^ (bigOmega n - j) := by
     gcongr
-  have hnn : (0 : ℝ) ≤ ((n:ℝ) ^ (-s)) := by positivity
+  have hnn : (0 : ℝ) ≤ ((n : ℝ) ^ (-s)) := by positivity
   apply mul_le_mul_of_nonneg_right _ hnn
   apply mul_le_mul hdesc hwpow (by positivity) (by positivity)
 
@@ -8006,7 +8006,7 @@ theorem deriv_bound_summable (s : ℝ) (hs : 1 < s) (j : ℕ)
     (r0 r : ℝ) (hr01 : 1 ≤ r0) (hr0r : r0 < r)
     (hr0 : 0 ≤ r) (hr3 : r * ((3 : ℝ) ^ (-s)) ≤ 1/2) (hr2 : r < (2 : ℝ) ^ s) :
     Summable (fun n : ℕ =>
-      ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n - j) * ((n:ℝ) ^ (-s))) := by
+      ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n - j) * ((n : ℝ) ^ (-s))) := by
   have hbase := omega_pow_summable_radius s hs j r0 r (by linarith) hr0r hr0 hr3 hr2
   apply Summable.of_nonneg_of_le _ _ hbase
   · intro n
@@ -8022,7 +8022,7 @@ theorem iteratedDeriv_term_differentiable (s : ℝ) (n : ℕ) (hn : n ≠ 0) (j 
     Differentiable ℂ (fun w : ℂ => iteratedDeriv j (fun z : ℂ => zOmegaHom s z n) w) := by
   have heq : (fun w : ℂ => iteratedDeriv j (fun z : ℂ => zOmegaHom s z n) w)
       = fun w : ℂ => ((Nat.descFactorial (bigOmega n) j : ℕ) : ℂ) * w ^ (bigOmega n - j)
-        * (((n:ℂ)) ^ (-(s:ℂ))) := by
+        * (((n : ℂ)) ^ (-(s : ℂ))) := by
     funext w
     exact iteratedDeriv_zOmega_term s n hn j w
   rw [heq]
@@ -8086,7 +8086,7 @@ theorem iteratedDeriv_tsum_eq (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
       · exact (iteratedDeriv_term_differentiable s n hn J).differentiableOn
     have hle : ∀ (n : ℕ) (v : ℂ), v ∈ Metric.ball (0 : ℂ) r0 →
         Norm.norm (iteratedDeriv J (fun z : ℂ => zOmegaHom s z n) v)
-          ≤ ((bigOmega n : ℕ) : ℝ) ^ J * r0 ^ (bigOmega n - J) * ((n:ℝ) ^ (-s)) := by
+          ≤ ((bigOmega n : ℕ) : ℝ) ^ J * r0 ^ (bigOmega n - J) * ((n : ℝ) ^ (-s)) := by
       intro n v hv
       rw [Metric.mem_ball, dist_zero_right] at hv
       by_cases hn : n = 0
@@ -8108,7 +8108,7 @@ theorem iteratedDeriv_tsum_eq (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
 /-- The k-th derivative at 0 of a single term, in collapsed form. -/
 theorem iteratedDeriv_term_at_zero (s : ℝ) (k : ℕ) (hk : 1 ≤ k) (n : ℕ) :
     iteratedDeriv k (fun z : ℂ => zOmegaHom s z n) 0
-      = if bigOmega n = k then (Nat.factorial k : ℂ) * (((n:ℂ)) ^ (-(s:ℂ))) else 0 := by
+      = if bigOmega n = k then (Nat.factorial k : ℂ) * (((n : ℂ)) ^ (-(s : ℂ))) else 0 := by
   by_cases hn : n = 0
   · subst hn
     rw [iteratedDeriv_term_zero s k 0]
@@ -8117,9 +8117,9 @@ theorem iteratedDeriv_term_at_zero (s : ℝ) (k : ℕ) (hk : 1 ≤ k) (n : ℕ) 
       omega
     rw [if_neg hO]
   · have hterm : (fun z : ℂ => zOmegaHom s z n)
-        = fun z : ℂ => z ^ (bigOmega n) * (((n:ℂ)) ^ (-(s:ℂ))) := by
+        = fun z : ℂ => z ^ (bigOmega n) * (((n : ℂ)) ^ (-(s : ℂ))) := by
       funext z
-      change (if n = 0 then 0 else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+      change (if n = 0 then 0 else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s : ℂ)))) = _
       rw [if_neg hn]
     rw [hterm, iteratedDeriv_monomial_zero]
 
@@ -8170,8 +8170,8 @@ theorem exists_radius_gap (s : ℝ) (hs : 1 < s) :
 
 /-- The Fk family is summable (real form). -/
 theorem Fk_summable_subtype (k : ℕ) (s : ℝ) (hs : 1 < s) :
-    Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} => ((n:ℕ):ℝ) ^ (-s)) := by
-  have hbase : Summable (fun n : ℕ => ((n:ℝ) ^ (-s))) := by
+    Summable (fun n : {n : ℕ // 2 ≤ n ∧ bigOmega n = k} => ((n : ℕ):ℝ) ^ (-s)) := by
+  have hbase : Summable (fun n : ℕ => ((n : ℝ) ^ (-s))) := by
     rw [Real.summable_nat_rpow]
     linarith
   exact hbase.subtype _
@@ -8186,7 +8186,7 @@ theorem Fk_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
   rw [hC2]
   have hcollapse : (∑' n : ℕ, iteratedDeriv k (fun z : ℂ => zOmegaHom s z n) 0)
       = ∑' n : ℕ,
-        (if bigOmega n = k then (Nat.factorial k : ℂ) * (((n:ℂ)) ^ (-(s:ℂ))) else 0) := by
+        (if bigOmega n = k then (Nat.factorial k : ℂ) * (((n : ℂ)) ^ (-(s : ℂ))) else 0) := by
     apply tsum_congr
     intro n
     exact iteratedDeriv_term_at_zero s k hk n
@@ -8194,9 +8194,9 @@ theorem Fk_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
   have hfac : ((Nat.factorial k : ℕ) : ℂ) ≠ 0 :=
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
   have hpull : (∑' n : ℕ,
-      (if bigOmega n = k then (Nat.factorial k : ℂ) * (((n:ℂ)) ^ (-(s:ℂ))) else 0))
+      (if bigOmega n = k then (Nat.factorial k : ℂ) * (((n : ℂ)) ^ (-(s : ℂ))) else 0))
       = (Nat.factorial k : ℂ) * ∑' n : ℕ,
-        (if bigOmega n = k then (((n:ℂ)) ^ (-(s:ℂ))) else 0) := by
+        (if bigOmega n = k then (((n : ℂ)) ^ (-(s : ℂ))) else 0) := by
     rw [← tsum_mul_left]
     apply tsum_congr
     intro n
@@ -8208,16 +8208,16 @@ theorem Fk_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
   unfold Fk
   rw [Complex.ofReal_tsum]
   change (∑' x : ({n : ℕ | 2 ≤ n ∧ bigOmega n = k} : Set ℕ),
-      ((((x:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) = _
+      ((((x : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) = _
   rw [tsum_subtype {n : ℕ | 2 ≤ n ∧ bigOmega n = k}
-    (fun n : ℕ => (((n:ℝ) ^ (-s) : ℝ) : ℂ))]
+    (fun n : ℕ => (((n : ℝ) ^ (-s) : ℝ) : ℂ))]
   apply tsum_congr
   intro n
   by_cases h : bigOmega n = k
   · have hmem : n ∈ {n : ℕ | 2 ≤ n ∧ bigOmega n = k} := by
       refine ⟨ two_le_of_bigOmega_eq k hk h, h ⟩
     rw [Set.indicator_of_mem hmem, if_pos h]
-    rw [show (-(s:ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
+    rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
     rw [← Complex.ofReal_natCast, ← Complex.ofReal_cpow (Nat.cast_nonneg n)]
   · have hnmem : n ∉ {n : ℕ | 2 ≤ n ∧ bigOmega n = k} := by
       intro hcon
@@ -8228,10 +8228,10 @@ theorem Fk_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
 This is the number-theoretic step (Dirichlet series = Euler product). -/
 theorem Fk_eq_coeff_Fbig (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
     (hc : 0 < cFac s)
-    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
-    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)
     (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))) :
     ((Fk k s : ℝ) : ℂ)
       = (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : ℂ) := by
   have hA4 := Fk_eq_coeff_tsum k hk s hs
@@ -8269,9 +8269,9 @@ theorem contDiffAt_factorA (s : ℝ) (hc : 0 < cFac s) (k : ℕ) (z : ℂ) :
 
 /-- The geometric factor is ContDiff at points where the denominator is nonzero. -/
 theorem contDiffAt_factorB (s : ℝ) (k : ℕ) (z : ℂ)
-    (hz : 1 - z / ((2 : ℂ) ^ (s:ℂ)) ≠ 0) :
-    ContDiffAt ℂ k (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s:ℂ)))⁻¹) z := by
-  have hden : ContDiffAt ℂ (k:ℕ) (fun w : ℂ => 1 - w / ((2 : ℂ) ^ (s:ℂ))) z := by
+    (hz : 1 - z / ((2 : ℂ) ^ (s : ℂ)) ≠ 0) :
+    ContDiffAt ℂ k (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s : ℂ)))⁻¹) z := by
+  have hden : ContDiffAt ℂ (k : ℕ) (fun w : ℂ => 1 - w / ((2 : ℂ) ^ (s : ℂ))) z := by
     apply ContDiffAt.sub contDiffAt_const
     exact ContDiffAt.div_const contDiffAt_id _
   exact hden.inv hz
@@ -8326,7 +8326,7 @@ which uses the cFac normalisation; both expand the same Fbig. -/
 theorem Fbig_eq_prod_manu (s : ℝ) (hs : 1 < s) :
     (fun z : ℂ => Fbig s z)
       = ((fun z : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-z))
-          * (fun z : ℂ => (1 - z / ((2 : ℂ) ^ (s:ℂ)))⁻¹))
+          * (fun z : ℂ => (1 - z / ((2 : ℂ) ^ (s : ℂ)))⁻¹))
         * (fun z : ℂ => G2manu s z) := by
   funext z
   rw [Fbig_eq_manuscript s hs z]
@@ -8336,7 +8336,7 @@ theorem Fbig_eq_prod_manu (s : ℝ) (hs : 1 < s) :
 theorem Fbig_eq_prod (s : ℝ) :
     (fun z : ℂ => Fbig s z)
       = ((fun z : ℂ => ((cFac s : ℝ) : ℂ) ^ z)
-          * (fun z : ℂ => (1 - z / ((2 : ℂ) ^ (s:ℂ)))⁻¹))
+          * (fun z : ℂ => (1 - z / ((2 : ℂ) ^ (s : ℂ)))⁻¹))
         * (fun z : ℂ => G2C s z) := by
   funext z
   unfold Fbig
@@ -8351,22 +8351,22 @@ theorem iteratedDeriv_Fbig (k : ℕ) (s : ℝ) (hs : 1 < s) (hc : 0 < cFac s) :
             (∑ i ∈ Finset.range (n + 1),
               (Nat.choose n i : ℂ)
                 * iteratedDeriv i (fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w) 0
-                * iteratedDeriv (n - i) (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s:ℂ)))⁻¹) 0)
+                * iteratedDeriv (n - i) (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s : ℂ)))⁻¹) 0)
             * iteratedDeriv (k - n) (fun w : ℂ => G2C s w) 0 := by
   have hs1 : (1 : ℝ) ≤ s := le_of_lt hs
-  have hzne : 1 - (0 : ℂ) / ((2 : ℂ) ^ (s:ℂ)) ≠ 0 := by
+  have hzne : 1 - (0 : ℂ) / ((2 : ℂ) ^ (s : ℂ)) ≠ 0 := by
     simp
   have hA : ∀ j : ℕ, ContDiffAt ℂ j
       (fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w) 0 :=
     fun j => contDiffAt_factorA s hc j 0
   have hB : ∀ j : ℕ, ContDiffAt ℂ j
-      (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s:ℂ)))⁻¹) 0 :=
+      (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s : ℂ)))⁻¹) 0 :=
     fun j => contDiffAt_factorB s j 0 hzne
   have hC : ∀ j : ℕ, ContDiffAt ℂ j (fun w : ℂ => G2C s w) 0 :=
     fun j => contDiffAt_factorC s hs1 j
   have hAB : ∀ j : ℕ, ContDiffAt ℂ j
       ((fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w)
-        * (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s:ℂ)))⁻¹)) 0 :=
+        * (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s : ℂ)))⁻¹)) 0 :=
     fun j => (hA j).mul (hB j)
   rw [Fbig_eq_prod s]
   rw [iteratedDeriv_mul (hAB k) (hC k)]
@@ -8390,25 +8390,25 @@ theorem iteratedDeriv_Fbig_manu (k : ℕ) (s : ℝ) (hs : 1 < s) :
             (∑ i ∈ Finset.range (n + 1),
               (Nat.choose n i : ℂ)
                 * iteratedDeriv i (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0
-                * iteratedDeriv (n - i) (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s:ℂ)))⁻¹) 0)
+                * iteratedDeriv (n - i) (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s : ℂ)))⁻¹) 0)
             * iteratedDeriv (k - n) (fun w : ℂ => G2manu s w) 0 := by
   have hc : 0 < cFac s := cFac_pos s hs
   have hs1 : (1 : ℝ) ≤ s := le_of_lt hs
   have hsm1 : (0 : ℝ) < s - 1 := by linarith
   have hk : (0 : ℝ) < kappaFac s := kappaFac_pos s hs hc
-  have hzne : 1 - (0 : ℂ) / ((2 : ℂ) ^ (s:ℂ)) ≠ 0 := by
+  have hzne : 1 - (0 : ℂ) / ((2 : ℂ) ^ (s : ℂ)) ≠ 0 := by
     simp
   have hA : ∀ j : ℕ, ContDiffAt ℂ j
       (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0 :=
     fun j => contDiffAt_factorAmanu s hsm1 j 0
   have hB : ∀ j : ℕ, ContDiffAt ℂ j
-      (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s:ℂ)))⁻¹) 0 :=
+      (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s : ℂ)))⁻¹) 0 :=
     fun j => contDiffAt_factorB s j 0 hzne
   have hC : ∀ j : ℕ, ContDiffAt ℂ j (fun w : ℂ => G2manu s w) 0 :=
     fun j => contDiffAt_factorCmanu s hs1 hk j
   have hAB : ∀ j : ℕ, ContDiffAt ℂ j
       ((fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w))
-        * (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s:ℂ)))⁻¹)) 0 :=
+        * (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s : ℂ)))⁻¹)) 0 :=
     fun j => (hA j).mul (hB j)
   rw [Fbig_eq_prod_manu s hs]
   rw [iteratedDeriv_mul (hAB k) (hC k)]
@@ -8546,7 +8546,7 @@ theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 
     (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : ℂ)
       = ∑ p ∈ Finset.range (k + 1),
           ∑ q ∈ Finset.range (k - p + 1),
-            gCoeff q s * (((2 : ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
+            gCoeff q s * (((2 : ℝ) ^ (-(p : ℝ) * s) : ℝ) : ℂ)
               * ((((Real.log (cFac s)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ) := by
   have hAval : ∀ i : ℕ,
       iteratedDeriv i (fun w : ℂ => ((cFac s : ℝ) : ℂ) ^ w) 0
@@ -8558,8 +8558,8 @@ theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 
     field_simp at h
     linear_combination h
   have hBval : ∀ j : ℕ,
-      iteratedDeriv j (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s:ℂ)))⁻¹) 0
-        = (Nat.factorial j : ℂ) * ((((2 : ℝ) ^ (-(j:ℝ) * s) : ℝ)) : ℂ) := by
+      iteratedDeriv j (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s : ℂ)))⁻¹) 0
+        = (Nat.factorial j : ℂ) * ((((2 : ℝ) ^ (-(j : ℝ) * s) : ℝ)) : ℂ) := by
     intro j
     have h := coeff_geom s hs j
     have hfj : ((Nat.factorial j : ℕ) : ℂ) ≠ 0 :=
@@ -8595,14 +8595,14 @@ theorem coeff_Fbig_eq_convolution (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 
       * ((Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
       * ((Nat.factorial (n - i) : ℂ) * ((((2 : ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
     * ((Nat.factorial (k - n) : ℂ) * gCoeff (k - n) s) / (Nat.factorial k : ℂ))]
-  rw [conv_flatten k (fun p q => gCoeff q s * (((2 : ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
+  rw [conv_flatten k (fun p q => gCoeff q s * (((2 : ℝ) ^ (-(p : ℝ) * s) : ℝ) : ℂ)
     * ((((Real.log (cFac s)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))]
   exact sigma_reindex k
     (fun n i => (Nat.choose k n : ℂ) *
       ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((Real.log (cFac s)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
         * ((Nat.factorial (n - i) : ℂ) * ((((2 : ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
       * ((Nat.factorial (k - n) : ℂ) * gCoeff (k - n) s) / (Nat.factorial k : ℂ))
-    (fun p q => gCoeff q s * (((2 : ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
+    (fun p q => gCoeff q s * (((2 : ℝ) ^ (-(p : ℝ) * s) : ℝ) : ℂ)
       * ((((Real.log (cFac s)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))
     (fun n i hin hnk => L2b_summand k s hs n i hin hnk)
 
@@ -8650,7 +8650,7 @@ theorem coeff_Fbig_eq_convolution_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s
     (iteratedDeriv k (fun z => Fbig s z) 0) / (Nat.factorial k : ℂ)
       = ∑ p ∈ Finset.range (k + 1),
           ∑ q ∈ Finset.range (k - p + 1),
-            gManu q s * (((2 : ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
+            gManu q s * (((2 : ℝ) ^ (-(p : ℝ) * s) : ℝ) : ℂ)
               * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ) := by
   have hAval : ∀ i : ℕ,
       iteratedDeriv i (fun w : ℂ => ((s - 1 : ℝ) : ℂ) ^ (-w)) 0
@@ -8662,8 +8662,8 @@ theorem coeff_Fbig_eq_convolution_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s
     field_simp at h
     linear_combination h
   have hBval : ∀ j : ℕ,
-      iteratedDeriv j (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s:ℂ)))⁻¹) 0
-        = (Nat.factorial j : ℂ) * ((((2 : ℝ) ^ (-(j:ℝ) * s) : ℝ)) : ℂ) := by
+      iteratedDeriv j (fun w : ℂ => (1 - w / ((2 : ℂ) ^ (s : ℂ)))⁻¹) 0
+        = (Nat.factorial j : ℂ) * ((((2 : ℝ) ^ (-(j : ℝ) * s) : ℝ)) : ℂ) := by
     intro j
     have h := coeff_geom s hs j
     have hfj : ((Nat.factorial j : ℕ) : ℂ) ≠ 0 :=
@@ -8699,14 +8699,14 @@ theorem coeff_Fbig_eq_convolution_manu (k : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s
       * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
       * ((Nat.factorial (n - i) : ℂ) * ((((2 : ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
     * ((Nat.factorial (k - n) : ℂ) * gManu (k - n) s) / (Nat.factorial k : ℂ))]
-  rw [conv_flatten k (fun p q => gManu q s * (((2 : ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
+  rw [conv_flatten k (fun p q => gManu q s * (((2 : ℝ) ^ (-(p : ℝ) * s) : ℝ) : ℂ)
     * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))]
   exact sigma_reindex k
     (fun n i => (Nat.choose k n : ℂ) *
       ((Nat.choose n i : ℂ) * ((Nat.factorial i : ℂ) * ((((-Real.log (s - 1)) ^ i / (Nat.factorial i) : ℝ)) : ℂ))
         * ((Nat.factorial (n - i) : ℂ) * ((((2 : ℝ) ^ (-((n - i : ℕ):ℝ) * s) : ℝ)) : ℂ)))
       * ((Nat.factorial (k - n) : ℂ) * gManu (k - n) s) / (Nat.factorial k : ℂ))
-    (fun p q => gManu q s * (((2 : ℝ) ^ (-(p:ℝ) * s) : ℝ) : ℂ)
+    (fun p q => gManu q s * (((2 : ℝ) ^ (-(p : ℝ) * s) : ℝ) : ℂ)
       * ((((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q)) : ℝ)) : ℂ))
     (fun n i hin hnk => L2b_summand_manu k s hs n i hin hnk)
 
@@ -8716,11 +8716,11 @@ This is the form Definition 2.3 and Lemma 2.4 consume. -/
 theorem Fk_expansion_manu (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
     Fk k s = ∑ p ∈ Finset.range (k + 1),
       ∑ q ∈ Finset.range (k - p + 1),
-        (gManu q s).re * (2 : ℝ) ^ (-((p:ℝ)) * s)
+        (gManu q s).re * (2 : ℝ) ^ (-((p : ℝ)) * s)
           * ((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q))) := by
   have hc : 0 < cFac s := cFac_pos s hs
   have hmulR := cFac_multipliable s hs
-  have hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ := by
+  have hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹ := by
     intro p
     obtain ⟨h3, hp⟩ := cFac_factor_le_third s hs p
     exact inv_pos.mpr (by linarith)
@@ -8741,13 +8741,13 @@ theorem Fk_expansion_manu (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 :
 /-- MANUSCRIPT LEMMA 2.2: the exact expansion of F_k(s). -/
 theorem Fk_expansion (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2)
     (hc : 0 < cFac s)
-    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))
-    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p:ℕ):ℝ) ^ (-s))⁻¹)
+    (hmulR : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))
+    (hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹)
     (hlogR : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹))) :
+      Real.log ((1 - ((p : ℕ):ℝ) ^ (-s))⁻¹))) :
     Fk k s = ∑ p ∈ Finset.range (k + 1),
       ∑ q ∈ Finset.range (k - p + 1),
-        (gCoeff q s).re * (2 : ℝ) ^ (-((p:ℝ)) * s)
+        (gCoeff q s).re * (2 : ℝ) ^ (-((p : ℝ)) * s)
           * ((Real.log (cFac s)) ^ (k - p - q) / (Nat.factorial (k - p - q))) := by
   have hC := (Fk_eq_coeff_Fbig k hk s hs hs2 hc hmulR hposR hlogR).trans (coeff_Fbig_eq_convolution k s hs hs2 hc)
   have hre : ((Fk k s : ℝ) : ℂ).re = Fk k s := Complex.ofReal_re _
@@ -8786,16 +8786,16 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
   classical
   have hl2 : (0 : ℝ) < Real.log 2 := Real.log_pos (by norm_num)
   have hind : Summable (Set.indicator {n : ℕ | 2 ≤ n ∧ bigOmega n = k}
-      (fun n : ℕ => 1 / ((n:ℝ) * Real.log n))) := by
+      (fun n : ℕ => 1 / ((n : ℝ) * Real.log n))) := by
     set I := Set.indicator {n : ℕ | 2 ≤ n ∧ bigOmega n = k}
-      (fun n : ℕ => 1 / ((n:ℝ) * Real.log n)) with hI
+      (fun n : ℕ => 1 / ((n : ℝ) * Real.log n)) with hI
     have hInn : ∀ n : ℕ, 0 ≤ I n := by
       intro n
       rw [hI]
       apply Set.indicator_nonneg
       intro a ha
       obtain ⟨ha2, _⟩ := ha
-      have haR : (2 : ℝ) ≤ (a:ℝ) := by exact_mod_cast ha2
+      have haR : (2 : ℝ) ≤ (a : ℝ) := by exact_mod_cast ha2
       have hla : (0 : ℝ) < Real.log a := Real.log_pos (by linarith)
       exact le_of_lt (one_div_pos.mpr (mul_pos (by linarith) hla))
     have hIvan : ∀ n : ℕ, ¬(2 ≤ n ∧ bigOmega n = k) → I n = 0 := by
@@ -8803,14 +8803,14 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
       rw [hI, Set.indicator_apply,
         if_neg (show n ∉ {n : ℕ | 2 ≤ n ∧ bigOmega n = k} from fun hmem => hn hmem)]
     have hImem : ∀ n : ℕ, 2 ≤ n → bigOmega n = k →
-        I n = 1 / ((n:ℝ) * Real.log n) := by
+        I n = 1 / ((n : ℝ) * Real.log n) := by
       intro n h2 hO
       rw [hI, Set.indicator_apply,
         if_pos (show n ∈ {n : ℕ | 2 ≤ n ∧ bigOmega n = k} from ⟨h2, hO⟩)]
     have hblock : ∀ N j : ℕ, 1 ≤ j →
         ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j), I n
           ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 *
-            (1 / ((j:ℝ) * Real.sqrt j)) := by
+            (1 / ((j : ℝ) * Real.sqrt j)) := by
       intro N j hj
       have hdz : ∑ n ∈ ((Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j)).filter
             (fun n => 2 ≤ n ∧ bigOmega n = k), I n
@@ -8827,7 +8827,7 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
         intro n hn
         obtain ⟨hnf, hn2, hnO⟩ := Finset.mem_filter.mp hn
         have hb := dyadic_fiber_mem_bounds 1 N j n hnf
-        have h2j : (((2 : ℕ) ^ j : ℕ) : ℝ) ≤ (n:ℝ) := by exact_mod_cast hb.1
+        have h2j : (((2 : ℕ) ^ j : ℕ) : ℝ) ≤ (n : ℝ) := by exact_mod_cast hb.1
         have h2jR : (((2 : ℕ) ^ j : ℕ) : ℝ) = (2 : ℝ) ^ j := by push_cast; ring
         rw [h2jR] at h2j
         have h2le : (2 : ℝ) ≤ (2 : ℝ) ^ j := by
@@ -8835,7 +8835,7 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
             _ ≤ (2 : ℝ) ^ j := by
                 apply pow_le_pow_right₀ (by norm_num) hj
         rw [hImem n hn2 hnO]
-        exact inv_mul_log_le ((2 : ℝ) ^ j) (n:ℝ) h2le h2j
+        exact inv_mul_log_le ((2 : ℝ) ^ j) (n : ℝ) h2le h2j
       have hsum1 := Finset.sum_le_sum hterm
       rw [Finset.sum_const, nsmul_eq_mul] at hsum1
       have hbpos : (0 : ℝ) < 1 / ((2 : ℝ) ^ j * Real.log ((2 : ℝ) ^ j)) := by
@@ -8872,7 +8872,7 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
               Real.log ((2 : ℝ) ^ (j + 1)) * (1 / ((2 : ℝ) ^ j * Real.log ((2 : ℝ) ^ j))) :=
             mul_le_mul_of_nonneg_right hpk hbpos.le
         _ ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 *
-              (1 / ((j:ℝ) * Real.sqrt j)) :=
+              (1 / ((j : ℝ) * Real.sqrt j)) :=
             block_arith C hC (k - 1) j hj
     have hKnn : (0 : ℝ) ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 :=
       div_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ 4 * C)
@@ -8910,7 +8910,7 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
         simp only [Finset.mem_range, Finset.mem_insert, Finset.mem_Icc]
         omega
       have hIcc3 : ∑ j ∈ Finset.Icc 1 (Nat.log 2 N),
-          1 / ((j:ℝ) * Real.sqrt j) ≤ 3 := by
+          1 / ((j : ℝ) * Real.sqrt j) ≤ 3 := by
         rcases Nat.lt_or_ge (Nat.log 2 N) 1 with hJ0 | hJ1
         · have hemp : Finset.Icc 1 (Nat.log 2 N) = (∅ : Finset ℕ) := by
             apply Finset.Icc_eq_empty
@@ -8935,10 +8935,10 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
             ∑ n ∈ (Finset.Ioc 1 N).filter (fun n => Nat.log 2 n = j), I n
             ≤ ∑ j ∈ Finset.Icc 1 (Nat.log 2 N),
               4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 *
-                (1 / ((j:ℝ) * Real.sqrt j)) :=
+                (1 / ((j : ℝ) * Real.sqrt j)) :=
               Finset.sum_le_sum (fun j hjm => hblock N j (Finset.mem_Icc.mp hjm).1)
           _ = 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 *
-              ∑ j ∈ Finset.Icc 1 (Nat.log 2 N), (1 / ((j:ℝ) * Real.sqrt j)) := by
+              ∑ j ∈ Finset.Icc 1 (Nat.log 2 N), (1 / ((j : ℝ) * Real.sqrt j)) := by
               rw [Finset.mul_sum]
           _ ≤ 4 * C * (2 * ((k - 1 : ℕ):ℝ)) ^ (k - 1) / (Real.log 2) ^ 2 * 3 :=
               mul_le_mul_of_nonneg_left hIcc3 hKnn
@@ -8958,7 +8958,7 @@ lemma fk_summable (k : ℕ) (hk : 1 ≤ k) :
     exact summable_of_sum_range_le hInn hpartial
   exact (summable_subtype_iff_indicator
     (s := {n : ℕ | 2 ≤ n ∧ bigOmega n = k})
-    (f := fun n : ℕ => 1 / ((n:ℝ) * Real.log n))).mpr hind
+    (f := fun n : ℕ => 1 / ((n : ℝ) * Real.log n))).mpr hind
 
 /-- MANUSCRIPT PROPOSITION 2.5 (exact decomposition).
 E(k) = -q(2k U_k - V_k) - Delta(k) - E_1(k) + E_exp(k), q = log 2 / 4.
@@ -9155,29 +9155,29 @@ log^2 p * p^(-2s) <= (64/9) p^(3/4 - 2s) <= (64/9) p^(-5/4).
 The r=2 analogue of deriv_series_summable. -/
 theorem deriv2_series_summable (s : ℝ) (hs : 1 ≤ s) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (Real.log ((p:ℕ):ℝ)) ^ 2 * (((p:ℕ):ℝ)) ^ (-2*s)) := by
+      (Real.log ((p : ℕ):ℝ)) ^ 2 * (((p : ℕ):ℝ)) ^ (-2*s)) := by
   have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (64/9) * (((p:ℕ):ℝ)) ^ (-(5 : ℝ)/4)) := by
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(5 : ℝ)/4)) := by
+      (64/9) * (((p : ℕ):ℝ)) ^ (-(5 : ℝ)/4)) := by
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(5 : ℝ)/4)) := by
       rw [Real.summable_nat_rpow]
       norm_num
     exact (hbase.subtype _).mul_left (64/9)
   apply Summable.of_nonneg_of_le _ _ hcomp
   · intro p
-    have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast p.2.2
+    have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast p.2.2
     positivity
   · intro p
-    have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast p.2.2
-    have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-    have hlog := log_sq_le (((p:ℕ):ℝ)) hp3
-    have hpos : (0 : ℝ) < (((p:ℕ):ℝ)) ^ (-2*s) := Real.rpow_pos_of_pos hp0 _
-    have hstep : (Real.log ((p:ℕ):ℝ)) ^ 2 * (((p:ℕ):ℝ)) ^ (-2*s)
-        ≤ ((64/9) * (((p:ℕ):ℝ)) ^ ((3 : ℝ)/4)) * (((p:ℕ):ℝ)) ^ (-2*s) :=
+    have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast p.2.2
+    have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+    have hlog := log_sq_le (((p : ℕ):ℝ)) hp3
+    have hpos : (0 : ℝ) < (((p : ℕ):ℝ)) ^ (-2*s) := Real.rpow_pos_of_pos hp0 _
+    have hstep : (Real.log ((p : ℕ):ℝ)) ^ 2 * (((p : ℕ):ℝ)) ^ (-2*s)
+        ≤ ((64/9) * (((p : ℕ):ℝ)) ^ ((3 : ℝ)/4)) * (((p : ℕ):ℝ)) ^ (-2*s) :=
       mul_le_mul_of_nonneg_right hlog (le_of_lt hpos)
-    have hcomb : ((64/9) * (((p:ℕ):ℝ)) ^ ((3 : ℝ)/4)) * (((p:ℕ):ℝ)) ^ (-2*s)
-        = (64/9) * (((p:ℕ):ℝ)) ^ ((3 : ℝ)/4 + -2*s) := by
+    have hcomb : ((64/9) * (((p : ℕ):ℝ)) ^ ((3 : ℝ)/4)) * (((p : ℕ):ℝ)) ^ (-2*s)
+        = (64/9) * (((p : ℕ):ℝ)) ^ ((3 : ℝ)/4 + -2*s) := by
       rw [mul_assoc, ← Real.rpow_add hp0]
-    have hmono : (((p:ℕ):ℝ)) ^ ((3 : ℝ)/4 + -2*s) ≤ (((p:ℕ):ℝ)) ^ (-(5 : ℝ)/4) := by
+    have hmono : (((p : ℕ):ℝ)) ^ ((3 : ℝ)/4 + -2*s) ≤ (((p : ℕ):ℝ)) ^ (-(5 : ℝ)/4) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
     rw [hcomb] at hstep
@@ -9189,30 +9189,30 @@ This is the estimate behind both Lemma 3.8's "product converging locally
 uniformly" and Lemma 3.9's termwise differentiation. -/
 theorem deriv_series_summable (s : ℝ) (hs : 1 ≤ s) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-2*s)) := by
+      Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-2*s)) := by
   have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (((p:ℕ):ℝ)) ^ (-(3 : ℝ)/2)) := by
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(3 : ℝ)/2)) := by
+      (((p : ℕ):ℝ)) ^ (-(3 : ℝ)/2)) := by
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(3 : ℝ)/2)) := by
       rw [Real.summable_nat_rpow]
       norm_num
     exact hbase.subtype _
   apply Summable.of_nonneg_of_le _ _ hcomp
   · intro p
-    have hp3 : (3 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
-    have hlog : (0 : ℝ) ≤ Real.log ((p:ℕ):ℝ) := Real.log_nonneg (by linarith)
+    have hp3 : (3 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast p.2.2
+    have hlog : (0 : ℝ) ≤ Real.log ((p : ℕ):ℝ) := Real.log_nonneg (by linarith)
     positivity
   · intro p
-    have hp3 : (3 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
-    have hp0 : (0 : ℝ) < ((p:ℕ):ℝ) := by linarith
-    have hlog := log_le_sqrt ((p:ℕ):ℝ) hp3
-    have hstep : Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-2*s)
-        ≤ (((p:ℕ):ℝ)) ^ ((1 : ℝ)/2) * (((p:ℕ):ℝ)) ^ (-2*s) := by
+    have hp3 : (3 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast p.2.2
+    have hp0 : (0 : ℝ) < ((p : ℕ):ℝ) := by linarith
+    have hlog := log_le_sqrt ((p : ℕ):ℝ) hp3
+    have hstep : Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-2*s)
+        ≤ (((p : ℕ):ℝ)) ^ ((1 : ℝ)/2) * (((p : ℕ):ℝ)) ^ (-2*s) := by
       apply mul_le_mul_of_nonneg_right hlog (by positivity)
-    have hcomb : (((p:ℕ):ℝ)) ^ ((1 : ℝ)/2) * (((p:ℕ):ℝ)) ^ (-2*s)
-        = (((p:ℕ):ℝ)) ^ ((1 : ℝ)/2 - 2*s) := by
+    have hcomb : (((p : ℕ):ℝ)) ^ ((1 : ℝ)/2) * (((p : ℕ):ℝ)) ^ (-2*s)
+        = (((p : ℕ):ℝ)) ^ ((1 : ℝ)/2 - 2*s) := by
       rw [← Real.rpow_add hp0]
       ring_nf
-    have hmono : (((p:ℕ):ℝ)) ^ ((1 : ℝ)/2 - 2*s) ≤ (((p:ℕ):ℝ)) ^ (-(3 : ℝ)/2) := by
+    have hmono : (((p : ℕ):ℝ)) ^ ((1 : ℝ)/2 - 2*s) ≤ (((p : ℕ):ℝ)) ^ (-(3 : ℝ)/2) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
     rw [hcomb] at hstep
@@ -9223,37 +9223,37 @@ d/ds log(1 - c*p^(-s)) = c*log p*p^(-s)/(1 - c*p^(-s)).
 Applied at c = z and c = 1 to get the two halves of the log-factor.
 Verified numerically at (p,s,c) = (3,1.4,1.3),(5,1.7,0.9),(11,1.2,1),(3,1,2). -/
 theorem deriv_log_one_sub_const_rpow (p : ℕ) (hp : 3 ≤ p) (c s : ℝ)
-    (hne : (1 : ℝ) - c * ((p:ℝ)) ^ (-s) ≠ 0) :
-    HasDerivAt (fun t : ℝ => Real.log (1 - c * ((p:ℝ)) ^ (-t)))
-      (c * Real.log (p:ℝ) * ((p:ℝ)) ^ (-s) / (1 - c * ((p:ℝ)) ^ (-s))) s := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hbase : HasDerivAt (fun t : ℝ => ((p:ℝ)) ^ (-t))
-      (-(((p:ℝ)) ^ (-s) * Real.log (p:ℝ))) s := by
-    have hrw : (fun t : ℝ => ((p:ℝ)) ^ (-t))
-        = fun t : ℝ => Real.exp ((-t) * Real.log (p:ℝ)) := by
+    (hne : (1 : ℝ) - c * ((p : ℝ)) ^ (-s) ≠ 0) :
+    HasDerivAt (fun t : ℝ => Real.log (1 - c * ((p : ℝ)) ^ (-t)))
+      (c * Real.log (p : ℝ) * ((p : ℝ)) ^ (-s) / (1 - c * ((p : ℝ)) ^ (-s))) s := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hbase : HasDerivAt (fun t : ℝ => ((p : ℝ)) ^ (-t))
+      (-(((p : ℝ)) ^ (-s) * Real.log (p : ℝ))) s := by
+    have hrw : (fun t : ℝ => ((p : ℝ)) ^ (-t))
+        = fun t : ℝ => Real.exp ((-t) * Real.log (p : ℝ)) := by
       funext t
       rw [Real.rpow_def_of_pos hp0, mul_comm]
     rw [hrw]
-    have hinner : HasDerivAt (fun t : ℝ => (-t) * Real.log (p:ℝ))
-        (-Real.log (p:ℝ)) s := by
-      simpa using (hasDerivAt_neg s).mul_const (Real.log (p:ℝ))
+    have hinner : HasDerivAt (fun t : ℝ => (-t) * Real.log (p : ℝ))
+        (-Real.log (p : ℝ)) s := by
+      simpa using (hasDerivAt_neg s).mul_const (Real.log (p : ℝ))
     have h := hinner.exp
     convert h using 1
-    rw [show Real.exp (-s * Real.log (p:ℝ)) = ((p:ℝ)) ^ (-s) by
+    rw [show Real.exp (-s * Real.log (p : ℝ)) = ((p : ℝ)) ^ (-s) by
       rw [Real.rpow_def_of_pos hp0, mul_comm]]
     ring
-  have hin : HasDerivAt (fun t : ℝ => 1 - c * ((p:ℝ)) ^ (-t))
-      (c * (((p:ℝ)) ^ (-s) * Real.log (p:ℝ))) s := by
+  have hin : HasDerivAt (fun t : ℝ => 1 - c * ((p : ℝ)) ^ (-t))
+      (c * (((p : ℝ)) ^ (-s) * Real.log (p : ℝ))) s := by
     have h := (hbase.const_mul c).const_sub 1
-    have hval2 : c * (((p:ℝ)) ^ (-s) * Real.log (p:ℝ))
-        = -(c * -(((p:ℝ)) ^ (-s) * Real.log (p:ℝ))) := by ring
+    have hval2 : c * (((p : ℝ)) ^ (-s) * Real.log (p : ℝ))
+        = -(c * -(((p : ℝ)) ^ (-s) * Real.log (p : ℝ))) := by ring
     rw [hval2]
     exact h
   have h := (Real.hasDerivAt_log hne).comp s hin
   simp only [Function.comp_def] at h
-  have hval : c * Real.log (p:ℝ) * ((p:ℝ)) ^ (-s) / (1 - c * ((p:ℝ)) ^ (-s))
-      = (1 - c * ((p:ℝ)) ^ (-s))⁻¹ * (c * (((p:ℝ)) ^ (-s) * Real.log (p:ℝ))) := by
+  have hval : c * Real.log (p : ℝ) * ((p : ℝ)) ^ (-s) / (1 - c * ((p : ℝ)) ^ (-s))
+      = (1 - c * ((p : ℝ)) ^ (-s))⁻¹ * (c * (((p : ℝ)) ^ (-s) * Real.log (p : ℝ))) := by
     field_simp
   rw [hval]
   exact h
@@ -9265,56 +9265,56 @@ bounding them separately would give only p^(-s), which is not summable. -/
 theorem deriv_log_prime_factor (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℝ) (hz : |z| ≤ 2) :
     HasDerivAt (fun t : ℝ =>
-        -Real.log (1 - z * ((p:ℝ)) ^ (-t)) + z * Real.log (1 - ((p:ℝ)) ^ (-t)))
-      (-(z * (z - 1) * Real.log (p:ℝ))
-        / ((((p:ℝ)) ^ s - 1) * (((p:ℝ)) ^ s - z))) s := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hps : (3 : ℝ) ≤ ((p:ℝ)) ^ s := by
+        -Real.log (1 - z * ((p : ℝ)) ^ (-t)) + z * Real.log (1 - ((p : ℝ)) ^ (-t)))
+      (-(z * (z - 1) * Real.log (p : ℝ))
+        / ((((p : ℝ)) ^ s - 1) * (((p : ℝ)) ^ s - z))) s := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hps : (3 : ℝ) ≤ ((p : ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ ((p:ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
-  have hneg : ((p:ℝ)) ^ (-s) = (((p:ℝ)) ^ s)⁻¹ := Real.rpow_neg (le_of_lt hp0) s
-  have hpsinv : ((p:ℝ)) ^ (-s) ≤ 1/3 := by
+      _ ≤ ((p : ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hneg : ((p : ℝ)) ^ (-s) = (((p : ℝ)) ^ s)⁻¹ := Real.rpow_neg (le_of_lt hp0) s
+  have hpsinv : ((p : ℝ)) ^ (-s) ≤ 1/3 := by
     rw [hneg, inv_le_comm₀ (by linarith) (by norm_num)]
     linarith
-  have hppos : (0 : ℝ) < ((p:ℝ)) ^ (-s) := Real.rpow_pos_of_pos hp0 _
+  have hppos : (0 : ℝ) < ((p : ℝ)) ^ (-s) := Real.rpow_pos_of_pos hp0 _
   have hzabs := abs_le.mp hz
-  have hne1 : (1 : ℝ) - z * ((p:ℝ)) ^ (-s) ≠ 0 := by
-    have : z * ((p:ℝ)) ^ (-s) ≤ 2/3 := by nlinarith [hzabs.2, hppos, hpsinv]
+  have hne1 : (1 : ℝ) - z * ((p : ℝ)) ^ (-s) ≠ 0 := by
+    have : z * ((p : ℝ)) ^ (-s) ≤ 2/3 := by nlinarith [hzabs.2, hppos, hpsinv]
     intro hcon
-    have : z * ((p:ℝ)) ^ (-s) = 1 := by linarith
+    have : z * ((p : ℝ)) ^ (-s) = 1 := by linarith
     linarith
-  have hne2 : (1 : ℝ) - (1 : ℝ) * ((p:ℝ)) ^ (-s) ≠ 0 := by
+  have hne2 : (1 : ℝ) - (1 : ℝ) * ((p : ℝ)) ^ (-s) ≠ 0 := by
     rw [one_mul]
     intro hcon
-    have : ((p:ℝ)) ^ (-s) = 1 := by linarith
+    have : ((p : ℝ)) ^ (-s) = 1 := by linarith
     linarith
-  have hpz : ((p:ℝ)) ^ s - z ≠ 0 := by
+  have hpz : ((p : ℝ)) ^ s - z ≠ 0 := by
     have h2 := hzabs.2
     intro hcon
     linarith
-  have hp1 : ((p:ℝ)) ^ s - 1 ≠ 0 := by
+  have hp1 : ((p : ℝ)) ^ s - 1 ≠ 0 := by
     intro hcon
     linarith
-  have hA : HasDerivAt (fun t : ℝ => -Real.log (1 - z * ((p:ℝ)) ^ (-t)))
-      (-(z * Real.log (p:ℝ) * ((p:ℝ)) ^ (-s) / (1 - z * ((p:ℝ)) ^ (-s)))) s :=
+  have hA : HasDerivAt (fun t : ℝ => -Real.log (1 - z * ((p : ℝ)) ^ (-t)))
+      (-(z * Real.log (p : ℝ) * ((p : ℝ)) ^ (-s) / (1 - z * ((p : ℝ)) ^ (-s)))) s :=
     (deriv_log_one_sub_const_rpow p hp z s hne1).neg
-  have hB : HasDerivAt (fun t : ℝ => z * Real.log (1 - ((p:ℝ)) ^ (-t)))
-      (z * (Real.log (p:ℝ) * ((p:ℝ)) ^ (-s) / (1 - ((p:ℝ)) ^ (-s)))) s := by
+  have hB : HasDerivAt (fun t : ℝ => z * Real.log (1 - ((p : ℝ)) ^ (-t)))
+      (z * (Real.log (p : ℝ) * ((p : ℝ)) ^ (-s) / (1 - ((p : ℝ)) ^ (-s)))) s := by
     have h := (deriv_log_one_sub_const_rpow p hp 1 s hne2).const_mul z
     simpa using h
   have hsum := hA.add hB
-  have hval : -(z * (z - 1) * Real.log (p:ℝ))
-        / ((((p:ℝ)) ^ s - 1) * (((p:ℝ)) ^ s - z))
-      = -(z * Real.log (p:ℝ) * ((p:ℝ)) ^ (-s) / (1 - z * ((p:ℝ)) ^ (-s)))
-        + z * (Real.log (p:ℝ) * ((p:ℝ)) ^ (-s) / (1 - ((p:ℝ)) ^ (-s))) := by
-    have hps0 : ((p:ℝ)) ^ s ≠ 0 := by
+  have hval : -(z * (z - 1) * Real.log (p : ℝ))
+        / ((((p : ℝ)) ^ s - 1) * (((p : ℝ)) ^ s - z))
+      = -(z * Real.log (p : ℝ) * ((p : ℝ)) ^ (-s) / (1 - z * ((p : ℝ)) ^ (-s)))
+        + z * (Real.log (p : ℝ) * ((p : ℝ)) ^ (-s) / (1 - ((p : ℝ)) ^ (-s))) := by
+    have hps0 : ((p : ℝ)) ^ s ≠ 0 := by
       intro hcon; rw [hcon] at hps; linarith
     rw [hneg]
-    rw [show (1 : ℝ) - z * (((p:ℝ)) ^ s)⁻¹ = (((p:ℝ)) ^ s - z) / ((p:ℝ)) ^ s by
+    rw [show (1 : ℝ) - z * (((p : ℝ)) ^ s)⁻¹ = (((p : ℝ)) ^ s - z) / ((p : ℝ)) ^ s by
       field_simp]
-    rw [show (1 : ℝ) - (((p:ℝ)) ^ s)⁻¹ = (((p:ℝ)) ^ s - 1) / ((p:ℝ)) ^ s by
+    rw [show (1 : ℝ) - (((p : ℝ)) ^ s)⁻¹ = (((p : ℝ)) ^ s - 1) / ((p : ℝ)) ^ s by
       field_simp]
     field_simp
     ring
@@ -9326,19 +9326,19 @@ theorem deriv_log_prime_factor (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
 Crude route: |z(z-1)| <= 6, p^s - 1 >= (2/3)p^s, |p^s - z| >= (1/3)p^s. -/
 theorem deriv_prime_term_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℝ) (hz : |z| ≤ 2) :
-    |(-(z * (z - 1) * Real.log (p:ℝ))
-        / ((((p:ℝ)) ^ s - 1) * (((p:ℝ)) ^ s - z)))|
-      ≤ 27 * Real.log (p:ℝ) * ((p:ℝ)) ^ (-2*s) := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hps : (3 : ℝ) ≤ ((p:ℝ)) ^ s := by
+    |(-(z * (z - 1) * Real.log (p : ℝ))
+        / ((((p : ℝ)) ^ s - 1) * (((p : ℝ)) ^ s - z)))|
+      ≤ 27 * Real.log (p : ℝ) * ((p : ℝ)) ^ (-2*s) := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hps : (3 : ℝ) ≤ ((p : ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ ((p:ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
-  have hps0 : (0 : ℝ) < ((p:ℝ)) ^ s := by linarith
+      _ ≤ ((p : ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hps0 : (0 : ℝ) < ((p : ℝ)) ^ s := by linarith
   have hzabs := abs_le.mp hz
-  have hlogpos : (0 : ℝ) ≤ Real.log (p:ℝ) := Real.log_nonneg (by linarith)
-  have hnum : |z * (z - 1) * Real.log (p:ℝ)| ≤ 6 * Real.log (p:ℝ) := by
+  have hlogpos : (0 : ℝ) ≤ Real.log (p : ℝ) := Real.log_nonneg (by linarith)
+  have hnum : |z * (z - 1) * Real.log (p : ℝ)| ≤ 6 * Real.log (p : ℝ) := by
     rw [abs_mul, abs_mul]
     rw [abs_of_nonneg hlogpos]
     have h1 : |z| ≤ 2 := hz
@@ -9347,35 +9347,35 @@ theorem deriv_prime_term_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
       constructor <;> linarith [hzabs.1, hzabs.2]
     have hprod : |z| * |z - 1| ≤ 6 := by nlinarith [abs_nonneg z, abs_nonneg (z - 1), h1, h2]
     nlinarith [hprod, hlogpos]
-  have hd1 : (2/3) * ((p:ℝ)) ^ s ≤ ((p:ℝ)) ^ s - 1 := by linarith
-  have hd2 : (1/3) * ((p:ℝ)) ^ s ≤ ((p:ℝ)) ^ s - z := by
+  have hd1 : (2/3) * ((p : ℝ)) ^ s ≤ ((p : ℝ)) ^ s - 1 := by linarith
+  have hd2 : (1/3) * ((p : ℝ)) ^ s ≤ ((p : ℝ)) ^ s - z := by
     linarith [hzabs.2]
-  have hden : (2/9) * (((p:ℝ)) ^ s) ^ 2
-      ≤ (((p:ℝ)) ^ s - 1) * (((p:ℝ)) ^ s - z) := by
+  have hden : (2/9) * (((p : ℝ)) ^ s) ^ 2
+      ≤ (((p : ℝ)) ^ s - 1) * (((p : ℝ)) ^ s - z) := by
     nlinarith [hd1, hd2, hps0]
-  have hdenpos : (0 : ℝ) < (((p:ℝ)) ^ s - 1) * (((p:ℝ)) ^ s - z) := by nlinarith [hps0]
-  have hsq : (((p:ℝ)) ^ s) ^ 2 = ((p:ℝ)) ^ (2*s) := by
-    rw [← Real.rpow_natCast (((p:ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
+  have hdenpos : (0 : ℝ) < (((p : ℝ)) ^ s - 1) * (((p : ℝ)) ^ s - z) := by nlinarith [hps0]
+  have hsq : (((p : ℝ)) ^ s) ^ 2 = ((p : ℝ)) ^ (2*s) := by
+    rw [← Real.rpow_natCast (((p : ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
     norm_num
     ring_nf
   rw [abs_div, abs_neg]
   rw [div_le_iff₀ (by rwa [abs_of_pos hdenpos])]
   rw [abs_of_pos hdenpos]
-  have hpow : ((p:ℝ)) ^ (-2*s) * ((p:ℝ)) ^ (2*s) = 1 := by
+  have hpow : ((p : ℝ)) ^ (-2*s) * ((p : ℝ)) ^ (2*s) = 1 := by
     rw [← Real.rpow_add hp0]
     norm_num
-  have hstep : |z * (z - 1) * Real.log (p:ℝ)| ≤ 6 * Real.log (p:ℝ) := hnum
-  have hrhs : 27 * Real.log (p:ℝ) * ((p:ℝ)) ^ (-2*s)
-        * ((((p:ℝ)) ^ s - 1) * (((p:ℝ)) ^ s - z))
-      ≥ 27 * Real.log (p:ℝ) * ((p:ℝ)) ^ (-2*s) * ((2/9) * (((p:ℝ)) ^ s) ^ 2) := by
-    have hc : (0 : ℝ) ≤ 27 * Real.log (p:ℝ) * ((p:ℝ)) ^ (-2*s) := by
-      have : (0 : ℝ) < ((p:ℝ)) ^ (-2*s) := Real.rpow_pos_of_pos hp0 _
+  have hstep : |z * (z - 1) * Real.log (p : ℝ)| ≤ 6 * Real.log (p : ℝ) := hnum
+  have hrhs : 27 * Real.log (p : ℝ) * ((p : ℝ)) ^ (-2*s)
+        * ((((p : ℝ)) ^ s - 1) * (((p : ℝ)) ^ s - z))
+      ≥ 27 * Real.log (p : ℝ) * ((p : ℝ)) ^ (-2*s) * ((2/9) * (((p : ℝ)) ^ s) ^ 2) := by
+    have hc : (0 : ℝ) ≤ 27 * Real.log (p : ℝ) * ((p : ℝ)) ^ (-2*s) := by
+      have : (0 : ℝ) < ((p : ℝ)) ^ (-2*s) := Real.rpow_pos_of_pos hp0 _
       positivity
     exact mul_le_mul_of_nonneg_left hden hc
-  have hsimp : 27 * Real.log (p:ℝ) * ((p:ℝ)) ^ (-2*s) * ((2/9) * (((p:ℝ)) ^ s) ^ 2)
-      = 6 * Real.log (p:ℝ) := by
+  have hsimp : 27 * Real.log (p : ℝ) * ((p : ℝ)) ^ (-2*s) * ((2/9) * (((p : ℝ)) ^ s) ^ 2)
+      = 6 * Real.log (p : ℝ) := by
     rw [hsq]
-    have : ((p:ℝ)) ^ (-2*s) * ((p:ℝ)) ^ (2*s) = 1 := hpow
+    have : ((p : ℝ)) ^ (-2*s) * ((p : ℝ)) ^ (2*s) = 1 := hpow
     nlinarith [this]
   linarith [hstep, hrhs, hsimp]
 
@@ -9384,17 +9384,17 @@ needs a dominating function independent of the point, so we replace p^(-2s)
 by p^(-2), valid since s >= 1 and p >= 3 > 1. -/
 theorem deriv_prime_term_bound_uniform (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℝ) (hz : |z| ≤ 2) :
-    |(-(z * (z - 1) * Real.log (p:ℝ))
-        / ((((p:ℝ)) ^ s - 1) * (((p:ℝ)) ^ s - z)))|
-      ≤ 27 * Real.log (p:ℝ) * ((p:ℝ)) ^ (-(2 : ℝ)) := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hlogpos : (0 : ℝ) ≤ Real.log (p:ℝ) := Real.log_nonneg (by linarith)
+    |(-(z * (z - 1) * Real.log (p : ℝ))
+        / ((((p : ℝ)) ^ s - 1) * (((p : ℝ)) ^ s - z)))|
+      ≤ 27 * Real.log (p : ℝ) * ((p : ℝ)) ^ (-(2 : ℝ)) := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hlogpos : (0 : ℝ) ≤ Real.log (p : ℝ) := Real.log_nonneg (by linarith)
   have hbase := deriv_prime_term_bound p hp s hs z hz
-  have hmono : ((p:ℝ)) ^ (-2*s) ≤ ((p:ℝ)) ^ (-(2 : ℝ)) := by
+  have hmono : ((p : ℝ)) ^ (-2*s) ≤ ((p : ℝ)) ^ (-(2 : ℝ)) := by
     apply Real.rpow_le_rpow_of_exponent_le (by linarith)
     linarith
-  have : 27 * Real.log (p:ℝ) * ((p:ℝ)) ^ (-2*s)
-      ≤ 27 * Real.log (p:ℝ) * ((p:ℝ)) ^ (-(2 : ℝ)) := by
+  have : 27 * Real.log (p : ℝ) * ((p : ℝ)) ^ (-2*s)
+      ≤ 27 * Real.log (p : ℝ) * ((p : ℝ)) ^ (-(2 : ℝ)) := by
     apply mul_le_mul_of_nonneg_left hmono
     linarith
   linarith
@@ -9402,12 +9402,12 @@ theorem deriv_prime_term_bound_uniform (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 
 /-- The s-free dominator is summable. -/
 theorem deriv_bound_uniform_summable :
     Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))) := by
+      27 * Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))) := by
   have h := deriv_series_summable 1 (le_refl 1)
   have heq : (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-2*(1 : ℝ)))
+      Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-2*(1 : ℝ)))
       = fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) := by
+      Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) := by
     funext p
     norm_num
   rw [heq] at h
@@ -9419,41 +9419,41 @@ theorem deriv_bound_uniform_summable :
 theorem hasDerivAt_log_series (z : ℝ) (hz : |z| ≤ 2) (s : ℝ)
     (hsmem : s ∈ Set.Ioo (1 : ℝ) 2) :
     HasDerivAt (fun t : ℝ => ∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (-Real.log (1 - z * (((p:ℕ):ℝ)) ^ (-t))
-          + z * Real.log (1 - (((p:ℕ):ℝ)) ^ (-t))))
+        (-Real.log (1 - z * (((p : ℕ):ℝ)) ^ (-t))
+          + z * Real.log (1 - (((p : ℕ):ℝ)) ^ (-t))))
       (∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (-(z * (z - 1) * Real.log ((p:ℕ):ℝ))
-          / (((((p:ℕ):ℝ)) ^ s - 1) * ((((p:ℕ):ℝ)) ^ s - z)))) s := by
+        (-(z * (z - 1) * Real.log ((p : ℕ):ℝ))
+          / (((((p : ℕ):ℝ)) ^ s - 1) * ((((p : ℕ):ℝ)) ^ s - z)))) s := by
   have hy0 : (3/2 : ℝ) ∈ Set.Ioo (1 : ℝ) 2 := by
     constructor <;> norm_num
   have hconv : Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      -Real.log (1 - z * (((p:ℕ):ℝ)) ^ (-(3/2:ℝ)))
-        + z * Real.log (1 - (((p:ℕ):ℝ)) ^ (-(3/2:ℝ)))) :=
+      -Real.log (1 - z * (((p : ℕ):ℝ)) ^ (-(3/2:ℝ)))
+        + z * Real.log (1 - (((p : ℕ):ℝ)) ^ (-(3/2:ℝ)))) :=
     (prime_correction_summable (3/2) (by norm_num) z hz).of_abs
   have hshape : (∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (-(z * (z - 1) * Real.log ((p:ℕ):ℝ))
-          / ((((p:ℕ):ℝ)) ^ s - 1) / ((((p:ℕ):ℝ)) ^ s - z)))
+        (-(z * (z - 1) * Real.log ((p : ℕ):ℝ))
+          / ((((p : ℕ):ℝ)) ^ s - 1) / ((((p : ℕ):ℝ)) ^ s - z)))
       = ∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (-(z * (z - 1) * Real.log ((p:ℕ):ℝ))
-          / (((((p:ℕ):ℝ)) ^ s - 1) * ((((p:ℕ):ℝ)) ^ s - z))) := by
+        (-(z * (z - 1) * Real.log ((p : ℕ):ℝ))
+          / (((((p : ℕ):ℝ)) ^ s - 1) * ((((p : ℕ):ℝ)) ^ s - z))) := by
     apply tsum_congr
     intro p
     rw [div_div]
   rw [← hshape]
   apply hasDerivAt_tsum_of_isPreconnected
     (g := fun (p : {p : ℕ // p.Prime ∧ 3 ≤ p}) (t : ℝ) =>
-      -Real.log (1 - z * (((p:ℕ):ℝ)) ^ (-t))
-        + z * Real.log (1 - (((p:ℕ):ℝ)) ^ (-t)))
+      -Real.log (1 - z * (((p : ℕ):ℝ)) ^ (-t))
+        + z * Real.log (1 - (((p : ℕ):ℝ)) ^ (-t)))
     (g' := fun (p : {p : ℕ // p.Prime ∧ 3 ≤ p}) (t : ℝ) =>
-      -(z * (z - 1) * Real.log ((p:ℕ):ℝ))
-        / ((((p:ℕ):ℝ)) ^ t - 1) / ((((p:ℕ):ℝ)) ^ t - z))
+      -(z * (z - 1) * Real.log ((p : ℕ):ℝ))
+        / ((((p : ℕ):ℝ)) ^ t - 1) / ((((p : ℕ):ℝ)) ^ t - z))
     deriv_bound_uniform_summable isOpen_Ioo isPreconnected_Ioo _ _ hy0 hconv hsmem
   · intro p y hy
     rw [div_div]
-    exact deriv_log_prime_factor (p:ℕ) p.2.2 y (le_of_lt hy.1) z hz
+    exact deriv_log_prime_factor (p : ℕ) p.2.2 y (le_of_lt hy.1) z hz
   · intro p y hy
     rw [Real.norm_eq_abs, div_div]
-    exact deriv_prime_term_bound_uniform (p:ℕ) p.2.2 y (le_of_lt hy.1) z hz
+    exact deriv_prime_term_bound_uniform (p : ℕ) p.2.2 y (le_of_lt hy.1) z hz
 
 /-- kappa(s) = zetaTilde(s) * (1 - 2^(-s)) for s > 1.
 Real-part projection of cFac_eq_zeta.  This is what lets Lemma 3.9's kappa-part
@@ -9462,14 +9462,14 @@ split into f(s) + log 2/(2^s - 1), with f = (log zetaTilde)' carried opaquely
 theorem kappaFac_eq_zetaTilde (s : ℝ) (hs : 1 < s) :
     kappaFac s = zetaTilde s * (1 - (2 : ℝ) ^ (-s)) := by
   have hne : s ≠ 1 := ne_of_gt hs
-  have hcast : ((1 : ℂ) - ((2 : ℂ)) ^ (-(s:ℂ))) = (((1 - (2 : ℝ) ^ (-s) : ℝ)) : ℂ) := by
+  have hcast : ((1 : ℂ) - ((2 : ℂ)) ^ (-(s : ℂ))) = (((1 - (2 : ℝ) ^ (-s) : ℝ)) : ℂ) := by
     push_cast
     rw [show ((2 : ℂ)) = (((2 : ℝ)) : ℂ) by norm_num]
-    rw [show (-(s:ℂ)) = (((-s : ℝ)) : ℂ) by push_cast; ring]
+    rw [show (-(s : ℂ)) = (((-s : ℝ)) : ℂ) by push_cast; ring]
     rw [← Complex.ofReal_cpow (by norm_num : (0 : ℝ) ≤ 2)]
   have hz := cFac_eq_zeta s hs
   rw [hcast] at hz
-  have hre : cFac s = (riemannZeta (s:ℂ)).re * (1 - (2 : ℝ) ^ (-s)) := by
+  have hre : cFac s = (riemannZeta (s : ℂ)).re * (1 - (2 : ℝ) ^ (-s)) := by
     have := congrArg Complex.re hz
     simpa [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im] using this
   unfold kappaFac zetaTilde
@@ -9479,55 +9479,55 @@ theorem kappaFac_eq_zetaTilde (s : ℝ) (hs : 1 < s) :
 /-- Each regularised factor is positive for real z with |z| <= 2, p >= 3, s >= 1. -/
 theorem reg_factor_real_pos (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℝ) (hz : |z| ≤ 2) :
-    0 < (1 - z * ((p:ℝ)) ^ (-s))⁻¹ * (1 - ((p:ℝ)) ^ (-s)) ^ z := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hppos : (0 : ℝ) < ((p:ℝ)) ^ (-s) := Real.rpow_pos_of_pos hp0 _
-  have hthird : ((p:ℝ)) ^ (-s) ≤ 1/3 := by
-    have h1 : ((p:ℝ)) ^ (-s) ≤ ((p:ℝ)) ^ (-(1 : ℝ)) := by
+    0 < (1 - z * ((p : ℝ)) ^ (-s))⁻¹ * (1 - ((p : ℝ)) ^ (-s)) ^ z := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hppos : (0 : ℝ) < ((p : ℝ)) ^ (-s) := Real.rpow_pos_of_pos hp0 _
+  have hthird : ((p : ℝ)) ^ (-s) ≤ 1/3 := by
+    have h1 : ((p : ℝ)) ^ (-s) ≤ ((p : ℝ)) ^ (-(1 : ℝ)) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
     rw [Real.rpow_neg_one] at h1
-    have h2 : ((p:ℝ))⁻¹ ≤ 1/3 := by
+    have h2 : ((p : ℝ))⁻¹ ≤ 1/3 := by
       rw [inv_le_comm₀ hp0 (by norm_num)]
       linarith
     linarith
   have hzabs := abs_le.mp hz
-  have hden : (0 : ℝ) < 1 - z * ((p:ℝ)) ^ (-s) := by
+  have hden : (0 : ℝ) < 1 - z * ((p : ℝ)) ^ (-s) := by
     nlinarith [hzabs.2, hppos, hthird]
-  have hbase : (0 : ℝ) < 1 - ((p:ℝ)) ^ (-s) := by linarith
-  have h1 : (0 : ℝ) < (1 - z * ((p:ℝ)) ^ (-s))⁻¹ := inv_pos.mpr hden
-  have h2 : (0 : ℝ) < (1 - ((p:ℝ)) ^ (-s)) ^ z := Real.rpow_pos_of_pos hbase z
+  have hbase : (0 : ℝ) < 1 - ((p : ℝ)) ^ (-s) := by linarith
+  have h1 : (0 : ℝ) < (1 - z * ((p : ℝ)) ^ (-s))⁻¹ := inv_pos.mpr hden
+  have h2 : (0 : ℝ) < (1 - ((p : ℝ)) ^ (-s)) ^ z := Real.rpow_pos_of_pos hbase z
   exact mul_pos h1 h2
 
 /-- The real regularised family is multipliable: its logs are summable
 (prime_correction_summable) and each factor is positive. -/
 theorem reg_multipliable_three_real (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
-      (1 - z * (((p:ℕ):ℝ)) ^ (-s))⁻¹ * (1 - (((p:ℕ):ℝ)) ^ (-s)) ^ z) := by
+      (1 - z * (((p : ℕ):ℝ)) ^ (-s))⁻¹ * (1 - (((p : ℕ):ℝ)) ^ (-s)) ^ z) := by
   apply Real.multipliable_of_summable_log
   · intro p
-    exact reg_factor_real_pos (p:ℕ) p.2.2 s hs z hz
+    exact reg_factor_real_pos (p : ℕ) p.2.2 s hs z hz
   · have hsum := (prime_correction_summable s hs z hz).of_abs
     apply hsum.congr
     intro p
-    have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast p.2.2
-    have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-    have hpos := reg_factor_real_pos (p:ℕ) p.2.2 s hs z hz
-    have hppos : (0 : ℝ) < (((p:ℕ):ℝ)) ^ (-s) := Real.rpow_pos_of_pos hp0 _
+    have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast p.2.2
+    have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+    have hpos := reg_factor_real_pos (p : ℕ) p.2.2 s hs z hz
+    have hppos : (0 : ℝ) < (((p : ℕ):ℝ)) ^ (-s) := Real.rpow_pos_of_pos hp0 _
     have hzabs := abs_le.mp hz
-    have hthird : (((p:ℕ):ℝ)) ^ (-s) ≤ 1/3 := by
-      have h1 : (((p:ℕ):ℝ)) ^ (-s) ≤ (((p:ℕ):ℝ)) ^ (-(1 : ℝ)) := by
+    have hthird : (((p : ℕ):ℝ)) ^ (-s) ≤ 1/3 := by
+      have h1 : (((p : ℕ):ℝ)) ^ (-s) ≤ (((p : ℕ):ℝ)) ^ (-(1 : ℝ)) := by
         apply Real.rpow_le_rpow_of_exponent_le (by linarith)
         linarith
       rw [Real.rpow_neg_one] at h1
-      have h2 : ((((p:ℕ):ℝ)))⁻¹ ≤ 1/3 := by
+      have h2 : ((((p : ℕ):ℝ)))⁻¹ ≤ 1/3 := by
         rw [inv_le_comm₀ hp0 (by norm_num)]
         linarith
       linarith
-    have hden : (0 : ℝ) < 1 - z * (((p:ℕ):ℝ)) ^ (-s) := by
+    have hden : (0 : ℝ) < 1 - z * (((p : ℕ):ℝ)) ^ (-s) := by
       nlinarith [hzabs.2, hppos, hthird]
-    have hbase : (0 : ℝ) < 1 - (((p:ℕ):ℝ)) ^ (-s) := by linarith
+    have hbase : (0 : ℝ) < 1 - (((p : ℕ):ℝ)) ^ (-s) := by linarith
     rw [Real.log_mul (by positivity) (by positivity), Real.log_inv, Real.log_rpow hbase]
 
 /-- The log of the real regularised p >= 3 product is the sum of the logs.
@@ -9535,34 +9535,34 @@ This is what turns hasDerivAt_log_series (a statement about the tsum) into a
 statement about the product, i.e. about log G2 restricted to its p >= 3 part. -/
 theorem log_reg_tprod_real (s : ℝ) (hs : 1 ≤ s) (z : ℝ) (hz : |z| ≤ 2) :
     Real.log (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (1 - z * (((p:ℕ):ℝ)) ^ (-s))⁻¹ * (1 - (((p:ℕ):ℝ)) ^ (-s)) ^ z)
+        (1 - z * (((p : ℕ):ℝ)) ^ (-s))⁻¹ * (1 - (((p : ℕ):ℝ)) ^ (-s)) ^ z)
       = ∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (-Real.log (1 - z * (((p:ℕ):ℝ)) ^ (-s))
-          + z * Real.log (1 - (((p:ℕ):ℝ)) ^ (-s))) := by
+        (-Real.log (1 - z * (((p : ℕ):ℝ)) ^ (-s))
+          + z * Real.log (1 - (((p : ℕ):ℝ)) ^ (-s))) := by
   have hlogeq : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-      Real.log ((1 - z * (((p:ℕ):ℝ)) ^ (-s))⁻¹ * (1 - (((p:ℕ):ℝ)) ^ (-s)) ^ z)
-        = -Real.log (1 - z * (((p:ℕ):ℝ)) ^ (-s))
-          + z * Real.log (1 - (((p:ℕ):ℝ)) ^ (-s)) := by
+      Real.log ((1 - z * (((p : ℕ):ℝ)) ^ (-s))⁻¹ * (1 - (((p : ℕ):ℝ)) ^ (-s)) ^ z)
+        = -Real.log (1 - z * (((p : ℕ):ℝ)) ^ (-s))
+          + z * Real.log (1 - (((p : ℕ):ℝ)) ^ (-s)) := by
     intro p
-    have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast p.2.2
-    have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-    have hppos : (0 : ℝ) < (((p:ℕ):ℝ)) ^ (-s) := Real.rpow_pos_of_pos hp0 _
-    have hthird : (((p:ℕ):ℝ)) ^ (-s) ≤ 1/3 := by
-      have h1 : (((p:ℕ):ℝ)) ^ (-s) ≤ (((p:ℕ):ℝ)) ^ (-(1 : ℝ)) := by
+    have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast p.2.2
+    have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+    have hppos : (0 : ℝ) < (((p : ℕ):ℝ)) ^ (-s) := Real.rpow_pos_of_pos hp0 _
+    have hthird : (((p : ℕ):ℝ)) ^ (-s) ≤ 1/3 := by
+      have h1 : (((p : ℕ):ℝ)) ^ (-s) ≤ (((p : ℕ):ℝ)) ^ (-(1 : ℝ)) := by
         apply Real.rpow_le_rpow_of_exponent_le (by linarith)
         linarith
       rw [Real.rpow_neg_one] at h1
-      have h2 : ((((p:ℕ):ℝ)))⁻¹ ≤ 1/3 := by
+      have h2 : ((((p : ℕ):ℝ)))⁻¹ ≤ 1/3 := by
         rw [inv_le_comm₀ hp0 (by norm_num)]
         linarith
       linarith
     have hzabs := abs_le.mp hz
-    have hden : (0 : ℝ) < 1 - z * (((p:ℕ):ℝ)) ^ (-s) := by
+    have hden : (0 : ℝ) < 1 - z * (((p : ℕ):ℝ)) ^ (-s) := by
       nlinarith [hzabs.2, hppos, hthird]
-    have hbase : (0 : ℝ) < 1 - (((p:ℕ):ℝ)) ^ (-s) := by linarith
+    have hbase : (0 : ℝ) < 1 - (((p : ℕ):ℝ)) ^ (-s) := by linarith
     rw [Real.log_mul (by positivity) (by positivity), Real.log_inv, Real.log_rpow hbase]
   rw [log_tprod_real
-    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => reg_factor_real_pos (p:ℕ) p.2.2 s hs z hz)
+    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => reg_factor_real_pos (p : ℕ) p.2.2 s hs z hz)
     (reg_multipliable_three_real s hs z hz)
     (by
       have hsum := (prime_correction_summable s hs z hz).of_abs
@@ -9578,10 +9578,10 @@ derivative across the pointwise identity on the open interval. -/
 theorem hasDerivAt_log_reg_tprod (z : ℝ) (hz : |z| ≤ 2) (s : ℝ)
     (hsmem : s ∈ Set.Ioo (1 : ℝ) 2) :
     HasDerivAt (fun t : ℝ => Real.log (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (1 - z * (((p:ℕ):ℝ)) ^ (-t))⁻¹ * (1 - (((p:ℕ):ℝ)) ^ (-t)) ^ z))
+        (1 - z * (((p : ℕ):ℝ)) ^ (-t))⁻¹ * (1 - (((p : ℕ):ℝ)) ^ (-t)) ^ z))
       (∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (-(z * (z - 1) * Real.log ((p:ℕ):ℝ))
-          / (((((p:ℕ):ℝ)) ^ s - 1) * ((((p:ℕ):ℝ)) ^ s - z)))) s := by
+        (-(z * (z - 1) * Real.log ((p : ℕ):ℝ))
+          / (((((p : ℕ):ℝ)) ^ s - 1) * ((((p : ℕ):ℝ)) ^ s - z)))) s := by
   have hbase := hasDerivAt_log_series z hz s hsmem
   apply hbase.congr_of_eventuallyEq
   filter_upwards [Ioo_mem_nhds hsmem.1 hsmem.2] with t ht
@@ -9630,11 +9630,11 @@ theorem lemma_3_9_real (z : ℝ) (hz : |z| ≤ 2) (s : ℝ) (hsmem : s ∈ Set.I
     HasDerivAt (fun t : ℝ =>
         z * (Real.log (zetaTilde t) + Real.log (1 - (2 : ℝ) ^ (-t)))
           + Real.log (∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-              (1 - z * (((p:ℕ):ℝ)) ^ (-t))⁻¹ * (1 - (((p:ℕ):ℝ)) ^ (-t)) ^ z))
+              (1 - z * (((p : ℕ):ℝ)) ^ (-t))⁻¹ * (1 - (((p : ℕ):ℝ)) ^ (-t)) ^ z))
       (z * (f s + Real.log 2 / ((2 : ℝ) ^ s - 1))
         + ∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-            (-(z * (z - 1) * Real.log ((p:ℕ):ℝ))
-              / (((((p:ℕ):ℝ)) ^ s - 1) * ((((p:ℕ):ℝ)) ^ s - z)))) s := by
+            (-(z * (z - 1) * Real.log ((p : ℕ):ℝ))
+              / (((((p : ℕ):ℝ)) ^ s - 1) * ((((p : ℕ):ℝ)) ^ s - z)))) s := by
   have hs1 : 1 < s := hsmem.1
   have hkap := hf.add (deriv_log_one_sub_two_pow s hs1)
   have hprod := hasDerivAt_log_reg_tprod z hz s hsmem
@@ -9645,71 +9645,71 @@ p >= 3, s >= 1: its distance from 1 is at most 2/3, so its real part exceeds
 1/3.  This is the side condition Complex.hasDerivAt_log needs. -/
 theorem one_sub_mem_slitPlane (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (c : ℂ) (hc : Norm.norm c ≤ 2) :
-    (1 : ℂ) - c * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ) ∈ Complex.slitPlane := by
-  have hp3 : (3 : ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < ((p:ℕ):ℝ) := by linarith
-  have hppos : (0 : ℝ) < ((p:ℕ):ℝ) ^ (-s) := Real.rpow_pos_of_pos hp0 _
-  have hthird : ((p:ℕ):ℝ) ^ (-s) ≤ 1/3 := by
-    have h1 : ((p:ℕ):ℝ) ^ (-s) ≤ ((p:ℕ):ℝ) ^ (-(1 : ℝ)) := by
+    (1 : ℂ) - c * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ) ∈ Complex.slitPlane := by
+  have hp3 : (3 : ℝ) ≤ ((p : ℕ):ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < ((p : ℕ):ℝ) := by linarith
+  have hppos : (0 : ℝ) < ((p : ℕ):ℝ) ^ (-s) := Real.rpow_pos_of_pos hp0 _
+  have hthird : ((p : ℕ):ℝ) ^ (-s) ≤ 1/3 := by
+    have h1 : ((p : ℕ):ℝ) ^ (-s) ≤ ((p : ℕ):ℝ) ^ (-(1 : ℝ)) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       linarith
     rw [Real.rpow_neg_one] at h1
-    have h2 : (((p:ℕ):ℝ))⁻¹ ≤ 1/3 := by
+    have h2 : (((p : ℕ):ℝ))⁻¹ ≤ 1/3 := by
       rw [inv_le_comm₀ hp0 (by norm_num)]
       linarith
     linarith
-  have hnorm : Norm.norm (c * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ≤ 2/3 := by
+  have hnorm : Norm.norm (c * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) ≤ 2/3 := by
     rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hppos]
     nlinarith [norm_nonneg c, hc, hthird, hppos]
   rw [Complex.mem_slitPlane_iff]
   left
-  have hre : (((1 : ℂ) - c * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))).re
-      = 1 - (c * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)).re := by
+  have hre : (((1 : ℂ) - c * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))).re
+      = 1 - (c * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)).re := by
     simp
   rw [hre]
-  have habs : |(c * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)).re|
-      ≤ Norm.norm (c * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) := Complex.abs_re_le_norm _
+  have habs : |(c * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)).re|
+      ≤ Norm.norm (c * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) := Complex.abs_re_le_norm _
   have := abs_le.mp (le_trans habs hnorm)
   linarith [this.2]
 
 /-- The real derivative of t |-> p^(-t), extracted so both the real and the
 complex chains can use it. -/
 theorem hasDerivAt_rpow_neg (p : ℕ) (hp : 3 ≤ p) (s : ℝ) :
-    HasDerivAt (fun t : ℝ => ((p:ℝ)) ^ (-t))
-      (-(((p:ℝ)) ^ (-s) * Real.log (p:ℝ))) s := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hrw : (fun t : ℝ => ((p:ℝ)) ^ (-t))
-      = fun t : ℝ => Real.exp ((-t) * Real.log (p:ℝ)) := by
+    HasDerivAt (fun t : ℝ => ((p : ℝ)) ^ (-t))
+      (-(((p : ℝ)) ^ (-s) * Real.log (p : ℝ))) s := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hrw : (fun t : ℝ => ((p : ℝ)) ^ (-t))
+      = fun t : ℝ => Real.exp ((-t) * Real.log (p : ℝ)) := by
     funext t
     rw [Real.rpow_def_of_pos hp0, mul_comm]
   rw [hrw]
-  have hinner : HasDerivAt (fun t : ℝ => (-t) * Real.log (p:ℝ))
-      (-Real.log (p:ℝ)) s := by
-    simpa using (hasDerivAt_neg s).mul_const (Real.log (p:ℝ))
+  have hinner : HasDerivAt (fun t : ℝ => (-t) * Real.log (p : ℝ))
+      (-Real.log (p : ℝ)) s := by
+    simpa using (hasDerivAt_neg s).mul_const (Real.log (p : ℝ))
   have h := hinner.exp
   convert h using 1
-  rw [show Real.exp (-s * Real.log (p:ℝ)) = ((p:ℝ)) ^ (-s) by
+  rw [show Real.exp (-s * Real.log (p : ℝ)) = ((p : ℝ)) ^ (-s) by
     rw [Real.rpow_def_of_pos hp0, mul_comm]]
   ring
 
 /-- d/dt p^t = p^t log p.  Positive-exponent mirror of hasDerivAt_rpow_neg,
 needed for the r=2 per-prime derivative where p^s appears in the denominators. -/
 theorem hasDerivAt_rpow_pos (p : ℕ) (hp : 3 ≤ p) (s : ℝ) :
-    HasDerivAt (fun t : ℝ => ((p:ℝ)) ^ t)
-      (((p:ℝ)) ^ s * Real.log (p:ℝ)) s := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hrw : (fun t : ℝ => ((p:ℝ)) ^ t)
-      = fun t : ℝ => Real.exp (t * Real.log (p:ℝ)) := by
+    HasDerivAt (fun t : ℝ => ((p : ℝ)) ^ t)
+      (((p : ℝ)) ^ s * Real.log (p : ℝ)) s := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hrw : (fun t : ℝ => ((p : ℝ)) ^ t)
+      = fun t : ℝ => Real.exp (t * Real.log (p : ℝ)) := by
     funext t
     rw [Real.rpow_def_of_pos hp0, mul_comm]
   rw [hrw]
-  have hinner : HasDerivAt (fun t : ℝ => t * Real.log (p:ℝ)) (Real.log (p:ℝ)) s := by
-    simpa using (hasDerivAt_id s).mul_const (Real.log (p:ℝ))
+  have hinner : HasDerivAt (fun t : ℝ => t * Real.log (p : ℝ)) (Real.log (p : ℝ)) s := by
+    simpa using (hasDerivAt_id s).mul_const (Real.log (p : ℝ))
   have h := hinner.exp
   convert h using 1
-  rw [show Real.exp (s * Real.log (p:ℝ)) = ((p:ℝ)) ^ s by
+  rw [show Real.exp (s * Real.log (p : ℝ)) = ((p : ℝ)) ^ s by
     rw [Real.rpow_def_of_pos hp0, mul_comm]]
 
 /-- The r=2 per-prime derivative:
@@ -9719,40 +9719,40 @@ Verified numerically at (p,s,z) = (3,1.4,1.3), (5,1.7,0.9), (11,1.2,1.8). -/
 theorem deriv2_prime_term (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℝ) (hz : |z| ≤ 2) :
     HasDerivAt (fun t : ℝ =>
-        -((z - 1) * Real.log (p:ℝ)) / (((p:ℝ)) ^ t - 1) / (((p:ℝ)) ^ t - z))
-      ((z - 1) * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ s)
-        * (((((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)))
-        / ((((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2)) s := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hps : (3 : ℝ) ≤ ((p:ℝ)) ^ s := by
+        -((z - 1) * Real.log (p : ℝ)) / (((p : ℝ)) ^ t - 1) / (((p : ℝ)) ^ t - z))
+      ((z - 1) * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ s)
+        * (((((p : ℝ)) ^ s - z) + (((p : ℝ)) ^ s - 1)))
+        / ((((p : ℝ)) ^ s - 1) ^ 2 * ((((p : ℝ)) ^ s - z)) ^ 2)) s := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hps : (3 : ℝ) ≤ ((p : ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ ((p:ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+      _ ≤ ((p : ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
   have hzabs := abs_le.mp hz
-  have hd1 : ((p:ℝ)) ^ s - 1 ≠ 0 := by intro hcon; linarith
-  have hd2 : ((p:ℝ)) ^ s - z ≠ 0 := by
+  have hd1 : ((p : ℝ)) ^ s - 1 ≠ 0 := by intro hcon; linarith
+  have hd2 : ((p : ℝ)) ^ s - z ≠ 0 := by
     intro hcon
     have := hzabs.2
     linarith
   have hbase := hasDerivAt_rpow_pos p hp s
-  have hA : HasDerivAt (fun t : ℝ => ((p:ℝ)) ^ t - 1)
-      (((p:ℝ)) ^ s * Real.log (p:ℝ)) s := by
+  have hA : HasDerivAt (fun t : ℝ => ((p : ℝ)) ^ t - 1)
+      (((p : ℝ)) ^ s * Real.log (p : ℝ)) s := by
     simpa using hbase.sub_const 1
-  have hB : HasDerivAt (fun t : ℝ => ((p:ℝ)) ^ t - z)
-      (((p:ℝ)) ^ s * Real.log (p:ℝ)) s := by
+  have hB : HasDerivAt (fun t : ℝ => ((p : ℝ)) ^ t - z)
+      (((p : ℝ)) ^ s * Real.log (p : ℝ)) s := by
     simpa using hbase.sub_const z
-  have hstep1 := (hasDerivAt_const s (-((z - 1) * Real.log (p:ℝ)))).div hA hd1
+  have hstep1 := (hasDerivAt_const s (-((z - 1) * Real.log (p : ℝ)))).div hA hd1
   have hstep2 := hstep1.div hB hd2
-  have hval : (z - 1) * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ s)
-        * (((((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)))
-        / ((((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2)
-      = ((0 * (((p:ℝ)) ^ s - 1) - -((z - 1) * Real.log (p:ℝ))
-            * (((p:ℝ)) ^ s * Real.log (p:ℝ))) / (((p:ℝ)) ^ s - 1) ^ 2
-          * (((p:ℝ)) ^ s - z)
-        - -((z - 1) * Real.log (p:ℝ)) / (((p:ℝ)) ^ s - 1)
-            * (((p:ℝ)) ^ s * Real.log (p:ℝ)))
-        / (((p:ℝ)) ^ s - z) ^ 2 := by
+  have hval : (z - 1) * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ s)
+        * (((((p : ℝ)) ^ s - z) + (((p : ℝ)) ^ s - 1)))
+        / ((((p : ℝ)) ^ s - 1) ^ 2 * ((((p : ℝ)) ^ s - z)) ^ 2)
+      = ((0 * (((p : ℝ)) ^ s - 1) - -((z - 1) * Real.log (p : ℝ))
+            * (((p : ℝ)) ^ s * Real.log (p : ℝ))) / (((p : ℝ)) ^ s - 1) ^ 2
+          * (((p : ℝ)) ^ s - z)
+        - -((z - 1) * Real.log (p : ℝ)) / (((p : ℝ)) ^ s - 1)
+            * (((p : ℝ)) ^ s * Real.log (p : ℝ)))
+        / (((p : ℝ)) ^ s - z) ^ 2 := by
     field_simp
     ring
   rw [hval]
@@ -9764,145 +9764,145 @@ Crude route: |z-1| <= 3, (p^s-z)+(p^s-1) <= 2p^s, (p^s-1)^2 >= (4/9)p^(2s),
 (p^s-z)^2 >= (1/9)p^(2s), giving 9/(4/81) = 182.25; 200 leaves margin. -/
 theorem deriv2_prime_term_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℝ) (hz : |z| ≤ 2) :
-    |(z - 1) * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ s)
-        * (((((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)))
-        / ((((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2)|
-      ≤ 200 * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ (-(2 : ℝ))) := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hps : (3 : ℝ) ≤ ((p:ℝ)) ^ s := by
+    |(z - 1) * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ s)
+        * (((((p : ℝ)) ^ s - z) + (((p : ℝ)) ^ s - 1)))
+        / ((((p : ℝ)) ^ s - 1) ^ 2 * ((((p : ℝ)) ^ s - z)) ^ 2)|
+      ≤ 200 * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ (-(2 : ℝ))) := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hps : (3 : ℝ) ≤ ((p : ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ ((p:ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
-  have hps0 : (0 : ℝ) < ((p:ℝ)) ^ s := by linarith
+      _ ≤ ((p : ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hps0 : (0 : ℝ) < ((p : ℝ)) ^ s := by linarith
   have hzabs := abs_le.mp hz
-  have hlog0 : (0 : ℝ) ≤ (Real.log (p:ℝ)) ^ 2 := sq_nonneg _
-  have hnum : |(z - 1) * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ s)
-        * (((((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)))|
-      ≤ 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by
+  have hlog0 : (0 : ℝ) ≤ (Real.log (p : ℝ)) ^ 2 := sq_nonneg _
+  have hnum : |(z - 1) * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ s)
+        * (((((p : ℝ)) ^ s - z) + (((p : ℝ)) ^ s - 1)))|
+      ≤ 9 * (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by
     rw [abs_mul, abs_mul, abs_mul, abs_of_nonneg hlog0, abs_of_pos hps0]
     have h1 : |z - 1| ≤ 3 := by rw [abs_le]; constructor <;> linarith [hzabs.1, hzabs.2]
-    have h2 : |(((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)| ≤ 3 * ((p:ℝ)) ^ s := by
+    have h2 : |(((p : ℝ)) ^ s - z) + (((p : ℝ)) ^ s - 1)| ≤ 3 * ((p : ℝ)) ^ s := by
       rw [abs_le]
       constructor
       · linarith [hzabs.2, hps]
       · linarith [hzabs.1, hps]
-    calc |z - 1| * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ s
-          * |(((p:ℝ)) ^ s - z) + (((p:ℝ)) ^ s - 1)|
-        ≤ 3 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ s * (3 * ((p:ℝ)) ^ s) := by
+    calc |z - 1| * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ s
+          * |(((p : ℝ)) ^ s - z) + (((p : ℝ)) ^ s - 1)|
+        ≤ 3 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ s * (3 * ((p : ℝ)) ^ s) := by
           apply mul_le_mul _ h2 (abs_nonneg _) (by positivity)
           apply mul_le_mul_of_nonneg_right _ (le_of_lt hps0)
           exact mul_le_mul_of_nonneg_right h1 hlog0
-      _ = 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by ring
-  have hd1 : (2/3) * ((p:ℝ)) ^ s ≤ ((p:ℝ)) ^ s - 1 := by linarith
-  have hd2 : (1/3) * ((p:ℝ)) ^ s ≤ ((p:ℝ)) ^ s - z := by linarith [hzabs.2]
-  have hd1pos : (0 : ℝ) < ((p:ℝ)) ^ s - 1 := by linarith
-  have hd2pos : (0 : ℝ) < ((p:ℝ)) ^ s - z := by linarith [hzabs.2]
-  have hsq1 : (4/9) * ((((p:ℝ)) ^ s)) ^ 2 ≤ (((p:ℝ)) ^ s - 1) ^ 2 := by
+      _ = 9 * (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by ring
+  have hd1 : (2/3) * ((p : ℝ)) ^ s ≤ ((p : ℝ)) ^ s - 1 := by linarith
+  have hd2 : (1/3) * ((p : ℝ)) ^ s ≤ ((p : ℝ)) ^ s - z := by linarith [hzabs.2]
+  have hd1pos : (0 : ℝ) < ((p : ℝ)) ^ s - 1 := by linarith
+  have hd2pos : (0 : ℝ) < ((p : ℝ)) ^ s - z := by linarith [hzabs.2]
+  have hsq1 : (4/9) * ((((p : ℝ)) ^ s)) ^ 2 ≤ (((p : ℝ)) ^ s - 1) ^ 2 := by
     nlinarith [hd1, hps0]
-  have hsq2 : (1/9) * ((((p:ℝ)) ^ s)) ^ 2 ≤ ((((p:ℝ)) ^ s - z)) ^ 2 := by
+  have hsq2 : (1/9) * ((((p : ℝ)) ^ s)) ^ 2 ≤ ((((p : ℝ)) ^ s - z)) ^ 2 := by
     nlinarith [hd2, hps0]
-  have hden : (4/81) * ((((p:ℝ)) ^ s)) ^ 4
-      ≤ (((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2 := by
-    nlinarith [hsq1, hsq2, hps0, sq_nonneg (((p:ℝ)) ^ s)]
-  have hdenpos : (0 : ℝ) < (((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2 :=
+  have hden : (4/81) * ((((p : ℝ)) ^ s)) ^ 4
+      ≤ (((p : ℝ)) ^ s - 1) ^ 2 * ((((p : ℝ)) ^ s - z)) ^ 2 := by
+    nlinarith [hsq1, hsq2, hps0, sq_nonneg (((p : ℝ)) ^ s)]
+  have hdenpos : (0 : ℝ) < (((p : ℝ)) ^ s - 1) ^ 2 * ((((p : ℝ)) ^ s - z)) ^ 2 :=
     mul_pos (pow_pos hd1pos 2) (pow_pos hd2pos 2)
   rw [abs_div, abs_of_pos hdenpos, div_le_iff₀ hdenpos]
-  have hpow : ((p:ℝ)) ^ (-(2 : ℝ)) * ((((p:ℝ)) ^ s)) ^ 2 ≥ 1 := by
-    have hsq : ((((p:ℝ)) ^ s)) ^ 2 = ((p:ℝ)) ^ (2*s) := by
-      rw [← Real.rpow_natCast (((p:ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
+  have hpow : ((p : ℝ)) ^ (-(2 : ℝ)) * ((((p : ℝ)) ^ s)) ^ 2 ≥ 1 := by
+    have hsq : ((((p : ℝ)) ^ s)) ^ 2 = ((p : ℝ)) ^ (2*s) := by
+      rw [← Real.rpow_natCast (((p : ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
       norm_num
       ring_nf
     rw [hsq, ← Real.rpow_add hp0]
-    calc (1 : ℝ) = ((p:ℝ)) ^ (0 : ℝ) := by rw [Real.rpow_zero]
-      _ ≤ ((p:ℝ)) ^ (-(2 : ℝ) + 2*s) :=
+    calc (1 : ℝ) = ((p : ℝ)) ^ (0 : ℝ) := by rw [Real.rpow_zero]
+      _ ≤ ((p : ℝ)) ^ (-(2 : ℝ) + 2*s) :=
           Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
-  have hkey : 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2 : ℝ))
-        * ((4/81) * ((((p:ℝ)) ^ s)) ^ 4)
-      ≥ 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by
-    have hexp : ((p:ℝ)) ^ (-(2 : ℝ)) * ((((p:ℝ)) ^ s)) ^ 2 ≥ 1 := hpow
-    have h4 : ((((p:ℝ)) ^ s)) ^ 4 = ((((p:ℝ)) ^ s)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by ring
+  have hkey : 200 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ (-(2 : ℝ))
+        * ((4/81) * ((((p : ℝ)) ^ s)) ^ 4)
+      ≥ 9 * (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by
+    have hexp : ((p : ℝ)) ^ (-(2 : ℝ)) * ((((p : ℝ)) ^ s)) ^ 2 ≥ 1 := hpow
+    have h4 : ((((p : ℝ)) ^ s)) ^ 4 = ((((p : ℝ)) ^ s)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by ring
     rw [h4]
-    have hLQ : (0 : ℝ) ≤ (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by positivity
-    have hstep : (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2
-          * (((p:ℝ)) ^ (-(2 : ℝ)) * ((((p:ℝ)) ^ s)) ^ 2)
-        ≥ (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 * 1 :=
+    have hLQ : (0 : ℝ) ≤ (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by positivity
+    have hstep : (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2
+          * (((p : ℝ)) ^ (-(2 : ℝ)) * ((((p : ℝ)) ^ s)) ^ 2)
+        ≥ (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 * 1 :=
       mul_le_mul_of_nonneg_left hexp hLQ
-    calc 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2 : ℝ))
-          * ((4/81) * (((((p:ℝ)) ^ s)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2))
-        = (800/81) * ((Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2
-            * (((p:ℝ)) ^ (-(2 : ℝ)) * ((((p:ℝ)) ^ s)) ^ 2)) := by ring
-      _ ≥ (800/81) * ((Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 * 1) := by
+    calc 200 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ (-(2 : ℝ))
+          * ((4/81) * (((((p : ℝ)) ^ s)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2))
+        = (800/81) * ((Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2
+            * (((p : ℝ)) ^ (-(2 : ℝ)) * ((((p : ℝ)) ^ s)) ^ 2)) := by ring
+      _ ≥ (800/81) * ((Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 * 1) := by
           apply mul_le_mul_of_nonneg_left hstep (by norm_num)
-      _ = (800/81) * ((Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2) := by ring
-      _ ≥ 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by nlinarith [hLQ]
-  have hmul : 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2 : ℝ))
-        * ((((p:ℝ)) ^ s - 1) ^ 2 * ((((p:ℝ)) ^ s - z)) ^ 2)
-      ≥ 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2 : ℝ))
-        * ((4/81) * ((((p:ℝ)) ^ s)) ^ 4) := by
+      _ = (800/81) * ((Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2) := by ring
+      _ ≥ 9 * (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by nlinarith [hLQ]
+  have hmul : 200 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ (-(2 : ℝ))
+        * ((((p : ℝ)) ^ s - 1) ^ 2 * ((((p : ℝ)) ^ s - z)) ^ 2)
+      ≥ 200 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ (-(2 : ℝ))
+        * ((4/81) * ((((p : ℝ)) ^ s)) ^ 4) := by
     apply mul_le_mul_of_nonneg_left hden
-    have : (0 : ℝ) < ((p:ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
+    have : (0 : ℝ) < ((p : ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
     positivity
   linarith [hnum, hkey, hmul]
 
 theorem deriv2_clog_prime_term (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
     HasDerivAt (fun t : ℝ =>
-        -((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ))
-          / (((((p:ℝ)) ^ t : ℝ) : ℂ) - 1) / (((((p:ℝ)) ^ t : ℝ) : ℂ) - z))
-      ((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ) ^ 2 * ((((p:ℝ)) ^ s : ℝ) : ℂ)
-        * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1))
-        / ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-          * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))) s := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hps : (3 : ℝ) ≤ ((p:ℝ)) ^ s := by
+        -((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ))
+          / (((((p : ℝ)) ^ t : ℝ) : ℂ) - 1) / (((((p : ℝ)) ^ t : ℝ) : ℂ) - z))
+      ((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ) ^ 2 * ((((p : ℝ)) ^ s : ℝ) : ℂ)
+        * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1))
+        / ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+          * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))) s := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hps : (3 : ℝ) ≤ ((p : ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ ((p:ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
-  have hpsC : Norm.norm ((((p:ℝ)) ^ s : ℝ) : ℂ) = ((p:ℝ)) ^ s := by
+      _ ≤ ((p : ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hpsC : Norm.norm ((((p : ℝ)) ^ s : ℝ) : ℂ) = ((p : ℝ)) ^ s := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
-  have hd1 : ((((p:ℝ)) ^ s : ℝ) : ℂ) - 1 ≠ 0 := by
+  have hd1 : ((((p : ℝ)) ^ s : ℝ) : ℂ) - 1 ≠ 0 := by
     intro hcon
     rw [sub_eq_zero] at hcon
-    have : ((p:ℝ)) ^ s = 1 := by exact_mod_cast hcon
+    have : ((p : ℝ)) ^ s = 1 := by exact_mod_cast hcon
     linarith
-  have hd2 : ((((p:ℝ)) ^ s : ℝ) : ℂ) - z ≠ 0 := by
+  have hd2 : ((((p : ℝ)) ^ s : ℝ) : ℂ) - z ≠ 0 := by
     intro hcon
     rw [sub_eq_zero] at hcon
     rw [← hcon, hpsC] at hz
     linarith
-  have hbase : HasDerivAt (fun t : ℝ => ((((p:ℝ)) ^ t : ℝ) : ℂ))
-      (((((p:ℝ)) ^ s * Real.log (p:ℝ) : ℝ)) : ℂ) s :=
+  have hbase : HasDerivAt (fun t : ℝ => ((((p : ℝ)) ^ t : ℝ) : ℂ))
+      (((((p : ℝ)) ^ s * Real.log (p : ℝ) : ℝ)) : ℂ) s :=
     (hasDerivAt_rpow_pos p hp s).ofReal_comp
-  have hA : HasDerivAt (fun t : ℝ => ((((p:ℝ)) ^ t : ℝ) : ℂ) - 1)
-      (((((p:ℝ)) ^ s * Real.log (p:ℝ) : ℝ)) : ℂ) s := by
+  have hA : HasDerivAt (fun t : ℝ => ((((p : ℝ)) ^ t : ℝ) : ℂ) - 1)
+      (((((p : ℝ)) ^ s * Real.log (p : ℝ) : ℝ)) : ℂ) s := by
     simpa using hbase.sub_const 1
-  have hB : HasDerivAt (fun t : ℝ => ((((p:ℝ)) ^ t : ℝ) : ℂ) - z)
-      (((((p:ℝ)) ^ s * Real.log (p:ℝ) : ℝ)) : ℂ) s := by
+  have hB : HasDerivAt (fun t : ℝ => ((((p : ℝ)) ^ t : ℝ) : ℂ) - z)
+      (((((p : ℝ)) ^ s * Real.log (p : ℝ) : ℝ)) : ℂ) s := by
     simpa using hbase.sub_const z
-  have hstep1 := (hasDerivAt_const s (-((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ)))).div hA hd1
+  have hstep1 := (hasDerivAt_const s (-((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ)))).div hA hd1
   have hstep2 := hstep1.div hB hd2
-  have hfun : (fun t : ℝ => -((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ))
-        / (((((p:ℝ)) ^ t : ℝ) : ℂ) - 1) / (((((p:ℝ)) ^ t : ℝ) : ℂ) - z))
-      = (((fun _ : ℝ => -((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ)))
-          / fun t : ℝ => ((((p:ℝ)) ^ t : ℝ) : ℂ) - 1)
-        / fun t : ℝ => ((((p:ℝ)) ^ t : ℝ) : ℂ) - z) := by
+  have hfun : (fun t : ℝ => -((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ))
+        / (((((p : ℝ)) ^ t : ℝ) : ℂ) - 1) / (((((p : ℝ)) ^ t : ℝ) : ℂ) - z))
+      = (((fun _ : ℝ => -((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ)))
+          / fun t : ℝ => ((((p : ℝ)) ^ t : ℝ) : ℂ) - 1)
+        / fun t : ℝ => ((((p : ℝ)) ^ t : ℝ) : ℂ) - z) := by
     funext t
     simp only [Pi.div_apply]
   rw [hfun]
-  have hval : (z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ) ^ 2 * ((((p:ℝ)) ^ s : ℝ) : ℂ)
-        * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1))
-        / ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-          * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))
-      = ((0 * (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)
-            - -((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ))
-              * ((((p:ℝ)) ^ s * Real.log (p:ℝ) : ℝ) : ℂ))
-            / (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2 * (((((p:ℝ)) ^ s : ℝ) : ℂ) - z)
-          - (((fun _ : ℝ => -((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ)))
-              / fun t : ℝ => ((((p:ℝ)) ^ t : ℝ) : ℂ) - 1) s)
-              * ((((p:ℝ)) ^ s * Real.log (p:ℝ) : ℝ) : ℂ))
-        / (((((p:ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2 := by
+  have hval : (z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ) ^ 2 * ((((p : ℝ)) ^ s : ℝ) : ℂ)
+        * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1))
+        / ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+          * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))
+      = ((0 * (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)
+            - -((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ))
+              * ((((p : ℝ)) ^ s * Real.log (p : ℝ) : ℝ) : ℂ))
+            / (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2 * (((((p : ℝ)) ^ s : ℝ) : ℂ) - z)
+          - (((fun _ : ℝ => -((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ)))
+              / fun t : ℝ => ((((p : ℝ)) ^ t : ℝ) : ℂ) - 1) s)
+              * ((((p : ℝ)) ^ s * Real.log (p : ℝ) : ℝ) : ℂ))
+        / (((((p : ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2 := by
     simp only [Pi.div_apply]
     push_cast
     field_simp
@@ -9915,12 +9915,12 @@ lemma_3_9_complex's terms (which carry z(z-1), not (z-1)). -/
 theorem deriv2_clog_prime_term_z (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
     HasDerivAt (fun t : ℝ =>
-        -(z * (z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ))
-          / (((((p:ℝ)) ^ t : ℝ) : ℂ) - 1) / (((((p:ℝ)) ^ t : ℝ) : ℂ) - z))
-      (z * ((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ) ^ 2 * ((((p:ℝ)) ^ s : ℝ) : ℂ)
-        * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1))
-        / ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-          * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2)))) s := by
+        -(z * (z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ))
+          / (((((p : ℝ)) ^ t : ℝ) : ℂ) - 1) / (((((p : ℝ)) ^ t : ℝ) : ℂ) - z))
+      (z * ((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ) ^ 2 * ((((p : ℝ)) ^ s : ℝ) : ℂ)
+        * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1))
+        / ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+          * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2)))) s := by
   have hbase := (deriv2_clog_prime_term p hp s hs z hz).const_mul z
   apply hbase.congr_of_eventuallyEq
   filter_upwards with t
@@ -9932,180 +9932,180 @@ Same crude route: ||z-1|| <= 3, ||(p^s-z)+(p^s-1)|| <= 3p^s,
 ||p^s-1|| >= (2/3)p^s, ||p^s-z|| >= (1/3)p^s. -/
 theorem deriv2_clog_term_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
-    Norm.norm ((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ) ^ 2 * ((((p:ℝ)) ^ s : ℝ) : ℂ)
-        * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1))
-        / ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-          * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2)))
-      ≤ 200 * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ (-(2 : ℝ))) := by
-  have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (p:ℝ) := by linarith
-  have hps : (3 : ℝ) ≤ ((p:ℝ)) ^ s := by
+    Norm.norm ((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ) ^ 2 * ((((p : ℝ)) ^ s : ℝ) : ℂ)
+        * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1))
+        / ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+          * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2)))
+      ≤ 200 * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ (-(2 : ℝ))) := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hps : (3 : ℝ) ≤ ((p : ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ ((p:ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
-  have hps0 : (0 : ℝ) < ((p:ℝ)) ^ s := by linarith
-  have hpsC : Norm.norm ((((p:ℝ)) ^ s : ℝ) : ℂ) = ((p:ℝ)) ^ s := by
+      _ ≤ ((p : ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hps0 : (0 : ℝ) < ((p : ℝ)) ^ s := by linarith
+  have hpsC : Norm.norm ((((p : ℝ)) ^ s : ℝ) : ℂ) = ((p : ℝ)) ^ s := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hps0]
-  have hlog0 : (0 : ℝ) ≤ (Real.log (p:ℝ)) ^ 2 := sq_nonneg _
-  have hlogC : Norm.norm (((Real.log (p:ℝ) : ℝ) : ℂ) ^ 2) = (Real.log (p:ℝ)) ^ 2 := by
+  have hlog0 : (0 : ℝ) ≤ (Real.log (p : ℝ)) ^ 2 := sq_nonneg _
+  have hlogC : Norm.norm (((Real.log (p : ℝ) : ℝ) : ℂ) ^ 2) = (Real.log (p : ℝ)) ^ 2 := by
     rw [norm_pow, Complex.norm_real, Real.norm_eq_abs, ← abs_pow,
       abs_of_nonneg (sq_nonneg _)]
   have hz1 : Norm.norm (z - 1) ≤ 3 := by
     calc Norm.norm (z - 1) ≤ Norm.norm z + Norm.norm (1 : ℂ) := norm_sub_le z 1
       _ ≤ 2 + 1 := by simp only [norm_one]; linarith
       _ = 3 := by norm_num
-  have hsum3 : Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z)
-      + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)) ≤ 3 * ((p:ℝ)) ^ s := by
-    calc Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1))
-        ≤ Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z))
-          + Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)) := norm_add_le _ _
-      _ ≤ (((p:ℝ)) ^ s + 2) + (((p:ℝ)) ^ s + 1) := by
-          have ha : Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z)) ≤ ((p:ℝ)) ^ s + 2 := by
-            calc Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z))
-                ≤ Norm.norm ((((p:ℝ)) ^ s : ℝ) : ℂ) + Norm.norm z := norm_sub_le _ _
-              _ ≤ ((p:ℝ)) ^ s + 2 := by rw [hpsC]; linarith
-          have hb : Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)) ≤ ((p:ℝ)) ^ s + 1 := by
-            calc Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1))
-                ≤ Norm.norm ((((p:ℝ)) ^ s : ℝ) : ℂ) + Norm.norm (1 : ℂ) := norm_sub_le _ _
-              _ ≤ ((p:ℝ)) ^ s + 1 := by rw [hpsC]; simp only [norm_one]; exact le_refl _
+  have hsum3 : Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z)
+      + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)) ≤ 3 * ((p : ℝ)) ^ s := by
+    calc Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1))
+        ≤ Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z))
+          + Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)) := norm_add_le _ _
+      _ ≤ (((p : ℝ)) ^ s + 2) + (((p : ℝ)) ^ s + 1) := by
+          have ha : Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z)) ≤ ((p : ℝ)) ^ s + 2 := by
+            calc Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z))
+                ≤ Norm.norm ((((p : ℝ)) ^ s : ℝ) : ℂ) + Norm.norm z := norm_sub_le _ _
+              _ ≤ ((p : ℝ)) ^ s + 2 := by rw [hpsC]; linarith
+          have hb : Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)) ≤ ((p : ℝ)) ^ s + 1 := by
+            calc Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1))
+                ≤ Norm.norm ((((p : ℝ)) ^ s : ℝ) : ℂ) + Norm.norm (1 : ℂ) := norm_sub_le _ _
+              _ ≤ ((p : ℝ)) ^ s + 1 := by rw [hpsC]; simp only [norm_one]; exact le_refl _
           linarith
-      _ ≤ 3 * ((p:ℝ)) ^ s := by linarith
-  have hd1 : (2/3) * ((p:ℝ)) ^ s ≤ Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)) := by
-    have h := norm_sub_norm_le ((((p:ℝ)) ^ s : ℝ) : ℂ) (1 : ℂ)
+      _ ≤ 3 * ((p : ℝ)) ^ s := by linarith
+  have hd1 : (2/3) * ((p : ℝ)) ^ s ≤ Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)) := by
+    have h := norm_sub_norm_le ((((p : ℝ)) ^ s : ℝ) : ℂ) (1 : ℂ)
     rw [hpsC] at h
     simp only [norm_one] at h
     linarith
-  have hd2 : (1/3) * ((p:ℝ)) ^ s ≤ Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z)) := by
-    have h := norm_sub_norm_le ((((p:ℝ)) ^ s : ℝ) : ℂ) z
+  have hd2 : (1/3) * ((p : ℝ)) ^ s ≤ Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z)) := by
+    have h := norm_sub_norm_le ((((p : ℝ)) ^ s : ℝ) : ℂ) z
     rw [hpsC] at h
     linarith
-  have hd1p : (0 : ℝ) < Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)) := by linarith
-  have hd2p : (0 : ℝ) < Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z)) := by linarith
+  have hd1p : (0 : ℝ) < Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)) := by linarith
+  have hd2p : (0 : ℝ) < Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z)) := by linarith
   rw [norm_div]
-  rw [show Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-      * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))
-      = Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)) ^ 2
-        * Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z)) ^ 2 by
+  rw [show Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+      * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))
+      = Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)) ^ 2
+        * Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z)) ^ 2 by
     rw [norm_mul, norm_pow, norm_pow]]
   rw [div_le_iff₀ (by positivity)]
-  have hnum : Norm.norm ((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ) ^ 2
-        * ((((p:ℝ)) ^ s : ℝ) : ℂ)
-        * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)))
-      ≤ 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by
+  have hnum : Norm.norm ((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ) ^ 2
+        * ((((p : ℝ)) ^ s : ℝ) : ℂ)
+        * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)))
+      ≤ 9 * (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by
     rw [norm_mul, norm_mul, norm_mul, hlogC, hpsC]
-    calc Norm.norm (z - 1) * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ s
-          * Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1))
-        ≤ 3 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ s * (3 * ((p:ℝ)) ^ s) := by
+    calc Norm.norm (z - 1) * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ s
+          * Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1))
+        ≤ 3 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ s * (3 * ((p : ℝ)) ^ s) := by
           apply mul_le_mul _ hsum3 (norm_nonneg _) (by positivity)
           apply mul_le_mul_of_nonneg_right _ (le_of_lt hps0)
           exact mul_le_mul_of_nonneg_right hz1 hlog0
-      _ = 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by ring
-  have hsq1 : (4/9) * ((((p:ℝ)) ^ s)) ^ 2
-      ≤ Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)) ^ 2 := by nlinarith [hd1, hps0]
-  have hsq2 : (1/9) * ((((p:ℝ)) ^ s)) ^ 2
-      ≤ Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z)) ^ 2 := by nlinarith [hd2, hps0]
-  have hden : (4/81) * ((((p:ℝ)) ^ s)) ^ 4
-      ≤ Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)) ^ 2
-        * Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z)) ^ 2 := by
-    nlinarith [hsq1, hsq2, hps0, sq_nonneg (((p:ℝ)) ^ s)]
-  have hpow : ((p:ℝ)) ^ (-(2 : ℝ)) * ((((p:ℝ)) ^ s)) ^ 2 ≥ 1 := by
-    have hsq : ((((p:ℝ)) ^ s)) ^ 2 = ((p:ℝ)) ^ (2*s) := by
-      rw [← Real.rpow_natCast (((p:ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
+      _ = 9 * (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by ring
+  have hsq1 : (4/9) * ((((p : ℝ)) ^ s)) ^ 2
+      ≤ Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)) ^ 2 := by nlinarith [hd1, hps0]
+  have hsq2 : (1/9) * ((((p : ℝ)) ^ s)) ^ 2
+      ≤ Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z)) ^ 2 := by nlinarith [hd2, hps0]
+  have hden : (4/81) * ((((p : ℝ)) ^ s)) ^ 4
+      ≤ Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)) ^ 2
+        * Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z)) ^ 2 := by
+    nlinarith [hsq1, hsq2, hps0, sq_nonneg (((p : ℝ)) ^ s)]
+  have hpow : ((p : ℝ)) ^ (-(2 : ℝ)) * ((((p : ℝ)) ^ s)) ^ 2 ≥ 1 := by
+    have hsq : ((((p : ℝ)) ^ s)) ^ 2 = ((p : ℝ)) ^ (2*s) := by
+      rw [← Real.rpow_natCast (((p : ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
       norm_num
       ring_nf
     rw [hsq, ← Real.rpow_add hp0]
-    calc (1 : ℝ) = ((p:ℝ)) ^ (0 : ℝ) := by rw [Real.rpow_zero]
-      _ ≤ ((p:ℝ)) ^ (-(2 : ℝ) + 2*s) :=
+    calc (1 : ℝ) = ((p : ℝ)) ^ (0 : ℝ) := by rw [Real.rpow_zero]
+      _ ≤ ((p : ℝ)) ^ (-(2 : ℝ) + 2*s) :=
           Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
-  have hLQ : (0 : ℝ) ≤ (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by positivity
-  have hkey : 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2 : ℝ))
-        * ((4/81) * ((((p:ℝ)) ^ s)) ^ 4)
-      ≥ 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by
-    have h4 : ((((p:ℝ)) ^ s)) ^ 4 = ((((p:ℝ)) ^ s)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by ring
+  have hLQ : (0 : ℝ) ≤ (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by positivity
+  have hkey : 200 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ (-(2 : ℝ))
+        * ((4/81) * ((((p : ℝ)) ^ s)) ^ 4)
+      ≥ 9 * (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by
+    have h4 : ((((p : ℝ)) ^ s)) ^ 4 = ((((p : ℝ)) ^ s)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by ring
     rw [h4]
-    have hstep : (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2
-          * (((p:ℝ)) ^ (-(2 : ℝ)) * ((((p:ℝ)) ^ s)) ^ 2)
-        ≥ (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 * 1 :=
+    have hstep : (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2
+          * (((p : ℝ)) ^ (-(2 : ℝ)) * ((((p : ℝ)) ^ s)) ^ 2)
+        ≥ (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 * 1 :=
       mul_le_mul_of_nonneg_left hpow hLQ
-    calc 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2 : ℝ))
-          * ((4/81) * (((((p:ℝ)) ^ s)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2))
-        = (800/81) * ((Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2
-            * (((p:ℝ)) ^ (-(2 : ℝ)) * ((((p:ℝ)) ^ s)) ^ 2)) := by ring
-      _ ≥ (800/81) * ((Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 * 1) := by
+    calc 200 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ (-(2 : ℝ))
+          * ((4/81) * (((((p : ℝ)) ^ s)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2))
+        = (800/81) * ((Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2
+            * (((p : ℝ)) ^ (-(2 : ℝ)) * ((((p : ℝ)) ^ s)) ^ 2)) := by ring
+      _ ≥ (800/81) * ((Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 * 1) := by
           apply mul_le_mul_of_nonneg_left hstep (by norm_num)
-      _ = (800/81) * ((Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2) := by ring
-      _ ≥ 9 * (Real.log (p:ℝ)) ^ 2 * ((((p:ℝ)) ^ s)) ^ 2 := by nlinarith [hLQ]
-  have hmul : 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2 : ℝ))
-        * (Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1)) ^ 2
-          * Norm.norm ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z)) ^ 2)
-      ≥ 200 * (Real.log (p:ℝ)) ^ 2 * ((p:ℝ)) ^ (-(2 : ℝ))
-        * ((4/81) * ((((p:ℝ)) ^ s)) ^ 4) := by
+      _ = (800/81) * ((Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2) := by ring
+      _ ≥ 9 * (Real.log (p : ℝ)) ^ 2 * ((((p : ℝ)) ^ s)) ^ 2 := by nlinarith [hLQ]
+  have hmul : 200 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ (-(2 : ℝ))
+        * (Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1)) ^ 2
+          * Norm.norm ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z)) ^ 2)
+      ≥ 200 * (Real.log (p : ℝ)) ^ 2 * ((p : ℝ)) ^ (-(2 : ℝ))
+        * ((4/81) * ((((p : ℝ)) ^ s)) ^ 4) := by
     apply mul_le_mul_of_nonneg_left hden
-    have : (0 : ℝ) < ((p:ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
+    have : (0 : ℝ) < ((p : ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
     positivity
   linarith [hnum, hkey, hmul]
 
 /-- The z-scaled r=2 bound: ||z|| <= 2 doubles the constant to 400. -/
 theorem deriv2_clog_term_bound_z (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
-    Norm.norm (z * ((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ) ^ 2 * ((((p:ℝ)) ^ s : ℝ) : ℂ)
-        * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1))
-        / ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-          * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))))
-      ≤ 400 * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ (-(2 : ℝ))) := by
+    Norm.norm (z * ((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ) ^ 2 * ((((p : ℝ)) ^ s : ℝ) : ℂ)
+        * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1))
+        / ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+          * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))))
+      ≤ 400 * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ (-(2 : ℝ))) := by
   have hbase := deriv2_clog_term_bound p hp s hs z hz
-  have hnn : (0 : ℝ) ≤ 200 * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ (-(2 : ℝ))) := by
-    have hp3 : (3 : ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-    have : (0 : ℝ) < (((p:ℝ)) ^ (-(2 : ℝ))) := Real.rpow_pos_of_pos (by linarith) _
+  have hnn : (0 : ℝ) ≤ 200 * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ (-(2 : ℝ))) := by
+    have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+    have : (0 : ℝ) < (((p : ℝ)) ^ (-(2 : ℝ))) := Real.rpow_pos_of_pos (by linarith) _
     positivity
   rw [norm_mul]
-  calc Norm.norm z * Norm.norm ((z - 1) * ((Real.log (p:ℝ) : ℝ) : ℂ) ^ 2
-        * ((((p:ℝ)) ^ s : ℝ) : ℂ)
-        * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p:ℝ)) ^ s : ℝ) : ℂ) - 1))
-        / ((((((p:ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-          * ((((((p:ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2)))
-      ≤ 2 * (200 * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ (-(2 : ℝ)))) := by
+  calc Norm.norm z * Norm.norm ((z - 1) * ((Real.log (p : ℝ) : ℝ) : ℂ) ^ 2
+        * ((((p : ℝ)) ^ s : ℝ) : ℂ)
+        * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) + (((((p : ℝ)) ^ s : ℝ) : ℂ) - 1))
+        / ((((((p : ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+          * ((((((p : ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2)))
+      ≤ 2 * (200 * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ (-(2 : ℝ)))) := by
         apply mul_le_mul hz hbase (norm_nonneg _) (by norm_num)
-    _ = 400 * (Real.log (p:ℝ)) ^ 2 * (((p:ℝ)) ^ (-(2 : ℝ))) := by ring
+    _ = 400 * (Real.log (p : ℝ)) ^ 2 * (((p : ℝ)) ^ (-(2 : ℝ))) := by ring
 
 /-- The r=2 s-free dominator, indexed at p >= 5.
 Rebuilt from the N-indexed p-series rather than restricted from the p >= 3
 version, per the file's idiom. -/
 theorem deriv2_bound_uniform_summable_five :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      200 * (Real.log ((p:ℕ):ℝ)) ^ 2 * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))) := by
-  have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(5 : ℝ)/4)) := by
+      200 * (Real.log ((p : ℕ):ℝ)) ^ 2 * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))) := by
+  have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(5 : ℝ)/4)) := by
     rw [Real.summable_nat_rpow]
     norm_num
   have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (((p:ℕ):ℝ)) ^ (-(5 : ℝ)/4)) := hbase.subtype _
+      (((p : ℕ):ℝ)) ^ (-(5 : ℝ)/4)) := hbase.subtype _
   have hc := hsub.mul_left ((200 : ℝ) * (64/9))
   apply Summable.of_nonneg_of_le _ _ hc
   · intro p
-    have hp5 : (5 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast p.2.2
-    have : (0 : ℝ) ≤ (Real.log ((p:ℕ):ℝ)) ^ 2 := sq_nonneg _
+    have hp5 : (5 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast p.2.2
+    have : (0 : ℝ) ≤ (Real.log ((p : ℕ):ℝ)) ^ 2 := sq_nonneg _
     positivity
   · intro p
-    have hp5 : (5 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast p.2.2
-    have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-    have hlog := log_sq_le (((p:ℕ):ℝ)) (by linarith)
-    have hpos : (0 : ℝ) < (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
-    have hstep : (Real.log ((p:ℕ):ℝ)) ^ 2 * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))
-        ≤ ((64/9) * (((p:ℕ):ℝ)) ^ ((3 : ℝ)/4)) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) :=
+    have hp5 : (5 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast p.2.2
+    have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+    have hlog := log_sq_le (((p : ℕ):ℝ)) (by linarith)
+    have hpos : (0 : ℝ) < (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
+    have hstep : (Real.log ((p : ℕ):ℝ)) ^ 2 * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))
+        ≤ ((64/9) * (((p : ℕ):ℝ)) ^ ((3 : ℝ)/4)) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) :=
       mul_le_mul_of_nonneg_right hlog (le_of_lt hpos)
-    have hcomb : ((64/9) * (((p:ℕ):ℝ)) ^ ((3 : ℝ)/4)) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))
-        = (64/9) * (((p:ℕ):ℝ)) ^ ((3 : ℝ)/4 + -(2 : ℝ)) := by
+    have hcomb : ((64/9) * (((p : ℕ):ℝ)) ^ ((3 : ℝ)/4)) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))
+        = (64/9) * (((p : ℕ):ℝ)) ^ ((3 : ℝ)/4 + -(2 : ℝ)) := by
       rw [mul_assoc, ← Real.rpow_add hp0]
-    have hmono : (((p:ℕ):ℝ)) ^ ((3 : ℝ)/4 + -(2 : ℝ)) ≤ (((p:ℕ):ℝ)) ^ (-(5 : ℝ)/4) := by
+    have hmono : (((p : ℕ):ℝ)) ^ ((3 : ℝ)/4 + -(2 : ℝ)) ≤ (((p : ℕ):ℝ)) ^ (-(5 : ℝ)/4) := by
       apply Real.rpow_le_rpow_of_exponent_le (by linarith)
       norm_num
     rw [hcomb] at hstep
-    nlinarith [hstep, hmono, hpos, sq_nonneg (Real.log ((p:ℕ):ℝ))]
+    nlinarith [hstep, hmono, hpos, sq_nonneg (Real.log ((p : ℕ):ℝ))]
 
 /-- The r=2 dominator at constant 400, for the z-scaled terms. -/
 theorem deriv2_bound_uniform_summable_five_z :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      400 * (Real.log ((p:ℕ):ℝ)) ^ 2 * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))) := by
+      400 * (Real.log ((p : ℕ):ℝ)) ^ 2 * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))) := by
   have h := deriv2_bound_uniform_summable_five.mul_left 2
   apply h.congr
   intro p
@@ -10118,32 +10118,32 @@ comes from hasDerivAt_rpow_neg cast to C; only the outer log is complex, and
 one_sub_mem_slitPlane supplies its side condition. -/
 theorem deriv_clog_one_sub_const_rpow (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (c : ℂ) (hc : Norm.norm c ≤ 2) :
-    HasDerivAt (fun t : ℝ => Complex.log (1 - c * (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ)))
-      (c * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) * ((((((p:ℕ):ℝ)) ^ (-s) : ℝ)) : ℂ)
-        / (1 - c * (((((p:ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))) s := by
+    HasDerivAt (fun t : ℝ => Complex.log (1 - c * (((((p : ℕ):ℝ)) ^ (-t) : ℝ) : ℂ)))
+      (c * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) * ((((((p : ℕ):ℝ)) ^ (-s) : ℝ)) : ℂ)
+        / (1 - c * (((((p : ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))) s := by
   have hslit := one_sub_mem_slitPlane p hp s hs c hc
   have hreal := hasDerivAt_rpow_neg p hp s
-  have hcast : HasDerivAt (fun t : ℝ => (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
-      (((-((((p:ℕ):ℝ)) ^ (-s) * Real.log ((p:ℕ):ℝ)) : ℝ) : ℂ)) s :=
+  have hcast : HasDerivAt (fun t : ℝ => (((((p : ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
+      (((-((((p : ℕ):ℝ)) ^ (-s) * Real.log ((p : ℕ):ℝ)) : ℝ) : ℂ)) s :=
     hreal.ofReal_comp
-  have hin : HasDerivAt (fun t : ℝ => 1 - c * (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
-      (c * (((((((p:ℕ):ℝ)) ^ (-s) * Real.log ((p:ℕ):ℝ)) : ℝ)) : ℂ)) s := by
+  have hin : HasDerivAt (fun t : ℝ => 1 - c * (((((p : ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
+      (c * (((((((p : ℕ):ℝ)) ^ (-s) * Real.log ((p : ℕ):ℝ)) : ℝ)) : ℂ)) s := by
     have h := (hcast.const_mul c).const_sub 1
-    have hval : c * (((((((p:ℕ):ℝ)) ^ (-s) * Real.log ((p:ℕ):ℝ)) : ℝ)) : ℂ)
-        = -(c * ((-((((p:ℕ):ℝ)) ^ (-s) * Real.log ((p:ℕ):ℝ)) : ℝ) : ℂ)) := by
+    have hval : c * (((((((p : ℕ):ℝ)) ^ (-s) * Real.log ((p : ℕ):ℝ)) : ℝ)) : ℂ)
+        = -(c * ((-((((p : ℕ):ℝ)) ^ (-s) * Real.log ((p : ℕ):ℝ)) : ℝ) : ℂ)) := by
       push_cast
       ring
     rw [hval]
     exact h
   have h := (Complex.hasDerivAt_log hslit).scomp s hin
   simp only [Function.comp_def, smul_eq_mul] at h
-  have hne : (1 : ℂ) - c * (((((p:ℕ):ℝ)) ^ (-s) : ℝ) : ℂ) ≠ 0 :=
+  have hne : (1 : ℂ) - c * (((((p : ℕ):ℝ)) ^ (-s) : ℝ) : ℂ) ≠ 0 :=
     Complex.slitPlane_ne_zero hslit
-  have hval : c * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ)
-        * ((((((p:ℕ):ℝ)) ^ (-s) : ℝ)) : ℂ)
-        / (1 - c * (((((p:ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))
-      = c * (((((((p:ℕ):ℝ)) ^ (-s) * Real.log ((p:ℕ):ℝ)) : ℝ)) : ℂ)
-        * (1 - c * (((((p:ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))⁻¹ := by
+  have hval : c * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ)
+        * ((((((p : ℕ):ℝ)) ^ (-s) : ℝ)) : ℂ)
+        / (1 - c * (((((p : ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))
+      = c * (((((((p : ℕ):ℝ)) ^ (-s) * Real.log ((p : ℕ):ℝ)) : ℝ)) : ℂ)
+        * (1 - c * (((((p : ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))⁻¹ := by
     push_cast
     field_simp
   rw [hval]
@@ -10157,18 +10157,18 @@ logs is again what produces the p^(-2s) decay. -/
 theorem deriv_clog_prime_factor (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
     HasDerivAt (fun t : ℝ =>
-        -Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
-          + z * Complex.log (1 - (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ)))
-      (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)) s := by
-  have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-  have hps : (3 : ℝ) ≤ (((p:ℕ):ℝ)) ^ s := by
+        -Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
+          + z * Complex.log (1 - (((((p : ℕ):ℝ)) ^ (-t) : ℝ) : ℂ)))
+      (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)) s := by
+  have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+  have hps : (3 : ℝ) ≤ (((p : ℕ):ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ (((p:ℕ):ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
-  have hneg : (((p:ℕ):ℝ)) ^ (-s) = ((((p:ℕ):ℝ)) ^ s)⁻¹ := Real.rpow_neg (le_of_lt hp0) s
+      _ ≤ (((p : ℕ):ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hneg : (((p : ℕ):ℝ)) ^ (-s) = ((((p : ℕ):ℝ)) ^ s)⁻¹ := Real.rpow_neg (le_of_lt hp0) s
   have hone : Norm.norm (1 : ℂ) ≤ 2 := by simp
   have hA := (deriv_clog_one_sub_const_rpow p hp s hs z hz).neg
   have hB := (deriv_clog_one_sub_const_rpow p hp s hs 1 hone).const_mul z
@@ -10177,38 +10177,38 @@ theorem deriv_clog_prime_factor (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s
   have hslitz := Complex.slitPlane_ne_zero (one_sub_mem_slitPlane p hp s hs z hz)
   have hslit1 := Complex.slitPlane_ne_zero (one_sub_mem_slitPlane p hp s hs 1 hone)
   simp only [one_mul] at hslit1
-  have hpsC : (((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) ≠ 0 := by
+  have hpsC : (((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) ≠ 0 := by
     simp only [ne_eq, Complex.ofReal_eq_zero]
     intro hcon
     rw [hcon] at hps
     linarith
-  have hval : -(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)
-      = -(z * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ)
-            * ((((((p:ℕ):ℝ)) ^ (-s) : ℝ)) : ℂ)
-            / (1 - z * (((((p:ℕ):ℝ)) ^ (-s) : ℝ) : ℂ)))
-        + z * (((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ)
-            * ((((((p:ℕ):ℝ)) ^ (-s) : ℝ)) : ℂ)
-            / (1 - (((((p:ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))) := by
+  have hval : -(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)
+      = -(z * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ)
+            * ((((((p : ℕ):ℝ)) ^ (-s) : ℝ)) : ℂ)
+            / (1 - z * (((((p : ℕ):ℝ)) ^ (-s) : ℝ) : ℂ)))
+        + z * (((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ)
+            * ((((((p : ℕ):ℝ)) ^ (-s) : ℝ)) : ℂ)
+            / (1 - (((((p : ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))) := by
     rw [hneg]
     rw [Complex.ofReal_inv]
-    rw [show (1 : ℂ) - z * ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ))⁻¹
-        = (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - z) / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) by
+    rw [show (1 : ℂ) - z * ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ))⁻¹
+        = (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - z) / ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) by
       field_simp]
-    rw [show (1 : ℂ) - ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ))⁻¹
-        = (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1) / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) by
+    rw [show (1 : ℂ) - ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ))⁻¹
+        = (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1) / ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) by
       field_simp]
-    have hz1 : ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - z ≠ 0 := by
+    have hz1 : ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - z ≠ 0 := by
       intro hcon
       rw [sub_eq_zero] at hcon
       rw [← hcon] at hz
-      simp only [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith : (0 : ℝ) < ((p:ℕ):ℝ) ^ s)] at hz
+      simp only [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith : (0 : ℝ) < ((p : ℕ):ℝ) ^ s)] at hz
       linarith
-    have hz2 : ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1 ≠ 0 := by
+    have hz2 : ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1 ≠ 0 := by
       intro hcon
       rw [sub_eq_zero] at hcon
-      have : ((((p:ℕ):ℝ)) ^ s : ℝ) = 1 := by exact_mod_cast hcon
+      have : ((((p : ℕ):ℝ)) ^ s : ℝ) = 1 := by exact_mod_cast hcon
       linarith
     field_simp
     ring
@@ -10220,20 +10220,20 @@ bound for the per-prime derivative.  Same constant 27, same crude route, with
 norms in place of absolute values. -/
 theorem deriv_clog_term_bound_uniform (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
-    Norm.norm (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))
-      ≤ 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) := by
-  have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-  have hps : (3 : ℝ) ≤ (((p:ℕ):ℝ)) ^ s := by
+    Norm.norm (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))
+      ≤ 27 * Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) := by
+  have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+  have hps : (3 : ℝ) ≤ (((p : ℕ):ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ (((p:ℕ):ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
-  have hps0 : (0 : ℝ) < (((p:ℕ):ℝ)) ^ s := by linarith
-  have hlogpos : (0 : ℝ) ≤ Real.log ((p:ℕ):ℝ) := Real.log_nonneg (by linarith)
-  have hnum : Norm.norm (z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-      ≤ 6 * Real.log ((p:ℕ):ℝ) := by
+      _ ≤ (((p : ℕ):ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+  have hps0 : (0 : ℝ) < (((p : ℕ):ℝ)) ^ s := by linarith
+  have hlogpos : (0 : ℝ) ≤ Real.log ((p : ℕ):ℝ) := Real.log_nonneg (by linarith)
+  have hnum : Norm.norm (z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+      ≤ 6 * Real.log ((p : ℕ):ℝ) := by
     rw [norm_mul, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hlogpos]
     have h1 : Norm.norm (z - 1) ≤ 3 := by
       calc Norm.norm (z - 1) ≤ Norm.norm z + Norm.norm (1 : ℂ) := norm_sub_le z 1
@@ -10242,56 +10242,56 @@ theorem deriv_clog_term_bound_uniform (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1
     have hprod6 : Norm.norm z * Norm.norm (z - 1) ≤ 6 := by
       nlinarith [norm_nonneg z, norm_nonneg (z - 1), hz, h1]
     nlinarith [hprod6, hlogpos]
-  have hd1 : (2/3) * (((p:ℕ):ℝ)) ^ s
-      ≤ Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1) := by
-    have hre : ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
-        = (((((((p:ℕ):ℝ)) ^ s - 1 : ℝ))) : ℂ) := by push_cast; ring
+  have hd1 : (2/3) * (((p : ℕ):ℝ)) ^ s
+      ≤ Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1) := by
+    have hre : ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
+        = (((((((p : ℕ):ℝ)) ^ s - 1 : ℝ))) : ℂ) := by push_cast; ring
     rw [hre, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
     linarith
-  have hd2 : (1/3) * (((p:ℕ):ℝ)) ^ s
-      ≤ Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
-    have hge : Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z)
-        ≥ Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ))) - Norm.norm z :=
+  have hd2 : (1/3) * (((p : ℕ):ℝ)) ^ s
+      ≤ Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
+    have hge : Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z)
+        ≥ Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ))) - Norm.norm z :=
       norm_sub_norm_le _ _
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hps0] at hge
     linarith
   rw [norm_div, norm_div]
   rw [div_div]
-  have hdpos : (0 : ℝ) < Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
-      * Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
-    have h1 : (0 : ℝ) < Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1) := by
+  have hdpos : (0 : ℝ) < Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
+      * Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
+    have h1 : (0 : ℝ) < Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1) := by
       linarith [hd1, hps0]
-    have h2 : (0 : ℝ) < Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
+    have h2 : (0 : ℝ) < Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
       linarith [hd2, hps0]
     positivity
   rw [div_le_iff₀ hdpos]
-  have hprod : (2/9) * ((((p:ℕ):ℝ)) ^ s) ^ 2
-      ≤ Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
-          * Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
-    nlinarith [hd1, hd2, hps0, norm_nonneg ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)]
+  have hprod : (2/9) * ((((p : ℕ):ℝ)) ^ s) ^ 2
+      ≤ Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
+          * Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z) := by
+    nlinarith [hd1, hd2, hps0, norm_nonneg ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)]
   rw [norm_neg]
-  have hkey : 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))
-        * ((2/9) * ((((p:ℕ):ℝ)) ^ s) ^ 2)
-      ≥ 6 * Real.log ((p:ℕ):ℝ) := by
-    have hsq : ((((p:ℕ):ℝ)) ^ s) ^ 2 = (((p:ℕ):ℝ)) ^ (2*s) := by
-      rw [← Real.rpow_natCast ((((p:ℕ):ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
+  have hkey : 27 * Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))
+        * ((2/9) * ((((p : ℕ):ℝ)) ^ s) ^ 2)
+      ≥ 6 * Real.log ((p : ℕ):ℝ) := by
+    have hsq : ((((p : ℕ):ℝ)) ^ s) ^ 2 = (((p : ℕ):ℝ)) ^ (2*s) := by
+      rw [← Real.rpow_natCast ((((p : ℕ):ℝ)) ^ s) 2, ← Real.rpow_mul (le_of_lt hp0)]
       norm_num
       ring_nf
     rw [hsq]
-    have hge : (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) * (((p:ℕ):ℝ)) ^ (2*s) ≥ 1 := by
+    have hge : (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) * (((p : ℕ):ℝ)) ^ (2*s) ≥ 1 := by
       rw [← Real.rpow_add hp0]
       have hexp : (0 : ℝ) ≤ -(2 : ℝ) + 2*s := by linarith
-      calc (1 : ℝ) = (((p:ℕ):ℝ)) ^ (0 : ℝ) := by rw [Real.rpow_zero]
-        _ ≤ (((p:ℕ):ℝ)) ^ (-(2 : ℝ) + 2*s) :=
+      calc (1 : ℝ) = (((p : ℕ):ℝ)) ^ (0 : ℝ) := by rw [Real.rpow_zero]
+        _ ≤ (((p : ℕ):ℝ)) ^ (-(2 : ℝ) + 2*s) :=
             Real.rpow_le_rpow_of_exponent_le (by linarith) hexp
     nlinarith [hge, hlogpos]
-  have hmul : 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))
-        * (Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
-          * Norm.norm ((((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z))
-      ≥ 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))
-        * ((2/9) * ((((p:ℕ):ℝ)) ^ s) ^ 2) := by
-    have hc : (0 : ℝ) ≤ 27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) := by
-      have : (0 : ℝ) < (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
+  have hmul : 27 * Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))
+        * (Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - 1)
+          * Norm.norm ((((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ)) - z))
+      ≥ 27 * Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))
+        * ((2/9) * ((((p : ℕ):ℝ)) ^ s) ^ 2) := by
+    have hc : (0 : ℝ) ≤ 27 * Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) := by
+      have : (0 : ℝ) < (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
       positivity
     exact mul_le_mul_of_nonneg_left hprod hc
   linarith [hnum, hkey, hmul]
@@ -10302,11 +10302,11 @@ prime_correction_summable_complex), indexed from p >= 5 to match G2tailC. -/
 theorem deriv_clog_prime_factor_canon (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
     HasDerivAt (fun t : ℝ =>
-        -Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
-          + z * ((Real.log (1 - (((p:ℕ):ℝ)) ^ (-t)) : ℝ) : ℂ))
-      (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)) s := by
+        -Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
+          + z * ((Real.log (1 - (((p : ℕ):ℝ)) ^ (-t)) : ℝ) : ℂ))
+      (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)) s := by
   have hbase := deriv_clog_prime_factor p hp s hs z hz
   apply hbase.congr_of_eventuallyEq
   have hnhds : Set.Ioi (0 : ℝ) ∈ nhds s := by
@@ -10315,12 +10315,12 @@ theorem deriv_clog_prime_factor_canon (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1
   filter_upwards [hnhds] with t ht
   congr 1
   congr 1
-  have hpr : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
+  have hpr : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
   have ht0 : (0 : ℝ) < t := ht
-  have hlt : (((p:ℕ):ℝ)) ^ (-t) < 1 :=
+  have hlt : (((p : ℕ):ℝ)) ^ (-t) < 1 :=
     Real.rpow_lt_one_of_one_lt_of_neg (by linarith) (by linarith)
-  have hpos : (0 : ℝ) < 1 - (((p:ℕ):ℝ)) ^ (-t) := by linarith
+  have hpos : (0 : ℝ) < 1 - (((p : ℕ):ℝ)) ^ (-t) := by linarith
   rw [Complex.ofReal_log (le_of_lt hpos)]
   push_cast
   ring
@@ -10331,28 +10331,28 @@ version: those are different subtypes of N, neither contained in the other as
 Lean sees it, and the file's idiom (line ~1126) is to restrict from N. -/
 theorem deriv_bound_uniform_summable_five :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      27 * Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))) := by
-  have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(3 : ℝ)/2)) := by
+      27 * Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))) := by
+  have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(3 : ℝ)/2)) := by
     rw [Real.summable_nat_rpow]
     norm_num
   have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      (((p:ℕ):ℝ)) ^ (-(3 : ℝ)/2)) := hbase.subtype _
+      (((p : ℕ):ℝ)) ^ (-(3 : ℝ)/2)) := hbase.subtype _
   have h27 := hsub.mul_left 27
   apply Summable.of_nonneg_of_le _ _ h27
   · intro p
-    have hp5 : (5 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast p.2.2
-    have : (0 : ℝ) ≤ Real.log ((p:ℕ):ℝ) := Real.log_nonneg (by linarith)
+    have hp5 : (5 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast p.2.2
+    have : (0 : ℝ) ≤ Real.log ((p : ℕ):ℝ) := Real.log_nonneg (by linarith)
     positivity
   · intro p
-    have hp5 : (5 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast p.2.2
-    have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-    have hlog := log_le_sqrt (((p:ℕ):ℝ)) (by linarith)
-    have hpos : (0 : ℝ) < (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
-    have hstep : Real.log ((p:ℕ):ℝ) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))
-        ≤ ((((p:ℕ):ℝ)) ^ ((1 : ℝ)/2)) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) :=
+    have hp5 : (5 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast p.2.2
+    have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+    have hlog := log_le_sqrt (((p : ℕ):ℝ)) (by linarith)
+    have hpos : (0 : ℝ) < (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) := Real.rpow_pos_of_pos hp0 _
+    have hstep : Real.log ((p : ℕ):ℝ) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))
+        ≤ ((((p : ℕ):ℝ)) ^ ((1 : ℝ)/2)) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) :=
       mul_le_mul_of_nonneg_right hlog (le_of_lt hpos)
-    have hcomb : ((((p:ℕ):ℝ)) ^ ((1 : ℝ)/2)) * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))
-        = (((p:ℕ):ℝ)) ^ (-(3 : ℝ)/2) := by
+    have hcomb : ((((p : ℕ):ℝ)) ^ ((1 : ℝ)/2)) * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))
+        = (((p : ℕ):ℝ)) ^ (-(3 : ℝ)/2) := by
       rw [← Real.rpow_add hp0]
       norm_num
     rw [hcomb] at hstep
@@ -10363,15 +10363,15 @@ Needed for cBracket f1 1 z to be a genuine value rather than a tsum junk
 value: at s = 1 the terms are -z(z-1)log p/((p-1)(p-z)), which is O(log p/p^2). -/
 theorem cBracket_series_summable_at_one (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      -(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / ((((((p:ℕ):ℝ)) ^ (1 : ℝ) : ℝ) : ℂ) - 1)
-          / ((((((p:ℕ):ℝ)) ^ (1 : ℝ) : ℝ) : ℂ) - z)) := by
+      -(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / ((((((p : ℕ):ℝ)) ^ (1 : ℝ) : ℝ) : ℂ) - 1)
+          / ((((((p : ℕ):ℝ)) ^ (1 : ℝ) : ℝ) : ℂ) - z)) := by
   apply Summable.of_norm
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
     _ deriv_bound_uniform_summable_five
   intro p
-  exact deriv_clog_term_bound_uniform (p:ℕ) (by omega) 1 (le_refl 1) z hz
+  exact deriv_clog_term_bound_uniform (p : ℕ) (by omega) 1 (le_refl 1) z hz
 
 /-- Per-term s-continuity for cBracket's series on {s // 1 <= s}.
 The denominators are nonvanishing there: p^s - 1 >= 2 and |p^s - z| >= 1
@@ -10379,33 +10379,33 @@ since p^s >= 3 and ||z|| <= 2. -/
 theorem cBracket_term_continuous_s (p : ℕ) (hp : 3 ≤ p) (z : ℂ)
     (hz : Norm.norm z ≤ 2) :
     Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      -(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / (((((((p:ℕ):ℝ)) ^ (s:ℝ) : ℝ)) : ℂ) - 1)
-          / (((((((p:ℕ):ℝ)) ^ (s:ℝ) : ℝ)) : ℂ) - z)) := by
-  have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-  have hsub : Continuous (fun s : {s : ℝ // 1 ≤ s} => (s:ℝ)) := continuous_subtype_val
-  have hrpow : Continuous (fun s : {s : ℝ // 1 ≤ s} => (((p:ℕ):ℝ)) ^ (s:ℝ)) :=
+      -(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / (((((((p : ℕ):ℝ)) ^ (s : ℝ) : ℝ)) : ℂ) - 1)
+          / (((((((p : ℕ):ℝ)) ^ (s : ℝ) : ℝ)) : ℂ) - z)) := by
+  have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+  have hsub : Continuous (fun s : {s : ℝ // 1 ≤ s} => (s : ℝ)) := continuous_subtype_val
+  have hrpow : Continuous (fun s : {s : ℝ // 1 ≤ s} => (((p : ℕ):ℝ)) ^ (s : ℝ)) :=
     (continuous_const_rpow (ne_of_gt hp0)).comp hsub
-  have hps : ∀ s : {s : ℝ // 1 ≤ s}, (3 : ℝ) ≤ (((p:ℕ):ℝ)) ^ (s:ℝ) := by
+  have hps : ∀ s : {s : ℝ // 1 ≤ s}, (3 : ℝ) ≤ (((p : ℕ):ℝ)) ^ (s : ℝ) := by
     intro s
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
-      _ ≤ (3 : ℝ) ^ (s:ℝ) := Real.rpow_le_rpow_of_exponent_le (by norm_num) s.2
-      _ ≤ (((p:ℕ):ℝ)) ^ (s:ℝ) := Real.rpow_le_rpow (by norm_num) hp3 (by linarith [s.2])
+      _ ≤ (3 : ℝ) ^ (s : ℝ) := Real.rpow_le_rpow_of_exponent_le (by norm_num) s.2
+      _ ≤ (((p : ℕ):ℝ)) ^ (s : ℝ) := Real.rpow_le_rpow (by norm_num) hp3 (by linarith [s.2])
   have hcast : Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      (((((((p:ℕ):ℝ)) ^ (s:ℝ) : ℝ)) : ℂ))) := Complex.continuous_ofReal.comp hrpow
+      (((((((p : ℕ):ℝ)) ^ (s : ℝ) : ℝ)) : ℂ))) := Complex.continuous_ofReal.comp hrpow
   have hd1 : ∀ s : {s : ℝ // 1 ≤ s},
-      (((((((p:ℕ):ℝ)) ^ (s:ℝ) : ℝ)) : ℂ)) - 1 ≠ 0 := by
+      (((((((p : ℕ):ℝ)) ^ (s : ℝ) : ℝ)) : ℂ)) - 1 ≠ 0 := by
     intro s hcon
     rw [sub_eq_zero] at hcon
-    have : ((((p:ℕ):ℝ)) ^ (s:ℝ) : ℝ) = 1 := by exact_mod_cast hcon
+    have : ((((p : ℕ):ℝ)) ^ (s : ℝ) : ℝ) = 1 := by exact_mod_cast hcon
     linarith [hps s]
   have hd2 : ∀ s : {s : ℝ // 1 ≤ s},
-      (((((((p:ℕ):ℝ)) ^ (s:ℝ) : ℝ)) : ℂ)) - z ≠ 0 := by
+      (((((((p : ℕ):ℝ)) ^ (s : ℝ) : ℝ)) : ℂ)) - z ≠ 0 := by
     intro s hcon
     rw [sub_eq_zero] at hcon
     rw [← hcon, Complex.norm_real, Real.norm_eq_abs,
-      abs_of_pos (by linarith [hps s] : (0 : ℝ) < (((p:ℕ):ℝ)) ^ (s:ℝ))] at hz
+      abs_of_pos (by linarith [hps s] : (0 : ℝ) < (((p : ℕ):ℝ)) ^ (s : ℝ))] at hz
     linarith [hps s]
   exact ((continuous_const.div (hcast.sub continuous_const) hd1).div
     (hcast.sub continuous_const) hd2)
@@ -10414,15 +10414,15 @@ theorem cBracket_term_continuous_s (p : ℕ) (hp : 3 ≤ p) (z : ℂ)
 theorem cBracket_series_continuous_s (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Continuous (fun s : {s : ℝ // 1 ≤ s} =>
       ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-          / (((((((p:ℕ):ℝ)) ^ (s:ℝ) : ℝ)) : ℂ) - 1)
-            / (((((((p:ℕ):ℝ)) ^ (s:ℝ) : ℝ)) : ℂ) - z))) := by
+        (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+          / (((((((p : ℕ):ℝ)) ^ (s : ℝ) : ℝ)) : ℂ) - 1)
+            / (((((((p : ℕ):ℝ)) ^ (s : ℝ) : ℝ)) : ℂ) - z))) := by
   apply continuous_tsum
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      cBracket_term_continuous_s (p:ℕ) (by omega) z hz)
+      cBracket_term_continuous_s (p : ℕ) (by omega) z hz)
     deriv_bound_uniform_summable_five
   intro p s
-  exact deriv_clog_term_bound_uniform (p:ℕ) (by omega) (s:ℝ) s.2 z hz
+  exact deriv_clog_term_bound_uniform (p : ℕ) (by omega) (s : ℝ) s.2 z hz
 
 /-- MANUSCRIPT Theorem 6.1: bHat_i = [z^i] G2^(1,0)(1,z).
 Defined through the explicit s = 1 product G2at1 z * cBracket f1 1 z rather
@@ -10431,50 +10431,50 @@ f1 = f 1 is the log-derivative of zetaTilde at 1; the manuscript has
 f(1) = -gamma via the Stieltjes expansion, certified from FLINT. -/
 theorem deriv2_series_summable_at_basepoint (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      -(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / ((((((p:ℕ):ℝ)) ^ (3/2:ℝ) : ℝ) : ℂ) - 1)
-        / ((((((p:ℕ):ℝ)) ^ (3/2:ℝ) : ℝ) : ℂ) - z)) := by
+      -(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / ((((((p : ℕ):ℝ)) ^ (3/2:ℝ) : ℝ) : ℂ) - 1)
+        / ((((((p : ℕ):ℝ)) ^ (3/2:ℝ) : ℝ) : ℂ) - z)) := by
   apply Summable.of_norm
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
     _ (deriv_bound_uniform_summable_five)
   intro p
-  exact deriv_clog_term_bound_uniform (p:ℕ) (by omega) (3/2) (by norm_num) z hz
+  exact deriv_clog_term_bound_uniform (p : ℕ) (by omega) (3/2) (by norm_num) z hz
 
 
 theorem hasDerivAt_clog_series2 (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
     (hsmem : s ∈ Set.Ioo (1 : ℝ) 2) :
     HasDerivAt (fun t : ℝ => ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-          / ((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1)
-          / ((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - z)))
+        (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+          / ((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1)
+          / ((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - z)))
       (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (z * ((z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) ^ 2
-            * (((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)
-            * ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - z
-              + ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-            * (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))))) s := by
+        (z * ((z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) ^ 2
+            * (((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)
+            * ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - z
+              + ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+            * (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))))) s := by
   have hy0 : (3/2 : ℝ) ∈ Set.Ioo (1 : ℝ) 2 := by
     constructor <;> norm_num
   apply hasDerivAt_tsum_of_isPreconnected
     (g := fun (p : {p : ℕ // p.Prime ∧ 5 ≤ p}) (t : ℝ) =>
-      -(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / ((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1)
-        / ((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - z))
+      -(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / ((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1)
+        / ((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - z))
     (g' := fun (p : {p : ℕ // p.Prime ∧ 5 ≤ p}) (t : ℝ) =>
-      z * ((z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) ^ 2
-          * (((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ)
-          * ((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - z
-            + ((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1))
-        / (((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1) ^ 2
-          * (((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - z) ^ 2))))
+      z * ((z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) ^ 2
+          * (((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ)
+          * ((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - z
+            + ((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1))
+        / (((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1) ^ 2
+          * (((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - z) ^ 2))))
     deriv2_bound_uniform_summable_five_z isOpen_Ioo isPreconnected_Ioo
     _ _ hy0 (deriv2_series_summable_at_basepoint z hz) hsmem
   · intro p y hy
-    exact deriv2_clog_prime_term_z (p:ℕ) (by omega) y (le_of_lt hy.1) z hz
+    exact deriv2_clog_prime_term_z (p : ℕ) (by omega) y (le_of_lt hy.1) z hz
   · intro p y hy
-    exact deriv2_clog_term_bound_z (p:ℕ) (by omega) y (le_of_lt hy.1) z hz
+    exact deriv2_clog_term_bound_z (p : ℕ) (by omega) y (le_of_lt hy.1) z hz
 
 
 /-- The derivative of Lemma 3.9's bracket C(s) = z c(s,z).
@@ -10488,9 +10488,9 @@ theorem hasDerivAt_c_bracket (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
               / ((((((3 : ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1)
                 / ((((((3 : ℕ):ℝ)) ^ t : ℝ) : ℂ) - z))
             + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-                (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-                  / ((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1)
-                    / ((((((p:ℕ):ℝ)) ^ t : ℝ) : ℂ) - z))))
+                (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+                  / ((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - 1)
+                    / ((((((p : ℕ):ℝ)) ^ t : ℝ) : ℂ) - z))))
       (z * (((fp s + -((Real.log 2) ^ 2 * (2 : ℝ) ^ s) / ((2 : ℝ) ^ s - 1) ^ 2 : ℝ)) : ℂ)
         + ((z * ((z - 1) * ((Real.log ((3 : ℕ):ℝ) : ℝ) : ℂ) ^ 2
               * (((((3 : ℕ):ℝ)) ^ s : ℝ) : ℂ)
@@ -10499,12 +10499,12 @@ theorem hasDerivAt_c_bracket (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
             / (((((((3 : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
               * (((((((3 : ℕ):ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2))))
           + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-              (z * ((z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) ^ 2
-                  * (((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)
-                  * ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - z
-                    + ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
-                / (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-                  * (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2)))))) s := by
+              (z * ((z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) ^ 2
+                  * (((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)
+                  * ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - z
+                    + ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
+                / (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+                  * (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - z) ^ 2)))))) s := by
   have hkp := hasDerivAt_kappa_part z s hsmem f fp hfp
   have hp3 := deriv2_clog_prime_term_z 3 (le_refl 3) s (le_of_lt hsmem.1) z hz
   have htail := hasDerivAt_clog_series2 z hz s hsmem
@@ -10533,18 +10533,18 @@ Same shape as prime_factor_sub_one_summable: restrict the N-indexed p-series,
 then compare termwise against prime_correction_bound_complex. -/
 theorem clog_series_summable_at_basepoint (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      -Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-(3/2:ℝ)) : ℝ) : ℂ))
-        + z * ((Real.log (1 - (((p:ℕ):ℝ)) ^ (-(3/2:ℝ))) : ℝ) : ℂ)) := by
+      -Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-(3/2:ℝ)) : ℝ) : ℂ))
+        + z * ((Real.log (1 - (((p : ℕ):ℝ)) ^ (-(3/2:ℝ))) : ℝ) : ℂ)) := by
   have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      18 * (((p:ℕ):ℝ)) ^ (-2*(3/2:ℝ))) := by
+      18 * (((p : ℕ):ℝ)) ^ (-2*(3/2:ℝ))) := by
     have h2s : -(2*(3/2:ℝ)) < -1 := by norm_num
-    have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2*(3/2:ℝ)))) :=
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*(3/2:ℝ)))) :=
       Real.summable_nat_rpow.mpr h2s
     have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-        (((p:ℕ):ℝ)) ^ (-(2*(3/2:ℝ)))) := hbase.subtype _
+        (((p : ℕ):ℝ)) ^ (-(2*(3/2:ℝ)))) := hbase.subtype _
     have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (18 : ℝ) * (((p:ℕ):ℝ)) ^ (-2*(3/2:ℝ))
-          = 18 * (((p:ℕ):ℝ)) ^ (-(2*(3/2:ℝ))) := by
+        (18 : ℝ) * (((p : ℕ):ℝ)) ^ (-2*(3/2:ℝ))
+          = 18 * (((p : ℕ):ℝ)) ^ (-(2*(3/2:ℝ))) := by
       intro p; ring_nf
     simp_rw [heq]
     exact hsub.mul_left 18
@@ -10552,7 +10552,7 @@ theorem clog_series_summable_at_basepoint (z : ℂ) (hz : Norm.norm z ≤ 2) :
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      prime_correction_bound_complex (p:ℕ) (by omega) (3/2) (by norm_num) z hz)
+      prime_correction_bound_complex (p : ℕ) (by omega) (3/2) (by norm_num) z hz)
     hcomp
 
 /-- Termwise differentiation of the complex p >= 5 log-series.
@@ -10561,28 +10561,28 @@ takes F in any complete normed space, so C works unchanged. -/
 theorem hasDerivAt_clog_series (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
     (hsmem : s ∈ Set.Ioo (1 : ℝ) 2) :
     HasDerivAt (fun t : ℝ => ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (-Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
-          + z * ((Real.log (1 - (((p:ℕ):ℝ)) ^ (-t)) : ℝ) : ℂ)))
+        (-Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
+          + z * ((Real.log (1 - (((p : ℕ):ℝ)) ^ (-t)) : ℝ) : ℂ)))
       (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-            / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))) s := by
+        (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+            / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))) s := by
   have hy0 : (3/2 : ℝ) ∈ Set.Ioo (1 : ℝ) 2 := by
     constructor <;> norm_num
   apply hasDerivAt_tsum_of_isPreconnected
     (g := fun (p : {p : ℕ // p.Prime ∧ 5 ≤ p}) (t : ℝ) =>
-      -Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
-        + z * ((Real.log (1 - (((p:ℕ):ℝ)) ^ (-t)) : ℝ) : ℂ))
+      -Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
+        + z * ((Real.log (1 - (((p : ℕ):ℝ)) ^ (-t)) : ℝ) : ℂ))
     (g' := fun (p : {p : ℕ // p.Prime ∧ 5 ≤ p}) (t : ℝ) =>
-      -(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / (((((((p:ℕ):ℝ)) ^ t : ℝ)) : ℂ) - 1)
-          / (((((((p:ℕ):ℝ)) ^ t : ℝ)) : ℂ) - z))
+      -(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / (((((((p : ℕ):ℝ)) ^ t : ℝ)) : ℂ) - 1)
+          / (((((((p : ℕ):ℝ)) ^ t : ℝ)) : ℂ) - z))
     deriv_bound_uniform_summable_five isOpen_Ioo isPreconnected_Ioo
     _ _ hy0 (clog_series_summable_at_basepoint z hz) hsmem
   · intro p y hy
-    exact deriv_clog_prime_factor_canon (p:ℕ) (by omega) y (le_of_lt hy.1) z hz
+    exact deriv_clog_prime_factor_canon (p : ℕ) (by omega) y (le_of_lt hy.1) z hz
   · intro p y hy
-    exact deriv_clog_term_bound_uniform (p:ℕ) (by omega) y (le_of_lt hy.1) z hz
+    exact deriv_clog_term_bound_uniform (p : ℕ) (by omega) y (le_of_lt hy.1) z hz
 
 /-- d/ds G2tailC = G2tailC * (sum of per-prime derivatives).
 The key step of the complex chain: G2tailC is exp of the log-series
@@ -10593,21 +10593,21 @@ theorem hasDerivAt_G2tailC (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
     (hsmem : s ∈ Set.Ioo (1 : ℝ) 2) :
     HasDerivAt (fun t : ℝ => G2tailC t z)
       (G2tailC s z * ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-            / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))) s := by
+        (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+            / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))) s := by
   have hser := hasDerivAt_clog_series z hz s hsmem
   have hexp := hser.cexp
   have heq : ∀ t : ℝ, t ∈ Set.Ioo (1 : ℝ) 2 →
       Complex.exp (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (-Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
-          + z * ((Real.log (1 - (((p:ℕ):ℝ)) ^ (-t)) : ℝ) : ℂ)))
+        (-Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-t) : ℝ) : ℂ))
+          + z * ((Real.log (1 - (((p : ℕ):ℝ)) ^ (-t)) : ℝ) : ℂ)))
       = G2tailC t z := by
     intro t ht
     exact (G2tailC_eq_exp_sum t (le_of_lt ht.1) z hz).symm
   have hval : Complex.exp (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (-Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))
-          + z * ((Real.log (1 - (((p:ℕ):ℝ)) ^ (-s)) : ℝ) : ℂ)))
+        (-Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-s) : ℝ) : ℂ))
+          + z * ((Real.log (1 - (((p : ℕ):ℝ)) ^ (-s)) : ℝ) : ℂ)))
       = G2tailC s z := heq s hsmem
   rw [← hval]
   apply hexp.congr_of_eventuallyEq
@@ -10653,9 +10653,9 @@ theorem hasDerivAt_G2C (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
             / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
               / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))
           + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-              (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-                / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-                  / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)))) s := by
+              (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+                / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+                  / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)))) s := by
   have h3 := hasDerivAt_prime_three_factor z hz s hsmem
   have htail := hasDerivAt_G2tailC z hz s hsmem
   have hcast : ∀ t : ℝ, ((((3 : ℕ):ℝ)) ^ (-t) : ℝ) = (((3 : ℝ)) ^ (-t) : ℝ) := by
@@ -10681,18 +10681,18 @@ theorem hasDerivAt_G2C (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
           / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
             / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))
         + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-            (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-              / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-                / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)))
+            (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+              / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+                / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)))
       = (1 - z * ((((3 : ℝ)) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - ((3 : ℝ)) ^ (-s) : ℝ) : ℂ)) ^ z
           * (-(z * (z - 1) * ((Real.log ((3 : ℕ):ℝ) : ℝ) : ℂ))
               / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
                 / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)) * G2tailC s z
         + (1 - z * ((((3 : ℝ)) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - ((3 : ℝ)) ^ (-s) : ℝ) : ℂ)) ^ z
           * (G2tailC s z * ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-              (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-                / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-                  / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))) := by
+              (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+                / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+                  / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))) := by
     rw [hG2C s]
     ring
   rw [hval]
@@ -10753,9 +10753,9 @@ theorem lemma_3_9_complex (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
               / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
                 / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))
             + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-                (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-                  / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-                    / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))))) s := by
+                (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+                  / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+                    / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))))) s := by
   have hkap := hasDerivAt_kappa_cpow z s hsmem f hf
   have hg2c := hasDerivAt_G2C z hz s hsmem
   have hmul := hkap.mul hg2c
@@ -10772,9 +10772,9 @@ theorem lemma_3_9_complex (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
             / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
               / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))
           + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-              (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-                / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-                  / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))))
+              (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+                / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+                  / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))))
       = ((kappaFac s : ℝ) : ℂ) ^ z
           * (z * (((f s + Real.log 2 / ((2 : ℝ) ^ s - 1) : ℝ)) : ℂ)) * G2C s z
         + ((kappaFac s : ℝ) : ℂ) ^ z
@@ -10783,9 +10783,9 @@ theorem lemma_3_9_complex (z : ℂ) (hz : Norm.norm z ≤ 2) (s : ℝ)
                 / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
                   / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z))
               + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-                  (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-                    / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-                      / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)))) := by
+                  (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+                    / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+                      / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - z)))) := by
     unfold G2manu
     ring
   rw [hval]
@@ -10801,9 +10801,9 @@ noncomputable def cBracket (fs : ℝ) (s : ℝ) (z : ℂ) : ℂ :=
         / ((((((3 : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1)
           / ((((((3 : ℕ):ℝ)) ^ s : ℝ) : ℂ) - z))
       + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-          (-(z * (z - 1) * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-            / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1)
-              / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - z)))
+          (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+            / ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1)
+              / ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - z)))
 
 /-- cBracket is affine in its first argument: cBracket fs s z - cBracket gs s z
 = z * (fs - gs).  This is what lets the two-argument limit
@@ -10816,19 +10816,19 @@ theorem cBracket_sub_first (fs gs s : ℝ) (z : ℂ) :
   ring
 
 theorem cBracket_continuous_s (fs : ℝ) (z : ℂ) (hz : Norm.norm z ≤ 2) :
-    Continuous (fun s : {s : ℝ // 1 ≤ s} => cBracket fs (s:ℝ) z) := by
-  have hsub : Continuous (fun s : {s : ℝ // 1 ≤ s} => (s:ℝ)) := continuous_subtype_val
-  have hrpow2 : Continuous (fun s : {s : ℝ // 1 ≤ s} => (2 : ℝ) ^ (s:ℝ)) :=
+    Continuous (fun s : {s : ℝ // 1 ≤ s} => cBracket fs (s : ℝ) z) := by
+  have hsub : Continuous (fun s : {s : ℝ // 1 ≤ s} => (s : ℝ)) := continuous_subtype_val
+  have hrpow2 : Continuous (fun s : {s : ℝ // 1 ≤ s} => (2 : ℝ) ^ (s : ℝ)) :=
     (continuous_const_rpow (by norm_num)).comp hsub
-  have h2ge : ∀ s : {s : ℝ // 1 ≤ s}, (2 : ℝ) ≤ (2 : ℝ) ^ (s:ℝ) := by
+  have h2ge : ∀ s : {s : ℝ // 1 ≤ s}, (2 : ℝ) ≤ (2 : ℝ) ^ (s : ℝ) := by
     intro s
     calc (2 : ℝ) = (2 : ℝ) ^ (1 : ℝ) := by norm_num
-      _ ≤ (2 : ℝ) ^ (s:ℝ) := Real.rpow_le_rpow_of_exponent_le (by norm_num) s.2
-  have hne : ∀ s : {s : ℝ // 1 ≤ s}, (2 : ℝ) ^ (s:ℝ) - 1 ≠ 0 := by
+      _ ≤ (2 : ℝ) ^ (s : ℝ) := Real.rpow_le_rpow_of_exponent_le (by norm_num) s.2
+  have hne : ∀ s : {s : ℝ // 1 ≤ s}, (2 : ℝ) ^ (s : ℝ) - 1 ≠ 0 := by
     intro s hcon
     linarith [h2ge s]
   have hkap : Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      z * (((fs + Real.log 2 / ((2 : ℝ) ^ (s:ℝ) - 1) : ℝ)) : ℂ)) := by
+      z * (((fs + Real.log 2 / ((2 : ℝ) ^ (s : ℝ) - 1) : ℝ)) : ℂ)) := by
     apply continuous_const.mul
     apply Complex.continuous_ofReal.comp
     exact continuous_const.add (continuous_const.div (hrpow2.sub continuous_const) hne)
@@ -10904,19 +10904,19 @@ theorem Dk_term_split (i j l : ℕ) (f1 : ℝ) (gh_i : ℝ) (hgh0 : 0 ≤ gh_i)
       Norm.norm (gManu i s - cCoeff i - (((s - 1 : ℝ)) : ℂ) * bHat f1 i)
         ≤ gh_i * (s - 1) ^ 2 / 2)
     (s : ℝ) (hs : s ∈ Set.Ioo (1 : ℝ) 2) :
-    |((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+    |((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))
-      - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+      - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))|
-      ≤ gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ) * s)
+      ≤ gh_i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) := by
   have hL : (0 : ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) := by
     apply div_nonneg _ (by positivity)
     apply pow_nonneg
     simp only [neg_nonneg]
     exact Real.log_nonpos (by linarith [hs.1]) (by linarith [hs.2])
-  have h2 : (0 : ℝ) < (2 : ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
-  have hW : (0 : ℝ) ≤ (2 : ℝ) ^ (-(j:ℝ) * s)
+  have h2 : (0 : ℝ) < (2 : ℝ) ^ (-(j : ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+  have hW : (0 : ℝ) ≤ (2 : ℝ) ^ (-(j : ℝ) * s)
       * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)) := by positivity
   have hre : ((gManu i s).re - (cCoeff i).re) - (bHat f1 i).re * (s - 1)
       = (gManu i s - cCoeff i - (((s - 1 : ℝ)) : ℂ) * bHat f1 i).re := by
@@ -10926,12 +10926,12 @@ theorem Dk_term_split (i j l : ℕ) (f1 : ℝ) (gh_i : ℝ) (hgh0 : 0 ≤ gh_i)
       ≤ gh_i * (s - 1) ^ 2 / 2 := by
     rw [hre]
     exact le_trans (Complex.abs_re_le_norm _) (htaylor s hs)
-  have hfactor : ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+  have hfactor : ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))
-      - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+      - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
       = (((gManu i s).re - (cCoeff i).re) - (bHat f1 i).re * (s - 1))
-        * ((2 : ℝ) ^ (-(j:ℝ) * s)
+        * ((2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) := by ring
   rw [hfactor, abs_mul, abs_of_nonneg hW]
   exact mul_le_mul_of_nonneg_right hbound hW
@@ -11177,38 +11177,38 @@ and |p^s - z| >= p^s - 2 >= 1 since |z| = 2 and p^s >= 3. -/
 theorem clog_term_continuous_theta (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
     Continuous (fun theta : ℝ =>
       -(circleMap 0 (2 : ℝ) theta * (circleMap 0 (2 : ℝ) theta - 1)
-          * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-        / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta)) := by
-  have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-  have hps : (3 : ℝ) ≤ (((p:ℕ):ℝ)) ^ s := by
+          * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+        / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta)) := by
+  have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+  have hps : (3 : ℝ) ≤ (((p : ℕ):ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ (((p:ℕ):ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+      _ ≤ (((p : ℕ):ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
   have hcm : Continuous (circleMap 0 (2 : ℝ)) := continuous_circleMap 0 _
   have hnorm : ∀ theta : ℝ, Norm.norm (circleMap 0 (2 : ℝ) theta) = 2 := by
     intro theta
     simp [circleMap]
-  have hd1 : (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1) ≠ 0 := by
+  have hd1 : (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1) ≠ 0 := by
     intro hcon
     rw [sub_eq_zero] at hcon
-    have : ((((p:ℕ):ℝ)) ^ s : ℝ) = 1 := by exact_mod_cast hcon
+    have : ((((p : ℕ):ℝ)) ^ s : ℝ) = 1 := by exact_mod_cast hcon
     linarith
   have hd2 : ∀ theta : ℝ,
-      (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta) ≠ 0 := by
+      (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta) ≠ 0 := by
     intro theta hcon
     rw [sub_eq_zero] at hcon
     have hn := hnorm theta
     rw [← hcon, Complex.norm_real, Real.norm_eq_abs,
-      abs_of_pos (by linarith : (0 : ℝ) < (((p:ℕ):ℝ)) ^ s)] at hn
+      abs_of_pos (by linarith : (0 : ℝ) < (((p : ℕ):ℝ)) ^ s)] at hn
     linarith
   have hnum : Continuous (fun theta : ℝ =>
       -(circleMap 0 (2 : ℝ) theta * (circleMap 0 (2 : ℝ) theta - 1)
-        * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))) :=
+        * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))) :=
     ((hcm.mul (hcm.sub continuous_const)).mul continuous_const).neg
   have hden : Continuous (fun theta : ℝ =>
-      (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta)) :=
+      (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta)) :=
     continuous_const.sub hcm
   exact (hnum.div continuous_const (fun _ => hd1)).div hden (fun theta => hd2 theta)
 
@@ -11216,30 +11216,30 @@ theorem clog_term_continuous_theta (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 �
 theorem clog2_term_continuous_theta (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
     Continuous (fun theta : ℝ =>
       circleMap 0 (2 : ℝ) theta * ((circleMap 0 (2 : ℝ) theta - 1)
-          * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)
-          * ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
-            + ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
-        / (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-          * (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta) ^ 2)))) := by
-  have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-  have hps : (3 : ℝ) ≤ (((p:ℕ):ℝ)) ^ s := by
+          * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)
+          * ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
+            + ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
+        / (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+          * (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta) ^ 2)))) := by
+  have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+  have hps : (3 : ℝ) ≤ (((p : ℕ):ℝ)) ^ s := by
     calc (3 : ℝ) = (3 : ℝ) ^ (1 : ℝ) := by norm_num
       _ ≤ (3 : ℝ) ^ s := Real.rpow_le_rpow_of_exponent_le (by norm_num) hs
-      _ ≤ (((p:ℕ):ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
+      _ ≤ (((p : ℕ):ℝ)) ^ s := Real.rpow_le_rpow (by norm_num) hp3 (by linarith)
   have hcm : Continuous (circleMap 0 (2 : ℝ)) := continuous_circleMap 0 _
   have hnorm : ∀ theta : ℝ, Norm.norm (circleMap 0 (2 : ℝ) theta) = 2 := by
     intro theta
     simp [circleMap]
-  have hpsC : Norm.norm ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) = (((p:ℕ):ℝ)) ^ s := by
+  have hpsC : Norm.norm ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) = (((p : ℕ):ℝ)) ^ s := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
-  have hd1 : (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1) ≠ 0 := by
+  have hd1 : (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1) ≠ 0 := by
     intro hcon
     rw [sub_eq_zero] at hcon
-    have : ((((p:ℕ):ℝ)) ^ s : ℝ) = 1 := by exact_mod_cast hcon
+    have : ((((p : ℕ):ℝ)) ^ s : ℝ) = 1 := by exact_mod_cast hcon
     linarith
   have hd2 : ∀ theta : ℝ,
-      (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - circleMap 0 (2 : ℝ) theta) ≠ 0 := by
+      (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - circleMap 0 (2 : ℝ) theta) ≠ 0 := by
     intro theta hcon
     rw [sub_eq_zero] at hcon
     have hn := hnorm theta
@@ -11247,33 +11247,33 @@ theorem clog2_term_continuous_theta (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 �
     linarith
   have hnum : Continuous (fun theta : ℝ =>
       circleMap 0 (2 : ℝ) theta * ((circleMap 0 (2 : ℝ) theta - 1)
-        * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)
-        * ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
-          + ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1)))) :=
+        * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)
+        * ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
+          + ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1)))) :=
     hcm.mul ((((hcm.sub continuous_const).mul continuous_const).mul continuous_const).mul
       ((continuous_const.sub hcm).add continuous_const))
   have hden : Continuous (fun theta : ℝ =>
-      (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1) ^ 2
-        * (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - circleMap 0 (2 : ℝ) theta) ^ 2) :=
+      (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1) ^ 2
+        * (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - circleMap 0 (2 : ℝ) theta) ^ 2) :=
     continuous_const.mul ((continuous_const.sub hcm).pow 2)
   have hdne : ∀ theta : ℝ,
-      (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1) ^ 2
-        * (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)) - circleMap 0 (2 : ℝ) theta) ^ 2 ≠ 0 := by
+      (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - 1) ^ 2
+        * (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)) - circleMap 0 (2 : ℝ) theta) ^ 2 ≠ 0 := by
     intro theta
     exact mul_ne_zero (pow_ne_zero 2 hd1) (pow_ne_zero 2 (hd2 theta))
   have hfun : ∀ theta : ℝ,
       circleMap 0 (2 : ℝ) theta * ((circleMap 0 (2 : ℝ) theta - 1)
-          * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)
-          * ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
-            + ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
-        / (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-          * (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta) ^ 2)))
+          * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)
+          * ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
+            + ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
+        / (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+          * (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta) ^ 2)))
       = (circleMap 0 (2 : ℝ) theta * ((circleMap 0 (2 : ℝ) theta - 1)
-          * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)
-          * ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
-            + ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))))
-        / ((((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-          * (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta) ^ 2))) := by
+          * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)
+          * ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
+            + ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))))
+        / ((((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+          * (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta) ^ 2))) := by
     intro theta
     ring
   simp only [hfun]
@@ -11286,20 +11286,20 @@ theorem clog2_series_continuous_theta (s : ℝ) (hs : 1 ≤ s) :
     Continuous (fun theta : ℝ =>
       ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
         (circleMap 0 (2 : ℝ) theta * ((circleMap 0 (2 : ℝ) theta - 1)
-            * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)
-            * ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
-              + ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-            * (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta) ^ 2))))) := by
+            * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) ^ 2 * (((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)
+            * ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
+              + ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+            * (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta) ^ 2))))) := by
   have hnorm : ∀ theta : ℝ, Norm.norm (circleMap 0 (2 : ℝ) theta) ≤ 2 := by
     intro theta
     simp [circleMap]
   apply continuous_tsum
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      clog2_term_continuous_theta (p:ℕ) (by omega) s hs)
+      clog2_term_continuous_theta (p : ℕ) (by omega) s hs)
     deriv2_bound_uniform_summable_five_z
   intro p theta
-  exact deriv2_clog_term_bound_z (p:ℕ) (by omega) s hs
+  exact deriv2_clog_term_bound_z (p : ℕ) (by omega) s hs
     (circleMap 0 (2 : ℝ) theta) (hnorm theta)
 
 /-- C' is continuous in theta on the contour: the kappa-part is constant in
@@ -11317,12 +11317,12 @@ theorem c_bracket_deriv_continuous_theta (s : ℝ) (hs : 1 ≤ s) (fps : ℝ) :
               * (((((((3 : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta) ^ 2))))
           + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
               (circleMap 0 (2 : ℝ) theta * ((circleMap 0 (2 : ℝ) theta - 1)
-                  * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ) ^ 2
-                  * (((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)
-                  * ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
-                    + ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
-                / (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
-                  * (((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ)
+                  * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ) ^ 2
+                  * (((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)
+                  * ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta
+                    + ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1))
+                / (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1) ^ 2
+                  * (((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ)
                     - circleMap 0 (2 : ℝ) theta) ^ 2)))))) := by
   have hcm : Continuous (circleMap 0 (2 : ℝ)) := continuous_circleMap 0 _
   apply Continuous.add (hcm.mul continuous_const)
@@ -11338,18 +11338,18 @@ theorem clog_series_continuous_theta (s : ℝ) (hs : 1 ≤ s) :
     Continuous (fun theta : ℝ =>
       ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
         (-(circleMap 0 (2 : ℝ) theta * (circleMap 0 (2 : ℝ) theta - 1)
-            * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-          / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-            / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta))) := by
+            * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+          / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+            / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta))) := by
   have hnorm : ∀ theta : ℝ, Norm.norm (circleMap 0 (2 : ℝ) theta) ≤ 2 := by
     intro theta
     simp [circleMap]
   apply continuous_tsum
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      clog_term_continuous_theta (p:ℕ) (by omega) s hs)
+      clog_term_continuous_theta (p : ℕ) (by omega) s hs)
     deriv_bound_uniform_summable_five
   intro p theta
-  exact deriv_clog_term_bound_uniform (p:ℕ) (by omega) s hs
+  exact deriv_clog_term_bound_uniform (p : ℕ) (by omega) s hs
     (circleMap 0 (2 : ℝ) theta) (hnorm theta)
 
 /-- C is continuous in theta on the contour: kappa-part, p=3 term, and the
@@ -11363,9 +11363,9 @@ theorem c_bracket_continuous_theta (s : ℝ) (hs : 1 ≤ s) (fs : ℝ) :
               / ((((((3 : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta))
           + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
               (-(circleMap 0 (2 : ℝ) theta * (circleMap 0 (2 : ℝ) theta - 1)
-                  * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-                / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1)
-                  / ((((((p:ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta)))) := by
+                  * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+                / ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - 1)
+                  / ((((((p : ℕ):ℝ)) ^ s : ℝ) : ℂ) - circleMap 0 (2 : ℝ) theta)))) := by
   have hcm : Continuous (circleMap 0 (2 : ℝ)) := continuous_circleMap 0 _
   apply Continuous.add (hcm.mul continuous_const)
   apply Continuous.add
@@ -11407,9 +11407,9 @@ theorem G2manu_deriv_continuous_theta (s : ℝ) (hsmem : s ∈ Set.Ioo (1 : ℝ)
                   / (((((((3 : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta))
               + ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
                   (-(circleMap 0 (2 : ℝ) theta * (circleMap 0 (2 : ℝ) theta - 1)
-                      * ((Real.log ((p:ℕ):ℝ) : ℝ) : ℂ))
-                    / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
-                      / (((((((p:ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta)))) := by
+                      * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
+                    / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - 1)
+                      / (((((((p : ℕ):ℝ)) ^ s : ℝ)) : ℂ) - circleMap 0 (2 : ℝ) theta)))) := by
     intro theta
     exact (lemma_3_9_complex (circleMap 0 (2 : ℝ) theta) (hnorm theta) s hsmem f
       (hf s hsmem)).deriv
@@ -11436,21 +11436,21 @@ theorem G2manu_deriv_continuous_theta (s : ℝ) (hsmem : s ∈ Set.Ioo (1 : ℝ)
 s-continuity argument. -/
 theorem correction_bound_uniform_summable_five :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      18 * (((p:ℕ):ℝ)) ^ (-(2 : ℝ))) := by
+      18 * (((p : ℕ):ℝ)) ^ (-(2 : ℝ))) := by
   have h2 : (-(2 : ℝ)) < -1 := by norm_num
-  have hbase : Summable (fun n : ℕ => (n:ℝ) ^ (-(2 : ℝ))) :=
+  have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2 : ℝ))) :=
     Real.summable_nat_rpow.mpr h2
   exact (hbase.subtype _).mul_left 18
 
 /-- The correction bound, s-free: 18 p^(-2s) <= 18 p^(-2) for s >= 1. -/
 theorem correction_bound_sfree (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 2) :
-    Norm.norm ((-Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-s) : ℝ) : ℂ)))
-        + z * ((Real.log (1 - (((p:ℕ):ℝ)) ^ (-s)) : ℝ) : ℂ))
-      ≤ 18 * (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) := by
-  have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
+    Norm.norm ((-Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-s) : ℝ) : ℂ)))
+        + z * ((Real.log (1 - (((p : ℕ):ℝ)) ^ (-s)) : ℝ) : ℂ))
+      ≤ 18 * (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) := by
+  have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast hp
   have hbase := prime_correction_bound_complex p hp s hs z hz
-  have hmono : (((p:ℕ):ℝ)) ^ (-2*s) ≤ (((p:ℕ):ℝ)) ^ (-(2 : ℝ)) := by
+  have hmono : (((p : ℕ):ℝ)) ^ (-2*s) ≤ (((p : ℕ):ℝ)) ^ (-(2 : ℝ)) := by
     apply Real.rpow_le_rpow_of_exponent_le (by linarith)
     linarith
   linarith
@@ -11461,37 +11461,37 @@ for small s (1 - p^(-s) -> 0 there) and the bound 18 p^(-2) needs s >= 1, so
 both hold unconditionally only after restricting. -/
 theorem correction_continuous_s (p : ℕ) (hp : 3 ≤ p) (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      -Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-(s:ℝ)) : ℝ) : ℂ))
-        + z * ((Real.log (1 - (((p:ℕ):ℝ)) ^ (-(s:ℝ))) : ℝ) : ℂ)) := by
-  have hp3 : (3 : ℝ) ≤ (((p:ℕ):ℝ)) := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < (((p:ℕ):ℝ)) := by linarith
-  have hsub : Continuous (fun s : {s : ℝ // 1 ≤ s} => (s:ℝ)) := continuous_subtype_val
-  have hrpow : Continuous (fun s : {s : ℝ // 1 ≤ s} => (((p:ℕ):ℝ)) ^ (-(s:ℝ))) :=
+      -Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-(s : ℝ)) : ℝ) : ℂ))
+        + z * ((Real.log (1 - (((p : ℕ):ℝ)) ^ (-(s : ℝ))) : ℝ) : ℂ)) := by
+  have hp3 : (3 : ℝ) ≤ (((p : ℕ):ℝ)) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (((p : ℕ):ℝ)) := by linarith
+  have hsub : Continuous (fun s : {s : ℝ // 1 ≤ s} => (s : ℝ)) := continuous_subtype_val
+  have hrpow : Continuous (fun s : {s : ℝ // 1 ≤ s} => (((p : ℕ):ℝ)) ^ (-(s : ℝ))) :=
     (continuous_const_rpow (ne_of_gt hp0)).comp hsub.neg
-  have hlt : ∀ s : {s : ℝ // 1 ≤ s}, (((p:ℕ):ℝ)) ^ (-(s:ℝ)) < 1 :=
+  have hlt : ∀ s : {s : ℝ // 1 ≤ s}, (((p : ℕ):ℝ)) ^ (-(s : ℝ)) < 1 :=
     fun s => Real.rpow_lt_one_of_one_lt_of_neg (by linarith) (by linarith [s.2])
   have hden : ∀ s : {s : ℝ // 1 ≤ s},
-      (0 : ℝ) < 1 - (((p:ℕ):ℝ)) ^ (-(s:ℝ)) := fun s => by linarith [hlt s]
+      (0 : ℝ) < 1 - (((p : ℕ):ℝ)) ^ (-(s : ℝ)) := fun s => by linarith [hlt s]
   have hlogr : Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      Real.log (1 - (((p:ℕ):ℝ)) ^ (-(s:ℝ)))) :=
+      Real.log (1 - (((p : ℕ):ℝ)) ^ (-(s : ℝ)))) :=
     Real.continuousOn_log.comp_continuous (continuous_const.sub hrpow)
       (fun s => ne_of_gt (hden s))
   have hinner : Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      (1 : ℂ) - z * (((((p:ℕ):ℝ)) ^ (-(s:ℝ)) : ℝ) : ℂ)) :=
+      (1 : ℂ) - z * (((((p : ℕ):ℝ)) ^ (-(s : ℝ)) : ℝ) : ℂ)) :=
     continuous_const.sub (continuous_const.mul (Complex.continuous_ofReal.comp hrpow))
   have hslit : ∀ s : {s : ℝ // 1 ≤ s},
-      (1 : ℂ) - z * (((((p:ℕ):ℝ)) ^ (-(s:ℝ)) : ℝ) : ℂ) ∈ Complex.slitPlane :=
-    fun s => one_sub_mem_slitPlane p hp (s:ℝ) s.2 z hz
+      (1 : ℂ) - z * (((((p : ℕ):ℝ)) ^ (-(s : ℝ)) : ℝ) : ℂ) ∈ Complex.slitPlane :=
+    fun s => one_sub_mem_slitPlane p hp (s : ℝ) s.2 z hz
   have hlogc : Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-(s:ℝ)) : ℝ) : ℂ))) := by
+      Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-(s : ℝ)) : ℝ) : ℂ))) := by
     rw [continuous_iff_continuousAt]
     intro s
     have hca : ContinuousAt Complex.log
-        (1 - z * (((((p:ℕ):ℝ)) ^ (-(s:ℝ)) : ℝ) : ℂ)) :=
+        (1 - z * (((((p : ℕ):ℝ)) ^ (-(s : ℝ)) : ℝ) : ℂ)) :=
       (Complex.hasDerivAt_log (hslit s)).continuousAt
     exact ContinuousAt.comp (g := Complex.log)
       (f := fun s : {s : ℝ // 1 ≤ s} =>
-        1 - z * (((((p:ℕ):ℝ)) ^ (-(s:ℝ)) : ℝ) : ℂ))
+        1 - z * (((((p : ℕ):ℝ)) ^ (-(s : ℝ)) : ℝ) : ℂ))
       hca hinner.continuousAt
   exact hlogc.neg.add (continuous_const.mul (Complex.continuous_ofReal.comp hlogr))
 
@@ -11499,67 +11499,67 @@ theorem correction_continuous_s (p : ℕ) (hp : 3 ≤ p) (z : ℂ) (hz : Norm.no
 theorem correction_series_continuous_s (z : ℂ) (hz : Norm.norm z ≤ 2) :
     Continuous (fun s : {s : ℝ // 1 ≤ s} =>
       ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
-        (-Complex.log (1 - z * (((((p:ℕ):ℝ)) ^ (-(s:ℝ)) : ℝ) : ℂ))
-          + z * ((Real.log (1 - (((p:ℕ):ℝ)) ^ (-(s:ℝ))) : ℝ) : ℂ))) := by
+        (-Complex.log (1 - z * (((((p : ℕ):ℝ)) ^ (-(s : ℝ)) : ℝ) : ℂ))
+          + z * ((Real.log (1 - (((p : ℕ):ℝ)) ^ (-(s : ℝ))) : ℝ) : ℂ))) := by
   apply continuous_tsum
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
-      correction_continuous_s (p:ℕ) (by omega) z hz)
+      correction_continuous_s (p : ℕ) (by omega) z hz)
     correction_bound_uniform_summable_five
   intro p s
-  exact correction_bound_sfree (p:ℕ) (by omega) (s:ℝ) s.2 z hz
+  exact correction_bound_sfree (p : ℕ) (by omega) (s : ℝ) s.2 z hz
 
 /-- G2tailC is continuous in s on {s // 1 <= s}: it is exp of the correction
 series (G2tailC_eq_exp_sum), which is continuous by
 correction_series_continuous_s. -/
 theorem G2tailC_continuous_s (z : ℂ) (hz : Norm.norm z ≤ 2) :
-    Continuous (fun s : {s : ℝ // 1 ≤ s} => G2tailC (s:ℝ) z) := by
+    Continuous (fun s : {s : ℝ // 1 ≤ s} => G2tailC (s : ℝ) z) := by
   have hser := correction_series_continuous_s z hz
   have hexp := Complex.continuous_exp.comp hser
   apply hexp.congr
   intro s
-  exact (G2tailC_eq_exp_sum (s:ℝ) s.2 z hz).symm
+  exact (G2tailC_eq_exp_sum (s : ℝ) s.2 z hz).symm
 
 /-- G2C is continuous in s on {s // 1 <= s}: the p = 3 factor times the tail.
 The p = 3 factor is continuous because 1 - z*3^(-s) stays in the slit plane
 and 1 - 3^(-s) stays positive for s >= 1. -/
 theorem G2C_continuous_s (z : ℂ) (hz : Norm.norm z ≤ 2) :
-    Continuous (fun s : {s : ℝ // 1 ≤ s} => G2C (s:ℝ) z) := by
-  have hrpow : Continuous (fun s : {s : ℝ // 1 ≤ s} => ((3 : ℝ)) ^ (-(s:ℝ))) :=
+    Continuous (fun s : {s : ℝ // 1 ≤ s} => G2C (s : ℝ) z) := by
+  have hrpow : Continuous (fun s : {s : ℝ // 1 ≤ s} => ((3 : ℝ)) ^ (-(s : ℝ))) :=
     (continuous_const_rpow (by norm_num)).comp continuous_subtype_val.neg
-  have hlt : ∀ s : {s : ℝ // 1 ≤ s}, ((3 : ℝ)) ^ (-(s:ℝ)) ≤ 1/3 := by
+  have hlt : ∀ s : {s : ℝ // 1 ≤ s}, ((3 : ℝ)) ^ (-(s : ℝ)) ≤ 1/3 := by
     intro s
-    have h1 : ((3 : ℝ)) ^ (-(s:ℝ)) ≤ ((3 : ℝ)) ^ (-(1 : ℝ)) := by
+    have h1 : ((3 : ℝ)) ^ (-(s : ℝ)) ≤ ((3 : ℝ)) ^ (-(1 : ℝ)) := by
       apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
       linarith [s.2]
     rw [Real.rpow_neg_one] at h1
     norm_num at h1
     linarith
-  have hpos : ∀ s : {s : ℝ // 1 ≤ s}, (0 : ℝ) < 1 - ((3 : ℝ)) ^ (-(s:ℝ)) := by
+  have hpos : ∀ s : {s : ℝ // 1 ≤ s}, (0 : ℝ) < 1 - ((3 : ℝ)) ^ (-(s : ℝ)) := by
     intro s
     linarith [hlt s]
   have hlogr : Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      Real.log (1 - ((3 : ℝ)) ^ (-(s:ℝ)))) :=
+      Real.log (1 - ((3 : ℝ)) ^ (-(s : ℝ)))) :=
     Real.continuousOn_log.comp_continuous (continuous_const.sub hrpow)
       (fun s => ne_of_gt (hpos s))
   have hcpow : Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      (((1 - ((3 : ℝ)) ^ (-(s:ℝ)) : ℝ)) : ℂ) ^ z) := by
+      (((1 - ((3 : ℝ)) ^ (-(s : ℝ)) : ℝ)) : ℂ) ^ z) := by
     have heq : (fun s : {s : ℝ // 1 ≤ s} =>
-        (((1 - ((3 : ℝ)) ^ (-(s:ℝ)) : ℝ)) : ℂ) ^ z)
+        (((1 - ((3 : ℝ)) ^ (-(s : ℝ)) : ℝ)) : ℂ) ^ z)
         = fun s : {s : ℝ // 1 ≤ s} =>
-          Complex.exp (z * ((Real.log (1 - ((3 : ℝ)) ^ (-(s:ℝ))) : ℝ) : ℂ)) := by
+          Complex.exp (z * ((Real.log (1 - ((3 : ℝ)) ^ (-(s : ℝ))) : ℝ) : ℂ)) := by
       funext s
-      rw [ofReal_cpow_eq_exp (1 - ((3 : ℝ)) ^ (-(s:ℝ))) (hpos s) z]
+      rw [ofReal_cpow_eq_exp (1 - ((3 : ℝ)) ^ (-(s : ℝ))) (hpos s) z]
     rw [heq]
     exact Complex.continuous_exp.comp
       (continuous_const.mul (Complex.continuous_ofReal.comp hlogr))
   have hzne : ∀ s : {s : ℝ // 1 ≤ s},
-      (1 : ℂ) - z * (((((3 : ℝ)) ^ (-(s:ℝ)) : ℝ)) : ℂ) ≠ 0 := by
+      (1 : ℂ) - z * (((((3 : ℝ)) ^ (-(s : ℝ)) : ℝ)) : ℂ) ≠ 0 := by
     intro s
-    have := one_sub_mem_slitPlane 3 (le_refl 3) (s:ℝ) s.2 z hz
+    have := one_sub_mem_slitPlane 3 (le_refl 3) (s : ℝ) s.2 z hz
     norm_num at this
     exact Complex.slitPlane_ne_zero this
   have hinv : Continuous (fun s : {s : ℝ // 1 ≤ s} =>
-      (1 - z * (((((3 : ℝ)) ^ (-(s:ℝ)) : ℝ)) : ℂ))⁻¹) := by
+      (1 - z * (((((3 : ℝ)) ^ (-(s : ℝ)) : ℝ)) : ℂ))⁻¹) := by
     apply Continuous.inv₀ _ hzne
     exact continuous_const.sub (continuous_const.mul (Complex.continuous_ofReal.comp hrpow))
   unfold G2C
@@ -12090,17 +12090,17 @@ theorem integrable_Ik_term (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
     (hM0 : ∀ u : ℝ, u ∈ Set.Ioi (1 : ℝ) → ∀ theta : ℝ,
       Norm.norm (G2manu u (circleMap 0 (2 : ℝ) theta)) ≤ M0) :
     MeasureTheory.IntegrableOn
-      (fun s : ℝ => (gManu i s).re * (2 : ℝ) ^ (-(j:ℝ) * s)
+      (fun s : ℝ => (gManu i s).re * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
       (Set.Ioc (1 : ℝ) 2) := by
   have hdomIoc := (integrable_Sm_integrand l j).const_mul (Norm.norm (cCoeff i) + beta)
   have hdomIoo : MeasureTheory.IntegrableOn
       (fun s : ℝ => (Norm.norm (cCoeff i) + beta) *
-        ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (2 : ℝ) ^ (-(j:ℝ) * s)))
+        ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (2 : ℝ) ^ (-(j : ℝ) * s)))
       (Set.Ioo (1 : ℝ) 2) :=
     MeasureTheory.IntegrableOn.mono_set hdomIoc Set.Ioo_subset_Ioc_self
   have hmeas : MeasureTheory.AEStronglyMeasurable
-      (fun s : ℝ => (gManu i s).re * (2 : ℝ) ^ (-(j:ℝ) * s)
+      (fun s : ℝ => (gManu i s).re * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
       (MeasureTheory.volume.restrict (Set.Ioo (1 : ℝ) 2)) := by
     apply ContinuousOn.aestronglyMeasurable _ measurableSet_Ioo
@@ -12120,7 +12120,7 @@ theorem integrable_Ik_term (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
       have hx1 : x = 1 := by linarith
       exact absurd hx1 (ne_of_gt hx.1)
   have hIoo : MeasureTheory.IntegrableOn
-      (fun s : ℝ => (gManu i s).re * (2 : ℝ) ^ (-(j:ℝ) * s)
+      (fun s : ℝ => (gManu i s).re * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
       (Set.Ioo (1 : ℝ) 2) := by
     apply MeasureTheory.Integrable.mono hdomIoo hmeas
@@ -12134,28 +12134,28 @@ theorem integrable_Ik_term (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
       have hpos : (0 : ℝ) < s - 1 := by linarith [hs.1]
       simp only [neg_nonneg]
       exact Real.log_nonpos (le_of_lt hpos) this
-    have h2 : (0 : ℝ) < (2 : ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+    have h2 : (0 : ℝ) < (2 : ℝ) ^ (-(j : ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
     have hcb : (0 : ℝ) ≤ Norm.norm (cCoeff i) + beta := by positivity
     have hkey : |(gManu i s).re| ≤ Norm.norm (cCoeff i) + beta := le_trans hre hb
     rw [Real.norm_eq_abs, Real.norm_eq_abs]
     have hrhsnn : (0 : ℝ) ≤ (Norm.norm (cCoeff i) + beta)
-        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (2 : ℝ) ^ (-(j:ℝ) * s)) := by
+        * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (2 : ℝ) ^ (-(j : ℝ) * s)) := by
       apply mul_nonneg hcb
       positivity
-    have hlhsnn : (0 : ℝ) ≤ |(gManu i s).re| * (2 : ℝ) ^ (-(j:ℝ) * s)
+    have hlhsnn : (0 : ℝ) ≤ |(gManu i s).re| * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)) := by positivity
     rw [abs_of_nonneg hrhsnn, abs_mul, abs_mul, abs_of_pos h2, abs_of_nonneg hlog]
-    have hAB : (0 : ℝ) ≤ (2 : ℝ) ^ (-(j:ℝ) * s)
+    have hAB : (0 : ℝ) ≤ (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)) := by positivity
-    calc |(gManu i s).re| * (2 : ℝ) ^ (-(j:ℝ) * s)
+    calc |(gManu i s).re| * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))
-        = |(gManu i s).re| * ((2 : ℝ) ^ (-(j:ℝ) * s)
+        = |(gManu i s).re| * ((2 : ℝ) ^ (-(j : ℝ) * s)
             * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) := by ring
-      _ ≤ (Norm.norm (cCoeff i) + beta) * ((2 : ℝ) ^ (-(j:ℝ) * s)
+      _ ≤ (Norm.norm (cCoeff i) + beta) * ((2 : ℝ) ^ (-(j : ℝ) * s)
             * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) :=
           mul_le_mul_of_nonneg_right hkey hAB
       _ = (Norm.norm (cCoeff i) + beta) * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)
-            * (2 : ℝ) ^ (-(j:ℝ) * s)) := by ring
+            * (2 : ℝ) ^ (-(j : ℝ) * s)) := by ring
   exact hIoo.congr_set_ae MeasureTheory.Ioo_ae_eq_Ioc.symm
 
 /-- Real-valued conv_flatten: the triangular double sum as a sigma sum. -/
@@ -12200,17 +12200,17 @@ theorem Ik_eq_double_sum (k : ℕ) (hk : 1 ≤ k) (beta : ℕ → ℝ)
       Norm.norm (G2manu u (circleMap 0 (2 : ℝ) theta)) ≤ M0) :
     Ik k = ∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
       (∫ s in Set.Ioc (1 : ℝ) 2,
-        (gManu i s).re * (2 : ℝ) ^ (-(j:ℝ) * s)
+        (gManu i s).re * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
   unfold Ik
   have hpt : ∀ s ∈ Set.Ioc (1 : ℝ) 2, Fk k s
       = ∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
-        (gManu i s).re * (2 : ℝ) ^ (-(j:ℝ) * s)
+        (gManu i s).re * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))) := by
     intro s hs
     rw [Fk_expansion_manu k hk s hs.1 hs.2]
     rw [triangular_sum_comm k (fun p q =>
-      (gManu q s).re * (2 : ℝ) ^ (-(p:ℝ) * s)
+      (gManu q s).re * (2 : ℝ) ^ (-(p : ℝ) * s)
         * ((-Real.log (s - 1)) ^ (k - p - q) / (Nat.factorial (k - p - q))))]
     apply Finset.sum_congr rfl
     intro i _
@@ -12238,7 +12238,7 @@ theorem Ikfrozen_re_eq_double_sum (k : ℕ) :
     (Ikfrozen k).re
       = ∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
         (∫ s in Set.Ioc (1 : ℝ) 2,
-          (cCoeff i).re * (2 : ℝ) ^ (-(j:ℝ) * s)
+          (cCoeff i).re * (2 : ℝ) ^ (-(j : ℝ) * s)
             * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
   rw [Ikfrozen_re_eq]
   apply Finset.sum_congr rfl
@@ -12268,7 +12268,7 @@ theorem Dk_eq_triple_sum (k : ℕ) (hk : 1 ≤ k) (beta : ℕ → ℝ)
       Norm.norm (G2manu u (circleMap 0 (2 : ℝ) theta)) ≤ M0) :
     Dk k = ∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
       (∫ s in Set.Ioc (1 : ℝ) 2,
-        ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+        ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
   unfold Dk
   rw [Ik_eq_double_sum k hk beta hbeta0 hderiv hbound M0 hM00 hM0,
@@ -12302,9 +12302,9 @@ theorem Dk_integrand_ptwise (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
     (hM0 : ∀ u : ℝ, u ∈ Set.Ioi (1 : ℝ) → ∀ theta : ℝ,
       Norm.norm (G2manu u (circleMap 0 (2 : ℝ) theta)) ≤ M0)
     (s : ℝ) (hs : s ∈ Set.Ioo (1 : ℝ) 2) :
-    |((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+    |((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))|
-      ≤ beta * (2 : ℝ) ^ (-(j:ℝ))
+      ≤ beta * (2 : ℝ) ^ (-(j : ℝ))
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)) := by
   have hmv := gManu_sub_cCoeff_bound i beta hbeta0 hderiv hbnd M0 hM00 hM0 s hs
   have hL : (0 : ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) := by
@@ -12312,10 +12312,10 @@ theorem Dk_integrand_ptwise (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
     apply pow_nonneg
     simp only [neg_nonneg]
     exact Real.log_nonpos (by linarith [hs.1]) (by linarith [hs.2])
-  have hB : (0 : ℝ) < (2 : ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
-  have hBle : (2 : ℝ) ^ (-(j:ℝ) * s) ≤ (2 : ℝ) ^ (-(j:ℝ)) := by
+  have hB : (0 : ℝ) < (2 : ℝ) ^ (-(j : ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+  have hBle : (2 : ℝ) ^ (-(j : ℝ) * s) ≤ (2 : ℝ) ^ (-(j : ℝ)) := by
     apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
-    have hj : (0 : ℝ) ≤ (j:ℝ) := by positivity
+    have hj : (0 : ℝ) ≤ (j : ℝ) := by positivity
     nlinarith [hs.1]
   have hA : |(gManu i s).re - (cCoeff i).re| ≤ beta * (s - 1) := by
     have hre : |(gManu i s).re - (cCoeff i).re|
@@ -12325,13 +12325,13 @@ theorem Dk_integrand_ptwise (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
     exact le_trans (Complex.abs_re_le_norm _) hmv
   have hs1 : (0 : ℝ) ≤ s - 1 := by linarith [hs.1]
   rw [abs_mul, abs_mul, abs_of_pos hB, abs_of_nonneg hL]
-  calc |(gManu i s).re - (cCoeff i).re| * (2 : ℝ) ^ (-(j:ℝ) * s)
+  calc |(gManu i s).re - (cCoeff i).re| * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))
-      ≤ (beta * (s - 1)) * (2 : ℝ) ^ (-(j:ℝ))
+      ≤ (beta * (s - 1)) * (2 : ℝ) ^ (-(j : ℝ))
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)) := by
         apply mul_le_mul_of_nonneg_right _ hL
         apply mul_le_mul hA hBle (le_of_lt hB) (by positivity)
-    _ = beta * (2 : ℝ) ^ (-(j:ℝ))
+    _ = beta * (2 : ℝ) ^ (-(j : ℝ))
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)) := by ring
 
 /-- MANUSCRIPT section 3.5: the exact evaluation
@@ -12394,7 +12394,7 @@ noncomputable def S2m (m : ℕ) : ℝ :=
   ∑ j ∈ Finset.range (m + 1),
     ∫ s in Set.Ioc (1 : ℝ) 2,
       (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (s - 1)
-        * (2 : ℝ) ^ (-(j:ℝ) * s)
+        * (2 : ℝ) ^ (-(j : ℝ) * s)
 
 /-- The (s-1)-weighted inner sum of Dk at fixed i is exactly S2m (k-i).
 S2m's definition sums over j <= m with log-index m - j; Dk's inner sum at
@@ -12403,7 +12403,7 @@ theorem inner_s2_group (k i : ℕ) (hik : i ≤ k) :
     ∑ j ∈ Finset.range (k - i + 1),
         (∫ s in Set.Ioc (1 : ℝ) 2,
           (-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)) * (s - 1)
-            * (2 : ℝ) ^ (-(j:ℝ) * s))
+            * (2 : ℝ) ^ (-(j : ℝ) * s))
       = S2m (k - i) := by
   unfold S2m
   rfl
@@ -12444,12 +12444,12 @@ integrand of integrable_log_pow_sub_one since 2^(-js) <= 1 there. -/
 theorem integrable_S2_integrand (l j : ℕ) :
     MeasureTheory.IntegrableOn
       (fun s : ℝ => (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)
-        * (2 : ℝ) ^ (-(j:ℝ) * s))
+        * (2 : ℝ) ^ (-(j : ℝ) * s))
       (Set.Ioc (1 : ℝ) 2) := by
   have hdom := integrable_log_pow_sub_one l
   have hmeas : MeasureTheory.AEStronglyMeasurable
       (fun s : ℝ => (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)
-        * (2 : ℝ) ^ (-(j:ℝ) * s))
+        * (2 : ℝ) ^ (-(j : ℝ) * s))
       (MeasureTheory.volume.restrict (Set.Ioc (1 : ℝ) 2)) := by
     apply MeasureTheory.AEStronglyMeasurable.mul _ _
     · exact hdom.aestronglyMeasurable
@@ -12466,35 +12466,35 @@ theorem integrable_S2_integrand (l j : ℕ) :
     apply pow_nonneg
     simp only [neg_nonneg]
     exact Real.log_nonpos (by linarith) (by linarith)
-  have h2 : (2 : ℝ) ^ (-(j:ℝ) * s) ≤ 1 := by
+  have h2 : (2 : ℝ) ^ (-(j : ℝ) * s) ≤ 1 := by
     apply Real.rpow_le_one_of_one_le_of_nonpos (by norm_num)
-    have : (0 : ℝ) ≤ (j:ℝ) := by positivity
+    have : (0 : ℝ) ≤ (j : ℝ) := by positivity
     nlinarith [hs1]
-  have h2pos : (0 : ℝ) < (2 : ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+  have h2pos : (0 : ℝ) < (2 : ℝ) ^ (-(j : ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hLpos]
   rw [abs_of_nonneg (by positivity : (0 : ℝ) ≤ (-Real.log (s - 1)) ^ l
-    / (Nat.factorial l) * (s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s))]
+    / (Nat.factorial l) * (s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s))]
   exact mul_le_of_le_one_right hLpos h2
 
 /-- Per-term identity: the E_1 term minus the M_2 term is 2^k times the
 integral of the pointwise difference. -/
 theorem term_diff_eq (i j l : ℕ) (f1 : ℝ) (K : ℝ)
     (hA : MeasureTheory.IntegrableOn
-      (fun s : ℝ => ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+      (fun s : ℝ => ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) (Set.Ioc (1 : ℝ) 2)) :
     K * (∫ s in Set.Ioc (1 : ℝ) 2,
-        ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+        ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
       - K * ((bHat f1 i).re * (∫ s in Set.Ioc (1 : ℝ) 2,
           (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)
-            * (2 : ℝ) ^ (-(j:ℝ) * s)))
+            * (2 : ℝ) ^ (-(j : ℝ) * s)))
       = K * (∫ s in Set.Ioc (1 : ℝ) 2,
-          (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+          (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
             * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))
-          - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+          - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
             * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))))) := by
   have hB : MeasureTheory.IntegrableOn
-      (fun s : ℝ => (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+      (fun s : ℝ => (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))) (Set.Ioc (1 : ℝ) 2) := by
     have h := (integrable_S2_integrand l j).const_mul ((bHat f1 i).re)
     apply MeasureTheory.IntegrableOn.congr_fun h _ measurableSet_Ioc
@@ -12502,9 +12502,9 @@ theorem term_diff_eq (i j l : ℕ) (f1 : ℝ) (K : ℝ)
     ring
   have hpull : (bHat f1 i).re * (∫ s in Set.Ioc (1 : ℝ) 2,
         (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)
-          * (2 : ℝ) ^ (-(j:ℝ) * s))
+          * (2 : ℝ) ^ (-(j : ℝ) * s))
       = ∫ s in Set.Ioc (1 : ℝ) 2,
-        (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+        (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))) := by
     rw [← MeasureTheory.integral_const_mul]
     apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioc
@@ -12525,9 +12525,9 @@ theorem E1k_sub_M2k_eq (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
     E1k k - M2k f1 k
       = ∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
         ((2 : ℝ) ^ k * (∫ s in Set.Ioc (1 : ℝ) 2,
-            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
-            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))))) := by
   unfold E1k
   rw [Dk_eq_triple_sum k hk beta hbeta0 hderiv hbnd M0 hM00 hM0, M2k_eq_S2]
@@ -12540,14 +12540,14 @@ theorem E1k_sub_M2k_eq (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
   apply Finset.sum_congr rfl
   intro j hj
   have hAdiff : MeasureTheory.IntegrableOn
-      (fun s : ℝ => ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+      (fun s : ℝ => ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
         * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))
       (Set.Ioc (1 : ℝ) 2) := by
     have hI := integrable_Ik_term i j (k - i - j) (beta i) (hbeta0 i) (hderiv i)
       (hbnd i) M0 hM00 hM0
     have hF := (integrable_Sm_integrand (k - i - j) j).const_mul ((cCoeff i).re)
     have hFc : MeasureTheory.IntegrableOn
-        (fun s : ℝ => (cCoeff i).re * (2 : ℝ) ^ (-(j:ℝ) * s)
+        (fun s : ℝ => (cCoeff i).re * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))
         (Set.Ioc (1 : ℝ) 2) := by
       apply MeasureTheory.IntegrableOn.congr_fun hF _ measurableSet_Ioc
@@ -12583,9 +12583,9 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
   have hstep : ∀ i ∈ Finset.range (k + 1),
       |∑ j ∈ Finset.range (k - i + 1),
         ((2 : ℝ) ^ k * (∫ s in Set.Ioc (1 : ℝ) 2,
-            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
-            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))))|
       ≤ gh i / 2 * (2 : ℝ) ^ i := by
     intro i hi
@@ -12593,24 +12593,24 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
     apply le_trans (Finset.abs_sum_le_sum_abs _ _)
     have hterm : ∀ j ∈ Finset.range (k - i + 1),
         |(2 : ℝ) ^ k * (∫ s in Set.Ioc (1 : ℝ) 2,
-            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
-            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))))|
         ≤ gh i / 2 * ((2 : ℝ) ^ k
-          * ((2 : ℝ) ^ (-(j:ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) := by
+          * ((2 : ℝ) ^ (-(j : ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) := by
       intro j hj
       have hAdiff : MeasureTheory.IntegrableOn
-          (fun s : ℝ => ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+          (fun s : ℝ => ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
-            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
           (Set.Ioc (1 : ℝ) 2) := by
         have hI := integrable_Ik_term i j (k - i - j) (beta i) (hbeta0 i) (hderiv i)
           (hbnd i) M0 hM00 hM0
         have hF := (integrable_Sm_integrand (k - i - j) j).const_mul ((cCoeff i).re)
         have hFc : MeasureTheory.IntegrableOn
-            (fun s : ℝ => (cCoeff i).re * (2 : ℝ) ^ (-(j:ℝ) * s)
+            (fun s : ℝ => (cCoeff i).re * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))
             (Set.Ioc (1 : ℝ) 2) := by
           apply MeasureTheory.IntegrableOn.congr_fun hF _ measurableSet_Ioc
@@ -12618,7 +12618,7 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
           ring
         have hB := (integrable_S2_integrand (k - i - j) j).const_mul ((bHat f1 i).re)
         have hBc : MeasureTheory.IntegrableOn
-            (fun s : ℝ => (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            (fun s : ℝ => (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
             (Set.Ioc (1 : ℝ) 2) := by
           apply MeasureTheory.IntegrableOn.congr_fun hB _ measurableSet_Ioc
@@ -12630,17 +12630,17 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
         simp only [Pi.sub_apply]
         ring
       have hdom : MeasureTheory.IntegrableOn
-          (fun s : ℝ => gh i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ) * s)
+          (fun s : ℝ => gh i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ) * s)
             * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
           (Set.Ioc (1 : ℝ) 2) := by
         have hbase := (integrable_log_pow_sub_one_sq (k - i - j)).const_mul (gh i / 2)
         have hmeas : MeasureTheory.AEStronglyMeasurable
-            (fun s : ℝ => gh i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ) * s)
+            (fun s : ℝ => gh i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
             (MeasureTheory.volume.restrict (Set.Ioc (1 : ℝ) 2)) := by
           have hLsq := (integrable_log_pow_sub_one_sq (k - i - j)).aestronglyMeasurable
           have hexp : MeasureTheory.AEStronglyMeasurable
-              (fun s : ℝ => (2 : ℝ) ^ (-(j:ℝ) * s))
+              (fun s : ℝ => (2 : ℝ) ^ (-(j : ℝ) * s))
               (MeasureTheory.volume.restrict (Set.Ioc (1 : ℝ) 2)) :=
             (Continuous.aestronglyMeasurable
               ((continuous_const_rpow (by norm_num)).comp
@@ -12659,16 +12659,16 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
           apply pow_nonneg
           simp only [neg_nonneg]
           exact Real.log_nonpos (by linarith) (by linarith [hs.2])
-        have h2 : (2 : ℝ) ^ (-(j:ℝ) * s) ≤ 1 := by
+        have h2 : (2 : ℝ) ^ (-(j : ℝ) * s) ≤ 1 := by
           apply Real.rpow_le_one_of_one_le_of_nonpos (by norm_num)
-          have : (0 : ℝ) ≤ (j:ℝ) := by positivity
+          have : (0 : ℝ) ≤ (j : ℝ) := by positivity
           nlinarith [hs1]
-        have h2p : (0 : ℝ) < (2 : ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+        have h2p : (0 : ℝ) < (2 : ℝ) ^ (-(j : ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
         have hbig : (0 : ℝ) ≤ gh i / 2 * ((-Real.log (s - 1)) ^ (k - i - j)
             / (Nat.factorial (k - i - j)) * (s - 1) ^ 2) := by
           apply mul_nonneg (by linarith [hgh0 i])
           apply mul_nonneg hL (sq_nonneg _)
-        have hsmall : (0 : ℝ) ≤ gh i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ) * s)
+        have hsmall : (0 : ℝ) ≤ gh i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ) * s)
             * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
           apply mul_nonneg
           · apply div_nonneg _ (by norm_num)
@@ -12677,12 +12677,12 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
         rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hsmall, abs_of_nonneg hbig]
         nlinarith [hL, h2, h2p, hgh0 i, sq_nonneg (s - 1)]
       have hint : |∫ s in Set.Ioc (1 : ℝ) 2,
-            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
-            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))|
           ≤ ∫ s in Set.Ioc (1 : ℝ) 2,
-            gh i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j:ℝ) * s)
+            gh i * (s - 1) ^ 2 / 2 * ((2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
         rw [← Real.norm_eq_abs]
         apply MeasureTheory.norm_integral_le_of_norm_le hdom
@@ -12707,37 +12707,37 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
       have h2k : (0 : ℝ) ≤ (2 : ℝ) ^ k := by positivity
       rw [abs_mul, abs_of_nonneg h2k]
       calc (2 : ℝ) ^ k * |∫ s in Set.Ioc (1 : ℝ) 2,
-              (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+              (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
                 * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
-              - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+              - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
                 * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))|
-          ≤ (2 : ℝ) ^ k * (gh i / 2 * ((2 : ℝ) ^ (-(j:ℝ))
+          ≤ (2 : ℝ) ^ k * (gh i / 2 * ((2 : ℝ) ^ (-(j : ℝ))
               * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) := by
             apply mul_le_mul_of_nonneg_left _ h2k
             exact le_trans hint hrem
         _ = gh i / 2 * ((2 : ℝ) ^ k
-            * ((2 : ℝ) ^ (-(j:ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) := by ring
+            * ((2 : ℝ) ^ (-(j : ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) := by ring
     calc ∑ j ∈ Finset.range (k - i + 1),
           |(2 : ℝ) ^ k * (∫ s in Set.Ioc (1 : ℝ) 2,
-              (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+              (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
                 * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
-              - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+              - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
                 * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))))|
         ≤ ∑ j ∈ Finset.range (k - i + 1),
             gh i / 2 * ((2 : ℝ) ^ k
-              * ((2 : ℝ) ^ (-(j:ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) :=
+              * ((2 : ℝ) ^ (-(j : ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) :=
           Finset.sum_le_sum hterm
       _ = gh i / 2 * ∑ j ∈ Finset.range (k - i + 1),
-            ((2 : ℝ) ^ k * ((2 : ℝ) ^ (-(j:ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) := by
+            ((2 : ℝ) ^ k * ((2 : ℝ) ^ (-(j : ℝ)) * (1 / (3 : ℝ) ^ ((k - i - j) + 1)))) := by
           rw [Finset.mul_sum]
       _ ≤ gh i / 2 * (2 : ℝ) ^ i := by
           apply mul_le_mul_of_nonneg_left (remainder_inner_le k i hik)
           linarith [hgh0 i]
   calc |∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
         ((2 : ℝ) ^ k * (∫ s in Set.Ioc (1 : ℝ) 2,
-            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
-            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
+            - (bHat f1 i).re * ((s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))))|
       ≤ ∑ i ∈ Finset.range (k + 1), gh i / 2 * (2 : ℝ) ^ i := by
         apply le_trans (Finset.abs_sum_le_sum_abs _ _)
@@ -12755,10 +12755,10 @@ integral_log_pow_sub_one. -/
 theorem S2_term_le (l j : ℕ) :
     (∫ s in Set.Ioc (1 : ℝ) 2,
       (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)
-        * (2 : ℝ) ^ (-(j:ℝ) * s))
-      ≤ (2 : ℝ) ^ (-(j:ℝ)) * (1 / (2 : ℝ) ^ (l + 1)) := by
+        * (2 : ℝ) ^ (-(j : ℝ) * s))
+      ≤ (2 : ℝ) ^ (-(j : ℝ)) * (1 / (2 : ℝ) ^ (l + 1)) := by
   have hleft := integrable_S2_integrand l j
-  have hright := (integrable_log_pow_sub_one l).const_mul ((2 : ℝ) ^ (-(j:ℝ)))
+  have hright := (integrable_log_pow_sub_one l).const_mul ((2 : ℝ) ^ (-(j : ℝ)))
   have hL : ∀ s : ℝ, s ∈ Set.Ioc (1 : ℝ) 2 →
       (0 : ℝ) ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) := by
     intro s hs
@@ -12769,22 +12769,22 @@ theorem S2_term_le (l j : ℕ) :
     exact Real.log_nonpos (by linarith [hs.1]) (by linarith [hs.2])
   have hmono : (∫ s in Set.Ioc (1 : ℝ) 2,
         (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)
-          * (2 : ℝ) ^ (-(j:ℝ) * s))
+          * (2 : ℝ) ^ (-(j : ℝ) * s))
       ≤ ∫ s in Set.Ioc (1 : ℝ) 2,
-        (2 : ℝ) ^ (-(j:ℝ)) * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)) := by
+        (2 : ℝ) ^ (-(j : ℝ)) * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)) := by
     refine MeasureTheory.integral_mono_of_nonneg ?_ hright ?_
     · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with s hs
-      have h2 : (0 : ℝ) < (2 : ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+      have h2 : (0 : ℝ) < (2 : ℝ) ^ (-(j : ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
       exact mul_nonneg (hL s hs) (le_of_lt h2)
     · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with s hs
-      have hmonoexp : (2 : ℝ) ^ (-(j:ℝ) * s) ≤ (2 : ℝ) ^ (-(j:ℝ)) := by
+      have hmonoexp : (2 : ℝ) ^ (-(j : ℝ) * s) ≤ (2 : ℝ) ^ (-(j : ℝ)) := by
         apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
-        have hj : (0 : ℝ) ≤ (j:ℝ) := by positivity
+        have hj : (0 : ℝ) ≤ (j : ℝ) := by positivity
         nlinarith [hs.1]
-      calc (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) * (2 : ℝ) ^ (-(j:ℝ) * s)
-          ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) * (2 : ℝ) ^ (-(j:ℝ)) :=
+      calc (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) * (2 : ℝ) ^ (-(j : ℝ) * s)
+          ≤ (-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1) * (2 : ℝ) ^ (-(j : ℝ)) :=
             mul_le_mul_of_nonneg_left hmonoexp (hL s hs)
-        _ = (2 : ℝ) ^ (-(j:ℝ))
+        _ = (2 : ℝ) ^ (-(j : ℝ))
             * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)) := by ring
   rw [MeasureTheory.integral_const_mul, integral_log_pow_sub_one] at hmono
   exact hmono
@@ -12798,14 +12798,14 @@ theorem Dk_term_bound (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
     (hM0 : ∀ u : ℝ, u ∈ Set.Ioi (1 : ℝ) → ∀ theta : ℝ,
       Norm.norm (G2manu u (circleMap 0 (2 : ℝ) theta)) ≤ M0) :
     |∫ s in Set.Ioc (1 : ℝ) 2,
-        ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+        ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l))|
-      ≤ beta * (2 : ℝ) ^ (-(j:ℝ)) * (1 / (2 : ℝ) ^ (l + 1)) := by
-  have hdom := (integrable_log_pow_sub_one l).const_mul (beta * (2 : ℝ) ^ (-(j:ℝ)))
+      ≤ beta * (2 : ℝ) ^ (-(j : ℝ)) * (1 / (2 : ℝ) ^ (l + 1)) := by
+  have hdom := (integrable_log_pow_sub_one l).const_mul (beta * (2 : ℝ) ^ (-(j : ℝ)))
   have hae : ∀ᵐ s ∂ (MeasureTheory.volume.restrict (Set.Ioc (1 : ℝ) 2)),
-      Norm.norm (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+      Norm.norm (((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l)))
-        ≤ beta * (2 : ℝ) ^ (-(j:ℝ))
+        ≤ beta * (2 : ℝ) ^ (-(j : ℝ))
           * ((-Real.log (s - 1)) ^ l / (Nat.factorial l) * (s - 1)) := by
     have hIoo : (MeasureTheory.volume.restrict (Set.Ioc (1 : ℝ) 2))
         (Set.Ioc (1 : ℝ) 2 \ Set.Ioo (1 : ℝ) 2) = 0 := by
@@ -12833,18 +12833,18 @@ theorem Dk_term_bound (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
 so the sum over j <= k-i is (k-i+1) * 2^(-(k-i)-1). -/
 theorem inner_sum_const (k i : ℕ) (hik : i ≤ k) (b : ℝ) :
     ∑ j ∈ Finset.range (k - i + 1),
-        b * (2 : ℝ) ^ (-(j:ℝ)) * (1 / (2 : ℝ) ^ ((k - i - j) + 1))
+        b * (2 : ℝ) ^ (-(j : ℝ)) * (1 / (2 : ℝ) ^ ((k - i - j) + 1))
       = ((k : ℝ) - (i : ℝ) + 1) * (b * (1 / (2 : ℝ) ^ ((k - i) + 1))) := by
   have hterm : ∀ j ∈ Finset.range (k - i + 1),
-      b * (2 : ℝ) ^ (-(j:ℝ)) * (1 / (2 : ℝ) ^ ((k - i - j) + 1))
+      b * (2 : ℝ) ^ (-(j : ℝ)) * (1 / (2 : ℝ) ^ ((k - i - j) + 1))
         = b * (1 / (2 : ℝ) ^ ((k - i) + 1)) := by
     intro j hj
     have hjk : j ≤ k - i := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
-    have hpow : (2 : ℝ) ^ (-(j:ℝ)) = 1 / (2 : ℝ) ^ (j:ℕ) := by
+    have hpow : (2 : ℝ) ^ (-(j : ℝ)) = 1 / (2 : ℝ) ^ (j : ℕ) := by
       rw [Real.rpow_neg (by norm_num), Real.rpow_natCast]
       ring
     rw [hpow]
-    have hsplit : (2 : ℝ) ^ ((k - i) + 1) = (2 : ℝ) ^ (j:ℕ) * (2 : ℝ) ^ ((k - i - j) + 1) := by
+    have hsplit : (2 : ℝ) ^ ((k - i) + 1) = (2 : ℝ) ^ (j : ℕ) * (2 : ℝ) ^ ((k - i - j) + 1) := by
       rw [← pow_add]
       congr 1
       omega
@@ -12863,16 +12863,16 @@ Each term of S_2(m) is at most 2^(-j) 2^(-(m-j)-1) = 2^(-m-1), constant in j;
 there are m+1 of them, and multiplying by 2^m gives (m+1)/2. -/
 theorem A2m_le (m : ℕ) : A2m m ≤ ((m : ℝ) + 1) / 2 := by
   have hbound : S2m m ≤ ∑ j ∈ Finset.range (m + 1),
-      (1 : ℝ) * (2 : ℝ) ^ (-(j:ℝ)) * (1 / (2 : ℝ) ^ ((m - j) + 1)) := by
+      (1 : ℝ) * (2 : ℝ) ^ (-(j : ℝ)) * (1 / (2 : ℝ) ^ ((m - j) + 1)) := by
     unfold S2m
     apply Finset.sum_le_sum
     intro j _
     have h := S2_term_le (m - j) j
     calc (∫ s in Set.Ioc (1 : ℝ) 2,
           (-Real.log (s - 1)) ^ (m - j) / (Nat.factorial (m - j)) * (s - 1)
-            * (2 : ℝ) ^ (-(j:ℝ) * s))
-        ≤ (2 : ℝ) ^ (-(j:ℝ)) * (1 / (2 : ℝ) ^ ((m - j) + 1)) := h
-      _ = (1 : ℝ) * (2 : ℝ) ^ (-(j:ℝ)) * (1 / (2 : ℝ) ^ ((m - j) + 1)) := by ring
+            * (2 : ℝ) ^ (-(j : ℝ) * s))
+        ≤ (2 : ℝ) ^ (-(j : ℝ)) * (1 / (2 : ℝ) ^ ((m - j) + 1)) := h
+      _ = (1 : ℝ) * (2 : ℝ) ^ (-(j : ℝ)) * (1 / (2 : ℝ) ^ ((m - j) + 1)) := by ring
   have hconst := inner_sum_const m 0 (Nat.zero_le m) (1 : ℝ)
   simp only [Nat.sub_zero, Nat.cast_zero, sub_zero] at hconst
   rw [hconst] at hbound
@@ -12906,7 +12906,7 @@ theorem E1k_bound (k : ℕ) (hk : 1 ≤ k) (beta : ℕ → ℝ)
   rw [abs_mul, abs_of_pos (by positivity : (0 : ℝ) < (2 : ℝ) ^ k)]
   have hstep : |∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k - i + 1),
       (∫ s in Set.Ioc (1 : ℝ) 2,
-        ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j:ℝ) * s)
+        ((gManu i s).re - (cCoeff i).re) * (2 : ℝ) ^ (-(j : ℝ) * s)
           * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))|
       ≤ ∑ i ∈ Finset.range (k + 1),
           ((k : ℝ) - (i : ℝ) + 1) * (beta i * (1 / (2 : ℝ) ^ ((k - i) + 1))) := by
