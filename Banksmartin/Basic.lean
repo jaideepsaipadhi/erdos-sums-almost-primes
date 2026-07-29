@@ -9139,7 +9139,6 @@ NumericalFacts asserted this bound outright, leaving Prop 2.5 and Theorem 4.1
 proved but unused. -/
 theorem source_bound_derived (k : ℕ) (hk : 1 ≤ k)
     (Sstar alph Umax Vmax : ℝ)
-    (hdelta : ∀ m : ℕ, |deltaM m| ≤ DBound m)
     (hS : ∀ m : ℕ,
       ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * |(cCoeff i).re| ≤ Sstar)
     (hE1 : ∀ m : ℕ, 1 ≤ m → |E1k m| ≤ alph * ((m : ℝ) + 1))
@@ -9152,8 +9151,8 @@ theorem source_bound_derived (k : ℕ) (hk : 1 ≤ k)
   rw [prop_2_5 k hk, prop_2_5 (k + 1) hk1]
   have hcast : (((k + 1 : ℕ)) : ℝ) = (k : ℝ) + 1 := by push_cast; ring
   rw [hcast]
-  have hD := deltaConv_le k Sstar hdelta (hS k)
-  have hD1 := deltaConv_le (k + 1) Sstar hdelta (hS (k + 1))
+  have hD := deltaConv_le k Sstar deltaM_abs_le (hS k)
+  have hD1 := deltaConv_le (k + 1) Sstar deltaM_abs_le (hS (k + 1))
   have hA := hE1 k hk
   have hA1 := hE1 (k + 1) hk1
   rw [hcast] at hA1
