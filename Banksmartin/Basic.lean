@@ -13171,6 +13171,34 @@ theorem E1k_le_alpha (k : ℕ) (hk : 1 ≤ k) (beta : ℕ → ℝ)
         positivity
     _ = alpha * ((k : ℝ) + 1) := by ring
 
+/-- source_bound_derived with the E_1 hypothesis discharged by E1k_le_alpha.
+
+The section 3.5 inputs (beta_i, the derivative bounds, M_0) now appear
+explicitly, which is honest: they are certified numerics, and having them at
+the top is better than hiding them behind an aggregate assumption on E_1. -/
+theorem source_bound_full (k : ℕ) (hk : 1 ≤ k)
+    (Sstar alph Umax Vmax : ℝ)
+    (beta : ℕ → ℝ) (hbeta0 : ∀ i, 0 ≤ beta i)
+    (hderiv : ∀ i : ℕ, ∀ x ∈ Set.Ioo (1 : ℝ) 2,
+      HasDerivAt (fun t : ℝ => gManu i t) (deriv (fun t : ℝ => gManu i t) x) x)
+    (hbnd : ∀ i : ℕ, ∀ x ∈ Set.Ioo (1 : ℝ) 2,
+      Norm.norm (deriv (fun t : ℝ => gManu i t) x) ≤ beta i)
+    (M0 : ℝ) (hM00 : 0 ≤ M0)
+    (hM0 : ∀ u : ℝ, u ∈ Set.Ioi (1 : ℝ) → ∀ theta : ℝ,
+      Norm.norm (G2manu u (circleMap 0 (2 : ℝ) theta)) ≤ M0)
+    (halpha : ∀ m : ℕ,
+      (1 / 2) * ∑ i ∈ Finset.range (m + 1), beta i * (2 : ℝ) ^ i ≤ alph)
+    (hS : ∀ m : ℕ,
+      ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * |(cCoeff i).re| ≤ Sstar)
+    (hUV : |2 * (2 * (k : ℝ) * Uk k - Vk k)
+             - (2 * ((k : ℝ) + 1) * Uk (k + 1) - Vk (k + 1))|
+           ≤ (2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax)
+    (hEexp : ∀ m : ℕ, |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3) :
+    |2 * Ek k - Ek (k + 1)| ≤ RBound Umax Vmax Sstar alph k :=
+  source_bound_derived k hk Sstar alph Umax Vmax hS
+    (fun m hm => E1k_le_alpha m hm beta hbeta0 hderiv hbnd M0 hM00 hM0 alph halpha)
+    hUV hEexp
+
 theorem lemma_3_8_integral_r1 (i : ℕ) (s : ℝ) (hsmem : s ∈ Set.Ioo (1 : ℝ) 2)
     (f : ℝ → ℝ)
     (hf : ∀ x ∈ Set.Ioo (1 : ℝ) 2,
