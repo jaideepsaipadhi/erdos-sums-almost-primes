@@ -408,15 +408,26 @@ under this) refers to SstarConst.  SstarValue, defined after cCoeff, gives
 the genuine series; Sstar_bound is vacuous until the two are connected. -/
 noncomputable def SstarConst : ℝ := 6.9763
 
-/-- Manuscript section 3.5: alpha_+ is the constant in B_1(k) <= alpha_+ (k+1).
-STILL A LITERAL: the real definition needs the beta_i interval sweep of
-section 3.5, which is not yet formalised.  alpha_bound is vacuous until then. -/
+/-- MANUSCRIPT section 3.5: alpha_+ is the constant in B_1(k) <= alpha_+ (k+1).
+
+A LITERAL BY DESIGN, not an omission.  alpha_+ = (1/2) sum_i beta_i 2^i where
+beta_i = max_{s in [1,2]} |[z^i] G2^(1,0)(s,z)|, evaluated by a 1000-box
+interval sweep in Arb.  It is the output of a certified computation, not a
+quantity Lean can define and evaluate.  E1k_le_alpha takes it as a parameter
+with its bounding hypothesis, which is the honest treatment. -/
 noncomputable def alphaConst : ℝ := 15.5716
 
-/-- Manuscript Theorem 6.1: Gamma = (1/2) sum_{i>=1} gammahat_i 2^i, the
-k-independent remainder bound.  STILL A LITERAL: needs gammahat_i, i.e. the
-second s-derivative G2^(2,0) and its interval sweep.  Gamma_bound is vacuous
-until then. -/
+/-- MANUSCRIPT Theorem 6.1: Gamma = (1/2) sum_{i>=1} gammahat_i 2^i, the
+k-independent remainder bound.
+
+A LITERAL BY DESIGN, as alphaConst is.  gammahat_i = max_{s in [1,2]}
+|[z^i] G2^(2,0)(s,z)|, evaluated by a 600-box interval sweep in Arb using the
+closed form G2^(2,0) = G2(z^2 c^2 + z c') -- which IS proved here, as
+hasDerivAt_G2manu_second.  theorem_6_1 takes Gamma as a parameter with its
+bounding hypothesis.
+
+The k-INDEPENDENCE of Gamma, which is what makes the refinement work, is
+proved: it is geom_two_three, sum_l 2^l 3^(-l-1) = 1. -/
 noncomputable def GammaConst : ℝ := 105.41
 
 structure NumericalFacts : Prop where
