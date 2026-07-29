@@ -6,7 +6,10 @@ payload*
 apply*.py
 patch_*.py
 fix*.py
-run_*.sh
+run_dyadic*.sh
+run_fk_a.sh
+run_pikbound.sh
+run_prune.sh
 prune_*.py
 install_payload.py
 

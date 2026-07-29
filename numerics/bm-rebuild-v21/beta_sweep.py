@@ -181,4 +181,4 @@ if __name__ == "__main__":
     print(f"{'i':>3} {'sup_[1,2] beta_i':>18} {'|value at s=1|':>16}")
     for i in range(1, 15):
         print(f"{i:>3} {float(sup_beta[i]):>18.6f} {float(v1[i].mid()):>16.6f}")
-    json.dump({i: float(sup_beta[i]) for i in range(NMAX + 1)}, open("/home/claude/beta_certified.json", "w"), indent=1)
+    json.dump({i: float(sup_beta[i]) for i in range(NMAX + 1)}, open("beta_certified.json", "w"), indent=1)

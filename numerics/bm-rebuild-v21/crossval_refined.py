@@ -15,7 +15,7 @@ stands. Also reported: deviation ratio |mid(implied) - mid(M2)| / Gamma
 even if overlapping).
 
 Usage:
-    python3 crossval_refined.py /workspace/certificate-k200.json
+    python3 crossval_refined.py ../certificate-k200.json
 
 Requires in the working directory: ci_certified.{py,json}, tail_constants.json,
 delta_table.jsonl, beta_certified.json (unused here but harmless),

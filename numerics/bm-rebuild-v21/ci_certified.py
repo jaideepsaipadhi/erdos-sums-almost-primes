@@ -94,7 +94,7 @@ if __name__ == "__main__":
     print("d =", d.str(12), "   (published: 0.3786950 +/- 4e-7)")
     for i in range(0, 15):
         print(f"c_{i:2d} = {c[i].str(15)}")
-    json.dump({i: c[i].str(20) for i in range(N + 1)}, open("/home/claude/ci_certified.json", "w"), indent=1)
+    json.dump({i: c[i].str(20) for i in range(N + 1)}, open("ci_certified.json", "w"), indent=1)
     # consistency: sum c_i = G_2(1,1) = 1/2 (converges like 3^-i)
     s = arb(0)
     for i in range(N + 1):

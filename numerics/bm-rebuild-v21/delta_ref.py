@@ -39,5 +39,5 @@ if __name__ == "__main__":
         d = delta(m, dps=60)
         out[m] = mp.nstr(d, 20)
         print(f"m={m:5d}  delta_m = {mp.nstr(d, 20)}")
-    with open("/home/claude/delta_ref.json", "w") as fh:
+    with open("delta_ref.json", "w") as fh:
         json.dump(out, fh, indent=1)

@@ -4,7 +4,7 @@ import sys, os, time, json
 from delta_arb import delta_arb
 
 def main(m_lo, m_hi):
-    path = "/home/claude/delta_table.jsonl"
+    path = "delta_table.jsonl"
     done = set()
     if os.path.exists(path):
         for line in open(path):

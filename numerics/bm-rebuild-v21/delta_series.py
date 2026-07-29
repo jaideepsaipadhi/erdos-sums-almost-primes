@@ -22,4 +22,4 @@ for m in [int(x) for x in sys.argv[1:]]:
     d = delta_series(m, 520)
     out[m] = mp.nstr(d, 20)
     print(f"m={m}  delta_m = {mp.nstr(d,20)}  ({time.time()-t0:.0f}s)", flush=True)
-json.dump(out, open("/home/claude/delta_large.json", "w"), indent=1)
+json.dump(out, open("delta_large.json", "w"), indent=1)

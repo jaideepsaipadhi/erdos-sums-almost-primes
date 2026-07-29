@@ -57,4 +57,4 @@ if __name__ == "__main__":
         mid, rad = d.mid(), d.rad()
         out[m] = {"mid": str(mid.str(25)), "rad": str(rad.str(5))}
         print(f"m={m:5d}  delta = {d.str(22)}   ({time.time()-t0:.0f}s)", flush=True)
-    json.dump(out, open("/home/claude/delta_arb.json", "w"), indent=1)
+    json.dump(out, open("delta_arb.json", "w"), indent=1)

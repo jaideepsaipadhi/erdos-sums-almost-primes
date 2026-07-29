@@ -99,4 +99,4 @@ if __name__ == "__main__":
     for k in [700, 720, 730, 735, 739, 740, 741, 742, 745, 750, 800, 850, 899]:
         lo, mid, e1 = res[k]
         print(f"k={k:4d}  crit_lower={lo:12.2f}   (certified part mid={mid:.1f}, E1 allowance={e1:.1f})")
-    json.dump({k: v for k, v in res.items()}, open("/home/claude/crit_sweep.json", "w"))
+    json.dump({k: v for k, v in res.items()}, open("crit_sweep.json", "w"))

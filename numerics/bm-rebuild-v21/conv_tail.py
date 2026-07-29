@@ -93,4 +93,4 @@ if __name__ == "__main__":
     sup, _ = certified_supH(R=4.2, P=10000, prec=250, arcs=240)
     print("sup|H| on |z|=4.2 <=", sup.str(8), f"  ({time.time()-t0:.0f}s)")
     json.dump({"rho": rho.str(20), "supH_R4.2_upper": str(float(sup.mid()) + float(sup.rad()))},
-              open("/home/claude/tail_constants.json", "w"), indent=1)
+              open("tail_constants.json", "w"), indent=1)
