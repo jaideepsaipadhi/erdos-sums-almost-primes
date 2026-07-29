@@ -1,93 +1,76 @@
-# K0 threshold certification — package for many-core execution
+# Certified numerics
 
-Everything here was developed and validated (against independent mpmath
-ground truth, brute-force interval-arithmetic checks, and known reference
-values) in a single interactive session tonight. See `K0-proof-v6.md` for the
-full write-up, including an honest accounting of every bug found along the
-way (Sec 8) — read that section before trusting any single number below.
+Everything the Lean development assumes rather than proves comes from here.
+`erdos_sums_increase_from_six` is conditional on a `NumericalFacts` structure;
+these are the Arb ball computations that justify its fields.  The analytic
+reduction is machine-checked, these are not, and that division is the one
+Caveat 1.3(b) of the manuscript draws.
 
-**Bottom line from tonight, single-core:** K0 = 800 (best current estimate,
-resting on newly-derived machinery not yet independently reviewed) vs
-K0 = 9119 (fully vetted floor, resting only on GLW's own stated bounds plus
-pure algebra — see the chat transcript for the derivation of both).
+## Directories
 
-## What your 256 cores actually buy you
+    bm-rebuild-v21/   the current pipeline: c_i, beta_i, gammahat_i, the delta
+                      table, and the criterion sweeps.  Start here.
+    k0-run/           the earlier end-to-end run (MASTER_CHECK.py, and the
+                      parallel delta and s-uniform drivers).  Its own README
+                      describes that pipeline.
+    delta-job/        the sharded delta computation as dispatched.
+    verify.py         checks the outputs against theorems proved in Lean.
 
-1. **Extend and re-verify the certified delta-table** (`delta_parallel.py`).
-   Trivially parallel across m — each value is independent. Re-running the
-   full table from scratch on your machine, at higher precision than the
-   original single-core run, is the single best thing to do first: if it
-   reproduces the same values, that's an independent confirmation; if it
-   diverges, you've found a real problem.
+## Which artefact feeds which NumericalFacts field
 
-2. **Refine the s-uniform S1 bound** (`s_uniform_parallel.py`). Also
-   trivially parallel across s-subintervals. Push NSUB and P far higher than
-   the original session (80 subintervals, P=20000) — try NSUB=2000,
-   P=2000000 — and confirm the bound is stable (doesn't move much) as you
-   refine further. If it keeps shrinking meaningfully, the original bound
-   (alpha=17.538) was itself not fully converged.
+| field | artefact | script |
+|---|---|---|
+| `d_enclosure`, `rho_enclosure` | computed inline | `bm-rebuild-v21/ci_certified.py` |
+| `Sstar_bound`   | `ci_certified.json`   | `ci_certified.py` |
+| `alpha_bound`   | `beta_certified.json` | `beta_sweep.py` |
+| `Gamma_bound`   | `gamma_constant.json` | `gamma2_sweep.py` |
+| `source_bound`  | `m1_constant.json`, `tail_constants.json` | `crit_refined.py` |
+| `phi_at_k1`, `phi_mono` | stdout | `k1_far_range.py` |
+| `sweep_low`  [6,199]    | `certificate*.json`  | `certificate.py`, `lowk_verify.py` |
+| `sweep_mid`  [79,899]   | `crit_certified.json`, `crit_sweep.json` | `crit_refined.py` |
+| `sweep_high` [900,2439] | `crit_900_2439.json` | `sweep_900_2439.py` |
 
-3. **Try to fix the noise floor found in the S* extension attempt**
-   (`extend_head_highprec.py`). This is the one genuinely open thread from
-   tonight: attempting to certify coefficients past i=14 hit a precision
-   floor (not a math error — diagnosed in Sec 8) where per-sample Euler-tail
-   uncertainty swamps the true (rapidly decaying) signal. The fix is a much
-   larger prime cutoff P and precision, which is exactly what your machine
-   is for. Run with increasing P (1e7, 1e8, 1e9) and watch whether the
-   coefficients keep decaying geometrically past i=14 instead of plateauing.
-   If you can push the certified head to i=20-25 without hitting the floor,
-   S* may shrink further, which would improve on K0=9119 via the SAME safe
-   category of argument (no Lemma-3.3 evaluation needed).
+Supporting: `bhat_signed_N60.json` (b-hat_i), `gamma2_certified.json`
+(gammahat_i), `delta_table.jsonl` (delta_m), `shards/` (256 shards;
+`merge_verify.py` reassembles).
 
-4. **Reassemble everything** (`assemble_final.py`) once you have fresh
-   delta-table and s-uniform outputs, to get a from-scratch K0.
+## Checks against the formalization
 
-5. **The actual computation half of the theorem** (not included here — see
-   `K0-proof-v6.md` Sec 10): certified evaluation of f_k itself for
-   6 <= k < K0. This is the other half of the Banks-Martin monotonicity
-   theorem and is currently done only to k=200. At k^3 scaling, reaching
-   k=800 is roughly 64x that cost — very plausibly a good target for a
-   256-core machine. The certified.py-style pipeline from the earlier
-   session (not included in this package; ask if you want it) would need
-   adaptation for k in the 800 range, including a check on whether the
-   precision requirement (PREC bits) needs to scale with k, which would
-   push the true cost above pure k^3.
+    cd bm-rebuild-v21 && python3 ../verify.py
 
-## Files
+Each check is a theorem proved in `Basic.lean` applied to the Arb output:
+Theorem 4.1's bound |delta_m| <= log2 m log(m+1) + 1 over 2441 entries;
+`A2m_le` (A2_m <= (m+1)/2); `geom_two_three`; the Cauchy tails; Gamma's
+recomposition; and the sweep coverage.  A bug that passes these has to be
+consistent with proved mathematics.
 
-- `K0-proof-v6.md` — full write-up, read this first, especially Sec 0 and Sec 8.
-- `core.py` — the underlying G2Engine machinery (Euler product evaluation,
-  polar coefficient extraction, etc). Required by `assemble_final.py`.
-- `MASTER_CHECK.py` — single-core, single-script reproduction of K0=800 with
-  built-in sanity assertions. Run this FIRST as a baseline before scaling up
-  anything else, so you have a known-good reference point on your own machine.
-- `delta_parallel.py` — parallelized certified delta-table computation.
-- `s_uniform_parallel.py` — parallelized s-uniform S1 coefficient bound.
-- `extend_head_highprec.py` — attempt to push the S* head further (open thread).
-- `assemble_final.py` — combines delta-table + s-uniform output into a final K0.
+## The contour radius
 
-## Suggested order
+The tail estimates use analyticity of G2 in |z| <= 2.9 (`M1_R2.9`,
+`M2sup_R2.9`).  The Lean wide-radius chain runs at |z| <= 29/10, so this is
+formally proved, not only argued in the manuscript.
 
-```bash
-pip install python-flint --break-system-packages
+## WARNING: NMAX in beta_sweep.py
 
-# 1. Reproduce the baseline on your hardware first
-python3 MASTER_CHECK.py
+Raising `NMAX` from 30 does NOT simply extend the table -- it degrades the
+i <= 30 coefficients by a factor of 10 or more (head sum 31.06 -> 44.09) and
+makes alpha_+ worse.  The cause is not understood.  The tables are valid only
+at the NMAX they were computed with, and the generators now write into the
+working directory, so a careless rerun overwrites certified data.  Back up
+`beta_certified.json` before touching it.
 
-# 2. Rebuild the delta table (parallel, trivial to scale up the range too)
-python3 delta_parallel.py 9016 250 delta_all_fresh.pkl
+## Reproducing
 
-# 3. Rebuild the s-uniform S1 bound at higher resolution
-python3 s_uniform_parallel.py 2000 2000000 250 supF_highres.pkl
+    pip install python-flint
+    cd bm-rebuild-v21
+    python3 ci_certified.py
+    python3 beta_sweep.py
+    python3 gamma2_sweep.py
+    bash run_delta_job.sh && python3 merge_verify.py
+    python3 crit_refined.py 79 899
+    python3 sweep_900_2439.py
+    python3 k1_far_range.py
+    python3 crossval_refined.py
 
-# 4. Reassemble
-python3 assemble_final.py delta_all_fresh.pkl supF_highres.pkl
-
-# 5. (open thread) try to push past the i=14 precision floor
-python3 extend_head_highprec.py 100000000 20 400 4096
-```
-
-Every script prints its own certified enclosures as it goes — nothing here
-is a black box. If a number doesn't reproduce, that itself is useful
-information (see Sec 8 for how this session treated exactly that situation
-each time it came up).
+`cchunks/` (407 MB of PREC=1400 panels feeding `ci_certified.json`) is not in
+the repository; `ci_certified.py` regenerates it.
