@@ -11060,9 +11060,9 @@ so the integrand's s-derivative is bounded by the sup of |d_s G2| alone.
 
 The bound M is a hypothesis: it is
   sup_{t in [1,2], |w| = 12 / 5} ||d_s G2manu t w||,
-the analogue of the manuscript's M1 = 2544 but at radius 12 / 5 rather than 2.9
-(2.9 exceeds the proven analyticity radius 5 / 2, so the Lean development must
-use its own radius). -/
+the analogue of the manuscript's M1 = 2544.  The wide-radius chain now proves
+analyticity on |z| <= 29 / 10, so the manuscript's radius 2.9 is available; the
+contour here is at 12 / 5, which sits inside it. -/
 theorem contour_integrand_deriv_bound (i : ℕ) (M : ℝ) (hM0 : 0 ≤ M)
     (t : ℝ) (theta : ℝ)
     (hbound : Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) t) ≤ M) :
