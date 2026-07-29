@@ -825,7 +825,7 @@ theorem assembly_identity (k : ℕ) (c δ : ℕ → ℝ) (q : ℝ) :
     ring
   rw [Finset.sum_congr rfl hterm]
   simp only [mul_add, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib,
-    Finset.mul_sum, Finset.sum_mul]
+    Finset.mul_sum]
   simp only [mul_comm, mul_left_comm, mul_assoc]
 
 /-- Lemma 1 substituted into E(k)'s actual definition. -/
@@ -939,7 +939,7 @@ theorem log_one_sub_add_self_lower (x : ℝ) (hx0 : 0 ≤ x) (hx1 : x < 1) :
       positivity
   have h0 := hmono (Set.mem_Ico.mpr ⟨le_refl 0, one_pos⟩) (Set.mem_Ico.mpr ⟨hx0, hx1⟩) hx0
   simp only [Real.log_one, sub_zero, zero_pow, ne_eq, OfNat.ofNat_ne_zero,
-    not_false_eq_true, zero_div, add_zero, zero_add] at h0
+    not_false_eq_true, zero_div, add_zero] at h0
   linarith
 
 /-- log(1+y)-y ≤ 0 for y ≥ 0. -/
@@ -6878,7 +6878,7 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
     rw [Nat.primesBelow]
     apply Finset.prod_congr
     · ext q
-      simp [Nat.primesBelow, Set.mem_setOf_eq]
+      simp [Set.mem_setOf_eq]
     · intro q hq
       simp only [Finset.mem_filter] at hq
       have hqp : q.Prime := hq.2
@@ -7715,7 +7715,7 @@ theorem ofReal_tendsto_halfplane :
       (Complex.continuous_ofReal.tendsto 1)
     simpa using hcont.mono_left nhdsWithin_le_nhds
   · filter_upwards [self_mem_nhdsWithin] with s hs
-    simp only [Set.mem_setOf_eq, Complex.ofReal_re]
+    simp only [Complex.ofReal_re]
     exact hs
 
 /-- kappa(s) = (s-1) cFac s tends to 1 / 2 as s -> 1 from above.
@@ -12039,7 +12039,7 @@ theorem taylor_second_bound (D : ℝ → ℂ) (c b : ℂ) (g : ℝ) (hg0 : 0 ≤
     have hsb := hx.mul_const b
     simp only [zero_mul] at hsb
     have hcomb := (hlimD.sub (tendsto_const_nhds (x := c))).sub hsb
-    simp only [sub_self, sub_zero] at hcomb
+    simp only [sub_self] at hcomb
     rw [hphi]
     exact hcomb
   exact quadratic_remainder_bound phi g hg0
