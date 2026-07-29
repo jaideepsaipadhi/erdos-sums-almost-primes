@@ -9,3 +9,7 @@ fix*.py
 run_*.sh
 prune_*.py
 install_payload.py
+
+# regenerable intermediates
+numerics/**/cchunks/
+numerics/**/__pycache__/
