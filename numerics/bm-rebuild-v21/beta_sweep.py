@@ -175,7 +175,10 @@ def beta_sweep(P=20000, boxes=80, prec=200):
 if __name__ == "__main__":
     import time
     t0 = time.time()
-    sup_beta, v1, viol = beta_sweep()
+    # PRODUCTION SETTINGS -- the defaults do NOT reproduce beta_certified.json.
+    # The manuscript's section 3.5 describes a 1000-box sweep; boxes=1600 gives
+    # values at or below the stored table, boxes=800 slightly above.
+    sup_beta, v1, viol = beta_sweep(P=100000, boxes=1600, prec=300)
     print(f"sweep done ({time.time()-t0:.0f}s)")
     print("INVARIANT sup>=value(s=1):", "VIOLATED at i=" + str(viol) if viol else "holds for all i")
     print(f"{'i':>3} {'sup_[1,2] beta_i':>18} {'|value at s=1|':>16}")

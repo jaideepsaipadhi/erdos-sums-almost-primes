@@ -13361,3 +13361,135 @@ theorem erdos_sums_increase_from_six' (beta : ℕ → ℝ)
     exact source_bound_full m (by omega) Sstar alph Umax Vmax beta hnum.beta_nonneg
       hnum.g_deriv hnum.g_deriv_bound M0 hnum.M0_nonneg hnum.M0_bound
       hnum.alpha_dom hnum.Sstar_dom (hnum.UV_bound m hm) (hnum.Eexp_bound m hm)
+
+/-- cBracket vanishes at z = 0: every term carries a factor of z.
+
+This is the algebraic content behind bHat_0 = 0.  Getting from here to
+`bHat f1 0 = 0` needs the Cauchy formula (the 0th coefficient equals the value
+at the centre), which this development deliberately avoids -- bHat is defined
+as a contour integral precisely so that z-analyticity of cBracket is not
+required.  So bHat_0 = 0 is TRUE and follows from this, but is NOT proved here;
+M2k's indexing from i = 0 rather than the manuscript's i = 1 relies on it. -/
+theorem cBracket_at_zero (fs s : ℝ) : cBracket fs s 0 = 0 := by
+  unfold cBracket
+  simp
+
+/-- |M_2(k)| <= (Bhat/2)(k+1), where Bhat dominates sum |bHat_i| 2^i.
+Uses A2m_le: A^(2)_m <= (m+1)/2. -/
+theorem M2k_le (f1 : ℝ) (k : ℕ) (Bhat : ℝ)
+    (hB : ∑ i ∈ Finset.range (k + 1), |(bHat f1 i).re| * (2 : ℝ) ^ i ≤ Bhat) :
+    |M2k f1 k| ≤ Bhat * ((k : ℝ) + 1) / 2 := by
+  have hterm : ∀ i ∈ Finset.range (k + 1),
+      |(bHat f1 i).re * (2 : ℝ) ^ i * A2m (k - i)|
+        ≤ (|(bHat f1 i).re| * (2 : ℝ) ^ i) * (((k : ℝ) + 1) / 2) := by
+    intro i hi
+    have hik : i ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+    have hA := A2m_le (k - i)
+    have hcast : ((k - i : ℕ) : ℝ) + 1 ≤ (k : ℝ) + 1 := by
+      have h : ((k - i : ℕ) : ℝ) ≤ (k : ℝ) := by
+        have : (k - i : ℕ) ≤ k := by omega
+        exact_mod_cast this
+      linarith
+    have hA' : A2m (k - i) ≤ ((k : ℝ) + 1) / 2 := by linarith
+    have hA0 : (0 : ℝ) ≤ A2m (k - i) := by
+      unfold A2m
+      have h1 : (0:ℝ) ≤ (2:ℝ) ^ (k - i) := by positivity
+      have h2 : (0:ℝ) ≤ S2m (k - i) := by
+        unfold S2m
+        apply Finset.sum_nonneg
+        intro j _
+        apply MeasureTheory.setIntegral_nonneg measurableSet_Ioc
+        intro x hx
+        have hx1 : (1:ℝ) < x := hx.1
+        have hL : (0:ℝ) ≤ (-Real.log (x - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)) := by
+          apply div_nonneg _ (by positivity)
+          apply pow_nonneg
+          simp only [neg_nonneg]
+          exact Real.log_nonpos (by linarith) (by linarith [hx.2])
+        have hs1 : (0:ℝ) ≤ x - 1 := by linarith
+        have h2p : (0:ℝ) < (2:ℝ) ^ (-(j:ℝ) * x) := Real.rpow_pos_of_pos (by norm_num) _
+        exact mul_nonneg (mul_nonneg hL hs1) (le_of_lt h2p)
+      positivity
+    have h2 : (0 : ℝ) ≤ (2 : ℝ) ^ i := by positivity
+    calc |(bHat f1 i).re * (2 : ℝ) ^ i * A2m (k - i)|
+        = (|(bHat f1 i).re| * (2 : ℝ) ^ i) * |A2m (k - i)| := by
+          rw [abs_mul, abs_mul, abs_of_nonneg h2]
+      _ = (|(bHat f1 i).re| * (2 : ℝ) ^ i) * A2m (k - i) := by rw [abs_of_nonneg hA0]
+      _ ≤ (|(bHat f1 i).re| * (2 : ℝ) ^ i) * (((k : ℝ) + 1) / 2) := by
+          apply mul_le_mul_of_nonneg_left hA' (by positivity)
+  unfold M2k
+  calc |∑ i ∈ Finset.range (k + 1), (bHat f1 i).re * (2 : ℝ) ^ i * A2m (k - i)|
+      ≤ ∑ i ∈ Finset.range (k + 1), |(bHat f1 i).re * (2 : ℝ) ^ i * A2m (k - i)| :=
+        Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ i ∈ Finset.range (k + 1),
+          (|(bHat f1 i).re| * (2 : ℝ) ^ i) * (((k : ℝ) + 1) / 2) :=
+        Finset.sum_le_sum hterm
+    _ = (∑ i ∈ Finset.range (k + 1), |(bHat f1 i).re| * (2 : ℝ) ^ i)
+          * (((k : ℝ) + 1) / 2) := by rw [Finset.sum_mul]
+    _ ≤ Bhat * (((k : ℝ) + 1) / 2) := by
+        apply mul_le_mul_of_nonneg_right hB (by positivity)
+    _ = Bhat * ((k : ℝ) + 1) / 2 := by ring
+
+/-- The refined E_1 bound, consuming Theorem 6.1's conclusion. -/
+theorem E1k_le_refined (f1 : ℝ) (k : ℕ) (Bhat Gam : ℝ)
+    (hB : ∑ i ∈ Finset.range (k + 1), |(bHat f1 i).re| * (2 : ℝ) ^ i ≤ Bhat)
+    (h61 : |E1k k - M2k f1 k| ≤ Gam) :
+    |E1k k| ≤ Bhat * ((k : ℝ) + 1) / 2 + Gam := by
+  have hM := M2k_le f1 k Bhat hB
+  have htri : |E1k k| ≤ |E1k k - M2k f1 k| + |M2k f1 k| := by
+    have h := abs_sub_abs_le_abs_sub (E1k k) (M2k f1 k)
+    have h2 := abs_nonneg (M2k f1 k)
+    linarith [h, h2]
+  linarith
+
+
+/-- MANUSCRIPT section 6.2: the refined R(k), with the E_1 term supplied by
+Theorem 6.1 rather than by section 3.5's cruder alpha_+ bound.
+
+Replaces alph (3k+4) by Bhat (3k+4)/2 + 3 Gamma, which is sharper whenever
+Bhat < 2 alpha_+.  This is the bound behind the manuscript's K0 = 79. -/
+noncomputable def RBound2 (Umax Vmax Sstar Bhat Gam : ℝ) (k : ℕ) : ℝ :=
+  (Real.log 2 / 4) * ((2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax)
+    + Sstar * (2 * DBound k + DBound (k + 1))
+    + Bhat * (3 * (k : ℝ) + 4) / 2 + 3 * Gam
+    + 3 * (1.45 / (k : ℝ) + 1e-3)
+
+/-- The source bound with the refined E_1 estimate.  This is the route that
+makes Theorem 6.1 load-bearing: `h61` is 6.1's conclusion, consumed through
+`E1k_le_refined`, which in turn uses `A2m_le`. -/
+theorem source_bound_refined (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ)
+    (Sstar Bhat Gam Umax Vmax : ℝ)
+    (hS : ∀ m : ℕ,
+      ∑ i ∈ Finset.range (m + 1), (2 : ℝ) ^ i * |(cCoeff i).re| ≤ Sstar)
+    (hB : ∀ m : ℕ,
+      ∑ i ∈ Finset.range (m + 1), |(bHat f1 i).re| * (2 : ℝ) ^ i ≤ Bhat)
+    (h61 : ∀ m : ℕ, |E1k m - M2k f1 m| ≤ Gam)
+    (hUV : |2 * (2 * (k : ℝ) * Uk k - Vk k)
+             - (2 * ((k : ℝ) + 1) * Uk (k + 1) - Vk (k + 1))|
+           ≤ (2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax)
+    (hEexp : ∀ m : ℕ, |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3) :
+    |2 * Ek k - Ek (k + 1)| ≤ RBound2 Umax Vmax Sstar Bhat Gam k := by
+  have hk1 : 1 ≤ k + 1 := by omega
+  rw [prop_2_5 k hk, prop_2_5 (k + 1) hk1]
+  have hcast : (((k + 1 : ℕ)) : ℝ) = (k : ℝ) + 1 := by push_cast; ring
+  rw [hcast]
+  have hD := deltaConv_le k Sstar deltaM_abs_le (hS k)
+  have hD1 := deltaConv_le (k + 1) Sstar deltaM_abs_le (hS (k + 1))
+  have hA := E1k_le_refined f1 k Bhat Gam (hB k) (h61 k)
+  have hA1 := E1k_le_refined f1 (k + 1) Bhat Gam (hB (k + 1)) (h61 (k + 1))
+  rw [hcast] at hA1
+  have hX := hEexp k
+  have hX1 := hEexp (k + 1)
+  have hq : (0 : ℝ) < Real.log 2 / 4 := by
+    have := Real.log_pos (by norm_num : (1 : ℝ) < 2); linarith
+  unfold RBound2
+  have habs := abs_le.mp hUV
+  have hDa := abs_le.mp hD
+  have hD1a := abs_le.mp hD1
+  have hAa := abs_le.mp hA
+  have hA1a := abs_le.mp hA1
+  have hXa := abs_le.mp hX
+  have hX1a := abs_le.mp hX1
+  rw [abs_le]
+  constructor <;> nlinarith [habs.1, habs.2, hDa.1, hDa.2, hD1a.1, hD1a.2,
+    hAa.1, hAa.2, hA1a.1, hA1a.2, hXa.1, hXa.2, hX1a.1, hX1a.2, hq]

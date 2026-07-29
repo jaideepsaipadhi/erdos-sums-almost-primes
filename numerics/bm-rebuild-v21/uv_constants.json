@@ -1,0 +1,13 @@
+{
+ "Umax": 0.08436,
+ "Vmax": 1.907462,
+ "alpha_plus": 15.425661,
+ "K1": 2433,
+ "valid_for": "k >= 900",
+ "beta_settings": {
+  "P": 100000,
+  "boxes": 1600,
+  "prec": 300
+ },
+ "note": "regenerated at pinned settings; alpha_+ is tighter than the manuscript's 15.5716 and K1 is 2433 rather than 2440"
+}
