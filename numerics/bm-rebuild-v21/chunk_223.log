@@ -1,0 +1,15 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "/root/lean/banksmartin/numerics/bm-rebuild-v21/crit_r25.py", line 88, in <module>
+    res = sweep(klo, khi)
+          ^^^^^^^^^^^^^^^
+  File "/root/lean/banksmartin/numerics/bm-rebuild-v21/crit_r25.py", line 80, in sweep
+    if kk not in Ek: Ek[kk] = E(kk)
+                              ^^^^^
+  File "/root/lean/banksmartin/numerics/bm-rebuild-v21/crit_r25.py", line 74, in E
+    return -q*(2*k*Uc[k] - Vc[k]) - Delta(k, ci, rho, supH, delta) - E1ball(k) + Eexp(k)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/lean/banksmartin/numerics/bm-rebuild-v21/delta_conv.py", line 36, in Delta
+    s += arb(2) ** i * ci[i] * delta[k - i]
+                               ~~~~~^^^^^^^
+KeyError: 2684

@@ -1061,6 +1061,37 @@ theorem log_bound_combined (x : ℝ) (hx : |x| ≤ 2 / 3) :
     · linarith [hlb, hy2.symm ▸ hlb]
     · nlinarith [hub, hy2]
 
+/-- Sharper variant of log_bound_combined on the smaller range |x| <= 1/5,
+where 1 - x >= 4/5 gives the constant 5/4 in place of 3.
+Needed for the wide-radius chain at |z| <= 29/10: the 5/2-radius proof has
+enough slack at constant 3, but 29/10 does not. -/
+theorem log_bound_combined_fifth (x : ℝ) (hx : |x| ≤ 1 / 5) :
+    |Real.log (1 - x) + x| ≤ (5 / 4) * x^2 := by
+  by_cases hx0 : (0 : ℝ) ≤ x
+  · have hx1 : x < 1 := by
+      have := abs_le.mp hx; linarith [this.2]
+    have hub := log_one_sub_add_self_nonpos x hx0 hx1
+    have hlb := log_one_sub_add_self_lower x hx0 hx1
+    have hxle : x ≤ 1 / 5 := (abs_le.mp hx).2
+    have h1mx : (4 : ℝ)/5 ≤ 1 - x := by linarith
+    rw [abs_le]
+    constructor
+    · have : x^2 / (1 - x) ≤ (5 / 4) * x^2 := by
+        rw [div_le_iff₀ (by linarith : (0 : ℝ) < 1 - x)]
+        nlinarith [sq_nonneg x]
+      linarith
+    · nlinarith [hub, sq_nonneg x]
+  · set y := -x with hy
+    have hy0 : 0 ≤ y := by linarith
+    have hub := log_one_add_sub_self_nonpos y hy0
+    have hlb := log_one_add_sub_self_lower y hy0
+    have hxy : Real.log (1 - x) + x = Real.log (1 + y) - y := by rw [hy]; ring_nf
+    rw [hxy, abs_le]
+    have hy2 : y^2 = x^2 := by rw [hy]; ring
+    constructor
+    · linarith [hlb, hy2.symm ▸ hlb]
+    · nlinarith [hub, hy2]
+
 /-- The per-prime log-correction bound: for p ≥ 3, s ≥ 1, |z| ≤ 2,
     |{-log(1-z p^{-s})} + z log(1-p^{-s})| ≤ 18 p^{-2s}. -/
 theorem prime_correction_bound (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s)
