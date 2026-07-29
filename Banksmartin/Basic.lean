@@ -5734,6 +5734,23 @@ theorem deltaM_upper_bound (m : ℕ) (hm : 1 ≤ m) :
 noncomputable def cStarOne : ℝ :=
   Real.log 2 * (Real.log (Real.log 2) + Real.eulerMascheroniConstant - 1 - 1 / 4)
 
+/-- cStarOne < 0: log(log 2) < 0 since 0 < log 2 < 1, and gamma < 2/3, so
+log log 2 + gamma - 5/4 < 0 - 5/4 + 2/3 < 0. -/
+theorem cStarOne_neg : cStarOne < 0 := by
+  unfold cStarOne
+  have hl2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hl2lt : Real.log 2 < 1 := by
+    have h : Real.log 2 < Real.log (Real.exp 1) := by
+      apply Real.log_lt_log (by norm_num)
+      have := Real.exp_one_gt_d9
+      linarith
+    rwa [Real.log_exp] at h
+  have hll : Real.log (Real.log 2) < 0 := log_neg hl2 hl2lt
+  have hg : Real.eulerMascheroniConstant < 2 / 3 := eulerMascheroniConstant_lt_two_thirds
+  have hinner : Real.log (Real.log 2) + Real.eulerMascheroniConstant - 1 - 1 / 4 < 0 := by
+    linarith
+  exact mul_neg_of_pos_of_neg hl2 hinner
+
 /-- MANUSCRIPT THEOREM 4.1 (upper bound, manuscript form):
 delta_m <= (log 2) m log m + c1* m, for m >= 1. -/
 theorem deltaM_upper_bound_manuscript (m : ℕ) (hm : 1 ≤ m) :
