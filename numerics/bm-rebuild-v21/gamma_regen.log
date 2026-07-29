@@ -1,0 +1,11 @@
+nohup: ignoring input
+sweep (528s); invariant sup>=|s=1|: holds
+i= 1  gamma-hat_i = 2.797158   |value s=1| = 2.795084
+i= 2  gamma-hat_i = 6.382356   |value s=1| = 6.342294
+i= 3  gamma-hat_i = 5.417142   |value s=1| = 5.330496
+i= 4  gamma-hat_i = 2.903073   |value s=1| = 2.828359
+i= 5  gamma-hat_i = 1.124369   |value s=1| = 1.080848
+i= 6  gamma-hat_i = 0.356013   |value s=1| = 0.335438
+i= 7  gamma-hat_i = 0.092248   |value s=1| = 0.083515
+i= 8  gamma-hat_i = 0.022660   |value s=1| = 0.019169
+i= 9  gamma-hat_i = 0.004702   |value s=1| = 0.003336

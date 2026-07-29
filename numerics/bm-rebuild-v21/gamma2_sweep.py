@@ -114,7 +114,11 @@ def process_box(sbox, primes, logs, gammas, T2, TL2, TL2b, P, prec):
         out.append(acc)
     return out
 
-def gamma2_sweep(P=20000, boxes=200, prec=200):
+# PRODUCTION SETTINGS: the old defaults (P=20000, boxes=200, prec=200) do not
+# reproduce gamma2_certified.json -- they give head 228.46 vs the stored 204.89,
+# which pushes Gamma to 117.19, above the 105.41 the criterion assumes.
+# P=100000, boxes=800, prec=300 gives head 203.12, at or below the stored table.
+def gamma2_sweep(P=100000, boxes=800, prec=300):
     ctx.prec = prec
     primes = [p for p in sieve(P) if p >= 3]
     logs = [arb(p).log() for p in primes]
