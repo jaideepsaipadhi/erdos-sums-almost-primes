@@ -6837,6 +6837,55 @@ noncomputable def wk (k : ℕ) : ℝ :=
 noncomputable def DeltaConv (k : ℕ) : ℝ :=
   ∑ i ∈ Finset.range (k + 1), (2 : ℝ) ^ i * (cCoeff i).re * deltaM (k - i)
 
+/-- D is monotone: m <= k implies D(m) <= D(k). -/
+theorem DBound_mono_le (m k : ℕ) (h : m ≤ k) : DBound m ≤ DBound k := by
+  unfold DBound
+  have hlog2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hmk : (m : ℝ) ≤ (k : ℝ) := by exact_mod_cast h
+  have hm0 : (0:ℝ) ≤ (m : ℝ) := by positivity
+  have hlogm : (0:ℝ) ≤ Real.log ((m : ℝ) + 1) := by
+    apply Real.log_nonneg; linarith
+  have hlogmk : Real.log ((m : ℝ) + 1) ≤ Real.log ((k : ℝ) + 1) := by
+    apply Real.log_le_log (by linarith)
+    linarith
+  have hstep : Real.log 2 * (m : ℝ) * Real.log ((m : ℝ) + 1)
+      ≤ Real.log 2 * (k : ℝ) * Real.log ((k : ℝ) + 1) := by
+    apply mul_le_mul _ hlogmk hlogm (by positivity)
+    apply mul_le_mul_of_nonneg_left hmk (le_of_lt hlog2)
+  linarith
+
+/-- MANUSCRIPT section 7, the convolution source: |Delta(k)| <= S* D(k).
+From Theorem 4.1's |delta_m| <= D(m), the monotonicity of D, and
+sum 2^i |c_i| <= S*.  This is what makes Theorem 4.1 load-bearing. -/
+theorem deltaConv_le (k : ℕ) (Sstar : ℝ)
+    (hdelta : ∀ m : ℕ, |deltaM m| ≤ DBound m)
+    (hS : ∑ i ∈ Finset.range (k + 1), (2:ℝ) ^ i * |(cCoeff i).re| ≤ Sstar) :
+    |DeltaConv k| ≤ Sstar * DBound k := by
+  have hDk0 : (0:ℝ) ≤ DBound k := DBound_nonneg k
+  have hterm : ∀ i ∈ Finset.range (k + 1),
+      |(2:ℝ) ^ i * (cCoeff i).re * deltaM (k - i)|
+        ≤ ((2:ℝ) ^ i * |(cCoeff i).re|) * DBound k := by
+    intro i hi
+    have hik : i ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+    have hDle : DBound (k - i) ≤ DBound k := DBound_mono_le (k - i) k (by omega)
+    have h2 : (0:ℝ) ≤ (2:ℝ) ^ i := by positivity
+    calc |(2:ℝ) ^ i * (cCoeff i).re * deltaM (k - i)|
+        = ((2:ℝ) ^ i * |(cCoeff i).re|) * |deltaM (k - i)| := by
+          rw [abs_mul, abs_mul, abs_of_nonneg h2]
+      _ ≤ ((2:ℝ) ^ i * |(cCoeff i).re|) * DBound (k - i) := by
+          apply mul_le_mul_of_nonneg_left (hdelta (k - i)) (by positivity)
+      _ ≤ ((2:ℝ) ^ i * |(cCoeff i).re|) * DBound k := by
+          apply mul_le_mul_of_nonneg_left hDle (by positivity)
+  unfold DeltaConv
+  calc |∑ i ∈ Finset.range (k + 1), (2:ℝ) ^ i * (cCoeff i).re * deltaM (k - i)|
+      ≤ ∑ i ∈ Finset.range (k + 1), |(2:ℝ) ^ i * (cCoeff i).re * deltaM (k - i)| :=
+        Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ i ∈ Finset.range (k + 1), ((2:ℝ) ^ i * |(cCoeff i).re|) * DBound k :=
+        Finset.sum_le_sum hterm
+    _ = (∑ i ∈ Finset.range (k + 1), (2:ℝ) ^ i * |(cCoeff i).re|) * DBound k := by
+        rw [Finset.sum_mul]
+    _ ≤ Sstar * DBound k := mul_le_mul_of_nonneg_right hS hDk0
+
 /-- E(k) defined by f_k = 1 - 2^(-k)(a1 k^2 + E(k)), i.e. solved for E(k). -/
 noncomputable def Ek (k : ℕ) : ℝ :=
   (2 : ℝ) ^ k * (1 - f k) - aOneConst * (k : ℝ) ^ 2
@@ -9017,6 +9066,51 @@ theorem prop_2_5 (k : ℕ) (hk : 1 ≤ k) :
   field_simp
   ring
 
+
+/-- MANUSCRIPT section 7: the aggregate source bound, DERIVED.
+
+|2E(k) - E(k+1)| <= RBound, from Proposition 2.5 (the exact decomposition),
+Theorem 4.1 via deltaConv_le, and section 3.5 via the E_1 bound.  The U/V term
+and E_exp stay as certified hypotheses, as in the manuscript.
+
+This is what makes sections 2, 4 and 3.5 reach the final theorem: previously
+NumericalFacts asserted this bound outright, leaving Prop 2.5 and Theorem 4.1
+proved but unused. -/
+theorem source_bound_derived (k : ℕ) (hk : 1 ≤ k)
+    (Sstar alph Umax Vmax : ℝ)
+    (hdelta : ∀ m : ℕ, |deltaM m| ≤ DBound m)
+    (hS : ∀ m : ℕ,
+      ∑ i ∈ Finset.range (m + 1), (2:ℝ) ^ i * |(cCoeff i).re| ≤ Sstar)
+    (hE1 : ∀ m : ℕ, 1 ≤ m → |E1k m| ≤ alph * ((m : ℝ) + 1))
+    (hUV : |2 * (2 * (k : ℝ) * Uk k - Vk k)
+             - (2 * ((k : ℝ) + 1) * Uk (k + 1) - Vk (k + 1))|
+           ≤ (2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax)
+    (hEexp : ∀ m : ℕ, |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3) :
+    |2 * Ek k - Ek (k + 1)| ≤ RBound Umax Vmax Sstar alph k := by
+  have hk1 : 1 ≤ k + 1 := by omega
+  rw [prop_2_5 k hk, prop_2_5 (k + 1) hk1]
+  have hcast : (((k + 1 : ℕ)) : ℝ) = (k : ℝ) + 1 := by push_cast; ring
+  rw [hcast]
+  have hD := deltaConv_le k Sstar hdelta (hS k)
+  have hD1 := deltaConv_le (k + 1) Sstar hdelta (hS (k + 1))
+  have hA := hE1 k hk
+  have hA1 := hE1 (k + 1) hk1
+  rw [hcast] at hA1
+  have hX := hEexp k
+  have hX1 := hEexp (k + 1)
+  have hq : (0:ℝ) < Real.log 2 / 4 := by
+    have := Real.log_pos (by norm_num : (1:ℝ) < 2); linarith
+  unfold RBound
+  have habs := abs_le.mp hUV
+  have hDa := abs_le.mp hD
+  have hD1a := abs_le.mp hD1
+  have hAa := abs_le.mp hA
+  have hA1a := abs_le.mp hA1
+  have hXa := abs_le.mp hX
+  have hX1a := abs_le.mp hX1
+  rw [abs_le]
+  constructor <;> nlinarith [habs.1, habs.2, hDa.1, hDa.2, hD1a.1, hD1a.2,
+    hAa.1, hAa.2, hA1a.1, hA1a.2, hXa.1, hXa.2, hX1a.1, hX1a.2, hq]
 
 /-- The p = 2 half of Lemma 3.9's c: d/ds log(1 - 2^(-s)) = log 2 / (2^s - 1). -/
 theorem deriv_log_one_sub_two_pow (s : ℝ) (hs : 1 < s) :
