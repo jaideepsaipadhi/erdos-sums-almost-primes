@@ -1262,7 +1262,7 @@ theorem correction_le_one (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
 
 /-- Wide-radius variant: 20 p^(-2s) <= 1 for p >= 5 (20 / 25 = 0.8). -/
 theorem correction_le_one_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
-    20 * (p : ℝ) ^ (-2*s) ≤ 1 := by
+    24 * (p : ℝ) ^ (-2*s) ≤ 1 := by
   have hp5 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
   have hpos : (0 : ℝ) < (p : ℝ) := by linarith
   have h1 : (p : ℝ) ^ (-2*s) ≤ (p : ℝ) ^ (-2:ℝ) := by
@@ -1629,14 +1629,14 @@ theorem prime_correction_bound_complex (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 
         rw [ha_def, ← Real.rpow_natCast ((p : ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
         ring_nf
 
-/-- Wide-radius variant: ||z|| <= 5 / 2 for p >= 5, constant 20.
+/-- Wide-radius variant: ||z|| <= 29 / 10 for p >= 5, constant 24.
 Needed to place z = 2 strictly inside the disc of analyticity, which is what
 sum 2^i c_i = d requires. -/
 theorem prime_correction_bound_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
-    (z : ℂ) (hz : ‖z‖ ≤ 5 / 2) :
+    (z : ℂ) (hz : ‖z‖ ≤ 29 / 10) :
     ‖(-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
         z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)‖
-      ≤ 20 * (p : ℝ) ^ (-2*s) := by
+      ≤ 24 * (p : ℝ) ^ (-2*s) := by
   have hp0 : (0 : ℝ) < (p : ℝ) := by
     have : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
@@ -1658,24 +1658,24 @@ theorem prime_correction_bound_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (
     first
     | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
-  have hza_le : ‖(z : ℂ) * (a : ℂ)‖ ≤ 1 / 2 := by
+  have hza_le : ‖(z : ℂ) * (a : ℂ)‖ ≤ 29 / 50 := by
     rw [norm_mul, hane]
-    have hmm : ‖z‖ * a ≤ (5 / 2) * (1 / 5) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
+    have hmm : ‖z‖ * a ≤ (29 / 10) * (1 / 5) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
     linarith
   have hza_lt1 : ‖(z : ℂ) * (a : ℂ)‖ < 1 := by linarith
   have hr1 := complex_log_bound ((z : ℂ) * (a : ℂ)) hza_lt1
-  have hr2 := log_bound_combined a (by rw [abs_of_pos ha_pos]; linarith)
-  have hr1bound : ‖z * (a : ℂ)‖^2 / (1 - ‖z * (a : ℂ)‖) ≤ 12.5 * a^2 := by
-    have h1 : ‖z * (a : ℂ)‖ ≤ (5 / 2) * a := by
+  have hr2 := log_bound_combined_fifth a (by rw [abs_of_pos ha_pos]; linarith)
+  have hr1bound : ‖z * (a : ℂ)‖^2 / (1 - ‖z * (a : ℂ)‖) ≤ (201 / 10) * a^2 := by
+    have h1 : ‖z * (a : ℂ)‖ ≤ (29 / 10) * a := by
       rw [norm_mul, hane]; nlinarith [hz]
-    have h2 : (1 : ℝ)/2 ≤ 1 - ‖z * (a : ℂ)‖ := by linarith [hza_le]
-    have h3 : ‖z * (a : ℂ)‖^2 ≤ 6.25 * a^2 := by
+    have h2 : (21 : ℝ)/50 ≤ 1 - ‖z * (a : ℂ)‖ := by linarith [hza_le]
+    have h3 : ‖z * (a : ℂ)‖^2 ≤ (841 / 100) * a^2 := by
       nlinarith [h1, norm_nonneg (z * (a : ℂ))]
-    calc ‖z * (a : ℂ)‖^2 / (1 - ‖z * (a : ℂ)‖) ≤ ‖z * (a : ℂ)‖^2 / (1 / 2) := by
+    calc ‖z * (a : ℂ)‖^2 / (1 - ‖z * (a : ℂ)‖) ≤ ‖z * (a : ℂ)‖^2 / (21 / 50) := by
           apply div_le_div_of_nonneg_left (sq_nonneg _) (by norm_num) h2
-      _ = 2 * ‖z * (a : ℂ)‖^2 := by ring
-      _ ≤ 2 * (6.25 * a^2) := by linarith [h3]
-      _ = 12.5 * a^2 := by ring
+      _ = (50 / 21) * ‖z * (a : ℂ)‖^2 := by ring
+      _ ≤ (50 / 21) * ((841 / 100) * a^2) := by linarith [h3]
+      _ ≤ (201 / 10) * a^2 := by nlinarith [sq_nonneg a]
   have hkey : (-Complex.log (1 - z * (a : ℂ))) + z * (Real.log (1 - a) : ℂ)
       = -(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)) +
           z * ((Real.log (1 - a) : ℂ) + (a : ℂ)) := by ring
@@ -1687,7 +1687,7 @@ theorem prime_correction_bound_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (
     have := norm_add_le (-(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)))
       (z * ((Real.log (1 - a) : ℂ) + (a : ℂ)))
     rwa [norm_neg] at this
-  have hstep2 : ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ ≤ ‖z‖ * (3 * a^2) := by
+  have hstep2 : ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ ≤ ‖z‖ * ((5 / 4) * a^2) := by
     rw [norm_mul]
     apply mul_le_mul_of_nonneg_left _ (norm_nonneg z)
     have heq : ((Real.log (1 - a) : ℂ) + (a : ℂ)) = ((Real.log (1 - a) + a : ℝ):ℂ) := by
@@ -1697,16 +1697,16 @@ theorem prime_correction_bound_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (
     | rw [Complex.norm_real]; exact hr2
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact hr2
   have hfinal_bound : ‖Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)‖ +
-      ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ ≤ 12.5 * a^2 + ‖z‖ * (3 * a^2) := by
+      ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ ≤ (201 / 10) * a^2 + ‖z‖ * ((5 / 4) * a^2) := by
     linarith [hr1, hr1bound, hstep2]
   calc ‖-(Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)) +
         z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖
       ≤ ‖Complex.log (1 - z * (a : ℂ)) + z * (a : ℂ)‖ +
           ‖z * ((Real.log (1 - a) : ℂ) + (a : ℂ))‖ := hstep1
-    _ ≤ 12.5 * a^2 + ‖z‖ * (3 * a^2) := hfinal_bound
-    _ ≤ 12.5 * a^2 + (5 / 2) * (3 * a^2) := by nlinarith [hz, sq_nonneg a]
-    _ = 20 * a^2 := by ring
-    _ = 20 * (p : ℝ) ^ (-2*s) := by
+    _ ≤ (201 / 10) * a^2 + ‖z‖ * ((5 / 4) * a^2) := hfinal_bound
+    _ ≤ (201 / 10) * a^2 + (29 / 10) * ((5 / 4) * a^2) := by nlinarith [hz, sq_nonneg a]
+    _ ≤ 24 * a^2 := by nlinarith [sq_nonneg a]
+    _ = 24 * (p : ℝ) ^ (-2*s) := by
         rw [ha_def, ← Real.rpow_natCast ((p : ℝ)^(-s)) 2, ← Real.rpow_mul hp0.le]
         ring_nf
 
@@ -1748,21 +1748,21 @@ theorem prime_factor_sub_one_bound_complex (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (h
     _ ≤ 2 * (18 * (p : ℝ) ^ (-2*s)) := by linarith [hbound]
     _ = 36 * (p : ℝ) ^ (-2*s) := by ring
 
-/-- Wide-radius variant: ||z|| <= 5 / 2, constant 40. -/
+/-- Wide-radius variant: ||z|| <= 29 / 10, constant 48. -/
 theorem prime_factor_sub_one_bound_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
-    (z : ℂ) (hz : ‖z‖ ≤ 5 / 2) :
+    (z : ℂ) (hz : ‖z‖ ≤ 29 / 10) :
     ‖Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
         z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖
-      ≤ 40 * (p : ℝ) ^ (-2*s) := by
+      ≤ 48 * (p : ℝ) ^ (-2*s) := by
   set c : ℂ := (-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
     z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ) with hc_def
   have hp3 : 5 ≤ p := by omega
-  have hbound : ‖c‖ ≤ 20 * (p : ℝ) ^ (-2*s) := prime_correction_bound_complex_wide p hp3 s hs z hz
-  have hle1 : 20 * (p : ℝ) ^ (-2*s) ≤ 1 := correction_le_one_wide p hp s hs
+  have hbound : ‖c‖ ≤ 24 * (p : ℝ) ^ (-2*s) := prime_correction_bound_complex_wide p hp3 s hs z hz
+  have hle1 : 24 * (p : ℝ) ^ (-2*s) ≤ 1 := correction_le_one_wide p hp s hs
   have hc1 : ‖c‖ ≤ 1 := le_trans hbound hle1
   calc ‖Complex.exp c - 1‖ ≤ 2 * ‖c‖ := Complex.norm_exp_sub_one_le hc1
-    _ ≤ 2 * (20 * (p : ℝ) ^ (-2*s)) := by linarith [hbound]
-    _ = 40 * (p : ℝ) ^ (-2*s) := by ring
+    _ ≤ 2 * (24 * (p : ℝ) ^ (-2*s)) := by linarith [hbound]
+    _ = 48 * (p : ℝ) ^ (-2*s) := by ring
 
 /-- Complex-z analogue of prime_factor_sub_one_summable. -/
 theorem prime_factor_sub_one_summable_complex (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) :
@@ -1843,7 +1843,7 @@ theorem prime_factor_eq_exp_complex (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 �
 
 /-- Wide-radius variant. -/
 theorem prime_factor_eq_exp_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
-    (z : ℂ) (hz : ‖z‖ ≤ 5 / 2) :
+    (z : ℂ) (hz : ‖z‖ ≤ 29 / 10) :
     (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
         (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z =
       Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
@@ -1869,9 +1869,9 @@ theorem prime_factor_eq_exp_complex_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs 
     first
     | rw [Complex.norm_real]; exact abs_of_nonneg ha_pos.le
     | rw [Complex.norm_eq_abs, Complex.abs_ofReal]; exact abs_of_nonneg ha_pos.le
-  have hza_le : ‖(z : ℂ) * (a : ℂ)‖ ≤ 1 / 2 := by
+  have hza_le : ‖(z : ℂ) * (a : ℂ)‖ ≤ 29 / 50 := by
     rw [norm_mul, hane]
-    have hmm : ‖z‖ * a ≤ (5 / 2) * (1 / 5) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
+    have hmm : ‖z‖ * a ≤ (29 / 10) * (1 / 5) := mul_le_mul hz ha_le ha_pos.le (by norm_num)
     linarith
   have hza_lt : ‖(z : ℂ) * (a : ℂ)‖ < 1 := by linarith
   have h1za_ne : (1 : ℂ) - z * (a : ℂ) ≠ 0 := by
@@ -1919,30 +1919,30 @@ theorem prime_factor_multipliable_complex (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz
     ring
   simpa only [heq] using hmult
 
-/-- Wide-radius variant (||z|| <= 5 / 2). -/
-theorem prime_factor_sub_one_summable_complex_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 5 / 2) :
+/-- Wide-radius variant (||z|| <= 29 / 10). -/
+theorem prime_factor_sub_one_summable_complex_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 29 / 10) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
       ‖Complex.exp ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
         z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) - 1‖) := by
-  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 40 * (p : ℝ) ^ (-2*s)) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 48 * (p : ℝ) ^ (-2*s)) := by
     have h2s : -(2*s) < -1 := by linarith
     have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
       Real.summable_nat_rpow.mpr h2s
     have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
       hbase.subtype _
-    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (40 : ℝ) * (p : ℝ) ^ (-2*s) =
-        40 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (48 : ℝ) * (p : ℝ) ^ (-2*s) =
+        48 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
       intro p; ring_nf
     simp_rw [heq]
-    exact hsub.mul_left 40
+    exact hsub.mul_left 48
   apply Summable.of_nonneg_of_le
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
     (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
       prime_factor_sub_one_bound_complex_wide (p : ℕ) p.property.2 s hs z hz)
     hcomp
 
-/-- Wide-radius variant (||z|| <= 5 / 2). -/
-theorem prime_factor_multipliable_complex_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 5 / 2) :
+/-- Wide-radius variant (||z|| <= 29 / 10). -/
+theorem prime_factor_multipliable_complex_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 29 / 10) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
       (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
         (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) := by
@@ -1976,8 +1976,8 @@ theorem G2tailC_hasProd (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 2) 
       (G2tailC s z) :=
   (prime_factor_multipliable_complex s hs z hz).hasProd
 
-/-- Wide-radius variant: the tail product converges for ||z|| <= 5 / 2. -/
-theorem G2tailC_hasProd_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.norm z ≤ 5 / 2) :
+/-- Wide-radius variant: the tail product converges for ||z|| <= 29 / 10. -/
+theorem G2tailC_hasProd_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : Norm.norm z ≤ 29 / 10) :
     HasProd (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
       (1 - z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * ((((1 - ((p : ℕ):ℝ) ^ (-s) : ℝ)) : ℂ)) ^ z)
       (G2tailC s z) :=
@@ -2116,14 +2116,14 @@ theorem prime_factor_differentiableOn (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1
     | exact differentiableAt_id.const_cpow (Or.inl h1a_ne)
     | exact DifferentiableAt.const_cpow differentiableAt_id (Or.inr h1a_ne)
 
-/-- The p = 3 Euler factor is differentiable on the wide disc |z| < 5 / 2.
+/-- The p = 3 Euler factor is differentiable on the wide disc |z| < 29 / 10.
 Simpler than the general per-prime lemma: no log estimates are needed, only
 that 1 - z*3^(-s) is nonvanishing there (|z*3^(-s)| < 5 / 6 at s = 1) and that
 the cpow factor is entire.  The general wide lemma requires p >= 5, so the
 p = 3 factor of G2C needs this separate treatment. -/
 theorem prime_three_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z : ℂ => (1 - z * ((((3 : ℝ)) ^ (-s) : ℝ) : ℂ))⁻¹ *
-      ((((1 - ((3 : ℝ)) ^ (-s) : ℝ)) : ℂ)) ^ z) (Metric.ball 0 (5 / 2)) := by
+      ((((1 - ((3 : ℝ)) ^ (-s) : ℝ)) : ℂ)) ^ z) (Metric.ball 0 (29 / 10)) := by
   set a : ℝ := ((3 : ℝ)) ^ (-s) with ha_def
   have ha_pos : (0 : ℝ) < a := by rw [ha_def]; positivity
   have ha_le : a ≤ 1 / 3 := by
@@ -2142,9 +2142,9 @@ theorem prime_three_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) :
   rw [Metric.mem_ball, dist_zero_right] at hz
   have hza : Norm.norm (z * ((a : ℝ) : ℂ)) < 1 := by
     rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ha_pos]
-    calc Norm.norm z * a < (5 / 2) * a := by
+    calc Norm.norm z * a < (29 / 10) * a := by
           apply mul_lt_mul_of_pos_right hz ha_pos
-      _ ≤ (5 / 2) * (1 / 3) := by
+      _ ≤ (29 / 10) * (1 / 3) := by
           apply mul_le_mul_of_nonneg_left ha_le (by norm_num)
       _ < 1 := by norm_num
   have hne : (1 : ℂ) - z * ((a : ℝ) : ℂ) ≠ 0 := by
@@ -2325,10 +2325,10 @@ theorem G2C_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
   · exact prime_factor_differentiableOn 3 (le_refl 3) s hs
   · exact G2tailC_differentiableOn s hs
 
-/-- Wide-radius variant (radius 5 / 2, p >= 5). -/
+/-- Wide-radius variant (radius 29 / 10, p >= 5). -/
 theorem prime_factor_differentiableOn_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z : ℂ => (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
-      (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) (Metric.ball 0 (5 / 2)) := by
+      (((1 - (p : ℝ) ^ (-s) : ℝ) : ℂ)) ^ z) (Metric.ball 0 (29 / 10)) := by
   have hp0 : (0 : ℝ) < (p : ℝ) := by
     have : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
@@ -2376,10 +2376,10 @@ theorem prime_factor_differentiableOn_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (h
     | exact differentiableAt_id.const_cpow (Or.inl h1a_ne)
     | exact DifferentiableAt.const_cpow differentiableAt_id (Or.inr h1a_ne)
 
-/-- Wide-radius variant (radius 5 / 2, p >= 5). -/
+/-- Wide-radius variant (radius 29 / 10, p >= 5). -/
 theorem correction_differentiableOn_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z : ℂ => (-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
-      z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) (Metric.ball 0 (5 / 2)) := by
+      z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) (Metric.ball 0 (29 / 10)) := by
   have hp0 : (0 : ℝ) < (p : ℝ) := by
     have : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
     linarith
@@ -2436,24 +2436,24 @@ theorem correction_differentiableOn_wide (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs 
     · exact Or.inl hre_pos
   · exact differentiableAt_id.mul_const _
 
-/-- Wide-radius variant (radius 5 / 2, p >= 5). -/
+/-- Wide-radius variant (radius 29 / 10, p >= 5). -/
 theorem correction_sum_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) :
     DifferentiableOn ℂ (fun z : ℂ => ∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
       ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
         z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)))
-      (Metric.ball 0 (5 / 2)) := by
+      (Metric.ball 0 (29 / 10)) := by
   apply Complex.differentiableOn_tsum_of_summable_norm
-    (u := fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 20 * (p : ℝ) ^ (-2*s))
+    (u := fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 24 * (p : ℝ) ^ (-2*s))
   · have h2s : -(2*s) < -1 := by linarith
     have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
       Real.summable_nat_rpow.mpr h2s
     have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
       hbase.subtype _
-    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (20 : ℝ) * (p : ℝ) ^ (-2*s) =
-        20 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
+    have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (24 : ℝ) * (p : ℝ) ^ (-2*s) =
+        24 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
       intro p; ring_nf
     simp_rw [heq]
-    exact hsub.mul_left 20
+    exact hsub.mul_left 24
   · intro p
     have hp3 : 5 ≤ (p : ℕ) := p.property.2
     exact correction_differentiableOn_wide (p : ℕ) hp3 s hs
@@ -2463,25 +2463,25 @@ theorem correction_sum_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) :
     have hp3 : 5 ≤ (p : ℕ) := p.property.2
     exact prime_correction_bound_complex_wide (p : ℕ) hp3 s hs w hw.le
 
-/-- Wide-radius variant (radius 5 / 2, p >= 5). -/
-theorem G2tailC_eq_exp_sum_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 5 / 2) :
+/-- Wide-radius variant (radius 29 / 10, p >= 5). -/
+theorem G2tailC_eq_exp_sum_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 29 / 10) :
     G2tailC s z = Complex.exp (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
       ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
         z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ))) := by
   have hnormsum : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
       ‖(-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
         z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)‖) := by
-    have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 20 * (p : ℝ) ^ (-2*s)) := by
+    have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => 24 * (p : ℝ) ^ (-2*s)) := by
       have h2s : -(2*s) < -1 := by linarith
       have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
         Real.summable_nat_rpow.mpr h2s
       have hsub : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => ((p : ℕ):ℝ) ^ (-(2*s))) :=
         hbase.subtype _
-      have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (20 : ℝ) * (p : ℝ) ^ (-2*s) =
-          20 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
+      have heq : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p}, (24 : ℝ) * (p : ℝ) ^ (-2*s) =
+          24 * ((p : ℕ):ℝ) ^ (-(2*s)) := by
         intro p; ring_nf
       simp_rw [heq]
-      exact hsub.mul_left 20
+      exact hsub.mul_left 24
     apply Summable.of_nonneg_of_le
       (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => norm_nonneg _)
       (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => by
@@ -2506,10 +2506,10 @@ theorem G2tailC_eq_exp_sum_wide (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖
   have hhasprod_G2 := G2tailC_hasProd_wide s hs z hz
   exact (hhasprod_G2.unique hhasprod_exp)
 
-/-- Wide-radius variant (radius 5 / 2, p >= 5). -/
+/-- Wide-radius variant (radius 29 / 10, p >= 5). -/
 theorem G2tailC_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) :
-    DifferentiableOn ℂ (fun z => G2tailC s z) (Metric.ball 0 (5 / 2)) := by
-  have heq : ∀ z ∈ Metric.ball (0 : ℂ) (5 / 2), G2tailC s z = Complex.exp
+    DifferentiableOn ℂ (fun z => G2tailC s z) (Metric.ball 0 (29 / 10)) := by
+  have heq : ∀ z ∈ Metric.ball (0 : ℂ) (29 / 10), G2tailC s z = Complex.exp
       (∑' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
         ((-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
           z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ))) := by
@@ -2519,9 +2519,9 @@ theorem G2tailC_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) :
   apply DifferentiableOn.congr _ heq
   exact Complex.differentiable_exp.comp_differentiableOn (correction_sum_differentiableOn_wide s hs)
 
-/-- Wide-radius variant (radius 5 / 2, p >= 5). -/
+/-- Wide-radius variant (radius 29 / 10, p >= 5). -/
 theorem G2C_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) :
-    DifferentiableOn ℂ (fun z => G2C s z) (Metric.ball 0 (5 / 2)) := by
+    DifferentiableOn ℂ (fun z => G2C s z) (Metric.ball 0 (29 / 10)) := by
   unfold G2C
   apply DifferentiableOn.mul
   · exact prime_three_differentiableOn_wide s hs
@@ -6748,7 +6748,7 @@ Radius 12 / 5 sits inside ball 0 (5 / 2) and strictly contains z = 2, which is
 what sum 2^i c_i = d needs. -/
 theorem G2at1_differentiableOn_wide :
     DifferentiableOn ℂ G2at1 (Metric.closedBall (0 : ℂ) (12 / 5 : ℝ)) := by
-  have hsub : Metric.closedBall (0 : ℂ) (12 / 5 : ℝ) ⊆ Metric.ball (0 : ℂ) (5 / 2) := by
+  have hsub : Metric.closedBall (0 : ℂ) (12 / 5 : ℝ) ⊆ Metric.ball (0 : ℂ) (29 / 10) := by
     intro z hz
     rw [Metric.mem_closedBall, dist_zero_right] at hz
     rw [Metric.mem_ball, dist_zero_right]
@@ -9113,7 +9113,7 @@ fixed s.  The s-independent half of Lemma 3.8; generalises
 G2at1_differentiableOn_wide from s = 1. -/
 theorem G2manu_differentiableOn_wide (s : ℝ) (hs : 1 ≤ s) (hk : 0 < kappaFac s) :
     DifferentiableOn ℂ (fun z : ℂ => G2manu s z) (Metric.closedBall (0 : ℂ) (12 / 5 : ℝ)) := by
-  have hsub : Metric.closedBall (0 : ℂ) (12 / 5 : ℝ) ⊆ Metric.ball (0 : ℂ) (5 / 2) := by
+  have hsub : Metric.closedBall (0 : ℂ) (12 / 5 : ℝ) ⊆ Metric.ball (0 : ℂ) (29 / 10) := by
     intro z hz
     rw [Metric.mem_closedBall, dist_zero_right] at hz
     rw [Metric.mem_ball, dist_zero_right]
