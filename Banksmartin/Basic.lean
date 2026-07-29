@@ -210,6 +210,36 @@ theorem crit_pos_iff (aa : ℝ) (k : ℕ) :
     exact mul_pos h2 hpos
   linarith
 
+/-- MANUSCRIPT Theorem 7.1: Crit(k) > 0, hence f_k < f_(k+1), for all k >= k1.
+
+phi(k1) > 0 and the monotonicity of phi are certified in the manuscript
+(an Arb ball scan at k1 = 2440, and the derivative gap
+a1(2k-2) - [2q Umax + 3 Sstar log2 (log(k+2)+1) + 3 alpha] > 0 increasing by
+convexity).  Both enter as hypotheses, as the other certified facts do. -/
+theorem theorem_7_1 (aa Umax Vmax Sstar alph : ℝ) (k1 : ℕ)
+    (hphi1 : 0 < phiBound aa Umax Vmax Sstar alph k1)
+    (hmono : ∀ m : ℕ, k1 ≤ m →
+      phiBound aa Umax Vmax Sstar alph m ≤ phiBound aa Umax Vmax Sstar alph (m + 1))
+    (hE : ∀ m : ℕ, k1 ≤ m →
+      |2 * E aa m - E aa (m + 1)| ≤ RBound Umax Vmax Sstar alph m)
+    (k : ℕ) (hk : k1 ≤ k) :
+    f k < f (k + 1) := by
+  have hphi : ∀ m : ℕ, k1 ≤ m → 0 < phiBound aa Umax Vmax Sstar alph m := by
+    intro m hm
+    induction m with
+    | zero =>
+      have : k1 = 0 := Nat.le_zero.mp hm
+      rw [this] at hphi1
+      exact hphi1
+    | succ n ih =>
+      rcases Nat.lt_or_ge k1 (n + 1) with h | h
+      · have hn : k1 ≤ n := Nat.lt_succ_iff.mp h
+        exact lt_of_lt_of_le (ih hn) (hmono n hn)
+      · have : k1 = n + 1 := le_antisymm hm h
+        rw [this] at hphi1
+        exact hphi1
+  exact crit_pos_iff aa k (lt_of_lt_of_le (hphi k hk) (crit_ge_phi aa Umax Vmax Sstar alph k (hE k hk)))
+
 lemma B_nonneg (j : ℕ) (u : ℝ) :
     0 ≤ (2 : ℝ) ^ (-(j : ℝ) * Real.exp (-u)) - 1 + j * Real.log 2 * Real.exp (-u) := by
   set x : ℝ := (j : ℝ) * Real.log 2 * Real.exp (-u) with hx
