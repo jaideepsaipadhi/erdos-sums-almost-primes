@@ -63,6 +63,21 @@ siblings quantify over f k, an infinite sum over {n : Omega(n) = k}, which no
 proof assistant evaluates.  The theorem is conditional by construction -- the
 division Caveat 1.3(b) of the manuscript already draws.
 
+## Constants
+
+The formalization takes these as parameters; the numerics certify them.  All
+four improve on the manuscript, because the sweeps were rerun at documented
+settings that are tighter than the ones originally used:
+
+| | manuscript | this repository |
+|---|---|---|
+| alpha_+ | 15.5716 | 15.4257 |
+| Gamma | 105.4060 | 104.5196 |
+| K0 | 79 | 78 |
+| K1 | 2440 | 2433 |
+
+See numerics/README.md for the settings and how they were recovered.
+
 ## Verifying
 
     lake build

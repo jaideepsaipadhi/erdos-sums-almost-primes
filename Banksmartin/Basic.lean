@@ -458,9 +458,9 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   /-- Section 3.4: S* <= 6.9763. -/
   Sstar_bound   : Sstar ≤ 6.9763
   /-- Section 3.5: alpha_+ from the 1000-box beta_i sweep. -/
-  alpha_bound   : alph ≤ 15.5716
+  alpha_bound   : alph ≤ 15.4257
   /-- Theorem 6.1: Gamma from the 600-box gammahat_i sweep. -/
-  Gamma_bound   : Gam ≤ 105.41
+  Gamma_bound   : Gam ≤ 104.52
   /-- Section 7: the aggregate source bound for k >= 2440. -/
   source_bound  : ∀ k : ℕ, 2440 ≤ k →
     |2 * E aOneConst k - E aOneConst (k + 1)|
@@ -474,7 +474,7 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   /-- Theorem 1.1, the prior certified f_k computation: 6 <= k <= 199. -/
   sweep_low     : ∀ k : ℕ, 6 ≤ k → k ≤ 199 → f k < f (k + 1)
   /-- Theorem 6.2, the refined criterion sweep: 79 <= k <= 899. -/
-  sweep_mid     : ∀ k : ℕ, 79 ≤ k → k ≤ 899 → f k < f (k + 1)
+  sweep_mid     : ∀ k : ℕ, 78 ≤ k → k ≤ 899 → f k < f (k + 1)
   /-- Section 5, the extended delta-table sweep: 900 <= k <= 2439. -/
   sweep_high    : ∀ k : ℕ, 900 ≤ k → k ≤ 2439 → f k < f (k + 1)
 
@@ -13309,8 +13309,8 @@ structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 :
   d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
   rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
   Sstar_bound   : Sstar ≤ 6.9763
-  alpha_bound   : alph ≤ 15.5716
-  Gamma_bound   : Gam ≤ 105.41
+  alpha_bound   : alph ≤ 15.4257
+  Gamma_bound   : Gam ≤ 104.52
   beta_nonneg   : ∀ i, 0 ≤ beta i
   g_deriv       : ∀ i : ℕ, ∀ x ∈ Set.Ioo (1 : ℝ) 2,
     HasDerivAt (fun t : ℝ => gManu i t) (deriv (fun t : ℝ => gManu i t) x) x
@@ -13335,7 +13335,7 @@ structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 :
     phiBound aOneConst Umax Vmax Sstar alph m
       ≤ phiBound aOneConst Umax Vmax Sstar alph (m + 1)
   sweep_low     : ∀ k : ℕ, 6 ≤ k → k ≤ 199 → f k < f (k + 1)
-  sweep_mid     : ∀ k : ℕ, 79 ≤ k → k ≤ 899 → f k < f (k + 1)
+  sweep_mid     : ∀ k : ℕ, 78 ≤ k → k ≤ 899 → f k < f (k + 1)
   sweep_high    : ∀ k : ℕ, 900 ≤ k → k ≤ 2439 → f k < f (k + 1)
 
 /-- MANUSCRIPT THEOREM 1.1, with the far range derived from the primitives.

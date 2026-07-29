@@ -55,7 +55,7 @@ else:
     check("gamma jsons present", False)
 
 print("== criterion sweeps ==")
-for fn in ("crit_900_2439.json","crit_79_734.json"):
+for fn in ("crit_900_2439.json","crit_78_734.json"):
     c=load(fn)
     if not c: continue
     ks=sorted(int(k) for k in c)

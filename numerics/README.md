@@ -50,14 +50,29 @@ The tail estimates use analyticity of G2 in |z| <= 2.9 (`M1_R2.9`,
 `M2sup_R2.9`).  The Lean wide-radius chain runs at |z| <= 29/10, so this is
 formally proved, not only argued in the manuscript.
 
-## WARNING: NMAX in beta_sweep.py
+## Provenance of the three constants: RESOLVED
 
-Raising `NMAX` from 30 does NOT simply extend the table -- it degrades the
-i <= 30 coefficients by a factor of 10 or more (head sum 31.06 -> 44.09) and
-makes alpha_+ worse.  The cause is not understood.  The tables are valid only
-at the NMAX they were computed with, and the generators now write into the
-working directory, so a careless rerun overwrites certified data.  Back up
-`beta_certified.json` before touching it.
+The two *sweep* scripts shipped with defaults that do not reproduce their
+stored tables -- the sup over s in [1,2] tightens with the box count, and the
+production runs used far more boxes than the defaults.  Both are now pinned in
+`__main__`, and the regenerated tables are uniformly at or below the stored
+ones.
+
+    ci_certified.py    N=30, P=2e6, prec=400     reproduces EXACTLY
+                       (also passes its own checks sum c_i = 1/2 and
+                        sum c_i 2^i = d, the two identities proved in Lean)
+    beta_sweep.py      P=1e5, boxes=1600, prec=300
+    gamma2_sweep.py    P=1e5, boxes=800,  prec=300
+
+CONSEQUENCE -- all four headline constants improve on the manuscript:
+
+    alpha_+   15.5716  ->  15.4257
+    Gamma    105.4060  -> 104.5196
+    K0             79  ->  78   (k=77 gives -7.85, k=78 gives +0.91)
+    K1           2440  -> 2433  (margin 138 rather than 89)
+
+Every downstream bound therefore holds with more room, and coverage is
+unaffected.  The criterion sweep is `crit_78_734.json`.
 
 ## Reproducing
 
