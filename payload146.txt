@@ -1,7 +1,0 @@
-  have hcompl : HasProd (((({b3} : Set {p : NN // p.Prime AND 3 LEQ p})COMPL).restrict g))
-      (TPRODN p : {p : NN // p.Prime AND 5 LEQ p}, f p) := by
-    have hbase : HasProd (fun p : {p : NN // p.Prime AND 5 LEQ p} => f p)
-        (TPRODN p : {p : NN // p.Prime AND 5 LEQ p}, f p) := hf5.hasProd
-    exact (compl_b3_equiv.hasProd_iff).mpr hbase
-  have hequiv : Multipliable (((({b3} : Set {p : NN // p.Prime AND 3 LEQ p})COMPL).restrict g)) :=
-    hcompl.multipliable

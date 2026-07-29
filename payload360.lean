@@ -1,9 +1,0 @@
-/-- cBracket is affine in its first argument: cBracket fs s z - cBracket gs s z
-= z * (fs - gs).  This is what lets the two-argument limit
-cBracket (f s) s z -> cBracket f1 1 z split into f's convergence and the
-fixed-fs limit. -/
-theorem cBracket_sub_first (fs gs s : ℝ) (z : ℂ) :
-    cBracket fs s z - cBracket gs s z = z * (((fs - gs : ℝ)) : ℂ) := by
-  unfold cBracket
-  push_cast
-  ring

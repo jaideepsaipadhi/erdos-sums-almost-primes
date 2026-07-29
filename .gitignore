@@ -1,2 +1,11 @@
 /.lake
 .github/workflows/
+
+# session scratch
+payload*
+apply*.py
+patch_*.py
+fix*.py
+run_*.sh
+prune_*.py
+install_payload.py

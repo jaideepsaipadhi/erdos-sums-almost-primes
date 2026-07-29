@@ -1,9 +1,0 @@
-  have hcongr : (TPRODN p : Nat.Primes, (1 - zOmegaHom s z p)INV)
-      = TPRODN p : {p : NN // p.Prime}, (1 - z * ((((p:NN):RR) ^ (-s) : RR) : CC))INV := by
-    apply tprod_congr
-    intro p
-    rw [zOmegaHom_prime s z p.2]
-  rw [hcongr]
-  have hsplit := tprod_split_two
-    (fun n : NN => (1 - z * (((n:RR) ^ (-s) : RR) : CC))INV) hmul3
-  rw [hsplit.2]

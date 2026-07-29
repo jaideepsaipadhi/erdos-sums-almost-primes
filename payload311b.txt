@@ -1,6 +1,0 @@
-/-- gManu i is continuous on (1,2), from differentiability there. -/
-theorem gManu_continuousOn (i : NN)
-    (hderiv : FORALL x IN Set.Ioo (1:RR) 2,
-      HasDerivAt (fun t : RR => gManu i t) (deriv (fun t : RR => gManu i t) x) x) :
-    ContinuousOn (fun t : RR => gManu i t) (Set.Ioo (1:RR) 2) :=
-  fun x hx => ((hderiv x hx).continuousAt).continuousWithinAt

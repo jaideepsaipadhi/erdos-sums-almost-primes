@@ -1,5 +1,0 @@
-/-- STEP C: Ein(a) = gamma + log a + tail(a). The constant in einCombo_const,
-identified via Euler's integral. -/
-theorem ein_eq (a : <<R>>) (ha : 0 < a) :
-    Ein a = Real.eulerMascheroniConstant + Real.log a + EinTailFun a := by
-  sorry

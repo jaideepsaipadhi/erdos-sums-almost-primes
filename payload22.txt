@@ -1,6 +1,0 @@
-theorem gammaDeriv_dom_integrable :
-    IntegrableOn gammaDeriv_dom (Set.Ioi 0) := by
-  have hsplit : Set.Ioo (0:<<R>>) 1 <<UN>> Set.Ici 1 = Set.Ioi 0 :=
-    Set.Ioo_union_Ici_eq_Ioi (by norm_num)
-  rw [<<LARR>> hsplit]
-  exact gammaDeriv_dom_integrableOn_Ioo.union gammaDeriv_dom_integrableOn_Ici

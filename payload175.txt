@@ -1,8 +1,0 @@
-/-- C2: term-by-term differentiation, j times, on the ball of radius 3/2. -/
-theorem iteratedDeriv_tsum_eq (s : RR) (hs : 1 < s) (r0 r : RR)
-    (hr00 : 0 < r0) (hr0r : r0 < r) (hr0 : 0 LEQ r)
-    (hr3 : r * ((3:RR) ^ (-s)) LEQ 1/2) (hr2 : r < (2:RR) ^ s) :
-    FORALL j : NN, FORALL w : CC, Norm.norm w < r0 TO
-      iteratedDeriv j (fun z : CC => TSUMN n : NN, zOmegaHom s z n) w
-        = TSUMN n : NN, iteratedDeriv j (fun z : CC => zOmegaHom s z n) w := by
-  sorry

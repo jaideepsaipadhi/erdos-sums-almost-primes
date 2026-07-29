@@ -1,4 +1,0 @@
-theorem gap_five_evaluation (a : <<R>>) (ha : 0 < a) :
-    <<INT>> t in Set.Ioc (0:<<R>>) 1, (Real.exp (-a * t) - 1 + a * t) / t ^ 2
-      <<LE>> a * Real.log a + Real.eulerMascheroniConstant * a - a + 1 := by
-  sorry

@@ -1,7 +1,0 @@
-/-- The Euler factors as an indicator family on all naturals, multipliable. -/
-theorem zOmegaNorm_indicator_multipliable (s : RR) (hs : 1 < s) (z : CC)
-    (hz : Norm.norm z < (2:RR) ^ s) :
-    Multipliable (Set.mulIndicator {p : NN | p.Prime}
-      (fun p : NN => (1 - Norm.norm z * ((p:RR) ^ (-s)))INV)) := by
-  rw [MUL_IND_IFF]
-  exact zOmega_factors_multipliable s hs z hz

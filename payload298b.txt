@@ -1,8 +1,0 @@
-/-- Transfer continuity on the subtype {s // 1 <= s} to a one-sided limit in R.
-Continuity at the boundary point gives the limit along nhdsWithin 1 (Ici 1),
-and nhdsWithin 1 (Ioi 1) is finer. -/
-theorem tendsto_of_subtype_continuous {F : Type*} [TopologicalSpace F]
-    (g : {s : RR // 1 LEQ s} ARROW F) (hg : Continuous g) :
-    Filter.Tendsto (fun s : RR => g (ANGL max s 1, le_max_right s 1 ANGR))
-      (nhdsWithin 1 (Set.Ioi (1:RR))) (nhds (g (ANGL 1, le_refl 1 ANGR))) := by
-  sorry

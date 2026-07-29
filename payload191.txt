@@ -1,7 +1,0 @@
-/-- The Fk family is summable (real form). -/
-theorem Fk_summable_subtype (k : NN) (s : RR) (hs : 1 < s) :
-    Summable (fun n : {n : NN // 2 LEQ n AND bigOmega n = k} => ((n:NN):RR) ^ (-s)) := by
-  have hbase : Summable (fun n : NN => ((n:RR) ^ (-s))) := by
-    rw [Real.summable_nat_rpow]
-    linarith
-  exact hbase.subtype _

@@ -1,9 +1,0 @@
-/-- Exponentiating a HasSum gives a HasProd (complex, with a scalar factor). -/
-theorem hasProd_cexp_of_hasSum {IDX : Type*} {f : IDX ARROW CC} {a c : CC}
-    (h : HasSum f a) :
-    HasProd (fun i => Complex.exp (c * f i)) (Complex.exp (c * a)) := by
-  have hmul : HasSum (fun i => c * f i) (c * a) := h.mul_left c
-  have hcont := (Complex.continuous_exp.tendsto (c * a)).comp hmul
-  apply hcont.congr
-  intro t
-  rw [Function.comp_apply, Complex.exp_sum]

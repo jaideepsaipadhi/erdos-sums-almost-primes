@@ -1,4 +1,0 @@
-/-- Partial sums of the c_i: the tail is w_k. -/
-theorem cCoeff_partial_sum (k : NN) :
-    SUMF i IN Finset.range (k + 1), (cCoeff i).re = 1/2 - wk k := by
-  sorry

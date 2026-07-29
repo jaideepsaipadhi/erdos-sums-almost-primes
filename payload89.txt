@@ -1,6 +1,0 @@
-/-- The convolution double sum, flattened to a sum over its sigma set. -/
-theorem conv_flatten (k : <<N>>) (g : <<N>> <<TO>> <<N>> <<TO>> <<C>>) :
-    <<SUM>> p <<IN>> Finset.range (k + 1), <<SUM>> q <<IN>> Finset.range (k - p + 1), g p q
-      = <<SUM>> x <<IN>> (Finset.range (k + 1)).sigma (fun p => Finset.range (k - p + 1)),
-          g x.1 x.2 := by
-  rw [Finset.sum_sigma]

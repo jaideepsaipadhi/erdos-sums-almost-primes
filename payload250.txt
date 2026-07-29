@@ -1,5 +1,0 @@
-/-- Definition 2.3 read as a formula for A_m in terms of delta_m. -/
-theorem Am_eq_delta (m : NN) :
-    Am m = (2:RR) ^ (m + 1) - (Real.log 2 / 4) * (m : RR) ^ 2 + deltaM m := by
-  unfold deltaM
-  ring

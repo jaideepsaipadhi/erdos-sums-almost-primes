@@ -1,8 +1,0 @@
-/-- B3 (HasProd form): the p >= 3 family has the factored value.
-Stated with HasProd rather than tprod because HasProd composes with
-mul_compl and Equiv.hasProd_iff, which tprod does not. -/
-theorem tail_regroup_hasProd (s : RR) (hs : 1 LEQ s) (z : CC) (hz : Norm.norm z LEQ 2) :
-    HasProd (fun p : {p : NN // p.Prime AND 3 LEQ p} =>
-        (1 - z * ((((p:NN):RR) ^ (-s) : RR) : CC))INV)
-      (((cFac s : RR) : CC) ^ z * G2C s z) := by
-  sorry
