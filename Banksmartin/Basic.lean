@@ -573,7 +573,6 @@ lemma B_sum_le (u : ℝ) (m : ℕ) :
     _ = (m + 1) * ((2 : ℝ) ^ (-(m : ℝ) * Real.exp (-u)) - 1 +
           (m : ℝ) * Real.log 2 * Real.exp (-u)) := by
         rw [Finset.sum_const, Finset.card_range]
-        push_cast
         ring
 
 /-- Σ_{i=0}^{m} (2u)^i/i! ≤ exp(2u) for u ≥ 0. -/
@@ -1144,7 +1143,7 @@ theorem abs_exp_sub_one_le (x : ℝ) (hx : |x| ≤ 1) : |Real.exp x - 1| ≤ 2 *
     rw [abs_of_nonpos (by linarith : Real.exp x - 1 ≤ 0)]
     rw [abs_of_nonpos hx0]
     linarith
-  · push_neg at hx0
+  · push Not at hx0
     have hx1 : x ≤ 1 := by
       have := abs_le.mp hx; linarith [this.2]
     have hlog2mem : Real.log 2 ∈ Set.Icc (0:ℝ) 1 := by
@@ -1178,7 +1177,7 @@ theorem abs_exp_sub_one_le (x : ℝ) (hx : |x| ≤ 1) : |Real.exp x - 1| ≤ 2 *
           (Set.mem_Icc.mpr ⟨hx0.le, hcase⟩) hx0.le
         simp only [mul_zero, add_zero, Real.exp_zero] at h0
         linarith
-      · push_neg at hcase
+      · push Not at hcase
         have hmono : AntitoneOn (fun u => 1 + 2*u + -Real.exp u) (Set.Icc (Real.log 2) 1) := by
           apply antitoneOn_of_deriv_nonpos (convex_Icc (Real.log 2) 1)
           · fun_prop
@@ -2812,7 +2811,7 @@ theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 
         omega
       have hnp2 : 2 ≤ n / p := by
         by_contra h
-        push_neg at h
+        push Not at h
         interval_cases (n / p)
         · simp [bigOmega] at hnpk; omega
         · have : bigOmega 1 = 0 := by simp [bigOmega]
@@ -2855,7 +2854,6 @@ theorem piKFrom_succ_eq (k : ℕ) (hk : 1 ≤ k) (x : ℝ) (p₀ : ℕ) (hx : 2 
         have : (m:ℝ) ≤ x / p := hmx
         have hpm : (p * m : ℝ) ≤ x := by
           rw [le_div_iff₀ (by positivity)] at this
-          push_cast
           nlinarith
         exact_mod_cast hpm
       · intro q hq hqdvd
@@ -2885,7 +2883,7 @@ theorem bigOmega_eq_one_iff (n : ℕ) : bigOmega n = 1 ↔ n.Prime := by
   · intro hn1
     have hn2 : 2 ≤ n := by
       by_contra h
-      push_neg at h
+      push Not at h
       interval_cases n <;> simp [bigOmega] at hn1
     set p := n.minFac with hp_def
     have hpp : p.Prime := Nat.minFac_prime (by omega)
@@ -3014,7 +3012,7 @@ theorem sum_log_prime_ge_sqrt_range (n : ℕ) (hn : 4 ≤ n) :
     apply Real.log_le_log (by positivity)
     have hpp : ⌊Real.sqrt n⌋₊ < p := by
       by_contra h
-      push_neg at h
+      push Not at h
       exact hp2 ⟨Nat.lt_succ_of_le h, hp1.2⟩
     calc Real.sqrt n ≤ (⌊Real.sqrt n⌋₊ : ℝ) + 1 := (Nat.lt_floor_add_one _).le
       _ ≤ p := by exact_mod_cast hpp
@@ -3204,7 +3202,7 @@ theorem hasDerivAt_ratio_log (x t : ℝ) (htpos : 0 < t) (hxt : 1 < x / t) :
   have hxpos : 0 < x := by
     have hposdiv : 0 < x / t := by linarith
     by_contra hxle
-    push_neg at hxle
+    push Not at hxle
     have : x / t ≤ 0 := div_nonpos_of_nonpos_of_nonneg hxle htpos.le
     linarith
   have hxt_ne : x / t ≠ 0 := by positivity
@@ -3497,7 +3495,6 @@ theorem primeCounting_two_pow_bound (j : ℕ) (hj : 1 ≤ j) :
   rw [hterm2] at hmain
   have h48 : 4 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1) + 4 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1)
       = 8 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1) := by ring
-  push_cast
   linarith [hmain, hsqrt_bound, h48]
 
 /-- Per-fiber constant simplification:
@@ -3519,7 +3516,6 @@ theorem dyadic_term_bound (x : ℝ) (j : ℕ) (hj : 1 ≤ j) (hx : 9 ≤ x)
   have hh_nonneg : (0:ℝ) ≤ (x / (2:ℝ) ^ j) / Real.log (x / (2:ℝ) ^ j) :=
     div_nonneg (by positivity) hlogpos.le
   have hpc := primeCounting_two_pow_bound j hj
-  push_cast at hpc
   have hid : ((x / (2:ℝ) ^ j) / Real.log (x / (2:ℝ) ^ j)) *
       (8 * (2:ℝ) ^ (j + 1) / ((j:ℝ) + 1))
       = 16 * x / (((j:ℝ) + 1) * Real.log (x / (2:ℝ) ^ j)) := by
@@ -6145,7 +6141,7 @@ theorem zOmega_prime_summable (s : ℝ) (hs : 1 < s) (z : ℂ)
     intro n
     have hpn : (p:ℕ) ^ n ≠ 0 := pow_ne_zero n hp.pos.ne'
     have hppos : 0 < (p:ℕ) ^ n := Nat.pos_of_ne_zero hpn
-    show Norm.norm (if (p:ℕ) ^ n = 0 then 0
+    change Norm.norm (if (p:ℕ) ^ n = 0 then 0
       else z ^ (bigOmega ((p:ℕ) ^ n)) * ((((p:ℕ) ^ n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
     rw [if_neg hpn, bigOmega_prime_pow hp n, norm_mul, norm_pow]
     rw [Complex.norm_natCast_cpow_of_pos hppos]
@@ -6182,7 +6178,7 @@ theorem zOmegaNorm_prime_pow (s : ℝ) (z : ℂ) {p : ℕ} (hp : p.Prime) (n : �
   rw [zOmegaNormHom_apply]
   have hpn : (p:ℕ) ^ n ≠ 0 := pow_ne_zero n hp.pos.ne'
   have hppos : 0 < (p:ℕ) ^ n := Nat.pos_of_ne_zero hpn
-  show Norm.norm (if (p:ℕ) ^ n = 0 then 0
+  change Norm.norm (if (p:ℕ) ^ n = 0 then 0
     else z ^ (bigOmega ((p:ℕ) ^ n)) * ((((p:ℕ) ^ n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
   rw [if_neg hpn, bigOmega_prime_pow hp n, norm_mul, norm_pow]
   rw [Complex.norm_natCast_cpow_of_pos hppos]
@@ -6331,7 +6327,7 @@ theorem cFac_multipliable_complex (s : ℝ) (hs : 1 < s) :
   apply hmap.congr
   intro p
   have hp3 : (3:ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.2.2
-  show ((((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ : ℝ)) : ℂ) = _
+  change ((((1 - ((p:ℕ):ℝ) ^ (-s))⁻¹ : ℝ)) : ℂ) = _
   push_cast
   congr 1
   rw [Complex.ofReal_cpow (by linarith : (0:ℝ) ≤ ((p:ℕ):ℝ))]
@@ -6739,7 +6735,7 @@ theorem cCoeff_sum : HasSum (fun n : ℕ => cCoeff n) (1/2 : ℂ) := by
   have hR : (0:NNReal) < 3/2 := by norm_num
   have hser := G2at1_differentiableOn.hasFPowerSeriesOnBall hR
   have hmem : (1 : ℂ) ∈ Metric.eball (0 : ℂ) ((3/2 : NNReal) : ENNReal) := by
-    show edist (1 : ℂ) 0 < ((3/2 : NNReal) : ENNReal)
+    change edist (1 : ℂ) 0 < ((3/2 : NNReal) : ENNReal)
     rw [edist_dist, dist_zero_right, norm_one, ENNReal.ofReal_one]
     rw [show (1 : ENNReal) = ((1 : NNReal) : ENNReal) by simp]
     rw [ENNReal.coe_lt_coe]
@@ -6892,7 +6888,7 @@ theorem zOmega_summable_radius (s : ℝ) (hs : 1 < s) (r : ℝ) (hr0 : 0 ≤ r)
   have hsm : Summable (fun m : N.smoothNumbers => Norm.norm (zOmegaHom s z m)) := by
     apply hgeo.1.congr
     intro m
-    show ‖zOmegaNormHom s z (m : ℕ)‖ = ‖zOmegaHom s z (m : ℕ)‖
+    change ‖zOmegaNormHom s z (m : ℕ)‖ = ‖zOmegaHom s z (m : ℕ)‖
     rw [zOmegaNormHom_apply, Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
   have hsum_le : (∑ x ∈ u, Norm.norm (zOmegaHom s z x))
       ≤ ∑' m : N.smoothNumbers, Norm.norm (zOmegaHom s z m) := by
@@ -7443,7 +7439,7 @@ theorem cCoeff_two_pow_sum :
   have hR : (0:NNReal) < 12/5 := by norm_num
   have hser := G2at1_differentiableOn_wide.hasFPowerSeriesOnBall hR
   have hmem : (2 : ℂ) ∈ Metric.eball (0 : ℂ) ((12/5 : NNReal) : ENNReal) := by
-    show edist (2 : ℂ) 0 < ((12/5 : NNReal) : ENNReal)
+    change edist (2 : ℂ) 0 < ((12/5 : NNReal) : ENNReal)
     rw [edist_dist, dist_zero_right]
     rw [show Norm.norm (2 : ℂ) = (2:ℝ) by norm_num]
     rw [show ENNReal.ofReal (2:ℝ) = ((2 : NNReal) : ENNReal) by
@@ -7743,7 +7739,7 @@ theorem kappaFac_tendsto_half :
         rw [show ((2:ℂ)) = (((2:ℝ)) : ℂ) by norm_num,
           show (-(((1:ℝ)) : ℂ)) = (((-1 : ℝ)) : ℂ) by push_cast; ring,
           ← Complex.ofReal_cpow (by norm_num : (0:ℝ) ≤ 2)]
-      show (1 : ℂ) - ((2:ℂ)) ^ (-(((1:ℝ)) : ℂ)) = (1/2 : ℂ)
+      change (1 : ℂ) - ((2:ℂ)) ^ (-(((1:ℝ)) : ℂ)) = (1/2 : ℂ)
       rw [hkey, Real.rpow_neg_one]
       norm_num
     rw [← hval]
@@ -7763,7 +7759,7 @@ theorem kappaFac_tendsto_half :
 theorem zOmegaHom_prime (s : ℝ) (z : ℂ) {p : ℕ} (hp : p.Prime) :
     zOmegaHom s z p = z * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ) := by
   have hp0 : (p:ℕ) ≠ 0 := hp.pos.ne'
-  show (if (p:ℕ) = 0 then 0
+  change (if (p:ℕ) = 0 then 0
     else z ^ (bigOmega (p:ℕ)) * (((p:ℕ) : ℂ) ^ (-(s:ℂ)))) = _
   rw [if_neg hp0]
   have hO : bigOmega (p:ℕ) = 1 := by
@@ -7865,7 +7861,7 @@ terms are exactly those with Omega n = k, i.e. Fk k s.
 theorem zOmegaHom_norm (s : ℝ) (z : ℂ) {n : ℕ} (hn : n ≠ 0) :
     Norm.norm (zOmegaHom s z n) = Norm.norm z ^ (bigOmega n) * ((n:ℝ) ^ (-s)) := by
   have hnpos : 0 < n := Nat.pos_of_ne_zero hn
-  show Norm.norm (if n = 0 then 0
+  change Norm.norm (if n = 0 then 0
     else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
   rw [if_neg hn, norm_mul, norm_pow]
   congr 1
@@ -7982,7 +7978,7 @@ theorem iteratedDeriv_zOmega_term (s : ℝ) (n : ℕ) (hn : n ≠ 0) (j : ℕ) (
   have hterm : (fun z : ℂ => zOmegaHom s z n)
       = fun z : ℂ => z ^ (bigOmega n) * (((n:ℂ)) ^ (-(s:ℂ))) := by
     funext z
-    show (if n = 0 then 0 else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+    change (if n = 0 then 0 else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
     rw [if_neg hn]
   rw [hterm, iteratedDeriv_mul_const_field, iteratedDeriv_pow]
 
@@ -8123,14 +8119,14 @@ theorem iteratedDeriv_term_at_zero (s : ℝ) (k : ℕ) (hk : 1 ≤ k) (n : ℕ) 
   · have hterm : (fun z : ℂ => zOmegaHom s z n)
         = fun z : ℂ => z ^ (bigOmega n) * (((n:ℂ)) ^ (-(s:ℂ))) := by
       funext z
-      show (if n = 0 then 0 else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
+      change (if n = 0 then 0 else z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s:ℂ)))) = _
       rw [if_neg hn]
     rw [hterm, iteratedDeriv_monomial_zero]
 
 /-- Terms with Omega(n) = k >= 1 automatically have n >= 2. -/
 theorem two_le_of_bigOmega_eq (k : ℕ) (hk : 1 ≤ k) {n : ℕ} (h : bigOmega n = k) : 2 ≤ n := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   interval_cases n
   · have : bigOmega 0 = 0 := by unfold bigOmega; simp
     omega
@@ -8211,7 +8207,7 @@ theorem Fk_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
   field_simp
   unfold Fk
   rw [Complex.ofReal_tsum]
-  show (∑' x : ({n : ℕ | 2 ≤ n ∧ bigOmega n = k} : Set ℕ),
+  change (∑' x : ({n : ℕ | 2 ≤ n ∧ bigOmega n = k} : Set ℕ),
       ((((x:ℕ):ℝ) ^ (-s) : ℝ) : ℂ)) = _
   rw [tsum_subtype {n : ℕ | 2 ≤ n ∧ bigOmega n = k}
     (fun n : ℕ => (((n:ℝ) ^ (-s) : ℝ) : ℂ))]
@@ -10976,7 +10972,7 @@ theorem gManu_eq_circleIntegral (s : ℝ) (hs : 1 ≤ s) (hk : 0 < kappaFac s) (
     field_simp
   rw [hcoeff]
   have h := cauchyPowerSeries_apply (fun z : ℂ => G2manu s z) 0 ((2 : NNReal) : ℝ) i 1
-  show ((cauchyPowerSeries (fun z : ℂ => G2manu s z) 0 ((2 : NNReal) : ℝ) i) fun _ => 1) = _
+  change ((cauchyPowerSeries (fun z : ℂ => G2manu s z) 0 ((2 : NNReal) : ℝ) i) fun _ => 1) = _
   rw [h]
   norm_num
 
@@ -11798,7 +11794,7 @@ theorem cCoeff_eq_circleIntegral (i : ℕ) :
     field_simp
   rw [hcoeff]
   have h := cauchyPowerSeries_apply G2at1 0 ((2 : NNReal) : ℝ) i 1
-  show ((cauchyPowerSeries G2at1 0 ((2 : NNReal) : ℝ) i) fun _ => 1) = _
+  change ((cauchyPowerSeries G2at1 0 ((2 : NNReal) : ℝ) i) fun _ => 1) = _
   rw [h]
   norm_num
 
