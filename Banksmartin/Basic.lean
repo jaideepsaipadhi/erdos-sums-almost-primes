@@ -430,12 +430,41 @@ The k-INDEPENDENCE of Gamma, which is what makes the refinement work, is
 proved: it is geom_two_three, sum_l 2^l 3^(-l-1) = 1. -/
 noncomputable def GammaConst : ℝ := 105.41
 
-structure NumericalFacts : Prop where
+/-- The certified inputs: everything the analytic reduction takes on trust.
+
+Each field is an Arb ball computation from the companion package, exactly the
+division Caveat 1.3(b) draws.  The analytic reduction is machine-verified;
+these are not.
+
+Umax and Vmax are parameters rather than fields because a Prop cannot carry
+data; the manuscript's values are 0.08436 and 1.90747, valid for k >= 900. -/
+structure NumericalFacts (Umax Vmax : ℝ) : Prop where
+  /-- Section 3.2: the certified enclosure of d. -/
   d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
+  /-- Lemma 3.6: the certified enclosure of rho. -/
   rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
+  /-- Section 3.4: S* <= 6.9763. -/
   Sstar_bound   : SstarConst ≤ 6.9763
+  /-- Section 3.5: alpha_+ from the 1000-box beta_i sweep. -/
   alpha_bound   : alphaConst ≤ 15.5716
+  /-- Theorem 6.1: Gamma from the 600-box gammahat_i sweep. -/
   Gamma_bound   : GammaConst ≤ 105.41
+  /-- Section 7: the aggregate source bound for k >= 2440. -/
+  source_bound  : ∀ k : ℕ, 2440 ≤ k →
+    |2 * E aOneConst k - E aOneConst (k + 1)|
+      ≤ RBound Umax Vmax SstarConst alphaConst k
+  /-- Section 7: phi(2440) = [89 +- 0.35] > 0, a certified scan. -/
+  phi_at_k1     : 0 < phiBound aOneConst Umax Vmax SstarConst alphaConst 2440
+  /-- Section 7: phi increasing above 2440. -/
+  phi_mono      : ∀ m : ℕ, 2440 ≤ m →
+    phiBound aOneConst Umax Vmax SstarConst alphaConst m
+      ≤ phiBound aOneConst Umax Vmax SstarConst alphaConst (m + 1)
+  /-- Theorem 1.1, the prior certified f_k computation: 6 <= k <= 199. -/
+  sweep_low     : ∀ k : ℕ, 6 ≤ k → k ≤ 199 → f k < f (k + 1)
+  /-- Theorem 6.2, the refined criterion sweep: 79 <= k <= 899. -/
+  sweep_mid     : ∀ k : ℕ, 79 ≤ k → k ≤ 899 → f k < f (k + 1)
+  /-- Section 5, the extended delta-table sweep: 900 <= k <= 2439. -/
+  sweep_high    : ∀ k : ℕ, 900 ≤ k → k ≤ 2439 → f k < f (k + 1)
 
 /-- The T_k tail bound denominator is positive for k ≥ 1. -/
 lemma Tk_bound_pos (k : ℕ) (hk : 1 ≤ k) :
@@ -13022,9 +13051,29 @@ theorem lemma_3_8_integral_r1 (i : ℕ) (s : ℝ) (hsmem : s ∈ Set.Ioo (1:ℝ)
     exact ((hd.const_mul _).const_mul _).const_mul _
 
 
-theorem erdos_sums_increase_from_six
-    (hnum : NumericalFacts) :
+/-- MANUSCRIPT THEOREM 1.1: f_k < f_(k+1) for every k >= 6.
+
+The four ranges of the manuscript, in order:
+  [6, 199]      sweep_low   -- the prior certified f_k computation
+  [200, 899]    sweep_mid   -- Theorem 6.2's refined criterion sweep (K0 = 79)
+  [900, 2439]   sweep_high  -- the extended delta-table sweep of section 5
+  [2440, inf)   theorem_7_1 -- the derivative-domination argument, PROVED here
+
+The union is [6, inf) with no gaps.  Everything outside theorem_7_1 is a
+certified computation entering through NumericalFacts. -/
+theorem erdos_sums_increase_from_six (Umax Vmax : ℝ)
+    (hnum : NumericalFacts Umax Vmax) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
-  sorry
+  intro k hk
+  by_cases h1 : k ≤ 199
+  · exact hnum.sweep_low k hk h1
+  by_cases h2 : k ≤ 899
+  · exact hnum.sweep_mid k (by omega) h2
+  by_cases h3 : k ≤ 2439
+  · exact hnum.sweep_high k (by omega) h3
+  · exact theorem_7_1 aOneConst Umax Vmax SstarConst alphaConst 2440
+      hnum.phi_at_k1 hnum.phi_mono hnum.source_bound k (by omega)
 
 end
+
+#print axioms erdos_sums_increase_from_six
