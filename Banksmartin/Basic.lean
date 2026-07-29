@@ -6614,6 +6614,36 @@ noncomputable def G2at1 (z : ℂ) : ℂ :=
 noncomputable def cCoeff (i : ℕ) : ℂ :=
   iteratedDeriv i G2at1 0 / (Nat.factorial i : ℂ)
 
+/-- MANUSCRIPT section 3.4: the genuine S* = sum_{i>=0} 2^i |c_i|.
+SstarConst above is the certified literal 6.9763; this is the object it
+approximates.  Connecting them requires the Cauchy tail |c_i| <= M/4.2^i of
+Lemma 3.7, which is a certified arc bound (M = 326) and so a hypothesis. -/
+noncomputable def SstarValue : ℝ :=
+  ∑' i : ℕ, (2:ℝ) ^ i * Norm.norm (cCoeff i)
+
+/-- S* converges, given the Cauchy tail bound of Lemma 3.7.
+The hypothesis hM is |c_i| <= M / 4.2^i, certified by the 240-interval-arc
+evaluation of the manuscript; (2/4.2)^i is then summable. -/
+theorem SstarValue_summable (M : ℝ) (hM0 : 0 ≤ M)
+    (hM : ∀ i : ℕ, Norm.norm (cCoeff i) ≤ M / (4.2:ℝ) ^ i) :
+    Summable (fun i : ℕ => (2:ℝ) ^ i * Norm.norm (cCoeff i)) := by
+  have hgeom : Summable (fun i : ℕ => M * ((2:ℝ) / 4.2) ^ i) := by
+    apply Summable.mul_left
+    apply summable_geometric_of_lt_one (by norm_num) (by norm_num)
+  apply Summable.of_nonneg_of_le _ _ hgeom
+  · intro i
+    positivity
+  · intro i
+    have h42 : (0:ℝ) < (4.2:ℝ) ^ i := by positivity
+    have hstep := hM i
+    have h2 : (0:ℝ) < (2:ℝ) ^ i := by positivity
+    calc (2:ℝ) ^ i * Norm.norm (cCoeff i)
+        ≤ (2:ℝ) ^ i * (M / (4.2:ℝ) ^ i) :=
+          mul_le_mul_of_nonneg_left hstep (le_of_lt h2)
+      _ = M * ((2:ℝ) / 4.2) ^ i := by
+          rw [div_pow]
+          field_simp
+
 /-- G2at1 is differentiable on the closed disc of radius 3/2.
 The cpow factor (1/2)^z is entire; G2C 1 . is differentiable on ball 0 2,
 which contains closedBall 0 (3/2).  Radius 3/2 is enough to reach z = 1
