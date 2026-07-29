@@ -131,6 +131,23 @@ theorem criterion (a₁ : ℝ) (k : ℕ) :
   push_cast
   ring
 
+/-- MANUSCRIPT section 2.1: Crit(k) = a1(k^2 - 2k - 1) + 2E(k) - E(k+1). -/
+noncomputable def Crit (aa : ℝ) (k : ℕ) : ℝ :=
+  aa * ((k : ℝ) ^ 2 - 2 * k - 1) + 2 * E aa k - E aa (k + 1)
+
+/-- MANUSCRIPT section 2.1: Crit(k) > 0 gives f_k < f_(k+1).
+This is the criterion every range of Theorem 1.1 goes through. -/
+theorem crit_pos_iff (aa : ℝ) (k : ℕ) :
+    0 < Crit aa k → f k < f (k + 1) := by
+  intro hpos
+  have hcrit := criterion aa k
+  have h2 : (0:ℝ) < (2:ℝ) ^ (-(k : ℝ) - 1) :=
+    Real.rpow_pos_of_pos (by norm_num) _
+  have hd : 0 < f (k + 1) - f k := by
+    rw [hcrit]
+    exact mul_pos h2 hpos
+  linarith
+
 lemma B_nonneg (j : ℕ) (u : ℝ) :
     0 ≤ (2 : ℝ) ^ (-(j : ℝ) * Real.exp (-u)) - 1 + j * Real.log 2 * Real.exp (-u) := by
   set x : ℝ := (j : ℝ) * Real.log 2 * Real.exp (-u) with hx
