@@ -5795,9 +5795,20 @@ theorem deltaM_abs_le (m : ℕ) : |deltaM m| ≤ DBound m := by
       linarith
     unfold DBound
     rw [abs_le]
+    have hm0 : (0:ℝ) ≤ (m : ℝ) := by linarith
+    have hkey1 : Real.log 2 / 4 * (m : ℝ)
+        ≤ Real.log 2 * (m : ℝ) * Real.log ((m : ℝ) + 1) := by
+      have hq : Real.log 2 / 4 ≤ Real.log 2 * Real.log ((m : ℝ) + 1) := by
+        nlinarith [hl2, hlogm1, hl2q]
+      nlinarith [hq, hm0]
+    have hkey2 : Real.log 2 * (m : ℝ) * Real.log (m : ℝ)
+        ≤ Real.log 2 * (m : ℝ) * Real.log ((m : ℝ) + 1) := by
+      apply mul_le_mul_of_nonneg_left hlogm
+      positivity
+    have hkey3 : cStarOne * (m : ℝ) ≤ 0 := mul_nonpos_of_nonpos_of_nonneg (le_of_lt hcs) hm0
     constructor
-    · nlinarith [hlow, hl2, hmR, hlogm1, hl2q]
-    · nlinarith [hup, hcs, hlogm, hl2, hmR, hlogm1]
+    · linarith [hlow, hkey1]
+    · linarith [hup, hkey2, hkey3]
 
 /-- BRIDGE: for a function with a power series on a ball, analytic everywhere,
 the n-th iterated (one-dimensional) derivative at the center is n! times the
