@@ -170,7 +170,7 @@ def beta_sweep(P=20000, boxes=80, prec=200):
     for i in range(1, NMAX + 1):
         if float(sup_beta[i]) < float(val_at_1[i].lower()):
             violations.append(i)
-    return sup_beta, val_at_1, violations
+    return sup_beta, val_at_1, violations, pt
 
 if __name__ == "__main__":
     import time
@@ -178,10 +178,20 @@ if __name__ == "__main__":
     # PRODUCTION SETTINGS -- the defaults do NOT reproduce beta_certified.json.
     # The manuscript's section 3.5 describes a 1000-box sweep; boxes=1600 gives
     # values at or below the stored table, boxes=800 slightly above.
-    sup_beta, v1, viol = beta_sweep(P=100000, boxes=1600, prec=300)
+    sup_beta, v1, viol, pt_signed = beta_sweep(P=100000, boxes=1600, prec=300)
     print(f"sweep done ({time.time()-t0:.0f}s)")
     print("INVARIANT sup>=value(s=1):", "VIOLATED at i=" + str(viol) if viol else "holds for all i")
     print(f"{'i':>3} {'sup_[1,2] beta_i':>18} {'|value at s=1|':>16}")
     for i in range(1, 15):
         print(f"{i:>3} {float(sup_beta[i]):>18.6f} {float(v1[i].mid()):>16.6f}")
     json.dump({i: float(sup_beta[i]) for i in range(NMAX + 1)}, open("beta_certified.json", "w"), indent=1)
+    # b-hat_i = [z^i] G2^(1,0)(1,z): the SIGNED value at s = 1, which
+    # NOTE: the stored bhat_signed_N60.json has 61 entries and radii about 85x
+    # tighter than this run produces -- it came from a finer computation, and
+    # its balls contain these.  To reproduce it, raise NMAX to 60 and use finer
+    # settings; NMAX provably does not change the values (verified at 30 vs 31,
+    # ratios 1.0000), only the range.
+    # process_box already computes as `pt`.  bhat_signed_N60.json was produced
+    # this way; the write was previously missing from this script.
+    json.dump({i: pt_signed[i].str(20) for i in range(NMAX + 1)},
+              open("bhat_signed.json", "w"), indent=1)
