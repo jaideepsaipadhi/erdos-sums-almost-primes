@@ -2,6 +2,13 @@ import PrimeNumberTheoremAnd.IEANTN.Mertens
 import Mathlib
 import Banksmartin.EulerGamma
 
+-- The `first | ... | ...` combinators in this file carry deliberate fallback
+-- branches so the proofs survive Mathlib changes in which branch fires.  The
+-- linter flags alternatives the current Mathlib does not reach; that is
+-- expected, and removing them would make the file brittle.
+set_option linter.unreachableTactic false
+set_option linter.unusedTactic false
+
 set_option linter.style.header false
 set_option linter.unusedVariables false
 
@@ -438,27 +445,27 @@ these are not.
 
 Umax and Vmax are parameters rather than fields because a Prop cannot carry
 data; the manuscript's values are 0.08436 and 1.90747, valid for k >= 900. -/
-structure NumericalFacts (Umax Vmax : ℝ) : Prop where
+structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   /-- Section 3.2: the certified enclosure of d. -/
   d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
   /-- Lemma 3.6: the certified enclosure of rho. -/
   rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
   /-- Section 3.4: S* <= 6.9763. -/
-  Sstar_bound   : SstarConst ≤ 6.9763
+  Sstar_bound   : Sstar ≤ 6.9763
   /-- Section 3.5: alpha_+ from the 1000-box beta_i sweep. -/
-  alpha_bound   : alphaConst ≤ 15.5716
+  alpha_bound   : alph ≤ 15.5716
   /-- Theorem 6.1: Gamma from the 600-box gammahat_i sweep. -/
-  Gamma_bound   : GammaConst ≤ 105.41
+  Gamma_bound   : Gam ≤ 105.41
   /-- Section 7: the aggregate source bound for k >= 2440. -/
   source_bound  : ∀ k : ℕ, 2440 ≤ k →
     |2 * E aOneConst k - E aOneConst (k + 1)|
-      ≤ RBound Umax Vmax SstarConst alphaConst k
+      ≤ RBound Umax Vmax Sstar alph k
   /-- Section 7: phi(2440) = [89 +- 0.35] > 0, a certified scan. -/
-  phi_at_k1     : 0 < phiBound aOneConst Umax Vmax SstarConst alphaConst 2440
+  phi_at_k1     : 0 < phiBound aOneConst Umax Vmax Sstar alph 2440
   /-- Section 7: phi increasing above 2440. -/
   phi_mono      : ∀ m : ℕ, 2440 ≤ m →
-    phiBound aOneConst Umax Vmax SstarConst alphaConst m
-      ≤ phiBound aOneConst Umax Vmax SstarConst alphaConst (m + 1)
+    phiBound aOneConst Umax Vmax Sstar alph m
+      ≤ phiBound aOneConst Umax Vmax Sstar alph (m + 1)
   /-- Theorem 1.1, the prior certified f_k computation: 6 <= k <= 199. -/
   sweep_low     : ∀ k : ℕ, 6 ≤ k → k ≤ 199 → f k < f (k + 1)
   /-- Theorem 6.2, the refined criterion sweep: 79 <= k <= 899. -/
@@ -13057,8 +13064,8 @@ The four ranges of the manuscript, in order:
 
 The union is [6, inf) with no gaps.  Everything outside theorem_7_1 is a
 certified computation entering through NumericalFacts. -/
-theorem erdos_sums_increase_from_six (Umax Vmax : ℝ)
-    (hnum : NumericalFacts Umax Vmax) :
+theorem erdos_sums_increase_from_six (Sstar alph Gam Umax Vmax : ℝ)
+    (hnum : NumericalFacts Sstar alph Gam Umax Vmax) :
     ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
   intro k hk
   by_cases h1 : k ≤ 199
@@ -13067,7 +13074,7 @@ theorem erdos_sums_increase_from_six (Umax Vmax : ℝ)
   · exact hnum.sweep_mid k (by omega) h2
   by_cases h3 : k ≤ 2439
   · exact hnum.sweep_high k (by omega) h3
-  · exact theorem_7_1 aOneConst Umax Vmax SstarConst alphaConst 2440
+  · exact theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
       hnum.phi_at_k1 hnum.phi_mono hnum.source_bound k (by omega)
 
 end
