@@ -161,3 +161,42 @@ DECISION: M1 = 2544 >= sup_{s in [1,2], |z|=2.9} |G2^(1,0)| enters as a
   integral MECHANICS, not a new estimate.
 Only r <= 2 is ever used (section 3.5 needs r=1, Theorem 6.1 needs r=2);
 C^infinity is never consumed.
+
+=== COMPLETE ===
+erdos_sums_increase_from_six : forall k, 6 <= k -> f k < f (k+1)
+Zero sorries.  Axioms: propext, Classical.choice, Quot.sound only.
+
+MACHINE-VERIFIED (the analytic reduction, end to end):
+  Section 2  Lemmas 2.1, 2.2, Def 2.3, 2.4, Proposition 2.5 (exact identity)
+             plus sum c_i = 1/2 and sum 2^i c_i = d
+  Section 3  Lemma 3.9 (real and complex), Lemma 3.8 (r=1 and r=2),
+             section 3.5's mean-value step, manuscript (4), manuscript (10),
+             |E_1(k)| <= alpha_+(k+1)
+  Section 4  Theorem 4.1, both bounds
+  Section 6  Theorem 6.1, including the k-INDEPENDENCE of Gamma
+             (geom_two_three: sum_l 2^l 3^(-l-1) = 1)
+  Section 7  Theorem 7.1, by induction from phi(k1) > 0
+  Assembly   the four ranges, no gaps
+
+ASSUMED (NumericalFacts, plus the analytic-layer certified inputs):
+  d, rho enclosures; S*, alpha_+, Gamma bounds; Umax, Vmax
+  phi(2440) > 0 and phi monotone above 2440; the aggregate source bound
+  the three criterion sweeps: [6,199], [79,899], [900,2439]
+  f = (log zetaTilde)' and f'; contour sups M, M0, M2; beta_i and gammahat_i
+
+THE CAVEAT THAT MATTERS: NumericalFacts is a hypothesis.  The theorem is
+vacuous unless an instance exists, and the instance comes from the Arb
+computations OUTSIDE Lean.  This is exactly Caveat 1.3(b)'s division, drawn
+explicitly rather than blurred -- but it means the correct claim is "the
+analytic reduction is machine-verified", NOT "Lean proved the theorem".
+
+DOCUMENTED DEVIATIONS FROM THE MANUSCRIPT:
+  contour radius 2, not 2.9 (the proven analyticity radius is 5/2, and
+    lemma_3_9_complex holds for ||z|| <= 2) -- so M, M0, M2 are sups at 2
+  M2k indexed from i = 0, not i = 1; equal since bHat_0 = 0, which is TRUE
+    (every cBracket term carries a factor of z) but NOT PROVED here
+
+VACUITIES FOUND AND CLOSED (each invisible on paper):
+  cFac's multipliability -- Lemma 2.2's convergence hypotheses
+  dConst's convergence -- d_enclosure was about a tprod junk value
+  Sm's integrability -- LOAD-BEARING under Am, deltaM and Theorem 4.1
