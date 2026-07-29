@@ -135,6 +135,45 @@ theorem criterion (a₁ : ℝ) (k : ℕ) :
 noncomputable def Crit (aa : ℝ) (k : ℕ) : ℝ :=
   aa * ((k : ℝ) ^ 2 - 2 * k - 1) + 2 * E aa k - E aa (k + 1)
 
+/-- MANUSCRIPT Theorem 4.1 uniform form / section 7:
+D(m) = (log 2) m log(m+1) + 1, the bound with |delta_m| <= D(m). -/
+noncomputable def DBound (m : ℕ) : ℝ :=
+  Real.log 2 * (m : ℝ) * Real.log ((m : ℝ) + 1) + 1
+
+/-- D is nonnegative. -/
+theorem DBound_nonneg (m : ℕ) : 0 ≤ DBound m := by
+  unfold DBound
+  have hlog2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hm : (0:ℝ) ≤ (m : ℝ) := by positivity
+  have hlog : (0:ℝ) ≤ Real.log ((m : ℝ) + 1) := by
+    apply Real.log_nonneg
+    linarith
+  have hprod : (0:ℝ) ≤ Real.log 2 * (m : ℝ) * Real.log ((m : ℝ) + 1) := by
+    apply mul_nonneg (mul_nonneg (le_of_lt hlog2) hm) hlog
+  linarith
+
+/-- D is monotone in m. -/
+theorem DBound_mono (m : ℕ) : DBound m ≤ DBound (m + 1) := by
+  unfold DBound
+  have hlog2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hm : (0:ℝ) ≤ (m : ℝ) := by positivity
+  have hcast : (((m + 1 : ℕ)) : ℝ) = (m : ℝ) + 1 := by push_cast; ring
+  rw [hcast]
+  have hlogmono : Real.log ((m : ℝ) + 1) ≤ Real.log ((m : ℝ) + 1 + 1) := by
+    apply Real.log_le_log (by linarith)
+    linarith
+  have hlognn : (0:ℝ) ≤ Real.log ((m : ℝ) + 1) := by
+    apply Real.log_nonneg
+    linarith
+  have hstep : Real.log 2 * (m : ℝ) * Real.log ((m : ℝ) + 1)
+      ≤ Real.log 2 * ((m : ℝ) + 1) * Real.log ((m : ℝ) + 1 + 1) := by
+    apply mul_le_mul _ hlogmono hlognn
+    · apply mul_nonneg (le_of_lt hlog2)
+      linarith
+    apply mul_le_mul_of_nonneg_left _ (le_of_lt hlog2)
+    linarith
+  linarith
+
 /-- MANUSCRIPT section 2.1: Crit(k) > 0 gives f_k < f_(k+1).
 This is the criterion every range of Theorem 1.1 goes through. -/
 theorem crit_pos_iff (aa : ℝ) (k : ℕ) :
