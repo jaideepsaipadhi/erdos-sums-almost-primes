@@ -6738,7 +6738,7 @@ The series converges at z = 1 (radius 3/2 > 1), and G2at1 1 = (1/2) G2C(1,1) = 1
 theorem cCoeff_sum : HasSum (fun n : ℕ => cCoeff n) (1/2 : ℂ) := by
   have hR : (0:NNReal) < 3/2 := by norm_num
   have hser := G2at1_differentiableOn.hasFPowerSeriesOnBall hR
-  have hmem : (1 : ℂ) ∈ EMetric.ball (0 : ℂ) ((3/2 : NNReal) : ENNReal) := by
+  have hmem : (1 : ℂ) ∈ Metric.eball (0 : ℂ) ((3/2 : NNReal) : ENNReal) := by
     show edist (1 : ℂ) 0 < ((3/2 : NNReal) : ENNReal)
     rw [edist_dist, dist_zero_right, norm_one, ENNReal.ofReal_one]
     rw [show (1 : ENNReal) = ((1 : NNReal) : ENNReal) by simp]
@@ -7442,7 +7442,7 @@ theorem cCoeff_two_pow_sum :
     HasSum (fun n : ℕ => cCoeff n * (2:ℂ) ^ n) ((dConst : ℝ) : ℂ) := by
   have hR : (0:NNReal) < 12/5 := by norm_num
   have hser := G2at1_differentiableOn_wide.hasFPowerSeriesOnBall hR
-  have hmem : (2 : ℂ) ∈ EMetric.ball (0 : ℂ) ((12/5 : NNReal) : ENNReal) := by
+  have hmem : (2 : ℂ) ∈ Metric.eball (0 : ℂ) ((12/5 : NNReal) : ENNReal) := by
     show edist (2 : ℂ) 0 < ((12/5 : NNReal) : ENNReal)
     rw [edist_dist, dist_zero_right]
     rw [show Norm.norm (2 : ℂ) = (2:ℝ) by norm_num]
@@ -12222,15 +12222,15 @@ theorem Ik_eq_double_sum (k : ℕ) (hk : 1 ≤ k) (beta : ℕ → ℝ)
     intro j _
     rw [show k - j - i = k - i - j by omega]
   rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioc hpt]
-  rw [MeasureTheory.integral_finset_sum]
+  rw [MeasureTheory.integral_finsetSum]
   · apply Finset.sum_congr rfl
     intro i _
-    rw [MeasureTheory.integral_finset_sum]
+    rw [MeasureTheory.integral_finsetSum]
     intro j _
     exact integrable_Ik_term i j (k - i - j) (beta i) (hbeta0 i) (hderiv i) (hbound i)
       M0 hM00 hM0
   · intro i _
-    apply MeasureTheory.integrable_finset_sum
+    apply MeasureTheory.integrable_finsetSum
     intro j _
     exact integrable_Ik_term i j (k - i - j) (beta i) (hbeta0 i) (hderiv i) (hbound i)
       M0 hM00 hM0
@@ -12694,7 +12694,7 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
             (Set.Ioc (1:ℝ) 2 \ Set.Ioo (1:ℝ) 2) = 0 := by
           have hsing : Set.Ioc (1:ℝ) 2 \ Set.Ioo (1:ℝ) 2 ⊆ {(2:ℝ)} := by
             intro x hx
-            simp only [Set.mem_diff, Set.mem_Ioc, Set.mem_Ioo,
+            simp only [Set.mem_sdiff, Set.mem_Ioc, Set.mem_Ioo,
               Set.mem_singleton_iff] at hx ⊢
             rcases hx with ⟨⟨h1, h2⟩, h3⟩
             by_contra hne
@@ -12704,7 +12704,7 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
           MeasureTheory.compl_mem_ae_iff.mpr hnull] with s hs hs2
         have hsIoo : s ∈ Set.Ioo (1:ℝ) 2 := by
           by_contra hcon
-          exact hs2 (Set.mem_diff_of_mem hs hcon)
+          exact hs2 (Set.mem_sdiff_of_mem hs hcon)
         rw [Real.norm_eq_abs]
         exact Dk_term_split i j (k - i - j) f1 (gh i) (hgh0 i) (htaylor i) s hsIoo
       have hrem := Dk_remainder_term_le j (k - i - j) (gh i) (hgh0 i)
@@ -12815,7 +12815,7 @@ theorem Dk_term_bound (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
         (Set.Ioc (1:ℝ) 2 \ Set.Ioo (1:ℝ) 2) = 0 := by
       have : Set.Ioc (1:ℝ) 2 \ Set.Ioo (1:ℝ) 2 ⊆ {(2:ℝ)} := by
         intro x hx
-        simp only [Set.mem_diff, Set.mem_Ioc, Set.mem_Ioo, Set.mem_singleton_iff] at hx ⊢
+        simp only [Set.mem_sdiff, Set.mem_Ioc, Set.mem_Ioo, Set.mem_singleton_iff] at hx ⊢
         rcases hx with ⟨ ⟨ h1, h2 ⟩, h3 ⟩
         by_contra hne
         exact h3 ⟨ h1, lt_of_le_of_ne h2 hne ⟩
@@ -12824,7 +12824,7 @@ theorem Dk_term_bound (i j l : ℕ) (beta : ℝ) (hbeta0 : 0 ≤ beta)
       MeasureTheory.compl_mem_ae_iff.mpr hIoo] with s hs hs2
     have hsIoo : s ∈ Set.Ioo (1:ℝ) 2 := by
       by_contra hcon
-      exact hs2 (Set.mem_diff_of_mem hs hcon)
+      exact hs2 (Set.mem_sdiff_of_mem hs hcon)
     rw [Real.norm_eq_abs]
     exact Dk_integrand_ptwise i j l beta hbeta0 hderiv hbnd M0 hM00 hM0 s hsIoo
   have hle := MeasureTheory.norm_integral_le_of_norm_le hdom hae
