@@ -22,7 +22,7 @@ from beta_sweep import sieve, interval, stieltjes_certified
 import beta_sweep as BS
 import json, math
 
-NM = 44
+NM = 24
 
 def f_f1_logg(xbox, gammas, NG):
     """certified (f, f', log g) on the x-box."""
