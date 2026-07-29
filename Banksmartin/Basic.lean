@@ -5766,6 +5766,39 @@ theorem deltaM_upper_bound_manuscript (m : ℕ) (hm : 1 ≤ m) :
   unfold cStarOne
   nlinarith [hub, hl2, hmpos]
 
+/-- MANUSCRIPT THEOREM 4.1, uniform form: |delta_m| <= D(m).
+
+Upper: the proved bound is log2 m log m + cStarOne m, and cStarOne < 0
+(cStarOne_neg), so it lies below D(m) = log2 m log(m+1) + 1.
+Lower: -1 - (log2/4) m >= -D(m), since log2 m log(m+1) >= (log2/4) m for m >= 1
+(log(m+1) >= log 2 >= 1/4).
+m = 0 is the anchor: delta_0 = -1 and D(0) = 1. -/
+theorem deltaM_abs_le (m : ℕ) : |deltaM m| ≤ DBound m := by
+  have hl2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  rcases Nat.eq_zero_or_pos m with hm0 | hm
+  · subst hm0
+    rw [deltaM_zero]
+    unfold DBound
+    norm_num
+  · have hlow := deltaM_lower_bound m
+    have hup := deltaM_upper_bound_manuscript m hm
+    have hcs := cStarOne_neg
+    have hmR : (1:ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
+    have hlogm1 : Real.log 2 ≤ Real.log ((m : ℝ) + 1) := by
+      apply Real.log_le_log (by norm_num)
+      linarith
+    have hlogm : Real.log (m : ℝ) ≤ Real.log ((m : ℝ) + 1) := by
+      apply Real.log_le_log (by linarith)
+      linarith
+    have hl2q : (1:ℝ) / 4 ≤ Real.log 2 := by
+      have h := Real.log_two_gt_d9
+      linarith
+    unfold DBound
+    rw [abs_le]
+    constructor
+    · nlinarith [hlow, hl2, hmR, hlogm1, hl2q]
+    · nlinarith [hup, hcs, hlogm, hl2, hmR, hlogm1]
+
 /-- BRIDGE: for a function with a power series on a ball, analytic everywhere,
 the n-th iterated (one-dimensional) derivative at the center is n! times the
 n-th coefficient. This is the Taylor-coefficient relation Mathlib does not

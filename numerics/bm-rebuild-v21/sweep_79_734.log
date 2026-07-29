@@ -1,3 +1,11 @@
 nohup: ignoring input
   k=100 (2s)
   k=200 (10s)
+  k=300 (30s)
+  k=400 (70s)
+  k=500 (136s)
+  k=600 (244s)
+  k=700 (400s)
+sweep [79,734]: 0 non-positive
+  k=79: crit_lower = 7.15
+  k=734: crit_lower = 33751.39
