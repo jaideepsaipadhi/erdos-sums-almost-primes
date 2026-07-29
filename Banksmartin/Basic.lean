@@ -400,10 +400,12 @@ to 1).  Previously a bare literal, which left rho_enclosure vacuous. -/
 noncomputable def rhoConst : ℝ :=
   -(1 / 9) * ∏' p : Nat.Primes,
     (if 5 ≤ (p : ℕ) then (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 else 1)
-/-- Manuscript section 3.4: S* = sum_{i>=0} 2^i |c_i|, the unsigned bound
-constant for the convolution Delta(k).  STILL A LITERAL: the real definition
-needs cCoeff, which is defined far below this point; moving it here would
-require relocating G2at1/G2C.  Sstar_bound is vacuous until then. -/
+/-- MANUSCRIPT section 3.4: S* = sum_{i>=0} 2^i |c_i|, the unsigned bound
+constant for the convolution Delta(k).
+
+STILL A LITERAL HERE: cCoeff is defined far below, and NumericalFacts (just
+under this) refers to SstarConst.  SstarValue, defined after cCoeff, gives
+the genuine series; Sstar_bound is vacuous until the two are connected. -/
 noncomputable def SstarConst : ℝ := 6.9763
 
 /-- Manuscript section 3.5: alpha_+ is the constant in B_1(k) <= alpha_+ (k+1).
