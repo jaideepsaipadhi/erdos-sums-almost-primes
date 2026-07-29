@@ -13293,3 +13293,65 @@ theorem erdos_sums_increase_from_six (Sstar alph Gam Umax Vmax : ℝ)
 end
 
 #print axioms erdos_sums_increase_from_six
+
+/-- The certified inputs, decomposed into primitives.
+
+`NumericalFacts` above states the section 7 source bound as a single aggregate.
+This version replaces it with the quantities the Arb package actually computes,
+so that Proposition 2.5, Theorem 4.1 and section 3.5 are *used* in deriving it
+rather than merely proved. -/
+structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 : ℝ) : Prop where
+  d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
+  rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
+  Sstar_bound   : Sstar ≤ 6.9763
+  alpha_bound   : alph ≤ 15.5716
+  Gamma_bound   : Gam ≤ 105.41
+  beta_nonneg   : ∀ i, 0 ≤ beta i
+  g_deriv       : ∀ i : ℕ, ∀ x ∈ Set.Ioo (1 : ℝ) 2,
+    HasDerivAt (fun t : ℝ => gManu i t) (deriv (fun t : ℝ => gManu i t) x) x
+  g_deriv_bound : ∀ i : ℕ, ∀ x ∈ Set.Ioo (1 : ℝ) 2,
+    Norm.norm (deriv (fun t : ℝ => gManu i t) x) ≤ beta i
+  M0_nonneg     : 0 ≤ M0
+  M0_bound      : ∀ u : ℝ, u ∈ Set.Ioi (1 : ℝ) → ∀ theta : ℝ,
+    Norm.norm (G2manu u (circleMap 0 (2 : ℝ) theta)) ≤ M0
+  alpha_dom     : ∀ m : ℕ,
+    (1 / 2) * ∑ i ∈ Finset.range (m + 1), beta i * (2 : ℝ) ^ i ≤ alph
+  Sstar_dom     : ∀ m : ℕ,
+    ∑ i ∈ Finset.range (m + 1), (2 : ℝ) ^ i * |(cCoeff i).re| ≤ Sstar
+  UV_bound      : ∀ k : ℕ, 2440 ≤ k →
+    |2 * (2 * (k : ℝ) * Uk k - Vk k)
+       - (2 * ((k : ℝ) + 1) * Uk (k + 1) - Vk (k + 1))|
+    ≤ (2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax
+  Eexp_bound    : ∀ k : ℕ, 2440 ≤ k → ∀ m : ℕ,
+    |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3
+  phi_at_k1     : 0 < phiBound aOneConst Umax Vmax Sstar alph 2440
+  phi_mono      : ∀ m : ℕ, 2440 ≤ m →
+    phiBound aOneConst Umax Vmax Sstar alph m
+      ≤ phiBound aOneConst Umax Vmax Sstar alph (m + 1)
+  sweep_low     : ∀ k : ℕ, 6 ≤ k → k ≤ 199 → f k < f (k + 1)
+  sweep_mid     : ∀ k : ℕ, 79 ≤ k → k ≤ 899 → f k < f (k + 1)
+  sweep_high    : ∀ k : ℕ, 900 ≤ k → k ≤ 2439 → f k < f (k + 1)
+
+/-- MANUSCRIPT THEOREM 1.1, with the far range derived from the primitives.
+
+Identical in statement to `erdos_sums_increase_from_six`, but the [2440, inf)
+branch goes through `source_bound_full`, so the dependency chain reaches
+Proposition 2.5 (the exact decomposition), Theorem 4.1 (via `deltaM_abs_le`
+and `deltaConv_le`) and section 3.5 (via `E1k_le_alpha`). -/
+theorem erdos_sums_increase_from_six' (beta : ℕ → ℝ)
+    (Sstar alph Gam Umax Vmax M0 : ℝ)
+    (hnum : NumericalFactsFull beta Sstar alph Gam Umax Vmax M0) :
+    ∀ k : ℕ, 6 ≤ k → f k < f (k + 1) := by
+  intro k hk
+  by_cases h1 : k ≤ 199
+  · exact hnum.sweep_low k hk h1
+  by_cases h2 : k ≤ 899
+  · exact hnum.sweep_mid k (by omega) h2
+  by_cases h3 : k ≤ 2439
+  · exact hnum.sweep_high k (by omega) h3
+  · refine theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
+      hnum.phi_at_k1 hnum.phi_mono ?_ k (by omega)
+    intro m hm
+    exact source_bound_full m (by omega) Sstar alph Umax Vmax beta hnum.beta_nonneg
+      hnum.g_deriv hnum.g_deriv_bound M0 hnum.M0_nonneg hnum.M0_bound
+      hnum.alpha_dom hnum.Sstar_dom (hnum.UV_bound m hm) (hnum.Eexp_bound m hm)
