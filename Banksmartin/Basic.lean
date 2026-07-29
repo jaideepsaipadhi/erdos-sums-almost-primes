@@ -12429,12 +12429,76 @@ theorem theorem_6_1 (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ) (beta : ℕ → ℝ)
             - (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
           (Set.Ioc (1:ℝ) 2) := by
-        sorry
+        have hI := integrable_Ik_term i j (k - i - j) (beta i) (hbeta0 i) (hderiv i)
+          (hbnd i) M0 hM00 hM0
+        have hF := (integrable_Sm_integrand (k - i - j) j).const_mul ((cCoeff i).re)
+        have hFc : MeasureTheory.IntegrableOn
+            (fun s : ℝ => (cCoeff i).re * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j))))
+            (Set.Ioc (1:ℝ) 2) := by
+          apply MeasureTheory.IntegrableOn.congr_fun hF _ measurableSet_Ioc
+          intro s _
+          ring
+        have hB := (integrable_S2_integrand (k - i - j) j).const_mul ((bHat f1 i).re)
+        have hBc : MeasureTheory.IntegrableOn
+            (fun s : ℝ => (bHat f1 i).re * ((s - 1) * (2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
+            (Set.Ioc (1:ℝ) 2) := by
+          apply MeasureTheory.IntegrableOn.congr_fun hB _ measurableSet_Ioc
+          intro s _
+          ring
+        have hsub := (hI.sub hFc).sub hBc
+        apply MeasureTheory.IntegrableOn.congr_fun hsub _ measurableSet_Ioc
+        intro s _
+        simp only [Pi.sub_apply]
+        ring
       have hdom : MeasureTheory.IntegrableOn
           (fun s : ℝ => gh i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
             * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
           (Set.Ioc (1:ℝ) 2) := by
-        sorry
+        have hbase := (integrable_log_pow_sub_one_sq (k - i - j)).const_mul (gh i / 2)
+        have hmeas : MeasureTheory.AEStronglyMeasurable
+            (fun s : ℝ => gh i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
+              * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))))
+            (MeasureTheory.volume.restrict (Set.Ioc (1:ℝ) 2)) := by
+          have hLsq := (integrable_log_pow_sub_one_sq (k - i - j)).aestronglyMeasurable
+          have hexp : MeasureTheory.AEStronglyMeasurable
+              (fun s : ℝ => (2:ℝ) ^ (-(j:ℝ) * s))
+              (MeasureTheory.volume.restrict (Set.Ioc (1:ℝ) 2)) :=
+            (Continuous.aestronglyMeasurable
+              ((continuous_const_rpow (by norm_num)).comp
+                (continuous_const.mul continuous_id)))
+          have hc := ((hLsq.mul hexp).const_mul (gh i / 2))
+          apply hc.congr
+          filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with s _
+          simp only [Pi.mul_apply]
+          ring
+        apply MeasureTheory.Integrable.mono hbase hmeas
+        filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with s hs
+        have hs1 : (1:ℝ) < s := hs.1
+        have hL : (0:ℝ) ≤ (-Real.log (s - 1)) ^ (k - i - j)
+            / (Nat.factorial (k - i - j)) := by
+          apply div_nonneg _ (by positivity)
+          apply pow_nonneg
+          simp only [neg_nonneg]
+          exact Real.log_nonpos (by linarith) (by linarith [hs.2])
+        have h2 : (2:ℝ) ^ (-(j:ℝ) * s) ≤ 1 := by
+          apply Real.rpow_le_one_of_one_le_of_nonpos (by norm_num)
+          have : (0:ℝ) ≤ (j:ℝ) := by positivity
+          nlinarith [hs1]
+        have h2p : (0:ℝ) < (2:ℝ) ^ (-(j:ℝ) * s) := Real.rpow_pos_of_pos (by norm_num) _
+        have hbig : (0:ℝ) ≤ gh i / 2 * ((-Real.log (s - 1)) ^ (k - i - j)
+            / (Nat.factorial (k - i - j)) * (s - 1) ^ 2) := by
+          apply mul_nonneg (by linarith [hgh0 i])
+          apply mul_nonneg hL (sq_nonneg _)
+        have hsmall : (0:ℝ) ≤ gh i * (s - 1) ^ 2 / 2 * ((2:ℝ) ^ (-(j:ℝ) * s)
+            * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))) := by
+          apply mul_nonneg
+          · apply div_nonneg _ (by norm_num)
+            exact mul_nonneg (hgh0 i) (sq_nonneg _)
+          · exact mul_nonneg (le_of_lt h2p) hL
+        rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hsmall, abs_of_nonneg hbig]
+        nlinarith [hL, h2, h2p, hgh0 i, sq_nonneg (s - 1)]
       have hint : |∫ s in Set.Ioc (1:ℝ) 2,
             (((gManu i s).re - (cCoeff i).re) * (2:ℝ) ^ (-(j:ℝ) * s)
               * ((-Real.log (s - 1)) ^ (k - i - j) / (Nat.factorial (k - i - j)))
