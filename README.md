@@ -14,6 +14,33 @@ where f k is the sum of 1/(n log n) over n >= 2 with Omega(n) = k.
 
 Zero sorries.  Axioms: propext, Classical.choice, Quot.sound.
 
+## Two forms of the theorem
+
+    erdos_sums_increase_from_six       (Sstar alph Gam Umax Vmax) (NumericalFacts ...)
+    erdos_sums_increase_from_six'  (beta Sstar alph Gam Umax Vmax M0) (NumericalFactsFull ...)
+
+Same conclusion.  They differ in how much of the analysis is *used*.
+
+The first takes the section 7 source bound as a single assumed field
+(`source_bound`).  Short hypothesis list, but Proposition 2.5, Theorem 4.1 and
+section 3.5 are then proved and unreferenced.
+
+The second replaces that field with the quantities the Arb package actually
+computes -- the beta_i sweep, M_0, the S* and alpha partial-sum bounds, the U/V
+and E_exp sources -- and *derives* the source bound from them via
+`source_bound_full`.  Its dependency chain reaches Proposition 2.5 (the exact
+decomposition), Theorem 4.1 (through `deltaM_abs_le` and `deltaConv_le`) and
+section 3.5 (through `E1k_le_alpha`).
+
+The primed form is the one that demonstrates the formalization is doing work.
+The unprimed form is kept because it is easier to instantiate and states the
+same theorem.
+
+Theorem 6.1 (the refined enclosure) is consumed by `E1k_le_refined`, which
+combines it with `A2m_le` to give |E_1(k)| <= (Bhat/2)(k+1) + Gamma.  That is
+the bound behind the manuscript's K0 = 79; the coverage of [79,899] itself
+comes from the certified sweep, which no formalization can replace.
+
 ## What is proved, and what is assumed
 
 MACHINE-CHECKED, in Banksmartin/Basic.lean:

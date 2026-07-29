@@ -410,9 +410,14 @@ noncomputable def rhoConst : ℝ :=
 /-- MANUSCRIPT section 3.4: S* = sum_{i>=0} 2^i |c_i|, the unsigned bound
 constant for the convolution Delta(k).
 
-STILL A LITERAL HERE: cCoeff is defined far below, and NumericalFacts (just
-under this) refers to SstarConst.  SstarValue, defined after cCoeff, gives
-the genuine series; Sstar_bound is vacuous until the two are connected. -/
+A LITERAL, by necessity: cCoeff is defined thousands of lines below, so the
+series cannot be written here.  `SstarValue`, defined after cCoeff, IS that
+series, and `SstarValue_summable` proves it converges given Lemma 3.7's Cauchy
+tail.  The two are deliberately NOT identified: SstarConst is the certified
+numeric value, SstarValue the mathematical object it encloses, and the
+enclosure is one of the things NumericalFacts assumes.  The final theorems take
+S* as a parameter with its bound, so neither constant is load-bearing on its
+own. -/
 noncomputable def SstarConst : ℝ := 6.9763
 
 /-- MANUSCRIPT section 3.5: alpha_+ is the constant in B_1(k) <= alpha_+ (k+1).
@@ -13322,6 +13327,7 @@ structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 :
     |2 * (2 * (k : ℝ) * Uk k - Vk k)
        - (2 * ((k : ℝ) + 1) * Uk (k + 1) - Vk (k + 1))|
     ≤ (2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax
+  /-- Section 7: the exponentially small source, at the two indices used. -/
   Eexp_bound    : ∀ k : ℕ, 2440 ≤ k → ∀ m : ℕ,
     |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3
   phi_at_k1     : 0 < phiBound aOneConst Umax Vmax Sstar alph 2440
