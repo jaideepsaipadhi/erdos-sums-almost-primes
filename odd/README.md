@@ -70,3 +70,28 @@ PROOF SKETCH
      |c_k(s)| suffices.
 
 This is a page, not a paper -- and correspondingly small to formalize.
+
+## PROOF STRATEGY
+
+Write c_k(s) = h_k(3^-s, 5^-s, 7^-s, ...), the complete homogeneous symmetric
+function in the odd prime powers.  Two facts:
+
+(1) h_{k+1} <= h_1 * h_k.
+    Standard: h_1 h_k counts each degree-(k+1) multiset once per DISTINCT
+    element it contains, hence at least once, so it dominates h_{k+1}.
+
+(2) h_1 = P(s) = sum_{p>=3} p^-s, and P(s) <= 1 exactly when s >= 1.25
+    (P(1.20) = 1.0697 + tail, P(1.25) = 0.9172 + 0.0073).
+
+So for s >= 1.25, c_{k+1}(s) <= c_k(s) for EVERY k, immediately.
+
+WHAT REMAINS: the compact interval s in [1, 1.25].  Numerically the worst
+ratio there is 0.80 at s = 1 (over k = 2..10), so there is 20% margin.  This is
+a bounded interval sweep of the same kind as beta_sweep.py -- not an asymptotic
+argument.
+
+k = 1 is separate: pointwise domination genuinely fails at s = 1 (ratio 1.0957),
+so f_1^odd > f_2^odd must come from the integrated values, 0.8143 vs 0.3735.
+
+STATUS: (1) and (2) are proved above.  The interval [1, 1.25] and the k = 1
+case are open.
