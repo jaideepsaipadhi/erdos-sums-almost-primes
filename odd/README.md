@@ -331,3 +331,28 @@ what an exact decomposition of g_k would establish.
 With it, the odd criterion becomes explicit:
     f_k^odd - f_{k+1}^odd = (f_k - f_{k+1}) + (g_k - g_{k-1})
 and both brackets have k^2 2^-k leading behaviour with known coefficients.
+
+## CORRECTION: log2/32 was a coincidence
+
+Extending g_k to k = 40 shows A(k) = -(g_k - 1/2) 2^k is NOT c k^2 with
+c = log2/32.  A(k)/k^2 climbs steadily through that value and past it:
+
+    k        16       20       24       28       32       36       40
+    A/k^2  0.02072  0.02160  0.02238  0.02307  0.02367  0.02420  0.02466
+    A-c0k^2  -0.242   -0.026   +0.415   +1.103   +2.055   +3.284   +4.800
+
+with c0 = log2/32 = 0.021661.  The four-digit agreement at k = 20 was the
+residual passing through zero, not convergence.
+
+Second differences of A, which would be the constant 2c if A ~ c k^2:
+
+    k        20       25       30       35       40
+    2c    0.05696  0.05881  0.06007  0.06097  0.06161
+
+still drifting upward -- the signature of a k log k term.  So g_k has the same
+shape as f_k: a k^2 term plus a k log k correction, matching the even case
+where E(k) is controlled by D(k) = log2 k log(k+1) + 1.
+
+No clean closed form for the leading coefficient.  An exact decomposition of
+g_k, with error terms bounded the way section 4 bounds delta_m, is what the
+odd proof needs.
