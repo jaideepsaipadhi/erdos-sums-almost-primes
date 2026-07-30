@@ -356,3 +356,32 @@ where E(k) is controlled by D(k) = log2 k log(k+1) + 1.
 No clean closed form for the leading coefficient.  An exact decomposition of
 g_k, with error terms bounded the way section 4 bounds delta_m, is what the
 odd proof needs.
+
+## CORRECTION: the reduction is for verification, not for the proof
+
+Writing (f_k^odd - 1/2)2^k = 2A(k-1) - (a_1 k^2 + E(k)), with
+A(k) = -(g_k - 1/2)2^k, the two terms on the right BOTH grow like k^2 and
+nearly cancel:
+
+    k      2A(k-1)    observed    cancellation
+   16       9.2178    0.168166        55:1
+   18      12.1048    0.163363        74:1
+   20      15.4393    0.160296        96:1
+
+and the ratio grows like k^2 -- about 500:1 by k = 40.
+
+So a proof routed through f_k^odd = f_k - g_{k-1} would have to control both
+f_k and g_k to relative precision O(1/k^2) merely to see the sign of their
+difference.  That is HARDER than the even case, not easier.
+
+Computed directly on the p >= 3 Euler product there is no cancellation:
+f_k^odd - 1/2 is O(2^-k) on its own.
+
+REVISED RECOMMENDATION.  Build the odd analogue of sections 2-7 directly on
+the p >= 3 product -- which is what cFac, G2C, dConst and rhoConst in
+Banksmartin/Basic.lean already are, since the manuscript's normalisation
+pulls the p = 2 factor out separately.  Keep the reduction as a cross-check:
+it is how f_k, f_k^odd and g_k were mutually confirmed above.
+
+(An earlier section of this README recommended the reduction as the
+foundation.  The cancellation analysis shows that was wrong.)
