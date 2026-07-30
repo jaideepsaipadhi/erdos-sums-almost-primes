@@ -117,3 +117,28 @@ f_k^odd = int_1^inf c_k(s) ds is largest.
 What is needed: the limiting behaviour of r_2(s) as s -> 1+, with a rigorous
 tail bound on sum_{p>P} p^-s rather than a bare truncation.  The 3^-s heuristic
 suggests r_2 -> something well below 1, but that is a guess until checked.
+
+## What the certified scaffold shows
+
+Running the odd prime zeta through certified.py's recursion, with the pole
+intact:
+
+    eps=0.5    P_k^odd: 0.496  0.148  0.035  0.008  0.002  0.000
+    eps=0.1    P_k^odd: 1.642  1.423  0.872  0.427  0.179  0.068
+    eps=0.01   P_k^odd: 3.806  7.341  9.578  9.523  7.706  5.296
+    eps=0.001  P_k^odd: 6.094 18.667 38.344 59.435 74.185 77.707
+
+Near the pole P_k^odd GROWS with k, peaking around k ~ log(1/eps).  That is the
+(log 1/(s-1))^k / k! profile -- the same structure that drives f_k -> 1 in the
+even case, and it survives removing p = 2 because sum_{p>=3} p^-s still
+diverges at s = 1.
+
+CONSEQUENCE: f_k^odd does NOT decay geometrically.  The earlier sections of
+this README claimed otherwise on the basis of prime-truncated computations,
+which destroy exactly this divergence.  Those claims are withdrawn.
+
+The odd problem therefore has the same shape as the even one, and the section
+2-7 apparatus is the right tool, with every constant recomputed for the p >= 3
+Euler product.  The one place it should be easier is the tail bound: the even
+case uses P(s) <= 2.78 * 2^-s for s >= 2, and the odd analogue is governed by
+3^-s instead.
