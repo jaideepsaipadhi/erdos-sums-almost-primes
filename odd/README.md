@@ -241,3 +241,57 @@ STATUS: the shape of the proof is clear and matches the certified numbers.
 Making it rigorous needs the odd analogue of Proposition 2.5 -- an exact
 identity for f_k^odd with all error terms explicit -- not an asymptotic
 estimate.  That is the next real piece of work.
+
+## THE REDUCTION (this is the right foundation)
+
+Since prod_{p>=3} (1 - z p^-s)^-1 = (1 - z 2^-s) prod_p (1 - z p^-s)^-1,
+extracting coefficients gives the EXACT identity
+
+    c_k^odd(s) = P_k(s) - 2^-s P_{k-1}(s)
+
+and integrating,
+
+    f_k^odd = f_k - g_{k-1},        g_k := int_1^inf 2^-s P_k(s) ds
+
+VERIFIED against the certified f_k^odd:
+
+    k   g_{k-1}        f_k^odd + g_{k-1}   = f_k
+    1   0.7213468320   1.6366156349          (= sum_p 1/(p log p))
+    2   0.5251314683   1.1448165627
+    3   0.4848249760   1.0308349869
+    4   0.4777596782   0.9973413231
+    5   0.4801403776   0.9888777290
+
+The right column is the manuscript's f_k, including the dip below 1 before the
+turnaround at k = 6.  The identity is exact.
+
+CONSEQUENCE.  The odd conjecture becomes
+
+    f_k^odd - f_{k+1}^odd = (f_k - f_{k+1}) + (g_k - g_{k-1})  >  0
+
+The first bracket is -2^{-k-1} Crit(k), NEGATIVE for k >= 6 by the main
+theorem.  So the odd result is exactly the statement that g increases faster
+than f decreases -- a comparison between the unweighted and the 2^-s-weighted
+integrals of the SAME P_k.
+
+This is much better than rebuilding sections 2-7 for the p >= 3 product:
+everything already proved about P_k, the delta table, the coefficient bounds
+and the criterion applies unchanged.  The single new object is g_k.
+
+CERTIFIED DIFFERENCES (all positive, ratio -> 1/2 from below):
+
+    k     f_k^odd - f_{k+1}^odd    ratio
+    2     +7.3675e-02              0.2493
+    5     +4.7383e-03              0.4369
+   10     +1.0251e-04              0.4739
+   15     +2.6661e-06              0.4868
+   19     +1.5545e-07              0.4937
+
+The ratio increases monotonically toward 1/2 and never approaches 1, so unlike
+the even case there is no competition between a geometric factor and a growing
+polynomial -- hence no turning point.
+
+NEXT: an exact decomposition of g_k with explicit error terms, i.e. the
+analogue of Proposition 2.5 for the weighted integral.  Then the criterion for
+the odd case is Crit(k) < 2^{k+1}(g_k - g_{k-1}), and the main theorem's
+machinery bounds the left side already.
