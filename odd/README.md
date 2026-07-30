@@ -295,3 +295,39 @@ NEXT: an exact decomposition of g_k with explicit error terms, i.e. the
 analogue of Proposition 2.5 for the weighted integral.  Then the criterion for
 the odd case is Crit(k) < 2^{k+1}(g_k - g_{k-1}), and the main theorem's
 machinery bounds the left side already.
+
+## g_k: STRUCTURE
+
+Certified g_k = int_1^inf 2^-s P_k(s) ds for k = 0..20 (odd/numerics/g_k.py).
+g_k dips below 1/2 at k = 2 and returns:
+
+    k     g_k                  (g_k - 1/2) 2^k
+    0     0.7213475204         +0.2213
+    2     0.4848250909         -0.0607
+    5     0.4847544275         -0.4879
+   10     0.4981045526         -1.9409
+   15     0.4998593480         -4.6089
+   20     0.4999917617         -8.6385
+
+CONSISTENCY CHECK: recovering f_k = f_k^odd + g_{k-1} reproduces the
+manuscript's values exactly, including the dip below 1 and the turnaround --
+f_4 = 0.99734, f_5 = 0.98888, f_6 = 0.98875, f_7 = 0.99102, ... f_20 = 0.99999.
+So the identity and both computations are mutually confirming.
+
+EMPIRICAL LEADING TERM.  Fitting (g_k - 1/2) 2^k = -c k^2:
+
+    k=10  c = 0.019409      k=17  c = 0.020943
+    k=14  c = 0.020252      k=20  c = 0.021596       log 2 / 32 = 0.021661
+
+converging from below, four digits by k = 20.  So
+
+    g_k = 1/2 - (log2 / 32) k^2 2^-k (1 + o(1))       [CONJECTURAL]
+
+Note log2/32 = (1/8)(log2/4) while a_1 = d(log2/4) with d = 0.3787, so g's
+analogue of d would be exactly 1/8.  That is clean enough to be real, but it is
+a numerical fit, NOT derived -- deriving it is the next piece of work and is
+what an exact decomposition of g_k would establish.
+
+With it, the odd criterion becomes explicit:
+    f_k^odd - f_{k+1}^odd = (f_k - f_{k+1}) + (g_k - g_{k-1})
+and both brackets have k^2 2^-k leading behaviour with known coefficients.
