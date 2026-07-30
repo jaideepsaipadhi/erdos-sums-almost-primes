@@ -95,3 +95,25 @@ so f_1^odd > f_2^odd must come from the integrated values, 0.8143 vs 0.3735.
 
 STATUS: (1) and (2) are proved above.  The interval [1, 1.25] and the k = 1
 case are open.
+
+## CORRECTION: the s -> 1+ endpoint is not settled
+
+The r_2 values quoted in Step 3 were computed with a finite prime cutoff P and
+are NOT stable in P:
+
+    s = 1.00   P=2e4: r_2 = 0.755   P=1e5: 0.800   P=5e5: 0.840   (climbing)
+    s = 1.05   P=2e4: r_2 = 0.638   P=1e5: 0.664   P=5e5: 0.685   (climbing)
+
+At s = 1 every c_k(1) diverges (c_1(1) = sum_{p>=3} 1/p), so r_2(1) is a ratio
+of two divergent truncations and the numbers above mean nothing on their own.
+At s = 1.05 the sums converge but the truncation error is still large at
+P = 5e5, so those margins are unreliable too.
+
+The pointwise claim c_{k+1}(s) <= c_k(s) is therefore ESTABLISHED only where
+the truncation is under control -- comfortably for s >= 1.25 by Step 2, which
+is unaffected -- and OPEN near s = 1, which is exactly where the integrand of
+f_k^odd = int_1^inf c_k(s) ds is largest.
+
+What is needed: the limiting behaviour of r_2(s) as s -> 1+, with a rigorous
+tail bound on sum_{p>P} p^-s rather than a bare truncation.  The 3^-s heuristic
+suggests r_2 -> something well below 1, but that is a guess until checked.
