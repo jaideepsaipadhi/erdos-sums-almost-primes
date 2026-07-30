@@ -176,3 +176,36 @@ The conjecture therefore looks not merely true but comfortably so.  What is
 needed for a proof is the analogue of section 2's exact decomposition with
 limit 1/2 rather than 1, and a criterion whose sign is then constant rather
 than changing at a threshold.
+
+## PROOF SHAPE (k = 2, the worst case)
+
+Pointwise domination c_k(s) >= c_{k+1}(s) FAILS near the pole and holds away
+from it.  The bad region shrinks rapidly with k:
+
+    sign of c_k - c_{k+1} at s = 1 + eps
+    eps      k=2  k=3  k=4  k=5  k=6  k=7
+    0.001     -    -    -    -    +    +
+    0.01      -    +    +    +    +    +
+    0.05      +    +    +    +    +    +
+
+So k = 2 is the worst case, with crossover at eps* = 0.025.  Splitting the
+integral there:
+
+    int over [1, 1.025]     =  -0.107585
+    int over [1.025, inf)   =  +0.181261
+    total                   =  +0.073676
+    certified f_2 - f_3     =   0.073675     (agrees to 6 digits)
+
+The positive part exceeds the negative by 68%.  A proof therefore needs:
+
+  (a) an UPPER bound on |int_{[1,1+eps*]} (c_{k+1} - c_k)|, where the
+      integrand is controlled by the (log 1/(s-1))^k / k! profile;
+  (b) a LOWER bound on int_{[1+eps*,inf)} (c_k - c_{k+1}), where pointwise
+      domination holds -- via h_1(s) <= 1 for s >= 1.25 and a bounded sweep
+      on [1+eps*, 1.25];
+  (c) (a) < (b), with 68% of margin at k = 2 and more for larger k since the
+      bad region shrinks.
+
+This is a finite, bounded argument -- much less than the even case's sections
+2-7, because there is no threshold to locate: the inequality holds for every
+k >= 2 with margin, rather than switching sign at k = 6.
