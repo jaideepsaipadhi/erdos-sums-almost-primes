@@ -142,3 +142,37 @@ The odd problem therefore has the same shape as the even one, and the section
 Euler product.  The one place it should be easier is the tail bound: the even
 case uses P(s) <= 2.78 * 2^-s for s >= 2, and the odd analogue is governed by
 3^-s instead.
+
+## RESULT: certified f_k^odd, k = 1..20
+
+Calibration: f_1^odd = 0.91526880, against f_1 - 1/(2 log 2) = 1.636616 -
+0.721348 = 0.915268.  The computation is correct.
+
+    k    f_k^odd            f_k^odd - 1/2    (f_k^odd - 1/2) * 2^k
+    1    0.915268803        4.153e-01        0.830538
+    2    0.619685094        1.197e-01        0.478740
+    3    0.546010011        4.601e-02        0.368080
+    5    0.508737351        8.737e-03        0.279595
+   10    0.500196851        1.969e-04        0.201575
+   15    0.500005232        5.232e-06        0.171446
+   20    0.500000153        1.529e-07        0.160296
+
+STRICTLY DECREASING on [2,20], certified.
+
+f_k^odd -> 1/2, from ABOVE.  The excess e_k = f_k^odd - 1/2 satisfies
+e_{k+1}/e_k -> 1/2, so the rate is governed by the prime 2 even though 2 is
+excluded from the sum -- the generating function's next singularity after the
+pole at s = 1 is at z = 2^s.
+
+CRUCIALLY, e_k * 2^k is DECREASING (0.83, 0.48, 0.37, ..., 0.160 at k = 20),
+so e_k is slightly slower than c 2^-k: a decaying polynomial correction.
+
+Contrast the even case, where f_k = 1 - 2^-k(a_1 k^2 + ...) and the polynomial
+factor GROWS -- that competition is what makes f_k turn around at k = 6.  Here
+the polynomial works the other way, so there is no competition and no expected
+turning point.
+
+The conjecture therefore looks not merely true but comfortably so.  What is
+needed for a proof is the analogue of section 2's exact decomposition with
+limit 1/2 rather than 1, and a criterion whose sign is then constant rather
+than changing at a threshold.
