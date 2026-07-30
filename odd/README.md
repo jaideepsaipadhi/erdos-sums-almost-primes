@@ -209,3 +209,35 @@ The positive part exceeds the negative by 68%.  A proof therefore needs:
 This is a finite, bounded argument -- much less than the even case's sections
 2-7, because there is no threshold to locate: the inequality holds for every
 k >= 2 with margin, rather than switching sign at k = 6.
+
+## ANALYTIC STRUCTURE
+
+Near the pole, P_odd(s) = log(1/(s-1)) - 1/2 + O(s-1), and c_k(s) ~ L^k/k!
+with L = P_odd(s).  Hence
+
+    c_{k+1}/c_k ~ L/(k+1) > 1   iff   L > k+1   iff   s - 1 < e^-(k+3/2)
+
+so the crossover is at eps*(k) = e^-(k+3/2), shrinking geometrically:
+
+    k        2        3        4        6        8
+    pred  0.0302   0.0111   0.0041   0.00055  0.000075
+    obs   0.025    ~0.005            ~0.0008
+
+Under s = 1 + e^-t the bad region is t > k + 3/2, so to leading order
+
+    negative mass = int_{k+3/2}^inf t^k e^-t / k! dt   (a Gamma tail)
+    positive mass = 1 - that
+
+    k        2        3        4        6        8
+    tail  0.3209   0.3423   0.3575   0.3782   0.3918
+    diff  0.3583   0.3154   0.2850   0.2437   0.2164
+
+The leading-order difference is positive but SHRINKING in k, while the true
+f_k - f_{k+1} shrinks like 2^-k.  So the leading term alone does not prove
+positivity -- the margin must be tracked against the corrections, which is
+exactly what section 2's exact decomposition does in the even case.
+
+STATUS: the shape of the proof is clear and matches the certified numbers.
+Making it rigorous needs the odd analogue of Proposition 2.5 -- an exact
+identity for f_k^odd with all error terms explicit -- not an asymptotic
+estimate.  That is the next real piece of work.
