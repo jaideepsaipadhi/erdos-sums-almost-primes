@@ -385,3 +385,93 @@ it is how f_k, f_k^odd and g_k were mutually confirmed above.
 
 (An earlier section of this README recommended the reduction as the
 foundation.  The cancellation analysis shows that was wrong.)
+
+## DERIVED: the odd Proposition 2.5
+
+Write prod_{p>=3}(1 - z p^-s)^-1 = zeta(s)^z H(s,z), so
+
+    H(s,z) = (1 - 2^-s)^z prod_{p>=3} [(1 - z p^-s)^-1 (1 - p^-s)^z]
+
+analytic in |z| < 3^s.  THIS IS THE STRUCTURAL DIFFERENCE from the even case:
+with p = 2 removed, z = 2 lies strictly inside the domain of analyticity
+instead of on the singularity, so there is no k^2 factor.
+
+Substituting u = log zeta(s) and expanding eps = e^-u + gamma e^-2u + ...,
+the contributions organise by powers of e^-u:
+
+  order e^-u :   sum_j h_j(1) = H(1,1) = 1/2                    [the limit]
+  order e^-2u:   2^-(k+1) [ d_s H(1,2) + 2 gamma H(1,2) ]       [the 2^-k term]
+
+with H(1,2) = (1/4) prod_{p>=3} (1-1/p)^2/(1-2/p) = 1/(4 C_2) = d = 0.3786950,
+and d_s log H(1,2) = 2 log 2 - 2S,  S = sum_{p>=3} log p/((p-1)(p-2)).
+
+    f_k^odd = 1/2 + d (log 2 - S + gamma) 2^-k + O((3/8)^k)
+
+PREDICTED  d(log2 - S + gamma) = 0.15563271
+
+VERIFIED against the certified B(k) = 2^k (f_k^odd - 1/2).  Richardson
+extrapolation, B_inf = (B_{k+1} - r B_k)/(1-r):
+
+    r        k=16       k=18       k=19
+    2/3    0.160183   0.158227   0.157586
+    3/4    0.157522   0.156515   0.156231     <- flattest, -> 0.15563
+    1/2    0.162844   0.159939   0.158941
+
+The r = 3/4 row converges on the predicted value from above.  The next
+correction is order e^-3u, which relative to the 2^-k normalisation decays
+like (3/4)^k -- self-consistent.
+
+CONSEQUENCE FOR THE CONJECTURE.  Since the leading coefficient is a positive
+constant with no polynomial factor,
+
+    f_k^odd - f_{k+1}^odd = d(log2 - S + gamma) 2^-(k+1) + O((3/8)^k) > 0
+
+for all large k, with no threshold.  Contrast the even case, where the k^2
+factor competes with 2^-k and produces the turnaround at k = 6.  Making this
+rigorous needs explicit error control on the O((3/8)^k), the analogue of
+section 4's bound on delta_m.
+
+## DERIVED: the odd Proposition 2.5
+
+Write prod_{p>=3}(1 - z p^-s)^-1 = zeta(s)^z H(s,z), so
+
+    H(s,z) = (1 - 2^-s)^z prod_{p>=3} [(1 - z p^-s)^-1 (1 - p^-s)^z]
+
+analytic in |z| < 3^s.  THIS IS THE STRUCTURAL DIFFERENCE from the even case:
+with p = 2 removed, z = 2 lies strictly inside the domain of analyticity
+instead of on the singularity, so there is no k^2 factor.
+
+Substituting u = log zeta(s) and expanding eps = e^-u + gamma e^-2u + ...,
+the contributions organise by powers of e^-u:
+
+  order e^-u :   sum_j h_j(1) = H(1,1) = 1/2                    [the limit]
+  order e^-2u:   2^-(k+1) [ d_s H(1,2) + 2 gamma H(1,2) ]       [the 2^-k term]
+
+with H(1,2) = (1/4) prod_{p>=3} (1-1/p)^2/(1-2/p) = 1/(4 C_2) = d = 0.3786950,
+and d_s log H(1,2) = 2 log 2 - 2S,  S = sum_{p>=3} log p/((p-1)(p-2)).
+
+    f_k^odd = 1/2 + d (log 2 - S + gamma) 2^-k + O((3/8)^k)
+
+PREDICTED  d(log2 - S + gamma) = 0.15563271
+
+VERIFIED against the certified B(k) = 2^k (f_k^odd - 1/2).  Richardson
+extrapolation, B_inf = (B_{k+1} - r B_k)/(1-r):
+
+    r        k=16       k=18       k=19
+    2/3    0.160183   0.158227   0.157586
+    3/4    0.157522   0.156515   0.156231     <- flattest, -> 0.15563
+    1/2    0.162844   0.159939   0.158941
+
+The r = 3/4 row converges on the predicted value from above.  The next
+correction is order e^-3u, which relative to the 2^-k normalisation decays
+like (3/4)^k -- self-consistent.
+
+CONSEQUENCE FOR THE CONJECTURE.  Since the leading coefficient is a positive
+constant with no polynomial factor,
+
+    f_k^odd - f_{k+1}^odd = d(log2 - S + gamma) 2^-(k+1) + O((3/8)^k) > 0
+
+for all large k, with no threshold.  Contrast the even case, where the k^2
+factor competes with 2^-k and produces the turnaround at k = 6.  Making this
+rigorous needs explicit error control on the O((3/8)^k), the analogue of
+section 4's bound on delta_m.
