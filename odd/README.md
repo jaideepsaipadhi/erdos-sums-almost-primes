@@ -556,3 +556,18 @@ REMAINING FOR PUBLICATION:
     a 2e6-truncated float)
   * d = 1/(4 C_2) is already certified in the main development
   * the k = 1..20 sweep is certified; k = 1..11 is what the theorem needs
+
+## All constants certified
+
+    d      0.3786950 +/- 5.3e-8          (from the main development)
+    S      [0.8593920314, 0.8593986014]  head to 5e6 + tail 2(log P + 1)/P
+    beta   [0.1556300826, 0.1556326142]  = d(log2 - S + gamma)
+    M_R    <= 826.705058                 interval sweep, 40 s-boxes x 100 theta
+    K0^odd 12                            using the WORST-CASE beta
+
+The threshold is 12 whether beta takes its upper or lower certified value, so
+the crude tail bound on S (summing over integers rather than primes) costs
+nothing.  A Mertens-type bound would tighten S if wanted for the writeup.
+
+With the certified sweep covering k = 1..20 and the analytic argument covering
+k >= 12, the theorem holds with eight values of overlap.

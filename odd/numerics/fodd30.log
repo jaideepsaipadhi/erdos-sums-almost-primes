@@ -2,3 +2,5 @@ nohup: ignoring input
 panel 25/138  t=66s  eta=298s
 panel 50/138  t=154s  eta=271s
 panel 75/138  t=243s  eta=204s
+panel 100/138  t=331s  eta=126s
+panel 125/138  t=420s  eta=44s
