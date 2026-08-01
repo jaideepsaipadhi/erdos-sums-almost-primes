@@ -475,3 +475,43 @@ for all large k, with no threshold.  Contrast the even case, where the k^2
 factor competes with 2^-k and produces the turnaround at k = 6.  Making this
 rigorous needs explicit error control on the O((3/8)^k), the analogue of
 section 4's bound on delta_m.
+
+## THE ODD THEOREM: complete in outline
+
+Two ranges, overlapping:
+
+  k = 1..20    certified values (odd/numerics/fodd_run.py), strictly decreasing
+  k >= 11      the leading term dominates the Cauchy-bounded remainder
+
+For the second range: Htilde(s,z) = H(s,z)(1 - z 3^-s) is analytic in
+|z| < 5^s, so Cauchy on |z| = R gives |[z^k] Htilde(1,z)| <= M_R R^-k with
+
+    M_3.5 =  85.795     M_4.0 = 171.022     M_4.5 = 344.449
+
+(sup attained at z = -R on the negative real axis, where (1-1/p)^z grows;
+48-point scan, needs an interval sweep for rigour.)
+
+The requirement is that the remainder be under beta 2^-k / 3, with
+beta = d(log2 - S + gamma) = 0.15563271:
+
+    k        need         M_4.5 4.5^-k
+   10     5.066e-05        1.012e-04     no
+   11     2.533e-05        2.248e-05     OK
+   12     1.267e-05        4.996e-06     OK
+   15     1.583e-06        5.482e-08     OK
+   20     4.947e-08        1.109e-10     OK
+
+so K0^odd = 11 at radius 4.5 (12 at radius 4), and the margin grows by a
+factor of ~2.25 per step.
+
+REMAINING FOR RIGOUR:
+  * M_R by interval arithmetic rather than a point scan -- the same
+    computation beta_sweep.py does for the even case, on Htilde instead
+  * the certified sweep already covers k = 1..20, well past K0^odd = 11
+  * assemble: [1,20] certified, [11,inf) analytic, no gap
+
+Note how much smaller this is than the even case: no delta table, no criterion
+sweep over thousands of k, no threshold hunt.  The reason is structural --
+with p = 2 removed, z = 2 lies strictly inside the domain of analyticity of H
+rather than on its boundary, so the leading behaviour is a constant times 2^-k
+instead of k^2 2^-k, and nothing competes with it.
