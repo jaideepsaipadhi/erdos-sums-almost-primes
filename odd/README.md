@@ -515,3 +515,44 @@ sweep over thousands of k, no threshold hunt.  The reason is structural --
 with p = 2 removed, z = 2 lies strictly inside the domain of analyticity of H
 rather than on its boundary, so the leading behaviour is a constant times 2^-k
 instead of k^2 2^-k, and nothing competes with it.
+
+## THE ODD THEOREM: COMPLETE
+
+    f_k^odd is strictly decreasing for every k >= 1.
+
+Two ranges, overlapping by eight values:
+
+    k = 1..20    certified sweep (fodd_run.py), all differences positive
+    k >= 12      the leading term dominates the certified remainder bound
+
+ANALYTIC PART.  With Htilde(s,z) = H(s,z)(1 - z 3^-s), analytic in |z| < 5^s,
+Cauchy on |z| = 4.5 gives |[z^k] Htilde(1,z)| <= M_R 4.5^-k.  The requirement
+is that this be under beta 2^-k / 3 with beta = d(log2 - S + gamma):
+
+    k        need          M_R 4.5^-k
+   11     2.533e-05        5.395e-05     no
+   12     1.267e-05        1.199e-05     OK
+   15     1.583e-06        1.316e-07     OK
+   20     4.947e-08        1.202e-10     OK
+
+and the margin improves by 2.25 per step.
+
+CERTIFIED CONSTANT.  M_R <= 826.705058, by interval arithmetic over 40 s-boxes
+on [1,2] and 100 theta-boxes on the circle, primes to 50000 with an explicit
+tail bound (odd/numerics/mr_certified.py).  Subdividing s was essential: a
+single box over [1,2] gives 739605, which pushes the threshold to 21 and opens
+a gap; 40 boxes give 826.7 and threshold 12.
+
+WHY THIS IS SO MUCH SMALLER THAN THE EVEN CASE.  Removing p = 2 moves z = 2
+from the boundary of H's domain of analyticity into the interior.  The even
+case has z = 2 ON the singularity, which produces the k^2 factor that competes
+with 2^-k and forces the turnaround at k = 6, the delta table, the criterion
+sweep over thousands of k, and the K0 = 78 threshold hunt.  Here the leading
+behaviour is a positive constant times 2^-k with nothing to compete with it,
+so the whole apparatus collapses to one sup computation.
+
+REMAINING FOR PUBLICATION:
+  * S = sum_{p>=3} log p/((p-1)(p-2)) needs a certified enclosure (currently
+    a 2e6-truncated float)
+  * d = 1/(4 C_2) is already certified in the main development
+  * the k = 1..20 sweep is certified; k = 1..11 is what the theorem needs
