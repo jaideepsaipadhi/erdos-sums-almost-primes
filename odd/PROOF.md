@@ -98,6 +98,24 @@ and hence, summing (2.5) over j >= 3,
 
     |R_k| <= M_R R^-k.                                                    (5.1)
 
+## 5a. Choice of radius
+
+R may be taken anywhere below 5.  Two constraints pull in opposite directions:
+a larger R lowers the threshold K0, while a smaller R lets the Euler tail start
+at a smaller prime, which matters for a formalization.
+
+    R     M_R (certified)   K0    tail starts at
+    4.0      374.367         13      p >= 7
+    4.5      826.705         12      p >= 11
+
+(The tail constraint: the p-th factor needs its correction bounded by 1, which
+at radius R and prime P reads R^2/(1 - R/P) + 1.25 R <= P^2.  At R = 4.5 that
+fails for P = 7 -- 62.3 > 49 -- and first holds at P = 11.)
+
+R = 4 is used below: K0 = 13 sits well inside the certified sweep's range of
+k = 1..20, and starting the tail at p >= 7 means only p = 2, 3, 5 are handled
+explicitly.
+
 ## 6. Assembly
 
     f_k^odd - f_{k+1}^odd = beta 2^-(k+1) + (R_k - R_{k+1}),
