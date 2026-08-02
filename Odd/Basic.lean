@@ -250,3 +250,41 @@ theorem Hodd_one_two : Hodd 1 2 = ((dConst : ℝ) : ℂ) := by
   simp only [Complex.ofRealHom_eq_coe] at hmt
   rw [Complex.ofReal_mul, ← hmt]
   norm_num
+
+/-- Htilde(s,z) = H(s,z)(1 - z 3^-s): the p = 3 pole factored out, leaving a
+function analytic in |z| < 5^s.  Cauchy's estimate on |z| = R < 5 then bounds
+the Taylor coefficients by M_R R^-k, which is the remainder bound of
+odd/PROOF.md section 5. -/
+noncomputable def HoddTilde (s : ℝ) (z : ℂ) : ℂ :=
+  Hodd s z * (1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ))
+
+/-- The p = 3 factor of Hodd, isolated. -/
+theorem HoddTilde_eq (s : ℝ) (z : ℂ) :
+    HoddTilde s z = Hodd s z * (1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ)) := rfl
+
+/-- At z = 1, s = 1: Htilde(1,1) = (1/2)(1 - 1/3) = 1/3. -/
+theorem HoddTilde_one_one : HoddTilde 1 1 = (1/3 : ℂ) := by
+  unfold HoddTilde
+  rw [Hodd_one_one]
+  rw [Real.rpow_neg_one]
+  push_cast
+  norm_num
+
+/-- Cauchy's coefficient estimate, in the form odd/PROOF.md section 5 uses:
+if f is analytic on the closed ball of radius R and bounded by C on the
+sphere, its Taylor coefficients at 0 satisfy |a_k| <= C / R^k.
+
+This is the shape of the remainder bound; the value of C for Htilde is the
+certified interval computation (odd/numerics/mr_certified.py) and stays an
+input, exactly as the contour sups do in the main development. -/
+theorem cauchy_coeff_bound (f : ℂ → ℂ) (R C : ℝ) (hR : 0 < R)
+    (hf : DiffContOnCl ℂ f (Metric.ball 0 R))
+    (hC : ∀ z ∈ Metric.sphere (0 : ℂ) R, ‖f z‖ ≤ C) (k : ℕ) :
+    ‖iteratedDeriv k f 0‖ / (Nat.factorial k) ≤ C / R ^ k := by
+  have h := Complex.norm_iteratedDeriv_le_of_forall_mem_sphere_norm_le k hR hf hC
+  have hk : (0:ℝ) < (Nat.factorial k) := by
+    exact_mod_cast Nat.factorial_pos k
+  rw [div_le_iff₀ hk]
+  have hRk : (0:ℝ) < R ^ k := by positivity
+  calc ‖iteratedDeriv k f 0‖ ≤ (Nat.factorial k : ℝ) * C / R ^ k := h
+    _ = C / R ^ k * (Nat.factorial k : ℝ) := by ring
