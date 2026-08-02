@@ -213,3 +213,40 @@ section 3. -/
 theorem Hodd_one_one : Hodd 1 1 = (1/2 : ℂ) := by
   rw [Hodd_at_one 1 le_rfl]
   norm_num
+
+/-- At s = 1 the Hodd factors take their elementary form:
+p^(-1) = 1/p, so the p-th factor is (1 - 2/p)^-1 (1 - 1/p)^2. -/
+theorem Hodd_factor_at_two (p : {p : ℕ // p.Prime ∧ 3 ≤ p}) :
+    (1 - (2:ℂ) * (((p : ℝ) ^ (-(1:ℝ)) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-(1:ℝ)) : ℝ)) : ℂ) ^ (2:ℂ)
+      = (((1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 : ℝ) : ℂ) := by
+  have hp3 : (3:ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.property.2
+  have hpinv : ((p : ℕ) : ℝ) ^ (-(1:ℝ)) = 1 / ((p : ℕ) : ℝ) := by
+    rw [Real.rpow_neg_one, one_div]
+  rw [hpinv]
+  have h2 : (((1 - 1 / ((p : ℕ) : ℝ) : ℝ)) : ℂ) ^ (2:ℂ)
+      = (((1 - 1 / ((p : ℕ) : ℝ) : ℝ)) : ℂ) ^ (2:ℕ) := by
+    rw [← Complex.cpow_natCast]
+    norm_num
+  rw [h2]
+  push_cast
+  field_simp
+
+/-- H(1,2) = d, the constant from the main development.
+
+(1 - 1/2)^2 = 1/4 supplies dConst's prefactor, and the p-th factor matches
+term for term by Hodd_factor_at_two.  See odd/PROOF.md section 4. -/
+theorem Hodd_one_two : Hodd 1 2 = ((dConst : ℝ) : ℂ) := by
+  unfold Hodd dConst
+  rw [dConst_prod_eq_subtype]
+  have hpre : ((1 - (2:ℝ) ^ (-(1:ℝ)) : ℝ) : ℂ) ^ (2:ℂ) = (1/4 : ℂ) := by
+    rw [Real.rpow_neg_one]
+    norm_num
+  rw [hpre]
+  -- the p-th factors agree, then push the cast through the product
+  rw [tprod_congr Hodd_factor_at_two]
+  have hmt := dConst_family_multipliable.map_tprod Complex.ofRealHom
+        Complex.continuous_ofReal
+  simp only [Complex.ofRealHom_eq_coe] at hmt
+  rw [Complex.ofReal_mul, ← hmt]
+  norm_num
