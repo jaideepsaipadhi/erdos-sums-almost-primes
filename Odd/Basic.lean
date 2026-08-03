@@ -990,3 +990,38 @@ theorem integral_split_at_two (g : ℝ → ℝ)
   rw [← hunion] at hint ⊢
   rw [MeasureTheory.setIntegral_union hdisj measurableSet_Ici
     (hint.mono_set Set.subset_union_left) (hint.mono_set Set.subset_union_right)]
+
+/-! ### Zeta's Laurent constant
+
+Mathlib has `riemannZeta_residue_one` and `tendsto_harmonic_sub_log` but not
+the constant term.  The route here, for real s > 1 only (which is all the odd
+proof needs):
+
+    zeta(s) - 1/(s-1) = sum_n [ (n+1)^-s - int_{n+1}^{n+2} x^-s dx ]
+
+each bracket tends to 1/(n+1) - log(1 + 1/(n+1)), dominated by C/(n+1)^2, and
+the limiting sum is gamma by `tendsto_harmonic_sub_log`.
+-/
+
+/-- The n-th bracket: (n+1)^-s minus the integral of x^-s over [n+1, n+2]. -/
+noncomputable def zetaBracket (n : ℕ) (s : ℝ) : ℝ :=
+  ((n : ℝ) + 1) ^ (-s) - ∫ x in Set.Ioc ((n : ℝ) + 1) ((n : ℝ) + 2), x ^ (-s)
+
+/-- At s = 1 the bracket is 1/(n+1) - log((n+2)/(n+1)). -/
+theorem zetaBracket_at_one (n : ℕ) :
+    zetaBracket n 1 = 1 / ((n : ℝ) + 1) - (Real.log ((n : ℝ) + 2) - Real.log ((n : ℝ) + 1)) := by
+  unfold zetaBracket
+  have hn1 : (0:ℝ) < (n : ℝ) + 1 := by positivity
+  have hn2 : (n : ℝ) + 1 < (n : ℝ) + 2 := by linarith
+  rw [Real.rpow_neg_one]
+  congr 1
+  · rw [one_div]
+  · have hlog : Real.log ((n : ℝ) + 2) - Real.log ((n : ℝ) + 1)
+        = Real.log (((n : ℝ) + 2) / ((n : ℝ) + 1)) := by
+      rw [Real.log_div (by positivity) (by positivity)]
+    rw [hlog, ← integral_one_div_of_pos hn1 (by linarith),
+      intervalIntegral.integral_of_le (by linarith : ((n:ℝ)+1) ≤ (n:ℝ)+2)]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioc
+    intro x hx
+    simp only
+    rw [Real.rpow_neg_one, one_div]
