@@ -1035,3 +1035,29 @@ theorem integral_Ioi_one_rpow_neg (s : ℝ) (hs : 1 < s) :
   have hne : s - 1 ≠ 0 := by intro h; linarith
   rw [show (-s + 1 : ℝ) = -(s - 1) by ring, div_neg]
   ring
+
+/-- Ioi 1 decomposes into the unit intervals Ioc (n+1) (n+2). -/
+theorem Ioi_one_eq_iUnion :
+    Set.Ioi (1:ℝ) = ⋃ n : ℕ, Set.Ioc ((n : ℝ) + 1) ((n : ℝ) + 2) := by
+  ext x
+  simp only [Set.mem_Ioi, Set.mem_iUnion, Set.mem_Ioc]
+  constructor
+  · intro hx
+    refine ⟨⌈x - 2⌉₊, ?_, ?_⟩
+    · have h := Nat.le_ceil (x - 2)
+      rcases Nat.eq_zero_or_pos ⌈x - 2⌉₊ with h0 | hpos
+      · rw [h0]; push_cast; linarith [Nat.ceil_eq_zero.mp h0]
+      · have hx2 : (0:ℝ) ≤ x - 2 := by
+          by_contra hneg
+          push_neg at hneg
+          have : ⌈x - 2⌉₊ = 0 := Nat.ceil_eq_zero.mpr (le_of_lt hneg)
+          omega
+        have := Nat.ceil_lt_add_one hx2
+        push_cast at this ⊢
+        linarith
+    · have := Nat.le_ceil (x - 2)
+      push_cast
+      linarith
+  · rintro ⟨n, h1, _⟩
+    have : (0:ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+    linarith
