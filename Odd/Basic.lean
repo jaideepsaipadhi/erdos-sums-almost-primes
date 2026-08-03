@@ -251,6 +251,70 @@ theorem Hodd_one_two : Hodd 1 2 = ((dConst : ℝ) : ℂ) := by
   rw [Complex.ofReal_mul, ← hmt]
   norm_num
 
+/-- A prime p >= 5 that is not 5 is at least 7 (6 is not prime). -/
+theorem seven_le_of_prime_ne_five {p : ℕ} (hp : p.Prime) (h5 : 5 ≤ p) (hne : p ≠ 5) :
+    7 ≤ p := by
+  rcases Nat.lt_or_ge p 7 with h | h
+  · interval_cases p
+    · exact absurd rfl hne
+    · exact absurd hp (by decide)
+  · exact h
+
+/-- The complement of {b5} in the p >= 3 primes is equivalent to the p >= 5 primes. -/
+def compl_b5_equiv :
+    (({⟨ 5, (by norm_num : Nat.Prime 5), le_refl 5 ⟩} : Set {p : ℕ // p.Prime ∧ 5 ≤ p})ᶜ :
+      Set {p : ℕ // p.Prime ∧ 5 ≤ p}) ≃ {p : ℕ // p.Prime ∧ 7 ≤ p} where
+  toFun q := ⟨ q.1.1, q.1.2.1, by
+    have hne : q.1.1 ≠ 5 := by
+      intro h
+      apply q.2
+      apply Subtype.ext
+      exact h
+    exact seven_le_of_prime_ne_five q.1.2.1 q.1.2.2 hne ⟩
+  invFun r := ⟨ ⟨ r.1, r.2.1, by have := r.2.2; omega ⟩, by
+    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+    intro h
+    have h5 := r.2.2
+    have : r.1 = 5 := congrArg Subtype.val h
+    omega ⟩
+  left_inv := by
+    intro q
+    apply Subtype.ext
+    apply Subtype.ext
+    rfl
+  right_inv := by
+    intro r
+    apply Subtype.ext
+    rfl
+
+
+
+/-- If the p >= 7 tail is multipliable, so is the p >= 5 family, and the
+product splits off the p = 5 factor. -/
+theorem tprod_split_five {M : Type*} [CommMonoid M] [TopologicalSpace M] [T2Space M]
+    [ContinuousMul M] (f : ℕ → M)
+    (hf5 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 7 ≤ p} => f p)) :
+    Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => f p)
+      ∧ (∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p}, f p)
+        = f 5 * ∏' p : {p : ℕ // p.Prime ∧ 7 ≤ p}, f p := by
+  classical
+  set b5 : {p : ℕ // p.Prime ∧ 5 ≤ p} := ⟨ 5, (by norm_num : Nat.Prime 5), le_refl 5 ⟩ with hb5
+  set g : {p : ℕ // p.Prime ∧ 5 ≤ p} → M := fun p => f p with hg
+  have hsingle : HasProd ((({b5} : Set {p : ℕ // p.Prime ∧ 5 ≤ p}).restrict g)) (g b5) := by
+    have := hasProd_singleton b5 g
+    exact this
+  have hcompl : HasProd (((({b5} : Set {p : ℕ // p.Prime ∧ 5 ≤ p})ᶜ).restrict g))
+      (∏' p : {p : ℕ // p.Prime ∧ 7 ≤ p}, f p) := by
+    have hbase : HasProd (fun p : {p : ℕ // p.Prime ∧ 7 ≤ p} => f p)
+        (∏' p : {p : ℕ // p.Prime ∧ 7 ≤ p}, f p) := hf5.hasProd
+    exact (compl_b5_equiv.hasProd_iff).mpr hbase
+  have hequiv : Multipliable (((({b5} : Set {p : ℕ // p.Prime ∧ 5 ≤ p})ᶜ).restrict g)) :=
+    hcompl.multipliable
+  have hall := hsingle.mul_compl hcompl
+  refine ⟨ hall.multipliable, ?_⟩
+  rw [hall.tprod_eq]
+
+
 /-- The p >= 7 Euler tail of Hodd, the analogue of G2tailC one prime along.
 Analytic in |z| < 7^s, which is what lets Htilde be handled at radius 4. -/
 noncomputable def HoddTail (s : ℝ) (z : ℂ) : ℂ :=
