@@ -964,3 +964,29 @@ theorem substitution_near_pole (g : ℝ → ℝ)
   simp only [ContinuousLinearMap.det_toSpanSingleton, smul_eq_mul]
   rw [abs_neg, abs_of_nonneg (le_of_lt (Real.exp_pos _))]
   ring
+
+/-- Splitting the integral at s = 2: the near-pole piece, where the
+substitution applies, and the far piece, controlled by the geometric bound
+P_odd(s) <= 1.91 * 3^-s. -/
+theorem integral_split_at_two (g : ℝ → ℝ)
+    (hint : MeasureTheory.IntegrableOn g (Set.Ioi 1) MeasureTheory.volume) :
+    ∫ s in Set.Ioi (1:ℝ), g s
+      = (∫ s in Set.Ioo (1:ℝ) 2, g s) + ∫ s in Set.Ici (2:ℝ), g s := by
+  have hdisj : Disjoint (Set.Ioo (1:ℝ) 2) (Set.Ici (2:ℝ)) := by
+    rw [Set.disjoint_left]
+    intro x hx hx2
+    exact absurd hx2 (by simp only [Set.mem_Ici, not_le]; exact hx.2)
+  have hunion : Set.Ioo (1:ℝ) 2 ∪ Set.Ici (2:ℝ) = Set.Ioi (1:ℝ) := by
+    ext x
+    simp only [Set.mem_union, Set.mem_Ioo, Set.mem_Ici, Set.mem_Ioi]
+    constructor
+    · rintro (⟨h1, _⟩ | h2)
+      · exact h1
+      · linarith
+    · intro h
+      rcases lt_or_ge x 2 with h2 | h2
+      · exact Or.inl ⟨h, h2⟩
+      · exact Or.inr h2
+  rw [← hunion] at hint ⊢
+  rw [MeasureTheory.setIntegral_union hdisj measurableSet_Ici
+    (hint.mono_set Set.subset_union_left) (hint.mono_set Set.subset_union_right)]
