@@ -746,7 +746,7 @@ theorem cauchy_coeff_bound (f : ℂ → ℂ) (R C : ℝ) (hR : 0 < R)
 p >= 7 tail.  This is the form Htilde's analyticity needs -- the p = 3 factor's
 pole at |z| = 3^s is what Htilde's (1 - z 3^-s) cancels, and the p = 5 factor's
 pole sits at |z| = 5^s > 4. -/
-theorem Hodd_factored (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 4)
+theorem Hodd_factored (s : ℝ) (hs : 1 ≤ s) (z : ℂ)
     (hmul7 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 7 ≤ p} =>
       (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (p : ℝ) ^ (-s) : ℝ)) : ℂ) ^ z)) :
     Hodd s z = (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *
@@ -764,3 +764,101 @@ theorem Hodd_factored (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 4)
   rw [hsplit3, hsplit5]
   norm_num [hf]
   ring
+
+/-- The p = 3 Euler factor is differentiable on the wide disc |z| < 4.
+Simpler than the general per-prime lemma: no log estimates are needed, only
+that 1 - z*3^(-s) is nonvanishing there (|z*3^(-s)| < 5 / 6 at s = 1) and that
+the cpow factor is entire.  The general wide lemma requires p >= 5, so the
+p = 3 factor of G2C needs this separate treatment. -/
+theorem prime_five_differentiableOn_four (s : ℝ) (hs : 1 ≤ s) :
+    DifferentiableOn ℂ (fun z : ℂ => (1 - z * ((((5 : ℝ)) ^ (-s) : ℝ) : ℂ))⁻¹ *
+      ((((1 - ((5 : ℝ)) ^ (-s) : ℝ)) : ℂ)) ^ z) (Metric.ball 0 (4)) := by
+  set a : ℝ := ((5 : ℝ)) ^ (-s) with ha_def
+  have ha_pos : (0 : ℝ) < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1 / 5 := by
+    rw [ha_def]
+    have h1 : ((5 : ℝ)) ^ (-s) ≤ ((5 : ℝ)) ^ (-(1 : ℝ)) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+      linarith
+    rw [Real.rpow_neg_one] at h1
+    norm_num at h1
+    linarith
+  have h1a_pos : (0 : ℝ) < 1 - a := by linarith
+  have h1a_ne : ((((1 - a : ℝ))) : ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  intro z hz
+  rw [Metric.mem_ball, dist_zero_right] at hz
+  have hza : Norm.norm (z * ((a : ℝ) : ℂ)) < 1 := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ha_pos]
+    calc Norm.norm z * a < (4) * a := by
+          apply mul_lt_mul_of_pos_right hz ha_pos
+      _ ≤ (4) * (1 / 5) := by
+          apply mul_le_mul_of_nonneg_left ha_le (by norm_num)
+      _ < 1 := by norm_num
+  have hne : (1 : ℂ) - z * ((a : ℝ) : ℂ) ≠ 0 := by
+    intro hcon
+    have := sub_eq_zero.mp hcon
+    rw [← this] at hza
+    simp at hza
+  apply DifferentiableAt.differentiableWithinAt
+  apply DifferentiableAt.mul
+  · have hinner : DifferentiableAt ℂ (fun w : ℂ => 1 - w * ((a : ℝ) : ℂ)) z :=
+      (differentiableAt_const 1).sub (differentiableAt_id.mul (differentiableAt_const _))
+    exact hinner.inv hne
+  · exact DifferentiableAt.const_cpow differentiableAt_id (Or.inl h1a_ne)
+
+
+/-- Htilde in factored form: the (1 - z 3^-s) multiplier cancels the p = 3
+factor's inverse, leaving three entire prefactors, the p = 5 factor (whose
+pole is at |z| = 5^s > 4) and the p >= 7 tail.  Manifestly differentiable on
+ball 0 4. -/
+theorem HoddTilde_factored (s : ℝ) (hs : 1 ≤ s) (z : ℂ)
+    (h3ne : 1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ) ≠ 0)
+    (hmul7 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 7 ≤ p} =>
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (p : ℝ) ^ (-s) : ℝ)) : ℂ) ^ z)) :
+    HoddTilde s z = (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *
+      (((1 - (3:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *
+      ((1 - z * (((5:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (5:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z) *
+      HoddTail s z := by
+  unfold HoddTilde
+  rw [Hodd_factored s hs z hmul7]
+  field_simp
+
+/-- ITEM 2: Htilde is differentiable on ball 0 4.
+
+Three factors: two entire prefactors (c^z for constant c > 0), the p = 5
+Euler factor whose pole sits at |z| = 5^s >= 5, and the p >= 7 tail.  The
+p = 3 pole is gone -- cancelled by Htilde's own (1 - z 3^-s). -/
+theorem HoddTilde_differentiableOn (s : ℝ) (hs : 1 ≤ s)
+    (hfac : ∀ z ∈ Metric.ball (0:ℂ) 4, HoddTilde s z =
+      (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z * (((1 - (3:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *
+      ((1 - z * (((5:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (5:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z) *
+      HoddTail s z) :
+    DifferentiableOn ℂ (fun z => HoddTilde s z) (Metric.ball 0 4) := by
+  apply DifferentiableOn.congr _ hfac
+  apply DifferentiableOn.mul
+  apply DifferentiableOn.mul
+  apply DifferentiableOn.mul
+  · apply Differentiable.differentiableOn
+    intro w
+    apply DifferentiableAt.const_cpow differentiableAt_id
+    left
+    have hpos : (0:ℝ) < 1 - (2:ℝ) ^ (-s) := by
+      have h : (2:ℝ) ^ (-s) < 1 :=
+        Real.rpow_lt_one_of_one_lt_of_neg (by norm_num) (by linarith)
+      linarith
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    exact ne_of_gt hpos
+  · apply Differentiable.differentiableOn
+    intro w
+    apply DifferentiableAt.const_cpow differentiableAt_id
+    left
+    have hpos : (0:ℝ) < 1 - (3:ℝ) ^ (-s) := by
+      have h : (3:ℝ) ^ (-s) < 1 :=
+        Real.rpow_lt_one_of_one_lt_of_neg (by norm_num) (by linarith)
+      linarith
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    exact ne_of_gt hpos
+  · exact prime_five_differentiableOn_four s hs
+  · exact HoddTail_differentiableOn_seven s hs
