@@ -45,6 +45,53 @@ def fOdd (k : ℕ) : ℝ :=
 
 
 
+/-- F_k(s) := Σ_{Ω(n)=k} n^{-s}, the Dirichlet series restricted to
+    k-almost-primes. -/
+noncomputable def FkOdd (k : ℕ) (s : ℝ) : ℝ :=
+  ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k}, (n : ℝ) ^ (-s)
+
+/-- F_k(s) is summable for s > 1. -/
+lemma FkOdd_summable (k : ℕ) (s : ℝ) (hs : 1 < s) :
+    Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} => (n : ℝ) ^ (-s)) := by
+  have hcomp : Summable (fun n : ℕ => (n : ℝ) ^ (-s)) :=
+    Real.summable_nat_rpow.mpr (by linarith)
+  exact hcomp.subtype _
+
+/-- The Tonelli exchange: f_k = ∫₁^∞ F_k(s) ds. -/
+lemma fOdd_eq_integral_FkOdd (k : ℕ) (hk : 1 ≤ k)
+    (hsum1 : Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n))) :
+    fOdd k = ∫ s in Set.Ioi (1 : ℝ), FkOdd k s := by
+  unfold fOdd FkOdd
+  have habs : ∀ (n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k}) (s : ℝ),
+      ‖(n : ℝ) ^ (-s)‖ = (n : ℝ) ^ (-s) := by
+    intro n s
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+  have hnorm_eq : ∀ n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k},
+      ∫ s in Set.Ioi (1 : ℝ), ‖(n : ℝ) ^ (-s)‖ = 1 / ((n : ℝ) * Real.log n) := by
+    intro n
+    simp_rw [habs]
+    exact integral_n_neg_s n (by omega : 2 ≤ (n : ℕ))
+  have hsummable_norm : Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
+      ∫ s in Set.Ioi (1 : ℝ), ‖(n : ℝ) ^ (-s)‖) := by
+    simp_rw [hnorm_eq]; exact hsum1
+  have hint : ∀ n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k},
+      MeasureTheory.Integrable (fun s => (n : ℝ) ^ (-s))
+        (MeasureTheory.volume.restrict (Set.Ioi (1 : ℝ))) := by
+    intro n
+    by_contra hni
+    have hz := MeasureTheory.integral_undef hni
+    rw [integral_n_neg_s n (by omega : 2 ≤ (n : ℕ))] at hz
+    have : (0 : ℝ) < 1 / ((n : ℝ) * Real.log n) := by
+      have hn2 : 2 ≤ (n : ℕ) := (by omega : 2 ≤ (n : ℕ))
+      have : (1 : ℝ) < (n : ℝ) := by exact_mod_cast (by omega : 1 < (n : ℕ))
+      have := Real.log_pos this
+      positivity
+    linarith [hz ▸ this]
+  rw [tsum_congr (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} => (integral_n_neg_s n (by omega : 2 ≤ (n : ℕ))).symm)]
+  exact MeasureTheory.integral_tsum_of_summable_integral_norm hint hsummable_norm
+
+
 /-- S = sum over odd primes of log p / ((p-1)(p-2)).
 
 Certified enclosure [0.8593920314, 0.8593986014]: head to 5e6 plus the tail
