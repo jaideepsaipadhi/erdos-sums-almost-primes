@@ -1025,3 +1025,13 @@ theorem zetaBracket_at_one (n : ℕ) :
     intro x hx
     simp only
     rw [Real.rpow_neg_one, one_div]
+
+/-- For s > 1, the improper integral of x^-s over [1, inf) is 1/(s-1). -/
+theorem integral_Ioi_one_rpow_neg (s : ℝ) (hs : 1 < s) :
+    ∫ x in Set.Ioi (1:ℝ), x ^ (-s) = 1 / (s - 1) := by
+  have h := integral_Ioi_rpow_of_lt (a := -s) (by linarith) (c := 1) (by norm_num)
+  rw [h]
+  rw [Real.one_rpow]
+  have hne : s - 1 ≠ 0 := by intro h; linarith
+  rw [show (-s + 1 : ℝ) = -(s - 1) by ring, div_neg]
+  ring
