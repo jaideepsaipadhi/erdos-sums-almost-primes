@@ -741,3 +741,26 @@ theorem cauchy_coeff_bound (f : ℂ → ℂ) (R C : ℝ) (hR : 0 < R)
   have hRk : (0:ℝ) < R ^ k := by positivity
   calc ‖iteratedDeriv k f 0‖ ≤ (Nat.factorial k : ℝ) * C / R ^ k := h
     _ = C / R ^ k * (Nat.factorial k : ℝ) := by ring
+
+/-- Hodd factored: the p = 3 and p = 5 Euler factors pulled out, leaving the
+p >= 7 tail.  This is the form Htilde's analyticity needs -- the p = 3 factor's
+pole at |z| = 3^s is what Htilde's (1 - z 3^-s) cancels, and the p = 5 factor's
+pole sits at |z| = 5^s > 4. -/
+theorem Hodd_factored (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 4)
+    (hmul7 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 7 ≤ p} =>
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (p : ℝ) ^ (-s) : ℝ)) : ℂ) ^ z)) :
+    Hodd s z = (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *
+      ((1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (3:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z) *
+      ((1 - z * (((5:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (5:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z) *
+      HoddTail s z := by
+  unfold Hodd HoddTail
+  set f : ℕ → ℂ := fun n =>
+    (1 - z * (((n : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (n : ℝ) ^ (-s) : ℝ)) : ℂ) ^ z with hf
+  have h5 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} => f p) := by
+    have := (tprod_split_five f hmul7).1
+    exact this
+  have hsplit5 := (tprod_split_five f hmul7).2
+  have hsplit3 := (tprod_split_three f h5).2
+  rw [hsplit3, hsplit5]
+  norm_num [hf]
+  ring
