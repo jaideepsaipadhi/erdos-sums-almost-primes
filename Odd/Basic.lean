@@ -909,3 +909,58 @@ theorem HoddTilde_differentiableOn (s : ℝ) (hs : 1 ≤ s)
     exact ne_of_gt hpos
   · exact prime_five_differentiableOn_four s hs
   · exact HoddTail_differentiableOn_seven s hs
+
+/-- The map u |-> 1 + e^(-u) sends Ioi 0 onto Ioo 1 2. -/
+theorem exp_sub_image : (fun u : ℝ => 1 + Real.exp (-u)) '' Set.Ioi 0 = Set.Ioo 1 2 := by
+  ext s
+  constructor
+  · rintro ⟨u, hu, rfl⟩
+    constructor
+    · have : 0 < Real.exp (-u) := Real.exp_pos _
+      linarith
+    · have : Real.exp (-u) < 1 := by
+        rw [Real.exp_lt_one_iff]
+        simpa using hu
+      linarith
+  · rintro ⟨h1, h2⟩
+    refine ⟨-Real.log (s - 1), ?_, ?_⟩
+    · simp only [Set.mem_Ioi, neg_pos]
+      apply Real.log_neg <;> linarith
+    · simp only
+      rw [neg_neg, Real.exp_log (by linarith)]
+      ring
+
+
+/-- The substitution s = 1 + e^(-u) on the near-pole piece.
+
+Maps Ioi 0 onto Ioo 1 2 with ds = -e^(-u) du, so for integrable g
+
+    int_{Ioo 1 2} g(s) ds = int_{Ioi 0} g(1 + e^(-u)) e^(-u) du.
+
+This is the change of variables odd/PROOF.md section 2 performs; the far piece
+s >= 2 is handled by the tail bound P_odd(s) <= 1.91 * 3^-s instead. -/
+theorem substitution_near_pole (g : ℝ → ℝ)
+    (hg : MeasureTheory.IntegrableOn g (Set.Ioo 1 2) MeasureTheory.volume)
+    (hgc : ContinuousOn g (Set.Ioo 1 2)) :
+    ∫ s in Set.Ioo (1:ℝ) 2, g s
+      = ∫ u in Set.Ioi (0:ℝ), g (1 + Real.exp (-u)) * Real.exp (-u) := by
+  have hinj : Set.InjOn (fun u : ℝ => 1 + Real.exp (-u)) (Set.Ioi 0) := by
+    intro a _ b _ hab
+    simp only [add_right_inj] at hab
+    have := Real.exp_injective hab
+    linarith
+  have hderiv : ∀ u ∈ Set.Ioi (0:ℝ),
+      HasFDerivWithinAt (fun u : ℝ => 1 + Real.exp (-u))
+        (ContinuousLinearMap.toSpanSingleton ℝ (-Real.exp (-u)))
+        (Set.Ioi 0) u := by
+    intro u _
+    have h := ((Real.hasDerivAt_exp (-u)).comp u (hasDerivAt_neg u)).const_add 1
+    simpa using h.hasDerivWithinAt.hasFDerivWithinAt
+  rw [← exp_sub_image]
+  rw [MeasureTheory.integral_image_eq_integral_abs_det_fderiv_smul
+        MeasureTheory.volume measurableSet_Ioi hderiv hinj g]
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+  intro u hu
+  simp only [ContinuousLinearMap.det_toSpanSingleton, smul_eq_mul]
+  rw [abs_neg, abs_of_nonneg (le_of_lt (Real.exp_pos _))]
+  ring
