@@ -1202,3 +1202,53 @@ theorem zetaBracket_le_diff (n : ℕ) (s : ℝ) (hs : 1 < s) :
     rw [MeasureTheory.measureReal_def, Real.volume_Ioc]
     norm_num
   linarith [hint, hconst.le, hconst.ge]
+
+/-- The summable dominating bound: |zetaBracket n s| <= 2/(n+1)^2 for
+s in (1,2].  By the mean value theorem, (n+1)^-s - (n+2)^-s = s c^(-s-1) for
+some c in (n+1,n+2), and s <= 2 with c >= n+1, s+1 >= 2 gives the bound. -/
+theorem zetaBracket_bound (n : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
+    |zetaBracket n s| ≤ 2 / ((n:ℝ) + 1) ^ 2 := by
+  have hlo := zetaBracket_nonneg_of_mem n s hs
+  have hhi := zetaBracket_le_diff n s hs
+  rw [abs_of_nonneg hlo]
+  refine le_trans hhi ?_
+  have hn0 : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+  have hn1 : (0:ℝ) < (n:ℝ) + 1 := by linarith
+  have hab : ((n:ℝ)+1) < ((n:ℝ)+2) := by linarith
+  have hderiv : ∀ x ∈ Set.Ioo ((n:ℝ)+1) ((n:ℝ)+2),
+      HasDerivAt (fun y : ℝ => y ^ (-s)) (-s * x ^ (-s-1)) x := by
+    intro x hx
+    have hx0 : (0:ℝ) < x := by linarith [hx.1]
+    simpa using Real.hasDerivAt_rpow_const (x := x) (p := -s) (Or.inl (ne_of_gt hx0))
+  have hcont : ContinuousOn (fun y : ℝ => y ^ (-s)) (Set.Icc ((n:ℝ)+1) ((n:ℝ)+2)) := by
+    apply ContinuousOn.rpow_const continuousOn_id
+    intro x hx
+    left
+    have : (0:ℝ) < x := by linarith [hx.1]
+    exact ne_of_gt this
+  obtain ⟨c, hc, hcv⟩ := exists_hasDerivAt_eq_slope
+    (fun y : ℝ => y ^ (-s)) (fun x => -s * x ^ (-s-1)) hab hcont hderiv
+  simp only [add_sub_add_left_eq_sub] at hcv
+  norm_num at hcv
+  -- hcv : (n+2)^-s - (n+1)^-s = -s * c^(-s-1)
+  have hc0 : (0:ℝ) < c := by linarith [hc.1]
+  -- c^(-s-1) <= (n+1)^(-s-1) <= (n+1)^(-2)
+  have h1 : c ^ (-s-1) ≤ ((n:ℝ)+1) ^ (-s-1) :=
+    Real.rpow_le_rpow_of_nonpos hn1 (le_of_lt hc.1) (by linarith)
+  have h2 : ((n:ℝ)+1) ^ (-s-1) ≤ ((n:ℝ)+1) ^ (-2:ℝ) := by
+    apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+    linarith
+  have h3 : ((n:ℝ)+1) ^ (-2:ℝ) = 1 / ((n:ℝ)+1) ^ 2 := by
+    rw [Real.rpow_neg (le_of_lt hn1), show (2:ℝ) = ((2:ℕ):ℝ) by norm_num,
+      Real.rpow_natCast]
+    rw [one_div]
+  have hcpos : (0:ℝ) ≤ c ^ (-s-1) := Real.rpow_nonneg (le_of_lt hc0) _
+  have hstep : s * c ^ (-s-1) ≤ 2 * c ^ (-s-1) :=
+    mul_le_mul_of_nonneg_right hs2 hcpos
+  have hstep2 : (2:ℝ) * c ^ (-s-1) ≤ 2 * ((n:ℝ)+1) ^ (-s-1) := by linarith
+  have hstep3 : (2:ℝ) * ((n:ℝ)+1) ^ (-s-1) ≤ 2 * ((n:ℝ)+1) ^ (-2:ℝ) := by linarith
+  rw [h3] at hstep3
+  have hgoal : ((n:ℝ)+1) ^ (-s) - ((n:ℝ)+2) ^ (-s) = s * c ^ (-s-1) := by linarith [hcv]
+  rw [hgoal]
+  have : (2:ℝ) * (1 / ((n:ℝ)+1) ^ 2) = 2 / ((n:ℝ)+1) ^ 2 := by ring
+  linarith [hstep, hstep2, hstep3, this]
