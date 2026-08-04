@@ -1252,3 +1252,44 @@ theorem zetaBracket_bound (n : ℕ) (s : ℝ) (hs : 1 < s) (hs2 : s ≤ 2) :
   rw [hgoal]
   have : (2:ℝ) * (1 / ((n:ℝ)+1) ^ 2) = 2 / ((n:ℝ)+1) ^ 2 := by ring
   linarith [hstep, hstep2, hstep3, this]
+
+/-- The bracket is continuous in s at s = 1 (from the right). -/
+theorem zetaBracket_tendsto (n : ℕ) :
+    Filter.Tendsto (fun s => zetaBracket n s) (nhdsWithin 1 (Set.Ioi 1))
+      (nhds (zetaBracket n 1)) := by
+  unfold zetaBracket
+  apply Filter.Tendsto.sub
+  · -- (n+1)^-s is continuous in s
+    have hb : ((n:ℝ)+1) ≠ 0 := by positivity
+    have h : Continuous (fun s : ℝ => ((n:ℝ)+1) ^ (-s)) := by
+      apply Real.continuous_const_rpow hb |>.comp continuous_neg
+    exact h.continuousAt.continuousWithinAt
+  · -- the integral is continuous in s by dominated convergence,
+    -- dominated by x^-1 on the bounded interval [n+1, n+2]
+    apply MeasureTheory.tendsto_integral_filter_of_dominated_convergence
+      (fun x : ℝ => ((n:ℝ)+1) ^ (-(1:ℝ)))
+    · filter_upwards with s
+      apply MeasureTheory.AEStronglyMeasurable.restrict
+      apply Measurable.aestronglyMeasurable
+      exact measurable_id.pow_const (-s)
+    · filter_upwards [self_mem_nhdsWithin] with s hs
+      filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with x hx
+      have hn0 : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+      have hx0 : (0:ℝ) < x := by linarith [hx.1]
+      have hs1 : (1:ℝ) < s := hs
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (le_of_lt hx0) _)]
+      calc x ^ (-s) ≤ ((n:ℝ)+1) ^ (-s) :=
+            Real.rpow_le_rpow_of_nonpos (by linarith) (le_of_lt hx.1) (by linarith)
+        _ ≤ ((n:ℝ)+1) ^ (-(1:ℝ)) := by
+            apply Real.rpow_le_rpow_of_exponent_le (by linarith)
+            linarith
+    · apply MeasureTheory.integrableOn_const
+      · rw [Real.volume_Ioc]
+        exact ENNReal.ofReal_ne_top
+      · exact enorm_ne_top
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with x hx
+      have hx0 : (0:ℝ) < x := by
+        have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+        linarith [hx.1]
+      exact ((Real.continuous_const_rpow (ne_of_gt hx0)).comp continuous_neg)
+        |>.continuousAt.continuousWithinAt
