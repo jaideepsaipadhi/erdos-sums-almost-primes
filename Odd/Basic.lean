@@ -1109,3 +1109,40 @@ theorem zetaBracket_nonneg (i : ℕ) :
   have := Real.log_le_sub_one_of_pos
     (show (0:ℝ) < 1 + 1 / ((i : ℝ) + 1) by positivity)
   linarith
+
+/-- log(N+1) - log N tends to 0. -/
+theorem log_succ_sub_log_tendsto_zero :
+    Filter.Tendsto (fun N : ℕ => Real.log ((N : ℝ) + 1) - Real.log (N : ℝ))
+      Filter.atTop (nhds 0) := by
+  have heq : ∀ N : ℕ, 0 < N →
+      Real.log ((N : ℝ) + 1) - Real.log (N : ℝ) = Real.log (1 + 1 / (N : ℝ)) := by
+    intro N hN
+    have hNpos : (0:ℝ) < (N : ℝ) := by exact_mod_cast hN
+    rw [← Real.log_div (by positivity) (by positivity)]
+    congr 1
+    field_simp
+  have hzero : Filter.Tendsto (fun N : ℕ => 1 / (N : ℝ)) Filter.atTop (nhds 0) :=
+    tendsto_one_div_atTop_nhds_zero_nat
+  have hinner : Filter.Tendsto (fun N : ℕ => 1 + 1 / (N : ℝ)) Filter.atTop (nhds 1) := by
+    simpa using hzero.const_add (1 : ℝ)
+  have hcomp := (Real.continuousAt_log (by norm_num : (1:ℝ) ≠ 0)).tendsto.comp hinner
+  rw [Real.log_one] at hcomp
+  apply Filter.Tendsto.congr' _ hcomp
+  filter_upwards [Filter.eventually_gt_atTop 0] with N hN
+  exact (heq N hN).symm
+
+/-- The limiting sum is gamma. -/
+theorem tsum_zetaBracket_at_one :
+    ∑' n : ℕ, (1 / ((n : ℝ) + 1) - (Real.log ((n : ℝ) + 2) - Real.log ((n : ℝ) + 1)))
+      = Real.eulerMascheroniConstant := by
+  have hlim : Filter.Tendsto (fun N => (harmonic N : ℝ) - Real.log ((N : ℝ) + 1))
+      Filter.atTop (nhds Real.eulerMascheroniConstant) := by
+    have hbase := tendsto_harmonic_sub_log
+    have := hbase.sub log_succ_sub_log_tendsto_zero
+    simpa using this
+  have hsum : HasSum
+      (fun n : ℕ => 1 / ((n : ℝ) + 1) - (Real.log ((n : ℝ) + 2) - Real.log ((n : ℝ) + 1)))
+      Real.eulerMascheroniConstant := by
+    rw [hasSum_iff_tendsto_nat_of_nonneg zetaBracket_nonneg]
+    simpa only [zetaBracket_partial_sum] using hlim
+  exact hsum.tsum_eq
