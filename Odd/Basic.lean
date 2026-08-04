@@ -1327,3 +1327,40 @@ theorem tsum_zetaBracket_tendsto_gamma :
     exact zetaBracket_bound n s hs.1 hs.2
   have := tendsto_tsum_of_dominated_convergence hbound hlim hdom
   simpa only [zetaBracket_at_one, tsum_zetaBracket_at_one] using this
+
+/-- For real s > 1, zeta(s) - 1/(s-1) is exactly the sum of the brackets. -/
+theorem zeta_sub_pole_eq_tsum (s : ℝ) (hs : 1 < s) :
+    (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) - 1 / (s - 1) = ∑' n : ℕ, zetaBracket n s := by
+  unfold zetaBracket
+  rw [← tsum_integral_Ioc_eq s hs]
+  have h1 : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-s)) := by
+    have hb := Real.summable_nat_rpow.mpr (by linarith : (-s:ℝ) < -1)
+    apply ((summable_nat_add_iff 1).mpr hb).congr
+    intro n
+    push_cast
+    ring_nf
+  have h2 : Summable (fun n : ℕ =>
+      ∫ x in Set.Ioc ((n:ℝ)+1) ((n:ℝ)+2), x ^ (-s)) := by
+    apply Summable.of_nonneg_of_le (fun n => ?_) (fun n => ?_) h1
+    · apply MeasureTheory.setIntegral_nonneg measurableSet_Ioc
+      intro x hx
+      have hn0 : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+      exact Real.rpow_nonneg (by linarith [hx.1]) _
+    · have hb := zetaBracket_nonneg_of_mem n s hs
+      unfold zetaBracket at hb
+      linarith
+  exact (Summable.tsum_sub h1 h2).symm
+
+/-- THE LAURENT CONSTANT, in recognisable form:
+
+    lim_{s -> 1+} ( sum_n (n+1)^-s  -  1/(s-1) )  =  gamma.
+
+For real s > 1 the sum is zeta(s), so this is
+lim (zeta(s) - 1/(s-1)) = gamma -- the statement Mathlib is missing and the
+one item 6 of the odd formalization is built on. -/
+theorem zeta_laurent_constant :
+    Filter.Tendsto (fun s : ℝ => (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) - 1 / (s - 1))
+      (nhdsWithin 1 (Set.Ioc 1 2)) (nhds Real.eulerMascheroniConstant) := by
+  apply Filter.Tendsto.congr' _ tsum_zetaBracket_tendsto_gamma
+  filter_upwards [self_mem_nhdsWithin] with s hs
+  exact (zeta_sub_pole_eq_tsum s hs.1).symm
