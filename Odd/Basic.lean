@@ -1293,3 +1293,37 @@ theorem zetaBracket_tendsto (n : ℕ) :
         linarith [hx.1]
       exact ((Real.continuous_const_rpow (ne_of_gt hx0)).comp continuous_neg)
         |>.continuousAt.continuousWithinAt
+
+/-- ZETA'S LAURENT CONSTANT.  For real s > 1,
+
+    zeta(s) - 1/(s-1) = sum_n zetaBracket n s  ->  gamma  as s -> 1+.
+
+The three hypotheses of dominated convergence are `summable_one_div_sq`-style
+summability of 2/(n+1)^2, `zetaBracket_tendsto` for the termwise limits, and
+`zetaBracket_bound` for the domination. -/
+theorem tsum_zetaBracket_tendsto_gamma :
+    Filter.Tendsto (fun s => ∑' n : ℕ, zetaBracket n s)
+      (nhdsWithin 1 (Set.Ioc 1 2)) (nhds Real.eulerMascheroniConstant) := by
+  have hbound : Summable (fun n : ℕ => 2 / ((n:ℝ) + 1) ^ 2) := by
+    have hbase : Summable (fun n : ℕ => 1 / ((n:ℝ) + 1) ^ 2) := by
+      have := Real.summable_one_div_nat_pow.mpr (by norm_num : 1 < 2)
+      apply (summable_nat_add_iff 1).mpr this |>.congr
+      intro n
+      push_cast
+      ring
+    apply (hbase.mul_left 2).congr
+    intro n
+    rw [mul_one_div]
+  have hlim : ∀ n : ℕ, Filter.Tendsto (fun s => zetaBracket n s)
+      (nhdsWithin 1 (Set.Ioc 1 2)) (nhds (zetaBracket n 1)) := by
+    intro n
+    apply (zetaBracket_tendsto n).mono_left
+    apply nhdsWithin_mono
+    exact Set.Ioc_subset_Ioi_self
+  have hdom : ∀ᶠ s in nhdsWithin 1 (Set.Ioc 1 2),
+      ∀ n : ℕ, ‖zetaBracket n s‖ ≤ 2 / ((n:ℝ) + 1) ^ 2 := by
+    filter_upwards [self_mem_nhdsWithin] with s hs n
+    rw [Real.norm_eq_abs]
+    exact zetaBracket_bound n s hs.1 hs.2
+  have := tendsto_tsum_of_dominated_convergence hbound hlim hdom
+  simpa only [zetaBracket_at_one, tsum_zetaBracket_at_one] using this
