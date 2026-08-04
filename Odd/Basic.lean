@@ -1173,3 +1173,32 @@ theorem zetaBracket_nonneg_of_mem (n : ℕ) (s : ℝ) (hs : 1 < s) :
     rw [MeasureTheory.measureReal_def, Real.volume_Ioc]
     norm_num
   linarith [hint, hconst.le, hconst.ge]
+
+/-- Upper bound: the bracket is at most (n+1)^-s - (n+2)^-s, since x^-s is
+decreasing so the integral is at least the right endpoint value. -/
+theorem zetaBracket_le_diff (n : ℕ) (s : ℝ) (hs : 1 < s) :
+    zetaBracket n s ≤ ((n:ℝ)+1) ^ (-s) - ((n:ℝ)+2) ^ (-s) := by
+  unfold zetaBracket
+  have hmono : ∀ x ∈ Set.Ioc ((n:ℝ)+1) ((n:ℝ)+2), ((n:ℝ)+2) ^ (-s) ≤ x ^ (-s) := by
+    intro x hx
+    have hn0 : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+    have hx0 : (0:ℝ) < x := by linarith [hx.1]
+    exact Real.rpow_le_rpow_of_nonpos hx0 hx.2 (by linarith)
+  have hint : (∫ _x in Set.Ioc ((n:ℝ)+1) ((n:ℝ)+2), ((n:ℝ)+2) ^ (-s))
+      ≤ ∫ x in Set.Ioc ((n:ℝ)+1) ((n:ℝ)+2), x ^ (-s) := by
+    apply MeasureTheory.setIntegral_mono_on _ _ measurableSet_Ioc hmono
+    · apply MeasureTheory.integrableOn_const
+      · rw [Real.volume_Ioc]
+        exact ENNReal.ofReal_ne_top
+      · exact enorm_ne_top
+    · apply MeasureTheory.IntegrableOn.mono_set
+        (integrableOn_Ioi_rpow_of_lt (by linarith : (-s:ℝ) < -1)
+          (show (0:ℝ) < (n:ℝ)+1 by positivity))
+      intro x hx
+      exact hx.1
+  have hconst : (∫ _x in Set.Ioc ((n:ℝ)+1) ((n:ℝ)+2), ((n:ℝ)+2) ^ (-s))
+      = ((n:ℝ)+2) ^ (-s) := by
+    rw [MeasureTheory.setIntegral_const]
+    rw [MeasureTheory.measureReal_def, Real.volume_Ioc]
+    norm_num
+  linarith [hint, hconst.le, hconst.ge]
