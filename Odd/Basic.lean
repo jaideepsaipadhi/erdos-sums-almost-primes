@@ -1146,3 +1146,30 @@ theorem tsum_zetaBracket_at_one :
     rw [hasSum_iff_tendsto_nat_of_nonneg zetaBracket_nonneg]
     simpa only [zetaBracket_partial_sum] using hlim
   exact hsum.tsum_eq
+
+/-- Lower bound: the bracket is nonnegative, since x^-s is decreasing so the
+integral over [n+1, n+2] is at most the left endpoint value. -/
+theorem zetaBracket_nonneg_of_mem (n : ℕ) (s : ℝ) (hs : 1 < s) :
+    0 ≤ zetaBracket n s := by
+  unfold zetaBracket
+  have hmono : ∀ x ∈ Set.Ioc ((n:ℝ)+1) ((n:ℝ)+2), x ^ (-s) ≤ ((n:ℝ)+1) ^ (-s) := by
+    intro x hx
+    exact Real.rpow_le_rpow_of_nonpos (by positivity) (le_of_lt hx.1) (by linarith)
+  have hint : (∫ x in Set.Ioc ((n:ℝ)+1) ((n:ℝ)+2), x ^ (-s))
+      ≤ ∫ _x in Set.Ioc ((n:ℝ)+1) ((n:ℝ)+2), ((n:ℝ)+1) ^ (-s) := by
+    apply MeasureTheory.setIntegral_mono_on _ _ measurableSet_Ioc hmono
+    · apply MeasureTheory.IntegrableOn.mono_set
+        (integrableOn_Ioi_rpow_of_lt (by linarith : (-s:ℝ) < -1)
+          (show (0:ℝ) < (n:ℝ)+1 by positivity))
+      intro x hx
+      exact hx.1
+    · apply MeasureTheory.integrableOn_const
+      · rw [Real.volume_Ioc]
+        exact ENNReal.ofReal_ne_top
+      · exact enorm_ne_top
+  have hconst : (∫ _x in Set.Ioc ((n:ℝ)+1) ((n:ℝ)+2), ((n:ℝ)+1) ^ (-s))
+      = ((n:ℝ)+1) ^ (-s) := by
+    rw [MeasureTheory.setIntegral_const]
+    rw [MeasureTheory.measureReal_def, Real.volume_Ioc]
+    norm_num
+  linarith [hint, hconst.le, hconst.ge]
