@@ -1061,3 +1061,51 @@ theorem Ioi_one_eq_iUnion :
   · rintro ⟨n, h1, _⟩
     have : (0:ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
     linarith
+
+/-- The telescoping: for s > 1, 1/(s-1) is the sum of the unit-interval
+integrals.  Combines Ioi_one_eq_iUnion with countable additivity. -/
+theorem tsum_integral_Ioc_eq (s : ℝ) (hs : 1 < s) :
+    ∑' n : ℕ, (∫ x in Set.Ioc ((n : ℝ) + 1) ((n : ℝ) + 2), x ^ (-s)) = 1 / (s - 1) := by
+  rw [← integral_Ioi_one_rpow_neg s hs, Ioi_one_eq_iUnion]
+  rw [MeasureTheory.integral_iUnion (fun n => measurableSet_Ioc)]
+  · intro i j hij
+    apply Set.disjoint_left.mpr
+    intro x hx hx2
+    simp only [Set.mem_Ioc] at hx hx2
+    rcases lt_or_gt_of_ne hij with h | h
+    · have : (i : ℝ) + 2 ≤ (j : ℝ) + 1 := by
+        have : (i : ℝ) + 1 ≤ (j : ℝ) := by exact_mod_cast h
+        linarith
+      linarith [hx.2, hx2.1]
+    · have : (j : ℝ) + 2 ≤ (i : ℝ) + 1 := by
+        have : (j : ℝ) + 1 ≤ (i : ℝ) := by exact_mod_cast h
+        linarith
+      linarith [hx2.2, hx.1]
+  · rw [← Ioi_one_eq_iUnion]
+    exact integrableOn_Ioi_rpow_of_lt (by linarith : (-s : ℝ) < -1) (by norm_num)
+
+/-- Partial sums of 1/(n+1) - log((n+2)/(n+1)) telescope to H_N - log(N+1). -/
+theorem zetaBracket_partial_sum (N : ℕ) :
+    ∑ n ∈ Finset.range N,
+      (1 / ((n : ℝ) + 1) - (Real.log ((n : ℝ) + 2) - Real.log ((n : ℝ) + 1)))
+      = (harmonic N : ℝ) - Real.log ((N : ℝ) + 1) := by
+  induction N with
+  | zero => simp
+  | succ n ih =>
+    rw [Finset.sum_range_succ, ih]
+    push_cast [harmonic_succ]
+    ring
+
+/-- Each bracket is nonnegative: log(1 + x) <= x. -/
+theorem zetaBracket_nonneg (i : ℕ) :
+    0 ≤ 1 / ((i : ℝ) + 1) - (Real.log ((i : ℝ) + 2) - Real.log ((i : ℝ) + 1)) := by
+  have hlog : Real.log ((i : ℝ) + 2) - Real.log ((i : ℝ) + 1)
+      = Real.log (1 + 1 / ((i : ℝ) + 1)) := by
+    rw [← Real.log_div (by positivity) (by positivity)]
+    congr 1
+    field_simp
+    ring
+  rw [hlog]
+  have := Real.log_le_sub_one_of_pos
+    (show (0:ℝ) < 1 + 1 / ((i : ℝ) + 1) by positivity)
+  linarith
