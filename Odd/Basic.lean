@@ -1414,3 +1414,29 @@ theorem eps_zeta_tendsto_one :
   have hne : eps ≠ 0 := ne_of_gt heps.1
   field_simp
   ring
+
+/-- The inversion, in the form 6c needs.
+
+Setting u = log zeta(1+eps), the two limits above give
+    e^-u = 1/zeta(1+eps) = eps/(eps zeta(1+eps)) = eps (1 + O(eps)),
+so eps = e^-u (1 + gamma e^-u + O(e^-2u)), i.e.
+
+    eps / e^-u  ->  1     and     (eps/e^-u - 1)/e^-u  ->  gamma.
+
+The first is `eps_zeta_tendsto_one` restated; the second is the content of
+`zeta_shift_laurent`. -/
+theorem eps_over_exp_tendsto_one :
+    Filter.Tendsto
+      (fun eps : ℝ => eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))))
+      (nhdsWithin 0 (Set.Ioc 0 1)) (nhds 1) :=
+  eps_zeta_tendsto_one
+
+/-- The second-order term: (eps zeta(1+eps) - 1)/eps -> gamma. -/
+theorem eps_zeta_second_order :
+    Filter.Tendsto
+      (fun eps : ℝ => (eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))) - 1) / eps)
+      (nhdsWithin 0 (Set.Ioc 0 1)) (nhds Real.eulerMascheroniConstant) := by
+  apply Filter.Tendsto.congr' _ zeta_shift_laurent
+  filter_upwards [self_mem_nhdsWithin] with eps heps
+  have hne : eps ≠ 0 := ne_of_gt heps.1
+  field_simp
