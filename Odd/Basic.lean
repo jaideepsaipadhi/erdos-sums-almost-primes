@@ -1440,3 +1440,29 @@ theorem eps_zeta_second_order :
   filter_upwards [self_mem_nhdsWithin] with eps heps
   have hne : eps ≠ 0 := ne_of_gt heps.1
   field_simp
+
+/-! ### 6c: the expansion inside the integral
+
+FkOdd k s = [z^k] prod_{p>=3} (1 - z p^-s)^-1 = [z^k] zeta(s)^z H(s,z).
+
+Since zeta(s)^z = e^(uz) with u = log zeta(s), the coefficient extraction gives
+
+    FkOdd k s = sum_{j<=k} h_j(s) u^(k-j) / (k-j)!
+
+where h_j(s) = [z^j] H(s,z).  Substituting s = 1 + e^-u and integrating over
+u in (0, inf), the j-th term contributes h_j(1) times
+int u^(k-j) e^(-u) / (k-j)! du = 1 at leading order -- and the corrections
+come from h_j's s-dependence and from eps = e^-u (1 + gamma e^-u + ...).
+-/
+
+/-- The coefficient of z^j in H(s, ·), as a contour-free definition via the
+Taylor coefficients of the analytic function Hodd s. -/
+noncomputable def hCoeff (s : ℝ) (j : ℕ) : ℂ :=
+  iteratedDeriv j (fun z => Hodd s z) 0 / (Nat.factorial j)
+
+/-- h_0(1) = H(1,0) = 1: the empty product. -/
+theorem hCoeff_zero_at_one : hCoeff 1 0 = 1 := by
+  unfold hCoeff
+  simp only [iteratedDeriv_zero, Nat.factorial_zero, Nat.cast_one, div_one]
+  unfold Hodd
+  sorry
