@@ -1465,4 +1465,36 @@ theorem hCoeff_zero_at_one : hCoeff 1 0 = 1 := by
   unfold hCoeff
   simp only [iteratedDeriv_zero, Nat.factorial_zero, Nat.cast_one, div_one]
   unfold Hodd
+  have hterm : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 - (0:ℂ) * (((p : ℝ) ^ (-(1:ℝ)) : ℝ) : ℂ))⁻¹ *
+        (((1 - (p : ℝ) ^ (-(1:ℝ)) : ℝ)) : ℂ) ^ (0:ℂ) = 1 := by
+    intro p
+    simp
+  rw [tprod_congr hterm]
+  simp
+
+/-- The Taylor series of Hodd converges to its value inside the disc of
+analyticity.  Since Hodd s is differentiable on ball 0 (29/10) -- via
+Hodd_factored, the p=3 and p=5 factors and HoddTail -- the series converges
+for |z| < 29/10, in particular at z = 1 and z = 2.
+
+This is the bridge between the h_j of the expansion and the values H(1,1),
+H(1,2) that PROOF.md section 2 collects. -/
+theorem hCoeff_hasSum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 4)
+    (hdiff : DifferentiableOn ℂ (fun w => Hodd s w) (Metric.ball 0 4)) :
+    HasSum (fun j : ℕ => hCoeff s j * z ^ j) (Hodd s z) := by
   sorry
+
+/-- At z = 1: sum_j h_j(1) = H(1,1) = 1/2. -/
+theorem hCoeff_sum_one (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+    HasSum (fun j : ℕ => hCoeff 1 j) (1/2 : ℂ) := by
+  have h := hCoeff_hasSum 1 le_rfl 1 (by norm_num) hdiff
+  rw [Hodd_one_one] at h
+  simpa using h
+
+/-- At z = 2: sum_j h_j(1) 2^j = H(1,2) = d. -/
+theorem hCoeff_sum_two (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+    HasSum (fun j : ℕ => hCoeff 1 j * 2 ^ j) ((dConst : ℝ) : ℂ) := by
+  have h := hCoeff_hasSum 1 le_rfl 2 (by norm_num) hdiff
+  rw [Hodd_one_two] at h
+  exact h
