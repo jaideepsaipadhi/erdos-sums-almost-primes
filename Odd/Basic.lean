@@ -1364,3 +1364,53 @@ theorem zeta_laurent_constant :
   apply Filter.Tendsto.congr' _ tsum_zetaBracket_tendsto_gamma
   filter_upwards [self_mem_nhdsWithin] with s hs
   exact (zeta_sub_pole_eq_tsum s hs.1).symm
+
+/-! ### 6b: inverting u = log zeta(s)
+
+From the Laurent constant, zeta(1+eps) = 1/eps + gamma + o(1), so
+    u = log zeta(1+eps) = -log eps + gamma eps + o(eps),
+and inverting,
+    eps = e^-u + gamma e^-2u + O(e^-3u).
+
+Only the first two orders are needed: the e^-u term gives the limit 1/2 via
+H(1,1), and the e^-2u term gives the leading 2^-k via H(1,2).
+-/
+
+/-- The next order: (zeta(1+eps) - 1/eps) -> gamma, restated in eps. -/
+theorem zeta_shift_laurent :
+    Filter.Tendsto (fun eps : ℝ => (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))) - 1 / eps)
+      (nhdsWithin 0 (Set.Ioc 0 1)) (nhds Real.eulerMascheroniConstant) := by
+  have h := zeta_laurent_constant
+  have hmap : Filter.Tendsto (fun eps : ℝ => 1 + eps)
+      (nhdsWithin 0 (Set.Ioc 0 1)) (nhdsWithin 1 (Set.Ioc 1 2)) := by
+    apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
+    · have hc : Filter.Tendsto (fun eps : ℝ => 1 + eps) (nhds 0) (nhds (1 + 0)) :=
+        (continuous_const.add continuous_id).tendsto 0
+      rw [add_zero] at hc
+      exact hc.mono_left nhdsWithin_le_nhds
+    · filter_upwards [self_mem_nhdsWithin] with eps heps
+      exact ⟨by linarith [heps.1], by linarith [heps.2]⟩
+  have hcomp := h.comp hmap
+  apply hcomp.congr
+  intro eps
+  simp only [Function.comp_apply]
+  congr 1
+  ring
+
+/-- eps * zeta(1+eps) tends to 1, and (eps * zeta(1+eps) - 1)/eps tends to
+gamma.  Both follow from the Laurent constant. -/
+theorem eps_zeta_tendsto_one :
+    Filter.Tendsto (fun eps : ℝ => eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))))
+      (nhdsWithin 0 (Set.Ioc 0 1)) (nhds 1) := by
+  have hL := zeta_shift_laurent
+  have hid : Filter.Tendsto (fun eps : ℝ => eps) (nhdsWithin 0 (Set.Ioc 0 1)) (nhds 0) :=
+    Filter.Tendsto.mono_left Filter.tendsto_id nhdsWithin_le_nhds
+  have hprod := hL.mul hid
+  rw [mul_zero] at hprod
+  have hsum := hprod.const_add 1
+  rw [add_zero] at hsum
+  apply Filter.Tendsto.congr' _ hsum
+  filter_upwards [self_mem_nhdsWithin] with eps heps
+  have hne : eps ≠ 0 := ne_of_gt heps.1
+  field_simp
+  ring
