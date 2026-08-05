@@ -1483,6 +1483,19 @@ H(1,2) that PROOF.md section 2 collects. -/
 theorem hCoeff_hasSum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 4)
     (hdiff : DifferentiableOn ℂ (fun w => Hodd s w) (Metric.ball 0 4)) :
     HasSum (fun j : ℕ => hCoeff s j * z ^ j) (Hodd s z) := by
+  -- work on a closed ball of radius 3 (contains z = 1 and z = 2, sits inside 4)
+  have hsub : Metric.closedBall (0:ℂ) (3:ℝ) ⊆ Metric.ball (0:ℂ) 4 := by
+    intro w hw
+    rw [Metric.mem_closedBall, dist_zero_right] at hw
+    rw [Metric.mem_ball, dist_zero_right]
+    linarith
+  have hcb : DifferentiableOn ℂ (fun w => Hodd s w)
+      (Metric.closedBall (0:ℂ) ((3:NNReal) : ℝ)) := by
+    apply hdiff.mono
+    intro w hw
+    apply hsub
+    simpa using hw
+  have hball := hcb.hasFPowerSeriesOnBall (by norm_num)
   sorry
 
 /-- At z = 1: sum_j h_j(1) = H(1,1) = 1/2. -/
