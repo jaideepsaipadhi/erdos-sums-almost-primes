@@ -1647,4 +1647,42 @@ theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
     intro n
     exact iteratedDeriv_term_at_zero s k hk (n : ℕ)
   rw [hcollapse]
+  have hfac : ((Nat.factorial k : ℕ) : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
+  have hpull : (∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+      (if bigOmega (n : ℕ) = k then (Nat.factorial k : ℂ) * ((((n : ℕ) : ℂ)) ^ (-(s : ℂ))) else 0))
+      = (Nat.factorial k : ℂ) * ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+        (if bigOmega (n : ℕ) = k then ((((n : ℕ) : ℂ)) ^ (-(s : ℂ))) else 0) := by
+    rw [← tsum_mul_left]
+    apply tsum_congr
+    intro n
+    by_cases h : bigOmega (n : ℕ) = k
+    · rw [if_pos h, if_pos h]
+    · rw [if_neg h, if_neg h, mul_zero]
+  rw [hpull]
+  field_simp
+  unfold FkOdd
+  rw [Complex.ofReal_tsum]
+  -- both sides are sums over {3<=n, odd}; on the left the Omega=k condition is
+  -- in the subtype, on the right it is an indicator
+  -- reindex: the triple-condition subtype is equivalent to the {Omega = k}
+  -- sub-subtype of the odd subtype
+  let hequiv : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k}
+      ≃ {n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} // bigOmega (n : ℕ) = k} :=
+    { toFun := fun a => ⟨⟨a.1, a.2.1, a.2.2.1⟩, a.2.2.2⟩,
+      invFun := fun b => ⟨b.1.1, b.1.2.1, b.1.2.2, b.2⟩,
+      left_inv := fun a => rfl,
+      right_inv := fun b => rfl }
+  have hstep : (∑' a : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k},
+      ((((a : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))
+      = ∑' b : {n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} // bigOmega (n : ℕ) = k},
+        (((((b : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}) : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ) :=
+    by
+      rw [← hequiv.tsum_eq
+        (fun b : {n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} // bigOmega (n : ℕ) = k} =>
+          (((((b : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}) : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))]
+      apply tsum_congr
+      intro c
+      simp only [hequiv, Equiv.coe_fn_mk]
+  rw [hstep]
   sorry
