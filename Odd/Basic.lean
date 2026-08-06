@@ -1532,3 +1532,26 @@ theorem hCoeff_sum_two (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric
   have h := hCoeff_hasSum 1 le_rfl 2 (by norm_num) hdiff
   rw [Hodd_one_two] at h
   exact h
+
+/-! ### 6c: the coefficient extraction
+
+    sum_k FkOdd k s * z^k = prod_{p>=3} (1 - z p^-s)^-1 = zeta(s)^z * Hodd s z
+                          = e^(u z) * Hodd s z,      u = log zeta(s)
+
+Extracting z^k from the product of e^(uz) = sum_m u^m z^m / m! and
+Hodd s z = sum_j h_j(s) z^j gives the convolution
+
+    FkOdd k s = sum_{j<=k} h_j(s) * u^(k-j) / (k-j)!.
+
+This is the odd analogue of Fk_expansion_manu.  It is what turns the Taylor
+coefficients h_j into the k-dependence that the theorem needs.
+-/
+
+/-- u(s) = log zeta(s), for real s > 1. -/
+noncomputable def uOf (s : ℝ) : ℝ := Real.log (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
+
+/-- THE COEFFICIENT EXTRACTION.  Stated as a HasSum over j <= k. -/
+theorem FkOdd_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) :
+    (FkOdd k s : ℂ) = ∑ j ∈ Finset.range (k + 1),
+      hCoeff s j * ((uOf s : ℝ) : ℂ) ^ (k - j) / (Nat.factorial (k - j)) := by
+  sorry
