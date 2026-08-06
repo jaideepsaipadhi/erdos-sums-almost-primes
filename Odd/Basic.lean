@@ -1561,15 +1561,6 @@ Same shape as the main development's tsum of zOmegaHom, restricted to odd n. -/
 noncomputable def zOmegaOdd (s : ℝ) (z : ℂ) : ℂ :=
   ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s : ℂ)))
 
-/-- FkOdd is the k-th Taylor coefficient of the odd generating function.
-Mirrors Fk_eq_coeff_tsum: termwise differentiation, then each term's k-th
-derivative at 0 picks out Omega(n) = k (iteratedDeriv_term_at_zero is stated
-per-n and so applies unchanged). -/
-theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
-    ((FkOdd k s : ℝ) : ℂ)
-      = iteratedDeriv k (fun z => zOmegaOdd s z) 0 / (Nat.factorial k : ℂ) := by
-  sorry
-
 /-- The derivative bound, restricted to the odd index set: a subfamily of a
 summable nonnegative family. -/
 theorem deriv_bound_summable_odd (s : ℝ) (hs : 1 < s) (j : ℕ)
@@ -1626,3 +1617,34 @@ theorem iteratedDeriv_tsum_eq_odd (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
     intro n
     rw [iteratedDeriv_succ]
 
+
+/-- FkOdd is the k-th Taylor coefficient of the odd generating function.
+Mirrors Fk_eq_coeff_tsum: termwise differentiation, then each term's k-th
+derivative at 0 picks out Omega(n) = k (iteratedDeriv_term_at_zero is stated
+per-n and so applies unchanged). -/
+theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
+    ((FkOdd k s : ℝ) : ℂ)
+      = iteratedDeriv k (fun z => zOmegaOdd s z) 0 / (Nat.factorial k : ℂ) := by
+  obtain ⟨ r, hrgt, hr3, hr2 ⟩ := exists_radius_gap s hs
+  unfold zOmegaOdd
+  have hzz : ∀ z : ℂ, (∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+      z ^ (bigOmega (n : ℕ)) * (((n : ℕ) : ℂ) ^ (-(s : ℂ))))
+      = ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, zOmegaHom s z (n : ℕ) := by
+    intro z
+    apply tsum_congr
+    intro n
+    have hn : (n : ℕ) ≠ 0 := by have := n.2.1; omega
+    unfold zOmegaHom
+    simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, if_neg hn]
+  simp only [hzz]
+  rw [iteratedDeriv_tsum_eq_odd s hs (3/2) r (by norm_num) hrgt (by linarith) hr3 hr2
+    k 0 (by norm_num)]
+  have hcollapse : (∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+      iteratedDeriv k (fun z : ℂ => zOmegaHom s z (n : ℕ)) 0)
+      = ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+        (if bigOmega (n : ℕ) = k then (Nat.factorial k : ℂ) * ((((n : ℕ) : ℂ)) ^ (-(s : ℂ))) else 0) := by
+    apply tsum_congr
+    intro n
+    exact iteratedDeriv_term_at_zero s k hk (n : ℕ)
+  rw [hcollapse]
+  sorry
