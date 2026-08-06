@@ -1715,4 +1715,14 @@ to Fbig; there the p = 2 factor is pulled out separately, here it is absent. -/
 theorem zOmegaOdd_eq_euler (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 3 ^ s) :
     zOmegaOdd s z = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
       (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
+  -- route: the odd sum times the p = 2 geometric factor is the full sum,
+  -- and the full sum is the full Euler product (zOmega_eulerProduct)
+  sorry
+
+/-- The p = 2 factor relates the odd sum to the full sum:
+every n factors uniquely as 2^a * m with m odd, so
+    sum_n z^Omega(n) n^-s = (sum_a (z 2^-s)^a) * (sum_{m odd} z^Omega(m) m^-s). -/
+theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s) :
+    (∑' n : ℕ, zOmegaHom s z n)
+      = (1 - z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * zOmegaOdd s z := by
   sorry
