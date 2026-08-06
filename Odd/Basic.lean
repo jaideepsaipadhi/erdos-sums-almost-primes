@@ -1555,3 +1555,17 @@ theorem FkOdd_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) :
     (FkOdd k s : ℂ) = ∑ j ∈ Finset.range (k + 1),
       hCoeff s j * ((uOf s : ℝ) : ℂ) ^ (k - j) / (Nat.factorial (k - j)) := by
   sorry
+
+/-- The odd generating function as a sum over odd n: sum_{n odd} z^Omega(n) n^-s.
+Same shape as the main development's tsum of zOmegaHom, restricted to odd n. -/
+noncomputable def zOmegaOdd (s : ℝ) (z : ℂ) : ℂ :=
+  ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s : ℂ)))
+
+/-- FkOdd is the k-th Taylor coefficient of the odd generating function.
+Mirrors Fk_eq_coeff_tsum: termwise differentiation, then each term's k-th
+derivative at 0 picks out Omega(n) = k (iteratedDeriv_term_at_zero is stated
+per-n and so applies unchanged). -/
+theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
+    ((FkOdd k s : ℝ) : ℂ)
+      = iteratedDeriv k (fun z => zOmegaOdd s z) 0 / (Nat.factorial k : ℂ) := by
+  sorry
