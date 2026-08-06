@@ -1569,3 +1569,60 @@ theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
     ((FkOdd k s : ℝ) : ℂ)
       = iteratedDeriv k (fun z => zOmegaOdd s z) 0 / (Nat.factorial k : ℂ) := by
   sorry
+
+/-- The derivative bound, restricted to the odd index set: a subfamily of a
+summable nonnegative family. -/
+theorem deriv_bound_summable_odd (s : ℝ) (hs : 1 < s) (j : ℕ)
+    (r0 r : ℝ) (hr01 : 1 ≤ r0) (hr0r : r0 < r)
+    (hr0 : 0 ≤ r) (hr3 : r * ((3 : ℝ) ^ (-s)) ≤ 1 / 2) (hr2 : r < (2 : ℝ) ^ s) :
+    Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} =>
+      ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n - j) * (((n : ℕ) : ℝ) ^ (-s))) :=
+  (deriv_bound_summable s hs j r0 r hr01 hr0r hr0 hr3 hr2).subtype _
+
+/-- Termwise differentiation for the odd sum.  The per-term lemmas
+(iteratedDeriv_term_zero, _differentiable, _bound) are stated for a single n
+and so apply unchanged; only the summability of the bound changes index set. -/
+theorem iteratedDeriv_tsum_eq_odd (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
+    (hr01 : 1 ≤ r0) (hr0r : r0 < r) (hr0 : 0 ≤ r)
+    (hr3 : r * ((3 : ℝ) ^ (-s)) ≤ 1 / 2) (hr2 : r < (2 : ℝ) ^ s) :
+    ∀ j : ℕ, ∀ w : ℂ, Norm.norm w < r0 →
+      iteratedDeriv j (fun z : ℂ =>
+        ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, zOmegaHom s z (n : ℕ)) w
+        = ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+            iteratedDeriv j (fun z : ℂ => zOmegaHom s z (n : ℕ)) w := by
+  intro j
+  induction j with
+  | zero =>
+    intro w hw
+    simp only [iteratedDeriv_zero]
+  | succ J IH =>
+    intro w hw
+    have hball : IsOpen (Metric.ball (0 : ℂ) r0) := Metric.isOpen_ball
+    have hwmem : w ∈ Metric.ball (0 : ℂ) r0 := by
+      rw [Metric.mem_ball, dist_zero_right]
+      exact hw
+    have hbound := deriv_bound_summable_odd s hs J r0 r hr01 hr0r hr0 hr3 hr2
+    have hdiff : ∀ n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, DifferentiableOn ℂ
+        (fun v : ℂ => iteratedDeriv J (fun z : ℂ => zOmegaHom s z (n : ℕ)) v)
+        (Metric.ball (0 : ℂ) r0) := by
+      intro n
+      have hn : (n : ℕ) ≠ 0 := by have := n.2.1; omega
+      exact (iteratedDeriv_term_differentiable s n hn J).differentiableOn
+    have hle : ∀ (n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}) (v : ℂ), v ∈ Metric.ball (0 : ℂ) r0 →
+        Norm.norm (iteratedDeriv J (fun z : ℂ => zOmegaHom s z (n : ℕ)) v)
+          ≤ ((bigOmega (n : ℕ) : ℕ) : ℝ) ^ J * r0 ^ (bigOmega (n : ℕ) - J) * (((n : ℕ) : ℝ) ^ (-s)) := by
+      intro n v hv
+      rw [Metric.mem_ball, dist_zero_right] at hv
+      have hn : (n : ℕ) ≠ 0 := by have := n.2.1; omega
+      exact iteratedDeriv_term_bound s hs r0 (by linarith : (0 : ℝ) < r0) J n hn v (le_of_lt hv)
+    have hmain := Complex.hasSum_deriv_of_summable_norm hbound hdiff hball hle hwmem
+    have hIHball : (fun v : ℂ => iteratedDeriv J (fun z : ℂ => ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, zOmegaHom s z (n : ℕ)) v)
+        =ᶠ[nhds w] fun v : ℂ => ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, iteratedDeriv J (fun z : ℂ => zOmegaHom s z (n : ℕ)) v := by
+      filter_upwards [hball.mem_nhds hwmem] with v hv
+      rw [Metric.mem_ball, dist_zero_right] at hv
+      exact IH v hv
+    rw [iteratedDeriv_succ, Filter.EventuallyEq.deriv_eq hIHball, ← hmain.tsum_eq]
+    apply tsum_congr
+    intro n
+    rw [iteratedDeriv_succ]
+
