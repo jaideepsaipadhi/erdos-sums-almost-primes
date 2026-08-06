@@ -1559,14 +1559,14 @@ theorem FkOdd_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) :
 /-- The odd generating function as a sum over odd n: sum_{n odd} z^Omega(n) n^-s.
 Same shape as the main development's tsum of zOmegaHom, restricted to odd n. -/
 noncomputable def zOmegaOdd (s : ℝ) (z : ℂ) : ℂ :=
-  ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s : ℂ)))
+  ∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)}, z ^ (bigOmega n) * (((n : ℕ) : ℂ) ^ (-(s : ℂ)))
 
 /-- The derivative bound, restricted to the odd index set: a subfamily of a
 summable nonnegative family. -/
 theorem deriv_bound_summable_odd (s : ℝ) (hs : 1 < s) (j : ℕ)
     (r0 r : ℝ) (hr01 : 1 ≤ r0) (hr0r : r0 < r)
     (hr0 : 0 ≤ r) (hr3 : r * ((3 : ℝ) ^ (-s)) ≤ 1 / 2) (hr2 : r < (2 : ℝ) ^ s) :
-    Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} =>
+    Summable (fun n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)} =>
       ((bigOmega n : ℕ) : ℝ) ^ j * r0 ^ (bigOmega n - j) * (((n : ℕ) : ℝ) ^ (-s))) :=
   (deriv_bound_summable s hs j r0 r hr01 hr0r hr0 hr3 hr2).subtype _
 
@@ -1578,8 +1578,8 @@ theorem iteratedDeriv_tsum_eq_odd (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
     (hr3 : r * ((3 : ℝ) ^ (-s)) ≤ 1 / 2) (hr2 : r < (2 : ℝ) ^ s) :
     ∀ j : ℕ, ∀ w : ℂ, Norm.norm w < r0 →
       iteratedDeriv j (fun z : ℂ =>
-        ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, zOmegaHom s z (n : ℕ)) w
-        = ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+        ∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)}, zOmegaHom s z (n : ℕ)) w
+        = ∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)},
             iteratedDeriv j (fun z : ℂ => zOmegaHom s z (n : ℕ)) w := by
   intro j
   induction j with
@@ -1593,13 +1593,13 @@ theorem iteratedDeriv_tsum_eq_odd (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
       rw [Metric.mem_ball, dist_zero_right]
       exact hw
     have hbound := deriv_bound_summable_odd s hs J r0 r hr01 hr0r hr0 hr3 hr2
-    have hdiff : ∀ n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, DifferentiableOn ℂ
+    have hdiff : ∀ n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)}, DifferentiableOn ℂ
         (fun v : ℂ => iteratedDeriv J (fun z : ℂ => zOmegaHom s z (n : ℕ)) v)
         (Metric.ball (0 : ℂ) r0) := by
       intro n
       have hn : (n : ℕ) ≠ 0 := by have := n.2.1; omega
       exact (iteratedDeriv_term_differentiable s n hn J).differentiableOn
-    have hle : ∀ (n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}) (v : ℂ), v ∈ Metric.ball (0 : ℂ) r0 →
+    have hle : ∀ (n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)}) (v : ℂ), v ∈ Metric.ball (0 : ℂ) r0 →
         Norm.norm (iteratedDeriv J (fun z : ℂ => zOmegaHom s z (n : ℕ)) v)
           ≤ ((bigOmega (n : ℕ) : ℕ) : ℝ) ^ J * r0 ^ (bigOmega (n : ℕ) - J) * (((n : ℕ) : ℝ) ^ (-s)) := by
       intro n v hv
@@ -1607,8 +1607,8 @@ theorem iteratedDeriv_tsum_eq_odd (s : ℝ) (hs : 1 < s) (r0 r : ℝ)
       have hn : (n : ℕ) ≠ 0 := by have := n.2.1; omega
       exact iteratedDeriv_term_bound s hs r0 (by linarith : (0 : ℝ) < r0) J n hn v (le_of_lt hv)
     have hmain := Complex.hasSum_deriv_of_summable_norm hbound hdiff hball hle hwmem
-    have hIHball : (fun v : ℂ => iteratedDeriv J (fun z : ℂ => ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, zOmegaHom s z (n : ℕ)) v)
-        =ᶠ[nhds w] fun v : ℂ => ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, iteratedDeriv J (fun z : ℂ => zOmegaHom s z (n : ℕ)) v := by
+    have hIHball : (fun v : ℂ => iteratedDeriv J (fun z : ℂ => ∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)}, zOmegaHom s z (n : ℕ)) v)
+        =ᶠ[nhds w] fun v : ℂ => ∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)}, iteratedDeriv J (fun z : ℂ => zOmegaHom s z (n : ℕ)) v := by
       filter_upwards [hball.mem_nhds hwmem] with v hv
       rw [Metric.mem_ball, dist_zero_right] at hv
       exact IH v hv
@@ -1627,9 +1627,9 @@ theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
       = iteratedDeriv k (fun z => zOmegaOdd s z) 0 / (Nat.factorial k : ℂ) := by
   obtain ⟨ r, hrgt, hr3, hr2 ⟩ := exists_radius_gap s hs
   unfold zOmegaOdd
-  have hzz : ∀ z : ℂ, (∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+  have hzz : ∀ z : ℂ, (∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)},
       z ^ (bigOmega (n : ℕ)) * (((n : ℕ) : ℂ) ^ (-(s : ℂ))))
-      = ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}, zOmegaHom s z (n : ℕ) := by
+      = ∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)}, zOmegaHom s z (n : ℕ) := by
     intro z
     apply tsum_congr
     intro n
@@ -1639,9 +1639,9 @@ theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
   simp only [hzz]
   rw [iteratedDeriv_tsum_eq_odd s hs (3/2) r (by norm_num) hrgt (by linarith) hr3 hr2
     k 0 (by norm_num)]
-  have hcollapse : (∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+  have hcollapse : (∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)},
       iteratedDeriv k (fun z : ℂ => zOmegaHom s z (n : ℕ)) 0)
-      = ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+      = ∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)},
         (if bigOmega (n : ℕ) = k then (Nat.factorial k : ℂ) * ((((n : ℕ) : ℂ)) ^ (-(s : ℂ))) else 0) := by
     apply tsum_congr
     intro n
@@ -1649,9 +1649,9 @@ theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
   rw [hcollapse]
   have hfac : ((Nat.factorial k : ℕ) : ℂ) ≠ 0 :=
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
-  have hpull : (∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+  have hpull : (∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)},
       (if bigOmega (n : ℕ) = k then (Nat.factorial k : ℂ) * ((((n : ℕ) : ℂ)) ^ (-(s : ℂ))) else 0))
-      = (Nat.factorial k : ℂ) * ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+      = (Nat.factorial k : ℂ) * ∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)},
         (if bigOmega (n : ℕ) = k then ((((n : ℕ) : ℂ)) ^ (-(s : ℂ))) else 0) := by
     rw [← tsum_mul_left]
     apply tsum_congr
@@ -1668,40 +1668,50 @@ theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
   -- reindex: the triple-condition subtype is equivalent to the {Omega = k}
   -- sub-subtype of the odd subtype
   let hequiv : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k}
-      ≃ {n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} // bigOmega (n : ℕ) = k} :=
-    { toFun := fun a => ⟨⟨a.1, a.2.1, a.2.2.1⟩, a.2.2.2⟩,
-      invFun := fun b => ⟨b.1.1, b.1.2.1, b.1.2.2, b.2⟩,
+      ≃ {n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)} // bigOmega (n : ℕ) = k} :=
+    { toFun := fun a => ⟨⟨a.1, by omega, a.2.2.1⟩, a.2.2.2⟩,
+      invFun := fun b => ⟨b.1.1, by
+        have h1 := b.1.2.1
+        have hodd := b.1.2.2
+        have hk := b.2
+        have hO1 : bigOmega 1 = 0 := by unfold bigOmega; simp
+        rcases Nat.lt_or_ge (b.1.1) 3 with hlt | hge
+        · exfalso
+          interval_cases h : (b.1.1 : ℕ)
+          · rw [hO1] at hk; omega
+          · exact hodd ⟨1, rfl⟩
+        · exact hge, b.1.2.2, b.2⟩,
       left_inv := fun a => rfl,
       right_inv := fun b => rfl }
   have hstep : (∑' a : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k},
       ((((a : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))
-      = ∑' b : {n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} // bigOmega (n : ℕ) = k},
-        (((((b : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}) : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ) :=
+      = ∑' b : {n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)} // bigOmega (n : ℕ) = k},
+        (((((b : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)}) : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ) :=
     by
       rw [← hequiv.tsum_eq
-        (fun b : {n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} // bigOmega (n : ℕ) = k} =>
-          (((((b : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)}) : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))]
+        (fun b : {n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)} // bigOmega (n : ℕ) = k} =>
+          (((((b : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)}) : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))]
       apply tsum_congr
       intro c
       simp only [hequiv, Equiv.coe_fn_mk]
   rw [hstep]
-  have hrhs : (∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+  have hrhs : (∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)},
       (if bigOmega (n : ℕ) = k then ((((n : ℕ) : ℂ)) ^ (-(s : ℂ))) else 0))
-      = ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
-        Set.indicator {m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k}
+      = ∑' n : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)},
+        Set.indicator {m : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k}
           (fun m => ((((m : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ)) n := by
     apply tsum_congr
     intro n
     by_cases h : bigOmega (n : ℕ) = k
-    · have hmem : n ∈ {m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k} := h
+    · have hmem : n ∈ {m : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k} := h
       rw [if_pos h, Set.indicator_of_mem hmem]
       rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
       rw [← Complex.ofReal_natCast, ← Complex.ofReal_cpow (Nat.cast_nonneg _)]
-    · have hnmem : n ∉ {m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k} := h
+    · have hnmem : n ∉ {m : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k} := h
       rw [if_neg h, Set.indicator_of_notMem hnmem]
   rw [hrhs, ← tsum_subtype
-    {m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k}
-    (fun m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} => ((((m : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))]
+    {m : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k}
+    (fun m : {n : ℕ // 1 ≤ n ∧ ¬ (2 ∣ n)} => ((((m : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))]
   rfl
 
 /-- Every n >= 1 factors uniquely as 2^a * m with m odd: the 2-adic valuation
@@ -1852,4 +1862,12 @@ theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
     rw [h2s]
     rw [← div_eq_mul_inv, div_lt_one (by positivity)]
     exact hzlt
+  -- the double sum factors
+  have hprod : (∑' q : ℕ × {m : ℕ // 1 ≤ m ∧ ¬ (2 ∣ m)},
+      (z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)) ^ q.1 *
+        (z ^ (bigOmega (q.2 : ℕ)) * (((q.2 : ℕ) : ℂ) ^ (-(s : ℂ)))))
+      = (∑' a : ℕ, (z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)) ^ a) *
+        (∑' m : {m : ℕ // 1 ≤ m ∧ ¬ (2 ∣ m)},
+          z ^ (bigOmega (m : ℕ)) * (((m : ℕ) : ℂ) ^ (-(s : ℂ)))) := by
+    sorry
   sorry
