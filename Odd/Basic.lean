@@ -1768,3 +1768,45 @@ noncomputable def twoAdicSplit : {n : ℕ // 1 ≤ n} ≃ ℕ × {m : ℕ // 1 �
       simp only
       rw [hfac]
       exact Nat.mul_div_cancel_left _ (by positivity)
+
+/-- Omega is additive on the 2-adic split: Omega(2^a * m) = a + Omega(m). -/
+theorem bigOmega_two_pow_mul (a m : ℕ) (hm : 1 ≤ m) :
+    bigOmega (2 ^ a * m) = a + bigOmega m := by
+  unfold bigOmega
+  have hpow : (2 ^ a : ℕ) ≠ 0 := by positivity
+  have hm0 : m ≠ 0 := by omega
+  rw [Nat.factorization_mul hpow hm0]
+  rw [Finsupp.sum_add_index']
+  · congr 1
+    rw [Nat.Prime.factorization_pow Nat.prime_two]
+    simp
+  · intro p
+    rfl
+  · intro p b1 b2
+    rfl
+
+/-- The summand transforms correctly under the split. -/
+theorem zOmega_split_summand (s : ℝ) (z : ℂ) (a m : ℕ) (hm : 1 ≤ m) :
+    z ^ (bigOmega (2 ^ a * m)) * (((2 ^ a * m : ℕ) : ℂ) ^ (-(s : ℂ)))
+      = (z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)) ^ a * (z ^ (bigOmega m) * ((m : ℂ) ^ (-(s : ℂ)))) := by
+  rw [bigOmega_two_pow_mul a m hm]
+  rw [pow_add]
+  push_cast
+  have hsplit : ((2:ℂ) ^ a * (m : ℂ)) ^ (-(s : ℂ))
+      = (((2:ℝ) ^ (-s) : ℝ) : ℂ) ^ a * ((m : ℂ) ^ (-(s : ℂ))) := by
+    have h2a : ((2:ℂ) ^ a) = (((2 ^ a : ℝ)) : ℂ) := by push_cast; ring
+    have hmR : ((m : ℂ)) = (((m : ℝ)) : ℂ) := by push_cast; ring
+    rw [h2a, hmR, ← Complex.ofReal_mul]
+    rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
+    rw [← Complex.ofReal_cpow (by positivity)]
+    rw [Real.mul_rpow (by positivity) (by positivity)]
+    rw [← Real.rpow_natCast (2:ℝ) a, ← Real.rpow_mul (by norm_num)]
+    have hR : (((2:ℝ) ^ (-s) : ℝ) : ℂ) ^ a = ((((2:ℝ) ^ (-s)) ^ a : ℝ) : ℂ) := by
+      push_cast; ring
+    rw [hR]
+    rw [← Complex.ofReal_cpow (Nat.cast_nonneg m), ← Complex.ofReal_mul]
+    congr 1
+    rw [← Real.rpow_natCast ((2:ℝ) ^ (-s)) a, ← Real.rpow_mul (by norm_num)]
+    ring_nf
+  rw [hsplit]
+  ring
