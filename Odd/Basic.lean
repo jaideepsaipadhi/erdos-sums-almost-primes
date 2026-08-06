@@ -1480,7 +1480,7 @@ for |z| < 29/10, in particular at z = 1 and z = 2.
 
 This is the bridge between the h_j of the expansion and the values H(1,1),
 H(1,2) that PROOF.md section 2 collects. -/
-theorem hCoeff_hasSum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 4)
+theorem hCoeff_hasSum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 3)
     (hdiff : DifferentiableOn ℂ (fun w => Hodd s w) (Metric.ball 0 4)) :
     HasSum (fun j : ℕ => hCoeff s j * z ^ j) (Hodd s z) := by
   -- work on a closed ball of radius 3 (contains z = 1 and z = 2, sits inside 4)
@@ -1496,7 +1496,28 @@ theorem hCoeff_hasSum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 4)
     apply hsub
     simpa using hw
   have hball := hcb.hasFPowerSeriesOnBall (by norm_num)
-  sorry
+  have hmem : z ∈ Metric.eball (0:ℂ) ((3:NNReal) : ENNReal) := by
+    rw [Metric.mem_eball, edist_zero_right]
+    rw [← ENNReal.ofReal_coe_nnreal]
+    rw [← ofReal_norm_eq_enorm]
+    exact ENNReal.ofReal_lt_ofReal_iff_of_nonneg (norm_nonneg z) |>.mpr (by simpa using hz)
+  have hs := hball.hasSum hmem
+  rw [zero_add] at hs
+  apply hs.congr_fun
+  intro n
+  have hfac := hball.factorial_smul (1:ℂ) n
+  unfold hCoeff
+  rw [iteratedDeriv_eq_iteratedFDeriv]
+  have hn : (0:ℝ) < (Nat.factorial n : ℝ) := by
+    exact_mod_cast Nat.factorial_pos n
+  field_simp
+  rw [← hfac]
+  have hne : (Nat.factorial n : ℂ) ≠ 0 := by
+    exact_mod_cast Nat.factorial_ne_zero n
+  rw [FormalMultilinearSeries.apply_eq_pow_smul_coeff,
+    FormalMultilinearSeries.apply_eq_pow_smul_coeff]
+  simp only [smul_eq_mul, one_pow, one_mul, nsmul_eq_mul]
+  field_simp
 
 /-- At z = 1: sum_j h_j(1) = H(1,1) = 1/2. -/
 theorem hCoeff_sum_one (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
