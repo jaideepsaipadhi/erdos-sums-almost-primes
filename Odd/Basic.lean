@@ -1726,3 +1726,45 @@ theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
     (∑' n : ℕ, zOmegaHom s z n)
       = (1 - z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * zOmegaOdd s z := by
   sorry
+
+/-- Every n >= 1 factors uniquely as 2^a * m with m odd: the 2-adic valuation
+and the odd part.  This is the bijection underlying zOmega_split_two. -/
+noncomputable def twoAdicSplit : {n : ℕ // 1 ≤ n} ≃ ℕ × {m : ℕ // 1 ≤ m ∧ ¬ (2 ∣ m)} where
+  toFun n := (n.1.factorization 2,
+    ⟨n.1 / 2 ^ (n.1.factorization 2), by
+      constructor
+      · have h := Nat.ordProj_mul_ordCompl_eq_self n.1 2
+        rcases Nat.eq_zero_or_pos (n.1 / 2 ^ (n.1.factorization 2)) with hz | hp
+        · rw [hz, mul_zero] at h
+          omega
+        · exact hp
+      · exact Nat.not_dvd_ordCompl Nat.prime_two (by omega)⟩)
+  invFun p := ⟨2 ^ p.1 * p.2.1, by
+    have hm := p.2.2.1
+    have h2 : 1 ≤ 2 ^ p.1 := Nat.one_le_two_pow
+    calc 1 = 1 * 1 := by ring
+      _ ≤ 2 ^ p.1 * p.2.1 := Nat.mul_le_mul h2 hm⟩
+  left_inv := by
+    intro n
+    apply Subtype.ext
+    exact Nat.ordProj_mul_ordCompl_eq_self n.1 2
+  right_inv := by
+    intro q
+    have hm0 : q.2.1 ≠ 0 := by have := q.2.2.1; omega
+    have hmodd : ¬ (2 ∣ q.2.1) := q.2.2.2
+    have hv2m : (q.2.1).factorization 2 = 0 := by
+      rw [Nat.factorization_eq_zero_iff]
+      right; left; exact hmodd
+    have hpow0 : (2 ^ q.1 : ℕ) ≠ 0 := by positivity
+    have hfac : (2 ^ q.1 * q.2.1).factorization 2 = q.1 := by
+      rw [Nat.factorization_mul hpow0 hm0]
+      simp only [Finsupp.coe_add, Pi.add_apply, hv2m, add_zero]
+      rw [Nat.Prime.factorization_pow Nat.prime_two]
+      simp
+    apply Prod.ext
+    · simp only
+      exact hfac
+    · apply Subtype.ext
+      simp only
+      rw [hfac]
+      exact Nat.mul_div_cancel_left _ (by positivity)
