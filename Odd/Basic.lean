@@ -1836,4 +1836,20 @@ theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
           omega
         · exact hp)]
     rw [Nat.ordProj_mul_ordCompl_eq_self]
+  -- the double sum factors: geometric in a, the odd sum in m
+  have hgeom : (∑' a : ℕ, (z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)) ^ a)
+      = (1 - z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
+    apply tsum_geometric_of_norm_lt_one
+    rw [norm_mul]
+    have h2 : ‖(((2 : ℝ) ^ (-s) : ℝ) : ℂ)‖ = (2 : ℝ) ^ (-s) := by
+      rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    rw [h2]
+    have hlt : (2 : ℝ) ^ (-s) < 1 :=
+      Real.rpow_lt_one_of_one_lt_of_neg (by norm_num) (by linarith)
+    have hzlt : ‖z‖ < 2 ^ s := hz
+    have h2s : ((2 : ℝ) ^ (-s)) = ((2 : ℝ) ^ s)⁻¹ := by
+      rw [Real.rpow_neg (by norm_num)]
+    rw [h2s]
+    rw [← div_eq_mul_inv, div_lt_one (by positivity)]
+    exact hzlt
   sorry
