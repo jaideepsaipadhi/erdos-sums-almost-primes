@@ -1685,4 +1685,21 @@ theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
       intro c
       simp only [hequiv, Equiv.coe_fn_mk]
   rw [hstep]
-  sorry
+  have hrhs : (∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+      (if bigOmega (n : ℕ) = k then ((((n : ℕ) : ℂ)) ^ (-(s : ℂ))) else 0))
+      = ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)},
+        Set.indicator {m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k}
+          (fun m => ((((m : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ)) n := by
+    apply tsum_congr
+    intro n
+    by_cases h : bigOmega (n : ℕ) = k
+    · have hmem : n ∈ {m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k} := h
+      rw [if_pos h, Set.indicator_of_mem hmem]
+      rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
+      rw [← Complex.ofReal_natCast, ← Complex.ofReal_cpow (Nat.cast_nonneg _)]
+    · have hnmem : n ∉ {m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k} := h
+      rw [if_neg h, Set.indicator_of_notMem hnmem]
+  rw [hrhs, ← tsum_subtype
+    {m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k}
+    (fun m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} => ((((m : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))]
+  rfl
