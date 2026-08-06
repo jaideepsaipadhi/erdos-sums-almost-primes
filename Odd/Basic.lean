@@ -1703,3 +1703,16 @@ theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
     {m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} | bigOmega (m : ℕ) = k}
     (fun m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} => ((((m : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))]
   rfl
+
+/-- The odd generating function is the Euler product over p >= 3:
+
+    zOmegaOdd s z = sum_{n odd} z^Omega(n) n^-s = prod_{p>=3} (1 - z p^-s)^-1
+
+and by the definition of Hodd this equals zeta(s)^z * Hodd s z.
+
+This is the odd analogue of the main development's route from the sum over n
+to Fbig; there the p = 2 factor is pulled out separately, here it is absent. -/
+theorem zOmegaOdd_eq_euler (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 3 ^ s) :
+    zOmegaOdd s z = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
+  sorry
