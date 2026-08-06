@@ -1704,29 +1704,6 @@ theorem FkOdd_eq_coeff_tsum (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s) :
     (fun m : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n)} => ((((m : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))]
   rfl
 
-/-- The odd generating function is the Euler product over p >= 3:
-
-    zOmegaOdd s z = sum_{n odd} z^Omega(n) n^-s = prod_{p>=3} (1 - z p^-s)^-1
-
-and by the definition of Hodd this equals zeta(s)^z * Hodd s z.
-
-This is the odd analogue of the main development's route from the sum over n
-to Fbig; there the p = 2 factor is pulled out separately, here it is absent. -/
-theorem zOmegaOdd_eq_euler (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 3 ^ s) :
-    zOmegaOdd s z = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
-  -- route: the odd sum times the p = 2 geometric factor is the full sum,
-  -- and the full sum is the full Euler product (zOmega_eulerProduct)
-  sorry
-
-/-- The p = 2 factor relates the odd sum to the full sum:
-every n factors uniquely as 2^a * m with m odd, so
-    sum_n z^Omega(n) n^-s = (sum_a (z 2^-s)^a) * (sum_{m odd} z^Omega(m) m^-s). -/
-theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s) :
-    (∑' n : ℕ, zOmegaHom s z n)
-      = (1 - z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * zOmegaOdd s z := by
-  sorry
-
 /-- Every n >= 1 factors uniquely as 2^a * m with m odd: the 2-adic valuation
 and the odd part.  This is the bijection underlying zOmega_split_two. -/
 noncomputable def twoAdicSplit : {n : ℕ // 1 ≤ n} ≃ ℕ × {m : ℕ // 1 ≤ m ∧ ¬ (2 ∣ m)} where
@@ -1810,3 +1787,53 @@ theorem zOmega_split_summand (s : ℝ) (z : ℂ) (a m : ℕ) (hm : 1 ≤ m) :
     ring_nf
   rw [hsplit]
   ring
+
+/-- The odd generating function is the Euler product over p >= 3:
+
+    zOmegaOdd s z = sum_{n odd} z^Omega(n) n^-s = prod_{p>=3} (1 - z p^-s)^-1
+
+and by the definition of Hodd this equals zeta(s)^z * Hodd s z.
+
+This is the odd analogue of the main development's route from the sum over n
+to Fbig; there the p = 2 factor is pulled out separately, here it is absent. -/
+theorem zOmegaOdd_eq_euler (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 3 ^ s) :
+    zOmegaOdd s z = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
+  -- route: the odd sum times the p = 2 geometric factor is the full sum,
+  -- and the full sum is the full Euler product (zOmega_eulerProduct)
+  sorry
+
+/-- The p = 2 factor relates the odd sum to the full sum:
+every n factors uniquely as 2^a * m with m odd, so
+    sum_n z^Omega(n) n^-s = (sum_a (z 2^-s)^a) * (sum_{m odd} z^Omega(m) m^-s). -/
+theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s) :
+    (∑' n : ℕ, zOmegaHom s z n)
+      = (1 - z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * zOmegaOdd s z := by
+  -- the n = 0 term vanishes, so the sum is over n >= 1
+  have hzero : ∀ z : ℂ, zOmegaHom s z 0 = 0 := by
+    intro z; unfold zOmegaHom; simp
+  -- reindex n >= 1 as (a, m) with m odd via twoAdicSplit
+  have hreindex : (∑' n : {n : ℕ // 1 ≤ n}, zOmegaHom s z (n : ℕ))
+      = ∑' q : ℕ × {m : ℕ // 1 ≤ m ∧ ¬ (2 ∣ m)},
+        (z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)) ^ q.1 *
+          (z ^ (bigOmega (q.2 : ℕ)) * (((q.2 : ℕ) : ℂ) ^ (-(s : ℂ)))) := by
+    rw [← twoAdicSplit.tsum_eq
+      (fun q : ℕ × {m : ℕ // 1 ≤ m ∧ ¬ (2 ∣ m)} =>
+        (z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)) ^ q.1 *
+          (z ^ (bigOmega (q.2 : ℕ)) * (((q.2 : ℕ) : ℂ) ^ (-(s : ℂ)))))]
+    apply tsum_congr
+    intro n
+    have hn1 : 1 ≤ (n : ℕ) := n.2
+    have hne : (n : ℕ) ≠ 0 := by omega
+    unfold zOmegaHom
+    simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, if_neg hne]
+    simp only [twoAdicSplit, Equiv.coe_fn_mk]
+    rw [← zOmega_split_summand s z ((n : ℕ).factorization 2)
+      ((n : ℕ) / 2 ^ ((n : ℕ).factorization 2)) (by
+        rcases Nat.eq_zero_or_pos ((n : ℕ) / 2 ^ ((n : ℕ).factorization 2)) with hz | hp
+        · have h := Nat.ordProj_mul_ordCompl_eq_self (n : ℕ) 2
+          rw [hz, mul_zero] at h
+          omega
+        · exact hp)]
+    rw [Nat.ordProj_mul_ordCompl_eq_self]
+  sorry
