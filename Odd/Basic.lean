@@ -2247,3 +2247,26 @@ theorem differentiableAt_GammaR_one : DifferentiableAt ℂ Complex.Gammaℝ 1 :=
       simp only [ne_eq, Complex.ofReal_eq_zero]
       exact Real.pi_ne_zero
   · exact hg.comp 1 (by fun_prop)
+
+/-- The regularised zeta: zeta(s) - 1/(s-1), defined everywhere (junk at s=1
+is irrelevant since we only use it near 1 where it extends). -/
+noncomputable def zetaReg (s : ℂ) : ℂ := riemannZeta s - 1 / (s - 1)
+
+/-- zetaReg agrees near s = 1 with an explicitly differentiable function:
+
+    zeta s - 1/(s-1) = [Λ₀(s) - 1/s] / Gammaℝ(s) + (1/(s-1))(1/Gammaℝ(s) - 1)
+
+The first summand is differentiable at 1 (Λ₀ entire, Gammaℝ nonzero there).
+The second has a removable singularity since Gammaℝ 1 = 1, so
+1/Gammaℝ(s) - 1 vanishes at s = 1 to first order. -/
+theorem zetaReg_eq_near_one (s : ℂ) (hs0 : s ≠ 0) (hs1 : s ≠ 1) (hg : Complex.Gammaℝ s ≠ 0) :
+    zetaReg s
+      = (completedRiemannZeta₀ s - 1 / s) / Complex.Gammaℝ s
+        + (1 / (s - 1)) * (1 / Complex.Gammaℝ s - 1) := by
+  unfold zetaReg
+  rw [riemannZeta_def_of_ne_zero hs0, completedRiemannZeta_eq]
+  have hsub : (1 : ℂ) - s = -(s - 1) := by ring
+  rw [hsub]
+  have hne : s - 1 ≠ 0 := sub_ne_zero_of_ne hs1
+  field_simp
+  ring
