@@ -1952,3 +1952,33 @@ theorem zOmegaOdd_eq_euler' (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^
   field_simp at hfull
   simp only [← one_div]
   exact hfull.symm
+
+/-- zeta(s)^z = exp(u z) with u = log zeta(s), so its j-th derivative at 0 is u^j. -/
+theorem iteratedDeriv_zeta_cpow (s : ℝ) (hs : 1 < s) (j : ℕ) :
+    iteratedDeriv j (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0 = ((uOf s : ℝ) : ℂ) ^ j := by
+  induction j with
+  | zero => simp
+  | succ n ih =>
+    rw [iteratedDeriv_succ']
+    have hderiv : deriv (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z))
+        = fun z : ℂ => ((uOf s : ℝ) : ℂ) * Complex.exp ((uOf s : ℂ) * z) := by
+      funext w
+      simp [Complex.deriv_exp, mul_comm]
+    rw [hderiv]
+    rw [iteratedDeriv_const_mul]
+    · rw [ih]
+      ring
+    · sorry
+
+/-- THE CONVOLUTION (6c step 2, second half).
+
+By Leibniz applied to zOmegaOdd s = exp(u ·) * Hodd s, the k-th Taylor
+coefficient is the convolution of u^j/j! with h_j. -/
+theorem FkOdd_convolution (k : ℕ) (s : ℝ) (hs : 1 < s)
+    (hfac : ∀ z : ℂ, zOmegaOdd s z = Complex.exp ((uOf s : ℂ) * z) * Hodd s z)
+    (hcd1 : ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
+    (hcd2 : ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0) :
+    iteratedDeriv k (fun z => zOmegaOdd s z) 0 / (Nat.factorial k : ℂ)
+      = ∑ j ∈ Finset.range (k + 1),
+          hCoeff s j * ((uOf s : ℝ) : ℂ) ^ (k - j) / (Nat.factorial (k - j)) := by
+  sorry
