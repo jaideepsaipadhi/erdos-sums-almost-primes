@@ -2005,7 +2005,8 @@ Unfolding Hodd, the p >= 3 product cancels and what remains is
     1 = [zeta(s) (1 - 2^-s) * prod_{p>=3}(1 - p^-s)]^z
 which holds because zeta(s)(1 - 2^-s) = cFac s (cFac_eq_zeta in the main
 development) and cFac s = prod_{p>=3}(1 - p^-s)^-1 by definition. -/
-theorem zOmegaOdd_factor (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
+theorem zOmegaOdd_factor (s : ℝ) (hs : 1 < s) (z : ℂ) (hz2 : ‖z‖ ≤ 2)
+    (hz : ‖z‖ < 2 ^ s)
     (hsum : Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
     (hmul3 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
       (1 - zOmegaHom s z (p : ℕ))⁻¹)) :
@@ -2040,8 +2041,33 @@ theorem zOmegaOdd_factor (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
     obtain ⟨h3, hp⟩ := cFac_factor_le_third s hs p
     exact inv_pos.mpr (by linarith)
   have hlogR := cFac_log_summable s hs
-  have hreg := (tail_regroup_hasProd s hs z (by sorry) hc hmulR hposR hlogR).tprod_eq
-  sorry
+  have hreg := (tail_regroup_hasProd s hs z hz2 hc hmulR hposR hlogR).tprod_eq
+  have hzo : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      zOmegaHom s z (p : ℕ) = z * ((((p : ℕ):ℝ) ^ (-s) : ℝ) : ℂ) := by
+    intro p
+    have hp0 : ((p : ℕ) : ℕ) ≠ 0 := by
+      have := p.2.2
+      omega
+    unfold zOmegaHom
+    simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, if_neg hp0]
+    have hO : bigOmega (p : ℕ) = 1 := by
+      unfold bigOmega
+      rw [Nat.Prime.factorization p.2.1]
+      simp
+    rw [hO, pow_one]
+    congr 1
+    rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
+    rw [← Complex.ofReal_natCast, ← Complex.ofReal_cpow (Nat.cast_nonneg _)]
+  simp only [hzo]
+  rw [hreg]
+  -- (cFac s)^z = (zeta s)^z (1 - 2^-s)^z, and Hodd = (1-2^-s)^z * G2C
+  have hcz : ((cFac s : ℝ) : ℂ) ^ z
+      = (((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ)) : ℂ) ^ z
+        * ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ) ^ z := by
+    sorry
+  rw [hcz]
+  rw [reg_tprod_eq_G2C s (le_of_lt hs) z hz2]
+  ring
 
 /-- The bracket is 1: zeta(s) (1 - 2^-s) prod_{p>=3}(1 - p^-s) = 1. -/
 theorem zeta_two_cFac_eq_one (s : ℝ) (hs : 1 < s) :
