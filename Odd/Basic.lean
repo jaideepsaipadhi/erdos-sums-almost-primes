@@ -1892,4 +1892,20 @@ theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
       simp only [Function.comp_apply, MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk]
       rw [if_neg hm0]
     exact (tsum_mul_tsum_of_summable_norm hgs hos).symm
-  sorry
+  -- the n = 0 term vanishes, so the full sum is the sum over n >= 1
+  have hdrop : (∑' n : ℕ, zOmegaHom s z n)
+      = ∑' n : {n : ℕ // 1 ≤ n}, zOmegaHom s z (n : ℕ) := by
+    show (∑' n : ℕ, zOmegaHom s z n)
+      = ∑' n : ({n : ℕ | 1 ≤ n} : Set ℕ), zOmegaHom s z (n : ℕ)
+    rw [tsum_subtype {n : ℕ | 1 ≤ n} (fun n : ℕ => zOmegaHom s z n)]
+    apply tsum_congr
+    intro n
+    by_cases hn : 1 ≤ n
+    · have hmem : n ∈ ({n : ℕ | 1 ≤ n} : Set ℕ) := hn
+      rw [Set.indicator_of_mem hmem]
+    · have hnmem : n ∉ ({n : ℕ | 1 ≤ n} : Set ℕ) := hn
+      rw [Set.indicator_of_notMem hnmem]
+      have hz0 : n = 0 := by omega
+      rw [hz0, hzero]
+  rw [hdrop, hreindex, hprod, hgeom]
+  rfl
