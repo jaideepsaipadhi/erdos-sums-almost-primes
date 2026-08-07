@@ -2113,3 +2113,29 @@ theorem zOmegaOdd_factor (s : ℝ) (hs : 1 < s) (z : ℂ) (hz2 : ‖z‖ ≤ 2)
   rw [hcz]
   rw [reg_tprod_eq_G2C s (le_of_lt hs) z hz2]
   ring
+
+/-- 6c COMPLETE: FkOdd is the convolution of the h_j with u^m/m!.
+
+Composes FkOdd_eq_coeff_tsum (the arithmetic sum is a Taylor coefficient),
+zOmegaOdd_factor (the generating function factors as exp(uz) * Hodd), and
+FkOdd_convolution (Leibniz). -/
+theorem FkOdd_expansion' (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s)
+    (hsum : ∀ z : ℂ, ‖z‖ ≤ 2 → Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
+    (hmul3 : ∀ z : ℂ, ‖z‖ ≤ 2 → Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - zOmegaHom s z (p : ℕ))⁻¹))
+    (hcd1 : ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
+    (hcd2 : ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0) :
+    ((FkOdd k s : ℝ) : ℂ) = ∑ j ∈ Finset.range (k + 1),
+      hCoeff s j * ((uOf s : ℝ) : ℂ) ^ (k - j) / (Nat.factorial (k - j)) := by
+  rw [FkOdd_eq_coeff_tsum k hk s hs]
+  apply FkOdd_convolution k s hs _ hcd1 hcd2
+  intro z hzmem
+  rw [Metric.mem_ball, dist_zero_right] at hzmem
+  have hz2s : ‖z‖ < 2 ^ s := by
+    have : (2:ℝ) < 2 ^ s := by
+      calc (2:ℝ) = 2 ^ (1:ℝ) := by norm_num
+        _ < 2 ^ s := Real.rpow_lt_rpow_of_exponent_lt (by norm_num) hs
+    linarith
+  exact zOmegaOdd_factor s hs z (le_of_lt hzmem) hz2s
+    (hsum z (le_of_lt hzmem)) (hmul3 z (le_of_lt hzmem))
+
