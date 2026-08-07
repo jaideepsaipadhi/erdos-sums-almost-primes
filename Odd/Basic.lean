@@ -1999,6 +1999,36 @@ theorem FkOdd_convolution (k : ℕ) (s : ℝ) (hs : 1 < s)
   field_simp
   linear_combination (↑(uOf s) ^ (k - i) * iteratedDeriv i (fun z => Hodd s z) 0) * hkey
 
+/-- The bracket is 1: zeta(s) (1 - 2^-s) prod_{p>=3}(1 - p^-s) = 1. -/
+theorem zeta_two_cFac_eq_one (s : ℝ) (hs : 1 < s) :
+    ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ) : ℂ) * ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ)
+      * ((cFac s : ℝ) : ℂ)⁻¹ = 1 := by
+  have hz := cFac_eq_zeta s hs
+  have hser : ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ) : ℂ) = riemannZeta (s : ℂ) := by
+    rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simpa using hs)]
+    rw [Complex.ofReal_tsum]
+    apply tsum_congr
+    intro n
+    rw [one_div, ← Complex.cpow_neg]
+    have hb : (0:ℝ) ≤ ((n:ℝ) + 1) := by positivity
+    have hoc := Complex.ofReal_cpow hb (-s)
+    push_cast at hoc
+    push_cast
+    exact hoc
+  have h2 : ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ) = 1 - ((2 : ℂ)) ^ (-(s : ℂ)) := by
+    have hb : (((2:ℝ) ^ (-s) : ℝ) : ℂ) = ((2 : ℂ)) ^ (-(s : ℂ)) := by
+      have := Complex.ofReal_cpow (by norm_num : (0:ℝ) ≤ 2) (-s)
+      rw [show ((2:ℝ) : ℂ) = (2 : ℂ) by norm_num] at this
+      rw [show (((-s : ℝ)) : ℂ) = -(s : ℂ) by push_cast; ring] at this
+      exact this
+    push_cast [hb]
+    ring
+  rw [hser, h2, ← hz]
+  have hne : ((cFac s : ℝ) : ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    exact ne_of_gt (cFac_pos s hs)
+  field_simp
+
 /-- The factorization zOmegaOdd s z = exp(u(s) z) * Hodd s z.
 
 Unfolding Hodd, the p >= 3 product cancels and what remains is
@@ -2064,37 +2094,20 @@ theorem zOmegaOdd_factor (s : ℝ) (hs : 1 < s) (z : ℂ) (hz2 : ‖z‖ ≤ 2)
   have hcz : ((cFac s : ℝ) : ℂ) ^ z
       = (((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ)) : ℂ) ^ z
         * ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ) ^ z := by
-    sorry
+    have hzt := zeta_two_cFac_eq_one s hs
+    have hcne : ((cFac s : ℝ) : ℂ) ≠ 0 := by
+      simp only [ne_eq, Complex.ofReal_eq_zero]
+      exact ne_of_gt hc
+    have hbase : ((cFac s : ℝ) : ℂ)
+        = (((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ)) : ℂ) * ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ) := by
+      field_simp at hzt
+      linear_combination -hzt
+    have hb2 : (0:ℝ) ≤ 1 - (2:ℝ) ^ (-s) := by
+      have h2 : (2:ℝ) ^ (-s) < 1 :=
+        Real.rpow_lt_one_of_one_lt_of_neg (by norm_num) (by linarith)
+      linarith
+    rw [hbase]
+    exact Complex.mul_cpow_ofReal_nonneg (le_of_lt hzpos) hb2 z
   rw [hcz]
   rw [reg_tprod_eq_G2C s (le_of_lt hs) z hz2]
   ring
-
-/-- The bracket is 1: zeta(s) (1 - 2^-s) prod_{p>=3}(1 - p^-s) = 1. -/
-theorem zeta_two_cFac_eq_one (s : ℝ) (hs : 1 < s) :
-    ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ) : ℂ) * ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ)
-      * ((cFac s : ℝ) : ℂ)⁻¹ = 1 := by
-  have hz := cFac_eq_zeta s hs
-  have hser : ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ) : ℂ) = riemannZeta (s : ℂ) := by
-    rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simpa using hs)]
-    rw [Complex.ofReal_tsum]
-    apply tsum_congr
-    intro n
-    rw [one_div, ← Complex.cpow_neg]
-    have hb : (0:ℝ) ≤ ((n:ℝ) + 1) := by positivity
-    have hoc := Complex.ofReal_cpow hb (-s)
-    push_cast at hoc
-    push_cast
-    exact hoc
-  have h2 : ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ) = 1 - ((2 : ℂ)) ^ (-(s : ℂ)) := by
-    have hb : (((2:ℝ) ^ (-s) : ℝ) : ℂ) = ((2 : ℂ)) ^ (-(s : ℂ)) := by
-      have := Complex.ofReal_cpow (by norm_num : (0:ℝ) ≤ 2) (-s)
-      rw [show ((2:ℝ) : ℂ) = (2 : ℂ) by norm_num] at this
-      rw [show (((-s : ℝ)) : ℂ) = -(s : ℂ) by push_cast; ring] at this
-      exact this
-    push_cast [hb]
-    ring
-  rw [hser, h2, ← hz]
-  have hne : ((cFac s : ℝ) : ℂ) ≠ 0 := by
-    simp only [ne_eq, Complex.ofReal_eq_zero]
-    exact ne_of_gt (cFac_pos s hs)
-  field_simp
