@@ -2139,3 +2139,27 @@ theorem FkOdd_expansion' (k : ℕ) (hk : 1 ≤ k) (s : ℝ) (hs : 1 < s)
   exact zOmegaOdd_factor s hs z (le_of_lt hzmem) hz2s
     (hsum z (le_of_lt hzmem)) (hmul3 z (le_of_lt hzmem))
 
+
+/-! ### 6c step 3: integrating the expansion
+
+    f_k^odd = int_{Ioi 1} FkOdd k s ds
+            = int_{Ioi 0} FkOdd k (1 + e^-u) e^-u du       [substitution, item 5]
+
+and FkOdd k (1+e^-u) = sum_j h_j(1+e^-u) u_*^(k-j)/(k-j)! with u_* = log zeta.
+
+At leading order u_* = u and h_j(1+e^-u) = h_j(1), so the j-th term integrates
+against int u^(k-j) e^-u /(k-j)! du = 1, giving sum_j h_j(1) = H(1,1) = 1/2.
+The e^-2u correction gives the beta 2^-k term via
+int u^i e^(-2u) du = i!/2^(i+1).
+
+The Gamma evaluations are already in the main development:
+integral_exp_neg_mul_pow, integral_pow_exp_neg_two_mul,
+integral_pow_exp_neg_three_mul. -/
+
+/-- The leading-order integral: int_{Ioi 0} u^m e^-u / m! du = 1. -/
+theorem gamma_normalised (m : ℕ) :
+    (∫ u in Set.Ioi (0:ℝ), Real.exp (-u) * u ^ m) / (Nat.factorial m : ℝ) = 1 := by
+  rw [integral_exp_neg_mul_pow m]
+  have : (Nat.factorial m : ℝ) ≠ 0 := by
+    exact_mod_cast Nat.factorial_ne_zero m
+  field_simp
