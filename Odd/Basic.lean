@@ -1798,19 +1798,6 @@ theorem zOmega_split_summand (s : ℝ) (z : ℂ) (a m : ℕ) (hm : 1 ≤ m) :
   rw [hsplit]
   ring
 
-/-- The odd generating function is the Euler product over p >= 3:
-
-    zOmegaOdd s z = sum_{n odd} z^Omega(n) n^-s = prod_{p>=3} (1 - z p^-s)^-1
-
-and by the definition of Hodd this equals zeta(s)^z * Hodd s z.
-
-This is the odd analogue of the main development's route from the sum over n
-to Fbig; there the p = 2 factor is pulled out separately, here it is absent. -/
-theorem zOmegaOdd_eq_euler (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 3 ^ s) :
-    zOmegaOdd s z = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-      (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
-  sorry
-
 /-- The p = 2 factor relates the odd sum to the full sum:
 every n factors uniquely as 2^a * m with m odd, so
     sum_n z^Omega(n) n^-s = (sum_a (z 2^-s)^a) * (sum_{m odd} z^Omega(m) m^-s). -/
