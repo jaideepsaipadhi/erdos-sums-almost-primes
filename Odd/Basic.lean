@@ -1999,4 +1999,15 @@ theorem FkOdd_convolution (k : ℕ) (s : ℝ) (hs : 1 < s)
   rw [hsub]
   unfold hCoeff
   rw [Nat.choose_symm hik]
-  sorry
+  have hkey : (k.choose i : ℂ) * (Nat.factorial i : ℂ) * (Nat.factorial (k - i) : ℂ)
+      = (Nat.factorial k : ℂ) := by
+    have := Nat.choose_mul_factorial_mul_factorial hik
+    exact_mod_cast congrArg (fun n : ℕ => (n : ℂ)) this
+  have hi0 : (Nat.factorial i : ℂ) ≠ 0 := by
+    exact_mod_cast Nat.factorial_ne_zero i
+  have hki0 : (Nat.factorial (k - i) : ℂ) ≠ 0 := by
+    exact_mod_cast Nat.factorial_ne_zero (k - i)
+  have hk0 : (Nat.factorial k : ℂ) ≠ 0 := by
+    exact_mod_cast Nat.factorial_ne_zero k
+  field_simp
+  linear_combination (↑(uOf s) ^ (k - i) * iteratedDeriv i (fun z => Hodd s z) 0) * hkey
