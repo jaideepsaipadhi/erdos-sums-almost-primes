@@ -1816,7 +1816,8 @@ theorem zOmegaOdd_eq_euler (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 3 ^ 
 /-- The p = 2 factor relates the odd sum to the full sum:
 every n factors uniquely as 2^a * m with m odd, so
     sum_n z^Omega(n) n^-s = (sum_a (z 2^-s)^a) * (sum_{m odd} z^Omega(m) m^-s). -/
-theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s) :
+theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
+    (hsum : Summable (fun n : ℕ => ‖zOmegaHom s z n‖)) :
     (∑' n : ℕ, zOmegaHom s z n)
       = (1 - z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * zOmegaOdd s z := by
   -- the n = 0 term vanishes, so the sum is over n >= 1
@@ -1869,5 +1870,26 @@ theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
       = (∑' a : ℕ, (z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)) ^ a) *
         (∑' m : {m : ℕ // 1 ≤ m ∧ ¬ (2 ∣ m)},
           z ^ (bigOmega (m : ℕ)) * (((m : ℕ) : ℂ) ^ (-(s : ℂ)))) := by
-    sorry
+    have hnlt : ‖z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)‖ < 1 := by
+      rw [norm_mul]
+      have h2 : ‖(((2 : ℝ) ^ (-s) : ℝ) : ℂ)‖ = (2 : ℝ) ^ (-s) := by
+        rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+      rw [h2, Real.rpow_neg (by norm_num), ← div_eq_mul_inv, div_lt_one (by positivity)]
+      exact hz
+    have hgs : Summable (fun a : ℕ => ‖(z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)) ^ a‖) := by
+      simp only [norm_pow]
+      exact summable_geometric_of_lt_one (by positivity) hnlt
+    have hos : Summable (fun m : {m : ℕ // 1 ≤ m ∧ ¬ (2 ∣ m)} =>
+        ‖z ^ (bigOmega (m : ℕ)) * (((m : ℕ) : ℂ) ^ (-(s : ℂ)))‖) := by
+      have hsub := hsum.subtype {m : ℕ | 1 ≤ m ∧ ¬ (2 ∣ m)}
+      apply hsub.congr
+      intro m
+      have hmem : (1 : ℕ) ≤ m.val ∧ ¬ (2 ∣ m.val) := m.2
+      have hm0 : m.val ≠ 0 := by
+        have := hmem.1
+        omega
+      unfold zOmegaHom
+      simp only [Function.comp_apply, MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk]
+      rw [if_neg hm0]
+    exact (tsum_mul_tsum_of_summable_norm hgs hos).symm
   sorry
