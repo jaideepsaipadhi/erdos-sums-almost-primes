@@ -1809,8 +1809,6 @@ to Fbig; there the p = 2 factor is pulled out separately, here it is absent. -/
 theorem zOmegaOdd_eq_euler (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 3 ^ s) :
     zOmegaOdd s z = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
       (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ := by
-  -- route: the odd sum times the p = 2 geometric factor is the full sum,
-  -- and the full sum is the full Euler product (zOmega_eulerProduct)
   sorry
 
 /-- The p = 2 factor relates the odd sum to the full sum:
@@ -1909,3 +1907,48 @@ theorem zOmega_split_two (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
       rw [hz0, hzero]
   rw [hdrop, hreindex, hprod, hgeom]
   rfl
+
+/-- Assembling the Euler product for the odd part.  Needs, as hypotheses, the
+absolute summability that `zOmega_eulerProduct` also requires, and the
+multipliability of the p >= 3 family. -/
+theorem zOmegaOdd_eq_euler' (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
+    (hsum : Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
+    (hmul3 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - zOmegaHom s z (p : ℕ))⁻¹)) :
+    zOmegaOdd s z = ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 - zOmegaHom s z (p : ℕ))⁻¹ := by
+  have hfull := zOmega_eulerProduct s hs z hsum
+  have hsplit2 := (tprod_split_two (fun n : ℕ => (1 - zOmegaHom s z n)⁻¹) hmul3).2
+  have hsplitOdd := zOmega_split_two s hs z hz hsum
+  have hfull' : (∏' p : {p : ℕ // p.Prime}, (1 - zOmegaHom s z (p : ℕ))⁻¹)
+      = ∑' n : ℕ, zOmegaHom s z n := hfull
+  rw [hsplit2] at hfull'
+  replace hfull := hfull'
+  rw [hsplitOdd] at hfull
+  have h2 : zOmegaHom s z 2 = z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ) := by
+    unfold zOmegaHom
+    simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, if_neg (by norm_num : (2:ℕ) ≠ 0)]
+    have hO2 : bigOmega 2 = 1 := by
+      unfold bigOmega
+      rw [Nat.Prime.factorization Nat.prime_two]
+      simp
+    rw [hO2, pow_one]
+    congr 1
+    rw [show (-(s : ℂ)) = ((-s : ℝ) : ℂ) by push_cast; ring]
+    rw [← Complex.ofReal_natCast, ← Complex.ofReal_cpow (by norm_num)]
+    norm_num
+  rw [h2] at hfull
+  have hne : (1 - z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)) ≠ 0 := by
+    intro hzero0
+    have hnorm : ‖z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ)‖ = 1 := by
+      have : z * (((2 : ℝ) ^ (-s) : ℝ) : ℂ) = 1 := by linear_combination -hzero0
+      rw [this, norm_one]
+    rw [norm_mul] at hnorm
+    have hb : ‖(((2 : ℝ) ^ (-s) : ℝ) : ℂ)‖ = (2 : ℝ) ^ (-s) := by
+      rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    rw [hb, Real.rpow_neg (by norm_num), ← div_eq_mul_inv] at hnorm
+    have := (div_eq_one_iff_eq (by positivity)).mp hnorm
+    linarith [hz, this.le, this.ge]
+  field_simp at hfull
+  simp only [← one_div]
+  exact hfull.symm
