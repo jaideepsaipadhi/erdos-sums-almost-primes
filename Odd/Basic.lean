@@ -2183,3 +2183,27 @@ theorem gamma_normalised_three (m : ℕ) :
   have hne : (Nat.factorial m : ℝ) ≠ 0 := by
     exact_mod_cast Nat.factorial_ne_zero m
   field_simp
+
+/-! ### 6b: the uniform estimate
+
+The two limits (eps_zeta_tendsto_one, eps_zeta_second_order) say
+
+    eps * zeta(1+eps) = 1 + gamma eps + o(eps).
+
+For step 3 we need this as a BOUND on a definite range, not a limit:
+there are C and eps0 > 0 with
+
+    |eps zeta(1+eps) - 1 - gamma eps| <= C eps^2   for 0 < eps <= eps0.
+
+Substituting eps = e^-u, this controls u_* = log zeta(1+e^-u) against u, and
+the error enters the integrals at order e^-3u -- the third Gamma evaluation.
+-/
+
+/-- The uniform second-order bound, as an existence statement.  The constant C
+and the range eps0 are what the certified computation supplies; here they are
+existentially quantified, which is all step 3 needs. -/
+theorem eps_zeta_uniform :
+    ∃ C > 0, ∃ eps0 > 0, eps0 ≤ 1 ∧ ∀ eps : ℝ, 0 < eps → eps ≤ eps0 →
+      |eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))) - 1
+        - Real.eulerMascheroniConstant * eps| ≤ C * eps ^ 2 := by
+  sorry
