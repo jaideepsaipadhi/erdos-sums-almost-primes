@@ -1998,3 +1998,22 @@ theorem FkOdd_convolution (k : ℕ) (s : ℝ) (hs : 1 < s)
     exact_mod_cast Nat.factorial_ne_zero k
   field_simp
   linear_combination (↑(uOf s) ^ (k - i) * iteratedDeriv i (fun z => Hodd s z) 0) * hkey
+
+/-- The factorization zOmegaOdd s z = exp(u(s) z) * Hodd s z.
+
+Unfolding Hodd, the p >= 3 product cancels and what remains is
+    1 = [zeta(s) (1 - 2^-s) * prod_{p>=3}(1 - p^-s)]^z
+which holds because zeta(s)(1 - 2^-s) = cFac s (cFac_eq_zeta in the main
+development) and cFac s = prod_{p>=3}(1 - p^-s)^-1 by definition. -/
+theorem zOmegaOdd_factor (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
+    (hsum : Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
+    (hmul3 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - zOmegaHom s z (p : ℕ))⁻¹)) :
+    zOmegaOdd s z = Complex.exp ((uOf s : ℂ) * z) * Hodd s z := by
+  sorry
+
+/-- The bracket is 1: zeta(s) (1 - 2^-s) prod_{p>=3}(1 - p^-s) = 1. -/
+theorem zeta_two_cFac_eq_one (s : ℝ) (hs : 1 < s) :
+    ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ) : ℂ) * ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ)
+      * ((cFac s : ℝ) : ℂ)⁻¹ = 1 := by
+  sorry
