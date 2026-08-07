@@ -2016,4 +2016,28 @@ theorem zOmegaOdd_factor (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
 theorem zeta_two_cFac_eq_one (s : ℝ) (hs : 1 < s) :
     ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ) : ℂ) * ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ)
       * ((cFac s : ℝ) : ℂ)⁻¹ = 1 := by
-  sorry
+  have hz := cFac_eq_zeta s hs
+  have hser : ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ) : ℂ) = riemannZeta (s : ℂ) := by
+    rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simpa using hs)]
+    rw [Complex.ofReal_tsum]
+    apply tsum_congr
+    intro n
+    rw [one_div, ← Complex.cpow_neg]
+    have hb : (0:ℝ) ≤ ((n:ℝ) + 1) := by positivity
+    have hoc := Complex.ofReal_cpow hb (-s)
+    push_cast at hoc
+    push_cast
+    exact hoc
+  have h2 : ((1 - (2:ℝ) ^ (-s) : ℝ) : ℂ) = 1 - ((2 : ℂ)) ^ (-(s : ℂ)) := by
+    have hb : (((2:ℝ) ^ (-s) : ℝ) : ℂ) = ((2 : ℂ)) ^ (-(s : ℂ)) := by
+      have := Complex.ofReal_cpow (by norm_num : (0:ℝ) ≤ 2) (-s)
+      rw [show ((2:ℝ) : ℂ) = (2 : ℂ) by norm_num] at this
+      rw [show (((-s : ℝ)) : ℂ) = -(s : ℂ) by push_cast; ring] at this
+      exact this
+    push_cast [hb]
+    ring
+  rw [hser, h2, ← hz]
+  have hne : ((cFac s : ℝ) : ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    exact ne_of_gt (cFac_pos s hs)
+  field_simp
