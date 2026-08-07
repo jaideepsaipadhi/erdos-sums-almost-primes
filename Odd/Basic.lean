@@ -2033,6 +2033,14 @@ theorem zOmegaOdd_factor (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
     congr 1
     rw [← Complex.ofReal_log (le_of_lt hzpos)]
   rw [hexp]
+  have hc : 0 < cFac s := cFac_pos s hs
+  have hmulR := cFac_multipliable s hs
+  have hposR : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p}, 0 < (1 - ((p : ℕ):ℝ) ^ (-s))⁻¹ := by
+    intro p
+    obtain ⟨h3, hp⟩ := cFac_factor_le_third s hs p
+    exact inv_pos.mpr (by linarith)
+  have hlogR := cFac_log_summable s hs
+  have hreg := (tail_regroup_hasProd s hs z (by sorry) hc hmulR hposR hlogR).tprod_eq
   sorry
 
 /-- The bracket is 1: zeta(s) (1 - 2^-s) prod_{p>=3}(1 - p^-s) = 1. -/
