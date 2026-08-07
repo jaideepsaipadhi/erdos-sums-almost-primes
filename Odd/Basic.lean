@@ -2207,3 +2207,43 @@ theorem eps_zeta_uniform :
       |eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))) - 1
         - Real.eulerMascheroniConstant * eps| ≤ C * eps ^ 2 := by
   sorry
+
+/-! ### The second-order bound, via the completed zeta
+
+Mathlib gives:
+  riemannZeta_def_of_ne_zero : s != 0 -> zeta s = completedRiemannZeta s / Gammaℝ s
+  completedRiemannZeta_eq    : Λ s = Λ₀ s - 1/s - 1/(1-s)
+  differentiable_completedZeta₀ : Λ₀ entire
+  Gammaℝ_one : Gammaℝ 1 = 1,  Gammaℝ_ne_zero_of_re_pos
+
+So near s = 1 the only pole of zeta comes from -1/(1-s) = 1/(s-1) divided by
+Gammaℝ, and since Gammaℝ 1 = 1 the residue is 1.  Hence
+
+    zeta s - 1/(s-1)
+
+extends differentiably across s = 1 -- WITHOUT naming the Stieltjes constant.
+Differentiability at a point gives the O(eps^2) Taylor bound that step 3 needs.
+-/
+
+/-- Gammaℝ is differentiable at 1. -/
+theorem differentiableAt_GammaR_one : DifferentiableAt ℂ Complex.Gammaℝ 1 := by
+  have hg : DifferentiableAt ℂ Complex.Gamma ((1 : ℂ) / 2) := by
+    apply Complex.differentiableAt_Gamma
+    intro m hcon
+    have hre : ((1:ℂ)/2).re = (-(m:ℂ)).re := by rw [hcon]
+    rw [Complex.div_re] at hre
+    norm_num at hre
+    have hm : (0:ℝ) ≤ (m:ℝ) := Nat.cast_nonneg m
+    linarith
+  have hfun : Complex.Gammaℝ
+      = fun s : ℂ => (↑Real.pi) ^ (-s / 2) * Complex.Gamma (s / 2) := by
+    funext s
+    exact Complex.Gammaℝ_def s
+  rw [hfun]
+  apply DifferentiableAt.mul
+  · apply DifferentiableAt.const_cpow
+    · fun_prop
+    · left
+      simp only [ne_eq, Complex.ofReal_eq_zero]
+      exact Real.pi_ne_zero
+  · exact hg.comp 1 (by fun_prop)
