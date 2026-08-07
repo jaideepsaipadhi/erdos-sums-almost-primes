@@ -1963,17 +1963,19 @@ theorem iteratedDeriv_zeta_cpow (s : ℝ) (hs : 1 < s) (j : ℕ) :
 By Leibniz applied to zOmegaOdd s = exp(u ·) * Hodd s, the k-th Taylor
 coefficient is the convolution of u^j/j! with h_j. -/
 theorem FkOdd_convolution (k : ℕ) (s : ℝ) (hs : 1 < s)
-    (hfac : ∀ z : ℂ, zOmegaOdd s z = Complex.exp ((uOf s : ℂ) * z) * Hodd s z)
+    (hfac : ∀ z ∈ Metric.ball (0:ℂ) 2, zOmegaOdd s z
+      = Complex.exp ((uOf s : ℂ) * z) * Hodd s z)
     (hcd1 : ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
     (hcd2 : ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0) :
     iteratedDeriv k (fun z => zOmegaOdd s z) 0 / (Nat.factorial k : ℂ)
       = ∑ j ∈ Finset.range (k + 1),
           hCoeff s j * ((uOf s : ℝ) : ℂ) ^ (k - j) / (Nat.factorial (k - j)) := by
   have hfun : (fun z => zOmegaOdd s z)
-      = (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) * (fun z : ℂ => Hodd s z) := by
-    funext z
-    exact hfac z
-  rw [hfun, iteratedDeriv_mul hcd1 hcd2]
+      =ᶠ[nhds (0:ℂ)] (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) * (fun z : ℂ => Hodd s z) := by
+    filter_upwards [Metric.isOpen_ball.mem_nhds (by simp : (0:ℂ) ∈ Metric.ball (0:ℂ) 2)]
+      with z hzmem
+    exact hfac z hzmem
+  rw [hfun.iteratedDeriv_eq, iteratedDeriv_mul hcd1 hcd2]
   rw [Finset.sum_div]
   rw [← Finset.sum_range_reflect]
   apply Finset.sum_congr rfl
