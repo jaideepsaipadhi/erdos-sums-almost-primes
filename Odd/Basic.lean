@@ -1968,7 +1968,8 @@ theorem iteratedDeriv_zeta_cpow (s : ℝ) (hs : 1 < s) (j : ℕ) :
     rw [iteratedDeriv_const_mul]
     · rw [ih]
       ring
-    · sorry
+    · apply ContDiff.contDiffAt
+      exact Complex.contDiff_exp.comp (contDiff_const.mul contDiff_id)
 
 /-- THE CONVOLUTION (6c step 2, second half).
 
@@ -1981,4 +1982,21 @@ theorem FkOdd_convolution (k : ℕ) (s : ℝ) (hs : 1 < s)
     iteratedDeriv k (fun z => zOmegaOdd s z) 0 / (Nat.factorial k : ℂ)
       = ∑ j ∈ Finset.range (k + 1),
           hCoeff s j * ((uOf s : ℝ) : ℂ) ^ (k - j) / (Nat.factorial (k - j)) := by
+  have hfun : (fun z => zOmegaOdd s z)
+      = (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) * (fun z : ℂ => Hodd s z) := by
+    funext z
+    exact hfac z
+  rw [hfun, iteratedDeriv_mul hcd1 hcd2]
+  rw [Finset.sum_div]
+  rw [← Finset.sum_range_reflect]
+  apply Finset.sum_congr rfl
+  intro i hi
+  have hik : i ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+  have hnorm : k + 1 - 1 - i = k - i := by omega
+  rw [hnorm]
+  rw [iteratedDeriv_zeta_cpow s hs (k - i)]
+  have hsub : k - (k - i) = i := by omega
+  rw [hsub]
+  unfold hCoeff
+  rw [Nat.choose_symm hik]
   sorry
