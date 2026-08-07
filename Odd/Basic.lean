@@ -2163,3 +2163,23 @@ theorem gamma_normalised (m : ℕ) :
   have : (Nat.factorial m : ℝ) ≠ 0 := by
     exact_mod_cast Nat.factorial_ne_zero m
   field_simp
+
+/-- The second-order integral: int_{Ioi 0} u^m e^(-2u) / m! du = 2^-(m+1).
+This is where the 2^-k in f_k^odd - 1/2 comes from -- note it arises from the
+integral, not from any prime, which is why it survives removing p = 2. -/
+theorem gamma_normalised_two (m : ℕ) :
+    (∫ u in Set.Ioi (0:ℝ), u ^ m * Real.exp (-(2 * u))) / (Nat.factorial m : ℝ)
+      = 1 / 2 ^ (m + 1) := by
+  rw [integral_pow_exp_neg_two_mul m]
+  have hne : (Nat.factorial m : ℝ) ≠ 0 := by
+    exact_mod_cast Nat.factorial_ne_zero m
+  field_simp
+
+/-- The third-order integral, for the remainder: int u^m e^(-3u)/m! = 3^-(m+1). -/
+theorem gamma_normalised_three (m : ℕ) :
+    (∫ u in Set.Ioi (0:ℝ), u ^ m * Real.exp (-(3 * u))) / (Nat.factorial m : ℝ)
+      = 1 / 3 ^ (m + 1) := by
+  rw [integral_pow_exp_neg_three_mul m]
+  have hne : (Nat.factorial m : ℝ) ≠ 0 := by
+    exact_mod_cast Nat.factorial_ne_zero m
+  field_simp
