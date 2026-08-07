@@ -2010,6 +2010,29 @@ theorem zOmegaOdd_factor (s : ℝ) (hs : 1 < s) (z : ℂ) (hz : ‖z‖ < 2 ^ s)
     (hmul3 : Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
       (1 - zOmegaHom s z (p : ℕ))⁻¹)) :
     zOmegaOdd s z = Complex.exp ((uOf s : ℂ) * z) * Hodd s z := by
+  rw [zOmegaOdd_eq_euler' s hs z hz hsum hmul3]
+  unfold Hodd
+  -- exp(u z) = (zeta s)^z since u = log (zeta s)
+  have hzpos : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
+    have hsummable : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-s)) := by
+      have hb := Real.summable_nat_rpow.mpr (by linarith : (-s:ℝ) < -1)
+      apply ((summable_nat_add_iff 1).mpr hb).congr
+      intro n
+      push_cast
+      ring_nf
+    have hterm : (0:ℝ) < ((0:ℕ) + 1 : ℝ) ^ (-s) := by norm_num
+    have hle := hsummable.le_tsum 0 (fun n _ => by positivity)
+    calc (0:ℝ) < ((0:ℝ) + 1) ^ (-s) := by norm_num
+      _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by simpa using hle
+  have hexp : Complex.exp ((uOf s : ℂ) * z)
+      = (((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ)) : ℂ) ^ z := by
+    unfold uOf
+    rw [Complex.cpow_def_of_ne_zero (by
+      simp only [ne_eq, Complex.ofReal_eq_zero]
+      exact ne_of_gt hzpos)]
+    congr 1
+    rw [← Complex.ofReal_log (le_of_lt hzpos)]
+  rw [hexp]
   sorry
 
 /-- The bracket is 1: zeta(s) (1 - 2^-s) prod_{p>=3}(1 - p^-s) = 1. -/
