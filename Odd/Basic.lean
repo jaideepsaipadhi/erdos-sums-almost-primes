@@ -2649,10 +2649,21 @@ theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k)
       rw [← Real.rpow_natCast x (k - j)]
     have hconst := (hgam'.const_mul (B / (Nat.factorial (k - j) : ℝ)))
     apply MeasureTheory.Integrable.mono hconst
-    · apply MeasureTheory.AEStronglyMeasurable.mul
-      · sorry
-      · sorry
     · sorry
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+      have hxpos : (0:ℝ) < x := hx
+      have hs1 : (1:ℝ) < 1 + Real.exp (-x) := by
+        have := Real.exp_pos (-x); linarith
+      have hs2 : 1 + Real.exp (-x) ≤ 2 := by
+        have : Real.exp (-x) ≤ 1 := by
+          rw [Real.exp_le_one_iff]; linarith
+        linarith
+      have hbj := hB j (1 + Real.exp (-x)) hs1 hs2
+      have hre_le : |(hCoeff (1 + Real.exp (-x)) j).re| ≤ B :=
+        le_trans (Complex.abs_re_le_norm _) hbj
+      rw [Real.norm_eq_abs, Real.norm_eq_abs]
+      rw [abs_mul, abs_mul, abs_div]
+      sorry
 
 /-- The leading order: replacing u_* by u and h_j(1+e^-u) by h_j(1) gives
 sum_j h_j(1), which is H(1,1) = 1/2. -/
