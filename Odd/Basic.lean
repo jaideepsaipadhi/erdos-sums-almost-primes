@@ -2626,7 +2626,14 @@ theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k)
     apply Finset.sum_congr rfl
     intro j _
     congr 1
-    sorry
+    have hrw : hCoeff (1 + Real.exp (-u)) j * ((uOf (1 + Real.exp (-u)) : ℝ) : ℂ) ^ (k - j)
+        / ((Nat.factorial (k - j) : ℕ) : ℂ)
+        = hCoeff (1 + Real.exp (-u)) j
+          * (((uOf (1 + Real.exp (-u)) ^ (k - j) / (Nat.factorial (k - j) : ℝ) : ℝ)) : ℂ) := by
+      push_cast
+      ring
+    rw [hrw, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+    ring
   · intro j hj
     sorry
 
