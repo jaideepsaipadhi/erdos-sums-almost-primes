@@ -2873,3 +2873,37 @@ log(n+1)(n+1)^(-(1+d)) on [1+d, inf)), and Ioi 1 is open. -/
 theorem zetaR_hasDerivAt (s : ℝ) (hs : 1 < s) :
     HasDerivAt (fun t : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t)) (zetaRderiv s) s := by
   sorry
+
+/-- log(n+1) (n+1)^-s is summable for s > 1: compare with (n+1)^-s' for
+1 < s' < s, using log(n+1) <= C (n+1)^(s-s') for large n. -/
+theorem log_rpow_summable (s : ℝ) (hs : 1 < s) :
+    Summable (fun n : ℕ => Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-s)) := by
+  set s' := (1 + s) / 2 with hs'
+  have hs'1 : 1 < s' := by rw [hs']; linarith
+  have hs's : s' < s := by rw [hs']; linarith
+  have hbase : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-s')) := by
+    have hb := Real.summable_nat_rpow.mpr (by linarith : (-s':ℝ) < -1)
+    apply ((summable_nat_add_iff 1).mpr hb).congr
+    intro n
+    push_cast
+    ring_nf
+  -- log(n+1) (n+1)^-s = [log(n+1) (n+1)^-(s-s')] (n+1)^-s', and the bracket -> 0
+  have hbdd : ∃ C > 0, ∀ n : ℕ,
+      Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-(s - s')) ≤ C := by
+    sorry
+  obtain ⟨C, hC, hCb⟩ := hbdd
+  apply Summable.of_nonneg_of_le _ _ (hbase.mul_left C)
+  · intro n
+    have hlog : (0:ℝ) ≤ Real.log ((n:ℝ) + 1) := by
+      apply Real.log_nonneg
+      have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+      linarith
+    have hpow : (0:ℝ) ≤ ((n:ℝ) + 1) ^ (-s) := by positivity
+    exact mul_nonneg hlog hpow
+  · intro n
+    have hfac : Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-s)
+        = (Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-(s - s'))) * ((n:ℝ) + 1) ^ (-s') := by
+      rw [mul_assoc, ← Real.rpow_add (by positivity)]
+      ring_nf
+    rw [hfac]
+    apply mul_le_mul_of_nonneg_right (hCb n) (by positivity)
