@@ -1550,12 +1550,6 @@ coefficients h_j into the k-dependence that the theorem needs.
 /-- u(s) = log zeta(s), for real s > 1. -/
 noncomputable def uOf (s : ℝ) : ℝ := Real.log (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
 
-/-- THE COEFFICIENT EXTRACTION.  Stated as a HasSum over j <= k. -/
-theorem FkOdd_expansion (k : ℕ) (s : ℝ) (hs : 1 < s) :
-    (FkOdd k s : ℂ) = ∑ j ∈ Finset.range (k + 1),
-      hCoeff s j * ((uOf s : ℝ) : ℂ) ^ (k - j) / (Nat.factorial (k - j)) := by
-  sorry
-
 /-- The odd generating function as a sum over odd n: sum_{n odd} z^Omega(n) n^-s.
 Same shape as the main development's tsum of zOmegaHom, restricted to odd n. -/
 noncomputable def zOmegaOdd (s : ℝ) (z : ℂ) : ℂ :=
@@ -2371,3 +2365,16 @@ theorem zetaRegFull_differentiableAt_one : DifferentiableAt ℂ zetaRegFull 1 :=
     exact (zetaReg_differentiableAt x (by simpa using hx.2)).differentiableWithinAt
   have hupd := Complex.differentiableOn_update_limUnder_of_bddAbove hmem hdiff hbdd
   exact (hupd.differentiableAt hmem)
+
+/-- zetaRegFull is analytic at 1: differentiable at 1 and on a punctured
+neighbourhood, hence eventually differentiable, hence analytic. -/
+theorem zetaRegFull_analyticAt_one : AnalyticAt ℂ zetaRegFull 1 := by
+  rw [Complex.analyticAt_iff_eventually_differentiableAt]
+  obtain ⟨r, hr, _⟩ := zetaReg_bddAbove
+  filter_upwards [Metric.ball_mem_nhds (1:ℂ) hr] with s hsball
+  by_cases hs1 : s = 1
+  · rw [hs1]; exact zetaRegFull_differentiableAt_one
+  · have heq : zetaRegFull =ᶠ[nhds s] zetaReg := by
+      filter_upwards [(isOpen_ne (x := (1:ℂ))).mem_nhds hs1] with w hwne
+      exact zetaRegFull_eq_of_ne w hwne
+    exact (zetaReg_differentiableAt s hs1).congr_of_eventuallyEq heq
