@@ -2388,4 +2388,16 @@ theorem zetaRegFull_taylor_bound :
     ∃ C > 0, ∃ r > 0, ∀ s : ℂ, ‖s - 1‖ ≤ r →
       ‖zetaRegFull s - zetaRegFull 1 - deriv zetaRegFull 1 * (s - 1)‖
         ≤ C * ‖s - 1‖ ^ 2 := by
+  have hps := zetaRegFull_analyticAt_one.hasFPowerSeriesAt
+  have hO := hps.isBigO_sub_partialSum_pow 2
+  obtain ⟨C, hC, hbw⟩ := hO.exists_pos
+  rw [Asymptotics.isBigOWith_iff] at hbw
+  obtain ⟨r, hr, hrsub⟩ := Metric.mem_nhds_iff.mp hbw
+  refine ⟨C, hC, r/2, by linarith, ?_⟩
+  intro s hs
+  have hy : (s - 1) ∈ Metric.ball (0:ℂ) r := by
+    rw [Metric.mem_ball, dist_zero_right]
+    linarith
+  have := hrsub hy
+  simp only [Set.mem_setOf_eq] at this
   sorry
