@@ -2731,7 +2731,16 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
           have hb := zetaBracket_nonneg_of_mem n t ht
           unfold zetaBracket at hb
           linarith
-        · sorry
+        · apply Summable.of_nonneg_of_le _ _ (hsummable t ht)
+          · intro n
+            apply MeasureTheory.setIntegral_nonneg measurableSet_Ioc
+            intro x hx
+            have hn0 : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+            exact Real.rpow_nonneg (by linarith [hx.1]) _
+          · intro n
+            have hb := zetaBracket_nonneg_of_mem n t ht
+            unfold zetaBracket at hb
+            linarith
         · exact hsummable t ht
       apply Filter.tendsto_atTop_mono' _ _ hpole
       filter_upwards [self_mem_nhdsWithin] with s hs
