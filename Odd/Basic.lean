@@ -2706,7 +2706,15 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
     have h1 : (0:ℝ) < ((1:ℝ) + 1) ^ (-t) := by positivity
     linarith
   have htop : Filter.Tendsto uOf (nhdsWithin 1 (Set.Ioi 1)) Filter.atTop := by
-    sorry
+    -- zeta(s) - 1/(s-1) -> gamma (6a), and 1/(s-1) -> inf, so zeta -> inf
+    have hpole : Filter.Tendsto (fun s : ℝ => 1 / (s - 1))
+        (nhdsWithin 1 (Set.Ioi 1)) Filter.atTop := by
+      sorry
+    have hz : Filter.Tendsto (fun s : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
+        (nhdsWithin 1 (Set.Ioi 1)) Filter.atTop := by
+      sorry
+    unfold uOf
+    exact Real.tendsto_log_atTop.comp hz
   have hbot : Filter.Tendsto uOf Filter.atTop (nhdsWithin 0 (Set.Ioi 0)) := by
     sorry
   sorry
