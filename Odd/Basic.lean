@@ -2817,7 +2817,17 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
         apply Real.rpow_le_rpow_of_exponent_le (by
           have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
           linarith) (by linarith)
-      sorry
+      have hOn : ContinuousOn (fun s : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
+          (Set.Ici (1 + d)) := by
+        apply continuousOn_tsum _ hdom hunif
+        intro n
+        have hb : ((n:ℝ) + 1) ≠ 0 := by positivity
+        apply Continuous.continuousOn
+        exact (Real.continuous_const_rpow hb).comp continuous_neg
+      apply (hOn.continuousAt _).continuousWithinAt
+      apply Ici_mem_nhds
+      rw [hd]
+      linarith
     have hcont : ContinuousOn uOf (Set.Ioi 1) := by
       unfold uOf
       apply ContinuousOn.log hzcont
