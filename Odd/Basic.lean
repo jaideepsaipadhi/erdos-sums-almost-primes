@@ -2303,8 +2303,47 @@ theorem zetaReg_bddAbove :
     have hg1 : (fun s => 1 / Complex.Gammaℝ s) 1 = 1 := by
       simp [Complex.Gammaℝ_one]
     -- the difference quotient tends to the derivative
-    have hslope := hgd.hasDerivAt.tendsto_slope_zero
-    sorry
+    -- A: the manifestly continuous part
+    have hAcont : ContinuousAt
+        (fun s : ℂ => (completedRiemannZeta₀ s - 1 / s) / Complex.Gammaℝ s) 1 := by
+      apply ContinuousAt.div
+      · exact (differentiable_completedZeta₀.continuous.continuousAt).sub
+          (continuousAt_const.div continuousAt_id one_ne_zero)
+      · exact differentiableAt_GammaR_one.continuousAt
+      · rw [Complex.Gammaℝ_one]; norm_num
+    -- B: the slope of g = 1/Gammaℝ at 1
+    have hBlim : Filter.Tendsto
+        (fun s : ℂ => (1 / (s - 1)) * (1 / Complex.Gammaℝ s - 1))
+        (nhdsWithin 1 {(1:ℂ)}ᶜ) (nhds (deriv (fun s => 1 / Complex.Gammaℝ s) 1)) := by
+      have hs := hasDerivAt_iff_tendsto_slope.mp hgd.hasDerivAt
+      apply hs.congr'
+      filter_upwards [self_mem_nhdsWithin] with s hsne
+      rw [slope_def_field, Complex.Gammaℝ_one]
+      have hne : s - 1 ≠ 0 := sub_ne_zero_of_ne (by simpa using hsne)
+      field_simp
+    refine ⟨((completedRiemannZeta₀ 1 - 1 / 1) / Complex.Gammaℝ 1)
+      + deriv (fun s => 1 / Complex.Gammaℝ s) 1, ?_⟩
+    have hsum := (hAcont.continuousWithinAt.tendsto).add hBlim
+    apply hsum.congr'
+    filter_upwards [self_mem_nhdsWithin,
+      nhdsWithin_le_nhds (Metric.ball_mem_nhds (1:ℂ) (by norm_num : (0:ℝ) < 1/2))]
+      with s hsne hsball
+    have hs1 : s ≠ 1 := by simpa using hsne
+    have hs0 : s ≠ 0 := by
+      intro h
+      rw [Metric.mem_ball, h, dist_zero_left] at hsball
+      simp at hsball
+      linarith
+    have hgne : Complex.Gammaℝ s ≠ 0 := by
+      apply Complex.Gammaℝ_ne_zero_of_re_pos
+      rw [Metric.mem_ball, Complex.dist_eq] at hsball
+      have := Complex.abs_re_le_norm (s - 1)
+      have hre : |(s - 1).re| ≤ ‖s - 1‖ := this
+      simp only [Complex.sub_re, Complex.one_re] at hre
+      have : |s.re - 1| < 1/2 := lt_of_le_of_lt hre hsball
+      cases' abs_lt.mp this with h1 h2
+      linarith
+    exact (zetaReg_eq_near_one s hs0 hs1 hgne).symm
   obtain ⟨L, hL⟩ := hlim
   have hev : ∀ᶠ s in nhdsWithin (1:ℂ) {(1:ℂ)}ᶜ, ‖zetaReg s‖ ≤ ‖L‖ + 1 := by
     have h1 : ∀ᶠ s in nhdsWithin (1:ℂ) {(1:ℂ)}ᶜ, zetaReg s ∈ Metric.ball L 1 :=
