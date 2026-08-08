@@ -2193,15 +2193,6 @@ Substituting eps = e^-u, this controls u_* = log zeta(1+e^-u) against u, and
 the error enters the integrals at order e^-3u -- the third Gamma evaluation.
 -/
 
-/-- The uniform second-order bound, as an existence statement.  The constant C
-and the range eps0 are what the certified computation supplies; here they are
-existentially quantified, which is all step 3 needs. -/
-theorem eps_zeta_uniform :
-    ∃ C > 0, ∃ eps0 > 0, eps0 ≤ 1 ∧ ∀ eps : ℝ, 0 < eps → eps ≤ eps0 →
-      |eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))) - 1
-        - Real.eulerMascheroniConstant * eps| ≤ C * eps ^ 2 := by
-  sorry
-
 /-! ### The second-order bound, via the completed zeta
 
 Mathlib gives:
@@ -2497,3 +2488,30 @@ theorem zetaRegFull_one_eq_gamma :
     rw [closure_Ioc (by norm_num : (1:ℝ) ≠ 2)]
     exact ⟨le_refl 1, by norm_num⟩
   exact tendsto_nhds_unique hreal hgamma
+
+/-- The uniform second-order bound, as an existence statement.  The constant C
+and the range eps0 are what the certified computation supplies; here they are
+existentially quantified, which is all step 3 needs. -/
+theorem eps_zeta_uniform :
+    ∃ C > 0, ∃ eps0 > 0, eps0 ≤ 1 ∧ ∀ eps : ℝ, 0 < eps → eps ≤ eps0 →
+      |eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))) - 1
+        - Real.eulerMascheroniConstant * eps| ≤ C * eps ^ 2 := by
+  obtain ⟨C, hC, r, hr, hbound⟩ := zetaRegFull_taylor_bound
+  refine ⟨C * (1 + ‖deriv zetaRegFull 1‖), by positivity, min r 1, by positivity,
+    min_le_right _ _, ?_⟩
+  intro eps heps hle
+  have hle_r : eps ≤ r := le_trans hle (min_le_left _ _)
+  have hne : ((1 : ℂ) + (eps : ℂ)) - 1 = (eps : ℂ) := by ring
+  have hnorm : ‖((1 : ℂ) + (eps : ℂ)) - 1‖ = eps := by
+    rw [hne, Complex.norm_real, Real.norm_eq_abs, abs_of_pos heps]
+  have htay := hbound ((1 : ℂ) + (eps : ℂ)) (by rw [hnorm]; exact hle_r)
+  rw [hnorm, hne, zetaRegFull_one_eq_gamma] at htay
+  -- eps * zeta(1+eps) - 1 = eps * zetaRegFull(1+eps)
+  have hkey := eps_zeta_eq_eps_zetaRegFull eps heps
+  -- transport to the real series
+  have hser : riemannZeta (1 + (eps : ℂ))
+      = ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps)) : ℝ) : ℂ) := by
+    rw [zeta_series_eq (1 + eps) (by linarith)]
+    push_cast
+    ring_nf
+  sorry
