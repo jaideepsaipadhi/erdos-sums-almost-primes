@@ -2763,7 +2763,13 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
           simp only [hone]
           exact tendsto_const_nhds
         · simp only [if_neg hn]
-          sorry
+          have hb : (1:ℝ) < (n:ℝ) + 1 := by
+            have : (1:ℕ) ≤ n := Nat.one_le_iff_ne_zero.mpr hn
+            have : (1:ℝ) ≤ (n:ℝ) := by exact_mod_cast this
+            linarith
+          have hneg : Filter.Tendsto (fun s : ℝ => -s) Filter.atTop Filter.atBot :=
+            Filter.tendsto_neg_atTop_atBot
+          exact (tendsto_rpow_atBot_of_base_gt_one _ hb).comp hneg
       have hdom : ∀ᶠ s : ℝ in Filter.atTop, ∀ n : ℕ,
           ‖((n:ℝ) + 1) ^ (-s)‖ ≤ ((n:ℝ) + 1) ^ (-(2:ℝ)) := by
         filter_upwards [Filter.eventually_ge_atTop (2:ℝ)] with s hs n
