@@ -2655,12 +2655,30 @@ theorem uOf_strictAnti : StrictAntiOn uOf (Set.Ioi 1) := by
   have ha1 : (1:ℝ) < a := ha
   have hb1 : (1:ℝ) < b := hb
   -- zeta is strictly decreasing: each term (n+1)^-s is, for n >= 1
+  have hsummable : ∀ t : ℝ, 1 < t → Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-t)) := by
+    intro t ht
+    have hb := Real.summable_nat_rpow.mpr (by linarith : (-t:ℝ) < -1)
+    apply ((summable_nat_add_iff 1).mpr hb).congr
+    intro n
+    push_cast
+    ring_nf
   have hzlt : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-b)) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-a) := by
-    sorry
-  have hza : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-a) := by
-    sorry
-  have hzb : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-b) := by
-    sorry
+    have hle : (fun n : ℕ => ((n:ℝ) + 1) ^ (-b)) ≤ fun n : ℕ => ((n:ℝ) + 1) ^ (-a) := by
+      intro n
+      apply Real.rpow_le_rpow_of_exponent_le (by
+        have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+        linarith) (by linarith)
+    have hstrict : ((1:ℕ):ℝ) + 1 ≤ ((1:ℕ):ℝ) + 1 := le_refl _
+    apply Summable.tsum_lt_tsum (i := 1) hle _ (hsummable b hb1) (hsummable a ha1)
+    show (((1:ℕ):ℝ) + 1) ^ (-b) < (((1:ℕ):ℝ) + 1) ^ (-a)
+    apply Real.rpow_lt_rpow_of_exponent_lt (by norm_num) (by linarith)
+  have hpos : ∀ t : ℝ, 1 < t → (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t) := by
+    intro t ht
+    have hle := (hsummable t ht).le_tsum 0 (fun n _ => by positivity)
+    calc (0:ℝ) < ((0:ℝ) + 1) ^ (-t) := by norm_num
+      _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t) := by simpa using hle
+  have hza := hpos a ha1
+  have hzb := hpos b hb1
   unfold uOf
   exact Real.log_lt_log hzb hzlt
 
