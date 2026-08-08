@@ -2609,61 +2609,10 @@ theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k)
             (hCoeff (1 + Real.exp (-u)) j).re
               * (uOf (1 + Real.exp (-u))) ^ (k - j) / (Nat.factorial (k - j))
               * Real.exp (-u) := by
-  rw [← MeasureTheory.integral_finsetSum]
-  · apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
-    intro u hu
-    have hupos : (0:ℝ) < u := hu
-    have hs1 : (1:ℝ) < 1 + Real.exp (-u) := by
-      have := Real.exp_pos (-u)
-      linarith
-    have hexp := FkOdd_expansion' k hk (1 + Real.exp (-u)) hs1
-      (hsum _ hs1) (hmul3 _ hs1) (hcd1 _ hs1) (hcd2 _ hs1)
-    simp only
-    have hre := congrArg Complex.re hexp
-    simp only [Complex.ofReal_re] at hre
-    rw [hre]
-    rw [Complex.re_sum]
-    rw [Finset.sum_mul]
-    apply Finset.sum_congr rfl
-    intro j _
-    congr 1
-    have hrw : hCoeff (1 + Real.exp (-u)) j * ((uOf (1 + Real.exp (-u)) : ℝ) : ℂ) ^ (k - j)
-        / ((Nat.factorial (k - j) : ℕ) : ℂ)
-        = hCoeff (1 + Real.exp (-u)) j
-          * (((uOf (1 + Real.exp (-u)) ^ (k - j) / (Nat.factorial (k - j) : ℝ) : ℝ)) : ℂ) := by
-      push_cast
-      ring
-    rw [hrw, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
-    ring
-  · intro j hj
-    -- |h_j| <= B and u^m e^-u is integrable (GammaIntegral_convergent)
-    have hgam : MeasureTheory.IntegrableOn
-        (fun x : ℝ => Real.exp (-x) * x ^ (((k - j : ℕ) : ℝ) + 1 - 1)) (Set.Ioi 0) :=
-      Real.GammaIntegral_convergent (by positivity)
-    simp only [add_sub_cancel_right] at hgam
-    have hgam' : MeasureTheory.IntegrableOn
-        (fun x : ℝ => Real.exp (-x) * x ^ ((k - j : ℕ))) (Set.Ioi 0) := by
-      apply hgam.congr_fun _ measurableSet_Ioi
-      intro x hx
-      simp only
-      rw [← Real.rpow_natCast x (k - j)]
-    have hconst := (hgam'.const_mul (B / (Nat.factorial (k - j) : ℝ)))
-    apply MeasureTheory.Integrable.mono hconst
-    · sorry
-    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
-      have hxpos : (0:ℝ) < x := hx
-      have hs1 : (1:ℝ) < 1 + Real.exp (-x) := by
-        have := Real.exp_pos (-x); linarith
-      have hs2 : 1 + Real.exp (-x) ≤ 2 := by
-        have : Real.exp (-x) ≤ 1 := by
-          rw [Real.exp_le_one_iff]; linarith
-        linarith
-      have hbj := hB j (1 + Real.exp (-x)) hs1 hs2
-      have hre_le : |(hCoeff (1 + Real.exp (-x)) j).re| ≤ B :=
-        le_trans (Complex.abs_re_le_norm _) hbj
-      rw [Real.norm_eq_abs, Real.norm_eq_abs]
-      rw [abs_mul, abs_mul, abs_div]
-      sorry
+  -- SUPERSEDED: this route needs |uOf(1+e^-x)| <= x, which is false.
+  -- The correct organisation substitutes u = log zeta(s) directly;
+  -- see substitution_log_zeta below.
+  sorry
 
 /-- The leading order: replacing u_* by u and h_j(1+e^-u) by h_j(1) gives
 sum_j h_j(1), which is H(1,1) = 1/2. -/
@@ -2683,3 +2632,27 @@ theorem fOdd_leading_order (k : ℕ) (hk : 1 ≤ k) :
     ring
   rw [hg]
   field_simp
+
+/-! ### The correct substitution for step 3: u = log zeta(s)
+
+`substitution_near_pole` (item 5) uses s = 1 + e^-u, which is convenient but
+wrong for the expansion: FkOdd's expansion is in powers of u(s) = log zeta(s),
+and 1 + e^-u does not make u(s) equal u.
+
+Substituting u = log zeta(s) instead makes u the integration variable, so the
+u^{k-j} factor is exact and the whole approximation moves into the Jacobian
+-s'(u), where eps_zeta_uniform controls it.
+
+zeta is strictly decreasing on (1, inf) from +inf to 1, so u = log zeta maps
+(1, inf) onto (0, inf) monotonically -- a valid change of variable. -/
+
+/-- zeta restricted to reals > 1, as the real series. -/
+noncomputable def zetaR (s : ℝ) : ℝ := ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)
+
+/-- u(s) = log zeta(s) is strictly decreasing on (1, inf). -/
+theorem uOf_strictAnti : StrictAntiOn uOf (Set.Ioi 1) := by
+  sorry
+
+/-- u maps (1, inf) onto (0, inf). -/
+theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
+  sorry
