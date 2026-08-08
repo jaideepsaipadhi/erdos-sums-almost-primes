@@ -2450,3 +2450,32 @@ theorem zeta_series_eq (s : ℝ) (hs : 1 < s) :
   push_cast at hoc
   push_cast
   exact hoc
+
+/-- zetaRegFull 1 = gamma: the removable-singularity value agrees with the
+Laurent constant computed in 6a via the bracket decomposition.
+
+Both are limits of zeta(s) - 1/(s-1) as s -> 1; 6a computes it along the real
+axis from above, and zetaRegFull is defined as the limit along the punctured
+neighbourhood.  Uniqueness of limits identifies them. -/
+theorem zetaRegFull_one_eq_gamma :
+    zetaRegFull 1 = ((Real.eulerMascheroniConstant : ℝ) : ℂ) := by
+  -- zetaRegFull is continuous at 1 (differentiable there), so it is the limit
+  -- of zetaReg along any filter tending to 1 within the punctured plane.
+  have hcont : ContinuousAt zetaRegFull 1 :=
+    zetaRegFull_differentiableAt_one.continuousAt
+  -- along real s decreasing to 1, zetaReg s = (real series) - 1/(s-1) -> gamma by 6a
+  have hreal : Filter.Tendsto (fun s : ℝ => zetaRegFull ((s : ℂ)))
+      (nhdsWithin 1 (Set.Ioc 1 2)) (nhds (zetaRegFull 1)) := by
+    sorry
+  have hgamma : Filter.Tendsto (fun s : ℝ => zetaRegFull ((s : ℂ)))
+      (nhdsWithin 1 (Set.Ioc 1 2)) (nhds ((Real.eulerMascheroniConstant : ℝ) : ℂ)) := by
+    sorry
+  have hnb : (nhdsWithin (1:ℝ) (Set.Ioc 1 2)).NeBot := by
+    apply mem_closure_iff_nhdsWithin_neBot.mp
+    rw [closure_Ioc (by norm_num : (1:ℝ) ≠ 2)]
+    exact ⟨le_refl 1, by norm_num⟩
+  have hnb : (nhdsWithin (1:ℝ) (Set.Ioc 1 2)).NeBot := by
+    apply mem_closure_iff_nhdsWithin_neBot.mp
+    rw [closure_Ioc (by norm_num : (1:ℝ) ≠ 2)]
+    exact ⟨le_refl 1, by norm_num⟩
+  exact tendsto_nhds_unique hreal hgamma
