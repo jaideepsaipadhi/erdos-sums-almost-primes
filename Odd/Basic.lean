@@ -2552,3 +2552,26 @@ theorem eps_zeta_uniform :
     have h2 : eps * (‖deriv zetaRegFull 1‖ * eps) = ‖deriv zetaRegFull 1‖ * eps ^ 2 := by ring
     nlinarith [h1, h2]
   linarith [hstep, hfin]
+
+/-- The s-uniformity input for step 3.
+
+Mirrors `NumericalFacts.beta` in the main development, where the sup of
+|d_s g_i(s)| over s in (1,2), uniform in i, is a certified input rather than a
+derived bound.  Supplied here by odd/numerics/mr_certified.py, whose interval
+sweep ranges over s in [1,2] as well as the z-circle. -/
+structure OddCoeffFacts (betaS : ℝ) : Prop where
+  nonneg : 0 ≤ betaS
+  deriv_exists : ∀ j : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
+    HasDerivAt (fun t : ℝ => hCoeff t j) (deriv (fun t : ℝ => hCoeff t j) x) x
+  deriv_bound : ∀ j : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
+    ‖deriv (fun t : ℝ => hCoeff t j) x‖ ≤ betaS
+
+/-- The mean-value step: |h_j(s) - h_j(t)| <= betaS |s - t| on (1,2),
+uniformly in j.  Transferred from gManu_lipschitz_interior. -/
+theorem hCoeff_lipschitz (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ)
+    (t s : ℝ) (ht : t ∈ Set.Ioo (1:ℝ) 2) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
+    ‖hCoeff s j - hCoeff t j‖ ≤ betaS * ‖s - t‖ := by
+  apply Convex.norm_image_sub_le_of_norm_hasDerivWithin_le
+    (f' := fun x : ℝ => deriv (fun u : ℝ => hCoeff u j) x)
+    (fun x hx => (hf.deriv_exists j x hx).hasDerivWithinAt)
+    (fun x hx => hf.deriv_bound j x hx) (convex_Ioo 1 2) ht hs
