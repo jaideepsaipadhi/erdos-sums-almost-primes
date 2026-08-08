@@ -2799,8 +2799,15 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
   · intro hy
     simp only [Set.mem_Ioi] at hy
     -- continuity of uOf on (1, inf)
-    have hcont : ContinuousOn uOf (Set.Ioi 1) := by
+    have hzcont : ContinuousOn (fun s : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
+        (Set.Ioi 1) := by
       sorry
+    have hcont : ContinuousOn uOf (Set.Ioi 1) := by
+      unfold uOf
+      apply ContinuousOn.log hzcont
+      intro s hs
+      have := hzgt s hs
+      linarith
     -- pick a < b in (1,inf) with uOf b < y < uOf a, then IVT
     obtain ⟨a, ha1, hay⟩ : ∃ a : ℝ, 1 < a ∧ y < uOf a := by
       have := htop.eventually (Filter.eventually_gt_atTop y)
