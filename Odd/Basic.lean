@@ -2279,3 +2279,26 @@ theorem zetaReg_differentiableAt (s : ℂ) (hs1 : s ≠ 1) :
   apply DifferentiableAt.div (differentiableAt_const 1)
     (differentiableAt_id.sub (differentiableAt_const 1))
   exact sub_ne_zero_of_ne hs1
+
+/-- The regularised zeta with its removable singularity filled in. -/
+noncomputable def zetaRegFull : ℂ → ℂ :=
+  Function.update zetaReg 1 ((nhdsWithin (1:ℂ) {(1:ℂ)}ᶜ).limUnder zetaReg)
+
+/-- zetaRegFull agrees with zetaReg away from 1. -/
+theorem zetaRegFull_eq_of_ne (s : ℂ) (hs : s ≠ 1) : zetaRegFull s = zetaReg s :=
+  Function.update_of_ne hs _ _
+
+/-- zeta s - 1/(s-1) is bounded near s = 1: the pole is simple with residue 1,
+so the difference stays finite.  This is what the removable-singularity
+theorem needs. -/
+theorem zetaReg_bddAbove :
+    ∃ r > 0, BddAbove (Norm.norm ∘ zetaReg '' (Metric.ball (1:ℂ) r \ {1})) := by
+  sorry
+
+/-- THE KEY LEMMA: zetaRegFull is differentiable at 1.
+
+Differentiable on a punctured ball (zetaReg_differentiableAt) plus bounded
+(zetaReg_bddAbove) gives differentiability of the update across the puncture,
+by Complex.differentiableOn_update_limUnder_of_bddAbove. -/
+theorem zetaRegFull_differentiableAt_one : DifferentiableAt ℂ zetaRegFull 1 := by
+  sorry
