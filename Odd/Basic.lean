@@ -2435,3 +2435,18 @@ theorem eps_zeta_eq_eps_zetaRegFull (eps : ℝ) (heps : 0 < eps) :
     simp only [ne_eq, Complex.ofReal_eq_zero]
     linarith
   field_simp
+
+/-- For real s > 1, the real Dirichlet series equals riemannZeta.
+(Extracted from zeta_two_cFac_eq_one's proof, where it was local.) -/
+theorem zeta_series_eq (s : ℝ) (hs : 1 < s) :
+    ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) : ℝ) : ℂ) = riemannZeta (s : ℂ) := by
+  rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simpa using hs)]
+  rw [Complex.ofReal_tsum]
+  apply tsum_congr
+  intro n
+  rw [one_div, ← Complex.cpow_neg]
+  have hb : (0:ℝ) ≤ ((n:ℝ) + 1) := by positivity
+  have hoc := Complex.ofReal_cpow hb (-s)
+  push_cast at hoc
+  push_cast
+  exact hoc
