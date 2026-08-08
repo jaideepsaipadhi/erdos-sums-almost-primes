@@ -2270,3 +2270,12 @@ theorem zetaReg_eq_near_one (s : ℂ) (hs0 : s ≠ 0) (hs1 : s ≠ 1) (hg : Comp
   have hne : s - 1 ≠ 0 := sub_ne_zero_of_ne hs1
   field_simp
   ring
+
+/-- zetaReg is differentiable away from s = 1 (and s = 0). -/
+theorem zetaReg_differentiableAt (s : ℂ) (hs1 : s ≠ 1) :
+    DifferentiableAt ℂ zetaReg s := by
+  unfold zetaReg
+  apply DifferentiableAt.sub (differentiableAt_riemannZeta hs1)
+  apply DifferentiableAt.div (differentiableAt_const 1)
+    (differentiableAt_id.sub (differentiableAt_const 1))
+  exact sub_ne_zero_of_ne hs1
