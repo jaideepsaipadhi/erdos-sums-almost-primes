@@ -2790,4 +2790,13 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
       simp only [Set.mem_Ioi]
       unfold uOf
       exact Real.log_pos (hzgt s hs)
-  sorry
+  ext y
+  constructor
+  · rintro ⟨s, hs, rfl⟩
+    simp only [Set.mem_Ioi]
+    unfold uOf
+    exact Real.log_pos (hzgt s hs)
+  · intro hy
+    simp only [Set.mem_Ioi] at hy
+    -- intermediate value: u is continuous on (1,inf), -> inf at 1+, -> 0 at inf
+    sorry
