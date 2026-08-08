@@ -2640,7 +2640,19 @@ theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k)
     have hgam : MeasureTheory.IntegrableOn
         (fun x : ℝ => Real.exp (-x) * x ^ (((k - j : ℕ) : ℝ) + 1 - 1)) (Set.Ioi 0) :=
       Real.GammaIntegral_convergent (by positivity)
-    sorry
+    simp only [add_sub_cancel_right] at hgam
+    have hgam' : MeasureTheory.IntegrableOn
+        (fun x : ℝ => Real.exp (-x) * x ^ ((k - j : ℕ))) (Set.Ioi 0) := by
+      apply hgam.congr_fun _ measurableSet_Ioi
+      intro x hx
+      simp only
+      rw [← Real.rpow_natCast x (k - j)]
+    have hconst := (hgam'.const_mul (B / (Nat.factorial (k - j) : ℝ)))
+    apply MeasureTheory.Integrable.mono hconst
+    · apply MeasureTheory.AEStronglyMeasurable.mul
+      · sorry
+      · sorry
+    · sorry
 
 /-- The leading order: replacing u_* by u and h_j(1+e^-u) by h_j(1) gives
 sum_j h_j(1), which is H(1,1) = 1/2. -/
