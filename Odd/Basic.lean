@@ -2364,4 +2364,10 @@ Differentiable on a punctured ball (zetaReg_differentiableAt) plus bounded
 (zetaReg_bddAbove) gives differentiability of the update across the puncture,
 by Complex.differentiableOn_update_limUnder_of_bddAbove. -/
 theorem zetaRegFull_differentiableAt_one : DifferentiableAt ℂ zetaRegFull 1 := by
-  sorry
+  obtain ⟨r, hr, hbdd⟩ := zetaReg_bddAbove
+  have hmem : Metric.ball (1:ℂ) r ∈ nhds (1:ℂ) := Metric.ball_mem_nhds 1 hr
+  have hdiff : DifferentiableOn ℂ zetaReg (Metric.ball (1:ℂ) r \ {1}) := by
+    intro x hx
+    exact (zetaReg_differentiableAt x (by simpa using hx.2)).differentiableWithinAt
+  have hupd := Complex.differentiableOn_update_limUnder_of_bddAbove hmem hdiff hbdd
+  exact (hupd.differentiableAt hmem)
