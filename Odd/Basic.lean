@@ -2651,7 +2651,18 @@ noncomputable def zetaR (s : ℝ) : ℝ := ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)
 
 /-- u(s) = log zeta(s) is strictly decreasing on (1, inf). -/
 theorem uOf_strictAnti : StrictAntiOn uOf (Set.Ioi 1) := by
-  sorry
+  intro a ha b hb hab
+  have ha1 : (1:ℝ) < a := ha
+  have hb1 : (1:ℝ) < b := hb
+  -- zeta is strictly decreasing: each term (n+1)^-s is, for n >= 1
+  have hzlt : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-b)) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-a) := by
+    sorry
+  have hza : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-a) := by
+    sorry
+  have hzb : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-b) := by
+    sorry
+  unfold uOf
+  exact Real.log_lt_log hzb hzlt
 
 /-- u maps (1, inf) onto (0, inf). -/
 theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
