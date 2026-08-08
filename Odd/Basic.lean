@@ -2798,5 +2798,32 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
     exact Real.log_pos (hzgt s hs)
   · intro hy
     simp only [Set.mem_Ioi] at hy
-    -- intermediate value: u is continuous on (1,inf), -> inf at 1+, -> 0 at inf
-    sorry
+    -- continuity of uOf on (1, inf)
+    have hcont : ContinuousOn uOf (Set.Ioi 1) := by
+      sorry
+    -- pick a < b in (1,inf) with uOf b < y < uOf a, then IVT
+    obtain ⟨a, ha1, hay⟩ : ∃ a : ℝ, 1 < a ∧ y < uOf a := by
+      have := htop.eventually (Filter.eventually_gt_atTop y)
+      obtain ⟨V, hV, hVsub⟩ := (mem_nhdsWithin_iff_exists_mem_nhds_inter).mp this
+      obtain ⟨r, hr, hrsub⟩ := Metric.mem_nhds_iff.mp hV
+      refine ⟨1 + r/2, by linarith, ?_⟩
+      apply hVsub
+      constructor
+      · apply hrsub
+        rw [Metric.mem_ball, Real.dist_eq]
+        rw [show (1 + r/2 - 1 : ℝ) = r/2 by ring, abs_of_pos (by linarith)]
+        linarith
+      · simp only [Set.mem_Ioi]; linarith
+    obtain ⟨b, hba, hby⟩ : ∃ b : ℝ, a < b ∧ uOf b < y := by
+      have := hbot.eventually (eventually_nhdsWithin_of_eventually_nhds
+        (eventually_lt_nhds hy))
+      obtain ⟨b, hb⟩ := (this.and (Filter.eventually_gt_atTop a)).exists
+      exact ⟨b, hb.2, hb.1⟩
+    have hsub : Set.Icc a b ⊆ Set.Ioi 1 := by
+      intro x hx
+      simp only [Set.mem_Ioi]
+      linarith [hx.1]
+    have hivt := intermediate_value_Icc' (le_of_lt hba) (hcont.mono hsub)
+    have hmem : y ∈ Set.Icc (uOf b) (uOf a) := ⟨le_of_lt hby, le_of_lt hay⟩
+    obtain ⟨x, hx, hxy⟩ := hivt hmem
+    exact ⟨x, hsub hx, hxy⟩
