@@ -2860,3 +2860,16 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
     have hmem : y ∈ Set.Icc (uOf b) (uOf a) := ⟨le_of_lt hby, le_of_lt hay⟩
     obtain ⟨x, hx, hxy⟩ := hivt hmem
     exact ⟨x, hsub hx, hxy⟩
+
+/-- The termwise derivative of the zeta series. -/
+noncomputable def zetaRderiv (s : ℝ) : ℝ :=
+  ∑' n : ℕ, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-s)
+
+/-- The zeta series is differentiable on (1, inf) with the termwise derivative.
+
+Via hasDerivAt_of_tendstoLocallyUniformlyOn: the partial sums converge
+pointwise, their derivatives converge locally uniformly (dominated by
+log(n+1)(n+1)^(-(1+d)) on [1+d, inf)), and Ioi 1 is open. -/
+theorem zetaR_hasDerivAt (s : ℝ) (hs : 1 < s) :
+    HasDerivAt (fun t : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t)) (zetaRderiv s) s := by
+  sorry
