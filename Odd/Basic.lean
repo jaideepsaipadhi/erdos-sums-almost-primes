@@ -2378,3 +2378,14 @@ theorem zetaRegFull_analyticAt_one : AnalyticAt ℂ zetaRegFull 1 := by
       filter_upwards [(isOpen_ne (x := (1:ℂ))).mem_nhds hs1] with w hwne
       exact zetaRegFull_eq_of_ne w hwne
     exact (zetaReg_differentiableAt s hs1).congr_of_eventuallyEq heq
+
+/-- From analyticity at 1: zetaRegFull is twice differentiable near 1, so its
+first-order Taylor remainder is O(|s-1|^2) on a small ball.
+
+This is the quantitative input step 3 needs -- it is what upgrades the
+o(eps) from eps_zeta_second_order to O(eps^2). -/
+theorem zetaRegFull_taylor_bound :
+    ∃ C > 0, ∃ r > 0, ∀ s : ℂ, ‖s - 1‖ ≤ r →
+      ‖zetaRegFull s - zetaRegFull 1 - deriv zetaRegFull 1 * (s - 1)‖
+        ≤ C * ‖s - 1‖ ^ 2 := by
+  sorry
