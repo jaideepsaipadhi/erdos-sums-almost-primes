@@ -2293,7 +2293,22 @@ so the difference stays finite.  This is what the removable-singularity
 theorem needs. -/
 theorem zetaReg_bddAbove :
     ∃ r > 0, BddAbove (Norm.norm ∘ zetaReg '' (Metric.ball (1:ℂ) r \ {1})) := by
-  sorry
+  -- zetaReg tends to a limit at 1 (the Laurent constant), hence is bounded near 1
+  have hlim : ∃ L : ℂ, Filter.Tendsto zetaReg (nhdsWithin 1 {(1:ℂ)}ᶜ) (nhds L) := by
+    sorry
+  obtain ⟨L, hL⟩ := hlim
+  have hev : ∀ᶠ s in nhdsWithin (1:ℂ) {(1:ℂ)}ᶜ, ‖zetaReg s‖ ≤ ‖L‖ + 1 := by
+    have h1 : ∀ᶠ s in nhdsWithin (1:ℂ) {(1:ℂ)}ᶜ, zetaReg s ∈ Metric.ball L 1 :=
+      hL (Metric.ball_mem_nhds L one_pos)
+    filter_upwards [h1] with s hsmem
+    rw [Metric.mem_ball, dist_eq_norm] at hsmem
+    have htri : ‖zetaReg s‖ - ‖L‖ ≤ ‖zetaReg s - L‖ := norm_sub_norm_le _ _
+    linarith [le_of_lt hsmem]
+  obtain ⟨V, hV, hVsub⟩ := (mem_nhdsWithin_iff_exists_mem_nhds_inter).mp hev
+  obtain ⟨r, hr, hrsub⟩ := Metric.mem_nhds_iff.mp hV
+  refine ⟨r, hr, ⟨‖L‖ + 1, ?_⟩⟩
+  rintro x ⟨s, hs, rfl⟩
+  exact hVsub ⟨hrsub hs.1, hs.2⟩
 
 /-- THE KEY LEMMA: zetaRegFull is differentiable at 1.
 
