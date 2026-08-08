@@ -2601,7 +2601,8 @@ theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k)
       Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - zOmegaHom s z (p : ℕ))⁻¹))
     (hcd1 : ∀ s : ℝ, 1 < s →
       ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
-    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0) :
+    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0)
+    (B : ℝ) (hB : ∀ j : ℕ, ∀ s : ℝ, 1 < s → s ≤ 2 → ‖hCoeff s j‖ ≤ B) :
     (∫ u in Set.Ioi (0:ℝ), FkOdd k (1 + Real.exp (-u)) * Real.exp (-u))
       = ∑ j ∈ Finset.range (k + 1),
           ∫ u in Set.Ioi (0:ℝ),
@@ -2635,6 +2636,10 @@ theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k)
     rw [hrw, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
     ring
   · intro j hj
+    -- |h_j| <= B and u^m e^-u is integrable (GammaIntegral_convergent)
+    have hgam : MeasureTheory.IntegrableOn
+        (fun x : ℝ => Real.exp (-x) * x ^ (((k - j : ℕ) : ℝ) + 1 - 1)) (Set.Ioi 0) :=
+      Real.GammaIntegral_convergent (by positivity)
     sorry
 
 /-- The leading order: replacing u_* by u and h_j(1+e^-u) by h_j(1) gives
