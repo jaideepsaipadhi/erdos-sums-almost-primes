@@ -2685,8 +2685,22 @@ theorem uOf_strictAnti : StrictAntiOn uOf (Set.Ioi 1) := by
 /-- u maps (1, inf) onto (0, inf). -/
 theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
   -- u = log zeta, zeta > 1 on (1,inf) so u > 0; zeta -> inf at 1+ and -> 1 at inf
+  have hsummable : ∀ t : ℝ, 1 < t → Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-t)) := by
+    intro t ht
+    have hb := Real.summable_nat_rpow.mpr (by linarith : (-t:ℝ) < -1)
+    apply ((summable_nat_add_iff 1).mpr hb).congr
+    intro n
+    push_cast
+    ring_nf
   have hzgt : ∀ s : ℝ, 1 < s → 1 < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
-    sorry
+    intro t ht
+    -- the n = 0 term is 1 and the n = 1 term is positive
+    have hsum2 : ((0:ℝ) + 1) ^ (-t) + ((1:ℝ) + 1) ^ (-t)
+        ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t) := by
+      sorry
+    have h0 : ((0:ℝ) + 1) ^ (-t) = 1 := by norm_num
+    have h1 : (0:ℝ) < ((1:ℝ) + 1) ^ (-t) := by positivity
+    linarith
   have htop : Filter.Tendsto uOf (nhdsWithin 1 (Set.Ioi 1)) Filter.atTop := by
     sorry
   have hbot : Filter.Tendsto uOf Filter.atTop (nhdsWithin 0 (Set.Ioi 0)) := by
