@@ -2709,9 +2709,22 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
     -- zeta(s) - 1/(s-1) -> gamma (6a), and 1/(s-1) -> inf, so zeta -> inf
     have hpole : Filter.Tendsto (fun s : ℝ => 1 / (s - 1))
         (nhdsWithin 1 (Set.Ioi 1)) Filter.atTop := by
-      sorry
+      simp only [one_div]
+      apply Filter.Tendsto.comp tendsto_inv_nhdsGT_zero
+      apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
+      · have hc : Filter.Tendsto (fun s : ℝ => s - 1) (nhds 1) (nhds ((1:ℝ) - 1)) :=
+          ((continuous_id.sub continuous_const).tendsto 1)
+        rw [sub_self] at hc
+        exact hc.mono_left nhdsWithin_le_nhds
+      · filter_upwards [self_mem_nhdsWithin] with s hs
+        have hs1 : (1:ℝ) < s := hs
+        simp only [Set.mem_Ioi]
+        linarith
     have hz : Filter.Tendsto (fun s : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
         (nhdsWithin 1 (Set.Ioi 1)) Filter.atTop := by
+      have hlaurent := zeta_laurent_constant
+      have hmono : nhdsWithin (1:ℝ) (Set.Ioc 1 2) ≤ nhdsWithin (1:ℝ) (Set.Ioi 1) :=
+        nhdsWithin_mono _ Set.Ioc_subset_Ioi_self
       sorry
     unfold uOf
     exact Real.tendsto_log_atTop.comp hz
