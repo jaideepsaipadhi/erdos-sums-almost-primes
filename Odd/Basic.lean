@@ -2722,10 +2722,20 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
         linarith
     have hz : Filter.Tendsto (fun s : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
         (nhdsWithin 1 (Set.Ioi 1)) Filter.atTop := by
-      have hlaurent := zeta_laurent_constant
-      have hmono : nhdsWithin (1:ℝ) (Set.Ioc 1 2) ≤ nhdsWithin (1:ℝ) (Set.Ioi 1) :=
-        nhdsWithin_mono _ Set.Ioc_subset_Ioi_self
-      sorry
+      -- zeta(s) >= 1/(s-1) by comparison with the integral (tsum_integral_Ioc_eq)
+      have hge : ∀ s : ℝ, 1 < s → 1 / (s - 1) ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
+        intro t ht
+        rw [← tsum_integral_Ioc_eq t ht]
+        apply Summable.tsum_le_tsum
+        · intro n
+          have hb := zetaBracket_nonneg_of_mem n t ht
+          unfold zetaBracket at hb
+          linarith
+        · sorry
+        · exact hsummable t ht
+      apply Filter.tendsto_atTop_mono' _ _ hpole
+      filter_upwards [self_mem_nhdsWithin] with s hs
+      exact hge s hs
     unfold uOf
     exact Real.tendsto_log_atTop.comp hz
   have hbot : Filter.Tendsto uOf Filter.atTop (nhdsWithin 0 (Set.Ioi 0)) := by
