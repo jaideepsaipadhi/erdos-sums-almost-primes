@@ -2464,16 +2464,34 @@ theorem zetaRegFull_one_eq_gamma :
   have hcont : ContinuousAt zetaRegFull 1 :=
     zetaRegFull_differentiableAt_one.continuousAt
   -- along real s decreasing to 1, zetaReg s = (real series) - 1/(s-1) -> gamma by 6a
+  have hcast : Filter.Tendsto (fun s : ℝ => ((s : ℂ)))
+      (nhdsWithin (1:ℝ) (Set.Ioc 1 2)) (nhds ((1:ℝ) : ℂ)) := by
+    apply Filter.Tendsto.mono_left _ nhdsWithin_le_nhds
+    exact Complex.continuous_ofReal.tendsto 1
   have hreal : Filter.Tendsto (fun s : ℝ => zetaRegFull ((s : ℂ)))
       (nhdsWithin 1 (Set.Ioc 1 2)) (nhds (zetaRegFull 1)) := by
-    sorry
+    have h := hcont.tendsto.comp hcast
+    simpa only [Function.comp_def, Complex.ofReal_one] using h
   have hgamma : Filter.Tendsto (fun s : ℝ => zetaRegFull ((s : ℂ)))
       (nhdsWithin 1 (Set.Ioc 1 2)) (nhds ((Real.eulerMascheroniConstant : ℝ) : ℂ)) := by
-    sorry
-  have hnb : (nhdsWithin (1:ℝ) (Set.Ioc 1 2)).NeBot := by
-    apply mem_closure_iff_nhdsWithin_neBot.mp
-    rw [closure_Ioc (by norm_num : (1:ℝ) ≠ 2)]
-    exact ⟨le_refl 1, by norm_num⟩
+    have h6a := zeta_laurent_constant
+    have hcomp : Filter.Tendsto
+        (fun s : ℝ => (((∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) - 1 / (s - 1) : ℝ) : ℂ))
+        (nhdsWithin 1 (Set.Ioc 1 2)) (nhds ((Real.eulerMascheroniConstant : ℝ) : ℂ)) :=
+      (Complex.continuous_ofReal.tendsto _).comp h6a
+    apply hcomp.congr'
+    filter_upwards [self_mem_nhdsWithin] with s hs
+    have hs1 : (1:ℝ) < s := hs.1
+    have hne : ((s : ℂ)) ≠ 1 := by
+      intro hcon
+      have : (s : ℝ) = 1 := by exact_mod_cast hcon
+      linarith
+    rw [zetaRegFull_eq_of_ne _ hne]
+    unfold zetaReg
+    rw [← zeta_series_eq s hs1]
+    push_cast
+    have hsne : (s : ℂ) - 1 ≠ 0 := sub_ne_zero_of_ne hne
+    field_simp
   have hnb : (nhdsWithin (1:ℝ) (Set.Ioc 1 2)).NeBot := by
     apply mem_closure_iff_nhdsWithin_neBot.mp
     rw [closure_Ioc (by norm_num : (1:ℝ) ≠ 2)]
