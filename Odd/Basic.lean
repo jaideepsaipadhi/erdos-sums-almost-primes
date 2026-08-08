@@ -2575,3 +2575,42 @@ theorem hCoeff_lipschitz (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ)
     (f' := fun x : ℝ => deriv (fun u : ℝ => hCoeff u j) x)
     (fun x hx => (hf.deriv_exists j x hx).hasDerivWithinAt)
     (fun x hx => hf.deriv_bound j x hx) (convex_Ioo 1 2) ht hs
+
+/-! ### 6c step 3: the assembly
+
+    fOdd k = int_{Ioi 1} FkOdd k s ds                        [item 1]
+           = int_{Ioo 1 2} + int_{Ici 2}                      [item 5]
+           = int_{Ioi 0} FkOdd k (1+e^-u) e^-u du + tail      [item 5]
+
+Insert FkOdd_expansion' and replace, term by term:
+  * u_*(u) = log zeta(1+e^-u) by u, error controlled by eps_zeta_uniform
+  * h_j(1+e^-u) by h_j(1), error controlled by hCoeff_lipschitz
+
+The sum over j <= k is FINITE, so it commutes with the integral.  The leading
+term is sum_j h_j(1) * int u^(k-j) e^-u/(k-j)! = sum_j h_j(1) = H(1,1) = 1/2
+(gamma_normalised, hCoeff_sum_one); the next order gives beta 2^-k via
+gamma_normalised_two and hCoeff_sum_two; the rest is bounded by
+gamma_normalised_three.
+-/
+
+/-- The near-pole integral of the expansion, term by term. -/
+theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k) :
+    (∫ u in Set.Ioi (0:ℝ), FkOdd k (1 + Real.exp (-u)) * Real.exp (-u))
+      = ∑ j ∈ Finset.range (k + 1),
+          ∫ u in Set.Ioi (0:ℝ),
+            (hCoeff (1 + Real.exp (-u)) j).re
+              * (uOf (1 + Real.exp (-u))) ^ (k - j) / (Nat.factorial (k - j))
+              * Real.exp (-u) := by
+  sorry
+
+/-- The leading order: replacing u_* by u and h_j(1+e^-u) by h_j(1) gives
+sum_j h_j(1), which is H(1,1) = 1/2. -/
+theorem fOdd_leading_order (k : ℕ) (hk : 1 ≤ k) :
+    ∑ j ∈ Finset.range (k + 1),
+      (hCoeff 1 j).re * (∫ u in Set.Ioi (0:ℝ), u ^ (k - j) * Real.exp (-u))
+        / (Nat.factorial (k - j))
+      = ∑ j ∈ Finset.range (k + 1), (hCoeff 1 j).re := by
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [div_eq_iff (by exact_mod_cast Nat.factorial_ne_zero (k - j))]
+  sorry
