@@ -2612,5 +2612,12 @@ theorem fOdd_leading_order (k : ℕ) (hk : 1 ≤ k) :
       = ∑ j ∈ Finset.range (k + 1), (hCoeff 1 j).re := by
   apply Finset.sum_congr rfl
   intro j _
-  rw [div_eq_iff (by exact_mod_cast Nat.factorial_ne_zero (k - j))]
-  sorry
+  have hg : (∫ u in Set.Ioi (0:ℝ), u ^ (k - j) * Real.exp (-u))
+      = (Nat.factorial (k - j) : ℝ) := by
+    have h := integral_exp_neg_mul_pow (k - j)
+    rw [← h]
+    apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro u _
+    ring
+  rw [hg]
+  field_simp
