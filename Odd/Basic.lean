@@ -2400,4 +2400,38 @@ theorem zetaRegFull_taylor_bound :
     linarith
   have := hrsub hy
   simp only [Set.mem_setOf_eq] at this
-  sorry
+  have hadd : (1 : ℂ) + (s - 1) = s := by ring
+  rw [hadd] at this
+  have hnorm : ‖‖s - 1‖ ^ 2‖ = ‖s - 1‖ ^ 2 := by
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+  rw [hnorm] at this
+  have hpart : (FormalMultilinearSeries.ofScalars ℂ
+      fun n => iteratedDeriv n zetaRegFull 1 / (Nat.factorial n : ℂ)).partialSum 2 (s - 1)
+      = zetaRegFull 1 + deriv zetaRegFull 1 * (s - 1) := by
+    rw [FormalMultilinearSeries.partialSum]
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_zero]
+    simp [FormalMultilinearSeries.ofScalars, iteratedDeriv_one, iteratedDeriv_zero]
+  rw [hpart] at this
+  have hre : zetaRegFull s - (zetaRegFull 1 + deriv zetaRegFull 1 * (s - 1))
+      = zetaRegFull s - zetaRegFull 1 - deriv zetaRegFull 1 * (s - 1) := by ring
+  rw [hre] at this
+  exact this
+
+/-- eps * zeta(1+eps) - 1 = eps * zetaRegFull(1+eps) for real eps > 0,
+since zetaRegFull(1+eps) = zeta(1+eps) - 1/eps there. -/
+theorem eps_zeta_eq_eps_zetaRegFull (eps : ℝ) (heps : 0 < eps) :
+    (eps : ℂ) * riemannZeta (1 + (eps : ℂ)) - 1
+      = (eps : ℂ) * zetaRegFull (1 + (eps : ℂ)) := by
+  have hne : (1 + (eps : ℂ)) ≠ 1 := by
+    intro h
+    have : (eps : ℂ) = 0 := by linear_combination h
+    have : eps = 0 := by exact_mod_cast this
+    linarith
+  rw [zetaRegFull_eq_of_ne _ hne]
+  unfold zetaReg
+  have hsub : (1 + (eps : ℂ)) - 1 = (eps : ℂ) := by ring
+  rw [hsub]
+  have hepsne : (eps : ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  field_simp
