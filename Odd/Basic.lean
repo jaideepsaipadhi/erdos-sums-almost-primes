@@ -2295,6 +2295,15 @@ theorem zetaReg_bddAbove :
     ∃ r > 0, BddAbove (Norm.norm ∘ zetaReg '' (Metric.ball (1:ℂ) r \ {1})) := by
   -- zetaReg tends to a limit at 1 (the Laurent constant), hence is bounded near 1
   have hlim : ∃ L : ℂ, Filter.Tendsto zetaReg (nhdsWithin 1 {(1:ℂ)}ᶜ) (nhds L) := by
+    -- g = 1/Gammaℝ is differentiable at 1 with g 1 = 1
+    have hgd : DifferentiableAt ℂ (fun s => 1 / Complex.Gammaℝ s) 1 := by
+      apply DifferentiableAt.div (differentiableAt_const 1) differentiableAt_GammaR_one
+      rw [Complex.Gammaℝ_one]
+      norm_num
+    have hg1 : (fun s => 1 / Complex.Gammaℝ s) 1 = 1 := by
+      simp [Complex.Gammaℝ_one]
+    -- the difference quotient tends to the derivative
+    have hslope := hgd.hasDerivAt.tendsto_slope_zero
     sorry
   obtain ⟨L, hL⟩ := hlim
   have hev : ∀ᶠ s in nhdsWithin (1:ℂ) {(1:ℂ)}ᶜ, ‖zetaReg s‖ ≤ ‖L‖ + 1 := by
