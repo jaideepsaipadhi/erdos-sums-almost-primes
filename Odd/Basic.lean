@@ -2684,4 +2684,11 @@ theorem uOf_strictAnti : StrictAntiOn uOf (Set.Ioi 1) := by
 
 /-- u maps (1, inf) onto (0, inf). -/
 theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
+  -- u = log zeta, zeta > 1 on (1,inf) so u > 0; zeta -> inf at 1+ and -> 1 at inf
+  have hzgt : ∀ s : ℝ, 1 < s → 1 < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
+    sorry
+  have htop : Filter.Tendsto uOf (nhdsWithin 1 (Set.Ioi 1)) Filter.atTop := by
+    sorry
+  have hbot : Filter.Tendsto uOf Filter.atTop (nhdsWithin 0 (Set.Ioi 0)) := by
+    sorry
   sorry
