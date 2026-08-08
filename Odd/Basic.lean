@@ -2497,7 +2497,7 @@ theorem eps_zeta_uniform :
       |eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))) - 1
         - Real.eulerMascheroniConstant * eps| ≤ C * eps ^ 2 := by
   obtain ⟨C, hC, r, hr, hbound⟩ := zetaRegFull_taylor_bound
-  refine ⟨C * (1 + ‖deriv zetaRegFull 1‖), by positivity, min r 1, by positivity,
+  refine ⟨C + ‖deriv zetaRegFull 1‖, by positivity, min r 1, by positivity,
     min_le_right _ _, ?_⟩
   intro eps heps hle
   have hle_r : eps ≤ r := le_trans hle (min_le_left _ _)
@@ -2514,4 +2514,41 @@ theorem eps_zeta_uniform :
     rw [zeta_series_eq (1 + eps) (by linarith)]
     push_cast
     ring_nf
-  sorry
+  have hle1 : eps ≤ 1 := le_trans hle (min_le_right _ _)
+  have hC_eq : ((eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))) - 1
+      - Real.eulerMascheroniConstant * eps : ℝ) : ℂ)
+      = (eps : ℂ) * (zetaRegFull (1 + (eps:ℂ))
+          - ((Real.eulerMascheroniConstant : ℝ) : ℂ)) := by
+    rw [Complex.ofReal_sub, Complex.ofReal_sub, Complex.ofReal_mul, Complex.ofReal_mul,
+      ← hser]
+    push_cast
+    linear_combination hkey
+  have habs : |eps * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(1+eps))) - 1
+      - Real.eulerMascheroniConstant * eps|
+      = ‖(eps : ℂ) * (zetaRegFull (1 + (eps:ℂ))
+          - ((Real.eulerMascheroniConstant : ℝ) : ℂ))‖ := by
+    rw [← hC_eq, Complex.norm_real, Real.norm_eq_abs]
+  rw [habs, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos heps]
+  have hsplit : zetaRegFull (1 + (eps:ℂ)) - ((Real.eulerMascheroniConstant : ℝ) : ℂ)
+      = (zetaRegFull (1 + (eps:ℂ)) - ((Real.eulerMascheroniConstant : ℝ) : ℂ)
+          - deriv zetaRegFull 1 * (eps:ℂ)) + deriv zetaRegFull 1 * (eps:ℂ) := by ring
+  rw [hsplit]
+  have htri := norm_add_le
+    (zetaRegFull (1 + (eps:ℂ)) - ((Real.eulerMascheroniConstant : ℝ) : ℂ)
+      - deriv zetaRegFull 1 * (eps:ℂ)) (deriv zetaRegFull 1 * (eps:ℂ))
+  have hd : ‖deriv zetaRegFull 1 * (eps:ℂ)‖ = ‖deriv zetaRegFull 1‖ * eps := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos heps]
+  rw [hd] at htri
+  have hstep : eps * ‖zetaRegFull (1 + (eps:ℂ)) - ((Real.eulerMascheroniConstant : ℝ) : ℂ)
+      - deriv zetaRegFull 1 * (eps:ℂ) + deriv zetaRegFull 1 * (eps:ℂ)‖
+      ≤ eps * (C * eps ^ 2 + ‖deriv zetaRegFull 1‖ * eps) := by
+    apply mul_le_mul_of_nonneg_left _ (le_of_lt heps)
+    linarith [htri, htay]
+  have hfin : eps * (C * eps ^ 2 + ‖deriv zetaRegFull 1‖ * eps)
+      ≤ (C + ‖deriv zetaRegFull 1‖) * eps ^ 2 := by
+    have h1 : eps * (C * eps ^ 2) ≤ C * eps ^ 2 := by
+      have hpos : (0:ℝ) ≤ C * eps ^ 2 := by positivity
+      nlinarith [hpos, hle1, heps]
+    have h2 : eps * (‖deriv zetaRegFull 1‖ * eps) = ‖deriv zetaRegFull 1‖ * eps ^ 2 := by ring
+    nlinarith [h1, h2]
+  linarith [hstep, hfin]
