@@ -2748,5 +2748,18 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
     unfold uOf
     exact Real.tendsto_log_atTop.comp hz
   have hbot : Filter.Tendsto uOf Filter.atTop (nhdsWithin 0 (Set.Ioi 0)) := by
-    sorry
+    -- zeta(s) -> 1 as s -> inf (the n=0 term is 1, the rest tends to 0)
+    have hz1 : Filter.Tendsto (fun s : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
+        Filter.atTop (nhds 1) := by
+      sorry
+    apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
+    · unfold uOf
+      have := Real.continuousAt_log (by norm_num : (1:ℝ) ≠ 0)
+      have hcomp := this.tendsto.comp hz1
+      rw [Real.log_one] at hcomp
+      exact hcomp
+    · filter_upwards [Filter.eventually_gt_atTop (1:ℝ)] with s hs
+      simp only [Set.mem_Ioi]
+      unfold uOf
+      exact Real.log_pos (hzgt s hs)
   sorry
