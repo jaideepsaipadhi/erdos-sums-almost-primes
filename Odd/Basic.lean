@@ -2801,6 +2801,22 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
     -- continuity of uOf on (1, inf)
     have hzcont : ContinuousOn (fun s : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
         (Set.Ioi 1) := by
+      apply ContinuousOn.mono _ (Set.Subset.refl _)
+      intro s0 hs0
+      have hs01 : (1:ℝ) < s0 := hs0
+      set d := (s0 - 1) / 2 with hd
+      have hdpos : 0 < d := by rw [hd]; linarith
+      -- on [1+d, inf) the series converges uniformly, dominated by (n+1)^-(1+d)
+      have hdom : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-(1 + d))) :=
+        hsummable (1 + d) (by linarith)
+      have hunif : ∀ n : ℕ, ∀ s ∈ Set.Ici (1 + d),
+          ‖((n:ℝ) + 1) ^ (-s)‖ ≤ ((n:ℝ) + 1) ^ (-(1 + d)) := by
+        intro n s hs
+        have hsle : 1 + d ≤ s := hs
+        rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+        apply Real.rpow_le_rpow_of_exponent_le (by
+          have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+          linarith) (by linarith)
       sorry
     have hcont : ContinuousOn uOf (Set.Ioi 1) := by
       unfold uOf
