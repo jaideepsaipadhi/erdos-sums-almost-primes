@@ -2594,14 +2594,41 @@ gamma_normalised_three.
 -/
 
 /-- The near-pole integral of the expansion, term by term. -/
-theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k) :
+theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k)
+    (hsum : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
+    (hmul3 : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - zOmegaHom s z (p : ℕ))⁻¹))
+    (hcd1 : ∀ s : ℝ, 1 < s →
+      ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
+    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0) :
     (∫ u in Set.Ioi (0:ℝ), FkOdd k (1 + Real.exp (-u)) * Real.exp (-u))
       = ∑ j ∈ Finset.range (k + 1),
           ∫ u in Set.Ioi (0:ℝ),
             (hCoeff (1 + Real.exp (-u)) j).re
               * (uOf (1 + Real.exp (-u))) ^ (k - j) / (Nat.factorial (k - j))
               * Real.exp (-u) := by
-  sorry
+  rw [← MeasureTheory.integral_finsetSum]
+  · apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+    intro u hu
+    have hupos : (0:ℝ) < u := hu
+    have hs1 : (1:ℝ) < 1 + Real.exp (-u) := by
+      have := Real.exp_pos (-u)
+      linarith
+    have hexp := FkOdd_expansion' k hk (1 + Real.exp (-u)) hs1
+      (hsum _ hs1) (hmul3 _ hs1) (hcd1 _ hs1) (hcd2 _ hs1)
+    simp only
+    have hre := congrArg Complex.re hexp
+    simp only [Complex.ofReal_re] at hre
+    rw [hre]
+    rw [Complex.re_sum]
+    rw [Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro j _
+    congr 1
+    sorry
+  · intro j hj
+    sorry
 
 /-- The leading order: replacing u_* by u and h_j(1+e^-u) by h_j(1) gives
 sum_j h_j(1), which is H(1,1) = 1/2. -/
