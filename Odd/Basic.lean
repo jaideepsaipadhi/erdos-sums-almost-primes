@@ -2697,7 +2697,11 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
     -- the n = 0 term is 1 and the n = 1 term is positive
     have hsum2 : ((0:ℝ) + 1) ^ (-t) + ((1:ℝ) + 1) ^ (-t)
         ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t) := by
-      sorry
+      have hfin := (hsummable t ht).sum_le_tsum (Finset.range 2)
+        (fun n _ => by positivity)
+      rw [Finset.sum_range_succ, Finset.sum_range_one] at hfin
+      push_cast at hfin
+      exact hfin
     have h0 : ((0:ℝ) + 1) ^ (-t) = 1 := by norm_num
     have h1 : (0:ℝ) < ((1:ℝ) + 1) ^ (-t) := by positivity
     linarith
