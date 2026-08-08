@@ -2751,7 +2751,29 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
     -- zeta(s) -> 1 as s -> inf (the n=0 term is 1, the rest tends to 0)
     have hz1 : Filter.Tendsto (fun s : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))
         Filter.atTop (nhds 1) := by
-      sorry
+      have hlim : ∀ n : ℕ, Filter.Tendsto (fun s : ℝ => ((n:ℝ) + 1) ^ (-s))
+          Filter.atTop (nhds (if n = 0 then 1 else 0)) := by
+        intro n
+        by_cases hn : n = 0
+        · subst hn
+          simp only [if_pos rfl]
+          have hone : ∀ s : ℝ, (((0:ℕ):ℝ) + 1) ^ (-s) = 1 := by
+            intro s
+            norm_num
+          simp only [hone]
+          exact tendsto_const_nhds
+        · simp only [if_neg hn]
+          sorry
+      have hdom : ∀ᶠ s : ℝ in Filter.atTop, ∀ n : ℕ,
+          ‖((n:ℝ) + 1) ^ (-s)‖ ≤ ((n:ℝ) + 1) ^ (-(2:ℝ)) := by
+        filter_upwards [Filter.eventually_ge_atTop (2:ℝ)] with s hs n
+        rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+        apply Real.rpow_le_rpow_of_exponent_le (by
+          have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+          linarith) (by linarith)
+      have hb2 : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-(2:ℝ))) := hsummable 2 (by norm_num)
+      have := tendsto_tsum_of_dominated_convergence hb2 hlim hdom
+      simpa using this
     apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
     · unfold uOf
       have := Real.continuousAt_log (by norm_num : (1:ℝ) ≠ 0)
