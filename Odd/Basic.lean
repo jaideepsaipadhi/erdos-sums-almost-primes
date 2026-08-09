@@ -2892,9 +2892,27 @@ theorem zetaR_hasDerivAt (s : ℝ) (hs : 1 < s) :
     (f := fun N : Finset ℕ => fun t : ℝ => ∑ n ∈ N, ((n:ℝ) + 1) ^ (-t))
     (f' := fun N : Finset ℕ => fun t : ℝ =>
       ∑ n ∈ N, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t))
-  · sorry
-  · sorry
-  · sorry
+  · -- local uniform convergence of the differentiated series
+    rw [tendstoLocallyUniformlyOn_iff_forall_isCompact isOpen_Ioi]
+    sorry
+  · -- each partial sum has the stated derivative
+    filter_upwards with N t ht
+    have ht0 : (0:ℝ) < t := by
+      have : (1:ℝ) < t := ht
+      linarith
+    have h := HasDerivAt.sum (u := N) (A := fun n => fun x : ℝ => ((n:ℝ) + 1) ^ (-x))
+      (A' := fun n => (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t))
+      (fun n _ => hterm n t ht0)
+    have hfun : (fun t : ℝ => ∑ n ∈ N, ((n:ℝ) + 1) ^ (-t))
+        = ∑ i ∈ N, (fun x : ℝ => ((i:ℝ) + 1) ^ (-x)) := by
+      funext x
+      rw [Finset.sum_apply]
+    rw [hfun]
+    simpa using h
+  · -- pointwise convergence of the partial sums
+    intro t ht
+    have ht1 : (1:ℝ) < t := ht
+    exact (hsummable t ht1).hasSum
   · exact hs
 
 /-- log(n+1) (n+1)^-s is summable for s > 1: compare with (n+1)^-s' for
