@@ -3294,7 +3294,27 @@ theorem integral_substitute (F : ℝ → ℝ) :
       _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by simpa using hle
   -- zeta' < 0 since zeta is strictly decreasing
   have hderivneg : zetaRderiv s < 0 := by
-    sorry
+    unfold zetaRderiv
+    have hsum := log_rpow_summable s hs1
+    have hneg : (∑' n : ℕ, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-s))
+        = -∑' n : ℕ, Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-s) := by
+      rw [← tsum_neg]
+      apply tsum_congr
+      intro n
+      ring
+    rw [hneg, neg_lt_zero]
+    -- the n = 1 term is positive, the rest nonneg
+    have hterm : (0:ℝ) < Real.log (((1:ℕ):ℝ) + 1) * (((1:ℕ):ℝ) + 1) ^ (-s) := by
+      apply mul_pos
+      · apply Real.log_pos
+        norm_num
+      · positivity
+    have hle := hsum.le_tsum 1 (fun n _ => by
+      apply mul_nonneg _ (by positivity)
+      apply Real.log_nonneg
+      have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+      linarith)
+    linarith
   have habs : |zetaRderiv s / (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))|
       = -zetaRderiv s / (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) := by
     rw [abs_div, abs_of_pos hzpos, abs_of_neg hderivneg]
