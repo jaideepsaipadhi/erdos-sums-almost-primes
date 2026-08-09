@@ -3338,4 +3338,16 @@ theorem fOdd_u_form (k : ℕ) (hk : 1 ≤ k)
       (∑ j ∈ Finset.range (k + 1),
         (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
       * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))) := by
+  rw [fOdd_eq_integral_FkOdd k hk hsum1]
+  rw [integral_substitute (fun s => FkOdd k s)]
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+  intro u hu
+  have hu0 : (0:ℝ) < u := hu
+  have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+  simp only
+  congr 1
+  -- FkOdd k (sOf u) = sum_j h_j(sOf u) u^{k-j}/(k-j)!, using uOf (sOf u) = u
+  have hexp := FkOdd_expansion' k hk (sOf u) hs1
+    (hsum _ hs1) (hmul3 _ hs1) (hcd1 _ hs1) (hcd2 _ hs1)
+  rw [uOf_sOf u hu0] at hexp
   sorry
