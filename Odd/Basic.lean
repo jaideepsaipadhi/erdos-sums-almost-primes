@@ -3132,4 +3132,10 @@ theorem jacobian_expansion :
     ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
       |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) / (-zetaRderiv s) - (s - 1)|
         ≤ C * (s - 1) ^ 2 := by
+  obtain ⟨C2, hC2, r2, hr2, hB⟩ := zetaRderiv_pole_bound
+  obtain ⟨C1, hC1, r1, hr1, hA⟩ := eps_zeta_uniform
+  -- A - eps B = gamma + O(eps), and 1/B <= 2 eps^2 for eps small
+  refine ⟨2 * (|Real.eulerMascheroniConstant| + C1 + 1), by positivity,
+    min (min r1 r2) (1 / (2 * (C2 + 1))), by positivity, ?_⟩
+  intro s hs1 hsr
   sorry
