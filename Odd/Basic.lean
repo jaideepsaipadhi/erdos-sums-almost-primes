@@ -3274,4 +3274,12 @@ theorem integral_substitute (F : ℝ → ℝ) :
     (∫ s in Set.Ioi (1:ℝ), F s)
       = ∫ u in Set.Ioi (0:ℝ),
           F (sOf u) * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))) := by
+  rw [uOf_change_of_variables
+    (fun u => F (sOf u) * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))]
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+  intro s hs
+  have hs1 : (1:ℝ) < s := hs
+  simp only
+  rw [sOf_uOf s hs1]
+  -- |u'(s)| = -zeta'(s)/zeta(s), so |u'| * (zeta / (-zeta')) = 1
   sorry
