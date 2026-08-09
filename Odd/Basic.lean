@@ -2861,60 +2861,6 @@ theorem uOf_image : uOf '' (Set.Ioi 1) = Set.Ioi 0 := by
     obtain ⟨x, hx, hxy⟩ := hivt hmem
     exact ⟨x, hsub hx, hxy⟩
 
-/-- The termwise derivative of the zeta series. -/
-noncomputable def zetaRderiv (s : ℝ) : ℝ :=
-  ∑' n : ℕ, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-s)
-
-/-- The zeta series is differentiable on (1, inf) with the termwise derivative.
-
-Via hasDerivAt_of_tendstoLocallyUniformlyOn: the partial sums converge
-pointwise, their derivatives converge locally uniformly (dominated by
-log(n+1)(n+1)^(-(1+d)) on [1+d, inf)), and Ioi 1 is open. -/
-theorem zetaR_hasDerivAt (s : ℝ) (hs : 1 < s) :
-    HasDerivAt (fun t : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t)) (zetaRderiv s) s := by
-  have hsummable : ∀ t : ℝ, 1 < t → Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-t)) := by
-    intro t ht
-    have hb := Real.summable_nat_rpow.mpr (by linarith : (-t:ℝ) < -1)
-    apply ((summable_nat_add_iff 1).mpr hb).congr
-    intro n
-    push_cast
-    ring_nf
-  -- each term's derivative
-  have hterm : ∀ (n : ℕ) (t : ℝ), 0 < t →
-      HasDerivAt (fun x : ℝ => ((n:ℝ) + 1) ^ (-x))
-        ((-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t)) t := by
-    intro n t _
-    have hb : (0:ℝ) < (n:ℝ) + 1 := by positivity
-    have h := HasDerivAt.const_rpow hb (hasDerivAt_neg t)
-    simpa [mul_comm, mul_assoc] using h
-  apply hasDerivAt_of_tendstoLocallyUniformlyOn (s := Set.Ioi 1)
-    (l := Filter.atTop) isOpen_Ioi
-    (f := fun N : Finset ℕ => fun t : ℝ => ∑ n ∈ N, ((n:ℝ) + 1) ^ (-t))
-    (f' := fun N : Finset ℕ => fun t : ℝ =>
-      ∑ n ∈ N, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t))
-  · -- local uniform convergence of the differentiated series
-    rw [tendstoLocallyUniformlyOn_iff_forall_isCompact isOpen_Ioi]
-    sorry
-  · -- each partial sum has the stated derivative
-    filter_upwards with N t ht
-    have ht0 : (0:ℝ) < t := by
-      have : (1:ℝ) < t := ht
-      linarith
-    have h := HasDerivAt.sum (u := N) (A := fun n => fun x : ℝ => ((n:ℝ) + 1) ^ (-x))
-      (A' := fun n => (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t))
-      (fun n _ => hterm n t ht0)
-    have hfun : (fun t : ℝ => ∑ n ∈ N, ((n:ℝ) + 1) ^ (-t))
-        = ∑ i ∈ N, (fun x : ℝ => ((i:ℝ) + 1) ^ (-x)) := by
-      funext x
-      rw [Finset.sum_apply]
-    rw [hfun]
-    simpa using h
-  · -- pointwise convergence of the partial sums
-    intro t ht
-    have ht1 : (1:ℝ) < t := ht
-    exact (hsummable t ht1).hasSum
-  · exact hs
-
 /-- log(n+1) (n+1)^-s is summable for s > 1: compare with (n+1)^-s' for
 1 < s' < s, using log(n+1) <= C (n+1)^(s-s') for large n. -/
 theorem log_rpow_summable (s : ℝ) (hs : 1 < s) :
@@ -2971,3 +2917,83 @@ theorem log_rpow_summable (s : ℝ) (hs : 1 < s) :
       ring_nf
     rw [hfac]
     apply mul_le_mul_of_nonneg_right (hCb n) (by positivity)
+
+/-- The termwise derivative of the zeta series. -/
+noncomputable def zetaRderiv (s : ℝ) : ℝ :=
+  ∑' n : ℕ, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-s)
+
+/-- The zeta series is differentiable on (1, inf) with the termwise derivative.
+
+Via hasDerivAt_of_tendstoLocallyUniformlyOn: the partial sums converge
+pointwise, their derivatives converge locally uniformly (dominated by
+log(n+1)(n+1)^(-(1+d)) on [1+d, inf)), and Ioi 1 is open. -/
+theorem zetaR_hasDerivAt (s : ℝ) (hs : 1 < s) :
+    HasDerivAt (fun t : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t)) (zetaRderiv s) s := by
+  have hsummable : ∀ t : ℝ, 1 < t → Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-t)) := by
+    intro t ht
+    have hb := Real.summable_nat_rpow.mpr (by linarith : (-t:ℝ) < -1)
+    apply ((summable_nat_add_iff 1).mpr hb).congr
+    intro n
+    push_cast
+    ring_nf
+  -- each term's derivative
+  have hterm : ∀ (n : ℕ) (t : ℝ), 0 < t →
+      HasDerivAt (fun x : ℝ => ((n:ℝ) + 1) ^ (-x))
+        ((-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t)) t := by
+    intro n t _
+    have hb : (0:ℝ) < (n:ℝ) + 1 := by positivity
+    have h := HasDerivAt.const_rpow hb (hasDerivAt_neg t)
+    simpa [mul_comm, mul_assoc] using h
+  apply hasDerivAt_of_tendstoLocallyUniformlyOn (s := Set.Ioi 1)
+    (l := Filter.atTop) isOpen_Ioi
+    (f := fun N : Finset ℕ => fun t : ℝ => ∑ n ∈ N, ((n:ℝ) + 1) ^ (-t))
+    (f' := fun N : Finset ℕ => fun t : ℝ =>
+      ∑ n ∈ N, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t))
+  · -- local uniform convergence of the differentiated series
+    rw [tendstoLocallyUniformlyOn_iff_forall_isCompact isOpen_Ioi]
+    intro K hKsub hKcomp
+    rcases K.eq_empty_or_nonempty with hKe | hKne
+    · subst hKe
+      simp [tendstoUniformlyOn_empty]
+    · obtain ⟨c, hcK, hcmin⟩ := hKcomp.exists_isMinOn hKne continuousOn_id
+      have hc1 : (1:ℝ) < c := hKsub hcK
+      apply tendstoUniformlyOn_tsum
+        (u := fun n : ℕ => Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-c))
+        (log_rpow_summable c hc1)
+      intro n x hx
+      have hxc : c ≤ x := hcmin hx
+      rw [norm_mul, Real.norm_eq_abs, Real.norm_eq_abs]
+      have hlog : |(-Real.log ((n:ℝ) + 1))| = Real.log ((n:ℝ) + 1) := by
+        rw [abs_neg, abs_of_nonneg]
+        apply Real.log_nonneg
+        have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+        linarith
+      have hpow : |((n:ℝ) + 1) ^ (-x)| = ((n:ℝ) + 1) ^ (-x) :=
+        abs_of_nonneg (by positivity)
+      rw [hlog, hpow]
+      apply mul_le_mul_of_nonneg_left _ (by
+        apply Real.log_nonneg
+        have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+        linarith)
+      apply Real.rpow_le_rpow_of_exponent_le (by
+        have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+        linarith) (by linarith)
+  · -- each partial sum has the stated derivative
+    filter_upwards with N t ht
+    have ht0 : (0:ℝ) < t := by
+      have : (1:ℝ) < t := ht
+      linarith
+    have h := HasDerivAt.sum (u := N) (A := fun n => fun x : ℝ => ((n:ℝ) + 1) ^ (-x))
+      (A' := fun n => (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t))
+      (fun n _ => hterm n t ht0)
+    have hfun : (fun t : ℝ => ∑ n ∈ N, ((n:ℝ) + 1) ^ (-t))
+        = ∑ i ∈ N, (fun x : ℝ => ((i:ℝ) + 1) ^ (-x)) := by
+      funext x
+      rw [Finset.sum_apply]
+    rw [hfun]
+    simpa using h
+  · -- pointwise convergence of the partial sums
+    intro t ht
+    have ht1 : (1:ℝ) < t := ht
+    exact (hsummable t ht1).hasSum
+  · exact hs
