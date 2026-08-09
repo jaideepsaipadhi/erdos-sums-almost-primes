@@ -2890,7 +2890,23 @@ theorem log_rpow_summable (s : ℝ) (hs : 1 < s) :
   -- log(n+1) (n+1)^-s = [log(n+1) (n+1)^-(s-s')] (n+1)^-s', and the bracket -> 0
   have hbdd : ∃ C > 0, ∀ n : ℕ,
       Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-(s - s')) ≤ C := by
-    sorry
+    -- log x <= x^a / a for x >= 1, a > 0, so log x * x^-a <= 1/a
+    refine ⟨1 / (s - s'), by positivity, ?_⟩
+    intro n
+    have hx1 : (1:ℝ) ≤ (n:ℝ) + 1 := by
+      have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+      linarith
+    have hxpos : (0:ℝ) < (n:ℝ) + 1 := by linarith
+    have ha : (0:ℝ) < s - s' := by linarith
+    have hlog : Real.log ((n:ℝ) + 1) ≤ ((n:ℝ) + 1) ^ (s - s') / (s - s') := by
+      have := Real.add_one_le_exp (Real.log ((n:ℝ) + 1) * (s - s'))
+      sorry
+    calc Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-(s - s'))
+        ≤ (((n:ℝ) + 1) ^ (s - s') / (s - s')) * ((n:ℝ) + 1) ^ (-(s - s')) := by
+          apply mul_le_mul_of_nonneg_right hlog (by positivity)
+      _ = 1 / (s - s') := by
+          rw [div_mul_eq_mul_div, ← Real.rpow_add hxpos]
+          simp
   obtain ⟨C, hC, hCb⟩ := hbdd
   apply Summable.of_nonneg_of_le _ _ (hbase.mul_left C)
   · intro n
