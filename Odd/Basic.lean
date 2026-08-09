@@ -3135,7 +3135,7 @@ theorem jacobian_expansion :
   obtain ⟨C2, hC2, r2, hr2, hB⟩ := zetaRderiv_pole_bound
   obtain ⟨C1, hC1, r1, hr1, hr1le, hA⟩ := eps_zeta_uniform
   -- A - eps B = gamma + O(eps), and 1/B <= 2 eps^2 for eps small
-  refine ⟨2 * (|Real.eulerMascheroniConstant| + C1 + 1), by positivity,
+  refine ⟨2 * (|Real.eulerMascheroniConstant| + C1 + C2), by positivity,
     min (min r1 r2) (1 / (2 * (C2 + 1))), by positivity, ?_⟩
   intro s hs1 hsr
   set eps := s - 1 with heps
@@ -3170,6 +3170,51 @@ theorem jacobian_expansion :
         exact hsmall
       nlinarith [heps0, hC2]
     linarith
-  have hnum : |A - eps * B| ≤ |Real.eulerMascheroniConstant| + C1 + 1 := by
-    sorry
+  have hnum : |A - eps * B| ≤ |Real.eulerMascheroniConstant| + C1 + C2 := by
+    -- eps * (A - eps B) = (eps A - 1 - gamma eps) + gamma eps - eps^2 (B - 1/eps^2)
+    have hid : eps * (A - eps * B)
+        = (eps * A - 1 - Real.eulerMascheroniConstant * eps)
+          + Real.eulerMascheroniConstant * eps - eps ^ 2 * (B - 1 / eps ^ 2) := by
+      field_simp
+      ring
+    have hb1 := abs_le.mp hAb
+    have hb2 := abs_le.mp hBb
+    have heps1 : eps ≤ 1 := by
+      have : (1:ℝ) / (2 * (C2 + 1)) ≤ 1 := by
+        rw [div_le_one (by positivity)]
+        linarith
+      linarith [hsmall]
+    -- bound eps * (A - eps B) first, then divide by eps
+    have hprod : |eps * (A - eps * B)|
+        ≤ eps * (|Real.eulerMascheroniConstant| + C1 + C2) := by
+      rw [hid]
+      have hb1a := hb1.1
+      have hb1b := hb1.2
+      have hb2a := hb2.1
+      have hb2b := hb2.2
+      have hg1 := le_abs_self Real.eulerMascheroniConstant
+      have hg2 := neg_abs_le Real.eulerMascheroniConstant
+      have hsq : eps ^ 2 ≤ eps := by nlinarith [heps0, heps1]
+      have hp1 : C1 * eps ^ 2 ≤ C1 * eps :=
+        mul_le_mul_of_nonneg_left hsq (le_of_lt hC1)
+      have hp2 : eps ^ 2 * C2 ≤ eps * C2 :=
+        mul_le_mul_of_nonneg_right hsq (le_of_lt hC2)
+      have hp3 : Real.eulerMascheroniConstant * eps ≤ |Real.eulerMascheroniConstant| * eps :=
+        mul_le_mul_of_nonneg_right hg1 (le_of_lt heps0)
+      have hp4 : -(|Real.eulerMascheroniConstant| * eps)
+          ≤ Real.eulerMascheroniConstant * eps := by
+        have := mul_le_mul_of_nonneg_right hg2 (le_of_lt heps0)
+        linarith
+      have hBterm : |eps ^ 2 * (B - 1 / eps ^ 2)| ≤ eps * C2 := by
+        rw [abs_mul, abs_of_nonneg (by positivity : (0:ℝ) ≤ eps ^ 2)]
+        calc eps ^ 2 * |B - 1 / eps ^ 2| ≤ eps ^ 2 * C2 :=
+              mul_le_mul_of_nonneg_left hBb (by positivity)
+          _ ≤ eps * C2 := hp2
+      have hBt := abs_le.mp hBterm
+      rw [abs_le]
+      constructor
+      · linarith [hb1a, hp1, hp4, hBt.2]
+      · linarith [hb1b, hp1, hp3, hBt.1]
+    rw [abs_mul, abs_of_pos heps0] at hprod
+    exact le_of_mul_le_mul_left (by linarith [hprod]) heps0
   sorry
