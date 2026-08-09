@@ -3363,3 +3363,13 @@ theorem fOdd_u_form (k : ℕ) (hk : 1 ≤ k)
     ring
   rw [hrw, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
   ring
+
+/-- The inverse expansion: eps(u) = s(u) - 1 satisfies |eps(u) - e^-u| <= C e^-2u.
+
+From eps_zeta_uniform, e^u = zeta(1+eps) = (1 + gamma eps + O(eps^2))/eps,
+so e^-u = eps/(1 + gamma eps + O(eps^2)) = eps(1 - gamma eps + O(eps^2)),
+i.e. eps = e^-u + gamma e^-2u + O(e^-3u). -/
+theorem eps_of_u_expansion :
+    ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
+      |(sOf u - 1) - Real.exp (-u)| ≤ C * Real.exp (-2 * u) := by
+  sorry
