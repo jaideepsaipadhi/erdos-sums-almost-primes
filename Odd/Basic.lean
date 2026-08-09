@@ -3133,9 +3133,26 @@ theorem jacobian_expansion :
       |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) / (-zetaRderiv s) - (s - 1)|
         ≤ C * (s - 1) ^ 2 := by
   obtain ⟨C2, hC2, r2, hr2, hB⟩ := zetaRderiv_pole_bound
-  obtain ⟨C1, hC1, r1, hr1, hA⟩ := eps_zeta_uniform
+  obtain ⟨C1, hC1, r1, hr1, hr1le, hA⟩ := eps_zeta_uniform
   -- A - eps B = gamma + O(eps), and 1/B <= 2 eps^2 for eps small
   refine ⟨2 * (|Real.eulerMascheroniConstant| + C1 + 1), by positivity,
     min (min r1 r2) (1 / (2 * (C2 + 1))), by positivity, ?_⟩
   intro s hs1 hsr
+  set eps := s - 1 with heps
+  have heps0 : 0 < eps := by rw [heps]; linarith
+  have hr1' : eps ≤ r1 := le_trans hsr (le_trans (min_le_left _ _) (min_le_left _ _))
+  have hr2' : eps ≤ r2 := le_trans hsr (le_trans (min_le_left _ _) (min_le_right _ _))
+  have hsmall : eps ≤ 1 / (2 * (C2 + 1)) := le_trans hsr (min_le_right _ _)
+  set A := ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) with hA_def
+  set B := -zetaRderiv s with hB_def
+  -- from eps_zeta_uniform: |eps A - 1 - gamma eps| <= C1 eps^2
+  have hAb : |eps * A - 1 - Real.eulerMascheroniConstant * eps| ≤ C1 * eps ^ 2 := by
+    have := hA eps heps0 hr1'
+    rw [heps] at this ⊢
+    sorry
+  -- from zetaRderiv_pole_bound: |B - 1/eps^2| <= C2
+  have hBb : |B - 1 / eps ^ 2| ≤ C2 := by
+    have := hB s hs1 (by rw [← heps]; exact hr2')
+    rw [hB_def, heps]
+    sorry
   sorry
