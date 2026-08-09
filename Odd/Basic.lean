@@ -2997,3 +2997,20 @@ theorem zetaR_hasDerivAt (s : ℝ) (hs : 1 < s) :
     have ht1 : (1:ℝ) < t := ht
     exact (hsummable t ht1).hasSum
   · exact hs
+
+/-- u = log zeta has derivative zeta'/zeta on (1, inf). -/
+theorem uOf_hasDerivAt (s : ℝ) (hs : 1 < s) :
+    HasDerivAt uOf (zetaRderiv s / (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))) s := by
+  have hz := zetaR_hasDerivAt s hs
+  have hzpos : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
+    have hsummable : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-s)) := by
+      have hb := Real.summable_nat_rpow.mpr (by linarith : (-s:ℝ) < -1)
+      apply ((summable_nat_add_iff 1).mpr hb).congr
+      intro n
+      push_cast
+      ring_nf
+    have hle := hsummable.le_tsum 0 (fun n _ => by positivity)
+    calc (0:ℝ) < ((0:ℝ) + 1) ^ (-s) := by norm_num
+      _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by simpa using hle
+  unfold uOf
+  exact hz.log (ne_of_gt hzpos)
