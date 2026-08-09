@@ -3246,3 +3246,20 @@ theorem jacobian_expansion :
           calc (1:ℝ) = 2 * eps ^ 2 * (1 / (2 * eps ^ 2)) := by field_simp
             _ ≤ 2 * eps ^ 2 * B := h2
         nlinarith [hkey, hpos]
+
+/-- The inverse of u = log zeta on (1, inf), as a function (0, inf) -> (1, inf). -/
+noncomputable def sOf (u : ℝ) : ℝ := Function.invFunOn uOf (Set.Ioi 1) u
+
+/-- sOf is a left inverse on (1, inf). -/
+theorem sOf_uOf (s : ℝ) (hs : 1 < s) : sOf (uOf s) = s :=
+  uOf_strictAnti.injOn.leftInvOn_invFunOn hs
+
+/-- sOf lands in (1, inf) for u > 0. -/
+theorem sOf_mem (u : ℝ) (hu : 0 < u) : 1 < sOf u := by
+  have hmem : u ∈ uOf '' (Set.Ioi 1) := by rw [uOf_image]; exact hu
+  exact Function.invFunOn_mem hmem
+
+/-- uOf is a right inverse on (0, inf). -/
+theorem uOf_sOf (u : ℝ) (hu : 0 < u) : uOf (sOf u) = u := by
+  have hmem : u ∈ uOf '' (Set.Ioi 1) := by rw [uOf_image]; exact hu
+  exact Function.invFunOn_eq hmem
