@@ -3014,3 +3014,21 @@ theorem uOf_hasDerivAt (s : ℝ) (hs : 1 < s) :
       _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by simpa using hle
   unfold uOf
   exact hz.log (ne_of_gt hzpos)
+
+/-- The change of variables u = log zeta(s), stated without needing the
+inverse function: for g integrable on (0, inf),
+
+    int_{Ioi 0} g u du = int_{Ioi 1} |u'(s)| g(u(s)) ds.
+
+Applying this with g(u) = [the expansion at u] turns the s-integral into a
+u-integral where the u^{k-j} factors are exact powers of the variable. -/
+theorem uOf_change_of_variables (g : ℝ → ℝ) :
+    (∫ u in Set.Ioi (0:ℝ), g u)
+      = ∫ s in Set.Ioi (1:ℝ),
+          |zetaRderiv s / (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))| * g (uOf s) := by
+  rw [← uOf_image]
+  apply MeasureTheory.integral_image_eq_integral_abs_deriv_smul
+    measurableSet_Ioi
+  · intro s hs
+    exact (uOf_hasDerivAt s hs).hasDerivWithinAt
+  · exact uOf_strictAnti.injOn
