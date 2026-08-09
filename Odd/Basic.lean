@@ -3147,12 +3147,15 @@ theorem jacobian_expansion :
   set B := -zetaRderiv s with hB_def
   -- from eps_zeta_uniform: |eps A - 1 - gamma eps| <= C1 eps^2
   have hAb : |eps * A - 1 - Real.eulerMascheroniConstant * eps| ≤ C1 * eps ^ 2 := by
-    have := hA eps heps0 hr1'
-    rw [heps] at this ⊢
-    sorry
+    have h := hA eps heps0 hr1'
+    have hse : (1 : ℝ) + eps = s := by rw [heps]; ring
+    rw [hse] at h
+    exact h
   -- from zetaRderiv_pole_bound: |B - 1/eps^2| <= C2
   have hBb : |B - 1 / eps ^ 2| ≤ C2 := by
-    have := hB s hs1 (by rw [← heps]; exact hr2')
-    rw [hB_def, heps]
-    sorry
+    have h := hB s hs1 (by rw [← heps]; exact hr2')
+    rw [hB_def]
+    have hrw : -zetaRderiv s - 1 / eps ^ 2 = -(zetaRderiv s + 1 / eps ^ 2) := by ring
+    rw [hrw, abs_neg, heps]
+    exact h
   sorry
