@@ -3372,4 +3372,22 @@ i.e. eps = e^-u + gamma e^-2u + O(e^-3u). -/
 theorem eps_of_u_expansion :
     ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
       |(sOf u - 1) - Real.exp (-u)| ≤ C * Real.exp (-2 * u) := by
+  obtain ⟨C1, hC1, r1, hr1, hr1le, hA⟩ := eps_zeta_uniform
+  -- for u large, eps(u) = sOf u - 1 is small
+  have hepssmall : ∃ U0 > 0, ∀ u : ℝ, U0 ≤ u → sOf u - 1 ≤ r1 := by
+    sorry
+  obtain ⟨U0, hU0, hsmall⟩ := hepssmall
+  -- the key identity: eps * e^u = 1 + gamma eps + O(eps^2)
+  -- e^u = zeta(sOf u), since u = uOf (sOf u) = log zeta (sOf u)
+  have hexpu : ∀ u : ℝ, 0 < u →
+      Real.exp u = ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) := by
+    intro u hu
+    have hs1 : (1:ℝ) < sOf u := sOf_mem u hu
+    have hzpos : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) := by
+      sorry
+    have huu := uOf_sOf u hu
+    unfold uOf at huu
+    calc Real.exp u = Real.exp (Real.log (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)))) := by
+          rw [huu]
+      _ = ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) := Real.exp_log hzpos
   sorry
