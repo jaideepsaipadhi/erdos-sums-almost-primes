@@ -3350,4 +3350,16 @@ theorem fOdd_u_form (k : ℕ) (hk : 1 ≤ k)
   have hexp := FkOdd_expansion' k hk (sOf u) hs1
     (hsum _ hs1) (hmul3 _ hs1) (hcd1 _ hs1) (hcd2 _ hs1)
   rw [uOf_sOf u hu0] at hexp
-  sorry
+  have hre := congrArg Complex.re hexp
+  simp only [Complex.ofReal_re] at hre
+  rw [hre, Complex.re_sum]
+  apply Finset.sum_congr rfl
+  intro j _
+  have hrw : hCoeff (sOf u) j * ((u : ℝ) : ℂ) ^ (k - j)
+      / ((Nat.factorial (k - j) : ℕ) : ℂ)
+      = hCoeff (sOf u) j
+        * (((u ^ (k - j) / (Nat.factorial (k - j) : ℝ) : ℝ)) : ℂ) := by
+    push_cast
+    ring
+  rw [hrw, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+  ring
