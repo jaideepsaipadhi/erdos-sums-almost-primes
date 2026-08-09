@@ -3091,7 +3091,41 @@ theorem zetaRderiv_pole_bound :
     have hsub : ((x:ℂ)) - 1 = (((x - 1 : ℝ)) : ℂ) := by push_cast; ring
     rw [hsub, ← Complex.ofReal_one, ← Complex.ofReal_div, ← Complex.ofReal_sub]
     exact Complex.ofReal_re _
-  sorry
+  -- differentiate the real description directly
+  have hpole : HasDerivAt (fun x : ℝ => 1 / (x - 1)) (-(1 / (s - 1) ^ 2)) s := by
+    have hne : s - 1 ≠ 0 := by intro h; linarith
+    have h := ((hasDerivAt_id s).sub_const 1).inv (by simpa using hne)
+    simp only [id_eq] at h
+    have hf : (fun x : ℝ => x - 1)⁻¹ = fun x : ℝ => 1 / (x - 1) := by
+      funext x
+      simp [one_div]
+    rw [hf] at h
+    have harith : -(1 / (s - 1) ^ 2) = -1 / (s - 1) ^ 2 := by ring
+    rw [harith]
+    exact h
+  have hdirect : HasDerivAt (fun x : ℝ => (∑' n : ℕ, ((n:ℝ) + 1) ^ (-x)) - 1 / (x - 1))
+      (zetaRderiv s + 1 / (s - 1) ^ 2) s := by
+    have h := (zetaR_hasDerivAt s hs1).sub hpole
+    have hf : ((fun t : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t)) - fun x : ℝ => 1 / (x - 1))
+        = fun x : ℝ => (∑' n : ℕ, ((n:ℝ) + 1) ^ (-x)) - 1 / (x - 1) := by
+      funext x
+      rfl
+    rw [hf] at h
+    have harith2 : zetaRderiv s + 1 / (s - 1) ^ 2
+        = zetaRderiv s - -(1 / (s - 1) ^ 2) := by ring
+    rw [harith2]
+    exact h
+  -- the two descriptions agree near s, so the derivatives agree
+  have hcongr : HasDerivAt (fun x : ℝ => (zetaRegFull ((x:ℂ))).re)
+      (zetaRderiv s + 1 / (s - 1) ^ 2) s := by
+    apply hdirect.congr_of_eventuallyEq
+    filter_upwards [eventually_gt_nhds hs1] with x hx
+    exact hrestrict x hx
+  have huniq := hcongr.unique hreal
+  rw [huniq]
+  calc |(deriv zetaRegFull ((s:ℂ))).re| ≤ ‖deriv zetaRegFull ((s:ℂ))‖ :=
+        Complex.abs_re_le_norm _
+    _ ≤ ‖deriv zetaRegFull 1‖ + 1 := hcont _ hsball
 
 /-- The Jacobian of the substitution: zeta/(-zeta') = eps (1 + O(eps)). -/
 theorem jacobian_expansion :
