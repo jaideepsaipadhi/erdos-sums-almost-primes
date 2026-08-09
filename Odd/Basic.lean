@@ -2918,6 +2918,22 @@ theorem log_rpow_summable (s : ℝ) (hs : 1 < s) :
     rw [hfac]
     apply mul_le_mul_of_nonneg_right (hCb n) (by positivity)
 
+/-- The zeta series is summable for s > 1. -/
+theorem zetaR_summable (s : ℝ) (hs : 1 < s) :
+    Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-s)) := by
+  have hb := Real.summable_nat_rpow.mpr (by linarith : (-s:ℝ) < -1)
+  apply ((summable_nat_add_iff 1).mpr hb).congr
+  intro n
+  push_cast
+  ring_nf
+
+/-- The zeta series is positive for s > 1. -/
+theorem zetaR_pos (s : ℝ) (hs : 1 < s) :
+    (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
+  have hle := (zetaR_summable s hs).le_tsum 0 (fun n _ => by positivity)
+  calc (0:ℝ) < ((0:ℝ) + 1) ^ (-s) := by norm_num
+    _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by simpa using hle
+
 /-- The termwise derivative of the zeta series. -/
 noncomputable def zetaRderiv (s : ℝ) : ℝ :=
   ∑' n : ℕ, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-s)
