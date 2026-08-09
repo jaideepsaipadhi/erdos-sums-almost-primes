@@ -3158,4 +3158,18 @@ theorem jacobian_expansion :
     have hrw : -zetaRderiv s - 1 / eps ^ 2 = -(zetaRderiv s + 1 / eps ^ 2) := by ring
     rw [hrw, abs_neg, heps]
     exact h
+  -- B >= 1/eps^2 - C2 > 0, and A - eps B = gamma + O(eps)
+  have hBpos : 0 < B := by
+    have hb1 : 1 / eps ^ 2 - C2 ≤ B := by
+      have := abs_le.mp hBb
+      linarith [this.1]
+    have hlarge : C2 + 1 ≤ 1 / eps ^ 2 := by
+      rw [le_div_iff₀ (by positivity)]
+      have h2 : eps * (2 * (C2 + 1)) ≤ 1 := by
+        rw [← le_div_iff₀ (by positivity)]
+        exact hsmall
+      nlinarith [heps0, hC2]
+    linarith
+  have hnum : |A - eps * B| ≤ |Real.eulerMascheroniConstant| + C1 + 1 := by
+    sorry
   sorry
