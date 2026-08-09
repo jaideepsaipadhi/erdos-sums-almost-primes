@@ -3032,3 +3032,20 @@ theorem uOf_change_of_variables (g : ℝ → ℝ) :
   · intro s hs
     exact (uOf_hasDerivAt s hs).hasDerivWithinAt
   · exact uOf_strictAnti.injOn
+
+/-- zeta'(s) + 1/(s-1)^2 is bounded near s = 1.
+
+This is the derivative of the Laurent expansion: zetaRegFull = zeta - 1/(s-1)
+is analytic at 1 (zetaRegFull_analyticAt_one), so its derivative is bounded on
+a neighbourhood, and d/ds[1/(s-1)] = -1/(s-1)^2. -/
+theorem zetaRderiv_pole_bound :
+    ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
+      |zetaRderiv s + 1 / (s - 1) ^ 2| ≤ C := by
+  sorry
+
+/-- The Jacobian of the substitution: zeta/(-zeta') = eps (1 + O(eps)). -/
+theorem jacobian_expansion :
+    ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
+      |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) / (-zetaRderiv s) - (s - 1)|
+        ≤ C * (s - 1) ^ 2 := by
+  sorry
