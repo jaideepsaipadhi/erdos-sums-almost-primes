@@ -3041,6 +3041,14 @@ a neighbourhood, and d/ds[1/(s-1)] = -1/(s-1)^2. -/
 theorem zetaRderiv_pole_bound :
     ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
       |zetaRderiv s + 1 / (s - 1) ^ 2| ≤ C := by
+  -- zetaRegFull is analytic at 1, so deriv zetaRegFull is bounded near 1
+  have hana := zetaRegFull_analyticAt_one
+  obtain ⟨r0, hr0, hcont⟩ : ∃ r > 0, ∀ z ∈ Metric.ball (1:ℂ) r,
+      ‖deriv zetaRegFull z‖ ≤ ‖deriv zetaRegFull 1‖ + 1 := by
+    sorry
+  refine ⟨‖deriv zetaRegFull 1‖ + 1, by positivity, r0 / 2, by linarith, ?_⟩
+  intro s hs1 hsr
+  -- the real derivative of zetaRegFull along the reals is zetaRderiv + 1/(s-1)^2
   sorry
 
 /-- The Jacobian of the substitution: zeta/(-zeta') = eps (1 + O(eps)). -/
