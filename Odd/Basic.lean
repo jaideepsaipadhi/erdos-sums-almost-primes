@@ -3217,4 +3217,32 @@ theorem jacobian_expansion :
       · linarith [hb1b, hp1, hp3, hBt.1]
     rw [abs_mul, abs_of_pos heps0] at hprod
     exact le_of_mul_le_mul_left (by linarith [hprod]) heps0
-  sorry
+  have hBlarge : 1 / (2 * eps ^ 2) ≤ B := by
+    have hb1 := (abs_le.mp hBb).1
+    have heps2 : (0:ℝ) < eps ^ 2 := by positivity
+    have hhalf : 1 / (2 * eps ^ 2) + C2 ≤ 1 / eps ^ 2 := by
+      rw [← sub_nonneg]
+      have hexp : 1 / eps ^ 2 - (1 / (2 * eps ^ 2) + C2)
+          = (1 - 2 * C2 * eps ^ 2) / (2 * eps ^ 2) := by
+        field_simp
+        ring
+      rw [hexp]
+      apply div_nonneg _ (by positivity)
+      have hb : eps * (2 * (C2 + 1)) ≤ 1 := by
+        rw [← le_div_iff₀ (by positivity)]
+        exact hsmall
+      nlinarith [heps0, hC2, hb]
+    linarith
+  have hdiv : A / B - eps = (A - eps * B) / B := by
+    field_simp
+  rw [hdiv, abs_div, abs_of_pos hBpos, div_le_iff₀ hBpos]
+  calc |A - eps * B| ≤ |Real.eulerMascheroniConstant| + C1 + C2 := hnum
+    _ ≤ 2 * (|Real.eulerMascheroniConstant| + C1 + C2) * eps ^ 2 * B := by
+        have hBb2 : 1 / (2 * eps ^ 2) ≤ B := hBlarge
+        have hpos : (0:ℝ) < |Real.eulerMascheroniConstant| + C1 + C2 := by positivity
+        have hkey : (1:ℝ) ≤ 2 * eps ^ 2 * B := by
+          have h2 := mul_le_mul_of_nonneg_left hBb2
+            (by positivity : (0:ℝ) ≤ 2 * eps ^ 2)
+          calc (1:ℝ) = 2 * eps ^ 2 * (1 / (2 * eps ^ 2)) := by field_simp
+            _ ≤ 2 * eps ^ 2 * B := h2
+        nlinarith [hkey, hpos]
