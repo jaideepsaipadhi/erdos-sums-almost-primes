@@ -3384,7 +3384,15 @@ theorem eps_of_u_expansion :
     intro u hu
     have hs1 : (1:ℝ) < sOf u := sOf_mem u hu
     have hzpos : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) := by
-      sorry
+      have hsm : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-(sOf u))) := by
+        have hb := Real.summable_nat_rpow.mpr (by linarith : (-(sOf u):ℝ) < -1)
+        apply ((summable_nat_add_iff 1).mpr hb).congr
+        intro n
+        push_cast
+        ring_nf
+      have hle := hsm.le_tsum 0 (fun n _ => by positivity)
+      calc (0:ℝ) < ((0:ℝ) + 1) ^ (-(sOf u)) := by norm_num
+        _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) := by simpa using hle
     have huu := uOf_sOf u hu
     unfold uOf at huu
     calc Real.exp u = Real.exp (Real.log (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)))) := by
