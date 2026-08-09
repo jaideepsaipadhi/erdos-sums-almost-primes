@@ -3263,3 +3263,15 @@ theorem sOf_mem (u : ℝ) (hu : 0 < u) : 1 < sOf u := by
 theorem uOf_sOf (u : ℝ) (hu : 0 < u) : uOf (sOf u) = u := by
   have hmem : u ∈ uOf '' (Set.Ioi 1) := by rw [uOf_image]; exact hu
   exact Function.invFunOn_eq hmem
+
+/-- The change of variables in the direction the assembly needs:
+
+    int_{Ioi 1} F(s) ds = int_{Ioi 0} F(sOf u) * J(u) du
+
+where J(u) = 1/|u'(sOf u)| = zeta(sOf u) / (-zeta'(sOf u)) is the Jacobian,
+which jacobian_expansion bounds as (sOf u - 1) + O((sOf u - 1)^2). -/
+theorem integral_substitute (F : ℝ → ℝ) :
+    (∫ s in Set.Ioi (1:ℝ), F s)
+      = ∫ u in Set.Ioi (0:ℝ),
+          F (sOf u) * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))) := by
+  sorry
