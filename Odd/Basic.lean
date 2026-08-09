@@ -3282,4 +3282,22 @@ theorem integral_substitute (F : ℝ → ℝ) :
   simp only
   rw [sOf_uOf s hs1]
   -- |u'(s)| = -zeta'(s)/zeta(s), so |u'| * (zeta / (-zeta')) = 1
-  sorry
+  have hzpos : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
+    have hsummable : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-s)) := by
+      have hb := Real.summable_nat_rpow.mpr (by linarith : (-s:ℝ) < -1)
+      apply ((summable_nat_add_iff 1).mpr hb).congr
+      intro n
+      push_cast
+      ring_nf
+    have hle := hsummable.le_tsum 0 (fun n _ => by positivity)
+    calc (0:ℝ) < ((0:ℝ) + 1) ^ (-s) := by norm_num
+      _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by simpa using hle
+  -- zeta' < 0 since zeta is strictly decreasing
+  have hderivneg : zetaRderiv s < 0 := by
+    sorry
+  have habs : |zetaRderiv s / (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))|
+      = -zetaRderiv s / (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) := by
+    rw [abs_div, abs_of_pos hzpos, abs_of_neg hderivneg]
+  rw [habs]
+  have hdne : zetaRderiv s ≠ 0 := ne_of_lt hderivneg
+  field_simp
