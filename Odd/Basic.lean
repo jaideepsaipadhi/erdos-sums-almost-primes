@@ -3080,7 +3080,17 @@ theorem zetaRderiv_pole_bound :
   -- the real restriction equals zetaR - 1/(s-1)
   have hrestrict : ∀ x : ℝ, 1 < x →
       (zetaRegFull ((x:ℂ))).re = (∑' n : ℕ, ((n:ℝ) + 1) ^ (-x)) - 1 / (x - 1) := by
-    sorry
+    intro x hx
+    have hne : ((x:ℂ)) ≠ 1 := by
+      intro hc
+      have : (x:ℝ) = 1 := by exact_mod_cast hc
+      linarith
+    rw [zetaRegFull_eq_of_ne _ hne]
+    unfold zetaReg
+    rw [← zeta_series_eq x hx]
+    have hsub : ((x:ℂ)) - 1 = (((x - 1 : ℝ)) : ℂ) := by push_cast; ring
+    rw [hsub, ← Complex.ofReal_one, ← Complex.ofReal_div, ← Complex.ofReal_sub]
+    exact Complex.ofReal_re _
   sorry
 
 /-- The Jacobian of the substitution: zeta/(-zeta') = eps (1 + O(eps)). -/
