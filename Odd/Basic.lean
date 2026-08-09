@@ -3321,3 +3321,21 @@ theorem integral_substitute (F : ℝ → ℝ) :
   rw [habs]
   have hdne : zetaRderiv s ≠ 0 := ne_of_lt hderivneg
   field_simp
+
+/-- fOdd in u-coordinates: the expansion's powers are now exact powers of the
+integration variable, since uOf (sOf u) = u. -/
+theorem fOdd_u_form (k : ℕ) (hk : 1 ≤ k)
+    (hsum1 : Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n)))
+    (hsum : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
+    (hmul3 : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - zOmegaHom s z (p : ℕ))⁻¹))
+    (hcd1 : ∀ s : ℝ, 1 < s →
+      ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
+    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0) :
+    fOdd k = ∫ u in Set.Ioi (0:ℝ),
+      (∑ j ∈ Finset.range (k + 1),
+        (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+      * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))) := by
+  sorry
