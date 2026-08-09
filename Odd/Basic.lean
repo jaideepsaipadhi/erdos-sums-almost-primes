@@ -2899,8 +2899,15 @@ theorem log_rpow_summable (s : ℝ) (hs : 1 < s) :
     have hxpos : (0:ℝ) < (n:ℝ) + 1 := by linarith
     have ha : (0:ℝ) < s - s' := by linarith
     have hlog : Real.log ((n:ℝ) + 1) ≤ ((n:ℝ) + 1) ^ (s - s') / (s - s') := by
-      have := Real.add_one_le_exp (Real.log ((n:ℝ) + 1) * (s - s'))
-      sorry
+      -- a log x <= x^a - 1 <= x^a, from log t <= t - 1 with t = x^a
+      have hxa : (0:ℝ) < ((n:ℝ) + 1) ^ (s - s') := by positivity
+      have hlt := Real.log_le_sub_one_of_pos hxa
+      rw [Real.log_rpow hxpos] at hlt
+      rw [le_div_iff₀ ha]
+      calc Real.log ((n:ℝ) + 1) * (s - s')
+          = (s - s') * Real.log ((n:ℝ) + 1) := by ring
+        _ ≤ ((n:ℝ) + 1) ^ (s - s') - 1 := hlt
+        _ ≤ ((n:ℝ) + 1) ^ (s - s') := by linarith
     calc Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-(s - s'))
         ≤ (((n:ℝ) + 1) ^ (s - s') / (s - s')) * ((n:ℝ) + 1) ^ (-(s - s')) := by
           apply mul_le_mul_of_nonneg_right hlog (by positivity)
