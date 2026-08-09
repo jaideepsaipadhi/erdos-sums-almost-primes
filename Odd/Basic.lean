@@ -3045,7 +3045,20 @@ theorem zetaRderiv_pole_bound :
   have hana := zetaRegFull_analyticAt_one
   obtain ⟨r0, hr0, hcont⟩ : ∃ r > 0, ∀ z ∈ Metric.ball (1:ℂ) r,
       ‖deriv zetaRegFull z‖ ≤ ‖deriv zetaRegFull 1‖ + 1 := by
-    sorry
+    -- deriv of an analytic function is continuous at the point
+    have hd : ContinuousAt (deriv zetaRegFull) 1 := by
+      have := hana.deriv
+      exact this.continuousAt
+    have hnb : ContinuousAt (fun z => ‖deriv zetaRegFull z‖) 1 := hd.norm
+    have hev := hnb (Metric.ball_mem_nhds (‖deriv zetaRegFull 1‖) one_pos)
+    rw [Filter.mem_map, Metric.mem_nhds_iff] at hev
+    obtain ⟨r, hr, hrsub⟩ := hev
+    refine ⟨r, hr, ?_⟩
+    intro z hz
+    have := hrsub hz
+    simp only [Set.mem_preimage, Metric.mem_ball, Real.dist_eq] at this
+    have habs := abs_lt.mp this
+    linarith [habs.2]
   refine ⟨‖deriv zetaRegFull 1‖ + 1, by positivity, r0 / 2, by linarith, ?_⟩
   intro s hs1 hsr
   -- the real derivative of zetaRegFull along the reals is zetaRderiv + 1/(s-1)^2
