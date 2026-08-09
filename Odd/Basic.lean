@@ -2872,7 +2872,30 @@ pointwise, their derivatives converge locally uniformly (dominated by
 log(n+1)(n+1)^(-(1+d)) on [1+d, inf)), and Ioi 1 is open. -/
 theorem zetaR_hasDerivAt (s : ℝ) (hs : 1 < s) :
     HasDerivAt (fun t : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t)) (zetaRderiv s) s := by
-  sorry
+  have hsummable : ∀ t : ℝ, 1 < t → Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-t)) := by
+    intro t ht
+    have hb := Real.summable_nat_rpow.mpr (by linarith : (-t:ℝ) < -1)
+    apply ((summable_nat_add_iff 1).mpr hb).congr
+    intro n
+    push_cast
+    ring_nf
+  -- each term's derivative
+  have hterm : ∀ (n : ℕ) (t : ℝ), 0 < t →
+      HasDerivAt (fun x : ℝ => ((n:ℝ) + 1) ^ (-x))
+        ((-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t)) t := by
+    intro n t _
+    have hb : (0:ℝ) < (n:ℝ) + 1 := by positivity
+    have h := HasDerivAt.const_rpow hb (hasDerivAt_neg t)
+    simpa [mul_comm, mul_assoc] using h
+  apply hasDerivAt_of_tendstoLocallyUniformlyOn (s := Set.Ioi 1)
+    (l := Filter.atTop) isOpen_Ioi
+    (f := fun N : Finset ℕ => fun t : ℝ => ∑ n ∈ N, ((n:ℝ) + 1) ^ (-t))
+    (f' := fun N : Finset ℕ => fun t : ℝ =>
+      ∑ n ∈ N, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t))
+  · sorry
+  · sorry
+  · sorry
+  · exact hs
 
 /-- log(n+1) (n+1)^-s is summable for s > 1: compare with (n+1)^-s' for
 1 < s' < s, using log(n+1) <= C (n+1)^(s-s') for large n. -/
