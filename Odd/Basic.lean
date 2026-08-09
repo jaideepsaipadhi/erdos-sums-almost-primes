@@ -3061,7 +3061,26 @@ theorem zetaRderiv_pole_bound :
     linarith [habs.2]
   refine ⟨‖deriv zetaRegFull 1‖ + 1, by positivity, r0 / 2, by linarith, ?_⟩
   intro s hs1 hsr
-  -- the real derivative of zetaRegFull along the reals is zetaRderiv + 1/(s-1)^2
+  have hsball : ((s : ℂ)) ∈ Metric.ball (1:ℂ) r0 := by
+    rw [Metric.mem_ball, Complex.dist_eq]
+    have : ((s:ℂ)) - 1 = ((s - 1 : ℝ) : ℂ) := by push_cast; ring
+    rw [this, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
+    linarith
+  -- zetaRegFull is differentiable at s (complex), restrict to the reals
+  have hdiff : DifferentiableAt ℂ zetaRegFull ((s:ℂ)) := by
+    have hne : ((s:ℂ)) ≠ 1 := by
+      intro hc
+      have : (s:ℝ) = 1 := by exact_mod_cast hc
+      linarith
+    have := zetaReg_differentiableAt ((s:ℂ)) hne
+    apply this.congr_of_eventuallyEq
+    filter_upwards [(isOpen_ne (x := (1:ℂ))).mem_nhds hne] with w hw
+    exact zetaRegFull_eq_of_ne w hw
+  have hreal := hdiff.hasDerivAt.real_of_complex
+  -- the real restriction equals zetaR - 1/(s-1)
+  have hrestrict : ∀ x : ℝ, 1 < x →
+      (zetaRegFull ((x:ℂ))).re = (∑' n : ℕ, ((n:ℝ) + 1) ^ (-x)) - 1 / (x - 1) := by
+    sorry
   sorry
 
 /-- The Jacobian of the substitution: zeta/(-zeta') = eps (1 + O(eps)). -/
