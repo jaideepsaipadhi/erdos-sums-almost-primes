@@ -3595,4 +3595,36 @@ theorem hCoeff_sub_one_bound (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ)
 theorem hCoeff_u_form (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ) :
     ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
       ‖hCoeff (sOf u) j - hCoeff 1 j‖ ≤ C * Real.exp (-u) := by
-  sorry
+  obtain ⟨CB, hCB, UB, hUB, hB⟩ := eps_of_u_bound
+  -- need sOf u < 2 as well, which holds for u large
+  have hUlt : ∃ U2 > 0, ∀ u : ℝ, U2 ≤ u → sOf u < 2 := by
+    refine ⟨max UB (Real.log CB + 1), by positivity, ?_⟩
+    intro u hu
+    have huB : UB ≤ u := le_trans (le_max_left _ _) hu
+    have hlog : Real.log CB + 1 ≤ u := le_trans (le_max_right _ _) hu
+    have hb := hB u huB
+    have hexp : CB * Real.exp (-u) < 1 := by
+      rw [Real.exp_neg, mul_inv_lt_iff₀ (Real.exp_pos u)]
+      calc CB = Real.exp (Real.log CB) := (Real.exp_log hCB).symm
+        _ < Real.exp u := Real.exp_lt_exp.mpr (by linarith)
+        _ = 1 * Real.exp u := by ring
+    linarith
+  obtain ⟨U2, hU2, hlt2⟩ := hUlt
+  have hpos : (0:ℝ) < betaS * CB + 1 := by
+    have : (0:ℝ) ≤ betaS * CB := mul_nonneg hf.nonneg (le_of_lt hCB)
+    linarith
+  refine ⟨betaS * CB + 1, hpos, max UB U2, by positivity, ?_⟩
+  intro u hu
+  have huB : UB ≤ u := le_trans (le_max_left _ _) hu
+  have hu2 : U2 ≤ u := le_trans (le_max_right _ _) hu
+  have hu0 : (0:ℝ) < u := lt_of_lt_of_le hUB huB
+  have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+  have hsmem : sOf u ∈ Set.Ioo (1:ℝ) 2 := ⟨hs1, hlt2 u hu2⟩
+  have hlip := hCoeff_sub_one_bound betaS hf j (sOf u) hsmem
+  have hb := hB u huB
+  calc ‖hCoeff (sOf u) j - hCoeff 1 j‖ ≤ betaS * (sOf u - 1) := hlip
+    _ ≤ betaS * (CB * Real.exp (-u)) :=
+        mul_le_mul_of_nonneg_left hb hf.nonneg
+    _ ≤ (betaS * CB + 1) * Real.exp (-u) := by
+        have := Real.exp_pos (-u)
+        nlinarith [this]
