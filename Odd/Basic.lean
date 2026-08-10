@@ -3523,4 +3523,19 @@ theorem jacobian_u_form :
     ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
       |((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
         - Real.exp (-u)| ≤ C * Real.exp (-2 * u) := by
+  obtain ⟨CJ, hCJ, rJ, hrJ, hJ⟩ := jacobian_expansion
+  obtain ⟨CE, hCE, UE, hUE, hE⟩ := eps_of_u_expansion
+  obtain ⟨CB, hCB, UB, hUB, hB⟩ := eps_of_u_bound
+  -- for u large, eps(u) <= rJ and eps(u) <= CB e^-u
+  have hUr : ∃ U1 > 0, ∀ u : ℝ, U1 ≤ u → sOf u - 1 ≤ rJ := by
+    sorry
+  obtain ⟨U1, hU1, hr⟩ := hUr
+  refine ⟨CJ * CB ^ 2 + CE, by positivity,
+    max (max UE UB) U1, by positivity, ?_⟩
+  intro u hu
+  have huE : UE ≤ u := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hu
+  have huB : UB ≤ u := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hu
+  have hu1 : U1 ≤ u := le_trans (le_max_right _ _) hu
+  have hu0 : (0:ℝ) < u := lt_of_lt_of_le hU1 hu1
+  have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
   sorry
