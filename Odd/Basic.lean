@@ -3679,4 +3679,26 @@ theorem zetaR_second_order :
       |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) - 1 / (s - 1)
         - Real.eulerMascheroniConstant
         - (s - 1) * (deriv zetaRegFull 1).re| ≤ C * (s - 1) ^ 2 := by
+  obtain ⟨C, hC, r, hr, htay⟩ := zetaRegFull_taylor_bound
+  refine ⟨C, hC, min r 1, by positivity, ?_⟩
+  intro s hs1 hsr
+  have hsr' : s - 1 ≤ r := le_trans hsr (min_le_left _ _)
+  have hne : ((s:ℂ)) ≠ 1 := by
+    intro hc
+    have : (s:ℝ) = 1 := by exact_mod_cast hc
+    linarith
+  have hnorm : ‖((s:ℂ)) - 1‖ = s - 1 := by
+    have hid : ((s:ℂ)) - 1 = (((s - 1 : ℝ)) : ℂ) := by push_cast; ring
+    rw [hid, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
+  have h := htay ((s:ℂ)) (by rw [hnorm]; exact hsr')
+  rw [hnorm, zetaRegFull_one_eq_gamma] at h
+  -- take real parts; zetaRegFull(s) is real for real s > 1
+  have hre : (zetaRegFull ((s:ℂ))).re
+      = (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) - 1 / (s - 1) := by
+    rw [zetaRegFull_eq_of_ne _ hne]
+    unfold zetaReg
+    rw [← zeta_series_eq s hs1]
+    have hsub : ((s:ℂ)) - 1 = (((s - 1 : ℝ)) : ℂ) := by push_cast; ring
+    rw [hsub, ← Complex.ofReal_one, ← Complex.ofReal_div, ← Complex.ofReal_sub]
+    exact Complex.ofReal_re _
   sorry
