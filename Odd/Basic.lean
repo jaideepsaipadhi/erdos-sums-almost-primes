@@ -3412,11 +3412,18 @@ theorem eps_of_u_expansion :
     have hmem : (1:ℝ) < 1 + r1 := by linarith
     refine ⟨uOf (1 + r1), ?_, ?_⟩
     · unfold uOf
-      apply Real.log_pos
-      have := zetaR_pos (1 + r1) hmem
-      sorry
+      exact Real.log_pos (zetaR_gt_one (1 + r1) hmem)
     · intro u hu
-      sorry
+      by_contra hcon
+      push_neg at hcon
+      have hgt : (1:ℝ) + r1 < sOf u := by linarith
+      have hu0 : (0:ℝ) < u := by
+        have hU0pos : (0:ℝ) < uOf (1 + r1) := Real.log_pos (zetaR_gt_one (1 + r1) hmem)
+        linarith
+      have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+      have hanti := uOf_strictAnti (Set.mem_Ioi.mpr hmem) (Set.mem_Ioi.mpr hs1) hgt
+      rw [uOf_sOf u hu0] at hanti
+      linarith
   obtain ⟨U0, hU0, hsmall⟩ := hepssmall
   -- the key identity: eps * e^u = 1 + gamma eps + O(eps^2)
   -- e^u = zeta(sOf u), since u = uOf (sOf u) = log zeta (sOf u)
