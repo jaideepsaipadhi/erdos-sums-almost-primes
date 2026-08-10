@@ -2559,7 +2559,7 @@ Mirrors `NumericalFacts.beta` in the main development, where the sup of
 |d_s g_i(s)| over s in (1,2), uniform in i, is a certified input rather than a
 derived bound.  Supplied here by odd/numerics/mr_certified.py, whose interval
 sweep ranges over s in [1,2] as well as the z-circle. -/
-structure OddCoeffFacts (betaS : ℝ) : Prop where
+structure OddCoeffFacts (betaS : ℝ) (bHatOdd : ℕ → ℂ) : Prop where
   nonneg : 0 ≤ betaS
   deriv_exists : ∀ j : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
     HasDerivAt (fun t : ℝ => hCoeff t j) (deriv (fun t : ℝ => hCoeff t j) x) x
@@ -2571,10 +2571,23 @@ structure OddCoeffFacts (betaS : ℝ) : Prop where
   main development's `gManu_tendsto_cCoeff` is the analogue. -/
   tendsto_one : ∀ j : ℕ, Filter.Tendsto (fun t : ℝ => hCoeff t j)
     (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds (hCoeff 1 j))
+  /-- The first-order coefficients b_j = d_s h_j(1) are the limits from the
+  right.  The analogue of `bHat` in the main development. -/
+  tendsto_deriv : ∀ j : ℕ, Filter.Tendsto (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t)
+    (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds (bHatOdd j))
+  /-- The second derivative exists and is bounded, uniformly in j.
+  The analogue of `gammahat` in the main development, certified by the same
+  interval sweep. -/
+  deriv2_exists : ∀ j : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
+    HasDerivAt (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t)
+      (deriv (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t) x) x
+  deriv2_bound : ∀ j : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
+    ‖deriv (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t) x‖ ≤ betaS
 
 /-- The mean-value step: |h_j(s) - h_j(t)| <= betaS |s - t| on (1,2),
 uniformly in j.  Transferred from gManu_lipschitz_interior. -/
-theorem hCoeff_lipschitz (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ)
+theorem hCoeff_lipschitz (betaS : ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaS bHatOdd) (j : ℕ)
     (t s : ℝ) (ht : t ∈ Set.Ioo (1:ℝ) 2) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
     ‖hCoeff s j - hCoeff t j‖ ≤ betaS * ‖s - t‖ := by
   apply Convex.norm_image_sub_le_of_norm_hasDerivWithin_le
@@ -3585,14 +3598,16 @@ Composes hCoeff_lipschitz (|h_j(s) - h_j(t)| <= betaS |s - t|) with
 eps_of_u_bound (s(u) - 1 <= C e^-u).  Note h_j(1) is the limiting value; the
 Lipschitz bound is stated on (1,2), so this is |h_j(s(u)) - h_j(1+delta)| for
 delta small, and h_j(1) enters as the limit. -/
-theorem hCoeff_sub_one_bound (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ)
+theorem hCoeff_sub_one_bound (betaS : ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaS bHatOdd) (j : ℕ)
     (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
     ‖hCoeff s j - hCoeff 1 j‖ ≤ betaS * (s - 1) :=
   deriv_sub_limit_bound (fun t => hCoeff t j) (hCoeff 1 j) betaS hf.nonneg
     (fun x hx => hf.deriv_exists j x hx) (fun x hx => hf.deriv_bound j x hx)
     (hf.tendsto_one j) s hs
 
-theorem hCoeff_u_form (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ) :
+theorem hCoeff_u_form (betaS : ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaS bHatOdd) (j : ℕ) :
     ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
       ‖hCoeff (sOf u) j - hCoeff 1 j‖ ≤ C * Real.exp (-u) := by
   obtain ⟨CB, hCB, UB, hUB, hB⟩ := eps_of_u_bound
@@ -3620,7 +3635,7 @@ theorem hCoeff_u_form (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ) :
   have hu0 : (0:ℝ) < u := lt_of_lt_of_le hUB huB
   have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
   have hsmem : sOf u ∈ Set.Ioo (1:ℝ) 2 := ⟨hs1, hlt2 u hu2⟩
-  have hlip := hCoeff_sub_one_bound betaS hf j (sOf u) hsmem
+  have hlip := hCoeff_sub_one_bound betaS bHatOdd hf j (sOf u) hsmem
   have hb := hB u huB
   calc ‖hCoeff (sOf u) j - hCoeff 1 j‖ ≤ betaS * (sOf u - 1) := hlip
     _ ≤ betaS * (CB * Real.exp (-u)) :=
