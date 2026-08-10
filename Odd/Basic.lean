@@ -3528,7 +3528,21 @@ theorem jacobian_u_form :
   obtain ⟨CB, hCB, UB, hUB, hB⟩ := eps_of_u_bound
   -- for u large, eps(u) <= rJ and eps(u) <= CB e^-u
   have hUr : ∃ U1 > 0, ∀ u : ℝ, U1 ≤ u → sOf u - 1 ≤ rJ := by
-    sorry
+    -- eps <= CB e^-u, and CB e^-u <= rJ once u >= log (CB / rJ)
+    refine ⟨max UB (Real.log (CB / rJ) + 1), by positivity, ?_⟩
+    intro u hu
+    have huB : UB ≤ u := le_trans (le_max_left _ _) hu
+    have hlog : Real.log (CB / rJ) + 1 ≤ u := le_trans (le_max_right _ _) hu
+    have hb := hB u huB
+    have hexp : CB * Real.exp (-u) ≤ rJ := by
+      rw [Real.exp_neg, mul_inv_le_iff₀ (Real.exp_pos u)]
+      calc CB = rJ * (CB / rJ) := by field_simp
+        _ ≤ rJ * Real.exp u := by
+            apply mul_le_mul_of_nonneg_left _ (le_of_lt hrJ)
+            calc CB / rJ = Real.exp (Real.log (CB / rJ)) :=
+                  (Real.exp_log (by positivity)).symm
+              _ ≤ Real.exp u := Real.exp_le_exp.mpr (by linarith)
+    linarith
   obtain ⟨U1, hU1, hr⟩ := hUr
   refine ⟨CJ * CB ^ 2 + CE, by positivity,
     max (max UE UB) U1, by positivity, ?_⟩
