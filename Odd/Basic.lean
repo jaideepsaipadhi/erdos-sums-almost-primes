@@ -3841,10 +3841,19 @@ theorem jacobian_signed :
   set B := -zetaRderiv s with hBdef
   have hAb : |A - 1 / eps - Real.eulerMascheroniConstant - eps * c1| ≤ CA * eps ^ 2 := by
     have h := hA s hs1 hepsA
-    sorry
+    have hrw : A - 1 / eps - Real.eulerMascheroniConstant - eps * c1
+        = A - 1 / (s - 1) - Real.eulerMascheroniConstant
+          - (s - 1) * (deriv zetaRegFull 1).re := by
+      rw [hepsdef, hc1]
+    rw [hrw]
+    exact h
   have hBb : |B - 1 / eps ^ 2 + c1| ≤ CB * eps := by
     have h := hB s hs1 hepsB
-    sorry
+    have hrw : B - 1 / eps ^ 2 + c1
+        = (-zetaRderiv s) - 1 / (s - 1) ^ 2 + (deriv zetaRegFull 1).re := by
+      rw [hepsdef, hc1, hBdef]
+    rw [hrw]
+    exact h
   sorry
 
 /-- The signed eps(u) expansion:
