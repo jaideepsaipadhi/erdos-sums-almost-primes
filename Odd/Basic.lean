@@ -3815,3 +3815,26 @@ theorem zetaRderiv_second_order :
         rw [Complex.sub_re]
     _ ≤ ‖deriv zetaRegFull ((s:ℂ)) - deriv zetaRegFull 1‖ := Complex.abs_re_le_norm _
     _ ≤ C * (s - 1) := hlip s hs1 hsr
+
+/-- The signed Jacobian expansion in s:
+
+    zeta/(-zeta') = eps + gamma eps^2 + O(eps^3),   eps = s - 1
+
+Verified symbolically: dividing zeta = 1/eps + gamma + c1 eps + O(eps^2) by
+-zeta' = 1/eps^2 - c1 + O(eps) gives eps + gamma eps^2 + 2 c1 eps^3 + ... -/
+theorem jacobian_signed :
+    ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
+      |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) / (-zetaRderiv s)
+        - (s - 1) - Real.eulerMascheroniConstant * (s - 1) ^ 2|
+        ≤ C * (s - 1) ^ 3 := by
+  sorry
+
+/-- The signed eps(u) expansion:
+
+    eps(u) = e^-u + gamma e^-2u + O(e^-3u) -/
+theorem eps_of_u_signed :
+    ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
+      |(sOf u - 1) - Real.exp (-u)
+        - Real.eulerMascheroniConstant * Real.exp (-2 * u)|
+        ≤ C * Real.exp (-3 * u) := by
+  sorry
