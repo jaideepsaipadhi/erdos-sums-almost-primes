@@ -3501,6 +3501,11 @@ theorem eps_of_u_expansion :
         rw [show (-2 * u : ℝ) = -u + -u by ring, Real.exp_add]
         ring
 
+/-- The crude bound eps(u) <= C e^-u, extracted for reuse. -/
+theorem eps_of_u_bound :
+    ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u → sOf u - 1 ≤ C * Real.exp (-u) := by
+  sorry
+
 /-- STEP A: the Jacobian is e^-u + O(e^-2u).
 
 Composes jacobian_expansion (J = eps + O(eps^2)) with eps_of_u_expansion
