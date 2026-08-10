@@ -3760,4 +3760,18 @@ theorem zetaRderiv_second_order :
     ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
       |(-zetaRderiv s) - 1 / (s - 1) ^ 2 + (deriv zetaRegFull 1).re|
         ≤ C * (s - 1) := by
-  sorry
+  obtain ⟨C, hC, r, hr, hlip⟩ := zetaRegFull_deriv_lipschitz
+  refine ⟨C, hC, r, hr, ?_⟩
+  intro s hs1 hsr
+  -- from zetaRderiv_pole_bound's derivative identification:
+  --   zetaRderiv s + 1/(s-1)^2 = (deriv zetaRegFull s).re
+  have hid : zetaRderiv s + 1 / (s - 1) ^ 2 = (deriv zetaRegFull ((s:ℂ))).re := by
+    sorry
+  have hrw : (-zetaRderiv s) - 1 / (s - 1) ^ 2 + (deriv zetaRegFull 1).re
+      = -((zetaRderiv s + 1 / (s - 1) ^ 2) - (deriv zetaRegFull 1).re) := by ring
+  rw [hrw, abs_neg, hid]
+  calc |(deriv zetaRegFull ((s:ℂ))).re - (deriv zetaRegFull 1).re|
+      = |(deriv zetaRegFull ((s:ℂ)) - deriv zetaRegFull 1).re| := by
+        rw [Complex.sub_re]
+    _ ≤ ‖deriv zetaRegFull ((s:ℂ)) - deriv zetaRegFull 1‖ := Complex.abs_re_le_norm _
+    _ ≤ C * (s - 1) := hlip s hs1 hsr
