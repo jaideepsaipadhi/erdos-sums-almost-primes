@@ -3459,4 +3459,22 @@ theorem eps_of_u_expansion :
       ≤ C1 * eps ^ 2 := by
     rw [hexpu u hu0, ← hone]
     exact hA eps heps0 hepsr
+  have hexppos : (0:ℝ) < Real.exp u := Real.exp_pos u
+  have hb := abs_le.mp hprod
+  -- |eps e^u - 1| <= (|gamma| + C1) eps  (using eps <= 1)
+  have heps1 : eps ≤ 1 := le_trans hepsr hr1le
+  have hmid : |eps * Real.exp u - 1| ≤ (|Real.eulerMascheroniConstant| + C1) * eps := by
+    have hg1 := le_abs_self Real.eulerMascheroniConstant
+    have hg2 := neg_abs_le Real.eulerMascheroniConstant
+    have hsq : eps ^ 2 ≤ eps := by nlinarith [heps0, heps1]
+    rw [abs_le]
+    constructor <;> nlinarith [hb.1, hb.2, hsq, hC1, heps0,
+      mul_le_mul_of_nonneg_right hg1 (le_of_lt heps0),
+      mul_le_mul_of_nonneg_right hg2 (le_of_lt heps0)]
+  -- so |eps - e^-u| = |eps e^u - 1| e^-u <= (|gamma| + C1) eps e^-u
+  have hfac : |eps - Real.exp (-u)| = |eps * Real.exp u - 1| * Real.exp (-u) := by
+    have hid : eps - Real.exp (-u) = (eps * Real.exp u - 1) * Real.exp (-u) := by
+      rw [Real.exp_neg]
+      field_simp
+    rw [hid, abs_mul, abs_of_pos (Real.exp_pos (-u))]
   sorry
