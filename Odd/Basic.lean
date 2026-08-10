@@ -3477,4 +3477,17 @@ theorem eps_of_u_expansion :
       rw [Real.exp_neg]
       field_simp
     rw [hid, abs_mul, abs_of_pos (Real.exp_pos (-u))]
-  sorry
+  -- bootstrap: eps <= 2 e^-u, from |eps e^u - 1| <= (|gamma|+C1) eps and eps small
+  have hboot : eps ≤ 2 * Real.exp (-u) := by
+    sorry
+  -- combine
+  rw [hfac]
+  calc |eps * Real.exp u - 1| * Real.exp (-u)
+      ≤ ((|Real.eulerMascheroniConstant| + C1) * eps) * Real.exp (-u) :=
+        mul_le_mul_of_nonneg_right hmid (le_of_lt (Real.exp_pos (-u)))
+    _ ≤ ((|Real.eulerMascheroniConstant| + C1) * (2 * Real.exp (-u))) * Real.exp (-u) := by
+        apply mul_le_mul_of_nonneg_right _ (le_of_lt (Real.exp_pos (-u)))
+        apply mul_le_mul_of_nonneg_left hboot (by positivity)
+    _ = 2 * (|Real.eulerMascheroniConstant| + C1) * Real.exp (-2 * u) := by
+        rw [show (-2 * u : ℝ) = -u + -u by ring, Real.exp_add]
+        ring
