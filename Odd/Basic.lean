@@ -3571,3 +3571,15 @@ theorem jacobian_u_form :
   calc |J - Real.exp (-u)| ≤ |J - eps| + |eps - Real.exp (-u)| := htri
     _ ≤ CJ * (CB ^ 2 * Real.exp (-2 * u)) + CE * Real.exp (-2 * u) := by linarith
     _ = (CJ * CB ^ 2 + CE) * Real.exp (-2 * u) := by ring
+
+/-- STEP B: the coefficients at s(u) differ from those at 1 by O(e^-u),
+uniformly in j.
+
+Composes hCoeff_lipschitz (|h_j(s) - h_j(t)| <= betaS |s - t|) with
+eps_of_u_bound (s(u) - 1 <= C e^-u).  Note h_j(1) is the limiting value; the
+Lipschitz bound is stated on (1,2), so this is |h_j(s(u)) - h_j(1+delta)| for
+delta small, and h_j(1) enters as the limit. -/
+theorem hCoeff_u_form (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ) :
+    ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
+      ‖hCoeff (sOf u) j - hCoeff 1 j‖ ≤ C * Real.exp (-u) := by
+  sorry
