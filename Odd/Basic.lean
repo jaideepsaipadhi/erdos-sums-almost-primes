@@ -3661,3 +3661,22 @@ theorem hCoeff_u_form (betaS : ℝ) (bHatOdd : ℕ → ℂ)
     _ ≤ (betaS * CB + 1) * Real.exp (-u) := by
         have := Real.exp_pos (-u)
         nlinarith [this]
+
+/-! ### Signed second-order data for zeta near the pole
+
+`zetaRegFull` is analytic at 1 (zetaRegFull_analyticAt_one), hence twice
+differentiable there.  Writing c1 = deriv zetaRegFull 1 (which equals -gamma_1,
+the second Stieltjes constant, though we never need that identification):
+
+    zeta(s) = 1/(s-1) + gamma + c1 (s-1) + O((s-1)^2)
+
+This is the signed refinement of zetaRegFull_taylor_bound, and it is what the
+signed Jacobian expansion needs. -/
+
+/-- The real second-order expansion of zeta near 1. -/
+theorem zetaR_second_order :
+    ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
+      |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) - 1 / (s - 1)
+        - Real.eulerMascheroniConstant
+        - (s - 1) * (deriv zetaRegFull 1).re| ≤ C * (s - 1) ^ 2 := by
+  sorry
