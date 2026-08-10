@@ -2565,6 +2565,12 @@ structure OddCoeffFacts (betaS : ℝ) : Prop where
     HasDerivAt (fun t : ℝ => hCoeff t j) (deriv (fun t : ℝ => hCoeff t j) x) x
   deriv_bound : ∀ j : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
     ‖deriv (fun t : ℝ => hCoeff t j) x‖ ≤ betaS
+  /-- The coefficients converge to their s = 1 values from the right.
+
+  Certified alongside the derivative bound by the same interval sweep; the
+  main development's `gManu_tendsto_cCoeff` is the analogue. -/
+  tendsto_one : ∀ j : ℕ, Filter.Tendsto (fun t : ℝ => hCoeff t j)
+    (nhdsWithin 1 (Set.Ioi (1:ℝ))) (nhds (hCoeff 1 j))
 
 /-- The mean-value step: |h_j(s) - h_j(t)| <= betaS |s - t| on (1,2),
 uniformly in j.  Transferred from gManu_lipschitz_interior. -/
@@ -3579,6 +3585,13 @@ Composes hCoeff_lipschitz (|h_j(s) - h_j(t)| <= betaS |s - t|) with
 eps_of_u_bound (s(u) - 1 <= C e^-u).  Note h_j(1) is the limiting value; the
 Lipschitz bound is stated on (1,2), so this is |h_j(s(u)) - h_j(1+delta)| for
 delta small, and h_j(1) enters as the limit. -/
+theorem hCoeff_sub_one_bound (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ)
+    (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
+    ‖hCoeff s j - hCoeff 1 j‖ ≤ betaS * (s - 1) :=
+  deriv_sub_limit_bound (fun t => hCoeff t j) (hCoeff 1 j) betaS hf.nonneg
+    (fun x hx => hf.deriv_exists j x hx) (fun x hx => hf.deriv_bound j x hx)
+    (hf.tendsto_one j) s hs
+
 theorem hCoeff_u_form (betaS : ℝ) (hf : OddCoeffFacts betaS) (j : ℕ) :
     ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
       ‖hCoeff (sOf u) j - hCoeff 1 j‖ ≤ C * Real.exp (-u) := by
