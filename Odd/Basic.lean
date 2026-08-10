@@ -3854,6 +3854,15 @@ theorem jacobian_signed :
       rw [hepsdef, hc1, hBdef]
     rw [hrw]
     exact h
+  set G := Real.eulerMascheroniConstant with hG
+  have hBpos : 0 < B := by
+    sorry
+  have hnumid : A - eps * B - G * eps ^ 2 * B
+      = (A - 1 / eps - G - eps * c1)
+        - (B - 1 / eps ^ 2 + c1) * (eps + G * eps ^ 2)
+        + 2 * c1 * eps + c1 * G * eps ^ 2 := by
+    field_simp
+    ring
   sorry
 
 /-- The signed eps(u) expansion:
