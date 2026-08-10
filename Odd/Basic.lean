@@ -3446,4 +3446,17 @@ theorem eps_of_u_expansion :
     calc Real.exp u = Real.exp (Real.log (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)))) := by
           rw [huu]
       _ = ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) := Real.exp_log hzpos
+  refine ⟨2 * (|Real.eulerMascheroniConstant| + C1), by positivity, U0, hU0, ?_⟩
+  intro u hUu
+  have hu0 : (0:ℝ) < u := lt_of_lt_of_le hU0 hUu
+  have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+  set eps := sOf u - 1 with hepsdef
+  have heps0 : 0 < eps := by rw [hepsdef]; linarith
+  have hepsr : eps ≤ r1 := hsmall u hUu
+  -- eps * e^u = 1 + gamma eps + O(eps^2)
+  have hone : (1:ℝ) + eps = sOf u := by rw [hepsdef]; ring
+  have hprod : |eps * Real.exp u - 1 - Real.eulerMascheroniConstant * eps|
+      ≤ C1 * eps ^ 2 := by
+    rw [hexpu u hu0, ← hone]
+    exact hA eps heps0 hepsr
   sorry
