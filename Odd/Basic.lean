@@ -2612,27 +2612,6 @@ gamma_normalised_two and hCoeff_sum_two; the rest is bounded by
 gamma_normalised_three.
 -/
 
-/-- The near-pole integral of the expansion, term by term. -/
-theorem fOdd_near_integral (k : ℕ) (hk : 1 ≤ k)
-    (hsum : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
-      Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
-    (hmul3 : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
-      Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - zOmegaHom s z (p : ℕ))⁻¹))
-    (hcd1 : ∀ s : ℝ, 1 < s →
-      ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
-    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0)
-    (B : ℝ) (hB : ∀ j : ℕ, ∀ s : ℝ, 1 < s → s ≤ 2 → ‖hCoeff s j‖ ≤ B) :
-    (∫ u in Set.Ioi (0:ℝ), FkOdd k (1 + Real.exp (-u)) * Real.exp (-u))
-      = ∑ j ∈ Finset.range (k + 1),
-          ∫ u in Set.Ioi (0:ℝ),
-            (hCoeff (1 + Real.exp (-u)) j).re
-              * (uOf (1 + Real.exp (-u))) ^ (k - j) / (Nat.factorial (k - j))
-              * Real.exp (-u) := by
-  -- SUPERSEDED: this route needs |uOf(1+e^-x)| <= x, which is false.
-  -- The correct organisation substitutes u = log zeta(s) directly;
-  -- see substitution_log_zeta below.
-  sorry
-
 /-- The leading order: replacing u_* by u and h_j(1+e^-u) by h_j(1) gives
 sum_j h_j(1), which is H(1,1) = 1/2. -/
 theorem fOdd_leading_order (k : ℕ) (hk : 1 ≤ k) :
@@ -3082,6 +3061,67 @@ theorem uOf_change_of_variables (g : ℝ → ℝ) :
   · intro s hs
     exact (uOf_hasDerivAt s hs).hasDerivWithinAt
   · exact uOf_strictAnti.injOn
+
+/-- The real derivative identification: for real s > 1,
+
+    zetaRderiv s + 1/(s-1)^2 = (deriv zetaRegFull s).re
+
+Extracted from zetaRderiv_pole_bound, where it was local. -/
+theorem zetaRderiv_eq_re (s : ℝ) (hs1 : 1 < s) :
+    zetaRderiv s + 1 / (s - 1) ^ 2 = (deriv zetaRegFull ((s:ℂ))).re := by
+  have hne : ((s:ℂ)) ≠ 1 := by
+    intro hc
+    have : (s:ℝ) = 1 := by exact_mod_cast hc
+    linarith
+  have hdiff : DifferentiableAt ℂ zetaRegFull ((s:ℂ)) := by
+    have h := zetaReg_differentiableAt ((s:ℂ)) hne
+    apply h.congr_of_eventuallyEq
+    filter_upwards [(isOpen_ne (x := (1:ℂ))).mem_nhds hne] with w hw
+    exact zetaRegFull_eq_of_ne w hw
+  have hreal := hdiff.hasDerivAt.real_of_complex
+  have hrestrict : ∀ x : ℝ, 1 < x →
+      (zetaRegFull ((x:ℂ))).re = (∑' n : ℕ, ((n:ℝ) + 1) ^ (-x)) - 1 / (x - 1) := by
+    intro x hx
+    have hnex : ((x:ℂ)) ≠ 1 := by
+      intro hc
+      have : (x:ℝ) = 1 := by exact_mod_cast hc
+      linarith
+    rw [zetaRegFull_eq_of_ne _ hnex]
+    unfold zetaReg
+    rw [← zeta_series_eq x hx]
+    have hsub : ((x:ℂ)) - 1 = (((x - 1 : ℝ)) : ℂ) := by push_cast; ring
+    rw [hsub, ← Complex.ofReal_one, ← Complex.ofReal_div, ← Complex.ofReal_sub]
+    exact Complex.ofReal_re _
+  have hpole : HasDerivAt (fun x : ℝ => 1 / (x - 1)) (-(1 / (s - 1) ^ 2)) s := by
+    have hnz : s - 1 ≠ 0 := by intro h; linarith
+    have h := ((hasDerivAt_id s).sub_const 1).inv (by simpa using hnz)
+    simp only [id_eq] at h
+    have hf : (fun x : ℝ => x - 1)⁻¹ = fun x : ℝ => 1 / (x - 1) := by
+      funext x
+      simp [one_div]
+    rw [hf] at h
+    have harith : -(1 / (s - 1) ^ 2) = -1 / (s - 1) ^ 2 := by ring
+    rw [harith]
+    exact h
+  have hdirect : HasDerivAt (fun x : ℝ => (∑' n : ℕ, ((n:ℝ) + 1) ^ (-x)) - 1 / (x - 1))
+      (zetaRderiv s + 1 / (s - 1) ^ 2) s := by
+    have h := (zetaR_hasDerivAt s hs1).sub hpole
+    have hf : ((fun t : ℝ => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-t)) - fun x : ℝ => 1 / (x - 1))
+        = fun x : ℝ => (∑' n : ℕ, ((n:ℝ) + 1) ^ (-x)) - 1 / (x - 1) := by
+      funext x
+      rfl
+    rw [hf] at h
+    have harith2 : zetaRderiv s + 1 / (s - 1) ^ 2
+        = zetaRderiv s - -(1 / (s - 1) ^ 2) := by ring
+    rw [harith2]
+    exact h
+  have hcongr : HasDerivAt (fun x : ℝ => (zetaRegFull ((x:ℂ))).re)
+      (zetaRderiv s + 1 / (s - 1) ^ 2) s := by
+    apply hdirect.congr_of_eventuallyEq
+    filter_upwards [eventually_gt_nhds hs1] with x hx
+    exact hrestrict x hx
+  exact hcongr.unique hreal
+
 
 /-- zeta'(s) + 1/(s-1)^2 is bounded near s = 1.
 
@@ -3765,8 +3805,8 @@ theorem zetaRderiv_second_order :
   intro s hs1 hsr
   -- from zetaRderiv_pole_bound's derivative identification:
   --   zetaRderiv s + 1/(s-1)^2 = (deriv zetaRegFull s).re
-  have hid : zetaRderiv s + 1 / (s - 1) ^ 2 = (deriv zetaRegFull ((s:ℂ))).re := by
-    sorry
+  have hid : zetaRderiv s + 1 / (s - 1) ^ 2 = (deriv zetaRegFull ((s:ℂ))).re :=
+    zetaRderiv_eq_re s hs1
   have hrw : (-zetaRderiv s) - 1 / (s - 1) ^ 2 + (deriv zetaRegFull 1).re
       = -((zetaRderiv s + 1 / (s - 1) ^ 2) - (deriv zetaRegFull 1).re) := by ring
   rw [hrw, abs_neg, hid]
