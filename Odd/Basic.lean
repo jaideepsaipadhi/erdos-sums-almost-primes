@@ -3827,6 +3827,10 @@ theorem jacobian_signed :
       |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) / (-zetaRderiv s)
         - (s - 1) - Real.eulerMascheroniConstant * (s - 1) ^ 2|
         ≤ C * (s - 1) ^ 3 := by
+  obtain ⟨CA, hCA, rA, hrA, hA⟩ := zetaR_second_order
+  obtain ⟨CB, hCB, rB, hrB, hB⟩ := zetaRderiv_second_order
+  set c1 := (deriv zetaRegFull 1).re with hc1
+  -- numerator: A - eps B - gamma eps^2 B = 2 c1 eps + c1 gamma eps^2 + errors
   sorry
 
 /-- The signed eps(u) expansion:
