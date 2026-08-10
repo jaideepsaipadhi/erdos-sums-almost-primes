@@ -3830,7 +3830,21 @@ theorem jacobian_signed :
   obtain ⟨CA, hCA, rA, hrA, hA⟩ := zetaR_second_order
   obtain ⟨CB, hCB, rB, hrB, hB⟩ := zetaRderiv_second_order
   set c1 := (deriv zetaRegFull 1).re with hc1
-  -- numerator: A - eps B - gamma eps^2 B = 2 c1 eps + c1 gamma eps^2 + errors
+  refine ⟨1, one_pos, min (min rA rB) 1, by positivity, ?_⟩
+  intro s hs1 hsr
+  set eps := s - 1 with hepsdef
+  have heps0 : 0 < eps := by rw [hepsdef]; linarith
+  have hepsA : eps ≤ rA := le_trans hsr (le_trans (min_le_left _ _) (min_le_left _ _))
+  have hepsB : eps ≤ rB := le_trans hsr (le_trans (min_le_left _ _) (min_le_right _ _))
+  have heps1 : eps ≤ 1 := le_trans hsr (min_le_right _ _)
+  set A := ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) with hAdef
+  set B := -zetaRderiv s with hBdef
+  have hAb : |A - 1 / eps - Real.eulerMascheroniConstant - eps * c1| ≤ CA * eps ^ 2 := by
+    have h := hA s hs1 hepsA
+    sorry
+  have hBb : |B - 1 / eps ^ 2 + c1| ≤ CB * eps := by
+    have h := hB s hs1 hepsB
+    sorry
   sorry
 
 /-- The signed eps(u) expansion:
