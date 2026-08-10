@@ -3724,7 +3724,34 @@ hence its derivative is continuous and locally Lipschitz). -/
 theorem zetaRegFull_deriv_lipschitz :
     ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
       ‖deriv zetaRegFull ((s:ℂ)) - deriv zetaRegFull 1‖ ≤ C * (s - 1) := by
-  sorry
+  have hana : AnalyticAt ℂ (deriv zetaRegFull) 1 := zetaRegFull_analyticAt_one.deriv
+  have hps := hana.hasFPowerSeriesAt
+  have hO := hps.isBigO_sub_partialSum_pow 1
+  obtain ⟨C, hC, hbw⟩ := hO.exists_pos
+  rw [Asymptotics.isBigOWith_iff] at hbw
+  obtain ⟨r, hr, hrsub⟩ := Metric.mem_nhds_iff.mp hbw
+  refine ⟨C, hC, r / 2, by linarith, ?_⟩
+  intro s hs1 hsr
+  have hy : ((s:ℂ)) - 1 ∈ Metric.ball (0:ℂ) r := by
+    rw [Metric.mem_ball, dist_zero_right]
+    have hid : ((s:ℂ)) - 1 = (((s - 1 : ℝ)) : ℂ) := by push_cast; ring
+    rw [hid, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith)]
+    linarith
+  have hb := hrsub hy
+  simp only [Set.mem_setOf_eq] at hb
+  have hadd : (1 : ℂ) + (((s:ℂ)) - 1) = (s:ℂ) := by ring
+  rw [hadd] at hb
+  have hpart : (FormalMultilinearSeries.ofScalars ℂ
+      fun n => iteratedDeriv n (deriv zetaRegFull) 1 / (Nat.factorial n : ℂ)).partialSum 1
+      (((s:ℂ)) - 1) = deriv zetaRegFull 1 := by
+    rw [FormalMultilinearSeries.partialSum, Finset.sum_range_one]
+    simp [FormalMultilinearSeries.ofScalars, iteratedDeriv_zero]
+  rw [hpart] at hb
+  have hn : ‖((s:ℂ)) - 1‖ ^ 1 = s - 1 := by
+    have hid : ((s:ℂ)) - 1 = (((s - 1 : ℝ)) : ℂ) := by push_cast; ring
+    rw [hid, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by linarith), pow_one]
+  rw [Real.norm_eq_abs, abs_of_nonneg (by positivity), hn] at hb
+  exact hb
 
 /-- The signed second-order expansion of -zeta':
 
