@@ -3504,7 +3504,16 @@ theorem eps_of_u_expansion :
 /-- The crude bound eps(u) <= C e^-u, extracted for reuse. -/
 theorem eps_of_u_bound :
     ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u → sOf u - 1 ≤ C * Real.exp (-u) := by
-  sorry
+  obtain ⟨C, hC, U, hU, hexp⟩ := eps_of_u_expansion
+  refine ⟨C + 1, by positivity, U, hU, ?_⟩
+  intro u hUu
+  have h := abs_le.mp (hexp u hUu)
+  have he2 : Real.exp (-2 * u) ≤ Real.exp (-u) := by
+    apply Real.exp_le_exp.mpr
+    have hu0 : (0:ℝ) < u := lt_of_lt_of_le hU hUu
+    linarith
+  have hepos : (0:ℝ) < Real.exp (-u) := Real.exp_pos _
+  nlinarith [h.2, he2, hC, hepos]
 
 /-- STEP A: the Jacobian is e^-u + O(e^-2u).
 
