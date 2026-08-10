@@ -3552,4 +3552,22 @@ theorem jacobian_u_form :
   have hu1 : U1 ≤ u := le_trans (le_max_right _ _) hu
   have hu0 : (0:ℝ) < u := lt_of_lt_of_le hU1 hu1
   have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
-  sorry
+  set J := (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)) with hJdef
+  set eps := sOf u - 1 with hepsdef
+  have h1 : |J - eps| ≤ CJ * eps ^ 2 := hJ (sOf u) hs1 (hr u hu1)
+  have h2 : |eps - Real.exp (-u)| ≤ CE * Real.exp (-2 * u) := hE u huE
+  have h3 : eps ≤ CB * Real.exp (-u) := hB u huB
+  have heps0 : 0 ≤ eps := by rw [hepsdef]; linarith
+  have hsq : eps ^ 2 ≤ CB ^ 2 * Real.exp (-2 * u) := by
+    have hexp2 : Real.exp (-u) * Real.exp (-u) = Real.exp (-2 * u) := by
+      rw [← Real.exp_add]; ring_nf
+    nlinarith [h3, heps0, Real.exp_pos (-u), hCB]
+  have htri : |J - Real.exp (-u)| ≤ |J - eps| + |eps - Real.exp (-u)| := by
+    have hid : J - Real.exp (-u) = (J - eps) + (eps - Real.exp (-u)) := by ring
+    rw [hid]
+    exact abs_add_le _ _
+  have hmul : CJ * eps ^ 2 ≤ CJ * (CB ^ 2 * Real.exp (-2 * u)) :=
+    mul_le_mul_of_nonneg_left hsq (le_of_lt hCJ)
+  calc |J - Real.exp (-u)| ≤ |J - eps| + |eps - Real.exp (-u)| := htri
+    _ ≤ CJ * (CB ^ 2 * Real.exp (-2 * u)) + CE * Real.exp (-2 * u) := by linarith
+    _ = (CJ * CB ^ 2 + CE) * Real.exp (-2 * u) := by ring
