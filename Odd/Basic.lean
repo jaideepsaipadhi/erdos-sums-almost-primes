@@ -3391,7 +3391,17 @@ theorem eps_of_u_expansion :
   obtain ⟨C1, hC1, r1, hr1, hr1le, hA⟩ := eps_zeta_uniform
   -- for u large, eps(u) = sOf u - 1 is small
   have hepssmall : ∃ U0 > 0, ∀ u : ℝ, U0 ≤ u → sOf u - 1 ≤ r1 := by
-    sorry
+    -- sOf is antitone (inverse of an antitone map), so sOf u <= sOf U0 for u >= U0.
+    -- Choose U0 = uOf (1 + r1), so sOf U0 = 1 + r1.
+    have hr1pos : (0:ℝ) < 1 + r1 - 1 := by linarith
+    have hmem : (1:ℝ) < 1 + r1 := by linarith
+    refine ⟨uOf (1 + r1), ?_, ?_⟩
+    · unfold uOf
+      apply Real.log_pos
+      have := zetaR_pos (1 + r1) hmem
+      sorry
+    · intro u hu
+      sorry
   obtain ⟨U0, hU0, hsmall⟩ := hepssmall
   -- the key identity: eps * e^u = 1 + gamma eps + O(eps^2)
   -- e^u = zeta(sOf u), since u = uOf (sOf u) = log zeta (sOf u)
