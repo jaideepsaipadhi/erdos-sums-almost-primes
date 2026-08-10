@@ -3718,3 +3718,19 @@ theorem zetaR_second_order :
     _ ≤ ‖zetaRegFull ((s:ℂ)) - ((Real.eulerMascheroniConstant : ℝ) : ℂ)
           - deriv zetaRegFull 1 * (((s:ℂ)) - 1)‖ := Complex.abs_re_le_norm _
     _ ≤ C * (s - 1) ^ 2 := h
+
+/-- The derivative of zetaRegFull is Lipschitz near 1 (it is analytic there,
+hence its derivative is continuous and locally Lipschitz). -/
+theorem zetaRegFull_deriv_lipschitz :
+    ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
+      ‖deriv zetaRegFull ((s:ℂ)) - deriv zetaRegFull 1‖ ≤ C * (s - 1) := by
+  sorry
+
+/-- The signed second-order expansion of -zeta':
+
+    -zeta'(s) = 1/(s-1)^2 - c1 + O(s-1),   c1 = (deriv zetaRegFull 1).re -/
+theorem zetaRderiv_second_order :
+    ∃ C > 0, ∃ r > 0, ∀ s : ℝ, 1 < s → s - 1 ≤ r →
+      |(-zetaRderiv s) - 1 / (s - 1) ^ 2 + (deriv zetaRegFull 1).re|
+        ≤ C * (s - 1) := by
+  sorry
