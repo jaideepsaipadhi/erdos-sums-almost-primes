@@ -3446,7 +3446,7 @@ theorem eps_of_u_expansion :
     calc Real.exp u = Real.exp (Real.log (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)))) := by
           rw [huu]
       _ = ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) := Real.exp_log hzpos
-  refine ⟨2 * (|Real.eulerMascheroniConstant| + C1), by positivity, U0, hU0, ?_⟩
+  refine ⟨(|Real.eulerMascheroniConstant| + C1) * (1 + |Real.eulerMascheroniConstant| + C1), by positivity, U0, hU0, ?_⟩
   intro u hUu
   have hu0 : (0:ℝ) < u := lt_of_lt_of_le hU0 hUu
   have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
@@ -3478,16 +3478,25 @@ theorem eps_of_u_expansion :
       field_simp
     rw [hid, abs_mul, abs_of_pos (Real.exp_pos (-u))]
   -- bootstrap: eps <= 2 e^-u, from |eps e^u - 1| <= (|gamma|+C1) eps and eps small
-  have hboot : eps ≤ 2 * Real.exp (-u) := by
-    sorry
+  have hboot : eps ≤ (1 + |Real.eulerMascheroniConstant| + C1) * Real.exp (-u) := by
+    have hm := abs_le.mp hmid
+    have hup : eps * Real.exp u ≤ 1 + (|Real.eulerMascheroniConstant| + C1) * eps := by
+      linarith [hm.2]
+    have hup2 : eps * Real.exp u ≤ 1 + (|Real.eulerMascheroniConstant| + C1) := by
+      nlinarith [heps1, heps0, abs_nonneg Real.eulerMascheroniConstant, hC1]
+    rw [← le_div_iff₀ (Real.exp_pos u)] at hup2
+    rw [Real.exp_neg]
+    calc eps ≤ (1 + (|Real.eulerMascheroniConstant| + C1)) / Real.exp u := hup2
+      _ = (1 + |Real.eulerMascheroniConstant| + C1) * (Real.exp u)⁻¹ := by
+          rw [div_eq_mul_inv]; ring_nf
   -- combine
   rw [hfac]
   calc |eps * Real.exp u - 1| * Real.exp (-u)
       ≤ ((|Real.eulerMascheroniConstant| + C1) * eps) * Real.exp (-u) :=
         mul_le_mul_of_nonneg_right hmid (le_of_lt (Real.exp_pos (-u)))
-    _ ≤ ((|Real.eulerMascheroniConstant| + C1) * (2 * Real.exp (-u))) * Real.exp (-u) := by
+    _ ≤ ((|Real.eulerMascheroniConstant| + C1) * ((1 + |Real.eulerMascheroniConstant| + C1) * Real.exp (-u))) * Real.exp (-u) := by
         apply mul_le_mul_of_nonneg_right _ (le_of_lt (Real.exp_pos (-u)))
         apply mul_le_mul_of_nonneg_left hboot (by positivity)
-    _ = 2 * (|Real.eulerMascheroniConstant| + C1) * Real.exp (-2 * u) := by
+    _ = (|Real.eulerMascheroniConstant| + C1) * (1 + |Real.eulerMascheroniConstant| + C1) * Real.exp (-2 * u) := by
         rw [show (-2 * u : ℝ) = -u + -u by ring, Real.exp_add]
         ring
