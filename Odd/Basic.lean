@@ -3701,4 +3701,20 @@ theorem zetaR_second_order :
     have hsub : ((s:ℂ)) - 1 = (((s - 1 : ℝ)) : ℂ) := by push_cast; ring
     rw [hsub, ← Complex.ofReal_one, ← Complex.ofReal_div, ← Complex.ofReal_sub]
     exact Complex.ofReal_re _
-  sorry
+  -- the real part of the complex Taylor remainder is the real remainder
+  have hrepart : ((zetaRegFull ((s:ℂ)) - ((Real.eulerMascheroniConstant : ℝ) : ℂ)
+      - deriv zetaRegFull 1 * (((s:ℂ)) - 1))).re
+      = (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) - 1 / (s - 1)
+        - Real.eulerMascheroniConstant - (s - 1) * (deriv zetaRegFull 1).re := by
+    have hsub : ((s:ℂ)) - 1 = (((s - 1 : ℝ)) : ℂ) := by push_cast; ring
+    rw [hsub]
+    simp only [Complex.sub_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+      hre]
+    ring
+  calc |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) - 1 / (s - 1)
+        - Real.eulerMascheroniConstant - (s - 1) * (deriv zetaRegFull 1).re|
+      = |((zetaRegFull ((s:ℂ)) - ((Real.eulerMascheroniConstant : ℝ) : ℂ)
+          - deriv zetaRegFull 1 * (((s:ℂ)) - 1))).re| := by rw [hrepart]
+    _ ≤ ‖zetaRegFull ((s:ℂ)) - ((Real.eulerMascheroniConstant : ℝ) : ℂ)
+          - deriv zetaRegFull 1 * (((s:ℂ)) - 1)‖ := Complex.abs_re_le_norm _
+    _ ≤ C * (s - 1) ^ 2 := h
