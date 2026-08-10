@@ -3500,3 +3500,13 @@ theorem eps_of_u_expansion :
     _ = (|Real.eulerMascheroniConstant| + C1) * (1 + |Real.eulerMascheroniConstant| + C1) * Real.exp (-2 * u) := by
         rw [show (-2 * u : ℝ) = -u + -u by ring, Real.exp_add]
         ring
+
+/-- STEP A: the Jacobian is e^-u + O(e^-2u).
+
+Composes jacobian_expansion (J = eps + O(eps^2)) with eps_of_u_expansion
+(eps = e^-u + O(e^-2u)). -/
+theorem jacobian_u_form :
+    ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
+      |((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - Real.exp (-u)| ≤ C * Real.exp (-2 * u) := by
+  sorry
