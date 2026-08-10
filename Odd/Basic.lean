@@ -2934,6 +2934,21 @@ theorem zetaR_pos (s : ℝ) (hs : 1 < s) :
   calc (0:ℝ) < ((0:ℝ) + 1) ^ (-s) := by norm_num
     _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by simpa using hle
 
+/-- zeta(s) > 1 for s > 1: the n = 0 term is 1 and the rest are positive. -/
+theorem zetaR_gt_one (s : ℝ) (hs : 1 < s) :
+    1 < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
+  have hsum2 : ((0:ℝ) + 1) ^ (-s) + ((1:ℝ) + 1) ^ (-s)
+      ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
+    have hfin := (zetaR_summable s hs).sum_le_tsum (Finset.range 2)
+      (fun n _ => by positivity)
+    rw [Finset.sum_range_succ, Finset.sum_range_one] at hfin
+    push_cast at hfin
+    exact hfin
+  have h0 : ((0:ℝ) + 1) ^ (-s) = 1 := by norm_num
+  have h1 : (0:ℝ) < ((1:ℝ) + 1) ^ (-s) := by positivity
+  linarith
+
+
 /-- The termwise derivative of the zeta series. -/
 noncomputable def zetaRderiv (s : ℝ) : ℝ :=
   ∑' n : ℕ, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-s)
