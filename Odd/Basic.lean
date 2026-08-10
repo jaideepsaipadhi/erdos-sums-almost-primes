@@ -3591,6 +3591,24 @@ theorem jacobian_u_form :
     _ ≤ CJ * (CB ^ 2 * Real.exp (-2 * u)) + CE * Real.exp (-2 * u) := by linarith
     _ = (CJ * CB ^ 2 + CE) * Real.exp (-2 * u) := by ring
 
+/-- The signed second-order expansion of the coefficients:
+
+    h_j(s) = h_j(1) + (s-1) b_j + R_j(s),   |R_j(s)| <= betaS (s-1)^2 / 2
+
+This is what step D needs -- the first-order term is the leading correction,
+not an error to be bounded away.  Applies taylor_second_bound from the main
+development. -/
+theorem hCoeff_taylor (betaS : ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaS bHatOdd) (j : ℕ)
+    (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
+    ‖hCoeff s j - hCoeff 1 j - (((s - 1 : ℝ)) : ℂ) * bHatOdd j‖
+      ≤ betaS * (s - 1) ^ 2 / 2 :=
+  taylor_second_bound (fun t => hCoeff t j) (hCoeff 1 j) (bHatOdd j) betaS hf.nonneg
+    (fun x hx => hf.deriv_exists j x hx)
+    (fun x hx => hf.deriv2_exists j x hx)
+    (fun x hx => hf.deriv2_bound j x hx)
+    (hf.tendsto_one j) (hf.tendsto_deriv j) s hs
+
 /-- STEP B: the coefficients at s(u) differ from those at 1 by O(e^-u),
 uniformly in j.
 
