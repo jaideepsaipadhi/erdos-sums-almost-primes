@@ -4069,3 +4069,17 @@ theorem eps_of_u_signed :
       ≤ |G * x * (eps - x)| + |(eps * Real.exp u - 1 - G * eps) * x| := abs_add_le _ _
     _ ≤ |G| * CE * x ^ 3 + C1 * CB ^ 2 * x ^ 3 := by linarith
     _ = (|G| * CE + C1 * CB ^ 2) * x ^ 3 := by ring
+
+/-- The signed Jacobian in u-coordinates:
+
+    J(u) = e^-u + 2 gamma e^-2u + O(e^-3u)
+
+Composes jacobian_signed (J = eps + G eps^2 + O(eps^3)) with eps_of_u_signed
+(eps = x + G x^2 + O(x^3), x = e^-u).  The 2G arises as G from each. -/
+theorem jacobian_u_signed :
+    ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
+      |((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - Real.exp (-u)
+        - 2 * Real.eulerMascheroniConstant * Real.exp (-2 * u)|
+        ≤ C * Real.exp (-3 * u) := by
+  sorry
