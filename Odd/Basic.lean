@@ -4290,5 +4290,16 @@ theorem logHodd2_deriv_summable (s : ℝ) (hs : 3/4 < s) :
   have hcomp := log_rpow_summable_subtype (2*s) (by linarith)
     {p : ℕ | p.Prime ∧ 3 ≤ p}
   apply Summable.of_nonneg_of_le _ _ (hcomp.mul_left 30)
-  · sorry
-  · sorry
+  · intro q
+    have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+      have := q.2.2
+      exact_mod_cast this
+    have hqs : (2:ℝ) < ((q:ℕ):ℝ) ^ s := by
+      sorry
+    have hlog : (0:ℝ) ≤ Real.log ((q:ℕ):ℝ) := by
+      apply Real.log_nonneg; linarith
+    have h1 : (0:ℝ) < ((q:ℕ):ℝ) ^ s - 1 := by linarith
+    have h2 : (0:ℝ) < ((q:ℕ):ℝ) ^ s - 2 := by linarith
+    positivity
+  · intro q
+    sorry
