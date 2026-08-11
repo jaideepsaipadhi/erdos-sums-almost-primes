@@ -4040,4 +4040,32 @@ theorem eps_of_u_signed :
       calc eps * Real.exp u * x = eps * (x * Real.exp u) := by ring
         _ = eps := by rw [hxe]; ring
     nlinarith [h1, hxe]
-  sorry
+  have hx2 : Real.exp (-2 * u) = x ^ 2 := by
+    rw [hxdef, ← Real.exp_nat_mul]
+    ring_nf
+  have hx3 : Real.exp (-3 * u) = x ^ 3 := by
+    rw [hxdef, ← Real.exp_nat_mul]
+    ring_nf
+  rw [hx2, hx3, hid]
+  -- |G x (eps - x)| <= |G| x CE x^2
+  have t1 : |G * x * (eps - x)| ≤ |G| * CE * x ^ 3 := by
+    rw [abs_mul, abs_mul, abs_of_pos hxpos]
+    have := hEb
+    rw [hx2] at this
+    calc |G| * x * |eps - x| ≤ |G| * x * (CE * x ^ 2) := by
+          apply mul_le_mul_of_nonneg_left this (by positivity)
+      _ = |G| * CE * x ^ 3 := by ring
+  -- |a x| <= C1 eps^2 x <= C1 CB^2 x^3
+  have t2 : |(eps * Real.exp u - 1 - G * eps) * x| ≤ C1 * CB ^ 2 * x ^ 3 := by
+    rw [abs_mul, abs_of_pos hxpos]
+    have heps2 : eps ^ 2 ≤ CB ^ 2 * x ^ 2 := by nlinarith [hBb2, heps0, hxpos]
+    calc |eps * Real.exp u - 1 - G * eps| * x ≤ (C1 * eps ^ 2) * x :=
+          mul_le_mul_of_nonneg_right hprod (le_of_lt hxpos)
+      _ ≤ (C1 * (CB ^ 2 * x ^ 2)) * x := by
+          apply mul_le_mul_of_nonneg_right _ (le_of_lt hxpos)
+          exact mul_le_mul_of_nonneg_left heps2 (le_of_lt hC1)
+      _ = C1 * CB ^ 2 * x ^ 3 := by ring
+  calc |G * x * (eps - x) + (eps * Real.exp u - 1 - G * eps) * x|
+      ≤ |G * x * (eps - x)| + |(eps * Real.exp u - 1 - G * eps) * x| := abs_add_le _ _
+    _ ≤ |G| * CE * x ^ 3 + C1 * CB ^ 2 * x ^ 3 := by linarith
+    _ = (|G| * CE + C1 * CB ^ 2) * x ^ 3 := by ring
