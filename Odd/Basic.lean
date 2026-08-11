@@ -3930,6 +3930,27 @@ theorem jacobian_signed :
       _ = 2 * |c1| * eps + |c1| * |G| * eps ^ 2 := by rw [h1, h2]
       _ ≤ 2 * |c1| * eps + |c1| * |G| * eps := by linarith
       _ = (2 * |c1| + |c1| * |G|) * eps := by ring
+  have hA2 : CA * eps ^ 2 ≤ CA * eps :=
+    mul_le_mul_of_nonneg_left hsq (le_of_lt hCA)
+  have hnum : |A - eps * B - G * eps ^ 2 * B| ≤ K * eps := by
+    rw [hnumid]
+    set X := A - 1 / eps - G - eps * c1 with hX
+    set Y := (B - 1 / eps ^ 2 + c1) * (eps + G * eps ^ 2) with hY
+    set Z := 2 * c1 * eps + c1 * G * eps ^ 2 with hZ
+    have hgoal : X - Y + 2 * c1 * eps + c1 * G * eps ^ 2 = (X - Y) + Z := by
+      rw [hZ]; ring
+    rw [hgoal]
+    have t1 : |X - Y| ≤ |X| + |Y| := abs_sub _ _
+    have t2 : |(X - Y) + Z| ≤ |X - Y| + |Z| := abs_add_le _ _
+    have hXb : |X| ≤ CA * eps := le_trans hAb hA2
+    have hYb : |Y| ≤ CB * (1 + |G|) * eps := by
+      have hstep : CB * eps * ((1 + |G|) * eps) = (CB * (1 + |G|)) * eps ^ 2 := by ring
+      rw [hstep] at hfac
+      have := mul_le_mul_of_nonneg_left hsq
+        (by positivity : (0:ℝ) ≤ CB * (1 + |G|))
+      linarith [hfac, this]
+    rw [hK]
+    linarith [t1, t2, hXb, hYb, hlast]
   sorry
 
 /-- The signed eps(u) expansion:
