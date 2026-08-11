@@ -4205,3 +4205,14 @@ theorem prefactor_logderiv :
     norm_num
   rw [← hval]
   exact hlog
+
+/-- Each odd prime's logarithmic-derivative contribution at s = 1.
+
+d/ds [ -log(1 - 2 p^-s) + 2 log(1 - p^-s) ] at s = 1
+  = -2 log p/(p-2) + 2 log p/(p-1)
+  = -2 log p/((p-1)(p-2)) -/
+theorem prime_logderiv (p : ℕ) (hp : 3 ≤ p) :
+    HasDerivAt (fun s : ℝ =>
+        -Real.log (1 - 2 * (p:ℝ) ^ (-s)) + 2 * Real.log (1 - (p:ℝ) ^ (-s)))
+      (-2 * Real.log p / (((p:ℝ) - 1) * ((p:ℝ) - 2))) 1 := by
+  sorry
