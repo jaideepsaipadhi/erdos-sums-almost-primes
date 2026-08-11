@@ -3867,8 +3867,36 @@ theorem jacobian_signed :
       rw [hepsdef, hc1, hBdef]
     rw [hrw]
     exact h
+  have hBlow : 1 / (2 * eps ^ 2) ≤ B := by
+    have hb := (abs_le.mp hBb).1
+    -- B >= 1/eps^2 - |c1| - CB eps, and eps <= 1/(2(|c1|+CB+1))
+    have hc1le : -|c1| ≤ c1 := neg_abs_le c1
+    have hstep : 1 / eps ^ 2 - |c1| - CB * eps ≤ B := by
+      have := le_abs_self c1
+      nlinarith [hb, hc1le, heps0]
+    have hhalf : 1 / (2 * eps ^ 2) + |c1| + CB * eps ≤ 1 / eps ^ 2 := by
+      have hexp : 1 / eps ^ 2 - 1 / (2 * eps ^ 2) = 1 / (2 * eps ^ 2) := by
+        field_simp
+        ring
+      have hbig : |c1| + CB * eps ≤ 1 / (2 * eps ^ 2) := by
+        have hle : eps * (2 * (|c1| + CB + 1)) ≤ 1 := by
+          rw [← le_div_iff₀ (by positivity)]
+          exact hepsB2
+        rw [le_div_iff₀ (by positivity)]
+        have h1 : |c1| + CB * eps ≤ |c1| + CB + 1 := by
+          nlinarith [heps0, heps1, hCB.le]
+        have h2 : (2:ℝ) * eps ^ 2 ≤ 2 * eps := by nlinarith [heps0, heps1]
+        have h3 : (0:ℝ) ≤ |c1| + CB * eps := by positivity
+        calc (|c1| + CB * eps) * (2 * eps ^ 2)
+            ≤ (|c1| + CB + 1) * (2 * eps) := by
+              apply mul_le_mul h1 h2 (by positivity) (by positivity)
+          _ = eps * (2 * (|c1| + CB + 1)) := by ring
+          _ ≤ 1 := hle
+      linarith
+    linarith
   have hBpos : 0 < B := by
-    sorry
+    have : (0:ℝ) < 1 / (2 * eps ^ 2) := by positivity
+    linarith
   have hnumid : A - eps * B - G * eps ^ 2 * B
       = (A - 1 / eps - G - eps * c1)
         - (B - 1 / eps ^ 2 + c1) * (eps + G * eps ^ 2)
