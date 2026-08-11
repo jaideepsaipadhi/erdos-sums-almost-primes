@@ -4259,3 +4259,32 @@ theorem prime_logderiv (p : ℕ) (hp : 3 ≤ p) :
     ring
   rw [← hval]
   exact hsum
+
+/-- The odd-prime part of log H(s,2), as a sum over p >= 3. -/
+noncomputable def logHodd2 (s : ℝ) : ℝ :=
+  ∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+    (-Real.log (1 - 2 * ((p:ℕ):ℝ) ^ (-s)) + 2 * Real.log (1 - ((p:ℕ):ℝ) ^ (-s)))
+
+/-- log n * n^-t is summable over any subtype of the naturals, for t > 1. -/
+theorem log_rpow_summable_subtype (t : ℝ) (ht : 1 < t) (S : Set ℕ) :
+    Summable (fun n : S => Real.log ((n:ℕ):ℝ) * (((n:ℕ):ℝ)) ^ (-t)) := by
+  have hbase : Summable (fun n : ℕ => Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-t)) :=
+    log_rpow_summable t ht
+  have hshift : Summable (fun n : ℕ => Real.log ((n:ℝ)) * ((n:ℝ)) ^ (-t)) := by
+    apply (summable_nat_add_iff 1).mp
+    apply hbase.congr
+    intro n
+    push_cast
+    ring_nf
+  exact hshift.subtype S
+
+
+/-- The differentiated series is summable for s > 3/4.
+
+|f_p'(s)| = 2 log p/((p^s - 1)(p^s - 2)) ~ 2 log p / p^(2s), summable for
+2s > 1.  Unlike the zeta series, s = 1 is INTERIOR here: the p >= 3 Euler
+factors have no pole at s = 1. -/
+theorem logHodd2_deriv_summable (s : ℝ) (hs : 3/4 < s) :
+    Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      2 * Real.log ((p:ℕ):ℝ) / ((((p:ℕ):ℝ) ^ s - 1) * (((p:ℕ):ℝ) ^ s - 2))) := by
+  sorry
