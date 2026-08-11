@@ -25,9 +25,12 @@ Step D needs `sum_j bHatOdd j * 2^j = 2 dConst (log 2 - Sodd)`, the
 s-derivative counterpart of `hCoeff_sum_two`.  Either derived (differentiating
 the Euler product in s) or added to the certified inputs.
 
-### PROOF.md correction needed
+### Note on the substitution (no PROOF.md error)
 
-§2 says "substituting s = 1 + e^-u".  That substitution does NOT make the
-u^{k-j} factors powers of the integration variable -- u(s) = log zeta(s) does.
-The numerics are unaffected (they compute the true integral); the write-up
-step is wrong as stated.
+PROOF.md §2 correctly uses u = log zeta(s), and (2.2) is exactly
+`eps_of_u_signed`.  The Lean development initially used s = 1 + e^-u
+(from item 5's `substitution_near_pole`), which does NOT make the u^{k-j}
+factors powers of the integration variable; that route was abandoned and
+replaced by `uOf_change_of_variables` / `integral_substitute`, matching
+PROOF.md.  Formulas (2.3)-(2.5) line up with `gamma_normalised{,_two,_three}`
+and `jacobian_u_signed`'s 2 gamma coefficient.
