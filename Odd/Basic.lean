@@ -4287,4 +4287,8 @@ factors have no pole at s = 1. -/
 theorem logHodd2_deriv_summable (s : ℝ) (hs : 3/4 < s) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
       2 * Real.log ((p:ℕ):ℝ) / ((((p:ℕ):ℝ) ^ s - 1) * (((p:ℕ):ℝ) ^ s - 2))) := by
-  sorry
+  have hcomp := log_rpow_summable_subtype (2*s) (by linarith)
+    {p : ℕ | p.Prime ∧ 3 ≤ p}
+  apply Summable.of_nonneg_of_le _ _ (hcomp.mul_left 30)
+  · sorry
+  · sorry
