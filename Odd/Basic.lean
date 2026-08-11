@@ -3951,7 +3951,23 @@ theorem jacobian_signed :
       linarith [hfac, this]
     rw [hK]
     linarith [t1, t2, hXb, hYb, hlast]
-  sorry
+  have hdivid : A / B - eps - G * eps ^ 2
+      = (A - eps * B - G * eps ^ 2 * B) / B := by
+    field_simp
+  rw [hdivid, abs_div, abs_of_pos hBpos, div_le_iff₀ hBpos]
+  have hBinv : (1:ℝ) ≤ 2 * eps ^ 2 * B := by
+    have h2 := mul_le_mul_of_nonneg_left hBlow
+      (by positivity : (0:ℝ) ≤ 2 * eps ^ 2)
+    calc (1:ℝ) = 2 * eps ^ 2 * (1 / (2 * eps ^ 2)) := by field_simp
+      _ ≤ 2 * eps ^ 2 * B := h2
+  have hKe : (0:ℝ) ≤ K * eps := by positivity
+  have hstep : K * eps ≤ (K * eps) * (2 * eps ^ 2 * B) := by
+    calc K * eps = (K * eps) * 1 := by ring
+      _ ≤ (K * eps) * (2 * eps ^ 2 * B) := mul_le_mul_of_nonneg_left hBinv hKe
+  calc |A - eps * B - G * eps ^ 2 * B| ≤ K * eps := hnum
+    _ ≤ (K * eps) * (2 * eps ^ 2 * B) := hstep
+    _ = 2 * K * eps ^ 3 * B := by ring
+  
 
 /-- The signed eps(u) expansion:
 
