@@ -4281,21 +4281,21 @@ theorem log_rpow_summable_subtype (t : ℝ) (ht : 1 < t) (S : Set ℕ) :
 
 /-- For p >= 3 and s > 3/4, p^s > 2.  The key point is 3^(3/4) > 2,
 i.e. 3^3 = 27 > 16 = 2^4. -/
-theorem three_rpow_gt_two (q : ℝ) (hq : 3 ≤ q) (s : ℝ) (hs : 3/4 < s) :
-    2 < q ^ s := by
+theorem three_rpow_gt_two' (q : ℝ) (hq : 3 ≤ q) (s : ℝ) (hs : 3/4 < s) :
+    (9:ℝ)/4 < q ^ s := by
   have hq0 : (0:ℝ) < q := by linarith
-  have h34 : (2:ℝ) < (3:ℝ) ^ ((3:ℝ)/4) := by
+  have h34 : (9:ℝ)/4 < (3:ℝ) ^ ((3:ℝ)/4) := by
     have hpos : (0:ℝ) < (3:ℝ) ^ ((3:ℝ)/4) := Real.rpow_pos_of_pos (by norm_num) _
     have hpow : ((3:ℝ) ^ ((3:ℝ)/4)) ^ (4:ℕ) = 27 := by
       rw [← Real.rpow_natCast ((3:ℝ) ^ ((3:ℝ)/4)) 4, ← Real.rpow_mul (by norm_num)]
       norm_num
     by_contra hcon
     push_neg at hcon
-    have h16 : ((3:ℝ) ^ ((3:ℝ)/4)) ^ (4:ℕ) ≤ (2:ℝ) ^ (4:ℕ) :=
+    have h16 : ((3:ℝ) ^ ((3:ℝ)/4)) ^ (4:ℕ) ≤ ((9:ℝ)/4) ^ (4:ℕ) :=
       pow_le_pow_left₀ (le_of_lt hpos) hcon 4
     rw [hpow] at h16
     norm_num at h16
-  calc (2:ℝ) < (3:ℝ) ^ ((3:ℝ)/4) := h34
+  calc (9:ℝ)/4 < (3:ℝ) ^ ((3:ℝ)/4) := h34
     _ ≤ q ^ ((3:ℝ)/4) := by
         apply Real.rpow_le_rpow (by norm_num) hq (by norm_num)
     _ ≤ q ^ s := by
@@ -4317,7 +4317,8 @@ theorem logHodd2_deriv_summable (s : ℝ) (hs : 3/4 < s) :
     have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
       have := q.2.2
       exact_mod_cast this
-    have hqs : (2:ℝ) < ((q:ℕ):ℝ) ^ s := three_rpow_gt_two _ hq3 s hs
+    have hqs' : (9:ℝ)/4 < ((q:ℕ):ℝ) ^ s := three_rpow_gt_two' _ hq3 s hs
+    have hqs : (2:ℝ) < ((q:ℕ):ℝ) ^ s := by linarith
     have hlog : (0:ℝ) ≤ Real.log ((q:ℕ):ℝ) := by
       apply Real.log_nonneg; linarith
     have h1 : (0:ℝ) < ((q:ℕ):ℝ) ^ s - 1 := by linarith
