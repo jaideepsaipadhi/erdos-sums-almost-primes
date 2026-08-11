@@ -4167,3 +4167,23 @@ theorem jacobian_u_signed :
     _ ≤ CJ * CB ^ 3 * x ^ 3 + CS * x ^ 3 + |G| * CE * (CB + 1) * x ^ 3 := by
         linarith [t1, hsb, t3]
     _ = (CJ * CB ^ 3 + CS + |G| * CE * (CB + 1)) * x ^ 3 := by ring
+
+/-! ### Option 2: toward discharging `OddNumericalFacts.remainder`
+
+Step D needs `sum_j bHatOdd j * 2^j = 2 dConst (log 2 - Sodd)`, i.e.
+`d_s H(s,2)` at `s = 1`.  Logarithmic differentiation of
+
+    H(s,2) = (1 - 2^-s)^2 prod_{p>=3} (1 - 2 p^-s)^-1 (1 - p^-s)^2
+
+gives, at s = 1,
+
+    d_s log H(1,2) = 2 log 2 - 2 sum_{p>=3} log p/((p-1)(p-2)) = 2(log 2 - S)
+
+and hence d_s H(1,2) = H(1,2) (2 log 2 - 2S) = 2 d (log 2 - S), the source of
+the `log 2 - S` in beta.  The p = 2 prefactor supplies the log 2; the odd
+primes supply the -S. -/
+
+/-- The p = 2 prefactor's logarithmic derivative at s = 1 is 2 log 2. -/
+theorem prefactor_logderiv :
+    HasDerivAt (fun s : ℝ => 2 * Real.log (1 - (2:ℝ) ^ (-s))) (2 * Real.log 2) 1 := by
+  sorry
