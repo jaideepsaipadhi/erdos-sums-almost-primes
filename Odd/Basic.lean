@@ -4186,4 +4186,22 @@ primes supply the -S. -/
 /-- The p = 2 prefactor's logarithmic derivative at s = 1 is 2 log 2. -/
 theorem prefactor_logderiv :
     HasDerivAt (fun s : ℝ => 2 * Real.log (1 - (2:ℝ) ^ (-s))) (2 * Real.log 2) 1 := by
-  sorry
+  have hb : (0:ℝ) < 2 := by norm_num
+  -- d/ds (2^-s) = -log 2 * 2^-s
+  have hpow : HasDerivAt (fun s : ℝ => (2:ℝ) ^ (-s))
+      (-(Real.log 2 * (2:ℝ) ^ (-(1:ℝ)))) 1 := by
+    have h := HasDerivAt.const_rpow hb (hasDerivAt_neg (1:ℝ))
+    simpa using h
+  have hinner : HasDerivAt (fun s : ℝ => 1 - (2:ℝ) ^ (-s))
+      (Real.log 2 * (2:ℝ) ^ (-(1:ℝ))) 1 := by
+    simpa using hpow.const_sub 1
+  have hne : (1:ℝ) - (2:ℝ) ^ (-(1:ℝ)) ≠ 0 := by
+    rw [Real.rpow_neg_one]
+    norm_num
+  have hlog := (hinner.log hne).const_mul 2
+  have hval : 2 * (Real.log 2 * (2:ℝ) ^ (-(1:ℝ)) / (1 - (2:ℝ) ^ (-(1:ℝ))))
+      = 2 * Real.log 2 := by
+    rw [Real.rpow_neg_one]
+    norm_num
+  rw [← hval]
+  exact hlog
