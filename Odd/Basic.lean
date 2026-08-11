@@ -3983,7 +3983,20 @@ theorem eps_of_u_signed :
   set G := Real.eulerMascheroniConstant with hG
   -- eps <= r1 for u large (same threshold argument as before)
   have hUr : ∃ U1 > 0, ∀ u : ℝ, U1 ≤ u → sOf u - 1 ≤ r1 := by
-    sorry
+    refine ⟨max UB (Real.log (CB / r1) + 1), by positivity, ?_⟩
+    intro u hu
+    have huB : UB ≤ u := le_trans (le_max_left _ _) hu
+    have hlog : Real.log (CB / r1) + 1 ≤ u := le_trans (le_max_right _ _) hu
+    have hb := hBd u huB
+    have hexp : CB * Real.exp (-u) ≤ r1 := by
+      rw [Real.exp_neg, mul_inv_le_iff₀ (Real.exp_pos u)]
+      calc CB = r1 * (CB / r1) := by field_simp
+        _ ≤ r1 * Real.exp u := by
+            apply mul_le_mul_of_nonneg_left _ (le_of_lt hr1)
+            calc CB / r1 = Real.exp (Real.log (CB / r1)) :=
+                  (Real.exp_log (by positivity)).symm
+              _ ≤ Real.exp u := Real.exp_le_exp.mpr (by linarith)
+    linarith
   obtain ⟨U1, hU1, hr⟩ := hUr
   refine ⟨|G| * CE + C1 * CB ^ 2, by positivity,
     max (max UE UB) U1, by positivity, ?_⟩
