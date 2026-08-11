@@ -4317,8 +4317,7 @@ theorem logHodd2_deriv_summable (s : ℝ) (hs : 3/4 < s) :
     have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
       have := q.2.2
       exact_mod_cast this
-    have hqs : (2:ℝ) < ((q:ℕ):ℝ) ^ s := by
-      sorry
+    have hqs : (2:ℝ) < ((q:ℕ):ℝ) ^ s := three_rpow_gt_two _ hq3 s hs
     have hlog : (0:ℝ) ≤ Real.log ((q:ℕ):ℝ) := by
       apply Real.log_nonneg; linarith
     have h1 : (0:ℝ) < ((q:ℕ):ℝ) ^ s - 1 := by linarith
