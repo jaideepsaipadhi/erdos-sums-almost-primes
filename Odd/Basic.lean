@@ -3830,13 +3830,26 @@ theorem jacobian_signed :
   obtain ⟨CA, hCA, rA, hrA, hA⟩ := zetaR_second_order
   obtain ⟨CB, hCB, rB, hrB, hB⟩ := zetaRderiv_second_order
   set c1 := (deriv zetaRegFull 1).re with hc1
-  refine ⟨1, one_pos, min (min rA rB) 1, by positivity, ?_⟩
+  set c1 := (deriv zetaRegFull 1).re with hc1
+  set G := Real.eulerMascheroniConstant with hG
+  set K := CA + CB * (1 + |G|) + 2 * |c1| + |c1| * |G| with hK
+  have hKpos : 0 < K := by
+    rw [hK]
+    have : (0:ℝ) ≤ CB * (1 + |G|) := by positivity
+    have h2 : (0:ℝ) ≤ 2 * |c1| := by positivity
+    have h3 : (0:ℝ) ≤ |c1| * |G| := by positivity
+    linarith
+  refine ⟨2 * K, by positivity,
+    min (min rA rB) (min 1 (1 / (2 * (|c1| + CB + 1)))), by positivity, ?_⟩
   intro s hs1 hsr
   set eps := s - 1 with hepsdef
   have heps0 : 0 < eps := by rw [hepsdef]; linarith
   have hepsA : eps ≤ rA := le_trans hsr (le_trans (min_le_left _ _) (min_le_left _ _))
   have hepsB : eps ≤ rB := le_trans hsr (le_trans (min_le_left _ _) (min_le_right _ _))
-  have heps1 : eps ≤ 1 := le_trans hsr (min_le_right _ _)
+  have heps1 : eps ≤ 1 :=
+    le_trans hsr (le_trans (min_le_right _ _) (min_le_left _ _))
+  have hepsB2 : eps ≤ 1 / (2 * (|c1| + CB + 1)) :=
+    le_trans hsr (le_trans (min_le_right _ _) (min_le_right _ _))
   set A := ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) with hAdef
   set B := -zetaRderiv s with hBdef
   have hAb : |A - 1 / eps - Real.eulerMascheroniConstant - eps * c1| ≤ CA * eps ^ 2 := by
@@ -3854,7 +3867,6 @@ theorem jacobian_signed :
       rw [hepsdef, hc1, hBdef]
     rw [hrw]
     exact h
-  set G := Real.eulerMascheroniConstant with hG
   have hBpos : 0 < B := by
     sorry
   have hnumid : A - eps * B - G * eps ^ 2 * B
