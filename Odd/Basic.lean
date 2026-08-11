@@ -4082,4 +4082,29 @@ theorem jacobian_u_signed :
         - Real.exp (-u)
         - 2 * Real.eulerMascheroniConstant * Real.exp (-2 * u)|
         ≤ C * Real.exp (-3 * u) := by
+  obtain ⟨CJ, hCJ, rJ, hrJ, hJ⟩ := jacobian_signed
+  obtain ⟨CS, hCS, US, hUS, hS⟩ := eps_of_u_signed
+  obtain ⟨CE, hCE, UE, hUE, hE⟩ := eps_of_u_expansion
+  obtain ⟨CB, hCB, UB, hUB, hBd⟩ := eps_of_u_bound
+  set G := Real.eulerMascheroniConstant with hG
+  -- eps(u) <= rJ for u large
+  have hUr : ∃ U1 > 0, ∀ u : ℝ, U1 ≤ u → sOf u - 1 ≤ rJ := by
+    refine ⟨max UB (Real.log (CB / rJ) + 1), by positivity, ?_⟩
+    intro u hu
+    have huB : UB ≤ u := le_trans (le_max_left _ _) hu
+    have hlog : Real.log (CB / rJ) + 1 ≤ u := le_trans (le_max_right _ _) hu
+    have hb := hBd u huB
+    have hexp : CB * Real.exp (-u) ≤ rJ := by
+      rw [Real.exp_neg, mul_inv_le_iff₀ (Real.exp_pos u)]
+      calc CB = rJ * (CB / rJ) := by field_simp
+        _ ≤ rJ * Real.exp u := by
+            apply mul_le_mul_of_nonneg_left _ (le_of_lt hrJ)
+            calc CB / rJ = Real.exp (Real.log (CB / rJ)) :=
+                  (Real.exp_log (by positivity)).symm
+              _ ≤ Real.exp u := Real.exp_le_exp.mpr (by linarith)
+    linarith
+  obtain ⟨U1, hU1, hr⟩ := hUr
+  refine ⟨CJ * CB ^ 3 + CS + |G| * CE * (CB + 1), by positivity,
+    max (max (max US UE) UB) U1, by positivity, ?_⟩
+  intro u hu
   sorry
