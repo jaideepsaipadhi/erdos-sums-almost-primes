@@ -4134,4 +4134,36 @@ theorem jacobian_u_signed :
     rw [hx2] at h
     exact h
   have hbb : eps ≤ CB * x := hBd u huB
-  sorry
+  rw [hx2, hx3]
+  have hid : J - x - 2 * G * x ^ 2
+      = (J - eps - G * eps ^ 2) + (eps - x - G * x ^ 2) + G * (eps ^ 2 - x ^ 2) := by
+    ring
+  rw [hid]
+  -- term 3: |G (eps^2 - x^2)| = |G| |eps - x| |eps + x|
+  have hsum : |eps + x| ≤ (CB + 1) * x := by
+    rw [abs_of_pos (by linarith)]
+    linarith [hbb]
+  have t3 : |G * (eps ^ 2 - x ^ 2)| ≤ |G| * CE * (CB + 1) * x ^ 3 := by
+    have hfac : eps ^ 2 - x ^ 2 = (eps - x) * (eps + x) := by ring
+    rw [hfac, abs_mul, abs_mul]
+    calc |G| * (|eps - x| * |eps + x|) ≤ |G| * ((CE * x ^ 2) * ((CB + 1) * x)) := by
+          apply mul_le_mul_of_nonneg_left _ (abs_nonneg G)
+          exact mul_le_mul heb hsum (abs_nonneg _) (by positivity)
+      _ = |G| * CE * (CB + 1) * x ^ 3 := by ring
+  -- term 1: |J - eps - G eps^2| <= CJ eps^3 <= CJ CB^3 x^3
+  have t1 : |J - eps - G * eps ^ 2| ≤ CJ * CB ^ 3 * x ^ 3 := by
+    have hcube : eps ^ 3 ≤ CB ^ 3 * x ^ 3 := by
+      have h := pow_le_pow_left₀ (le_of_lt heps0) hbb 3
+      calc eps ^ 3 ≤ (CB * x) ^ 3 := h
+        _ = CB ^ 3 * x ^ 3 := by ring
+    calc |J - eps - G * eps ^ 2| ≤ CJ * eps ^ 3 := hjb
+      _ ≤ CJ * (CB ^ 3 * x ^ 3) := mul_le_mul_of_nonneg_left hcube (le_of_lt hCJ)
+      _ = CJ * CB ^ 3 * x ^ 3 := by ring
+  calc |(J - eps - G * eps ^ 2) + (eps - x - G * x ^ 2) + G * (eps ^ 2 - x ^ 2)|
+      ≤ |(J - eps - G * eps ^ 2) + (eps - x - G * x ^ 2)| + |G * (eps ^ 2 - x ^ 2)| :=
+        abs_add_le _ _
+    _ ≤ (|J - eps - G * eps ^ 2| + |eps - x - G * x ^ 2|) + |G * (eps ^ 2 - x ^ 2)| := by
+        linarith [abs_add_le (J - eps - G * eps ^ 2) (eps - x - G * x ^ 2)]
+    _ ≤ CJ * CB ^ 3 * x ^ 3 + CS * x ^ 3 + |G| * CE * (CB + 1) * x ^ 3 := by
+        linarith [t1, hsb, t3]
+    _ = (CJ * CB ^ 3 + CS + |G| * CE * (CB + 1)) * x ^ 3 := by ring
