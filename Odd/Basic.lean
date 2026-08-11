@@ -3917,6 +3917,19 @@ theorem jacobian_signed :
       ≤ (CB * eps) * ((1 + |G|) * eps) := by
     rw [abs_mul]
     exact mul_le_mul hBb hlin (abs_nonneg _) (by positivity)
+  have hlast : |2 * c1 * eps + c1 * G * eps ^ 2|
+      ≤ (2 * |c1| + |c1| * |G|) * eps := by
+    have h1 : |2 * c1 * eps| = 2 * |c1| * eps := by
+      rw [abs_mul, abs_mul, abs_of_pos heps0, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 2)]
+    have h2 : |c1 * G * eps ^ 2| = |c1| * |G| * eps ^ 2 := by
+      rw [abs_mul, abs_mul, abs_of_nonneg (by positivity : (0:ℝ) ≤ eps ^ 2)]
+    have h3 : |c1| * |G| * eps ^ 2 ≤ |c1| * |G| * eps :=
+      mul_le_mul_of_nonneg_left hsq (by positivity)
+    calc |2 * c1 * eps + c1 * G * eps ^ 2|
+        ≤ |2 * c1 * eps| + |c1 * G * eps ^ 2| := abs_add_le _ _
+      _ = 2 * |c1| * eps + |c1| * |G| * eps ^ 2 := by rw [h1, h2]
+      _ ≤ 2 * |c1| * eps + |c1| * |G| * eps := by linarith
+      _ = (2 * |c1| + |c1| * |G|) * eps := by ring
   sorry
 
 /-- The signed eps(u) expansion:
