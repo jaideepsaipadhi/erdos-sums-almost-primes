@@ -4030,4 +4030,14 @@ theorem eps_of_u_signed :
     have hone : (1:ℝ) + eps = sOf u := by rw [hepsdef]; ring
     rw [exp_u_eq_zetaR u hu0, ← hone]
     exact hA eps heps0 hr'
+  -- eps = x(1 + G eps + a), so eps - x - G x^2 = G x (eps - x) + a x
+  have hxe : x * Real.exp u = 1 := by
+    rw [hxdef, Real.exp_neg]
+    field_simp
+  have hid : eps - x - G * x ^ 2
+      = G * x * (eps - x) + (eps * Real.exp u - 1 - G * eps) * x := by
+    have h1 : eps * Real.exp u * x = eps := by
+      calc eps * Real.exp u * x = eps * (x * Real.exp u) := by ring
+        _ = eps := by rw [hxe]; ring
+    nlinarith [h1, hxe]
   sorry
