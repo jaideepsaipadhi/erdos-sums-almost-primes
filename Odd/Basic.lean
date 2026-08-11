@@ -3977,4 +3977,15 @@ theorem eps_of_u_signed :
       |(sOf u - 1) - Real.exp (-u)
         - Real.eulerMascheroniConstant * Real.exp (-2 * u)|
         ≤ C * Real.exp (-3 * u) := by
+  obtain ⟨C1, hC1, r1, hr1, hr1le, hA⟩ := eps_zeta_uniform
+  obtain ⟨CE, hCE, UE, hUE, hE⟩ := eps_of_u_expansion
+  obtain ⟨CB, hCB, UB, hUB, hBd⟩ := eps_of_u_bound
+  set G := Real.eulerMascheroniConstant with hG
+  -- eps <= r1 for u large (same threshold argument as before)
+  have hUr : ∃ U1 > 0, ∀ u : ℝ, U1 ≤ u → sOf u - 1 ≤ r1 := by
+    sorry
+  obtain ⟨U1, hU1, hr⟩ := hUr
+  refine ⟨|G| * CE + C1 * CB ^ 2, by positivity,
+    max (max UE UB) U1, by positivity, ?_⟩
+  intro u hu
   sorry
