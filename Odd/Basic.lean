@@ -3454,6 +3454,18 @@ theorem fOdd_u_form (k : ℕ) (hk : 1 ≤ k)
   rw [hrw, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
   ring
 
+/-- e^u = zeta(sOf u): the bridge between the u and eps variables. -/
+theorem exp_u_eq_zetaR (u : ℝ) (hu : 0 < u) :
+    Real.exp u = ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) := by
+  have hs1 : (1:ℝ) < sOf u := sOf_mem u hu
+  have hzpos := zetaR_pos (sOf u) hs1
+  have huu := uOf_sOf u hu
+  unfold uOf at huu
+  calc Real.exp u = Real.exp (Real.log (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)))) := by
+        rw [huu]
+    _ = ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) := Real.exp_log hzpos
+
+
 /-- The inverse expansion: eps(u) = s(u) - 1 satisfies |eps(u) - e^-u| <= C e^-2u.
 
 From eps_zeta_uniform, e^u = zeta(1+eps) = (1 + gamma eps + O(eps^2))/eps,
@@ -3516,7 +3528,7 @@ theorem eps_of_u_expansion :
   have hone : (1:ℝ) + eps = sOf u := by rw [hepsdef]; ring
   have hprod : |eps * Real.exp u - 1 - Real.eulerMascheroniConstant * eps|
       ≤ C1 * eps ^ 2 := by
-    rw [hexpu u hu0, ← hone]
+    rw [exp_u_eq_zetaR u hu0, ← hone]
     exact hA eps heps0 hepsr
   have hexppos : (0:ℝ) < Real.exp u := Real.exp_pos u
   have hb := abs_le.mp hprod
@@ -4001,4 +4013,21 @@ theorem eps_of_u_signed :
   refine ⟨|G| * CE + C1 * CB ^ 2, by positivity,
     max (max UE UB) U1, by positivity, ?_⟩
   intro u hu
+  have huE : UE ≤ u := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hu
+  have huB : UB ≤ u := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hu
+  have hu1 : U1 ≤ u := le_trans (le_max_right _ _) hu
+  have hu0 : (0:ℝ) < u := lt_of_lt_of_le hU1 hu1
+  have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+  set eps := sOf u - 1 with hepsdef
+  set x := Real.exp (-u) with hxdef
+  have hxpos : 0 < x := Real.exp_pos _
+  have heps0 : 0 < eps := by rw [hepsdef]; linarith
+  have hr' : eps ≤ r1 := hr u hu1
+  have hEb : |eps - x| ≤ CE * Real.exp (-2 * u) := hE u huE
+  have hBb2 : eps ≤ CB * x := hBd u huB
+  -- eps * e^u = 1 + G eps + a  with |a| <= C1 eps^2
+  have hprod : |eps * Real.exp u - 1 - G * eps| ≤ C1 * eps ^ 2 := by
+    have hone : (1:ℝ) + eps = sOf u := by rw [hepsdef]; ring
+    rw [exp_u_eq_zetaR u hu0, ← hone]
+    exact hA eps heps0 hr'
   sorry
