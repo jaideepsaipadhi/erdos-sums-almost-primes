@@ -3913,6 +3913,10 @@ theorem jacobian_signed :
           have := mul_le_mul_of_nonneg_left hsq (abs_nonneg G)
           linarith
       _ = (1 + |G|) * eps := by ring
+  have hfac : |(B - 1 / eps ^ 2 + c1) * (eps + G * eps ^ 2)|
+      ≤ (CB * eps) * ((1 + |G|) * eps) := by
+    rw [abs_mul]
+    exact mul_le_mul hBb hlin (abs_nonneg _) (by positivity)
   sorry
 
 /-- The signed eps(u) expansion:
