@@ -3903,6 +3903,16 @@ theorem jacobian_signed :
         + 2 * c1 * eps + c1 * G * eps ^ 2 := by
     field_simp
     ring
+  have hsq : eps ^ 2 ≤ eps := by nlinarith [heps0, heps1]
+  have hlin : |eps + G * eps ^ 2| ≤ (1 + |G|) * eps := by
+    calc |eps + G * eps ^ 2| ≤ |eps| + |G * eps ^ 2| := abs_add_le _ _
+      _ = eps + |G| * eps ^ 2 := by
+          rw [abs_of_pos heps0, abs_mul,
+            abs_of_nonneg (by positivity : (0:ℝ) ≤ eps ^ 2)]
+      _ ≤ eps + |G| * eps := by
+          have := mul_le_mul_of_nonneg_left hsq (abs_nonneg G)
+          linarith
+      _ = (1 + |G|) * eps := by ring
   sorry
 
 /-- The signed eps(u) expansion:
