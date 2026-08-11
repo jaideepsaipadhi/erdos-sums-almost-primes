@@ -4107,4 +4107,31 @@ theorem jacobian_u_signed :
   refine ⟨CJ * CB ^ 3 + CS + |G| * CE * (CB + 1), by positivity,
     max (max (max US UE) UB) U1, by positivity, ?_⟩
   intro u hu
+  have huS : US ≤ u :=
+    le_trans (le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) (le_max_left _ _)) hu
+  have huE : UE ≤ u :=
+    le_trans (le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) (le_max_left _ _)) hu
+  have huB : UB ≤ u := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hu
+  have hu1 : U1 ≤ u := le_trans (le_max_right _ _) hu
+  have hu0 : (0:ℝ) < u := lt_of_lt_of_le hU1 hu1
+  have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+  set eps := sOf u - 1 with hepsdef
+  set x := Real.exp (-u) with hxdef
+  set J := (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)) with hJdef
+  have hxpos : 0 < x := Real.exp_pos _
+  have heps0 : 0 < eps := by rw [hepsdef]; linarith
+  have hx2 : Real.exp (-2 * u) = x ^ 2 := by
+    rw [hxdef, ← Real.exp_nat_mul]; ring_nf
+  have hx3 : Real.exp (-3 * u) = x ^ 3 := by
+    rw [hxdef, ← Real.exp_nat_mul]; ring_nf
+  have hjb : |J - eps - G * eps ^ 2| ≤ CJ * eps ^ 3 := hJ (sOf u) hs1 (hr u hu1)
+  have hsb : |eps - x - G * x ^ 2| ≤ CS * x ^ 3 := by
+    have h := hS u huS
+    rw [hx2, hx3] at h
+    exact h
+  have heb : |eps - x| ≤ CE * x ^ 2 := by
+    have h := hE u huE
+    rw [hx2] at h
+    exact h
+  have hbb : eps ≤ CB * x := hBd u huB
   sorry
