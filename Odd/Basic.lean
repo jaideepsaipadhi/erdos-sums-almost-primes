@@ -4215,4 +4215,47 @@ theorem prime_logderiv (p : ℕ) (hp : 3 ≤ p) :
     HasDerivAt (fun s : ℝ =>
         -Real.log (1 - 2 * (p:ℝ) ^ (-s)) + 2 * Real.log (1 - (p:ℝ) ^ (-s)))
       (-2 * Real.log p / (((p:ℝ) - 1) * ((p:ℝ) - 2))) 1 := by
-  sorry
+  have hp0 : (0:ℝ) < (p:ℝ) := by
+    have : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+    linarith
+  have hp1 : (p:ℝ) ^ (-(1:ℝ)) = 1 / (p:ℝ) := by
+    rw [Real.rpow_neg_one, one_div]
+  have hpow : HasDerivAt (fun s : ℝ => (p:ℝ) ^ (-s))
+      (-(Real.log p * (p:ℝ) ^ (-(1:ℝ)))) 1 := by
+    have h := HasDerivAt.const_rpow hp0 (hasDerivAt_neg (1:ℝ))
+    simpa using h
+  have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+  -- first log: 1 - 2 p^-s
+  have hin1 : HasDerivAt (fun s : ℝ => 1 - 2 * (p:ℝ) ^ (-s))
+      (2 * (Real.log p * (p:ℝ) ^ (-(1:ℝ)))) 1 := by
+    simpa using (hpow.const_mul (2:ℝ)).const_sub 1
+  have hne1 : (1:ℝ) - 2 * (p:ℝ) ^ (-(1:ℝ)) ≠ 0 := by
+    rw [hp1]
+    have : (2:ℝ) / (p:ℝ) < 1 := by
+      rw [div_lt_one hp0]; linarith
+    intro hc
+    rw [mul_one_div] at hc
+    linarith [hc]
+  -- second log: 1 - p^-s
+  have hin2 : HasDerivAt (fun s : ℝ => 1 - (p:ℝ) ^ (-s))
+      (Real.log p * (p:ℝ) ^ (-(1:ℝ))) 1 := by
+    simpa using hpow.const_sub 1
+  have hne2 : (1:ℝ) - (p:ℝ) ^ (-(1:ℝ)) ≠ 0 := by
+    rw [hp1]
+    have : (1:ℝ) / (p:ℝ) < 1 := by
+      rw [div_lt_one hp0]; linarith
+    intro hc
+    linarith [hc]
+  have hL1 := (hin1.log hne1).neg
+  have hL2 := (hin2.log hne2).const_mul 2
+  have hsum := hL1.add hL2
+  have hval : -(2 * (Real.log p * (p:ℝ) ^ (-(1:ℝ))) / (1 - 2 * (p:ℝ) ^ (-(1:ℝ))))
+      + 2 * (Real.log p * (p:ℝ) ^ (-(1:ℝ)) / (1 - (p:ℝ) ^ (-(1:ℝ))))
+      = -2 * Real.log p / (((p:ℝ) - 1) * ((p:ℝ) - 2)) := by
+    rw [hp1]
+    have h1 : (p:ℝ) - 1 ≠ 0 := by linarith
+    have h2 : (p:ℝ) - 2 ≠ 0 := by linarith
+    field_simp
+    ring
+  rw [← hval]
+  exact hsum
