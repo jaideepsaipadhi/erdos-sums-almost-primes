@@ -4357,3 +4357,19 @@ theorem logHodd2_deriv_summable (s : ℝ) (hs : 3/4 < s) :
             field_simp
           rw [hrw]
           apply mul_le_mul_of_nonneg_left hkey (by positivity)
+
+/-- The undifferentiated series converges: the p^-s terms cancel at first
+order, leaving O(p^-2s).  This is the same cancellation that makes H
+analytic where the bare Euler factors are not. -/
+theorem logHodd2_summable (s : ℝ) (hs : 3/4 < s) :
+    Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      -Real.log (1 - 2 * ((p:ℕ):ℝ) ^ (-s)) + 2 * Real.log (1 - ((p:ℕ):ℝ) ^ (-s))) := by
+  sorry
+
+/-- The summed derivative: d/ds logHodd2 at s in (3/4, 2) is the sum of the
+per-prime contributions. -/
+theorem logHodd2_hasDerivAt (s : ℝ) (hs : 3/4 < s) (hs2 : s < 2) :
+    HasDerivAt logHodd2
+      (∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+        (-2 * Real.log ((p:ℕ):ℝ) / ((((p:ℕ):ℝ) ^ s - 1) * (((p:ℕ):ℝ) ^ s - 2)))) s := by
+  sorry
