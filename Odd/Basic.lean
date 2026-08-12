@@ -4369,7 +4369,30 @@ theorem logHodd2_summable (s : ℝ) (hs : 3/4 < s) :
   have hcomp : Summable (fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
       9 * (((q:ℕ):ℝ)) ^ (-(2*s))) := (hbase.subtype _).mul_left 9
   apply Summable.of_nonneg_of_le _ _ hcomp
-  · sorry
+  · intro q
+    have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+      have := q.2.2
+      exact_mod_cast this
+    have hqs : (9:ℝ)/4 < ((q:ℕ):ℝ) ^ s := three_rpow_gt_two' _ hq3 s hs
+    set x := ((q:ℕ):ℝ) ^ (-s) with hx
+    have hxpos : 0 < x := Real.rpow_pos_of_pos (by linarith) _
+    have hxval : x = 1 / ((q:ℕ):ℝ) ^ s := by
+      rw [hx, Real.rpow_neg (by linarith), one_div]
+    have hxlt : x < 4/9 := by
+      rw [hxval, div_lt_div_iff₀ (by linarith) (by norm_num)]
+      linarith
+    have h2x : (0:ℝ) < 1 - 2 * x := by linarith
+    have h1x : (0:ℝ) < 1 - x := by linarith
+    -- -log(1-2x) + 2log(1-x) = log((1-x)^2/(1-2x)) >= 0
+    have hid : -Real.log (1 - 2*x) + 2 * Real.log (1 - x)
+        = Real.log ((1-x)^2 / (1-2*x)) := by
+      rw [Real.log_div (by positivity) (ne_of_gt h2x), Real.log_pow]
+      push_cast
+      ring
+    rw [hid]
+    apply Real.log_nonneg
+    rw [le_div_iff₀ h2x]
+    nlinarith [hxpos]
   · sorry
 
 /-- The summed derivative: d/ds logHodd2 at s in (3/4, 2) is the sum of the
