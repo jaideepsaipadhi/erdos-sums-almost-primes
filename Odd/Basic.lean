@@ -4312,7 +4312,7 @@ theorem logHodd2_deriv_summable (s : ℝ) (hs : 3/4 < s) :
       2 * Real.log ((p:ℕ):ℝ) / ((((p:ℕ):ℝ) ^ s - 1) * (((p:ℕ):ℝ) ^ s - 2))) := by
   have hcomp := log_rpow_summable_subtype (2*s) (by linarith)
     {p : ℕ | p.Prime ∧ 3 ≤ p}
-  apply Summable.of_nonneg_of_le _ _ (hcomp.mul_left 30)
+  apply Summable.of_nonneg_of_le _ _ (hcomp.mul_left 33)
   · intro q
     have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
       have := q.2.2
@@ -4325,4 +4325,35 @@ theorem logHodd2_deriv_summable (s : ℝ) (hs : 3/4 < s) :
     have h2 : (0:ℝ) < ((q:ℕ):ℝ) ^ s - 2 := by linarith
     positivity
   · intro q
-    sorry
+    have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+      have := q.2.2
+      exact_mod_cast this
+    have hqs : (9:ℝ)/4 < ((q:ℕ):ℝ) ^ s := three_rpow_gt_two' _ hq3 s hs
+    set P := ((q:ℕ):ℝ) ^ s with hP
+    have hP0 : (0:ℝ) < P := by linarith
+    have hlog : (0:ℝ) ≤ Real.log ((q:ℕ):ℝ) := by
+      apply Real.log_nonneg; linarith
+    have h1 : (5:ℝ)/9 * P ≤ P - 1 := by nlinarith [hqs]
+    have h2 : (1:ℝ)/9 * P ≤ P - 2 := by nlinarith [hqs]
+    have hprod : (5:ℝ)/81 * P ^ 2 ≤ (P - 1) * (P - 2) := by nlinarith [h1, h2, hP0]
+    have hP2 : P ^ 2 = ((q:ℕ):ℝ) ^ (2*s) := by
+      rw [hP, ← Real.rpow_natCast (((q:ℕ):ℝ) ^ s) 2, ← Real.rpow_mul (by positivity)]
+      ring_nf
+    rw [div_le_iff₀ (by nlinarith [hprod, hP0])]
+    have hrp : ((q:ℕ):ℝ) ^ (-(2*s)) = 1 / ((q:ℕ):ℝ) ^ (2*s) := by
+      rw [Real.rpow_neg (by positivity), one_div]
+    rw [hrp, ← hP2]
+    have hPpow : (0:ℝ) < P ^ 2 := by positivity
+    have hkey : (5:ℝ)/81 ≤ (P - 1) * (P - 2) / P ^ 2 := by
+      rw [le_div_iff₀ hPpow]
+      linarith [hprod]
+    have hstep : 2 * Real.log ((q:ℕ):ℝ)
+        ≤ 33 * Real.log ((q:ℕ):ℝ) * ((5:ℝ)/81) := by
+      nlinarith [hlog]
+    calc 2 * Real.log ((q:ℕ):ℝ) ≤ 33 * Real.log ((q:ℕ):ℝ) * ((5:ℝ)/81) := hstep
+      _ ≤ 33 * (Real.log ((q:ℕ):ℝ) * (1 / P ^ 2)) * ((P - 1) * (P - 2)) := by
+          have hrw : 33 * (Real.log ((q:ℕ):ℝ) * (1 / P ^ 2)) * ((P - 1) * (P - 2))
+              = 33 * Real.log ((q:ℕ):ℝ) * ((P - 1) * (P - 2) / P ^ 2) := by
+            field_simp
+          rw [hrw]
+          apply mul_le_mul_of_nonneg_left hkey (by positivity)
