@@ -4364,7 +4364,13 @@ analytic where the bare Euler factors are not. -/
 theorem logHodd2_summable (s : ℝ) (hs : 3/4 < s) :
     Summable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
       -Real.log (1 - 2 * ((p:ℕ):ℝ) ^ (-s)) + 2 * Real.log (1 - ((p:ℕ):ℝ) ^ (-s))) := by
-  sorry
+  have hbase : Summable (fun n : ℕ => ((n:ℝ)) ^ (-(2*s))) :=
+    Real.summable_nat_rpow.mpr (by linarith)
+  have hcomp : Summable (fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      9 * (((q:ℕ):ℝ)) ^ (-(2*s))) := (hbase.subtype _).mul_left 9
+  apply Summable.of_nonneg_of_le _ _ hcomp
+  · sorry
+  · sorry
 
 /-- The summed derivative: d/ds logHodd2 at s in (3/4, 2) is the sum of the
 per-prime contributions. -/
