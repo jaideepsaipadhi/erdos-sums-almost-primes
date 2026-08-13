@@ -4476,7 +4476,74 @@ theorem logHodd2_hasDerivAt (s : ℝ) (hs : 3/4 < s) (hs2 : s < 2) :
             / (1 - 2 * ((p:ℕ):ℝ) ^ (-s))
           + 2 * Real.log ((p:ℕ):ℝ) * ((p:ℕ):ℝ) ^ (-s)
             / (1 - ((p:ℕ):ℝ) ^ (-s)))) s := by
-  sorry
+  have hterm : ∀ (q : {p : ℕ // p.Prime ∧ 3 ≤ p}) (t : ℝ), 3/4 < t →
+      HasDerivAt (fun r : ℝ =>
+          -Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-r)) + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-r)))
+        (-2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-t) / (1 - 2 * ((q:ℕ):ℝ) ^ (-t))
+          + 2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-t) / (1 - ((q:ℕ):ℝ) ^ (-t))) t := by
+    intro q t ht
+    exact prime_logderiv_gen (q:ℕ) q.2.2 t ht
+  have hfun : logHodd2 = fun t : ℝ => ∑' q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (-Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-t))
+        + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-t))) := by
+    funext t
+    rfl
+  rw [hfun]
+  apply hasDerivAt_of_tendstoLocallyUniformlyOn (s := Set.Ioo (3/4 : ℝ) 2)
+    (l := Filter.atTop) isOpen_Ioo
+    (g := fun t : ℝ => ∑' q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (-Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-t))
+        + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-t))))
+    (g' := fun t : ℝ => ∑' q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (-2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-t)
+          / (1 - 2 * ((q:ℕ):ℝ) ^ (-t))
+        + 2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-t)
+          / (1 - ((q:ℕ):ℝ) ^ (-t))))
+    (f := fun N : Finset {p : ℕ // p.Prime ∧ 3 ≤ p} => fun t : ℝ =>
+      ∑ q ∈ N, (-Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-t))
+        + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-t))))
+    (f' := fun N : Finset {p : ℕ // p.Prime ∧ 3 ≤ p} => fun t : ℝ =>
+      ∑ q ∈ N, (-2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-t)
+          / (1 - 2 * ((q:ℕ):ℝ) ^ (-t))
+        + 2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-t)
+          / (1 - ((q:ℕ):ℝ) ^ (-t))))
+  · -- (a) local uniform convergence of the differentiated partial sums
+    rw [tendstoLocallyUniformlyOn_iff_forall_isCompact isOpen_Ioo]
+    intro K hKsub hKcomp
+    rcases K.eq_empty_or_nonempty with hKe | hKne
+    · subst hKe; simp [tendstoUniformlyOn_empty]
+    · obtain ⟨c, hcK, hcmin⟩ := hKcomp.exists_isMinOn hKne continuousOn_id
+      have hc : (3/4 : ℝ) < c := (hKsub hcK).1
+      apply tendstoUniformlyOn_tsum
+        (u := fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+          2 * Real.log ((q:ℕ):ℝ) / ((((q:ℕ):ℝ) ^ c - 1) * ((((q:ℕ):ℝ) ^ c - 2))))
+        (logHodd2_deriv_summable c hc)
+      intro q x hx
+      sorry
+  · -- (b) each partial sum has the stated derivative
+    filter_upwards with N t ht
+    have ht34 : (3/4 : ℝ) < t := ht.1
+    have h := HasDerivAt.sum (u := N)
+      (A := fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} => fun r : ℝ =>
+        -Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-r)) + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-r)))
+      (A' := fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+        -2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-t) / (1 - 2 * ((q:ℕ):ℝ) ^ (-t))
+          + 2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-t) / (1 - ((q:ℕ):ℝ) ^ (-t)))
+      (fun q _ => hterm q t ht34)
+    have hfn : (fun r : ℝ => ∑ q ∈ N, (-Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-r))
+          + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-r))))
+        = ∑ q ∈ N, (fun r : ℝ =>
+            -Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-r))
+              + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-r))) := by
+      funext r
+      rw [Finset.sum_apply]
+    rw [hfn]
+    exact h
+  · -- (c) pointwise convergence of the partial sums
+    intro t ht
+    have ht34 : (3/4 : ℝ) < t := ht.1
+    exact (logHodd2_summable t ht34).hasSum
+  · exact ⟨hs, hs2⟩
 
 /-- The two forms of the per-prime derivative agree for every s, not just at
 s = 1: multiplying through by p^(2s),
