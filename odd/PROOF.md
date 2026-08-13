@@ -112,9 +112,10 @@ at a smaller prime, which matters for a formalization.
 at radius R and prime P reads R^2/(1 - R/P) + 1.25 R <= P^2.  At R = 4.5 that
 fails for P = 7 -- 62.3 > 49 -- and first holds at P = 11.)
 
-R = 4 is used below: K0 = 13 sits well inside the certified sweep's range of
-k = 1..20, and starting the tail at p >= 7 means only p = 2, 3, 5 are handled
-explicitly.
+R = 4.5 is used below and in the formalization: K0 = 12 sits well inside the
+certified sweep's range of k = 1..20.  R = 4 is the alternative -- it raises
+K0 to 13, still inside the sweep, but lets the Euler tail start at p >= 7
+rather than p >= 11, so that only p = 2, 3, 5 need explicit handling.
 
 ## 6. Assembly
 
