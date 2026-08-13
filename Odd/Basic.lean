@@ -4603,3 +4603,37 @@ theorem prime_logderiv_at_one (p : ℕ) (hp : 3 ≤ p) :
   rw [Real.rpow_neg_one]
   field_simp
   ring
+
+/-- At s = 1 the summed derivative is -2 Sodd: each summand collapses by
+prime_logderiv_at_one to -2 log p/((p-1)(p-2)). -/
+theorem logHodd2_deriv_at_one :
+    (∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (-2 * Real.log ((p:ℕ):ℝ) * ((p:ℕ):ℝ) ^ (-(1:ℝ))
+          / (1 - 2 * ((p:ℕ):ℝ) ^ (-(1:ℝ)))
+        + 2 * Real.log ((p:ℕ):ℝ) * ((p:ℕ):ℝ) ^ (-(1:ℝ))
+          / (1 - ((p:ℕ):ℝ) ^ (-(1:ℝ)))))
+      = -2 * Sodd := by
+  have hcongr : ∀ q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (-2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-(1:ℝ))
+          / (1 - 2 * ((q:ℕ):ℝ) ^ (-(1:ℝ)))
+        + 2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-(1:ℝ))
+          / (1 - ((q:ℕ):ℝ) ^ (-(1:ℝ))))
+      = -2 * (Real.log ((q:ℕ):ℝ) / ((((q:ℕ):ℝ) - 1) * ((((q:ℕ):ℝ)) - 2))) := by
+    intro q
+    rw [prime_logderiv_at_one (q:ℕ) q.2.2]
+    ring
+  rw [tsum_congr hcongr, tsum_mul_left]
+  unfold Sodd
+  rfl
+
+/-- STEP 2: d_s log H(1,2) = 2 log 2 - 2 Sodd. -/
+theorem logH_deriv_at_one :
+    HasDerivAt (fun s : ℝ => 2 * Real.log (1 - (2:ℝ) ^ (-s)) + logHodd2 s)
+      (2 * Real.log 2 - 2 * Sodd) 1 := by
+  have h1 := prefactor_logderiv
+  have h2 := logHodd2_hasDerivAt 1 (by norm_num) (by norm_num)
+  rw [logHodd2_deriv_at_one] at h2
+  have h := h1.add h2
+  have hval : 2 * Real.log 2 + -2 * Sodd = 2 * Real.log 2 - 2 * Sodd := by ring
+  rw [← hval]
+  exact h
