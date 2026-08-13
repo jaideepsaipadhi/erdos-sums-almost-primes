@@ -4478,6 +4478,30 @@ theorem logHodd2_hasDerivAt (s : ℝ) (hs : 3/4 < s) (hs2 : s < 2) :
             / (1 - ((p:ℕ):ℝ) ^ (-s)))) s := by
   sorry
 
+/-- The two forms of the per-prime derivative agree for every s, not just at
+s = 1: multiplying through by p^(2s),
+
+    -2 L x/(1-2x) + 2 L x/(1-x)  =  -2 L/((P-1)(P-2)),   x = 1/P, P = p^s.
+
+This is what connects prime_logderiv_gen's conclusion to the majorant used in
+logHodd2_deriv_summable. -/
+theorem prime_logderiv_forms_eq (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 3/4 < s) :
+    -2 * Real.log p * (p:ℝ) ^ (-s) / (1 - 2 * (p:ℝ) ^ (-s))
+      + 2 * Real.log p * (p:ℝ) ^ (-s) / (1 - (p:ℝ) ^ (-s))
+      = -2 * Real.log p / (((p:ℝ) ^ s - 1) * ((p:ℝ) ^ s - 2)) := by
+  have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+  have hp0 : (0:ℝ) < (p:ℝ) := by linarith
+  have hP : (9:ℝ)/4 < (p:ℝ) ^ s := three_rpow_gt_two' _ hp3 s hs
+  have hPpos : (0:ℝ) < (p:ℝ) ^ s := by linarith
+  have hxval : (p:ℝ) ^ (-s) = 1 / (p:ℝ) ^ s := by
+    rw [Real.rpow_neg (le_of_lt hp0), one_div]
+  have h1 : (p:ℝ) ^ s - 1 ≠ 0 := by linarith
+  have h2 : (p:ℝ) ^ s - 2 ≠ 0 := by linarith
+  have hPne : (p:ℝ) ^ s ≠ 0 := ne_of_gt hPpos
+  rw [hxval]
+  field_simp
+  ring
+
 /-- At s = 1 the general-s summand collapses to prime_logderiv's form:
 p^-1/(1-2p^-1) = 1/(p-2), p^-1/(1-p^-1) = 1/(p-1). -/
 theorem prime_logderiv_at_one (p : ℕ) (hp : 3 ≤ p) :
