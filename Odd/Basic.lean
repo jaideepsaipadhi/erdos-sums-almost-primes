@@ -4411,8 +4411,7 @@ theorem logHodd2_summable (s : ℝ) (hs : 3/4 < s) :
         = Real.log (1 + x^2 / (1 - 2*x)) := by
       have hne : (1:ℝ) - 2*x ≠ 0 := by linarith
       have hrw : (1:ℝ) + x^2/(1-2*x) = (1-x)^2/(1-2*x) := by
-        rw [div_add' _ _ _ hne] at *
-        rw [div_eq_div_iff hne hne]
+        rw [eq_div_iff hne, add_mul, div_mul_cancel₀ _ hne]
         ring
       rw [hrw]
       rw [Real.log_div (by positivity) (by linarith), Real.log_pow]
@@ -4429,10 +4428,67 @@ theorem logHodd2_summable (s : ℝ) (hs : 3/4 < s) :
           rw [div_le_iff₀ (by linarith)]
           nlinarith [hxpos, h2x]
 
+/-- The per-prime derivative at general s, not just s = 1.  At s = 1 the
+value collapses to -2 log p/((p-1)(p-2)), which is prime_logderiv. -/
+theorem prime_logderiv_gen (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 3/4 < s) :
+    HasDerivAt (fun t : ℝ =>
+        -Real.log (1 - 2 * (p:ℝ) ^ (-t)) + 2 * Real.log (1 - (p:ℝ) ^ (-t)))
+      (-2 * Real.log p * (p:ℝ) ^ (-s) / (1 - 2 * (p:ℝ) ^ (-s))
+        + 2 * Real.log p * (p:ℝ) ^ (-s) / (1 - (p:ℝ) ^ (-s))) s := by
+  have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+  have hp0 : (0:ℝ) < (p:ℝ) := by linarith
+  have hqs : (9:ℝ)/4 < (p:ℝ) ^ s := three_rpow_gt_two' _ hp3 s hs
+  have hxpos : 0 < (p:ℝ) ^ (-s) := Real.rpow_pos_of_pos hp0 _
+  have hxval : (p:ℝ) ^ (-s) = 1 / (p:ℝ) ^ s := by
+    rw [Real.rpow_neg (le_of_lt hp0), one_div]
+  have hxlt : (p:ℝ) ^ (-s) < 4/9 := by
+    rw [hxval, div_lt_div_iff₀ (by linarith) (by norm_num)]
+    linarith
+  have h2x : (0:ℝ) < 1 - 2 * (p:ℝ) ^ (-s) := by linarith
+  have h1x : (0:ℝ) < 1 - (p:ℝ) ^ (-s) := by linarith
+  have hpow : HasDerivAt (fun t : ℝ => (p:ℝ) ^ (-t))
+      (-(Real.log p * (p:ℝ) ^ (-s))) s := by
+    have h := HasDerivAt.const_rpow hp0 (hasDerivAt_neg s)
+    simpa using h
+  have hin1 : HasDerivAt (fun t : ℝ => 1 - 2 * (p:ℝ) ^ (-t))
+      (2 * (Real.log p * (p:ℝ) ^ (-s))) s := by
+    simpa using (hpow.const_mul (2:ℝ)).const_sub 1
+  have hin2 : HasDerivAt (fun t : ℝ => 1 - (p:ℝ) ^ (-t))
+      (Real.log p * (p:ℝ) ^ (-s)) s := by
+    simpa using hpow.const_sub 1
+  have hL1 := (hin1.log (ne_of_gt h2x)).neg
+  have hL2 := (hin2.log (ne_of_gt h1x)).const_mul 2
+  have hsum := hL1.add hL2
+  have hval : -(2 * (Real.log p * (p:ℝ) ^ (-s)) / (1 - 2 * (p:ℝ) ^ (-s)))
+      + 2 * (Real.log p * (p:ℝ) ^ (-s) / (1 - (p:ℝ) ^ (-s)))
+      = -2 * Real.log p * (p:ℝ) ^ (-s) / (1 - 2 * (p:ℝ) ^ (-s))
+        + 2 * Real.log p * (p:ℝ) ^ (-s) / (1 - (p:ℝ) ^ (-s)) := by
+    field_simp
+  rw [← hval]
+  exact hsum
+
 /-- The summed derivative: d/ds logHodd2 at s in (3/4, 2) is the sum of the
 per-prime contributions. -/
 theorem logHodd2_hasDerivAt (s : ℝ) (hs : 3/4 < s) (hs2 : s < 2) :
     HasDerivAt logHodd2
       (∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
-        (-2 * Real.log ((p:ℕ):ℝ) / ((((p:ℕ):ℝ) ^ s - 1) * (((p:ℕ):ℝ) ^ s - 2)))) s := by
+        (-2 * Real.log ((p:ℕ):ℝ) * ((p:ℕ):ℝ) ^ (-s)
+            / (1 - 2 * ((p:ℕ):ℝ) ^ (-s))
+          + 2 * Real.log ((p:ℕ):ℝ) * ((p:ℕ):ℝ) ^ (-s)
+            / (1 - ((p:ℕ):ℝ) ^ (-s)))) s := by
   sorry
+
+/-- At s = 1 the general-s summand collapses to prime_logderiv's form:
+p^-1/(1-2p^-1) = 1/(p-2), p^-1/(1-p^-1) = 1/(p-1). -/
+theorem prime_logderiv_at_one (p : ℕ) (hp : 3 ≤ p) :
+    -2 * Real.log p * (p:ℝ) ^ (-(1:ℝ)) / (1 - 2 * (p:ℝ) ^ (-(1:ℝ)))
+      + 2 * Real.log p * (p:ℝ) ^ (-(1:ℝ)) / (1 - (p:ℝ) ^ (-(1:ℝ)))
+      = -2 * Real.log p / (((p:ℝ) - 1) * ((p:ℝ) - 2)) := by
+  have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+  have hp0 : (0:ℝ) < (p:ℝ) := by linarith
+  have h1 : (p:ℝ) - 1 ≠ 0 := by linarith
+  have h2 : (p:ℝ) - 2 ≠ 0 := by linarith
+  have hpne : (p:ℝ) ≠ 0 := by linarith
+  rw [Real.rpow_neg_one]
+  field_simp
+  ring
