@@ -4467,6 +4467,30 @@ theorem prime_logderiv_gen (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 3/4 < s) :
   rw [← hval]
   exact hsum
 
+/-- The two forms of the per-prime derivative agree for every s, not just at
+s = 1: multiplying through by p^(2s),
+
+    -2 L x/(1-2x) + 2 L x/(1-x)  =  -2 L/((P-1)(P-2)),   x = 1/P, P = p^s.
+
+This is what connects prime_logderiv_gen's conclusion to the majorant used in
+logHodd2_deriv_summable. -/
+theorem prime_logderiv_forms_eq (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 3/4 < s) :
+    -2 * Real.log p * (p:ℝ) ^ (-s) / (1 - 2 * (p:ℝ) ^ (-s))
+      + 2 * Real.log p * (p:ℝ) ^ (-s) / (1 - (p:ℝ) ^ (-s))
+      = -2 * Real.log p / (((p:ℝ) ^ s - 1) * ((p:ℝ) ^ s - 2)) := by
+  have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+  have hp0 : (0:ℝ) < (p:ℝ) := by linarith
+  have hP : (9:ℝ)/4 < (p:ℝ) ^ s := three_rpow_gt_two' _ hp3 s hs
+  have hPpos : (0:ℝ) < (p:ℝ) ^ s := by linarith
+  have hxval : (p:ℝ) ^ (-s) = 1 / (p:ℝ) ^ s := by
+    rw [Real.rpow_neg (le_of_lt hp0), one_div]
+  have h1 : (p:ℝ) ^ s - 1 ≠ 0 := by linarith
+  have h2 : (p:ℝ) ^ s - 2 ≠ 0 := by linarith
+  have hPne : (p:ℝ) ^ s ≠ 0 := ne_of_gt hPpos
+  rw [hxval]
+  field_simp
+  ring
+
 /-- The summed derivative: d/ds logHodd2 at s in (3/4, 2) is the sum of the
 per-prime contributions. -/
 theorem logHodd2_hasDerivAt (s : ℝ) (hs : 3/4 < s) (hs2 : s < 2) :
@@ -4519,7 +4543,27 @@ theorem logHodd2_hasDerivAt (s : ℝ) (hs : 3/4 < s) (hs2 : s < 2) :
           2 * Real.log ((q:ℕ):ℝ) / ((((q:ℕ):ℝ) ^ c - 1) * ((((q:ℕ):ℝ) ^ c - 2))))
         (logHodd2_deriv_summable c hc)
       intro q x hx
-      sorry
+      have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+        have := q.2.2
+        exact_mod_cast this
+      have hq0 : (0:ℝ) < ((q:ℕ):ℝ) := by linarith
+      have hxc : c ≤ x := hcmin hx
+      have hx34 : (3/4:ℝ) < x := lt_of_lt_of_le hc hxc
+      have hPc : (9:ℝ)/4 < ((q:ℕ):ℝ) ^ c := three_rpow_gt_two' _ hq3 c hc
+      have hPx : (9:ℝ)/4 < ((q:ℕ):ℝ) ^ x := three_rpow_gt_two' _ hq3 x hx34
+      have hmono : ((q:ℕ):ℝ) ^ c ≤ ((q:ℕ):ℝ) ^ x :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith) hxc
+      have hlog : (0:ℝ) ≤ Real.log ((q:ℕ):ℝ) := by
+        apply Real.log_nonneg; linarith
+      rw [prime_logderiv_forms_eq (q:ℕ) q.2.2 x hx34]
+      rw [Real.norm_eq_abs, abs_div, abs_of_nonneg (by nlinarith [hPx] :
+        (0:ℝ) ≤ (((q:ℕ):ℝ) ^ x - 1) * (((q:ℕ):ℝ) ^ x - 2))]
+      have habs : |-2 * Real.log ((q:ℕ):ℝ)| = 2 * Real.log ((q:ℕ):ℝ) := by
+        rw [abs_of_nonpos (by nlinarith [hlog])]
+        ring
+      rw [habs]
+      apply div_le_div_of_nonneg_left (by linarith) (by nlinarith [hPc])
+      nlinarith [hmono, hPc, hPx]
   · -- (b) each partial sum has the stated derivative
     filter_upwards with N t ht
     have ht34 : (3/4 : ℝ) < t := ht.1
@@ -4544,30 +4588,6 @@ theorem logHodd2_hasDerivAt (s : ℝ) (hs : 3/4 < s) (hs2 : s < 2) :
     have ht34 : (3/4 : ℝ) < t := ht.1
     exact (logHodd2_summable t ht34).hasSum
   · exact ⟨hs, hs2⟩
-
-/-- The two forms of the per-prime derivative agree for every s, not just at
-s = 1: multiplying through by p^(2s),
-
-    -2 L x/(1-2x) + 2 L x/(1-x)  =  -2 L/((P-1)(P-2)),   x = 1/P, P = p^s.
-
-This is what connects prime_logderiv_gen's conclusion to the majorant used in
-logHodd2_deriv_summable. -/
-theorem prime_logderiv_forms_eq (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 3/4 < s) :
-    -2 * Real.log p * (p:ℝ) ^ (-s) / (1 - 2 * (p:ℝ) ^ (-s))
-      + 2 * Real.log p * (p:ℝ) ^ (-s) / (1 - (p:ℝ) ^ (-s))
-      = -2 * Real.log p / (((p:ℝ) ^ s - 1) * ((p:ℝ) ^ s - 2)) := by
-  have hp3 : (3:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
-  have hp0 : (0:ℝ) < (p:ℝ) := by linarith
-  have hP : (9:ℝ)/4 < (p:ℝ) ^ s := three_rpow_gt_two' _ hp3 s hs
-  have hPpos : (0:ℝ) < (p:ℝ) ^ s := by linarith
-  have hxval : (p:ℝ) ^ (-s) = 1 / (p:ℝ) ^ s := by
-    rw [Real.rpow_neg (le_of_lt hp0), one_div]
-  have h1 : (p:ℝ) ^ s - 1 ≠ 0 := by linarith
-  have h2 : (p:ℝ) ^ s - 2 ≠ 0 := by linarith
-  have hPne : (p:ℝ) ^ s ≠ 0 := ne_of_gt hPpos
-  rw [hxval]
-  field_simp
-  ring
 
 /-- At s = 1 the general-s summand collapses to prime_logderiv's form:
 p^-1/(1-2p^-1) = 1/(p-2), p^-1/(1-p^-1) = 1/(p-1). -/
