@@ -4393,7 +4393,41 @@ theorem logHodd2_summable (s : ℝ) (hs : 3/4 < s) :
     apply Real.log_nonneg
     rw [le_div_iff₀ h2x]
     nlinarith [hxpos]
-  · sorry
+  · intro q
+    have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+      have := q.2.2
+      exact_mod_cast this
+    have hqs : (9:ℝ)/4 < ((q:ℕ):ℝ) ^ s := three_rpow_gt_two' _ hq3 s hs
+    set x := ((q:ℕ):ℝ) ^ (-s) with hx
+    have hxpos : 0 < x := Real.rpow_pos_of_pos (by linarith) _
+    have hxval : x = 1 / ((q:ℕ):ℝ) ^ s := by
+      rw [hx, Real.rpow_neg (by linarith), one_div]
+    have hxlt : x < 4/9 := by
+      rw [hxval, div_lt_div_iff₀ (by linarith) (by norm_num)]
+      linarith
+    have h2x : (1:ℝ)/9 < 1 - 2 * x := by linarith
+    have h1x : (0:ℝ) < 1 - x := by linarith
+    have hid : -Real.log (1 - 2*x) + 2 * Real.log (1 - x)
+        = Real.log (1 + x^2 / (1 - 2*x)) := by
+      have hne : (1:ℝ) - 2*x ≠ 0 := by linarith
+      have hrw : (1:ℝ) + x^2/(1-2*x) = (1-x)^2/(1-2*x) := by
+        rw [div_add' _ _ _ hne] at *
+        rw [div_eq_div_iff hne hne]
+        ring
+      rw [hrw]
+      rw [Real.log_div (by positivity) (by linarith), Real.log_pow]
+      push_cast
+      ring
+    have hsq : x ^ 2 = ((q:ℕ):ℝ) ^ (-(2*s)) := by
+      rw [hx, ← Real.rpow_natCast (((q:ℕ):ℝ) ^ (-s)) 2, ← Real.rpow_mul (by linarith)]
+      ring_nf
+    rw [hid, ← hsq]
+    calc Real.log (1 + x^2/(1-2*x)) ≤ x^2/(1-2*x) := by
+          have := Real.log_le_sub_one_of_pos (by positivity : (0:ℝ) < 1 + x^2/(1-2*x))
+          linarith
+      _ ≤ 9 * x^2 := by
+          rw [div_le_iff₀ (by linarith)]
+          nlinarith [hxpos, h2x]
 
 /-- The summed derivative: d/ds logHodd2 at s in (3/4, 2) is the sum of the
 per-prime contributions. -/

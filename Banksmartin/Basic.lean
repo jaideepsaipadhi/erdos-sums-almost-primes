@@ -13493,3 +13493,8 @@ theorem source_bound_refined (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ)
   rw [abs_le]
   constructor <;> nlinarith [habs.1, habs.2, hDa.1, hDa.2, hD1a.1, hD1a.2,
     hAa.1, hAa.2, hA1a.1, hA1a.2, hXa.1, hXa.2, hX1a.1, hX1a.2, hq]
+
+/-- G2deriv1 vanishes at z = 0. -/
+theorem G2deriv1_at_zero (f1 : ℝ) : G2deriv1 f1 0 = 0 := by
+  unfold G2deriv1
+  rw [cBracket_at_zero, mul_zero]
