@@ -4637,3 +4637,114 @@ theorem logH_deriv_at_one :
   have hval : 2 * Real.log 2 + -2 * Sodd = 2 * Real.log 2 - 2 * Sodd := by ring
   rw [← hval]
   exact h
+
+/-- Real analogue of `hasProd_exp_of_hasSum`: exp carries a HasSum to a
+HasProd.  Mathlib has neither direction for the reals. -/
+theorem hasProd_rexp_of_hasSum {ι : Type*} {g : ι → ℝ} {a : ℝ}
+    (h : HasSum g a) :
+    HasProd (fun i => Real.exp (g i)) (Real.exp a) := by
+  have hcont : Filter.Tendsto Real.exp (nhds a) (nhds (Real.exp a)) :=
+    (Real.continuous_exp.tendsto a)
+  have hc := hcont.comp h
+  apply hc.congr
+  intro t
+  simp only [Function.comp_apply]
+  exact Real.exp_sum t g
+
+/-- The real-valued H(s,2), as the exponential of its logarithm.
+
+Working with exp of the log-sum rather than with the product itself avoids
+needing log of an infinite product: the derivative is then HasDerivAt.exp
+applied to logH_deriv_at_one. -/
+noncomputable def HoddR2 (s : ℝ) : ℝ :=
+  Real.exp (2 * Real.log (1 - (2:ℝ) ^ (-s)) + logHodd2 s)
+
+/-- STEP 3: d_s H(1,2) = H(1,2) * (2 log 2 - 2 Sodd), i.e. 2d(log 2 - Sodd)
+once H(1,2) = d is substituted. -/
+theorem HoddR2_hasDerivAt_one :
+    HasDerivAt HoddR2 (HoddR2 1 * (2 * Real.log 2 - 2 * Sodd)) 1 := by
+  have h := logH_deriv_at_one.exp
+  unfold HoddR2
+  convert h using 1
+
+/-- H(1,2) = d: the exponential form agrees with the product at s = 1. -/
+theorem HoddR2_at_one : HoddR2 1 = dConst := by
+  unfold HoddR2
+  -- the prefactor: 2 log(1 - 2^-1) = -2 log 2, so exp of it is 1/4
+  have hpre : 2 * Real.log (1 - (2:ℝ) ^ (-(1:ℝ))) = -(2 * Real.log 2) := by
+    rw [Real.rpow_neg_one]
+    norm_num
+    rw [show (1:ℝ)/2 = (2:ℝ)⁻¹ by norm_num, Real.log_inv]
+    ring
+  rw [hpre, Real.exp_add, Real.exp_neg]
+  have hquarter : (Real.exp (2 * Real.log 2))⁻¹ = 1/4 := by
+    rw [two_mul, Real.exp_add, Real.exp_log (by norm_num : (0:ℝ) < 2)]
+    norm_num
+  rw [hquarter]
+  unfold dConst
+  rw [dConst_prod_eq_subtype]
+  congr 1
+  -- each factor is positive
+  have hpos : ∀ q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (0:ℝ) < (1 - 2 / ((q:ℕ):ℝ))⁻¹ * (1 - 1 / ((q:ℕ):ℝ)) ^ 2 := by
+    intro q
+    have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+      have := q.2.2
+      exact_mod_cast this
+    have h2 : (0:ℝ) < 1 - 2 / ((q:ℕ):ℝ) := by
+      rw [sub_pos, div_lt_one (by linarith)]
+      linarith
+    have h1 : (0:ℝ) < 1 - 1 / ((q:ℕ):ℝ) := by
+      rw [sub_pos, div_lt_one (by linarith)]
+      linarith
+    positivity
+  -- the summands agree with the logs of the factors
+  have hlogeq : ∀ q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      Real.exp (-Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-(1:ℝ)))
+        + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-(1:ℝ))))
+      = (1 - 2 / ((q:ℕ):ℝ))⁻¹ * (1 - 1 / ((q:ℕ):ℝ)) ^ 2 := by
+    intro q
+    have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+      have := q.2.2
+      exact_mod_cast this
+    have hq0 : (0:ℝ) < ((q:ℕ):ℝ) := by linarith
+    have h2 : (0:ℝ) < 1 - 2 / ((q:ℕ):ℝ) := by
+      rw [sub_pos, div_lt_one (by linarith)]; linarith
+    have h1 : (0:ℝ) < 1 - 1 / ((q:ℕ):ℝ) := by
+      rw [sub_pos, div_lt_one (by linarith)]; linarith
+    rw [Real.rpow_neg_one]
+    rw [Real.exp_add, Real.exp_neg]
+    rw [show (2:ℝ) * ((q:ℕ):ℝ)⁻¹ = 2 / ((q:ℕ):ℝ) by ring]
+    rw [show ((q:ℕ):ℝ)⁻¹ = 1 / ((q:ℕ):ℝ) by ring]
+    rw [Real.exp_log h2, two_mul, Real.exp_add, Real.exp_log h1]
+    ring
+  -- HasSum -> HasProd via exp
+  have hsum : HasSum (fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      -Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-(1:ℝ)))
+        + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-(1:ℝ)))) (logHodd2 1) :=
+    (logHodd2_summable 1 (by norm_num)).hasSum
+  have hprod := hasProd_rexp_of_hasSum hsum
+  have hprod' : HasProd (fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - 2 / ((q:ℕ):ℝ))⁻¹ * (1 - 1 / ((q:ℕ):ℝ)) ^ 2)
+      (Real.exp (logHodd2 1)) := by
+    have hfe : (fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} => Real.exp
+        (-Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-(1:ℝ)))
+          + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-(1:ℝ)))))
+        = fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+          (1 - 2 / ((q:ℕ):ℝ))⁻¹ * (1 - 1 / ((q:ℕ):ℝ)) ^ 2 := by
+      funext q
+      exact hlogeq q
+    rw [hfe] at hprod
+    exact hprod
+  exact (hprod'.tprod_eq).symm
+
+/-- STEP 3, in the form step D consumes:
+    d_s H(1,2) = 2 d (log 2 - S). -/
+theorem HoddR2_deriv_value :
+    HasDerivAt HoddR2 (2 * dConst * (Real.log 2 - Sodd)) 1 := by
+  have h := HoddR2_hasDerivAt_one
+  rw [HoddR2_at_one] at h
+  have hval : dConst * (2 * Real.log 2 - 2 * Sodd)
+      = 2 * dConst * (Real.log 2 - Sodd) := by ring
+  rw [← hval]
+  exact h
