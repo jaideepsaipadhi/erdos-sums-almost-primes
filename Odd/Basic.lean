@@ -5317,3 +5317,81 @@ theorem order_two_coefficient (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
   unfold betaOdd
   push_cast
   ring
+
+/-! ### Step 5: the integration
+
+From fOdd_u_form,
+
+  fOdd k = ∫_{Ioi 0} [Σ_j (h_j(s(u))).re u^{k-j}/(k-j)!] J(u) du
+
+Substituting h_j(s(u)) = h_j(1) + ε(u) b_j + O(ε²) [hCoeff_taylor] and
+J(u) = e^-u + 2γ e^-2u + O(e^-3u) [jacobian_u_signed], the product expands as
+
+  MAIN1 : [Σ_j h_j(1) u^{k-j}/(k-j)!] e^-u
+  MAIN2 : [Σ_j (b_j + 2γ h_j(1)) u^{k-j}/(k-j)!] e^-2u
+  ERR   : everything else, each factor O(e^-3u) times a polynomial in u.
+
+MAIN1 integrates to Σ_j h_j(1) = 1/2 by gamma_normalised and hCoeff_sum_one.
+MAIN2 integrates to 2^{-(k+1)} Σ_j (b_j + 2γ h_j(1)) 2^j = β 2^-k by
+gamma_normalised_two and order_two_coefficient.
+ERR is bounded by gamma_normalised_three. -/
+
+/-- The main term at order e^-u integrates to 1/2. -/
+theorem main_term_one (k : ℕ) (hk : 1 ≤ k)
+    (hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+    ∑ j ∈ Finset.range (k + 1),
+        (hCoeff 1 j).re * (∫ u in Set.Ioi (0:ℝ), u ^ (k - j) * Real.exp (-u))
+          / (Nat.factorial (k - j))
+      = ∑ j ∈ Finset.range (k + 1), (hCoeff 1 j).re :=
+  fOdd_leading_order k hk
+
+/-- The main term at order e^-2u carries the factor 2^-(k+1). -/
+theorem main_term_two (k : ℕ) (c : ℕ → ℝ) :
+    ∑ j ∈ Finset.range (k + 1),
+        c j * (∫ u in Set.Ioi (0:ℝ), u ^ (k - j) * Real.exp (-(2 * u)))
+          / (Nat.factorial (k - j))
+      = ∑ j ∈ Finset.range (k + 1), c j * (1 / 2 ^ (k - j + 1)) := by
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [div_eq_iff (by exact_mod_cast Nat.factorial_ne_zero (k - j))]
+  have hg := gamma_normalised_two (k - j)
+  rw [div_eq_iff (by exact_mod_cast Nat.factorial_ne_zero (k - j))] at hg
+  rw [mul_assoc, hg]
+
+/-- The integrand of fOdd_u_form, split into its two main terms and the
+remainder.  Every piece of the split is an identity; the content is in
+bounding `rest`. -/
+noncomputable def oddSplitMain1 (k : ℕ) (u : ℝ) : ℝ :=
+  (∑ j ∈ Finset.range (k + 1),
+    (hCoeff 1 j).re * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-u)
+
+noncomputable def oddSplitMain2 (bHatOdd : ℕ → ℂ) (k : ℕ) (u : ℝ) : ℝ :=
+  (∑ j ∈ Finset.range (k + 1),
+    ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+      * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-2 * u)
+
+/-- MAIN1 integrates to 1/2. -/
+theorem oddSplitMain1_integral (k : ℕ) (hk : 1 ≤ k)
+    (hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+    (∫ u in Set.Ioi (0:ℝ), oddSplitMain1 k u)
+      = ∑ j ∈ Finset.range (k + 1), (hCoeff 1 j).re := by
+  sorry
+
+/-- MAIN2 integrates to beta 2^-k. -/
+theorem oddSplitMain2_integral (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd) (k : ℕ) (hk : 1 ≤ k) :
+    (∫ u in Set.Ioi (0:ℝ), oddSplitMain2 bHatOdd k u)
+      = betaOdd * ((1:ℝ)/2) ^ k := by
+  sorry
+
+/-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
+
+    fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
+
+Route: fOdd_u_form, then the integrand splits as
+oddSplitMain1 + oddSplitMain2 + rest, with the two main integrals above and
+`rest` bounded via gamma_normalised_three (each error factor is O(e^-3u)
+against a polynomial in u). -/
+theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k) :
+    |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k| ≤ MR * ((2:ℝ)/9) ^ k := by
+  sorry
