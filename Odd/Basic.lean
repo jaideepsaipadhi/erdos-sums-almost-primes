@@ -4784,7 +4784,52 @@ theorem logHodd2_continuousOn :
         (-(2*(3/4 + d)) : ℝ) < -1)).subtype _).mul_left 9)
     · intro q x hx
       have hxle : (3:ℝ)/4 + d ≤ x := hx
-      sorry
+      have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+        have := q.2.2
+        exact_mod_cast this
+      have hq0 : (0:ℝ) < ((q:ℕ):ℝ) := by linarith
+      have hx34 : (3:ℝ)/4 < x := by linarith
+      set y := ((q:ℕ):ℝ) ^ (-x) with hy
+      have hypos : 0 < y := Real.rpow_pos_of_pos hq0 _
+      have hqs := three_rpow_gt_two' _ hq3 x hx34
+      have hyval : y = 1 / ((q:ℕ):ℝ) ^ x := by
+        rw [hy, Real.rpow_neg (le_of_lt hq0), one_div]
+      have hylt : y < 4/9 := by
+        rw [hyval, div_lt_div_iff₀ (by linarith) (by norm_num)]
+        linarith
+      have h2y : (1:ℝ)/9 < 1 - 2 * y := by linarith
+      have h1y : (0:ℝ) < 1 - y := by linarith
+      -- |g(y)| <= 9 y^2, exactly as in logHodd2_summable
+      have hid : -Real.log (1 - 2*y) + 2 * Real.log (1 - y)
+          = Real.log (1 + y^2 / (1 - 2*y)) := by
+        have hne : (1:ℝ) - 2*y ≠ 0 := by linarith
+        have hrw : (1:ℝ) + y^2/(1-2*y) = (1-y)^2/(1-2*y) := by
+          rw [eq_div_iff hne, add_mul, div_mul_cancel₀ _ hne]
+          ring
+        rw [hrw, Real.log_div (by positivity) (by linarith), Real.log_pow]
+        push_cast
+        ring
+      rw [hid, Real.norm_eq_abs, abs_of_nonneg]
+      · have hle : Real.log (1 + y^2/(1-2*y)) ≤ 9 * y^2 := by
+          calc Real.log (1 + y^2/(1-2*y)) ≤ y^2/(1-2*y) := by
+                have := Real.log_le_sub_one_of_pos
+                  (by positivity : (0:ℝ) < 1 + y^2/(1-2*y))
+                linarith
+            _ ≤ 9 * y^2 := by
+                rw [div_le_iff₀ (by linarith)]
+                nlinarith [hypos, h2y]
+        have hy2 : y^2 = ((q:ℕ):ℝ) ^ (-(2*x)) := by
+          rw [hy, ← Real.rpow_natCast (((q:ℕ):ℝ) ^ (-x)) 2,
+            ← Real.rpow_mul (le_of_lt hq0)]
+          ring_nf
+        have hmono : ((q:ℕ):ℝ) ^ (-(2*x)) ≤ ((q:ℕ):ℝ) ^ (-(2*(3/4 + d))) :=
+          Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+        calc Real.log (1 + y^2/(1-2*y)) ≤ 9 * y^2 := hle
+          _ = 9 * ((q:ℕ):ℝ) ^ (-(2*x)) := by rw [hy2]
+          _ ≤ 9 * ((q:ℕ):ℝ) ^ (-(2*(3/4 + d))) := by linarith
+      · apply Real.log_nonneg
+        have : (0:ℝ) ≤ y^2/(1-2*y) := by positivity
+        linarith
     · intro q
       have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
         have := q.2.2
