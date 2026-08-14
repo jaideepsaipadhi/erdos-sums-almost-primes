@@ -5396,7 +5396,19 @@ theorem oddSplitMain1_integral (k : ℕ) (hk : 1 ≤ k) :
     intro j _
     rw [MeasureTheory.integral_const_mul]
     ring
-  · sorry
+  · intro j _
+    have hgam : MeasureTheory.IntegrableOn
+        (fun x : ℝ => Real.exp (-x) * x ^ (((k - j : ℕ) : ℝ) + 1 - 1)) (Set.Ioi 0) :=
+      Real.GammaIntegral_convergent (by positivity)
+    simp only [add_sub_cancel_right] at hgam
+    have hgam' : MeasureTheory.IntegrableOn
+        (fun x : ℝ => x ^ ((k - j : ℕ)) * Real.exp (-x)) (Set.Ioi 0) := by
+      apply hgam.congr_fun _ measurableSet_Ioi
+      intro x _
+      simp only
+      rw [← Real.rpow_natCast x (k - j)]
+      ring
+    exact hgam'.const_mul _
 
 /-- MAIN2 integrates to 2^-(k+1) times the PARTIAL sum, again not the full
 series; the tail joins the remainder. -/
@@ -5424,13 +5436,45 @@ theorem oddSplitMain2_integral (bHatOdd : ℕ → ℂ) (k : ℕ) (hk : 1 ≤ k) 
   rw [MeasureTheory.integral_finsetSum]
   · rw [Finset.mul_sum]
     apply Finset.sum_congr rfl
-    intro j _
+    intro j hj
+    have hjk : j ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
+    have hpow : (2:ℝ) ^ (k - j) * 2 ^ j = 2 ^ k := by
+      rw [← pow_add]
+      congr 1
+      omega
     rw [MeasureTheory.integral_const_mul]
     have hg := gamma_normalised_two (k - j)
     rw [div_eq_iff (by exact_mod_cast Nat.factorial_ne_zero (k - j))] at hg
     rw [hg]
-    sorry
-  · sorry
+    have hfne : ((Nat.factorial (k - j) : ℝ)) ≠ 0 := by
+      exact_mod_cast Nat.factorial_ne_zero (k - j)
+    field_simp
+    simp only [hc]
+    linear_combination (-(2 * (bHatOdd j).re
+      + 4 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)) * hpow
+  · intro j _
+    have hgam : MeasureTheory.IntegrableOn
+        (fun x : ℝ => Real.exp (-x) * x ^ (((k - j : ℕ) : ℝ) + 1 - 1)) (Set.Ioi 0) :=
+      Real.GammaIntegral_convergent (by positivity)
+    simp only [add_sub_cancel_right] at hgam
+    have hgam' : MeasureTheory.IntegrableOn
+        (fun x : ℝ => x ^ ((k - j : ℕ)) * Real.exp (-x)) (Set.Ioi 0) := by
+      apply hgam.congr_fun _ measurableSet_Ioi
+      intro x _
+      simp only
+      rw [← Real.rpow_natCast x (k - j)]
+      ring
+    apply MeasureTheory.Integrable.const_mul
+    apply MeasureTheory.Integrable.mono hgam'
+    · apply MeasureTheory.AEStronglyMeasurable.mul <;>
+        (apply Continuous.aestronglyMeasurable; fun_prop)
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+      have hx0 : (0:ℝ) < x := hx
+      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_mul,
+        abs_of_pos (Real.exp_pos (-(2*x))), abs_of_pos (Real.exp_pos (-x))]
+      apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
+      apply Real.exp_le_exp.mpr
+      linarith
 
 /-! The two main integrals give PARTIAL sums.  Passing to the full series --
 where hCoeff_sum_one gives 1/2 and order_two_coefficient gives 2 beta -- costs
@@ -5456,4 +5500,22 @@ oddSplitMain1 + oddSplitMain2 + rest, with the two main integrals above and
 against a polynomial in u). -/
 theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k) :
     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k| ≤ MR * ((2:ℝ)/9) ^ k := by
+  sorry
+
+/-! ### Step 5: the tail bounds
+
+MAIN1 and MAIN2 give partial sums over j <= k.  Passing to the full series
+costs two tails, and fam_decay supplies their rate. -/
+
+/-- The coefficient tail beyond k, from the Cauchy bound at radius 3. -/
+theorem hCoeff_tail_bound (C : ℝ) (hC : 0 ≤ C)
+    (hcb : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C / (3:ℝ) ^ j) (k : ℕ) :
+    ‖∑' j : ℕ, (if k < j then hCoeff 1 j else 0)‖ ≤ C * (3:ℝ) / 2 / (3:ℝ) ^ k := by
+  sorry
+
+/-- The derivative tail beyond k, from fam_decay. -/
+theorem bHatOdd_tail_bound (bHatOdd : ℕ → ℂ) (D : ℝ) (hD : 0 ≤ D)
+    (hdec : ∀ j : ℕ, ‖bHatOdd j‖ ≤ D / (3:ℝ) ^ j) (k : ℕ) :
+    ‖∑' j : ℕ, (if k < j then bHatOdd j * 2 ^ j else 0)‖
+      ≤ D * 3 * ((2:ℝ)/3) ^ (k + 1) := by
   sorry
