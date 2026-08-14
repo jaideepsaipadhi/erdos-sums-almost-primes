@@ -5561,7 +5561,26 @@ theorem geom_tail_bound_cx (f : ℕ → ℂ) (D r : ℝ) (hD : 0 ≤ D)
         | exact Summable.tsum_le_tsum hle hfs hmaj
         | exact tsum_le_tsum hle hfs hmaj
     _ = D * r ^ (k+1) / (1 - r) := by
-        sorry
+        have hsplit := hmaj.sum_add_tsum_nat_add (k+1)
+        have hzero : ∑ j ∈ Finset.range (k+1),
+            (if k < j then D * r ^ j else 0) = 0 := by
+          apply Finset.sum_eq_zero
+          intro j hj
+          have : j < k + 1 := Finset.mem_range.mp hj
+          have hnk : ¬ (k < j) := by omega
+          simp only [hnk, if_false]
+        rw [hzero, zero_add] at hsplit
+        have hshift : ∀ i : ℕ,
+            (if k < i + (k + 1) then D * r ^ (i + (k + 1)) else 0)
+              = D * r ^ (k+1) * r ^ i := by
+          intro i
+          have hlt : k < i + (k + 1) := by omega
+          simp only [hlt, if_true]
+          rw [pow_add]
+          ring
+        rw [← hsplit, tsum_congr hshift, tsum_mul_left,
+          tsum_geometric_of_lt_one hr0 hr1]
+        rw [div_eq_mul_inv]
 
 /-- The coefficient tail beyond k, from the Cauchy bound at radius 3. -/
 theorem hCoeff_tail_bound (C : ℝ) (hC : 0 ≤ C)
