@@ -4777,12 +4777,50 @@ theorem logHodd2_continuousOn :
   have hc : (3/4:ℝ) < 3/4 + d := by linarith
   have hOn : ContinuousOn logHodd2 (Set.Ici (3/4 + d)) := by
     unfold logHodd2
-    apply continuousOn_tsum _ (logHodd2_summable (3/4 + d) hc)
+    apply continuousOn_tsum
+      (u := fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+        9 * (((q:ℕ):ℝ)) ^ (-(2*(3/4 + d))))
+      _ (((Real.summable_nat_rpow.mpr (by linarith :
+        (-(2*(3/4 + d)) : ℝ) < -1)).subtype _).mul_left 9)
     · intro q x hx
       have hxle : (3:ℝ)/4 + d ≤ x := hx
       sorry
     · intro q
-      sorry
+      have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+        have := q.2.2
+        exact_mod_cast this
+      have hq0 : (0:ℝ) < ((q:ℕ):ℝ) := by linarith
+      apply ContinuousOn.add
+      · apply ContinuousOn.neg
+        apply ContinuousOn.log
+        · apply ContinuousOn.sub continuousOn_const
+          apply ContinuousOn.mul continuousOn_const
+          apply Continuous.continuousOn
+          exact (Real.continuous_const_rpow (ne_of_gt hq0)).comp continuous_neg
+        · intro x hx
+          have hxle : (3:ℝ)/4 + d ≤ x := hx
+          have hqs := three_rpow_gt_two' _ hq3 x (by linarith)
+          have hxv : ((q:ℕ):ℝ) ^ (-x) = 1 / ((q:ℕ):ℝ) ^ x := by
+            rw [Real.rpow_neg (le_of_lt hq0), one_div]
+          rw [hxv]
+          intro hcon
+          rw [sub_eq_zero] at hcon
+          rw [eq_comm, mul_one_div, div_eq_one_iff_eq (by linarith)] at hcon
+          linarith
+      · apply ContinuousOn.mul continuousOn_const
+        apply ContinuousOn.log
+        · apply ContinuousOn.sub continuousOn_const
+          apply Continuous.continuousOn
+          exact (Real.continuous_const_rpow (ne_of_gt hq0)).comp continuous_neg
+        · intro x hx
+          have hxle : (3:ℝ)/4 + d ≤ x := hx
+          have hqs := three_rpow_gt_two' _ hq3 x (by linarith)
+          have hxv : ((q:ℕ):ℝ) ^ (-x) = 1 / ((q:ℕ):ℝ) ^ x := by
+            rw [Real.rpow_neg (le_of_lt hq0), one_div]
+          rw [hxv]
+          intro hcon
+          rw [sub_eq_zero, eq_comm, div_eq_one_iff_eq (by linarith)] at hcon
+          linarith
   apply (hOn.continuousAt _).continuousWithinAt
   apply Ici_mem_nhds
   rw [hd]; linarith
