@@ -4770,9 +4770,25 @@ noncomputable def LprimeOdd (s : ℝ) : ℝ :=
 undifferentiated series. -/
 theorem logHodd2_continuousOn :
     ContinuousOn logHodd2 (Set.Ioo (3/4 : ℝ) 2) := by
-  sorry
+  intro s0 hs0
+  have hs034 : (3/4:ℝ) < s0 := hs0.1
+  set d := (s0 - 3/4) / 2 with hd
+  have hdpos : 0 < d := by rw [hd]; linarith
+  have hc : (3/4:ℝ) < 3/4 + d := by linarith
+  have hOn : ContinuousOn logHodd2 (Set.Ici (3/4 + d)) := by
+    unfold logHodd2
+    apply continuousOn_tsum _ (logHodd2_summable (3/4 + d) hc)
+    · intro q x hx
+      have hxle : (3:ℝ)/4 + d ≤ x := hx
+      sorry
+    · intro q
+      sorry
+  apply (hOn.continuousAt _).continuousWithinAt
+  apply Ici_mem_nhds
+  rw [hd]; linarith
 
-/-- The differentiated series is continuous on (3/4, 2). -/
 theorem LprimeOdd_continuousOn :
     ContinuousOn LprimeOdd (Set.Ioo (3/4 : ℝ) 2) := by
   sorry
+
+
