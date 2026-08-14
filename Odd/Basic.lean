@@ -5114,6 +5114,26 @@ theorem Hodd_factor_at_two_gen (s : ℝ) (hs : 3/4 < s)
   push_cast
   ring
 
+/-- L'(1) = 2 log 2 - 2 S: the prefactor gives 2 log 2 and the prime sum
+gives -2 S, by logHodd2_deriv_at_one. -/
+theorem LprimeOdd_at_one : LprimeOdd 1 = 2 * Real.log 2 - 2 * Sodd := by
+  unfold LprimeOdd
+  have hpre : 2 * ((2:ℝ) ^ (-(1:ℝ)) * Real.log 2 / (1 - (2:ℝ) ^ (-(1:ℝ))))
+      = 2 * Real.log 2 := by
+    rw [Real.rpow_neg_one]
+    norm_num
+  have hcongr : ∀ q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (-2 * Real.log ((q:ℕ):ℝ)
+        / ((((q:ℕ):ℝ) ^ (1:ℝ) - 1) * ((((q:ℕ):ℝ) ^ (1:ℝ) - 2))))
+      = -2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-(1:ℝ))
+          / (1 - 2 * ((q:ℕ):ℝ) ^ (-(1:ℝ)))
+        + 2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-(1:ℝ))
+          / (1 - ((q:ℕ):ℝ) ^ (-(1:ℝ))) := by
+    intro q
+    exact (prime_logderiv_forms_eq (q:ℕ) q.2.2 1 (by norm_num)).symm
+  rw [hpre, tsum_congr hcongr, logHodd2_deriv_at_one]
+  ring
+
 /-- Item 5': the C/R bridge.  Hodd s 2 is a product of positive reals, so it
 is real and equals HoddR2 s.  Proved at s = 1 as HoddR2_at_one. -/
 theorem HoddR2_eq_Hodd_two (s : ℝ) (hs : 3/4 < s) :
@@ -5153,7 +5173,30 @@ theorem bHatOdd_sum_two (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
   have hcont : Filter.Tendsto (fun t : ℝ => deriv (fun r : ℝ => Hodd r 2) t)
       (nhdsWithin 1 (Set.Ioo (1:ℝ) 2))
       (nhds (((2 * dConst * (Real.log 2 - Sodd) : ℝ) : ℂ))) := by
-    sorry
+    -- on (1,2) the derivative is the real quantity HoddR2 * LprimeOdd, cast
+    have hval : ∀ t ∈ Set.Ioo (1:ℝ) 2,
+        deriv (fun r : ℝ => Hodd r 2) t = (((HoddR2 t * LprimeOdd t : ℝ)) : ℂ) := by
+      intro t ht
+      have hgen := HoddR2_hasDerivAt_gen t (by linarith [ht.1]) ht.2
+      exact (HoddR2_deriv_bridge t (by linarith [ht.1]) _ hgen).deriv
+    -- the real function is continuous at 1, with value dConst * (2 log2 - 2 S)
+    have hR : Filter.Tendsto (fun t : ℝ => HoddR2 t * LprimeOdd t)
+        (nhdsWithin 1 (Set.Ioo (1:ℝ) 2))
+        (nhds (HoddR2 1 * LprimeOdd 1)) := by
+      have hc := HoddR2_deriv_continuousOn 1 (by norm_num)
+      apply hc.mono_left
+      apply nhdsWithin_mono
+      intro x hx
+      exact ⟨by linarith [hx.1], hx.2⟩
+    have hvalue : HoddR2 1 * LprimeOdd 1 = 2 * dConst * (Real.log 2 - Sodd) := by
+      rw [HoddR2_at_one, LprimeOdd_at_one]
+      ring
+    rw [hvalue] at hR
+    have hcast := (Complex.continuous_ofReal.tendsto _).comp hR
+    apply hcast.congr'
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    simp only [Function.comp_apply]
+    exact (hval t ht).symm
   have hnb : (nhdsWithin (1:ℝ) (Set.Ioo 1 2)).NeBot := by
     apply mem_closure_iff_nhdsWithin_neBot.mp
     rw [closure_Ioo (by norm_num : (1:ℝ) ≠ 2)]
