@@ -5089,6 +5089,31 @@ theorem hCoeff_deriv_sum_limit (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
     rw [h2]
     exact mul_le_mul_of_nonneg_right hb (by positivity)
 
+/-- The p-th Hodd factor at z = 2, general s: it is the cast of a real. -/
+theorem Hodd_factor_at_two_gen (s : ℝ) (hs : 3/4 < s)
+    (p : {p : ℕ // p.Prime ∧ 3 ≤ p}) :
+    (1 - (2:ℂ) * ((((p:ℕ):ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ *
+        (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ)) : ℂ) ^ (2:ℂ)
+      = ((((1 - 2 * ((p:ℕ):ℝ) ^ (-s))⁻¹ * (1 - ((p:ℕ):ℝ) ^ (-s)) ^ 2 : ℝ)) : ℂ) := by
+  have hp3 : (3:ℝ) ≤ ((p:ℕ):ℝ) := by exact_mod_cast p.property.2
+  have hp0 : (0:ℝ) < ((p:ℕ):ℝ) := by linarith
+  have hP := three_rpow_gt_two' _ hp3 s hs
+  have hxv : ((p:ℕ):ℝ) ^ (-s) = 1 / ((p:ℕ):ℝ) ^ s := by
+    rw [Real.rpow_neg (le_of_lt hp0), one_div]
+  have hlt : ((p:ℕ):ℝ) ^ (-s) < 4/9 := by
+    rw [hxv, div_lt_div_iff₀ (by linarith) (by norm_num)]
+    linarith
+  have hpos : (0:ℝ) < ((p:ℕ):ℝ) ^ (-s) := Real.rpow_pos_of_pos hp0 _
+  have h1 : (0:ℝ) < 1 - ((p:ℕ):ℝ) ^ (-s) := by linarith
+  have h2 : (0:ℝ) < 1 - 2 * ((p:ℕ):ℝ) ^ (-s) := by linarith
+  have hsq : (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ)) : ℂ) ^ (2:ℂ)
+      = (((1 - ((p:ℕ):ℝ) ^ (-s) : ℝ)) : ℂ) ^ (2:ℕ) := by
+    rw [← Complex.cpow_natCast]
+    norm_num
+  rw [hsq]
+  push_cast
+  ring
+
 /-- Item 5': the C/R bridge.  Hodd s 2 is a product of positive reals, so it
 is real and equals HoddR2 s.  Proved at s = 1 as HoddR2_at_one. -/
 theorem HoddR2_eq_Hodd_two (s : ℝ) (hs : 3/4 < s) :
@@ -5114,7 +5139,23 @@ theorem bHatOdd_sum_two (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
     (∑' j : ℕ, bHatOdd j * 2 ^ j)
       = ((2 * dConst * (Real.log 2 - Sodd) : ℝ) : ℂ) := by
   have hlim := hCoeff_deriv_sum_limit betaFam bHatOdd hf
-  have hone : HasDerivAt (fun t : ℝ => Hodd t 2)
-      (((2 * dConst * (Real.log 2 - Sodd) : ℝ) : ℂ)) 1 :=
-    HoddR2_deriv_bridge 1 (by norm_num) _ HoddR2_deriv_value
-  sorry
+  have heq : ∀ t ∈ Set.Ioo (1:ℝ) 2,
+      (∑' j : ℕ, deriv (fun x : ℝ => hCoeff x j) t * 2 ^ j)
+        = deriv (fun r : ℝ => Hodd r 2) t := by
+    intro t ht
+    exact ((hCoeff_interchange betaFam bHatOdd hf hdiff t ht).deriv).symm
+  have hlim' : Filter.Tendsto (fun t : ℝ => deriv (fun r : ℝ => Hodd r 2) t)
+      (nhdsWithin 1 (Set.Ioo (1:ℝ) 2))
+      (nhds (∑' j : ℕ, bHatOdd j * 2 ^ j)) := by
+    apply hlim.congr'
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    exact heq t ht
+  have hcont : Filter.Tendsto (fun t : ℝ => deriv (fun r : ℝ => Hodd r 2) t)
+      (nhdsWithin 1 (Set.Ioo (1:ℝ) 2))
+      (nhds (((2 * dConst * (Real.log 2 - Sodd) : ℝ) : ℂ))) := by
+    sorry
+  have hnb : (nhdsWithin (1:ℝ) (Set.Ioo 1 2)).NeBot := by
+    apply mem_closure_iff_nhdsWithin_neBot.mp
+    rw [closure_Ioo (by norm_num : (1:ℝ) ≠ 2)]
+    exact ⟨le_refl 1, by norm_num⟩
+  exact tendsto_nhds_unique hlim' hcont
