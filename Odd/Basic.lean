@@ -4872,7 +4872,82 @@ theorem logHodd2_continuousOn :
 
 theorem LprimeOdd_continuousOn :
     ContinuousOn LprimeOdd (Set.Ioo (3/4 : ℝ) 2) := by
-  sorry
+  intro s0 hs0
+  have hs034 : (3/4:ℝ) < s0 := hs0.1
+  set d := (s0 - 3/4) / 2 with hd
+  have hdpos : 0 < d := by rw [hd]; linarith
+  have hc : (3/4:ℝ) < 3/4 + d := by linarith
+  have hOn : ContinuousOn LprimeOdd (Set.Ici (3/4 + d)) := by
+    unfold LprimeOdd
+    apply ContinuousOn.add
+    · apply ContinuousOn.mul continuousOn_const
+      apply ContinuousOn.div
+      · apply ContinuousOn.mul _ continuousOn_const
+        apply Continuous.continuousOn
+        exact (Real.continuous_const_rpow (by norm_num : (2:ℝ) ≠ 0)).comp continuous_neg
+      · apply ContinuousOn.sub continuousOn_const
+        apply Continuous.continuousOn
+        exact (Real.continuous_const_rpow (by norm_num : (2:ℝ) ≠ 0)).comp continuous_neg
+      · intro x hx
+        have hxle : (3:ℝ)/4 + d ≤ x := hx
+        have hx0 : (0:ℝ) < x := by linarith
+        have hlt : (2:ℝ) ^ (-x) < 1 := by
+          rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2), inv_lt_one_iff₀]
+          right
+          exact Real.one_lt_rpow_iff_of_pos (by norm_num) |>.mpr
+            (Or.inl ⟨by norm_num, hx0⟩)
+        intro hcon
+        rw [sub_eq_zero] at hcon
+        linarith [hcon.symm ▸ hlt]
+    · apply continuousOn_tsum
+        (u := fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+          2 * Real.log ((q:ℕ):ℝ)
+            / ((((q:ℕ):ℝ) ^ (3/4 + d) - 1) * ((((q:ℕ):ℝ) ^ (3/4 + d) - 2))))
+        _ (logHodd2_deriv_summable (3/4 + d) hc)
+      · intro q x hx
+        have hxle : (3:ℝ)/4 + d ≤ x := hx
+        have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+          have := q.2.2
+          exact_mod_cast this
+        have hq0 : (0:ℝ) < ((q:ℕ):ℝ) := by linarith
+        have hPx := three_rpow_gt_two' _ hq3 x (by linarith)
+        have hPc := three_rpow_gt_two' _ hq3 (3/4 + d) hc
+        have hmono : ((q:ℕ):ℝ) ^ (3/4 + d) ≤ ((q:ℕ):ℝ) ^ x :=
+          Real.rpow_le_rpow_of_exponent_le (by linarith) hxle
+        have hlog : (0:ℝ) ≤ Real.log ((q:ℕ):ℝ) := by
+          apply Real.log_nonneg; linarith
+        rw [Real.norm_eq_abs, abs_div,
+          abs_of_nonneg (by nlinarith [hPx] :
+            (0:ℝ) ≤ (((q:ℕ):ℝ) ^ x - 1) * (((q:ℕ):ℝ) ^ x - 2))]
+        have habs : |-2 * Real.log ((q:ℕ):ℝ)| = 2 * Real.log ((q:ℕ):ℝ) := by
+          rw [abs_of_nonpos (by nlinarith [hlog])]
+          ring
+        rw [habs]
+        apply div_le_div_of_nonneg_left (by linarith) (by nlinarith [hPc])
+        nlinarith [hmono, hPc, hPx]
+      · intro q
+        have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+          have := q.2.2
+          exact_mod_cast this
+        have hq0 : (0:ℝ) < ((q:ℕ):ℝ) := by linarith
+        apply ContinuousOn.div continuousOn_const
+        · apply ContinuousOn.mul
+          · apply ContinuousOn.sub _ continuousOn_const
+            apply Continuous.continuousOn
+            exact Real.continuous_const_rpow (ne_of_gt hq0)
+          · apply ContinuousOn.sub _ continuousOn_const
+            apply Continuous.continuousOn
+            exact Real.continuous_const_rpow (ne_of_gt hq0)
+        · intro x hx
+          have hxle : (3:ℝ)/4 + d ≤ x := hx
+          have hPx := three_rpow_gt_two' _ hq3 x (by linarith)
+          intro hcon
+          rcases mul_eq_zero.mp hcon with h | h
+          · linarith [sub_eq_zero.mp h]
+          · linarith [sub_eq_zero.mp h]
+  apply (hOn.continuousAt _).continuousWithinAt
+  apply Ici_mem_nhds
+  rw [hd]; linarith
 
 /-- Item 2: the prefactor's log-derivative at general s. -/
 theorem prefactor_logderiv_gen (s : ℝ) (hs : 0 < s) :
@@ -4953,7 +5028,43 @@ theorem hCoeff_interchange (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
     (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
     HasDerivAt (fun t : ℝ => Hodd t 2)
       (∑' j : ℕ, deriv (fun x : ℝ => hCoeff x j) s * 2 ^ j) s := by
-  sorry
+  apply hasDerivAt_of_tendstoLocallyUniformlyOn (s := Set.Ioo (1:ℝ) 2)
+    (l := Filter.atTop) isOpen_Ioo
+    (f := fun N : Finset ℕ => fun t : ℝ => ∑ j ∈ N, hCoeff t j * 2 ^ j)
+    (f' := fun N : Finset ℕ => fun t : ℝ =>
+      ∑ j ∈ N, deriv (fun x : ℝ => hCoeff x j) t * 2 ^ j)
+    (g := fun t : ℝ => Hodd t 2)
+    (g' := fun t : ℝ => ∑' j : ℕ, deriv (fun x : ℝ => hCoeff x j) t * 2 ^ j)
+  · rw [tendstoLocallyUniformlyOn_iff_forall_isCompact isOpen_Ioo]
+    intro K hKsub hKcomp
+    apply tendstoUniformlyOn_tsum
+      (u := fun j : ℕ => betaFam j * (2:ℝ) ^ j) hf.fam_summable
+    intro j x hx
+    have hxmem : x ∈ Set.Ioo (1:ℝ) 2 := hKsub hx
+    rw [norm_mul]
+    have hb := hf.deriv_bound j x hxmem
+    have h2 : ‖((2:ℂ)) ^ j‖ = (2:ℝ) ^ j := by
+      rw [norm_pow]
+      norm_num
+    rw [h2]
+    exact mul_le_mul_of_nonneg_right hb (by positivity)
+  · filter_upwards with N t ht
+    have hd : ∀ j ∈ N, HasDerivAt (fun x : ℝ => hCoeff x j * 2 ^ j)
+        (deriv (fun x : ℝ => hCoeff x j) t * 2 ^ j) t := by
+      intro j _
+      exact (hf.deriv_exists j t ht).mul_const _
+    have h := HasDerivAt.sum (u := N)
+      (A := fun j : ℕ => fun x : ℝ => hCoeff x j * 2 ^ j)
+      (A' := fun j : ℕ => deriv (fun x : ℝ => hCoeff x j) t * 2 ^ j) hd
+    have hfn : (fun t : ℝ => ∑ j ∈ N, hCoeff t j * 2 ^ j)
+        = ∑ j ∈ N, (fun x : ℝ => hCoeff x j * 2 ^ j) := by
+      funext r
+      rw [Finset.sum_apply]
+    rw [hfn]
+    exact h
+  · intro t ht
+    exact hCoeff_hasSum t (le_of_lt ht.1) 2 (by norm_num) (hdiff t (le_of_lt ht.1))
+  · exact hs
 
 /-- Item 7: the s -> 1+ limit of the coefficient-derivative sum.
 
@@ -4963,9 +5074,37 @@ theorem hCoeff_deriv_sum_limit (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
     (hf : OddCoeffFacts betaFam bHatOdd) :
     Filter.Tendsto
       (fun s : ℝ => ∑' j : ℕ, deriv (fun x : ℝ => hCoeff x j) s * 2 ^ j)
-      (nhdsWithin 1 (Set.Ioi (1:ℝ)))
+      (nhdsWithin 1 (Set.Ioo (1:ℝ) 2))
       (nhds (∑' j : ℕ, bHatOdd j * 2 ^ j)) := by
+  apply tendsto_tsum_of_dominated_convergence hf.fam_summable
+  · intro j
+    apply ((hf.tendsto_deriv j).mul_const _).mono_left
+    exact nhdsWithin_mono _ Set.Ioo_subset_Ioi_self
+  · filter_upwards [self_mem_nhdsWithin] with t ht j
+    rw [norm_mul]
+    have hb := hf.deriv_bound j t ht
+    have h2 : ‖((2:ℂ)) ^ j‖ = (2:ℝ) ^ j := by
+      rw [norm_pow]
+      norm_num
+    rw [h2]
+    exact mul_le_mul_of_nonneg_right hb (by positivity)
+
+/-- Item 5': the C/R bridge.  Hodd s 2 is a product of positive reals, so it
+is real and equals HoddR2 s.  Proved at s = 1 as HoddR2_at_one. -/
+theorem HoddR2_eq_Hodd_two (s : ℝ) (hs : 3/4 < s) :
+    ((HoddR2 s : ℝ) : ℂ) = Hodd s 2 := by
   sorry
+
+/-- The bridge on derivatives. -/
+theorem HoddR2_deriv_bridge (s : ℝ) (hs : 3/4 < s) (L : ℝ)
+    (h : HasDerivAt HoddR2 L s) :
+    HasDerivAt (fun t : ℝ => Hodd t 2) ((L : ℂ)) s := by
+  have hcast : HasDerivAt (fun t : ℝ => ((HoddR2 t : ℝ) : ℂ)) ((L : ℂ)) s :=
+    h.ofReal_comp
+  apply hcast.congr_of_eventuallyEq
+  filter_upwards [(isOpen_Ioi (a := (3/4 : ℝ))).mem_nhds hs] with t ht
+  exact (HoddR2_eq_Hodd_two t ht).symm
+
 
 /-- STEP 4: sum_j b_j 2^j = 2 d (log 2 - S). -/
 theorem bHatOdd_sum_two (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
@@ -4974,4 +5113,8 @@ theorem bHatOdd_sum_two (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
       DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4)) :
     (∑' j : ℕ, bHatOdd j * 2 ^ j)
       = ((2 * dConst * (Real.log 2 - Sodd) : ℝ) : ℂ) := by
+  have hlim := hCoeff_deriv_sum_limit betaFam bHatOdd hf
+  have hone : HasDerivAt (fun t : ℝ => Hodd t 2)
+      (((2 * dConst * (Real.log 2 - Sodd) : ℝ) : ℂ)) 1 :=
+    HoddR2_deriv_bridge 1 (by norm_num) _ HoddR2_deriv_value
   sorry
