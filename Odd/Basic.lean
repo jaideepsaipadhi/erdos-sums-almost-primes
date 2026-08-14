@@ -5498,8 +5498,25 @@ Route: fOdd_u_form, then the integrand splits as
 oddSplitMain1 + oddSplitMain2 + rest, with the two main integrals above and
 `rest` bounded via gamma_normalised_three (each error factor is O(e^-3u)
 against a polynomial in u). -/
-theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k) :
+theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
+    (hsum1 : Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n)))
+    (hsum : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
+    (hmul3 : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - zOmegaHom s z (p : ℕ))⁻¹))
+    (hcd1 : ∀ s : ℝ, 1 < s →
+      ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
+    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0)
+    (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd)
+    (hdiff : ∀ t : ℝ, 1 ≤ t →
+      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4))
+    (C D : ℝ) (hC : 0 ≤ C) (hD : 0 ≤ D)
+    (hcb : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C * ((1:ℝ)/3) ^ j)
+    (hdec : ∀ j : ℕ, ‖bHatOdd j * 2 ^ j‖ ≤ D * ((2:ℝ)/3) ^ j) :
     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k| ≤ MR * ((2:ℝ)/9) ^ k := by
+  rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
   sorry
 
 /-! ### Step 5: the tail bounds
@@ -5508,14 +5525,55 @@ MAIN1 and MAIN2 give partial sums over j <= k.  Passing to the full series
 costs two tails, and fam_decay supplies their rate. -/
 
 /-- The coefficient tail beyond k, from the Cauchy bound at radius 3. -/
+theorem geom_tail_bound_cx (f : ℕ → ℂ) (D r : ℝ) (hD : 0 ≤ D)
+    (hr0 : 0 ≤ r) (hr1 : r < 1)
+    (hb : ∀ j : ℕ, ‖f j‖ ≤ D * r ^ j) (k : ℕ) :
+    ‖∑' j : ℕ, (if k < j then f j else 0)‖ ≤ D * r ^ (k+1) / (1 - r) := by
+  have hsum : Summable (fun j : ℕ => D * r ^ j) :=
+    (summable_geometric_of_lt_one hr0 hr1).mul_left D
+  have hfs : Summable (fun j : ℕ => ‖(if k < j then f j else 0)‖) := by
+    apply Summable.of_nonneg_of_le (fun _ => norm_nonneg _) _ hsum
+    intro j
+    by_cases hj : k < j
+    · simp only [hj, if_true]; exact hb j
+    · simp only [hj, if_false, norm_zero]
+      positivity
+  have hmaj : Summable (fun j : ℕ => (if k < j then D * r ^ j else 0)) := by
+    apply Summable.of_nonneg_of_le _ _ hsum
+    · intro j
+      by_cases hj : k < j
+      · simp only [hj, if_true]; positivity
+      · simp only [hj, if_false]; exact le_refl _
+    · intro j
+      by_cases hj : k < j
+      · simp only [hj, if_true]; exact le_refl _
+      · simp only [hj, if_false]; positivity
+  have hle : ∀ j : ℕ, ‖(if k < j then f j else 0)‖
+      ≤ (if k < j then D * r ^ j else 0) := by
+    intro j
+    by_cases hj : k < j
+    · simp only [hj, if_true]; exact hb j
+    · simp only [hj, if_false, norm_zero]; exact le_refl 0
+  calc ‖∑' j : ℕ, (if k < j then f j else 0)‖
+      ≤ ∑' j : ℕ, ‖(if k < j then f j else 0)‖ := norm_tsum_le_tsum_norm hfs
+    _ ≤ ∑' j : ℕ, (if k < j then D * r ^ j else 0) := by
+        first
+        | exact Summable.tsum_le_tsum hle hfs hmaj
+        | exact tsum_le_tsum hle hfs hmaj
+    _ = D * r ^ (k+1) / (1 - r) := by
+        sorry
+
+/-- The coefficient tail beyond k, from the Cauchy bound at radius 3. -/
 theorem hCoeff_tail_bound (C : ℝ) (hC : 0 ≤ C)
-    (hcb : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C / (3:ℝ) ^ j) (k : ℕ) :
-    ‖∑' j : ℕ, (if k < j then hCoeff 1 j else 0)‖ ≤ C * (3:ℝ) / 2 / (3:ℝ) ^ k := by
-  sorry
+    (hcb : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C * ((1:ℝ)/3) ^ j) (k : ℕ) :
+    ‖∑' j : ℕ, (if k < j then hCoeff 1 j else 0)‖
+      ≤ C * ((1:ℝ)/3) ^ (k+1) / (1 - 1/3) :=
+  geom_tail_bound_cx (fun j => hCoeff 1 j) C (1/3) hC (by norm_num) (by norm_num) hcb k
 
 /-- The derivative tail beyond k, from fam_decay. -/
 theorem bHatOdd_tail_bound (bHatOdd : ℕ → ℂ) (D : ℝ) (hD : 0 ≤ D)
-    (hdec : ∀ j : ℕ, ‖bHatOdd j‖ ≤ D / (3:ℝ) ^ j) (k : ℕ) :
+    (hdec : ∀ j : ℕ, ‖bHatOdd j * 2 ^ j‖ ≤ D * ((2:ℝ)/3) ^ j) (k : ℕ) :
     ‖∑' j : ℕ, (if k < j then bHatOdd j * 2 ^ j else 0)‖
-      ≤ D * 3 * ((2:ℝ)/3) ^ (k + 1) := by
-  sorry
+      ≤ D * ((2:ℝ)/3) ^ (k+1) / (1 - 2/3) :=
+  geom_tail_bound_cx (fun j => bHatOdd j * 2 ^ j) D (2/3) hD (by norm_num)
+    (by norm_num) hdec k
