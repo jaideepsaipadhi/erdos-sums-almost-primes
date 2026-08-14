@@ -4874,4 +4874,104 @@ theorem LprimeOdd_continuousOn :
     ContinuousOn LprimeOdd (Set.Ioo (3/4 : ℝ) 2) := by
   sorry
 
+/-- Item 2: the prefactor's log-derivative at general s. -/
+theorem prefactor_logderiv_gen (s : ℝ) (hs : 0 < s) :
+    HasDerivAt (fun t : ℝ => 2 * Real.log (1 - (2:ℝ) ^ (-t)))
+      (2 * ((2:ℝ) ^ (-s) * Real.log 2 / (1 - (2:ℝ) ^ (-s)))) s := by
+  have hb : (0:ℝ) < 2 := by norm_num
+  have hlt : (2:ℝ) ^ (-s) < 1 := by
+    rw [Real.rpow_neg (le_of_lt hb)]
+    rw [inv_lt_one_iff₀]
+    right
+    exact Real.one_lt_rpow_iff_of_pos hb |>.mpr (Or.inl ⟨by norm_num, hs⟩)
+  have hne : (1:ℝ) - (2:ℝ) ^ (-s) ≠ 0 := by
+    intro hc
+    rw [sub_eq_zero] at hc
+    linarith [hc.symm ▸ hlt]
+  have hpow : HasDerivAt (fun t : ℝ => (2:ℝ) ^ (-t))
+      (-(Real.log 2 * (2:ℝ) ^ (-s))) s := by
+    have h := HasDerivAt.const_rpow hb (hasDerivAt_neg s)
+    simpa using h
+  have hinner : HasDerivAt (fun t : ℝ => 1 - (2:ℝ) ^ (-t))
+      (Real.log 2 * (2:ℝ) ^ (-s)) s := by
+    simpa using hpow.const_sub 1
+  have hlog := (hinner.log hne).const_mul 2
+  have hval : 2 * (Real.log 2 * (2:ℝ) ^ (-s) / (1 - (2:ℝ) ^ (-s)))
+      = 2 * ((2:ℝ) ^ (-s) * Real.log 2 / (1 - (2:ℝ) ^ (-s))) := by ring
+  rw [← hval]
+  exact hlog
 
+/-- Item 3: the chain rule at general s in (3/4, 2). -/
+theorem HoddR2_hasDerivAt_gen (s : ℝ) (hs : 3/4 < s) (hs2 : s < 2) :
+    HasDerivAt HoddR2 (HoddR2 s * LprimeOdd s) s := by
+  have h1 := prefactor_logderiv_gen s (by linarith)
+  have h2 := logHodd2_hasDerivAt s hs hs2
+  have hcongr : ∀ q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (-2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-s) / (1 - 2 * ((q:ℕ):ℝ) ^ (-s))
+        + 2 * Real.log ((q:ℕ):ℝ) * ((q:ℕ):ℝ) ^ (-s) / (1 - ((q:ℕ):ℝ) ^ (-s)))
+      = -2 * Real.log ((q:ℕ):ℝ) / ((((q:ℕ):ℝ) ^ s - 1) * ((((q:ℕ):ℝ) ^ s - 2))) := by
+    intro q
+    exact prime_logderiv_forms_eq (q:ℕ) q.2.2 s hs
+  rw [tsum_congr hcongr] at h2
+  have hsum := h1.add h2
+  have hexp := hsum.exp
+  unfold HoddR2 LprimeOdd
+  convert hexp using 1 <;> simp [Pi.add_apply]
+
+/-- Item 4: deriv HoddR2 is continuous on (3/4, 2). -/
+theorem HoddR2_deriv_continuousOn :
+    ContinuousOn (fun s : ℝ => HoddR2 s * LprimeOdd s) (Set.Ioo (3/4 : ℝ) 2) := by
+  apply ContinuousOn.mul _ LprimeOdd_continuousOn
+  unfold HoddR2
+  apply ContinuousOn.rexp
+  apply ContinuousOn.add _ logHodd2_continuousOn
+  apply ContinuousOn.mul continuousOn_const
+  apply ContinuousOn.log
+  · apply ContinuousOn.sub continuousOn_const
+    apply Continuous.continuousOn
+    exact (Real.continuous_const_rpow (by norm_num : (2:ℝ) ≠ 0)).comp continuous_neg
+  · intro x hx
+    have hx0 : (0:ℝ) < x := by linarith [hx.1]
+    have hlt : (2:ℝ) ^ (-x) < 1 := by
+      rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2), inv_lt_one_iff₀]
+      right
+      exact Real.one_lt_rpow_iff_of_pos (by norm_num) |>.mpr (Or.inl ⟨by norm_num, hx0⟩)
+    intro hc
+    rw [sub_eq_zero] at hc
+    linarith [hc.symm ▸ hlt]
+
+/-! ### Step 4, items 6-8: the interchange and the limit -/
+
+/-- Item 6: on (1,2), d_s Hodd(s,2) is the termwise sum.
+
+hCoeff_hasSum gives the pointwise convergence at z = 2; the derivative series
+is dominated by betaFam j * 2^j, summable by fam_summable. -/
+theorem hCoeff_interchange (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd)
+    (hdiff : ∀ t : ℝ, 1 ≤ t →
+      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4))
+    (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
+    HasDerivAt (fun t : ℝ => Hodd t 2)
+      (∑' j : ℕ, deriv (fun x : ℝ => hCoeff x j) s * 2 ^ j) s := by
+  sorry
+
+/-- Item 7: the s -> 1+ limit of the coefficient-derivative sum.
+
+Dominated convergence: termwise by tendsto_deriv, dominated by
+betaFam j * 2^j. -/
+theorem hCoeff_deriv_sum_limit (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd) :
+    Filter.Tendsto
+      (fun s : ℝ => ∑' j : ℕ, deriv (fun x : ℝ => hCoeff x j) s * 2 ^ j)
+      (nhdsWithin 1 (Set.Ioi (1:ℝ)))
+      (nhds (∑' j : ℕ, bHatOdd j * 2 ^ j)) := by
+  sorry
+
+/-- STEP 4: sum_j b_j 2^j = 2 d (log 2 - S). -/
+theorem bHatOdd_sum_two (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd)
+    (hdiff : ∀ t : ℝ, 1 ≤ t →
+      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4)) :
+    (∑' j : ℕ, bHatOdd j * 2 ^ j)
+      = ((2 * dConst * (Real.log 2 - Sodd) : ℝ) : ℂ) := by
+  sorry
