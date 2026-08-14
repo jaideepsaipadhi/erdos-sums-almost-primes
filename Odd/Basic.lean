@@ -5138,7 +5138,88 @@ theorem LprimeOdd_at_one : LprimeOdd 1 = 2 * Real.log 2 - 2 * Sodd := by
 is real and equals HoddR2 s.  Proved at s = 1 as HoddR2_at_one. -/
 theorem HoddR2_eq_Hodd_two (s : ℝ) (hs : 3/4 < s) :
     ((HoddR2 s : ℝ) : ℂ) = Hodd s 2 := by
-  sorry
+  have h2pos : (0:ℝ) < 1 - (2:ℝ) ^ (-s) := by
+    have hs0 : (0:ℝ) < s := by linarith
+    have hlt : (2:ℝ) ^ (-s) < 1 := by
+      rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2), inv_lt_one_iff₀]
+      right
+      exact Real.one_lt_rpow_iff_of_pos (by norm_num) |>.mpr (Or.inl ⟨by norm_num, hs0⟩)
+    linarith
+  have hpos : ∀ q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (0:ℝ) < (1 - 2 * ((q:ℕ):ℝ) ^ (-s))⁻¹ * (1 - ((q:ℕ):ℝ) ^ (-s)) ^ 2 := by
+    intro q
+    have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+      have := q.2.2
+      exact_mod_cast this
+    have hq0 : (0:ℝ) < ((q:ℕ):ℝ) := by linarith
+    have hP := three_rpow_gt_two' _ hq3 s hs
+    have hxv : ((q:ℕ):ℝ) ^ (-s) = 1 / ((q:ℕ):ℝ) ^ s := by
+      rw [Real.rpow_neg (le_of_lt hq0), one_div]
+    have hlt : ((q:ℕ):ℝ) ^ (-s) < 4/9 := by
+      rw [hxv, div_lt_div_iff₀ (by linarith) (by norm_num)]
+      linarith
+    have hp2 : (0:ℝ) < 1 - 2 * ((q:ℕ):ℝ) ^ (-s) := by linarith
+    have hp1 : (0:ℝ) < 1 - ((q:ℕ):ℝ) ^ (-s) := by linarith
+    positivity
+  have hlogeq : ∀ q : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      Real.exp (-Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-s))
+        + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-s)))
+      = (1 - 2 * ((q:ℕ):ℝ) ^ (-s))⁻¹ * (1 - ((q:ℕ):ℝ) ^ (-s)) ^ 2 := by
+    intro q
+    have hq3 : (3:ℝ) ≤ ((q:ℕ):ℝ) := by
+      have := q.2.2
+      exact_mod_cast this
+    have hq0 : (0:ℝ) < ((q:ℕ):ℝ) := by linarith
+    have hP := three_rpow_gt_two' _ hq3 s hs
+    have hxv : ((q:ℕ):ℝ) ^ (-s) = 1 / ((q:ℕ):ℝ) ^ s := by
+      rw [Real.rpow_neg (le_of_lt hq0), one_div]
+    have hlt : ((q:ℕ):ℝ) ^ (-s) < 4/9 := by
+      rw [hxv, div_lt_div_iff₀ (by linarith) (by norm_num)]
+      linarith
+    have hp2 : (0:ℝ) < 1 - 2 * ((q:ℕ):ℝ) ^ (-s) := by linarith
+    have hp1 : (0:ℝ) < 1 - ((q:ℕ):ℝ) ^ (-s) := by linarith
+    have hsq : Real.exp (2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-s)))
+        = (1 - ((q:ℕ):ℝ) ^ (-s)) ^ 2 := by
+      rw [two_mul, Real.exp_add, Real.exp_log hp1]
+      ring
+    rw [Real.exp_add, Real.exp_neg, Real.exp_log hp2, hsq]
+  have hsum : HasSum (fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      -Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-s))
+        + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-s))) (logHodd2 s) :=
+    (logHodd2_summable s hs).hasSum
+  have hprod := hasProd_rexp_of_hasSum hsum
+  have hfe : (fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} => Real.exp
+      (-Real.log (1 - 2 * ((q:ℕ):ℝ) ^ (-s))
+        + 2 * Real.log (1 - ((q:ℕ):ℝ) ^ (-s))))
+      = fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+        (1 - 2 * ((q:ℕ):ℝ) ^ (-s))⁻¹ * (1 - ((q:ℕ):ℝ) ^ (-s)) ^ 2 := by
+    funext q
+    exact hlogeq q
+  rw [hfe] at hprod
+  unfold HoddR2 Hodd
+  rw [Real.exp_add]
+  have hpre : Real.exp (2 * Real.log (1 - (2:ℝ) ^ (-s)))
+      = (1 - (2:ℝ) ^ (-s)) ^ 2 := by
+    rw [two_mul, Real.exp_add, Real.exp_log h2pos]
+    ring
+  rw [hpre, ← hprod.tprod_eq]
+  have hmul : Multipliable (fun q : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - 2 * ((q:ℕ):ℝ) ^ (-s))⁻¹ * (1 - ((q:ℕ):ℝ) ^ (-s)) ^ 2) :=
+    hprod.multipliable
+  have hmt := hmul.map_tprod Complex.ofRealHom Complex.continuous_ofReal
+  simp only [Complex.ofRealHom_eq_coe] at hmt
+  rw [Complex.ofReal_mul, hmt]
+  congr 1
+  · have hsq : (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ (2:ℂ)
+        = (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ (2:ℕ) := by
+      rw [← Complex.cpow_natCast]
+      norm_num
+    rw [hsq]
+    push_cast
+    ring
+  · apply tprod_congr
+    intro q
+    exact (Hodd_factor_at_two_gen s hs q).symm
 
 /-- The bridge on derivatives. -/
 theorem HoddR2_deriv_bridge (s : ℝ) (hs : 3/4 < s) (L : ℝ)
@@ -5202,3 +5283,37 @@ theorem bHatOdd_sum_two (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
     rw [closure_Ioo (by norm_num : (1:ℝ) ≠ 2)]
     exact ⟨le_refl 1, by norm_num⟩
   exact tendsto_nhds_unique hlim' hcont
+
+/-! ### Step 5: the coefficient of 2^-k
+
+Substituting the two expansions into fOdd_u_form and integrating termwise:
+
+  order e^-u : sum_j h_j(1) = H(1,1) = 1/2                [hCoeff_sum_one]
+
+  order e^-2u: 2^-(k+1) * sum_j (b_j + 2 gamma h_j(1)) 2^j
+             = 2^-(k+1) * [2d(log2 - S) + 2 gamma d]      [bHatOdd_sum_two,
+                                                           hCoeff_sum_two]
+             = 2^-k * d(log2 - S + gamma) = beta 2^-k
+
+  order e^-ju, j >= 3: O(3^-(k+1)) each                   [gamma_normalised_three]
+
+The 2 gamma comes from the Jacobian (jacobian_u_signed) and the b_j from the
+coefficient expansion (hCoeff_taylor); each is halved by the 2^-(m+1) of the
+second Gamma integral, which is why beta carries d(log2 - S + gamma) rather
+than twice it. -/
+
+/-- The order-2 coefficient, assembled from step 4 and hCoeff_sum_two. -/
+theorem order_two_coefficient (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd)
+    (hdiff : ∀ t : ℝ, 1 ≤ t →
+      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4))
+    (hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+    (∑' j : ℕ, bHatOdd j * 2 ^ j)
+      + 2 * ((Real.eulerMascheroniConstant : ℝ) : ℂ)
+          * (∑' j : ℕ, hCoeff 1 j * 2 ^ j)
+      = ((2 * betaOdd : ℝ) : ℂ) := by
+  rw [bHatOdd_sum_two betaFam bHatOdd hf hdiff]
+  rw [(hCoeff_sum_two hd1).tsum_eq]
+  unfold betaOdd
+  push_cast
+  ring
