@@ -2559,12 +2559,16 @@ Mirrors `NumericalFacts.beta` in the main development, where the sup of
 |d_s g_i(s)| over s in (1,2), uniform in i, is a certified input rather than a
 derived bound.  Supplied here by odd/numerics/mr_certified.py, whose interval
 sweep ranges over s in [1,2] as well as the z-circle. -/
-structure OddCoeffFacts (betaS : ℝ) (bHatOdd : ℕ → ℂ) : Prop where
-  nonneg : 0 ≤ betaS
+structure OddCoeffFacts (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) : Prop where
+  nonneg : ∀ j : ℕ, 0 ≤ betaFam j
+  /-- The per-j bounds are summable against 2^j.  This is what the
+  coefficient-sum identity of step 4 needs, and it is the analogue of the
+  main development's beta_i sweep rather than of its uniform bound. -/
+  fam_summable : Summable (fun j : ℕ => betaFam j * (2:ℝ) ^ j)
   deriv_exists : ∀ j : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
     HasDerivAt (fun t : ℝ => hCoeff t j) (deriv (fun t : ℝ => hCoeff t j) x) x
   deriv_bound : ∀ j : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
-    ‖deriv (fun t : ℝ => hCoeff t j) x‖ ≤ betaS
+    ‖deriv (fun t : ℝ => hCoeff t j) x‖ ≤ betaFam j
   /-- The coefficients converge to their s = 1 values from the right.
 
   Certified alongside the derivative bound by the same interval sweep; the
@@ -2582,14 +2586,14 @@ structure OddCoeffFacts (betaS : ℝ) (bHatOdd : ℕ → ℂ) : Prop where
     HasDerivAt (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t)
       (deriv (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t) x) x
   deriv2_bound : ∀ j : ℕ, ∀ x ∈ Set.Ioo (1:ℝ) 2,
-    ‖deriv (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t) x‖ ≤ betaS
+    ‖deriv (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t) x‖ ≤ betaFam j
 
 /-- The mean-value step: |h_j(s) - h_j(t)| <= betaS |s - t| on (1,2),
 uniformly in j.  Transferred from gManu_lipschitz_interior. -/
-theorem hCoeff_lipschitz (betaS : ℝ) (bHatOdd : ℕ → ℂ)
-    (hf : OddCoeffFacts betaS bHatOdd) (j : ℕ)
+theorem hCoeff_lipschitz (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd) (j : ℕ)
     (t s : ℝ) (ht : t ∈ Set.Ioo (1:ℝ) 2) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
-    ‖hCoeff s j - hCoeff t j‖ ≤ betaS * ‖s - t‖ := by
+    ‖hCoeff s j - hCoeff t j‖ ≤ betaFam j * ‖s - t‖ := by
   apply Convex.norm_image_sub_le_of_norm_hasDerivWithin_le
     (f' := fun x : ℝ => deriv (fun u : ℝ => hCoeff u j) x)
     (fun x hx => (hf.deriv_exists j x hx).hasDerivWithinAt)
@@ -3650,12 +3654,12 @@ theorem jacobian_u_form :
 This is what step D needs -- the first-order term is the leading correction,
 not an error to be bounded away.  Applies taylor_second_bound from the main
 development. -/
-theorem hCoeff_taylor (betaS : ℝ) (bHatOdd : ℕ → ℂ)
-    (hf : OddCoeffFacts betaS bHatOdd) (j : ℕ)
+theorem hCoeff_taylor (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd) (j : ℕ)
     (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
     ‖hCoeff s j - hCoeff 1 j - (((s - 1 : ℝ)) : ℂ) * bHatOdd j‖
-      ≤ betaS * (s - 1) ^ 2 / 2 :=
-  taylor_second_bound (fun t => hCoeff t j) (hCoeff 1 j) (bHatOdd j) betaS hf.nonneg
+      ≤ betaFam j * (s - 1) ^ 2 / 2 :=
+  taylor_second_bound (fun t => hCoeff t j) (hCoeff 1 j) (bHatOdd j) (betaFam j) (hf.nonneg j)
     (fun x hx => hf.deriv_exists j x hx)
     (fun x hx => hf.deriv2_exists j x hx)
     (fun x hx => hf.deriv2_bound j x hx)
@@ -3668,16 +3672,16 @@ Composes hCoeff_lipschitz (|h_j(s) - h_j(t)| <= betaS |s - t|) with
 eps_of_u_bound (s(u) - 1 <= C e^-u).  Note h_j(1) is the limiting value; the
 Lipschitz bound is stated on (1,2), so this is |h_j(s(u)) - h_j(1+delta)| for
 delta small, and h_j(1) enters as the limit. -/
-theorem hCoeff_sub_one_bound (betaS : ℝ) (bHatOdd : ℕ → ℂ)
-    (hf : OddCoeffFacts betaS bHatOdd) (j : ℕ)
+theorem hCoeff_sub_one_bound (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd) (j : ℕ)
     (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
-    ‖hCoeff s j - hCoeff 1 j‖ ≤ betaS * (s - 1) :=
-  deriv_sub_limit_bound (fun t => hCoeff t j) (hCoeff 1 j) betaS hf.nonneg
+    ‖hCoeff s j - hCoeff 1 j‖ ≤ betaFam j * (s - 1) :=
+  deriv_sub_limit_bound (fun t => hCoeff t j) (hCoeff 1 j) (betaFam j) (hf.nonneg j)
     (fun x hx => hf.deriv_exists j x hx) (fun x hx => hf.deriv_bound j x hx)
     (hf.tendsto_one j) s hs
 
-theorem hCoeff_u_form (betaS : ℝ) (bHatOdd : ℕ → ℂ)
-    (hf : OddCoeffFacts betaS bHatOdd) (j : ℕ) :
+theorem hCoeff_u_form (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd) (j : ℕ) :
     ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
       ‖hCoeff (sOf u) j - hCoeff 1 j‖ ≤ C * Real.exp (-u) := by
   obtain ⟨CB, hCB, UB, hUB, hB⟩ := eps_of_u_bound
@@ -3695,22 +3699,22 @@ theorem hCoeff_u_form (betaS : ℝ) (bHatOdd : ℕ → ℂ)
         _ = 1 * Real.exp u := by ring
     linarith
   obtain ⟨U2, hU2, hlt2⟩ := hUlt
-  have hpos : (0:ℝ) < betaS * CB + 1 := by
-    have : (0:ℝ) ≤ betaS * CB := mul_nonneg hf.nonneg (le_of_lt hCB)
+  have hpos : (0:ℝ) < betaFam j * CB + 1 := by
+    have : (0:ℝ) ≤ betaFam j * CB := mul_nonneg (hf.nonneg j) (le_of_lt hCB)
     linarith
-  refine ⟨betaS * CB + 1, hpos, max UB U2, by positivity, ?_⟩
+  refine ⟨betaFam j * CB + 1, hpos, max UB U2, by positivity, ?_⟩
   intro u hu
   have huB : UB ≤ u := le_trans (le_max_left _ _) hu
   have hu2 : U2 ≤ u := le_trans (le_max_right _ _) hu
   have hu0 : (0:ℝ) < u := lt_of_lt_of_le hUB huB
   have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
   have hsmem : sOf u ∈ Set.Ioo (1:ℝ) 2 := ⟨hs1, hlt2 u hu2⟩
-  have hlip := hCoeff_sub_one_bound betaS bHatOdd hf j (sOf u) hsmem
+  have hlip := hCoeff_sub_one_bound betaFam bHatOdd hf j (sOf u) hsmem
   have hb := hB u huB
-  calc ‖hCoeff (sOf u) j - hCoeff 1 j‖ ≤ betaS * (sOf u - 1) := hlip
-    _ ≤ betaS * (CB * Real.exp (-u)) :=
-        mul_le_mul_of_nonneg_left hb hf.nonneg
-    _ ≤ (betaS * CB + 1) * Real.exp (-u) := by
+  calc ‖hCoeff (sOf u) j - hCoeff 1 j‖ ≤ betaFam j * (sOf u - 1) := hlip
+    _ ≤ betaFam j * (CB * Real.exp (-u)) :=
+        mul_le_mul_of_nonneg_left hb (hf.nonneg j)
+    _ ≤ (betaFam j * CB + 1) * Real.exp (-u) := by
         have := Real.exp_pos (-u)
         nlinarith [this]
 
@@ -4748,3 +4752,27 @@ theorem HoddR2_deriv_value :
       = 2 * dConst * (Real.log 2 - Sodd) := by ring
   rw [← hval]
   exact h
+
+/-! ### Step 4, part (i): continuity of L and L' near s = 1
+
+L(s) = 2 log(1 - 2^-s) + logHodd2 s, so HoddR2 = exp o L and
+deriv HoddR2 = HoddR2 * L'.  Both L and L' are continuous on (3/4, 2), where
+s = 1 is interior -- the boundary difficulty is confined to hCoeff, which
+lives on (1,2). -/
+
+/-- L' as an explicit function: the prefactor term plus the prime sum. -/
+noncomputable def LprimeOdd (s : ℝ) : ℝ :=
+  2 * ((2:ℝ) ^ (-s) * Real.log 2 / (1 - (2:ℝ) ^ (-s)))
+    + ∑' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+        (-2 * Real.log ((p:ℕ):ℝ) / ((((p:ℕ):ℝ) ^ s - 1) * (((p:ℕ):ℝ) ^ s - 2)))
+
+/-- logHodd2 is continuous on (3/4, 2): the M-test again, with the
+undifferentiated series. -/
+theorem logHodd2_continuousOn :
+    ContinuousOn logHodd2 (Set.Ioo (3/4 : ℝ) 2) := by
+  sorry
+
+/-- The differentiated series is continuous on (3/4, 2). -/
+theorem LprimeOdd_continuousOn :
+    ContinuousOn LprimeOdd (Set.Ioo (3/4 : ℝ) 2) := by
+  sorry
