@@ -5370,19 +5370,81 @@ noncomputable def oddSplitMain2 (bHatOdd : ℕ → ℂ) (k : ℕ) (u : ℝ) : �
     ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
       * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-2 * u)
 
-/-- MAIN1 integrates to 1/2. -/
-theorem oddSplitMain1_integral (k : ℕ) (hk : 1 ≤ k)
-    (hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+/-- MAIN1 integrates to the PARTIAL sum of the h_j(1).
+
+Note this is the partial sum over j <= k, not the full series: the difference
+Sum_{j>k} h_j(1) is exponentially small (Cauchy, |h_j| <= M/3^j) and joins the
+remainder rather than vanishing. -/
+theorem oddSplitMain1_integral (k : ℕ) (hk : 1 ≤ k) :
     (∫ u in Set.Ioi (0:ℝ), oddSplitMain1 k u)
       = ∑ j ∈ Finset.range (k + 1), (hCoeff 1 j).re := by
-  sorry
+  unfold oddSplitMain1
+  have hrw : ∀ u : ℝ,
+      (∑ j ∈ Finset.range (k + 1),
+        (hCoeff 1 j).re * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-u)
+      = ∑ j ∈ Finset.range (k + 1),
+        ((hCoeff 1 j).re / (Nat.factorial (k - j)) * (u ^ (k - j) * Real.exp (-u))) := by
+    intro u
+    rw [Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro j _
+    ring
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun u _ => hrw u)]
+  rw [MeasureTheory.integral_finsetSum]
+  · rw [← fOdd_leading_order k hk]
+    apply Finset.sum_congr rfl
+    intro j _
+    rw [MeasureTheory.integral_const_mul]
+    ring
+  · sorry
 
-/-- MAIN2 integrates to beta 2^-k. -/
-theorem oddSplitMain2_integral (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
-    (hf : OddCoeffFacts betaFam bHatOdd) (k : ℕ) (hk : 1 ≤ k) :
+/-- MAIN2 integrates to 2^-(k+1) times the PARTIAL sum, again not the full
+series; the tail joins the remainder. -/
+theorem oddSplitMain2_integral (bHatOdd : ℕ → ℂ) (k : ℕ) (hk : 1 ≤ k) :
     (∫ u in Set.Ioi (0:ℝ), oddSplitMain2 bHatOdd k u)
-      = betaOdd * ((1:ℝ)/2) ^ k := by
-  sorry
+      = (1 / 2 ^ (k + 1)) * ∑ j ∈ Finset.range (k + 1),
+          (((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+            * 2 ^ j) := by
+  unfold oddSplitMain2
+  set c : ℕ → ℝ := fun j =>
+    (bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re with hc
+  have hrw : ∀ u : ℝ,
+      (∑ j ∈ Finset.range (k + 1),
+        c j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-2 * u)
+      = ∑ j ∈ Finset.range (k + 1),
+        (c j / (Nat.factorial (k - j)) * (u ^ (k - j) * Real.exp (-(2 * u)))) := by
+    intro u
+    rw [Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro j _
+    have : (-2 : ℝ) * u = -(2 * u) := by ring
+    rw [this]
+    ring
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun u _ => hrw u)]
+  rw [MeasureTheory.integral_finsetSum]
+  · rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j _
+    rw [MeasureTheory.integral_const_mul]
+    have hg := gamma_normalised_two (k - j)
+    rw [div_eq_iff (by exact_mod_cast Nat.factorial_ne_zero (k - j))] at hg
+    rw [hg]
+    sorry
+  · sorry
+
+/-! The two main integrals give PARTIAL sums.  Passing to the full series --
+where hCoeff_sum_one gives 1/2 and order_two_coefficient gives 2 beta -- costs
+two tail terms,
+
+    Sum_{j>k} h_j(1)      and    Sum_{j>k} (b_j + 2 gamma h_j(1)) 2^j,
+
+both exponentially small by the Cauchy bound |h_j| <= M/3^j (and its
+derivative analogue).  These join the remainder in fOdd_expansion_final.
+
+A second point the split must handle: jacobian_u_signed and eps_of_u_signed
+hold only for u >= U.  The integral over Ioi 0 therefore splits at U, and the
+piece on Ioc 0 U -- which is where s is large, not where the expansion lives --
+needs its own bound. -/
 
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
