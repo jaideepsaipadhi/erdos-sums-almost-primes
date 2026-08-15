@@ -6085,15 +6085,63 @@ theorem oddErr_integral_bound (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ
       have hg := gamma_normalised_three (k - j)
       rw [div_eq_iff (by exact_mod_cast Nat.factorial_ne_zero (k - j))] at hg
       rw [hg]
-      have hpow : ((1:ℝ)/3) ^ (k - j + 1) * (3:ℝ) ^ j = ((1:ℝ)/3) ^ (k + 1) * (3:ℝ) ^ j * 1 := by
-        sorry
+      -- 3^-(k-j+1) = 3^-(k+1) * 3^j, since (k-j+1) + j = k+1
+      have hexp : j + (k - j + 1) = k + 1 := by omega
       have hfne : ((Nat.factorial (k - j) : ℝ)) ≠ 0 := by
         exact_mod_cast Nat.factorial_ne_zero (k - j)
+      have h3a : ((3:ℝ) ^ (k - j + 1)) ≠ 0 := by positivity
+      -- put both sides over the same basis: 3^(k+1) = 3^j * 3^(k-j+1)
+      rw [div_pow, one_pow, show k + 1 = j + (k - j + 1) from hexp.symm, pow_add]
       field_simp
-      sorry
+      ring
     rw [Finset.sum_congr rfl hterm]
-    sorry
-  · sorry
+    -- sum_j dom j (1/3)^(k+1) 3^j = (1/3)^(k+1) sum_j dom j 3^j
+    have hfac : ∑ j ∈ Finset.range (k + 1), dom j * ((1:ℝ)/3) ^ (k + 1) * (3:ℝ) ^ j
+        = ((1:ℝ)/3) ^ (k + 1) * ∑ j ∈ Finset.range (k + 1), dom j * (3:ℝ) ^ j := by
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro j _
+      ring
+    rw [hfac]
+    have habs : ∑ j ∈ Finset.range (k + 1), dom j * (3:ℝ) ^ j
+        ≤ (Nat.choose (k + 3) 3 : ℝ) * S := by
+      have := dom_sum_bound dom betaFam bHatOdd S hd k
+      refine le_trans (Finset.sum_le_sum ?_) this
+      intro j _
+      have : dom j ≤ |dom j| := le_abs_self _
+      have h3 : (0:ℝ) ≤ (3:ℝ) ^ j := by positivity
+      exact mul_le_mul_of_nonneg_right this h3
+    have h13 : (0:ℝ) ≤ ((1:ℝ)/3) ^ (k + 1) := by positivity
+    calc CE * (((1:ℝ)/3) ^ (k + 1)
+            * ∑ j ∈ Finset.range (k + 1), dom j * (3:ℝ) ^ j)
+        ≤ CE * (((1:ℝ)/3) ^ (k + 1) * ((Nat.choose (k + 3) 3 : ℝ) * S)) := by
+          apply mul_le_mul_of_nonneg_left _ hCE
+          exact mul_le_mul_of_nonneg_left habs h13
+      _ = CE * (Nat.choose (k + 3) 3 : ℝ) * S * ((1:ℝ)/3) ^ (k + 1) := by ring
+  · -- integrability of each term
+    intro j _
+    have hgam : MeasureTheory.IntegrableOn
+        (fun x : ℝ => Real.exp (-x) * x ^ (((k - j : ℕ) : ℝ) + 1 - 1)) (Set.Ioi 0) :=
+      Real.GammaIntegral_convergent (by positivity)
+    simp only [add_sub_cancel_right] at hgam
+    have hgam' : MeasureTheory.IntegrableOn
+        (fun x : ℝ => x ^ ((k - j : ℕ)) * Real.exp (-x)) (Set.Ioi 0) := by
+      apply hgam.congr_fun _ measurableSet_Ioi
+      intro x _
+      simp only
+      rw [← Real.rpow_natCast x (k - j)]
+      ring
+    apply MeasureTheory.Integrable.const_mul
+    apply MeasureTheory.Integrable.mono hgam'
+    · apply MeasureTheory.AEStronglyMeasurable.mul <;>
+        (apply Continuous.aestronglyMeasurable; fun_prop)
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+      have hx0 : (0:ℝ) < x := hx
+      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_mul,
+        abs_of_pos (Real.exp_pos (-(3*x))), abs_of_pos (Real.exp_pos (-x))]
+      apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
+      apply Real.exp_le_exp.mpr
+      linarith
 
 /-- LEAF 3: the near piece, u in Ioc 0 U.
 
