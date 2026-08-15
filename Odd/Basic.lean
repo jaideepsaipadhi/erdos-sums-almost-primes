@@ -5825,7 +5825,58 @@ theorem convInverse (a : ℕ → ℝ) (j : ℕ) :
     intro u hu
     rw [Nat.add_sub_cancel_left, ← Nat.sub_sub]
   rw [Finset.sum_congr rfl hinner]
-  sorry
+  -- extend the inner range to the full square, swap, then collapse by
+  -- poleCoeff_conv: for fixed u the t-sum is 1 if u = j and 0 otherwise.
+  have hext2 : ∀ t ∈ Finset.range (j + 1),
+      (∑ u ∈ Finset.range (j + 1 - t),
+        poleCoeff t * a u * invPoleCoeff (j - t - u))
+      = ∑ u ∈ Finset.range (j + 1),
+          (if t + u ≤ j then poleCoeff t * a u * invPoleCoeff (j - t - u) else 0) := by
+    intro t ht
+    rw [Finset.mem_range] at ht
+    have hsub : Finset.range (j + 1 - t) ⊆ Finset.range (j + 1) := by
+      intro x hx
+      rw [Finset.mem_range] at hx ⊢
+      omega
+    rw [← Finset.sum_subset hsub]
+    · apply Finset.sum_congr rfl
+      intro u hu
+      rw [Finset.mem_range] at hu
+      rw [if_pos (by omega)]
+    · intro x _ hx
+      rw [Finset.mem_range] at hx
+      rw [if_neg (by omega)]
+  rw [Finset.sum_congr rfl hext2, Finset.sum_comm]
+  have hcollapse : ∀ u ∈ Finset.range (j + 1),
+      (∑ t ∈ Finset.range (j + 1),
+        (if t + u ≤ j then poleCoeff t * a u * invPoleCoeff (j - t - u) else 0))
+      = a u * (if j - u = 0 then 1 else 0) := by
+    intro u hu
+    rw [Finset.mem_range] at hu
+    have hsub : Finset.range (j - u + 1) ⊆ Finset.range (j + 1) := by
+      intro x hx
+      rw [Finset.mem_range] at hx ⊢
+      omega
+    rw [← Finset.sum_subset hsub]
+    · rw [← poleCoeff_conv (j - u), Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro t ht
+      rw [Finset.mem_range] at ht
+      rw [if_pos (by omega)]
+      have : j - t - u = j - u - t := by omega
+      rw [this]
+      ring
+    · intro x _ hx
+      rw [Finset.mem_range] at hx
+      rw [if_neg (by omega)]
+  rw [Finset.sum_congr rfl hcollapse]
+  rw [Finset.sum_eq_single j]
+  · simp
+  · intro b hb hbj
+    rw [Finset.mem_range] at hb
+    rw [if_neg (by omega), mul_zero]
+  · intro h
+    exact absurd (Finset.self_mem_range_succ j) h
 
 /-- invPoleCoeff (j-i) * 3^j = C(j-i+2,2) * 3^i for i <= j. -/
 theorem invPoleCoeff_scale (i j : ℕ) (hij : i ≤ j) :
