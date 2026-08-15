@@ -120,25 +120,26 @@ at a smaller prime, which matters for a formalization.
 at radius R and prime P reads R^2/(1 - R/P) + 1.25 R <= P^2.  At R = 4.5 that
 fails for P = 7 -- 62.3 > 49 -- and first holds at P = 11.)
 
-R = 4.5 is used below and in the formalization: K0 = 12 sits well inside the
-certified sweep's range of k = 1..20.  R = 4 is the alternative -- it raises
-K0 to 13, still inside the sweep, but lets the Euler tail start at p >= 7
-rather than p >= 11, so that only p = 2, 3, 5 need explicit handling.
+Neither radius is used below.  The Cauchy route is superseded by the
+calibrated bound (5.1); the table is retained only to record what the
+contour estimate yields.  The threshold K0 = 12 quoted there happens to
+agree with the one (5.1) gives, but for unrelated reasons.
 
 ## 6. Assembly
 
     f_k^odd - f_{k+1}^odd = beta 2^-(k+1) + (R_k - R_{k+1}),
 
 so it suffices that |R_k| + |R_{k+1}| < beta 2^-(k+1), for which
-|R_k| < beta 2^-k / 3 is enough.  With R = 4.5 and the certified M_R below:
+|R_k| < beta 2^-k / 3 is enough.  With the calibrated bound (5.1):
 
-    k        beta 2^-k / 3      M_R 4.5^-k
-   11         2.533e-05         5.395e-05      fails
-   12         1.267e-05         1.199e-05      holds
-   15         1.583e-06         1.316e-07      holds
-   20         4.947e-08         1.202e-10      holds
+    k        beta 2^-k / 3      0.8653 * 0.39^k
+   11         2.533e-05         2.747e-05        fails
+   12         1.267e-05         1.071e-05        holds
+   13         6.333e-06         4.178e-06        holds
+   15         1.583e-06         6.355e-07        holds
+   20         4.947e-08         5.734e-09        holds
 
-and the margin improves by a factor 4.5/2 = 2.25 at each step, so the
+and the margin improves by a factor (1/2)/0.39 = 1.28 at each step, so the
 inequality holds for all k >= 12.  For k = 1..11 the differences are positive
 by direct certified computation.  The two ranges overlap (the sweep covers
 k = 1..20), so the theorem holds for every k >= 1.  QED

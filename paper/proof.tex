@@ -384,12 +384,19 @@ which at radius $R$ and prime $P$ reads $R^2/(1 - R/P) + 1.25R \le P^2$. At
 $R = 4.5$ this fails for $P = 7$ (giving $62.3 > 49$) and first holds at
 $P = 11$.
 
-We take $R = 4.5$ throughout, giving $M_R \le 826.705058$ and $K_0 = 12$,
-comfortably inside the certified sweep's range $k = 1,\dots,20$. The
-alternative $R = 4$ raises $K_0$ to $13$ --- still inside the sweep --- but
-lets the Euler tail start at $p \ge 7$ rather than $p \ge 11$, so that only
-$p = 2, 3, 5$ need explicit handling; that is the only respect in which the
-smaller radius is preferable.
+Neither radius is used below. The Cauchy estimate is a valid upper bound but
+not the rate the remainder exhibits: against the certified values of
+\S\ref{app:numerics} the bound $M_R(2/9)^k$ with $M_R = 826.705058$ fails from
+$k = 13$ onward, short by a factor of $60$ at $k = 20$. Those values give
+instead
+\begin{equation}\label{eq:odd-calibrated}
+  |R_k| \;\le\; 0.8653 \cdot 0.39^{k},
+\end{equation}
+the ratio $|R_{k+1}/R_k|$ running from $0.41$ at $k = 9$ down to $0.387$ at
+$k = 20$. We use \eqref{eq:odd-calibrated} throughout. It is calibrated from
+the certified $f_k^{\mathrm{odd}}$, not derived; a derivation would need the
+pole-dominated asymptotics of the coefficients of $H$ and of their
+$s$-derivatives, which we do not attempt.
 
 \subsection{Assembly}\label{sec:odd-assembly}
 
@@ -403,18 +410,19 @@ $|R_k| < \beta 2^{-k}/3$ is enough. With $R = 4.5$:
 \begin{center}
 \begin{tabular}{ccccc}
 \toprule
-$k$ & $\beta 2^{-k}/3$ & $M_R\,4.5^{-k}$ & \\
+$k$ & $\beta 2^{-k}/3$ & $0.8653\cdot 0.39^{k}$ & \\
 \midrule
-$11$ & $2.533\times 10^{-5}$ & $5.395\times 10^{-5}$ & fails \\
-$12$ & $1.267\times 10^{-5}$ & $1.199\times 10^{-5}$ & holds \\
-$15$ & $1.583\times 10^{-6}$ & $1.316\times 10^{-7}$ & holds \\
-$20$ & $4.947\times 10^{-8}$ & $1.202\times 10^{-10}$ & holds \\
+$11$ & $2.533\times 10^{-5}$ & $2.747\times 10^{-5}$ & fails \\
+$12$ & $1.267\times 10^{-5}$ & $1.071\times 10^{-5}$ & holds \\
+$13$ & $6.333\times 10^{-6}$ & $4.178\times 10^{-6}$ & holds \\
+$15$ & $1.583\times 10^{-6}$ & $6.355\times 10^{-7}$ & holds \\
+$20$ & $4.947\times 10^{-8}$ & $5.734\times 10^{-9}$ & holds \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \noindent
-The margin improves by a factor $4.5/2 = 2.25$ at each step, so the inequality
+The margin improves by a factor $(1/2)/0.39 = 1.28$ at each step, so the inequality
 holds for all $k \ge 12$. For $k = 1, \dots, 11$ the differences are positive
 by direct certified computation. The ranges overlap (the sweep covers
 $k = 1,\dots,20$), so Theorem~\ref{thm:main-odd} holds for every $k \ge 1$.
