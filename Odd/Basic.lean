@@ -5762,3 +5762,89 @@ theorem poleCoeff_conv (n : ℕ) :
       rw [p4, p3, p2, p1]
       push_cast
       ring
+
+/-- The convolution of a sequence against poleCoeff. -/
+noncomputable def poleConv (a : ℕ → ℝ) (i : ℕ) : ℝ :=
+  ∑ t ∈ Finset.range (i + 1), poleCoeff t * a (i - t)
+
+/-- (b) The inverse convolution recovers a.
+
+Since poleCoeff and invPoleCoeff are convolution inverses (poleCoeff_conv),
+convolving g = poleConv a against invPoleCoeff returns a. -/
+theorem convInverse (a : ℕ → ℝ) (j : ℕ) :
+    ∑ i ∈ Finset.range (j + 1), poleConv a i * invPoleCoeff (j - i) = a j := by
+  -- extend each inner sum to the full range so Finset.sum_comm applies
+  have hext : ∀ i ∈ Finset.range (j + 1),
+      poleConv a i * invPoleCoeff (j - i)
+        = ∑ t ∈ Finset.range (j + 1),
+            (if t ≤ i then poleCoeff t * a (i - t) * invPoleCoeff (j - i) else 0) := by
+    intro i hi
+    rw [Finset.mem_range] at hi
+    rw [poleConv, Finset.sum_mul]
+    have hsub : Finset.range (i + 1) ⊆ Finset.range (j + 1) := by
+      intro x hx
+      rw [Finset.mem_range] at hx ⊢
+      omega
+    rw [← Finset.sum_subset hsub]
+    · apply Finset.sum_congr rfl
+      intro t ht
+      rw [Finset.mem_range] at ht
+      rw [if_pos (by omega)]
+    · intro x _ hx
+      rw [Finset.mem_range] at hx
+      rw [if_neg (by omega)]
+  rw [Finset.sum_congr rfl hext, Finset.sum_comm]
+  -- for fixed t, drop the indicator (range -> Ico) and shift i = t + u
+  have hinner : ∀ t ∈ Finset.range (j + 1),
+      (∑ i ∈ Finset.range (j + 1),
+        (if t ≤ i then poleCoeff t * a (i - t) * invPoleCoeff (j - i) else 0))
+      = ∑ u ∈ Finset.range (j + 1 - t),
+          poleCoeff t * a u * invPoleCoeff (j - t - u) := by
+    intro t ht
+    rw [Finset.mem_range] at ht
+    have hIco : Finset.Ico t (j + 1) ⊆ Finset.range (j + 1) := by
+      intro x hx
+      rw [Finset.mem_Ico] at hx
+      rw [Finset.mem_range]
+      omega
+    have hfil : ∑ i ∈ Finset.range (j + 1),
+        (if t ≤ i then poleCoeff t * a (i - t) * invPoleCoeff (j - i) else 0)
+        = ∑ i ∈ Finset.Ico t (j + 1),
+            poleCoeff t * a (i - t) * invPoleCoeff (j - i) := by
+      rw [← Finset.sum_subset hIco]
+      · apply Finset.sum_congr rfl
+        intro i hi
+        rw [Finset.mem_Ico] at hi
+        rw [if_pos hi.1]
+      · intro x hx hnx
+        rw [Finset.mem_range] at hx
+        rw [Finset.mem_Ico] at hnx
+        rw [if_neg (by omega)]
+    rw [hfil, Finset.sum_Ico_eq_sum_range]
+    apply Finset.sum_congr rfl
+    intro u hu
+    rw [Nat.add_sub_cancel_left, ← Nat.sub_sub]
+  rw [Finset.sum_congr rfl hinner]
+  sorry
+
+/-- invPoleCoeff (j-i) * 3^j = C(j-i+2,2) * 3^i for i <= j. -/
+theorem invPoleCoeff_scale (i j : ℕ) (hij : i ≤ j) :
+    invPoleCoeff (j - i) * (3:ℝ) ^ j
+      = (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i := by
+  rw [invPoleCoeff]
+  have hp : ((1:ℝ)/3) ^ (j - i) * (3:ℝ) ^ j = (3:ℝ) ^ i := by
+    have hji : i + (j - i) = j := by omega
+    have h3 : ((3:ℝ) ^ (j - i)) ≠ 0 := by positivity
+    rw [div_pow, one_pow, div_mul_eq_mul_div, one_mul, div_eq_iff h3, ← pow_add, hji]
+  calc (Nat.choose (j - i + 2) 2 : ℝ) * ((1:ℝ)/3) ^ (j - i) * (3:ℝ) ^ j
+      = (Nat.choose (j - i + 2) 2 : ℝ) * (((1:ℝ)/3) ^ (j - i) * (3:ℝ) ^ j) := by ring
+    _ = (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i := by rw [hp]
+
+/-- (d) The coefficient sum bound, PROOF.md (5.5). -/
+theorem coeffSum_bound (a : ℕ → ℝ) (k : ℕ) (S : ℝ)
+    (hS : ∑ i ∈ Finset.range (k + 1), |poleConv a i| * (3:ℝ) ^ i ≤ S) :
+    ∑ j ∈ Finset.range (k + 1), |a j| * (3:ℝ) ^ j
+      ≤ (Nat.choose (k + 3) 3 : ℝ) * S := by
+  -- |a j| 3^j <= sum_{i<=j} |g i| C(j-i+2,2) 3^i by convInverse and the
+  -- triangle inequality; then swap and apply hockey_stick.
+  sorry
