@@ -5896,6 +5896,90 @@ theorem coeffSum_bound (a : ℕ → ℝ) (k : ℕ) (S : ℝ)
     (hS : ∑ i ∈ Finset.range (k + 1), |poleConv a i| * (3:ℝ) ^ i ≤ S) :
     ∑ j ∈ Finset.range (k + 1), |a j| * (3:ℝ) ^ j
       ≤ (Nat.choose (k + 3) 3 : ℝ) * S := by
-  -- |a j| 3^j <= sum_{i<=j} |g i| C(j-i+2,2) 3^i by convInverse and the
-  -- triangle inequality; then swap and apply hockey_stick.
-  sorry
+  -- |a j| 3^j <= sum_{i<=j} |g i| C(j-i+2,2) 3^i, then swap and hockey_stick
+  have hstep : ∀ j ∈ Finset.range (k + 1), |a j| * (3:ℝ) ^ j
+      ≤ ∑ i ∈ Finset.range (k + 1),
+          (if i ≤ j then |poleConv a i| * (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i
+           else 0) := by
+    intro j hj
+    rw [Finset.mem_range] at hj
+    have hsub : Finset.range (j + 1) ⊆ Finset.range (k + 1) := by
+      intro x hx; rw [Finset.mem_range] at hx ⊢; omega
+    rw [← Finset.sum_subset hsub (by
+      intro x _ hx
+      rw [Finset.mem_range] at hx
+      rw [if_neg (by omega)])]
+    have hexp : ∀ i ∈ Finset.range (j + 1),
+        (if i ≤ j then |poleConv a i| * (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i
+         else 0)
+        = |poleConv a i * invPoleCoeff (j - i)| * (3:ℝ) ^ j := by
+      intro i hi
+      rw [Finset.mem_range] at hi
+      rw [if_pos (by omega), abs_mul]
+      have hnn : |invPoleCoeff (j - i)| = invPoleCoeff (j - i) := by
+        rw [abs_of_nonneg]
+        rw [invPoleCoeff]; positivity
+      rw [hnn]
+      have := invPoleCoeff_scale i j (by omega)
+      calc |poleConv a i| * (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i
+          = |poleConv a i| * ((Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i) := by ring
+        _ = |poleConv a i| * (invPoleCoeff (j - i) * (3:ℝ) ^ j) := by rw [this]
+        _ = |poleConv a i| * invPoleCoeff (j - i) * (3:ℝ) ^ j := by ring
+    rw [Finset.sum_congr rfl hexp, ← Finset.sum_mul, ← convInverse a j]
+    exact mul_le_mul_of_nonneg_right (Finset.abs_sum_le_sum_abs _ _) (by positivity)
+  calc ∑ j ∈ Finset.range (k + 1), |a j| * (3:ℝ) ^ j
+      ≤ ∑ j ∈ Finset.range (k + 1), ∑ i ∈ Finset.range (k + 1),
+          (if i ≤ j then |poleConv a i| * (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i
+           else 0) := Finset.sum_le_sum hstep
+    _ = ∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k + 1),
+          (if i ≤ j then |poleConv a i| * (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i
+           else 0) := Finset.sum_comm
+    _ ≤ (Nat.choose (k + 3) 3 : ℝ) * S := by
+        have hrow : ∀ i ∈ Finset.range (k + 1),
+            (∑ j ∈ Finset.range (k + 1),
+              (if i ≤ j then |poleConv a i| * (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i
+               else 0))
+            ≤ (Nat.choose (k + 3) 3 : ℝ) * (|poleConv a i| * (3:ℝ) ^ i) := by
+          intro i hi
+          rw [Finset.mem_range] at hi
+          -- restrict to Ico i (k+1), shift, then hockey_stick
+          have hIco : Finset.Ico i (k + 1) ⊆ Finset.range (k + 1) := by
+            intro x hx; rw [Finset.mem_Ico] at hx; rw [Finset.mem_range]; omega
+          rw [← Finset.sum_subset hIco (by
+            intro x hx hnx
+            rw [Finset.mem_range] at hx
+            rw [Finset.mem_Ico] at hnx
+            rw [if_neg (by omega)])]
+          have hin : ∀ j ∈ Finset.Ico i (k + 1),
+              (if i ≤ j then |poleConv a i| * (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i
+               else 0)
+              = (Nat.choose (j - i + 2) 2 : ℝ) * (|poleConv a i| * (3:ℝ) ^ i) := by
+            intro j hj
+            rw [Finset.mem_Ico] at hj
+            rw [if_pos hj.1]
+            ring
+          rw [Finset.sum_congr rfl hin, ← Finset.sum_mul,
+            Finset.sum_Ico_eq_sum_range]
+          have hshift : ∀ m ∈ Finset.range (k + 1 - i),
+              (Nat.choose (i + m - i + 2) 2 : ℝ) = (Nat.choose (m + 2) 2 : ℝ) := by
+            intro m _
+            congr 2
+            omega
+          rw [Finset.sum_congr rfl hshift]
+          have hk1 : k + 1 - i = (k - i) + 1 := by omega
+          rw [hk1, hockey_stick]
+          apply mul_le_mul_of_nonneg_right _ (by positivity)
+          have : Nat.choose (k - i + 3) 3 ≤ Nat.choose (k + 3) 3 :=
+            Nat.choose_le_choose 3 (by omega)
+          exact_mod_cast this
+        calc ∑ i ∈ Finset.range (k + 1), ∑ j ∈ Finset.range (k + 1),
+              (if i ≤ j then |poleConv a i| * (Nat.choose (j - i + 2) 2 : ℝ) * (3:ℝ) ^ i
+               else 0)
+            ≤ ∑ i ∈ Finset.range (k + 1),
+                (Nat.choose (k + 3) 3 : ℝ) * (|poleConv a i| * (3:ℝ) ^ i) :=
+              Finset.sum_le_sum hrow
+          _ = (Nat.choose (k + 3) 3 : ℝ)
+                * ∑ i ∈ Finset.range (k + 1), |poleConv a i| * (3:ℝ) ^ i := by
+              rw [← Finset.mul_sum]
+          _ ≤ (Nat.choose (k + 3) 3 : ℝ) * S :=
+              mul_le_mul_of_nonneg_left hS (by positivity)
