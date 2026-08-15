@@ -114,12 +114,12 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   /-- The certified enclosure of S. -/
   Sodd_enclosure : |Sodd - 0.8593953| ≤ 3.3e-6
   /-- Cauchy bound: the sup of |Htilde| on |z| = 4.5, s in [1,2]. -/
-  MR_bound       : MR ≤ 0.8653
+  MR_bound       : MR ≤ 2402.3
   /-- The remainder bound that Cauchy's estimate yields. -/
   remainder      : ∀ k : ℕ, |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
-                     ≤ MR * ((39:ℝ)/100) ^ k
+                     ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
   /-- Certified sweep below the analytic threshold. -/
-  sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 11 → fOdd (k + 1) < fOdd k
+  sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 56 → fOdd (k + 1) < fOdd k
   /-- Euler-Mascheroni, lower bound.  Mathlib has
   `eulerMascheroniConstant_lt_two_thirds` but no lower bound, so this enters as
   an input.  It is a Mathlib gap, not a mathematical one. -/
@@ -128,18 +128,47 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   d_enc          : |dConst - 0.3786950| ≤ 5.3e-8
 /-- The arithmetic core of the odd assembly, with all rpow stripped out.
 
-A = f_k, B = f_{k+1}, P = 2^-k, T = MR 2^-k (39/50)^k, b = beta.  The two
+A = f_k, B = f_{k+1}, P = 2^-k, T = MR (k+3)^3 3^-k, b = beta; T <= 0.0477 P for k >= 57.  The two
 enclosures give A >= bP - T and B <= bP/2 + 2T/9, so
-A - B >= bP/2 - T(139/100) >= P(0.1556/2 - 0.0439*139/100) = 0.0167 P > 0. -/
+A - B >= bP/2 - T(1.3503) >= P(0.1556/2 - 0.0477*1.3503) = 0.0135 P > 0. -/
 theorem odd_step (b P T A B : ℝ)
     (hb : (0.1556 : ℝ) ≤ b) (hP : 0 < P) (hT : 0 ≤ T)
-    (hTb : T ≤ (0.0439 : ℝ) * P)
+    (hTb : T ≤ (0.0477 : ℝ) * P)
     (hA : |A - b * P| ≤ T)
-    (hB : |B - b * P / 2| ≤ T * (39/100)) :
+    (hB : |B - b * P / 2| ≤ T * (3503/10000)) :
     B < A := by
   have hA1 := (abs_le.mp hA).1
   have hB2 := (abs_le.mp hB).2
   nlinarith [hA1, hB2, hTb, hP, hT, hb]
+
+/-- (k+3)^3 (2/3)^k is antitone for k >= 4: the ratio is
+((k+4)/(k+3))^3 (2/3) < 1 as soon as (1 + 1/(k+3))^3 < 3/2, i.e. k+3 > 6.5.
+This replaces the geometric factorisation the old purely-exponential bound
+used; with T = MR (k+3)^3 3^-k there is no such factorisation. -/
+theorem polyGeom_step (k : ℕ) (hk : 4 ≤ k) :
+    ((k:ℝ) + 4) ^ 3 * ((2:ℝ)/3) ^ (k+1) ≤ ((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k := by
+  have hk4 : (4:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
+  have hpos : (0:ℝ) < ((2:ℝ)/3) ^ k := pow_pos (by norm_num) k
+  have h3 : (0:ℝ) < (k:ℝ) + 3 := by linarith
+  have hcube : ((k:ℝ) + 4) ^ 3 * (2/3) ≤ ((k:ℝ) + 3) ^ 3 := by
+    -- 3(k+3)^3 - 2(k+4)^3 = (k-4)(k^2+7k+13) + 5 >= 5 > 0 for k >= 4
+    nlinarith [mul_nonneg (by linarith : (0:ℝ) ≤ (k:ℝ) - 4)
+                 (by nlinarith : (0:ℝ) ≤ (k:ℝ)^2 + 7*(k:ℝ) + 13)]
+  have he : ((2:ℝ)/3) ^ (k+1) = ((2:ℝ)/3) ^ k * (2/3) := pow_succ _ _
+  rw [he]
+  calc ((k:ℝ)+4)^3 * (((2:ℝ)/3)^k * (2/3))
+      = (((k:ℝ)+4)^3 * (2/3)) * ((2:ℝ)/3)^k := by ring
+    _ ≤ ((k:ℝ)+3)^3 * ((2:ℝ)/3)^k :=
+        mul_le_mul_of_nonneg_right hcube (le_of_lt hpos)
+
+theorem polyGeom_antitone (k : ℕ) (hk : 57 ≤ k) :
+    ((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k ≤ (60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57 := by
+  induction k, hk using Nat.le_induction with
+  | base => norm_num
+  | succ n hn ih =>
+      have hstep := polyGeom_step n (by omega)
+      push_cast at hstep ⊢
+      linarith [hstep, ih]
 
 /-- The odd theorem, conditional on the certified inputs.
 
@@ -149,32 +178,41 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
     (hnum : OddNumericalFacts MR) :
     ∀ k : ℕ, 1 ≤ k → fOdd (k + 1) < fOdd k := by
   intro k hk
-  by_cases hsmall : k ≤ 11
+  by_cases hsmall : k ≤ 56
   · exact hnum.sweep_low k hk hsmall
-  · have hk12 : 12 ≤ k := by omega
+  · have hk57 : 57 ≤ k := by omega
     set P : ℝ := ((1:ℝ)/2) ^ k with hPdef
     have hP : 0 < P := pow_pos (by norm_num) k
-    set T : ℝ := MR * ((39:ℝ)/100) ^ k with hTdef
+    set T : ℝ := MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k with hTdef
     have hT : 0 ≤ T := by
-      rw [hTdef]; exact mul_nonneg hMR0 (pow_nonneg (by norm_num) k)
-    -- (39/100)^k = (39/50)^k (1/2)^k, and (39/50)^k ≤ (39/50)^12
-    have hfac : ((39:ℝ)/100) ^ k = ((39:ℝ)/50) ^ k * ((1:ℝ)/2) ^ k := by
-      rw [← mul_pow]; norm_num
-    have hmono : ((39:ℝ)/50) ^ k ≤ ((39:ℝ)/50) ^ 12 :=
-      pow_le_pow_of_le_one (by norm_num) (by norm_num) hk12
-    have hTb : T ≤ (0.0439:ℝ) * P := by
-      rw [hTdef, hfac, hPdef]
-      have h1 : MR * (((39:ℝ)/50) ^ k * ((1:ℝ)/2) ^ k)
-          ≤ MR * (((39:ℝ)/50) ^ 12 * ((1:ℝ)/2) ^ k) := by
-        apply mul_le_mul_of_nonneg_left _ hMR0
-        exact mul_le_mul_of_nonneg_right hmono (pow_nonneg (by norm_num) k)
-      have h2 : MR * (((39:ℝ)/50) ^ 12 * ((1:ℝ)/2) ^ k)
-          ≤ (0.8653:ℝ) * (((39:ℝ)/50) ^ 12 * ((1:ℝ)/2) ^ k) := by
-        apply mul_le_mul_of_nonneg_right hnum.MR_bound
-        positivity
-      have h3 : (0.8653:ℝ) * ((39:ℝ)/50) ^ 12 ≤ (0.0439:ℝ) := by
+      rw [hTdef]
+      apply mul_nonneg (mul_nonneg hMR0 (by positivity))
+      exact pow_nonneg (by norm_num) k
+    -- T/P = MR (k+3)^3 (2/3)^k, antitone in k, so bounded by its value at 57
+    have hTb : T ≤ (0.0477:ℝ) * P := by
+      rw [hTdef, hPdef]
+      have hsplit : ((1:ℝ)/3) ^ k = ((2:ℝ)/3) ^ k * ((1:ℝ)/2) ^ k := by
+        rw [← mul_pow]; norm_num
+      rw [hsplit]
+      have hmono := polyGeom_antitone k hk57
+      have hhalf : (0:ℝ) < ((1:ℝ)/2) ^ k := pow_pos (by norm_num) k
+      have hgpos : (0:ℝ) ≤ ((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k := by positivity
+      have hnum60 : (2402.3:ℝ) * ((60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57) ≤ (0.0477:ℝ) := by
         norm_num
-      nlinarith [h1, h2, h3, pow_pos (show (0:ℝ) < 1/2 by norm_num) k]
+      have hMRb := hnum.MR_bound
+      have stepA : MR * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k)
+          ≤ (2402.3:ℝ) * ((60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57) := by
+        calc MR * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k)
+            ≤ (2402.3:ℝ) * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k) :=
+              mul_le_mul_of_nonneg_right hMRb hgpos
+          _ ≤ (2402.3:ℝ) * ((60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57) :=
+              mul_le_mul_of_nonneg_left hmono (by norm_num)
+      calc MR * (((k:ℝ) + 3) ^ 3) * (((2:ℝ)/3) ^ k * ((1:ℝ)/2) ^ k)
+          = (MR * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k)) * ((1:ℝ)/2) ^ k := by ring
+        _ ≤ ((2402.3:ℝ) * ((60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57)) * ((1:ℝ)/2) ^ k :=
+              mul_le_mul_of_nonneg_right stepA (le_of_lt hhalf)
+        _ ≤ (0.0477:ℝ) * ((1:ℝ)/2) ^ k :=
+              mul_le_mul_of_nonneg_right hnum60 (le_of_lt hhalf)
     have hb : (0.1556 : ℝ) ≤ betaOdd := by
       unfold betaOdd
       have hg := hnum.gamma_gt
@@ -187,21 +225,32 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
       have := hnum.remainder k
       calc |(fOdd k - 1/2) - betaOdd * ((1:ℝ)/2) ^ k|
           = |fOdd k - 1/2 - betaOdd * ((1:ℝ)/2) ^ k| := by ring_nf
-        _ ≤ MR * ((39:ℝ)/100) ^ k := this
-    have hB : |(fOdd (k+1) - 1/2) - betaOdd * P / 2| ≤ T * (39/100) := by
+        _ ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := this
+    have hB : |(fOdd (k+1) - 1/2) - betaOdd * P / 2| ≤ T * (3503/10000) := by
       have h := hnum.remainder (k+1)
       have e1 : ((1:ℝ)/2) ^ (k+1) = ((1:ℝ)/2) ^ k / 2 := by
         rw [pow_succ]; ring
-      have e2 : ((39:ℝ)/100) ^ (k+1) = ((39:ℝ)/100) ^ k * (39/100) := by
-        rw [pow_succ]
-      rw [e1, e2] at h
+      have e3 : ((1:ℝ)/3) ^ (k+1) = ((1:ℝ)/3) ^ k * (1/3) := pow_succ _ _
+      have ecast : (((k+1:ℕ)):ℝ) + 3 = (k:ℝ) + 4 := by push_cast; ring
+      rw [e1, e3, ecast] at h
+      -- ((k+4)/(k+3))^3 / 3 <= 0.3503 for k >= 57, since (61/60)^3 = 1.05084
+      have hratio : ((k:ℝ) + 4) ^ 3 * (1/3) ≤ ((k:ℝ) + 3) ^ 3 * (3503/10000) := by
+        have hk57r : (57:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk57
+        nlinarith [hk57r, sq_nonneg ((k:ℝ) + 3)]
+      have h3pos : (0:ℝ) < ((1:ℝ)/3) ^ k := pow_pos (by norm_num) k
       rw [hPdef, hTdef]
       calc |(fOdd (k+1) - 1/2) - betaOdd * ((1:ℝ)/2) ^ k / 2|
           = |fOdd (k+1) - 1/2 - betaOdd * (((1:ℝ)/2) ^ k / 2)| := by ring_nf
-        _ ≤ MR * ((39:ℝ)/100) ^ k * (39/100) := by
-              calc |fOdd (k+1) - 1/2 - betaOdd * (((1:ℝ)/2) ^ k / 2)|
-                  ≤ MR * (((39:ℝ)/100) ^ k * (39/100)) := h
-                _ = MR * ((39:ℝ)/100) ^ k * (39/100) := by ring
+        _ ≤ MR * (((k:ℝ) + 4) ^ 3) * (((1:ℝ)/3) ^ k * (1/3)) := h
+        _ ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k * (3503/10000) := by
+              have hr : MR * (((k:ℝ) + 4) ^ 3 * (1/3))
+                  ≤ MR * (((k:ℝ) + 3) ^ 3 * (3503/10000)) :=
+                mul_le_mul_of_nonneg_left hratio hMR0
+              calc MR * (((k:ℝ) + 4) ^ 3) * (((1:ℝ)/3) ^ k * (1/3))
+                  = (MR * (((k:ℝ) + 4) ^ 3 * (1/3))) * ((1:ℝ)/3) ^ k := by ring
+                _ ≤ (MR * (((k:ℝ) + 3) ^ 3 * (3503/10000))) * ((1:ℝ)/3) ^ k :=
+                      mul_le_mul_of_nonneg_right hr (le_of_lt h3pos)
+                _ = MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k * (3503/10000) := by ring
     have := odd_step betaOdd P T (fOdd k - 1/2) (fOdd (k+1) - 1/2)
       hb hP hT hTb hA hB
     linarith [this]
