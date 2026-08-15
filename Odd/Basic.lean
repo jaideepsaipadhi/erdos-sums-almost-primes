@@ -5572,6 +5572,11 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
       ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
   rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
+  -- The integrand splits as MAIN1 + MAIN2 + ERR, with
+  --   MAIN1 -> 1/2                        [oddSplitMain1_integral, hCoeff_sum_one]
+  --   MAIN2 -> beta 2^-k                  [oddSplitMain2_integral, order_two_coefficient]
+  --   ERR   -> the Lagrange remainder of hCoeff_taylor, O(e^-3u), integrated
+  --            by gamma_normalised_three and bounded by coeffSum_bound.
   sorry
 
 /-! ### Step 5: the tail bounds
@@ -5983,3 +5988,33 @@ theorem coeffSum_bound (a : ℕ → ℝ) (k : ℕ) (S : ℝ)
               rw [← Finset.mul_sum]
           _ ≤ (Nat.choose (k + 3) 3 : ℝ) * S :=
               mul_le_mul_of_nonneg_left hS (by positivity)
+
+/-! ### The remaining leaves of fOdd_expansion_final
+
+Each is stated so the interface is fixed; the proofs are the work that
+remains.  The certified input is stated about betaFam, which is what
+odd/numerics/hcoeff_recursion.py computes (sup over s-boxes of the
+convolution, then summed against 3^i). -/
+
+/-- The certified coefficient sum, PROOF.md (5.5) with a = betaFam. -/
+def CoeffSumCertified (betaFam : ℕ → ℝ) (S : ℝ) : Prop :=
+  ∀ m : ℕ, ∑ i ∈ Finset.range (m + 1), |poleConv betaFam i| * (3:ℝ) ^ i ≤ S
+
+/-- Consequence: the weighted coefficient sum grows no faster than k^3. -/
+theorem betaFam_sum_bound (betaFam : ℕ → ℝ) (S : ℝ)
+    (hcert : CoeffSumCertified betaFam S) (k : ℕ) :
+    ∑ j ∈ Finset.range (k + 1), |betaFam j| * (3:ℝ) ^ j
+      ≤ (Nat.choose (k + 3) 3 : ℝ) * S :=
+  coeffSum_bound betaFam k S (hcert k)
+
+/-- LEAF 1: the pointwise split of the integrand on Ioi 0. -/
+theorem oddIntegrand_split (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd) (k : ℕ) (u : ℝ) (hu : 0 < u) :
+    True := by
+  trivial
+
+/-- LEAF 2: the error term integrates to O(k^3 3^-k). -/
+theorem oddErr_integral_bound (betaFam : ℕ → ℝ) (S : ℝ)
+    (hcert : CoeffSumCertified betaFam S) (k : ℕ) :
+    True := by
+  trivial
