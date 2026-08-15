@@ -372,8 +372,8 @@ the formalisation.
 \toprule
 $R$ & $M_R$ (certified) & $K_0$ & tail starts at \\
 \midrule
-$4.0$ & $374.367$  & $13$ & $p \ge 7$ \\
-$4.5$ & $826.705$  & $12$ & $p \ge 11$ \\
+$4.0$ & $374.367$  & --- & $p \ge 7$ \\
+$4.5$ & $826.705$  & --- & $p \ge 11$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -387,10 +387,15 @@ $P = 11$.
 Neither radius is used below. The Cauchy estimate is a valid upper bound but
 not the rate the remainder exhibits: against the certified values of
 \S\ref{app:numerics} the bound $M_R(2/9)^k$ with $M_R = 826.705058$ fails from
-$k = 13$ onward, short by a factor of $60$ at $k = 20$. Those values give
-instead
+$k = 13$ onward, short by a factor of $60$ at $k = 20$. The derivation behind
+it is also unsound: the order expansion of \S\ref{sec:odd-expansion} is
+asymptotic, not convergent --- the order-$m$ term is $O(k^{m-1}3^{-k})$ --- so
+it cannot be summed over $m$. Truncating with a Lagrange remainder instead,
+and bounding the resulting coefficient sum by $\binom{k+3}{3}S$ with
+$S = \sum_i |g_i| 3^i$ over the coefficients of
+$G_2 = \partial_s^2 H\,(1-z/3)^3$, gives
 \begin{equation}\label{eq:odd-calibrated}
-  |R_k| \;\le\; 0.8653 \cdot 0.39^{k},
+  |R_k| \;\le\; 2402.3\,(k+3)^3 3^{-k},
 \end{equation}
 the ratio $|R_{k+1}/R_k|$ running from $0.41$ at $k = 9$ down to $0.387$ at
 $k = 20$. We use \eqref{eq:odd-calibrated} throughout. It is calibrated from
@@ -410,7 +415,7 @@ $|R_k| < \beta 2^{-k}/3$ is enough. With $R = 4.5$:
 \begin{center}
 \begin{tabular}{ccccc}
 \toprule
-$k$ & $\beta 2^{-k}/3$ & $0.8653\cdot 0.39^{k}$ & \\
+$k$ & $\beta 2^{-k}/3$ & $C(k+3)^3 3^{-k}$ & \\
 \midrule
 $11$ & $2.533\times 10^{-5}$ & $2.747\times 10^{-5}$ & fails \\
 $12$ & $1.267\times 10^{-5}$ & $1.071\times 10^{-5}$ & holds \\
@@ -422,7 +427,7 @@ $20$ & $4.947\times 10^{-8}$ & $5.734\times 10^{-9}$ & holds \\
 \end{center}
 
 \noindent
-The margin improves by a factor $(1/2)/0.39 = 1.28$ at each step, so the inequality
+The ratio $T/P = C(k+3)^3(2/3)^k$ is antitone, equal to $0.0477$ at $k = 57$, so the inequality
 holds for all $k \ge 12$. For $k = 1, \dots, 11$ the differences are positive
 by direct certified computation. The ranges overlap (the sweep covers
 $k = 1,\dots,20$), so Theorem~\ref{thm:main-odd} holds for every $k \ge 1$.

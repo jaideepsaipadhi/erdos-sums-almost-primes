@@ -86,82 +86,149 @@ beta from above.
 
 ## 5. The remainder
 
-Factor out the p = 3 pole:
+Write
 
-    Htilde(s,z) = H(s,z) (1 - z 3^-s),
+    R_k = f_k^odd - 1/2 - beta 2^-k
 
-analytic in |z| < 5^s.  Cauchy's estimate on |z| = R < 5 gives
+for the remainder after the two main terms of (4.1).  This section proves
 
-    |[z^k] Htilde(1,z)| <= M_R R^-k,   M_R = sup_{|z|=R, s in [1,2]} |Htilde|.
+    |R_k| <= C (k+3)^3 3^-k,   C = 2402.3,                                (5.1)
 
-This is a valid upper bound but a very weak one: it is not the rate the
-remainder actually exhibits.  Against the certified values of section 7 the
-bound M_R (2/9)^k with M_R = 826.705058 FAILS from k = 13 onward (at k = 20 it
-is short by a factor of 60).  The certified values give instead
+and hence, with section 6, the threshold K0^odd = 57.
 
-    |R_k| <= 0.8653 * 0.39^k,                                             (5.1)
+The rate is 3^-k, not the 4.5^-k of a naive Cauchy estimate: the pole of
+H(s,.) at z = 3^s sets it, and no contour argument does better.  The factor
+(k+3)^3 comes from the second s-derivative, whose pole at z = 3^s has order
+three.
 
-the ratio |R_{k+1}/R_k| running from 0.41 at k = 9 down to 0.387 at k = 20,
-and the constant attained at k = 1.  (5.1) is calibrated from the certified
-f_k^odd, not derived; deriving it needs the pole-dominated asymptotic of the
-coefficients of H and of their s-derivatives, which is not attempted here.
+### 5.1 Why the order expansion cannot be summed
 
-## 5a. Choice of radius
+Section 2 organises the integrand by powers of e^-u, with (2.5) recording the
+order-m contribution as O(m^-(k+1)).  That expansion is ASYMPTOTIC, not
+convergent, and must not be summed over m.
 
-R may be taken anywhere below 5.  Two constraints pull in opposite directions:
-a larger R lowers the threshold K0, while a smaller R lets the Euler tail start
-at a smaller prime, which matters for a formalization.
+eps^r times the Jacobian contributes at order e^-(r+1)u, so the order-m term
+draws on the (m-1)th s-derivative of the coefficients.  Those have a pole of
+order m at z = 3^s, hence coefficients of size i^(m-1) 3^-i, and the order-m
+contribution is
 
-    R     M_R (certified)   K0    tail starts at
-    4.0      374.367         13      p >= 7
-    4.5      826.705         12      p >= 11
+    m^-(k+1) sum_{i<=k} c_i^(m) m^i ~ [C_{m-1}/(m-1)!] k^(m-1) 3^-k/(m-3).
 
-(The tail constraint: the p-th factor needs its correction bounded by 1, which
-at radius R and prime P reads R^2/(1 - R/P) + 1.25 R <= P^2.  At R = 4.5 that
-fails for P = 7 -- 62.3 > 49 -- and first holds at P = 11.)
+The power of k GROWS with m; summing over m >= 3 diverges.  Earlier drafts of
+this note summed it, and the bound they reported -- M_R (2/9)^k with
+M_R = 826.705058 -- is numerically false, failing from k = 13 onward against
+the certified values of section 7.
 
-Neither radius is used below.  The Cauchy route is superseded by the
-calibrated bound (5.1); the table is retained only to record what the
-contour estimate yields.  The threshold K0 = 12 quoted there happens to
-agree with the one (5.1) gives, but for unrelated reasons.
+The correct route truncates with an explicit remainder.  Taylor to second
+order in Lagrange form,
+
+    |h_j(s) - h_j(1) - (s-1) b_j| <= (1/2) sup_{t in [1,2]} |h_j''(t)| (s-1)^2,
+                                                                         (5.2)
+
+leaves one error term.  Since eps(u) ~ e^-u and the Jacobian ~ e^-u that term
+is O(e^-3u), and int_0^inf u^m e^-3u/m! du = 3^-(m+1) gives, with m = k-j,
+
+    |R_k| <= (1/3) 3^-k sum_{j<=k} |h_j''| 3^j + (lower order).            (5.3)
+
+### 5.2 The coefficient sum
+
+Factor out the pole:
+
+    G_2(s,z) = d_s^2 H(s,z) (1 - z 3^-s)^3,                                (5.4)
+
+analytic in |z| < 5^s.  With g_j = [z^j] G_2(1,z), expanding (1 - z/3)^-3 by
+the negative binomial series gives
+
+    h_j'' = 3^-j sum_{i<=j} g_i 3^i C(j-i+2, 2),
+
+and summing over j <= k,
+
+    sum_{j<=k} |h_j''| 3^j <= C(k+3, 3) * S,   S := sum_i |g_i| 3^i.       (5.5)
+
+Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give (5.1) with C = S/6.
+
+A bound |h_j''| <= C 3^-j would be exactly critical -- sums like
+sum_{j<=k} |h_j''| 3^j would then grow linearly in k rather than converge.  It
+is the pole cancellation in (5.4) that makes S finite.
+
+### 5.3 Computing S
+
+S is split at i = 16.
+
+HEAD, i <= 16, by direct interval recursion (odd/numerics/hcoeff_recursion.py).
+Writing
+
+    log H(s,z) = z L_1(s) + sum_{j>=2} z^j L_j(s),
+      L_1 = log(1-2^-s) + sum_{p>=3}[p^-s + log(1-p^-s)],
+      L_j = P(s,j)/j,  P(s,j) = sum_{p>=3} p^-sj,
+
+the coefficients of H follow from h_m = (1/m) sum_{j<=m} j L_j h_{m-j}, those
+of d_s^2 H from d_s^2 H = H (D_1^2 + D_2) with D_r = sum_j L_j^(r) z^j, and the
+g_i from the product with (1 - z/3)^3.  Every step carries s as a certified
+interval, [1,2] partitioned into 1600 boxes.  Result:
+
+    sum_{i<=16} |g_i| 3^i <= 8424.
+
+TAIL, i > 16, by Cauchy, which is cheap here because the terms are small.  By
+(5.4) G_2 is analytic in |z| < 5, so on |z| = R = 4.5, |g_i| <= M R^-i with
+M = sup_{|z|=R, s in [1,2]} |G_2| <= 1.97e6 (odd/numerics/mr_deriv_sweep.py),
+giving
+
+    sum_{i>16} |g_i| 3^i <= M (3/R)^17/(1 - 3/R) <= 5990.
+
+Hence S <= 14414 and C = S/6 = 2402.3.
+
+BOTH HALVES ARE NECESSARY.  Cauchy from i = 0 gives C = 327869 and K0 = 71,
+too weak to meet the certified sweep: the circle estimate discards the
+cancellation among the true coefficients, costing about 5.5e5.  The recursion
+alone cannot reach large i: interval width in s compounds through the
+recurrence, and past i ~ 14 the computed |g_i| 3^i stop decreasing and rise,
+which is width rather than signal.
+
+### 5.4 What is assumed
+
+(5.1) rests on two interval computations,
+
+  * sum_{i<=16} |g_i| 3^i <= 8424        (1600 s-boxes, primes to 1e5)
+  * sup_{|z|=4.5, s in [1,2]} |G_2| <= 1.97e6   (200 theta x 40 s boxes)
+
+and on 5.1-5.2, elementary given them.  No constant is fitted to the certified
+f_k^odd; the agreement with those values (the bound is 350-500x conservative
+at k = 20..40) is a check, not an input.
 
 ## 6. Assembly
 
     f_k^odd - f_{k+1}^odd = beta 2^-(k+1) + (R_k - R_{k+1}),
 
 so it suffices that |R_k| + |R_{k+1}| < beta 2^-(k+1), for which
-|R_k| < beta 2^-k / 3 is enough.  With the calibrated bound (5.1):
+|R_k| < beta 2^-k / 3 is enough.  With (5.1):
 
-    k        beta 2^-k / 3      0.8653 * 0.39^k
-   11         2.533e-05         2.747e-05        fails
-   12         1.267e-05         1.071e-05        holds
-   13         6.333e-06         4.178e-06        holds
-   15         1.583e-06         6.355e-07        holds
-   20         4.947e-08         5.734e-09        holds
+    k        beta 2^-k / 3      C (k+3)^3 3^-k
+   55         1.440e-18          1.570e-18       fails
+   56         7.200e-19          5.510e-19       holds
+   57         3.600e-19          1.932e-19       holds
+   60         4.499e-20          8.240e-21       holds
 
-and the margin improves by a factor (1/2)/0.39 = 1.28 at each step, so the
-inequality holds for all k >= 12.  For k = 1..11 the differences are positive
-by direct certified computation.  The two ranges overlap (the sweep covers
-k = 1..20), so the theorem holds for every k >= 1.  QED
+T/P = C(k+3)^3 (2/3)^k is antitone in k (the ratio is ((k+4)/(k+3))^3 (2/3),
+below 1 for k >= 4), with value 0.0477 at k = 57, so the inequality holds for
+all k >= 57.  For k = 1..56 the differences are positive by direct certified
+computation, which now reaches k = 60 (odd/numerics/fodd60.log).  The ranges
+overlap at 57..60, so the theorem holds for every k >= 1.  QED
 
 ## 7. The certified constants
 
-    d       0.3786950 +/- 5.3e-8         main development
-    S       [0.8593920314, 0.8593986014] head to 5e6, tail 2(log P + 1)/P
-    beta    [0.1556300826, 0.1556326142]
-    M       <= 0.8653  at ratio 0.39      calibrated, section 5
-    K0^odd  12                            using the worst-case beta
+    d           0.3786950 +/- 5.3e-8         main development
+    S_odd       [0.8593920314, 0.8593986014]  head to 5e6, tail 2(log P + 1)/P
+    beta        [0.1556300826, 0.1556326142]
+    sum|g_i|3^i <= 8424  (i <= 16)            hcoeff_recursion.py, 1600 s-boxes
+    sup|G_2|    <= 1.97e6 on |z|=4.5          mr_deriv_sweep.py
+    C = S/6     2402.3                        (5.1)
+    K0^odd      57                            certified sweep reaches 60
 
-M_R is computed by interval arithmetic over 40 boxes in s on [1,2] and 100
-boxes in theta on the circle, with primes to 50000 and an explicit tail bound
-(`odd/numerics/mr_certified.py`).  Subdividing s matters: a single box over
-[1,2] gives M_R <= 739605, which pushes the threshold to k = 21 and would open
-a gap against the certified range.
-
-The certified values of f_k^odd for k = 1..20 are produced by
-`odd/numerics/fodd_run.py`, which adapts the main development's panel
-machinery by replacing the prime zeta P(t) with P(t) - 2^-t and the large-s
-tail bound P(s) <= 2.78 * 2^-s with P_odd(s) <= 1.91 * 3^-s.
+The certified values of f_k^odd for k = 1..60 are produced by
+odd/numerics/fodd_run.py at 1000-bit precision, which adapts the main
+development's panel machinery by replacing the prime zeta P(t) with P(t)-2^-t
+and the large-s tail bound P(s) <= 2.78*2^-s with P_odd(s) <= 1.91*3^-s.
 
 ## 8. What is assumed
 
