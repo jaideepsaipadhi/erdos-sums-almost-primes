@@ -6031,6 +6031,64 @@ theorem dom_sum_bound (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : �
       ≤ (Nat.choose (k + 3) 3 : ℝ) * S :=
   coeffSum_bound dom k S (hd.dom_cert k)
 
+/-- eps(u) J(u) = e^-2u + O(e^-3u).
+
+Only the FIRST-order expansions are needed: writing
+
+    eps J - e^-2u = (eps - e^-u) J + e^-u (J - e^-u),
+
+each bracket is O(e^-2u) against a factor that is O(e^-u).  This supplies the
+b_j e^-2u of MAIN2 and leaves an O(e^-3u) error. -/
+theorem eps_jacobian_product :
+    ∃ C > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
+      |(sOf u - 1) * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - Real.exp (-2 * u)|
+      ≤ C * Real.exp (-3 * u) := by
+  obtain ⟨Ce, hCe, Ue, hUe, he⟩ := eps_of_u_expansion
+  obtain ⟨Cj, hCj, Uj, hUj, hj⟩ := jacobian_u_form
+  refine ⟨Ce * (Cj + 1) + Cj, by positivity, max Ue Uj, by positivity, ?_⟩
+  intro u hu
+  have hUe' : Ue ≤ u := le_trans (le_max_left _ _) hu
+  have hUj' : Uj ≤ u := le_trans (le_max_right _ _) hu
+  have hu0 : (0:ℝ) ≤ u := le_trans (le_of_lt hUe) hUe'
+  set eps := sOf u - 1 with hepsdef
+  set J := (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)) with hJdef
+  have hE : |eps - Real.exp (-u)| ≤ Ce * Real.exp (-2 * u) := he u hUe'
+  have hJd : |J - Real.exp (-u)| ≤ Cj * Real.exp (-2 * u) := hj u hUj'
+  have h1 : (0:ℝ) < Real.exp (-u) := Real.exp_pos _
+  have h2 : (0:ℝ) < Real.exp (-2 * u) := Real.exp_pos _
+  have e21 : Real.exp (-2 * u) = Real.exp (-u) * Real.exp (-u) := by
+    rw [← Real.exp_add]; ring_nf
+  have e31 : Real.exp (-3 * u) = Real.exp (-u) * Real.exp (-2 * u) := by
+    rw [← Real.exp_add]; ring_nf
+  have e42 : Real.exp (-2 * u) ≤ Real.exp (-u) := by
+    apply Real.exp_le_exp.mpr; linarith
+  have hJb : |J| ≤ Cj * Real.exp (-2 * u) + Real.exp (-u) := by
+    have hd := abs_le.mp hJd
+    rw [abs_le]
+    constructor
+    · linarith [hd.1, h1, h2, hCj]
+    · linarith [hd.2, h1]
+  have hsplit : eps * J - Real.exp (-2 * u)
+      = (eps - Real.exp (-u)) * J + Real.exp (-u) * (J - Real.exp (-u)) := by
+    rw [e21]; ring
+  rw [hsplit]
+  calc |(eps - Real.exp (-u)) * J + Real.exp (-u) * (J - Real.exp (-u))|
+      ≤ |(eps - Real.exp (-u)) * J| + |Real.exp (-u) * (J - Real.exp (-u))| :=
+        abs_add_le _ _
+    _ = |eps - Real.exp (-u)| * |J| + Real.exp (-u) * |J - Real.exp (-u)| := by
+        rw [abs_mul, abs_mul, abs_of_pos h1]
+    _ ≤ (Ce * Real.exp (-2 * u)) * (Cj * Real.exp (-2 * u) + Real.exp (-u))
+          + Real.exp (-u) * (Cj * Real.exp (-2 * u)) := by
+        apply add_le_add
+        · exact mul_le_mul hE hJb (abs_nonneg _) (by positivity)
+        · exact mul_le_mul_of_nonneg_left hJd (le_of_lt h1)
+    _ ≤ (Ce * (Cj + 1) + Cj) * Real.exp (-3 * u) := by
+        rw [e31]
+        -- RHS - LHS = Ce Cj e2 (e1 - e2) >= 0
+        nlinarith [mul_nonneg (mul_nonneg (le_of_lt hCe) (le_of_lt hCj))
+          (mul_nonneg (le_of_lt h2) (sub_nonneg.mpr e42))]
+
 /-- LEAF 1: the pointwise split of the integrand on Ici U.
 
     integrand = MAIN1 + MAIN2 + ERR,   |ERR| <= 4 W_k(u) e^-3u
