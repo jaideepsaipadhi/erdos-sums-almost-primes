@@ -6007,14 +6007,57 @@ theorem betaFam_sum_bound (betaFam : ℕ → ℝ) (S : ℝ)
       ≤ (Nat.choose (k + 3) 3 : ℝ) * S :=
   coeffSum_bound betaFam k S (hcert k)
 
-/-- LEAF 1: the pointwise split of the integrand on Ioi 0. -/
-theorem oddIntegrand_split (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
-    (hf : OddCoeffFacts betaFam bHatOdd) (k : ℕ) (u : ℝ) (hu : 0 < u) :
-    True := by
-  trivial
+/-- The certified dominating sequence.  All three of |h_j(1)|, |b_j| and
+betaFam j are bounded by dom j, and CoeffSumCertified dom S holds.  These are
+exactly the r = 0, 1, 2 columns that odd/numerics/hcoeff_recursion.py prints,
+so the Lean interface and the numerics agree by construction.
 
-/-- LEAF 2: the error term integrates to O(k^3 3^-k). -/
-theorem oddErr_integral_bound (betaFam : ℕ → ℝ) (S : ℝ)
-    (hcert : CoeffSumCertified betaFam S) (k : ℕ) :
-    True := by
-  trivial
+A single sequence is needed because the four error pieces of the split draw on
+all three: piece (1) on betaFam, (2) and (3) on |b_j|, (4) on |h_j(1)|.  Note
+OddCoeffFacts alone bounds none of |h_j(1)| -- tendsto_one gives convergence,
+not size -- so this is a genuine additional input, not a repackaging. -/
+structure OddDomFacts (dom : ℕ → ℝ) (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (S : ℝ) : Prop where
+  dom_nonneg : ∀ j, 0 ≤ dom j
+  dom_h      : ∀ j, ‖hCoeff 1 j‖ ≤ dom j
+  dom_b      : ∀ j, ‖bHatOdd j‖ ≤ dom j
+  dom_beta   : ∀ j, betaFam j ≤ dom j
+  dom_cert   : CoeffSumCertified dom S
+
+/-- The weighted sum of the dominating sequence, from step 3. -/
+theorem dom_sum_bound (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : ℝ)
+    (hd : OddDomFacts dom betaFam bHatOdd S) (k : ℕ) :
+    ∑ j ∈ Finset.range (k + 1), |dom j| * (3:ℝ) ^ j
+      ≤ (Nat.choose (k + 3) 3 : ℝ) * S :=
+  coeffSum_bound dom k S (hd.dom_cert k)
+
+/-- LEAF 1: the pointwise split of the integrand on Ici U.
+
+    integrand = MAIN1 + MAIN2 + ERR,   |ERR| <= 4 W_k(u) e^-3u
+
+where W_k(u) = sum_{j<=k} dom j u^(k-j)/(k-j)! collects the coefficient
+weights.  The four pieces are (1) the Lagrange remainder against J, (2) eps b_j
+against J - e^-u, (3) (eps - e^-u) b_j against e^-u, and (4) h_j(1) against
+J - e^-u - 2 gamma e^-2u. -/
+theorem oddIntegrand_split (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : ℝ)
+    (hf : OddCoeffFacts betaFam bHatOdd)
+    (hd : OddDomFacts dom betaFam bHatOdd S) (k : ℕ) :
+    ∃ CE > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
+      |(∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u|
+      ≤ CE * (∑ j ∈ Finset.range (k + 1),
+          dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u) := by
+  sorry
+
+/-- LEAF 2: the error integrates to O(k^3 3^-k), via gamma_normalised_three
+and step 3's coefficient bound. -/
+theorem oddErr_integral_bound (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (S CE : ℝ) (hCE : 0 ≤ CE)
+    (hd : OddDomFacts dom betaFam bHatOdd S) (k : ℕ) :
+    CE * ∫ u in Set.Ioi (0:ℝ),
+        (∑ j ∈ Finset.range (k + 1),
+          dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u)
+      ≤ CE * (Nat.choose (k + 3) 3 : ℝ) * S * ((1:ℝ)/3) ^ (k + 1) := by
+  sorry
