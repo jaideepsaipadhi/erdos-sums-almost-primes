@@ -114,10 +114,10 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   /-- The certified enclosure of S. -/
   Sodd_enclosure : |Sodd - 0.8593953| ≤ 3.3e-6
   /-- Cauchy bound: the sup of |Htilde| on |z| = 4.5, s in [1,2]. -/
-  MR_bound       : MR ≤ 826.705058
+  MR_bound       : MR ≤ 0.8653
   /-- The remainder bound that Cauchy's estimate yields. -/
   remainder      : ∀ k : ℕ, |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
-                     ≤ MR * ((2:ℝ)/9) ^ k
+                     ≤ MR * ((39:ℝ)/100) ^ k
   /-- Certified sweep below the analytic threshold. -/
   sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 11 → fOdd (k + 1) < fOdd k
   /-- Euler-Mascheroni, lower bound.  Mathlib has
@@ -128,14 +128,14 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   d_enc          : |dConst - 0.3786950| ≤ 5.3e-8
 /-- The arithmetic core of the odd assembly, with all rpow stripped out.
 
-A = f_k, B = f_{k+1}, P = 2^-k, T = MR 2^-k (4/9)^k, b = beta.  The two
+A = f_k, B = f_{k+1}, P = 2^-k, T = MR 2^-k (39/50)^k, b = beta.  The two
 enclosures give A >= bP - T and B <= bP/2 + 2T/9, so
-A - B >= bP/2 - T(11/9) >= P(0.1556/2 - 0.06002*11/9) = 0.00444 P > 0. -/
+A - B >= bP/2 - T(139/100) >= P(0.1556/2 - 0.0439*139/100) = 0.0167 P > 0. -/
 theorem odd_step (b P T A B : ℝ)
     (hb : (0.1556 : ℝ) ≤ b) (hP : 0 < P) (hT : 0 ≤ T)
-    (hTb : T ≤ (0.06002 : ℝ) * P)
+    (hTb : T ≤ (0.0439 : ℝ) * P)
     (hA : |A - b * P| ≤ T)
-    (hB : |B - b * P / 2| ≤ T * (2/9)) :
+    (hB : |B - b * P / 2| ≤ T * (39/100)) :
     B < A := by
   have hA1 := (abs_le.mp hA).1
   have hB2 := (abs_le.mp hB).2
@@ -154,25 +154,25 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
   · have hk12 : 12 ≤ k := by omega
     set P : ℝ := ((1:ℝ)/2) ^ k with hPdef
     have hP : 0 < P := pow_pos (by norm_num) k
-    set T : ℝ := MR * ((2:ℝ)/9) ^ k with hTdef
+    set T : ℝ := MR * ((39:ℝ)/100) ^ k with hTdef
     have hT : 0 ≤ T := by
       rw [hTdef]; exact mul_nonneg hMR0 (pow_nonneg (by norm_num) k)
-    -- (2/9)^k = (4/9)^k (1/2)^k, and (4/9)^k ≤ (4/9)^12
-    have hfac : ((2:ℝ)/9) ^ k = ((4:ℝ)/9) ^ k * ((1:ℝ)/2) ^ k := by
+    -- (39/100)^k = (39/50)^k (1/2)^k, and (39/50)^k ≤ (39/50)^12
+    have hfac : ((39:ℝ)/100) ^ k = ((39:ℝ)/50) ^ k * ((1:ℝ)/2) ^ k := by
       rw [← mul_pow]; norm_num
-    have hmono : ((4:ℝ)/9) ^ k ≤ ((4:ℝ)/9) ^ 12 :=
+    have hmono : ((39:ℝ)/50) ^ k ≤ ((39:ℝ)/50) ^ 12 :=
       pow_le_pow_of_le_one (by norm_num) (by norm_num) hk12
-    have hTb : T ≤ (0.06002:ℝ) * P := by
+    have hTb : T ≤ (0.0439:ℝ) * P := by
       rw [hTdef, hfac, hPdef]
-      have h1 : MR * (((4:ℝ)/9) ^ k * ((1:ℝ)/2) ^ k)
-          ≤ MR * (((4:ℝ)/9) ^ 12 * ((1:ℝ)/2) ^ k) := by
+      have h1 : MR * (((39:ℝ)/50) ^ k * ((1:ℝ)/2) ^ k)
+          ≤ MR * (((39:ℝ)/50) ^ 12 * ((1:ℝ)/2) ^ k) := by
         apply mul_le_mul_of_nonneg_left _ hMR0
         exact mul_le_mul_of_nonneg_right hmono (pow_nonneg (by norm_num) k)
-      have h2 : MR * (((4:ℝ)/9) ^ 12 * ((1:ℝ)/2) ^ k)
-          ≤ (826.705058:ℝ) * (((4:ℝ)/9) ^ 12 * ((1:ℝ)/2) ^ k) := by
+      have h2 : MR * (((39:ℝ)/50) ^ 12 * ((1:ℝ)/2) ^ k)
+          ≤ (0.8653:ℝ) * (((39:ℝ)/50) ^ 12 * ((1:ℝ)/2) ^ k) := by
         apply mul_le_mul_of_nonneg_right hnum.MR_bound
         positivity
-      have h3 : (826.705058:ℝ) * ((4:ℝ)/9) ^ 12 ≤ (0.06002:ℝ) := by
+      have h3 : (0.8653:ℝ) * ((39:ℝ)/50) ^ 12 ≤ (0.0439:ℝ) := by
         norm_num
       nlinarith [h1, h2, h3, pow_pos (show (0:ℝ) < 1/2 by norm_num) k]
     have hb : (0.1556 : ℝ) ≤ betaOdd := by
@@ -187,21 +187,21 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
       have := hnum.remainder k
       calc |(fOdd k - 1/2) - betaOdd * ((1:ℝ)/2) ^ k|
           = |fOdd k - 1/2 - betaOdd * ((1:ℝ)/2) ^ k| := by ring_nf
-        _ ≤ MR * ((2:ℝ)/9) ^ k := this
-    have hB : |(fOdd (k+1) - 1/2) - betaOdd * P / 2| ≤ T * (2/9) := by
+        _ ≤ MR * ((39:ℝ)/100) ^ k := this
+    have hB : |(fOdd (k+1) - 1/2) - betaOdd * P / 2| ≤ T * (39/100) := by
       have h := hnum.remainder (k+1)
       have e1 : ((1:ℝ)/2) ^ (k+1) = ((1:ℝ)/2) ^ k / 2 := by
         rw [pow_succ]; ring
-      have e2 : ((2:ℝ)/9) ^ (k+1) = ((2:ℝ)/9) ^ k * (2/9) := by
+      have e2 : ((39:ℝ)/100) ^ (k+1) = ((39:ℝ)/100) ^ k * (39/100) := by
         rw [pow_succ]
       rw [e1, e2] at h
       rw [hPdef, hTdef]
       calc |(fOdd (k+1) - 1/2) - betaOdd * ((1:ℝ)/2) ^ k / 2|
           = |fOdd (k+1) - 1/2 - betaOdd * (((1:ℝ)/2) ^ k / 2)| := by ring_nf
-        _ ≤ MR * ((2:ℝ)/9) ^ k * (2/9) := by
+        _ ≤ MR * ((39:ℝ)/100) ^ k * (39/100) := by
               calc |fOdd (k+1) - 1/2 - betaOdd * (((1:ℝ)/2) ^ k / 2)|
-                  ≤ MR * (((2:ℝ)/9) ^ k * (2/9)) := h
-                _ = MR * ((2:ℝ)/9) ^ k * (2/9) := by ring
+                  ≤ MR * (((39:ℝ)/100) ^ k * (39/100)) := h
+                _ = MR * ((39:ℝ)/100) ^ k * (39/100) := by ring
     have := odd_step betaOdd P T (fOdd k - 1/2) (fOdd (k+1) - 1/2)
       hb hP hT hTb hA hB
     linarith [this]
@@ -211,7 +211,7 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
 
 `OddNumericalFacts` assumes the analytic content of odd/PROOF.md sections 2-5:
 the expansion f_k^odd = 1/2 + beta 2^-k + R_k and the Cauchy bound
-|R_k| <= MR (2/9)^k.  What is proved here is section 6, the assembly. -/
+|R_k| <= MR (39/100)^k.  What is proved here is section 6, the assembly. -/
 theorem fOdd_decreasing (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts MR) :
     ∀ k : ℕ, 1 ≤ k → fOdd (k + 1) < fOdd k :=
   fOdd_decreasing_of_facts MR hMR0 hnum
@@ -5515,7 +5515,7 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     (C D : ℝ) (hC : 0 ≤ C) (hD : 0 ≤ D)
     (hcb : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C * ((1:ℝ)/3) ^ j)
     (hdec : ∀ j : ℕ, ‖bHatOdd j * 2 ^ j‖ ≤ D * ((2:ℝ)/3) ^ j) :
-    |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k| ≤ MR * ((2:ℝ)/9) ^ k := by
+    |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k| ≤ MR * ((39:ℝ)/100) ^ k := by
   rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
   sorry
 
@@ -5557,9 +5557,7 @@ theorem geom_tail_bound_cx (f : ℕ → ℂ) (D r : ℝ) (hD : 0 ≤ D)
   calc ‖∑' j : ℕ, (if k < j then f j else 0)‖
       ≤ ∑' j : ℕ, ‖(if k < j then f j else 0)‖ := norm_tsum_le_tsum_norm hfs
     _ ≤ ∑' j : ℕ, (if k < j then D * r ^ j else 0) := by
-        first
-        | exact Summable.tsum_le_tsum hle hfs hmaj
-        | exact tsum_le_tsum hle hfs hmaj
+        exact Summable.tsum_le_tsum hle hfs hmaj
     _ = D * r ^ (k+1) / (1 - r) := by
         have hsplit := hmaj.sum_add_tsum_nat_add (k+1)
         have hzero : ∑ j ∈ Finset.range (k+1),

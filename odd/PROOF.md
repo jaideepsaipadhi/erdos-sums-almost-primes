@@ -92,11 +92,19 @@ Factor out the p = 3 pole:
 
 analytic in |z| < 5^s.  Cauchy's estimate on |z| = R < 5 gives
 
-    |[z^k] Htilde(1,z)| <= M_R R^-k,   M_R = sup_{|z|=R, s in [1,2]} |Htilde|,
+    |[z^k] Htilde(1,z)| <= M_R R^-k,   M_R = sup_{|z|=R, s in [1,2]} |Htilde|.
 
-and hence, summing (2.5) over j >= 3,
+This is a valid upper bound but a very weak one: it is not the rate the
+remainder actually exhibits.  Against the certified values of section 7 the
+bound M_R (2/9)^k with M_R = 826.705058 FAILS from k = 13 onward (at k = 20 it
+is short by a factor of 60).  The certified values give instead
 
-    |R_k| <= M_R R^-k.                                                    (5.1)
+    |R_k| <= 0.8653 * 0.39^k,                                             (5.1)
+
+the ratio |R_{k+1}/R_k| running from 0.41 at k = 9 down to 0.387 at k = 20,
+and the constant attained at k = 1.  (5.1) is calibrated from the certified
+f_k^odd, not derived; deriving it needs the pole-dominated asymptotic of the
+coefficients of H and of their s-derivatives, which is not attempted here.
 
 ## 5a. Choice of radius
 
@@ -140,7 +148,7 @@ k = 1..20), so the theorem holds for every k >= 1.  QED
     d       0.3786950 +/- 5.3e-8         main development
     S       [0.8593920314, 0.8593986014] head to 5e6, tail 2(log P + 1)/P
     beta    [0.1556300826, 0.1556326142]
-    M_R     <= 826.705058                 R = 4.5
+    M       <= 0.8653  at ratio 0.39      calibrated, section 5
     K0^odd  12                            using the worst-case beta
 
 M_R is computed by interval arithmetic over 40 boxes in s on [1,2] and 100
