@@ -5561,10 +5561,16 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     (hf : OddCoeffFacts betaFam bHatOdd)
     (hdiff : ∀ t : ℝ, 1 ≤ t →
       DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4))
-    (C D : ℝ) (hC : 0 ≤ C) (hD : 0 ≤ D)
-    (hcb : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C * ((1:ℝ)/3) ^ j)
-    (hdec : ∀ j : ℕ, ‖bHatOdd j * 2 ^ j‖ ≤ D * ((2:ℝ)/3) ^ j) :
-    |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k| ≤ MR * ((39:ℝ)/100) ^ k := by
+    -- The certified coefficient sum of PROOF.md (5.5).  S = sum_i |g_i| 3^i
+    -- over the coefficients of G_2 = d_s^2 H (1 - z/3)^3; the certified value
+    -- is S <= 14414 (head i <= 16 by interval recursion, tail by Cauchy).
+    (S : ℝ) (hS0 : 0 ≤ S)
+    (hSbound : ∀ m : ℕ, ∑ j ∈ Finset.range (m + 1),
+        ‖deriv (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t) 1‖ * (3:ℝ) ^ j
+      ≤ S * ((m:ℝ) + 3) ^ 3 / 6)
+    (hMR : S / 6 ≤ MR) :
+    |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
+      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
   rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
   sorry
 
@@ -5643,3 +5649,116 @@ theorem bHatOdd_tail_bound (bHatOdd : ℕ → ℂ) (D : ℝ) (hD : 0 ≤ D)
       ≤ D * ((2:ℝ)/3) ^ (k+1) / (1 - 2/3) :=
   geom_tail_bound_cx (fun j => bHatOdd j * 2 ^ j) D (2/3) hD (by norm_num)
     (by norm_num) hdec k
+
+/-! ### Step 3: the coefficient sum, by finite algebra
+
+PROOF.md (5.5).  With g the convolution of h'' against the coefficients of
+(1 - z/3)^3 = 1 - z + z^2/3 - z^3/27, the inverse convolution recovers h'':
+
+    h_j'' = sum_{i<=j} g_i C(j-i+2,2) 3^-(j-i)
+
+because (1,-1,1/3,-1/27) and (C(m+2,2) 3^-m) are convolution inverses.  This
+is finite algebra: no analyticity of G_2 enters. -/
+
+/-- The coefficients of (1 - z/3)^3. -/
+noncomputable def poleCoeff : ℕ → ℝ
+  | 0 => 1
+  | 1 => -1
+  | 2 => 1/3
+  | 3 => -1/27
+  | _ => 0
+
+/-- The coefficients of (1 - z/3)^(-3). -/
+noncomputable def invPoleCoeff (m : ℕ) : ℝ :=
+  (Nat.choose (m + 2) 2 : ℝ) * ((1:ℝ)/3) ^ m
+
+/-- C(m+2,2) as a quadratic over the reals. -/
+theorem choose_two_real (m : ℕ) :
+    (Nat.choose (m + 2) 2 : ℝ) = ((m:ℝ) + 2) * ((m:ℝ) + 1) / 2 := by
+  induction m with
+  | zero => norm_num
+  | succ n ih =>
+      rw [show n + 1 + 2 = (n + 2) + 1 by ring, Nat.choose_succ_succ' (n + 2) 1,
+        Nat.choose_one_right]
+      push_cast at ih ⊢
+      linarith [ih]
+
+/-- Hockey stick: sum_{m<=n} C(m+2,2) = C(n+3,3). -/
+theorem hockey_stick (n : ℕ) :
+    ∑ m ∈ Finset.range (n + 1), (Nat.choose (m + 2) 2 : ℝ)
+      = (Nat.choose (n + 3) 3 : ℝ) := by
+  induction n with
+  | zero => norm_num
+  | succ m ih =>
+      rw [Finset.sum_range_succ, ih]
+      have hp : Nat.choose (m + 1 + 3) 3
+          = Nat.choose (m + 3) 3 + Nat.choose (m + 3) 2 := by
+        rw [show m + 1 + 3 = (m + 3) + 1 by ring, Nat.choose_succ_succ' (m + 3) 2]
+        ring
+      rw [hp]
+      push_cast
+      have : (Nat.choose (m + 3) 2 : ℝ) = (Nat.choose (m + 1 + 2) 2 : ℝ) := by
+        norm_num
+      linarith [this]
+
+/-- poleCoeff vanishes from index 4 on. -/
+theorem poleCoeff_zero (t : ℕ) (ht : 4 ≤ t) : poleCoeff t = 0 := by
+  match t, ht with
+  | (m+4), _ => rfl
+
+/-- (a) The two coefficient sequences are convolution inverses.
+
+For n >= 4 only t = 0,1,2,3 contribute, and the bracket
+
+    (n+2)(n+1) - 3n(n+1) + 3n(n-1) - (n-1)(n-2)
+
+is the third finite difference of a quadratic, hence identically zero. -/
+theorem poleCoeff_conv (n : ℕ) :
+    ∑ t ∈ Finset.range (n + 1), poleCoeff t * invPoleCoeff (n - t)
+      = if n = 0 then 1 else 0 := by
+  have hc : ∀ m : ℕ, invPoleCoeff m
+      = (((m:ℝ) + 2) * ((m:ℝ) + 1) / 2) * ((1:ℝ)/3) ^ m := by
+    intro m; rw [invPoleCoeff, choose_two_real]
+  match n with
+  | 0 => norm_num [poleCoeff, hc]
+  | 1 =>
+      rw [Finset.sum_range_succ, Finset.sum_range_succ]
+      norm_num [poleCoeff, hc]
+  | 2 =>
+      rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ]
+      norm_num [poleCoeff, hc]
+  | 3 =>
+      rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+        Finset.sum_range_succ]
+      norm_num [poleCoeff, hc]
+  | (m+4) =>
+      have hsub : Finset.range 4 ⊆ Finset.range (m + 4 + 1) := by
+        intro x hx
+        rw [Finset.mem_range] at hx ⊢
+        omega
+      have hvanish : ∀ x ∈ Finset.range (m + 4 + 1), x ∉ Finset.range 4 →
+          poleCoeff x * invPoleCoeff (m + 4 - x) = 0 := by
+        intro x _ hx
+        rcases Nat.lt_or_ge x 4 with h | h
+        · exact absurd (Finset.mem_range.mpr h) hx
+        · rw [poleCoeff_zero x h, zero_mul]
+      rw [← Finset.sum_subset hsub hvanish]
+      rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_succ,
+        Finset.sum_range_succ, Finset.sum_range_zero]
+      have e0 : m + 4 - 0 = m + 4 := by omega
+      have e1 : m + 4 - 1 = m + 3 := by omega
+      have e2 : m + 4 - 2 = m + 2 := by omega
+      have e3 : m + 4 - 3 = m + 1 := by omega
+      rw [e0, e1, e2, e3]
+      simp only [poleCoeff, hc]
+      have p4 : ((1:ℝ)/3) ^ (m+4) = ((1:ℝ)/3) ^ m * (1/81) := by
+        rw [pow_add]; norm_num
+      have p3 : ((1:ℝ)/3) ^ (m+3) = ((1:ℝ)/3) ^ m * (1/27) := by
+        rw [pow_add]; norm_num
+      have p2 : ((1:ℝ)/3) ^ (m+2) = ((1:ℝ)/3) ^ m * (1/9) := by
+        rw [pow_add]; norm_num
+      have p1 : ((1:ℝ)/3) ^ (m+1) = ((1:ℝ)/3) ^ m * (1/3) := by
+        rw [pow_add]; norm_num
+      rw [p4, p3, p2, p1]
+      push_cast
+      ring
