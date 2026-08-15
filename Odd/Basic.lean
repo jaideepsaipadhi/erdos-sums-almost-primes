@@ -6304,7 +6304,53 @@ theorem oddIntegrand_split (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
         - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u|
       ≤ CE * (∑ j ∈ Finset.range (k + 1),
           dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u) := by
-  sorry
+  obtain ⟨CT, hCT, U, hU, hterm⟩ := oddTerm_bound dom betaFam bHatOdd S hf hd
+  refine ⟨CT, hCT, U, hU, ?_⟩
+  intro u hu
+  have hu0 : (0:ℝ) < u := lt_of_lt_of_le hU hu
+  set J := (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)) with hJdef
+  have hwnn : ∀ j : ℕ, (0:ℝ) ≤ u ^ (k - j) / (Nat.factorial (k - j)) := by
+    intro j; positivity
+  -- pull the weights out of the difference, then bound termwise
+  have hdiff : (∑ j ∈ Finset.range (k + 1), (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j))) * J
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u
+      = ∑ j ∈ Finset.range (k + 1),
+          ((hCoeff (sOf u) j).re * J
+            - (hCoeff 1 j).re * Real.exp (-u)
+            - ((bHatOdd j).re
+                + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+              * Real.exp (-2 * u)) * (u ^ (k - j) / (Nat.factorial (k - j))) := by
+    unfold oddSplitMain1 oddSplitMain2
+    rw [Finset.sum_mul, Finset.sum_mul, Finset.sum_mul, ← Finset.sum_sub_distrib,
+      ← Finset.sum_sub_distrib]
+    apply Finset.sum_congr rfl
+    intro j _
+    ring
+  rw [hdiff]
+  calc |∑ j ∈ Finset.range (k + 1),
+          ((hCoeff (sOf u) j).re * J
+            - (hCoeff 1 j).re * Real.exp (-u)
+            - ((bHatOdd j).re
+                + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+              * Real.exp (-2 * u)) * (u ^ (k - j) / (Nat.factorial (k - j)))|
+      ≤ ∑ j ∈ Finset.range (k + 1),
+          |((hCoeff (sOf u) j).re * J
+            - (hCoeff 1 j).re * Real.exp (-u)
+            - ((bHatOdd j).re
+                + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+              * Real.exp (-2 * u)) * (u ^ (k - j) / (Nat.factorial (k - j)))| :=
+        Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ j ∈ Finset.range (k + 1),
+          (CT * dom j * Real.exp (-3 * u)) * (u ^ (k - j) / (Nat.factorial (k - j))) := by
+        apply Finset.sum_le_sum
+        intro j _
+        rw [abs_mul, abs_of_nonneg (hwnn j)]
+        exact mul_le_mul_of_nonneg_right (hterm u hu j) (hwnn j)
+    _ = CT * (∑ j ∈ Finset.range (k + 1), dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u) := by
+        rw [Finset.mul_sum, Finset.sum_mul]
+        apply Finset.sum_congr rfl
+        intro j _
+        ring
 
 /-- LEAF 2: the error integrates to O(k^3 3^-k), via gamma_normalised_three
 and step 3's coefficient bound. -/
