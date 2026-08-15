@@ -6089,6 +6089,203 @@ theorem eps_jacobian_product :
         nlinarith [mul_nonneg (mul_nonneg (le_of_lt hCe) (le_of_lt hCj))
           (mul_nonneg (le_of_lt h2) (sub_nonneg.mpr e42))]
 
+set_option maxHeartbeats 1000000 in
+/-- The per-j error bound behind LEAF 1.
+
+Writing h = h_j(1), b = b_j, eps = eps(u), J = J(u) and R_j for the Lagrange
+remainder of hCoeff_taylor,
+
+    (h_j(s(u))).re J - h.re e^-u - (b.re + 2g h.re) e^-2u
+      = h.re (J - e^-u - 2g e^-2u)     -- jacobian_u_signed
+      + b.re (eps J - e^-2u)           -- eps_jacobian_product
+      + (R_j).re J                     -- hCoeff_taylor, |R_j| <= beta eps^2/2
+
+each O(e^-3u), with coefficients |h|, |b|, betaFam j -- all bounded by dom j. -/
+theorem oddTerm_bound (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : ℝ)
+    (hf : OddCoeffFacts betaFam bHatOdd)
+    (hd : OddDomFacts dom betaFam bHatOdd S) :
+    ∃ CT > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u → ∀ j : ℕ,
+      |(hCoeff (sOf u) j).re
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - (hCoeff 1 j).re * Real.exp (-u)
+        - ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+            * Real.exp (-2 * u)|
+      ≤ CT * dom j * Real.exp (-3 * u) := by
+  obtain ⟨CJ, hCJ, UJ, hUJ, hJsig⟩ := jacobian_u_signed
+  obtain ⟨CP, hCP, UP, hUP, hProd⟩ := eps_jacobian_product
+  obtain ⟨Cb, hCb, Ub, hUb, hEps⟩ := eps_of_u_bound
+  obtain ⟨Cf, hCf, Uf, hUf, hJf⟩ := jacobian_u_form
+  -- need sOf u < 2 as well, so that hCoeff_taylor applies
+  have hUlt : ∃ U2 > 0, ∀ u : ℝ, U2 ≤ u → sOf u < 2 := by
+    -- eps <= Cb e^-u, so sOf u <= 1 + Cb e^-u < 2 once Cb e^-u < 1
+    refine ⟨max Ub (Real.log (Cb + 1) + 1), by positivity, ?_⟩
+    intro u hu
+    have hUb2 : Ub ≤ u := le_trans (le_max_left _ _) hu
+    have hlog : Real.log (Cb + 1) + 1 ≤ u := le_trans (le_max_right _ _) hu
+    have hb := hEps u hUb2
+    have hexp : Cb * Real.exp (-u) < 1 := by
+      have h1 : Real.exp (-u) ≤ Real.exp (-(Real.log (Cb + 1) + 1)) := by
+        apply Real.exp_le_exp.mpr; linarith
+      have h2 : Real.exp (-(Real.log (Cb + 1) + 1))
+          = 1 / ((Cb + 1) * Real.exp 1) := by
+        rw [neg_add, Real.exp_add, Real.exp_neg, Real.exp_neg,
+          Real.exp_log (by linarith)]
+        field_simp
+      rw [h2] at h1
+      have he1 : (2:ℝ) < Real.exp 1 := by
+        have := Real.add_one_lt_exp (by norm_num : (1:ℝ) ≠ 0)
+        linarith
+      have hCbpos : (0:ℝ) < Cb + 1 := by linarith
+      calc Cb * Real.exp (-u) ≤ Cb * (1 / ((Cb + 1) * Real.exp 1)) :=
+            mul_le_mul_of_nonneg_left h1 (le_of_lt hCb)
+        _ < 1 := by
+            rw [mul_one_div, div_lt_one (by positivity)]
+            nlinarith [hCb, he1]
+    linarith [hb, hexp]
+  obtain ⟨U2, hU2, hlt2⟩ := hUlt
+  refine ⟨CJ + CP + Cb ^ 2 * (Cf + 1), by positivity,
+    max (max UJ UP) (max (max Ub Uf) U2), by positivity, ?_⟩
+  intro u hu j
+  have hUJ' : UJ ≤ u := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hu
+  have hUP' : UP ≤ u := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hu
+  have hUb' : Ub ≤ u := by
+    refine le_trans ?_ hu
+    exact le_trans (le_max_left Ub Uf) (le_trans (le_max_left (max Ub Uf) U2)
+      (le_max_right (max UJ UP) (max (max Ub Uf) U2)))
+  have hUf' : Uf ≤ u := by
+    refine le_trans ?_ hu
+    exact le_trans (le_max_right Ub Uf) (le_trans (le_max_left (max Ub Uf) U2)
+      (le_max_right (max UJ UP) (max (max Ub Uf) U2)))
+  have hU2' : U2 ≤ u := by
+    refine le_trans ?_ hu
+    exact le_trans (le_max_right (max Ub Uf) U2)
+      (le_max_right (max UJ UP) (max (max Ub Uf) U2))
+  have hu0 : (0:ℝ) < u := lt_of_lt_of_le hU2 hU2'
+  have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+  have hsmem : sOf u ∈ Set.Ioo (1:ℝ) 2 := ⟨hs1, hlt2 u hU2'⟩
+  set eps := sOf u - 1 with hepsdef
+  set J := (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)) with hJdef
+  -- Taylor: h_s = h + eps b + R, |R| <= betaFam j eps^2 / 2
+  have hTay := hCoeff_taylor betaFam bHatOdd hf j (sOf u) hsmem
+  set R := hCoeff (sOf u) j - hCoeff 1 j - ((eps : ℝ) : ℂ) * bHatOdd j with hRdef
+  have hRb : ‖R‖ ≤ betaFam j * eps ^ 2 / 2 := hTay
+  -- the three-way split
+  have hsplit : (hCoeff (sOf u) j).re * J
+      - (hCoeff 1 j).re * Real.exp (-u)
+      - ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+          * Real.exp (-2 * u)
+      = (hCoeff 1 j).re * (J - Real.exp (-u)
+            - 2 * Real.eulerMascheroniConstant * Real.exp (-2 * u))
+        + (bHatOdd j).re * (eps * J - Real.exp (-2 * u))
+        + R.re * J := by
+    have hre : (hCoeff (sOf u) j).re
+        = (hCoeff 1 j).re + eps * (bHatOdd j).re + R.re := by
+      rw [hRdef]
+      simp [Complex.sub_re, Complex.mul_re, Complex.ofReal_re,
+        Complex.ofReal_im]
+    rw [hre]
+    ring
+  rw [hsplit]
+  have hJsig' := hJsig u hUJ'
+  have hProd' := hProd u hUP'
+  have hepsb := hEps u hUb'
+  have hJf' := hJf u hUf'
+  have h1 : (0:ℝ) < Real.exp (-u) := Real.exp_pos _
+  have h2 : (0:ℝ) < Real.exp (-2 * u) := Real.exp_pos _
+  have h3 : (0:ℝ) < Real.exp (-3 * u) := Real.exp_pos _
+  have hepspos : (0:ℝ) < eps := by
+    rw [hepsdef]; linarith [hs1]
+  -- |J| <= (Cf + 1) e^-u
+  have hJbound : |J| ≤ (Cf + 1) * Real.exp (-u) := by
+    have hd := abs_le.mp hJf'
+    have he2 : Real.exp (-2 * u) ≤ Real.exp (-u) := by
+      apply Real.exp_le_exp.mpr; linarith [hu0]
+    rw [abs_le]
+    constructor
+    · nlinarith [hd.1, h1, h2, hCf, he2]
+    · nlinarith [hd.2, h1, h2, hCf, he2]
+  -- |R| <= betaFam j Cb^2 e^-2u / 2
+  have hRbound : ‖R‖ ≤ betaFam j * Cb ^ 2 * Real.exp (-2 * u) / 2 := by
+    refine le_trans hRb ?_
+    have hsq : eps ^ 2 ≤ (Cb * Real.exp (-u)) ^ 2 := by
+      nlinarith [hepsb, hepspos]
+    have hexpand : (Cb * Real.exp (-u)) ^ 2 = Cb ^ 2 * Real.exp (-2 * u) := by
+      rw [mul_pow, ← Real.exp_nat_mul]
+      ring_nf
+    rw [hexpand] at hsq
+    have hbn := hd.dom_beta j
+    have hbnn : 0 ≤ betaFam j := hf.nonneg j
+    nlinarith [hsq, hbnn]
+  have hReR : |R.re| ≤ ‖R‖ := by
+    first
+    | exact Complex.abs_re_le_norm R
+    | exact Complex.abs_re_le_abs R
+    | exact_mod_cast Complex.abs_re_le_abs R
+  have hReh : |(hCoeff 1 j).re| ≤ dom j := by
+    refine le_trans ?_ (hd.dom_h j)
+    first
+    | exact Complex.abs_re_le_norm _
+    | exact Complex.abs_re_le_abs _
+  have hReb : |(bHatOdd j).re| ≤ dom j := by
+    refine le_trans ?_ (hd.dom_b j)
+    first
+    | exact Complex.abs_re_le_norm _
+    | exact Complex.abs_re_le_abs _
+  have hbeta : betaFam j ≤ dom j := hd.dom_beta j
+  calc |(hCoeff 1 j).re * (J - Real.exp (-u)
+          - 2 * Real.eulerMascheroniConstant * Real.exp (-2 * u))
+        + (bHatOdd j).re * (eps * J - Real.exp (-2 * u)) + R.re * J|
+      ≤ |(hCoeff 1 j).re * (J - Real.exp (-u)
+            - 2 * Real.eulerMascheroniConstant * Real.exp (-2 * u))
+          + (bHatOdd j).re * (eps * J - Real.exp (-2 * u))| + |R.re * J| :=
+        abs_add_le _ _
+    _ ≤ |(hCoeff 1 j).re| * |J - Real.exp (-u)
+            - 2 * Real.eulerMascheroniConstant * Real.exp (-2 * u)|
+        + |(bHatOdd j).re| * |eps * J - Real.exp (-2 * u)|
+        + |R.re| * |J| := by
+        rw [← abs_mul, ← abs_mul, ← abs_mul]
+        linarith [abs_add_le ((hCoeff 1 j).re * (J - Real.exp (-u)
+          - 2 * Real.eulerMascheroniConstant * Real.exp (-2 * u)))
+          ((bHatOdd j).re * (eps * J - Real.exp (-2 * u)))]
+    _ ≤ (CJ + CP + Cb ^ 2 * (Cf + 1)) * dom j * Real.exp (-3 * u) := by
+        have hdn : 0 ≤ dom j := hd.dom_nonneg j
+        have hbnn : 0 ≤ betaFam j := hf.nonneg j
+        -- term 1
+        have t1 : |(hCoeff 1 j).re| * |J - Real.exp (-u)
+              - 2 * Real.eulerMascheroniConstant * Real.exp (-2 * u)|
+            ≤ dom j * (CJ * Real.exp (-3 * u)) :=
+          mul_le_mul hReh hJsig' (abs_nonneg _) hdn
+        -- term 2
+        have t2 : |(bHatOdd j).re| * |eps * J - Real.exp (-2 * u)|
+            ≤ dom j * (CP * Real.exp (-3 * u)) :=
+          mul_le_mul hReb hProd' (abs_nonneg _) hdn
+        -- term 3
+        have t3 : |R.re| * |J|
+            ≤ (betaFam j * Cb ^ 2 * Real.exp (-2 * u) / 2)
+              * ((Cf + 1) * Real.exp (-u)) := by
+          apply mul_le_mul (le_trans hReR hRbound) hJbound (abs_nonneg _)
+          positivity
+        have hexp23 : Real.exp (-2 * u) * Real.exp (-u) = Real.exp (-3 * u) := by
+          rw [← Real.exp_add]; ring_nf
+        have t3' : (betaFam j * Cb ^ 2 * Real.exp (-2 * u) / 2)
+              * ((Cf + 1) * Real.exp (-u))
+            ≤ dom j * (Cb ^ 2 * (Cf + 1) * Real.exp (-3 * u)) := by
+          have hkey : (betaFam j * Cb ^ 2 * Real.exp (-2 * u) / 2)
+                * ((Cf + 1) * Real.exp (-u))
+              = betaFam j * (Cb ^ 2 * (Cf + 1)) / 2
+                * (Real.exp (-2 * u) * Real.exp (-u)) := by ring
+          rw [hkey, hexp23]
+          have hcoef : betaFam j * (Cb ^ 2 * (Cf + 1)) / 2
+              ≤ dom j * (Cb ^ 2 * (Cf + 1)) := by
+            have hX : (0:ℝ) < Cb ^ 2 * (Cf + 1) := by positivity
+            have hmul := mul_le_mul_of_nonneg_right hbeta (le_of_lt hX)
+            nlinarith [hmul, hbnn, hX]
+          calc betaFam j * (Cb ^ 2 * (Cf + 1)) / 2 * Real.exp (-3 * u)
+              ≤ dom j * (Cb ^ 2 * (Cf + 1)) * Real.exp (-3 * u) :=
+                mul_le_mul_of_nonneg_right hcoef (le_of_lt h3)
+            _ = dom j * (Cb ^ 2 * (Cf + 1) * Real.exp (-3 * u)) := by ring
+        linarith [t1, t2, t3, t3']
+
 /-- LEAF 1: the pointwise split of the integrand on Ici U.
 
     integrand = MAIN1 + MAIN2 + ERR,   |ERR| <= 4 W_k(u) e^-3u
