@@ -6060,4 +6060,55 @@ theorem oddErr_integral_bound (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ
         (∑ j ∈ Finset.range (k + 1),
           dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u)
       ≤ CE * (Nat.choose (k + 3) 3 : ℝ) * S * ((1:ℝ)/3) ^ (k + 1) := by
+  have hrw : ∀ u : ℝ,
+      (∑ j ∈ Finset.range (k + 1),
+        dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u)
+      = ∑ j ∈ Finset.range (k + 1),
+        (dom j / (Nat.factorial (k - j)) * (u ^ (k - j) * Real.exp (-(3 * u)))) := by
+    intro u
+    rw [Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro j _
+    have h3u : (-3 : ℝ) * u = -(3 * u) := by ring
+    rw [h3u]
+    ring
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioi (fun u _ => hrw u)]
+  rw [MeasureTheory.integral_finsetSum]
+  · -- each term integrates to dom j * 3^-(k-j+1)
+    have hterm : ∀ j ∈ Finset.range (k + 1),
+        (∫ u in Set.Ioi (0:ℝ),
+          dom j / (Nat.factorial (k - j)) * (u ^ (k - j) * Real.exp (-(3 * u))))
+        = dom j * ((1:ℝ)/3) ^ (k + 1) * (3:ℝ) ^ j := by
+      intro j hj
+      have hjk : j ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
+      rw [MeasureTheory.integral_const_mul]
+      have hg := gamma_normalised_three (k - j)
+      rw [div_eq_iff (by exact_mod_cast Nat.factorial_ne_zero (k - j))] at hg
+      rw [hg]
+      have hpow : ((1:ℝ)/3) ^ (k - j + 1) * (3:ℝ) ^ j = ((1:ℝ)/3) ^ (k + 1) * (3:ℝ) ^ j * 1 := by
+        sorry
+      have hfne : ((Nat.factorial (k - j) : ℝ)) ≠ 0 := by
+        exact_mod_cast Nat.factorial_ne_zero (k - j)
+      field_simp
+      sorry
+    rw [Finset.sum_congr rfl hterm]
+    sorry
+  · sorry
+
+/-- LEAF 3: the near piece, u in Ioc 0 U.
+
+The signed expansions (jacobian_u_signed, eps_of_u_signed) hold only for
+u >= U, so the integral over Ioi 0 splits at U and the near piece needs its own
+bound.  There u <= U, so the weight u^(k-j)/(k-j)! is at most U^(k-j)/(k-j)!,
+which decays superexponentially in k-j; the Jacobian is bounded on Ioc 0 U
+because s(u) is bounded away from 1 there. -/
+theorem oddNear_integral_bound (dom : ℕ → ℝ) (U : ℝ) (hU : 0 < U)
+    (hdom : ∀ j, 0 ≤ dom j) (k : ℕ) :
+    ∃ CN > 0,
+      |∫ u in Set.Ioc (0:ℝ) U,
+        (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))|
+      ≤ CN * ∑ j ∈ Finset.range (k + 1),
+          dom j * U ^ (k - j) / (Nat.factorial (k - j)) := by
   sorry
