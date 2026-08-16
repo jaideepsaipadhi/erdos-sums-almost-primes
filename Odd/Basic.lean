@@ -6502,13 +6502,60 @@ theorem FkOdd_ge_three_pow (k : ℕ)
 since every term satisfies n^-s = n^-S0 n^-(s-S0) <= n^-S0 (3^k)^-(s-S0). -/
 theorem FkOdd_tail_ratio (k : ℕ) (S0 s : ℝ) (hS0 : 1 < S0) (hs : S0 ≤ s) :
     FkOdd k s ≤ (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0 := by
-  sorry
+  unfold FkOdd
+  have hSs : Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
+      (n:ℝ) ^ (-s)) := FkOdd_summable k s (by linarith)
+  have hSS0 : Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
+      (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * (n:ℝ) ^ (-S0)) :=
+    (FkOdd_summable k S0 hS0).mul_left _
+  rw [← tsum_mul_left]
+  have hle : ∀ n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k},
+      ((n:ℕ):ℝ) ^ (-s) ≤ (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * ((n:ℕ):ℝ) ^ (-S0) := by
+    intro n
+    have hn0 : (0:ℝ) < (n:ℕ) := by
+      have := n.2.1; positivity
+    have hn3k : (3:ℝ) ^ (k:ℝ) ≤ (n:ℕ) := by
+      have h3k := FkOdd_ge_three_pow k n
+      rwa [Real.rpow_natCast]
+    have hsplit : ((n:ℕ):ℝ) ^ (-s) = ((n:ℕ):ℝ) ^ (-S0) * ((n:ℕ):ℝ) ^ (-(s - S0)) := by
+      rw [← Real.rpow_add hn0]; congr 1; ring
+    rw [hsplit]
+    have hpk0 : (0:ℝ) < (3:ℝ) ^ (k:ℝ) := by positivity
+    have hmono : ((n:ℕ):ℝ) ^ (-(s - S0)) ≤ ((3:ℝ) ^ (k:ℝ)) ^ (-(s - S0)) := by
+      apply Real.rpow_le_rpow_of_nonpos hpk0 hn3k
+      linarith
+    have hpow3 : ((3:ℝ) ^ (k:ℝ)) ^ (-(s - S0)) = (3:ℝ) ^ (-(k:ℝ) * (s - S0)) := by
+      rw [← Real.rpow_mul (by norm_num : (0:ℝ) ≤ 3)]
+      congr 1
+      ring
+    rw [hpow3] at hmono
+    calc ((n:ℕ):ℝ) ^ (-S0) * ((n:ℕ):ℝ) ^ (-(s - S0))
+        ≤ ((n:ℕ):ℝ) ^ (-S0) * (3:ℝ) ^ (-(k:ℝ) * (s - S0)) :=
+          mul_le_mul_of_nonneg_left hmono (by positivity)
+      _ = (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * ((n:ℕ):ℝ) ^ (-S0) := by ring
+  first
+  | exact Summable.tsum_le_tsum hle hSs hSS0
+  | exact tsum_le_tsum hle hSs hSS0
 
 /-- LEAF 3: the near piece is O(3^-k), far inside the C(k+3)^3 3^-k budget. -/
 theorem oddNear_s_bound (k : ℕ) (S0 : ℝ) (hS0 : 1 < S0) (hk : 1 ≤ k) :
     |∫ s in Set.Ioi S0, FkOdd k s|
       ≤ FkOdd k S0 / ((k:ℝ) * Real.log 3) := by
-  sorry
+  have hknn : (0:ℝ) < (k:ℝ) := by exact_mod_cast hk
+  have hlog3 : (0:ℝ) < Real.log 3 := Real.log_pos (by norm_num)
+  have hFnn : ∀ s : ℝ, 1 < s → 0 ≤ FkOdd k s := by
+    intro s hs
+    unfold FkOdd
+    apply tsum_nonneg
+    intro n; positivity
+  have hFS0 : 0 ≤ FkOdd k S0 := hFnn S0 hS0
+  have hgint : ∫ s in Set.Ioi S0, (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0
+      = FkOdd k S0 / ((k:ℝ) * Real.log 3) := by
+    sorry
+  calc |∫ s in Set.Ioi S0, FkOdd k s|
+      ≤ ∫ s in Set.Ioi S0, (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0 := by
+        sorry
+    _ = FkOdd k S0 / ((k:ℝ) * Real.log 3) := hgint
 
 /-- LEAF 3: the near piece, u in Ioc 0 U.
 
