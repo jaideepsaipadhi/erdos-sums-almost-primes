@@ -6549,12 +6549,130 @@ theorem oddNear_s_bound (k : ℕ) (S0 : ℝ) (hS0 : 1 < S0) (hk : 1 ≤ k) :
     apply tsum_nonneg
     intro n; positivity
   have hFS0 : 0 ≤ FkOdd k S0 := hFnn S0 hS0
+  have hc : (0:ℝ) < (k:ℝ) * Real.log 3 := by positivity
+  have hexpS0 : ∫ s in Set.Ioi S0, (3:ℝ) ^ (-(k:ℝ) * (s - S0))
+      = ((k:ℝ) * Real.log 3)⁻¹ := by
+    have heq : ∀ s : ℝ, (3:ℝ) ^ (-(k:ℝ) * (s - S0))
+        = Real.exp (-((k:ℝ) * Real.log 3) * (s - S0)) := by
+      intro s
+      rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 3)]
+      congr 1; ring
+    simp_rw [heq]
+    have hstep1 : ∫ s in Set.Ioi S0, Real.exp (-((k:ℝ) * Real.log 3) * (s - S0))
+        = ∫ s in Set.Ioi S0, Real.exp (-(((k:ℝ) * Real.log 3) * s)
+            + ((k:ℝ) * Real.log 3) * S0) := by
+      apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+      intro s _
+      congr 1
+      ring
+    have hstep2 : ∫ s in Set.Ioi S0, Real.exp (-(((k:ℝ) * Real.log 3) * s)
+          + ((k:ℝ) * Real.log 3) * S0)
+        = Real.exp (((k:ℝ) * Real.log 3) * S0)
+          * ∫ s in Set.Ioi S0, Real.exp (-(((k:ℝ) * Real.log 3) * s)) := by
+      rw [← MeasureTheory.integral_const_mul]
+      apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+      intro s _
+      show Real.exp (-(((k:ℝ) * Real.log 3) * s) + ((k:ℝ) * Real.log 3) * S0)
+        = Real.exp (((k:ℝ) * Real.log 3) * S0) * Real.exp (-(((k:ℝ) * Real.log 3) * s))
+      rw [← Real.exp_add]
+      ring_nf
+    have hstep3 : ∫ s in Set.Ioi S0, Real.exp (-(((k:ℝ) * Real.log 3) * s))
+        = ((k:ℝ) * Real.log 3)⁻¹
+          * ∫ x in Set.Ioi (((k:ℝ) * Real.log 3) * S0), Real.exp (-x) := by
+      have h := MeasureTheory.integral_comp_mul_left_Ioi
+        (fun x : ℝ => Real.exp (-x)) S0 hc
+      simpa using h
+    have hstep4 : ∫ x in Set.Ioi (((k:ℝ) * Real.log 3) * S0), Real.exp (-x)
+        = Real.exp (-(((k:ℝ) * Real.log 3) * S0)) :=
+      integral_exp_neg_Ioi _
+    rw [hstep1, hstep2, hstep3, hstep4]
+    have hcombine : Real.exp ((k:ℝ) * Real.log 3 * S0)
+          * (((k:ℝ) * Real.log 3)⁻¹
+            * Real.exp (-((k:ℝ) * Real.log 3 * S0)))
+        = ((k:ℝ) * Real.log 3)⁻¹
+          * (Real.exp ((k:ℝ) * Real.log 3 * S0)
+            * Real.exp (-((k:ℝ) * Real.log 3 * S0))) := by ring
+    rw [hcombine, ← Real.exp_add]
+    have hzero : (k:ℝ) * Real.log 3 * S0 + -((k:ℝ) * Real.log 3 * S0) = 0 := by ring
+    rw [hzero, Real.exp_zero, mul_one]
   have hgint : ∫ s in Set.Ioi S0, (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0
       = FkOdd k S0 / ((k:ℝ) * Real.log 3) := by
-    sorry
+    rw [MeasureTheory.integral_mul_const, hexpS0]
+    field_simp
+  have hmaj : ∀ s ∈ Set.Ioi S0, |FkOdd k s|
+      ≤ (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0 := by
+    intro s hs
+    rw [abs_of_nonneg (hFnn s (by have := Set.mem_Ioi.mp hs; linarith))]
+    exact FkOdd_tail_ratio k S0 s hS0 (le_of_lt (Set.mem_Ioi.mp hs))
+  have hmajBare : ∀ s ∈ Set.Ioi S0, FkOdd k s
+      ≤ (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0 := by
+    intro s hs
+    have h := hmaj s hs
+    rwa [abs_of_nonneg (hFnn s (by have := Set.mem_Ioi.mp hs; linarith))] at h
+  have hmajint : MeasureTheory.IntegrableOn
+      (fun s : ℝ => (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0) (Set.Ioi S0) := by
+    have heq : (fun s : ℝ => (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0)
+        = (fun s : ℝ => FkOdd k S0 * (Real.exp ((k:ℝ) * Real.log 3 * S0)
+            * Real.exp (-((k:ℝ) * Real.log 3 * s)))) := by
+      funext s
+      rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 3), ← Real.exp_add]
+      rw [show (k:ℝ) * Real.log 3 * S0 + -((k:ℝ) * Real.log 3 * s)
+            = Real.log 3 * (-(k:ℝ) * (s - S0)) from by ring]
+      ring
+    rw [heq]
+    apply MeasureTheory.Integrable.const_mul
+    apply MeasureTheory.Integrable.const_mul
+    have hb : (0:ℝ) < (k:ℝ) * Real.log 3 := hc
+    have h1 : MeasureTheory.IntegrableOn
+        (fun x : ℝ => Real.exp (-x)) (Set.Ioi (((k:ℝ) * Real.log 3) * S0)) :=
+      integrableOn_exp_neg_Ioi _
+    exact (MeasureTheory.integrableOn_Ioi_comp_mul_left_iff
+      (fun x : ℝ => Real.exp (-x)) S0 hb).mpr h1
+  have hcontF : ContinuousOn (FkOdd k) (Set.Ici S0) := by
+    unfold FkOdd
+    apply continuousOn_tsum
+      (u := fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
+        ((n:ℕ):ℝ) ^ (-S0))
+      _ (FkOdd_summable k S0 hS0)
+    · intro n x hx
+      have hxS0 : S0 ≤ x := hx
+      have hn0 : (0:ℝ) < (n:ℕ) := by
+        have := n.2.1; positivity
+      have hn3 : (3:ℝ) ≤ (n:ℕ) := by exact_mod_cast n.2.1
+      rw [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hn0 _)]
+      have hn1 : (1:ℝ) ≤ (n:ℕ) := by linarith [hn3]
+      exact Real.rpow_le_rpow_of_exponent_le hn1 (by linarith)
+    · intro n
+      apply Continuous.continuousOn
+      have hn0 : (0:ℝ) < (n:ℕ) := by
+        have := n.2.1; positivity
+      apply Continuous.rpow continuous_const continuous_neg
+      intro x
+      left
+      exact ne_of_gt hn0
+  have hAESM : MeasureTheory.AEStronglyMeasurable (fun s : ℝ => FkOdd k s)
+      (MeasureTheory.volume.restrict (Set.Ioi S0)) :=
+    (hcontF.mono Set.Ioi_subset_Ici_self).aestronglyMeasurable measurableSet_Ioi
+  have hboundAE : Filter.Eventually
+      (fun s : ℝ => ‖FkOdd k s‖ ≤ (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0)
+      (MeasureTheory.ae (MeasureTheory.volume.restrict (Set.Ioi S0))) := by
+    apply MeasureTheory.ae_restrict_of_forall_mem measurableSet_Ioi
+    intro s hs
+    rw [Real.norm_eq_abs, abs_of_nonneg (hFnn s (by have := Set.mem_Ioi.mp hs; linarith))]
+    exact hmajBare s hs
+  have hFint : MeasureTheory.IntegrableOn (fun s : ℝ => FkOdd k s) (Set.Ioi S0) :=
+    MeasureTheory.Integrable.mono' hmajint hAESM hboundAE
   calc |∫ s in Set.Ioi S0, FkOdd k s|
       ≤ ∫ s in Set.Ioi S0, (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0 := by
-        sorry
+        rw [abs_of_nonneg (MeasureTheory.integral_nonneg
+          (fun s => by
+            by_cases hs : s ∈ Set.Ioi S0
+            · exact hFnn s (by have := Set.mem_Ioi.mp hs; linarith)
+            · unfold FkOdd
+              apply tsum_nonneg
+              intro n
+              positivity))]
+        exact MeasureTheory.setIntegral_mono_on hFint hmajint measurableSet_Ioi hmajBare
     _ = FkOdd k S0 / ((k:ℝ) * Real.log 3) := hgint
 
 /-- LEAF 3: the near piece, u in Ioc 0 U.
