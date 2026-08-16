@@ -6444,6 +6444,72 @@ theorem oddErr_integral_bound (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ
       apply Real.exp_le_exp.mpr
       linarith
 
+/-! ### LEAF 3, rerouted: the near piece in the s-variable
+
+On Ioc 0 U the u-substitution is hostile -- s(u) is LARGE there, the Jacobian
+blows up like 2^s, and neither hCoeff_lipschitz nor hCoeff_sub_one_bound
+applies (both need s in Ioo 1 2).  But fOdd_eq_integral_FkOdd lets us stay in
+s: the near piece is s >= S0 = sOf U, and there the elementary bound
+
+    n >= 3^k  for every n with Omega(n) = k and all factors odd
+
+does the work with no coefficient machinery at all. -/
+
+/-- Every odd n with Omega(n) = k is at least 3^k. -/
+theorem FkOdd_ge_three_pow (k : ℕ)
+    (n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k}) :
+    (3:ℝ) ^ k ≤ (n : ℕ) := by
+  obtain ⟨m, hm3, hmodd, hmk⟩ := n
+  simp only
+  have hm0 : m ≠ 0 := by omega
+  have heq : m = m.factorization.prod (fun p e => p ^ e) :=
+    (Nat.factorization_prod_pow_eq_self hm0).symm
+  have hodd3 : ∀ p ∈ m.factorization.support, 3 ≤ p := by
+    intro p hp
+    rw [Nat.support_factorization, Nat.mem_primeFactors] at hp
+    have hpp := hp.1
+    have hpdvd := hp.2.1
+    have hp2 : p ≠ 2 := by
+      intro h; apply hmodd; rw [← h]; exact hpdvd
+    have hple2 := hpp.two_le
+    omega
+  have hcast : (m : ℝ) = ∏ p ∈ m.factorization.support, (p:ℝ) ^ (m.factorization p) := by
+    conv_lhs => rw [heq]
+    rw [Finsupp.prod]
+    push_cast
+    rfl
+  rw [hcast]
+  have hbigOmega : bigOmega m = ∑ p ∈ m.factorization.support, m.factorization p := by
+    unfold bigOmega
+    rw [Finsupp.sum]
+  rw [hmk] at hbigOmega
+  calc (3:ℝ) ^ k = (3:ℝ) ^ (∑ p ∈ m.factorization.support, m.factorization p) := by
+        rw [hbigOmega]
+    _ = ∏ p ∈ m.factorization.support, (3:ℝ) ^ (m.factorization p) := by
+        rw [Finset.prod_pow_eq_pow_sum]
+    _ ≤ ∏ p ∈ m.factorization.support, (p:ℝ) ^ (m.factorization p) := by
+        apply Finset.prod_le_prod
+        · intro p _; positivity
+        · intro p hp
+          first
+          | exact pow_le_pow_left₀ (by norm_num) (by exact_mod_cast hodd3 p hp) _
+          | exact pow_le_pow_left (by norm_num) (by exact_mod_cast hodd3 p hp) _
+
+/-- The far-s tail: for s >= S0 > 1,
+
+    FkOdd k s <= 3^(-k(s - S0)) FkOdd k S0,
+
+since every term satisfies n^-s = n^-S0 n^-(s-S0) <= n^-S0 (3^k)^-(s-S0). -/
+theorem FkOdd_tail_ratio (k : ℕ) (S0 s : ℝ) (hS0 : 1 < S0) (hs : S0 ≤ s) :
+    FkOdd k s ≤ (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0 := by
+  sorry
+
+/-- LEAF 3: the near piece is O(3^-k), far inside the C(k+3)^3 3^-k budget. -/
+theorem oddNear_s_bound (k : ℕ) (S0 : ℝ) (hS0 : 1 < S0) (hk : 1 ≤ k) :
+    |∫ s in Set.Ioi S0, FkOdd k s|
+      ≤ FkOdd k S0 / ((k:ℝ) * Real.log 3) := by
+  sorry
+
 /-- LEAF 3: the near piece, u in Ioc 0 U.
 
 The signed expansions (jacobian_u_signed, eps_of_u_signed) hold only for
