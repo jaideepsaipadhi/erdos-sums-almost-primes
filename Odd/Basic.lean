@@ -6499,6 +6499,7 @@ theorem FkOdd_tail_ratio (k : ℕ) (S0 s : ℝ) (hS0 : 1 < S0) (hs : S0 ≤ s) :
 
 /-- LEAF 3: the near piece is O(3^-k), far inside the C(k+3)^3 3^-k budget. -/
 theorem oddNear_s_bound (k : ℕ) (S0 : ℝ) (hS0 : 1 < S0) (hk : 1 ≤ k) :
+    MeasureTheory.IntegrableOn (fun s : ℝ => FkOdd k s) (Set.Ioi S0) ∧
     |∫ s in Set.Ioi S0, FkOdd k s|
       ≤ FkOdd k S0 / ((k:ℝ) * Real.log 3) := by
   have hknn : (0:ℝ) < (k:ℝ) := by exact_mod_cast hk
@@ -6622,6 +6623,7 @@ theorem oddNear_s_bound (k : ℕ) (S0 : ℝ) (hS0 : 1 < S0) (hk : 1 ≤ k) :
     exact hmajBare s hs
   have hFint : MeasureTheory.IntegrableOn (fun s : ℝ => FkOdd k s) (Set.Ioi S0) :=
     MeasureTheory.Integrable.mono' hmajint hAESM hboundAE
+  refine ⟨hFint, ?_⟩
   calc |∫ s in Set.Ioi S0, FkOdd k s|
       ≤ ∫ s in Set.Ioi S0, (3:ℝ) ^ (-(k:ℝ) * (s - S0)) * FkOdd k S0 := by
         rw [abs_of_nonneg (MeasureTheory.integral_nonneg
@@ -6839,7 +6841,7 @@ theorem oddNear_integral_bound (U : ℝ) (hU : 0 < U) (k : ℕ) (hk : 1 ≤ k)
   rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioc hrw,
     ← integral_substitute_Ioc U hU (fun s => FkOdd k s),
     MeasureTheory.integral_Ici_eq_integral_Ioi]
-  exact oddNear_s_bound k (sOf U) hSU hk
+  exact (oddNear_s_bound k (sOf U) hSU hk).2
 
 
 /-- MAIN1 over the near interval Ioc 0 U: bounded by the dom-weighted sum
