@@ -6675,20 +6675,157 @@ theorem oddNear_s_bound (k : ℕ) (S0 : ℝ) (hS0 : 1 < S0) (hk : 1 ≤ k) :
         exact MeasureTheory.setIntegral_mono_on hFint hmajint measurableSet_Ioi hmajBare
     _ = FkOdd k S0 / ((k:ℝ) * Real.log 3) := hgint
 
-/-- LEAF 3: the near piece, u in Ioc 0 U.
 
-The signed expansions (jacobian_u_signed, eps_of_u_signed) hold only for
-u >= U, so the integral over Ioi 0 splits at U and the near piece needs its own
-bound.  There u <= U, so the weight u^(k-j)/(k-j)! is at most U^(k-j)/(k-j)!,
-which decays superexponentially in k-j; the Jacobian is bounded on Ioc 0 U
-because s(u) is bounded away from 1 there. -/
-theorem oddNear_integral_bound (dom : ℕ → ℝ) (U : ℝ) (hU : 0 < U)
-    (hdom : ∀ j, 0 ≤ dom j) (k : ℕ) :
-    ∃ CN > 0,
-      |∫ u in Set.Ioc (0:ℝ) U,
+/-- sOf is strictly antitone on (0, inf): the inverse of a strictly
+antitone bijection is strictly antitone. -/
+theorem sOf_strictAntiOn : StrictAntiOn sOf (Set.Ioi 0) := by
+  intro u1 hu1 u2 hu2 hu12
+  simp only [Set.mem_Ioi] at hu1 hu2
+  by_contra hcon
+  push_neg at hcon
+  have h1 : (1:ℝ) < sOf u1 := sOf_mem u1 hu1
+  have h2 : (1:ℝ) < sOf u2 := sOf_mem u2 hu2
+  rcases eq_or_lt_of_le hcon with heq | hlt
+  · have huEq : u1 = u2 := by
+      rw [← uOf_sOf u1 hu1, ← uOf_sOf u2 hu2, heq]
+    linarith [hu12, huEq]
+  · have hmono := uOf_strictAnti h1 h2 hlt
+    rw [uOf_sOf u1 hu1, uOf_sOf u2 hu2] at hmono
+    linarith [hu12, hmono]
+
+/-- Restricted change of variables: u in Ioc 0 U corresponds to
+s in Ici (sOf U), since sOf is a strictly antitone bijection (0,inf) -> (1,inf)
+sending u -> 0+ to s -> inf and u = U to s = sOf U. -/
+theorem uOf_change_of_variables_Ioc (U : ℝ) (hU : 0 < U) (g : ℝ → ℝ) :
+    (∫ u in Set.Ioc (0:ℝ) U, g u)
+      = ∫ s in Set.Ici (sOf U),
+          |zetaRderiv s / (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))| * g (uOf s) := by
+  have himg : uOf '' (Set.Ici (sOf U)) = Set.Ioc (0:ℝ) U := by
+    apply Set.eq_of_subset_of_subset
+    · rintro u ⟨s, hs, rfl⟩
+      have hsIci : sOf U ≤ s := Set.mem_Ici.mp hs
+      have hs1 : (1:ℝ) < s := lt_of_lt_of_le (sOf_mem U hU) hsIci
+      refine ⟨?_, ?_⟩
+      · have h0mem : uOf '' (Set.Ioi 1) = Set.Ioi 0 := uOf_image
+        have : uOf s ∈ Set.Ioi (0:ℝ) := by
+          rw [← h0mem]; exact ⟨s, hs1, rfl⟩
+        exact this
+      · rcases eq_or_lt_of_le hsIci with heq | hlt
+        · rw [← heq, uOf_sOf U hU]
+        · have hst := uOf_strictAnti (sOf_mem U hU) hs1 hlt
+          rw [uOf_sOf U hU] at hst
+          exact le_of_lt hst
+    · intro u hu
+      have hu0 : (0:ℝ) < u := hu.1
+      have huU : u ≤ U := hu.2
+      refine ⟨sOf u, Set.mem_Ici.mpr ?_, uOf_sOf u hu0⟩
+      rcases eq_or_lt_of_le huU with heq | hlt
+      · rw [heq]
+      · exact le_of_lt (sOf_strictAntiOn (Set.mem_Ioi.mpr hu0) (Set.mem_Ioi.mpr hU) hlt)
+  rw [← himg]
+  apply MeasureTheory.integral_image_eq_integral_abs_deriv_smul
+    measurableSet_Ici
+  · intro s hs
+    have hs1 : (1:ℝ) < s := lt_of_lt_of_le (sOf_mem U hU) hs
+    exact (uOf_hasDerivAt s hs1).hasDerivWithinAt
+  · exact uOf_strictAnti.injOn.mono (fun s hs =>
+      lt_of_lt_of_le (sOf_mem U hU) hs)
+
+/-- Restricted substitution in the direction the assembly needs, mirroring
+`integral_substitute` but on Ici (sOf U) / Ioc 0 U. -/
+theorem integral_substitute_Ioc (U : ℝ) (hU : 0 < U) (F : ℝ → ℝ) :
+    (∫ s in Set.Ici (sOf U), F s)
+      = ∫ u in Set.Ioc (0:ℝ) U,
+          F (sOf u) * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))) := by
+  rw [uOf_change_of_variables_Ioc U hU
+    (fun u => F (sOf u) * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))]
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ici
+  intro s hs
+  have hs1 : (1:ℝ) < s := lt_of_lt_of_le (sOf_mem U hU) (Set.mem_Ici.mp hs)
+  simp only
+  rw [sOf_uOf s hs1]
+  -- |u'(s)| = -zeta'(s)/zeta(s), so |u'| * (zeta / (-zeta')) = 1
+  have hzpos : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by
+    have hsummable : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-s)) := by
+      have hb := Real.summable_nat_rpow.mpr (by linarith : (-s:ℝ) < -1)
+      apply ((summable_nat_add_iff 1).mpr hb).congr
+      intro n
+      push_cast
+      ring_nf
+    have hle := hsummable.le_tsum 0 (fun n _ => by positivity)
+    calc (0:ℝ) < ((0:ℝ) + 1) ^ (-s) := by norm_num
+      _ ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) := by simpa using hle
+  have hderivneg : zetaRderiv s < 0 := by
+    unfold zetaRderiv
+    have hsum := log_rpow_summable s hs1
+    have hneg : (∑' n : ℕ, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-s))
+        = -∑' n : ℕ, Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-s) := by
+      rw [← tsum_neg]
+      apply tsum_congr
+      intro n
+      ring
+    rw [hneg, neg_lt_zero]
+    have hterm : (0:ℝ) < Real.log (((1:ℕ):ℝ) + 1) * (((1:ℕ):ℝ) + 1) ^ (-s) := by
+      apply mul_pos
+      · apply Real.log_pos
+        norm_num
+      · positivity
+    have hle := hsum.le_tsum 1 (fun n _ => by
+      apply mul_nonneg _ (by positivity)
+      apply Real.log_nonneg
+      have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+      linarith)
+    linarith
+  have habs : |zetaRderiv s / (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s))|
+      = -zetaRderiv s / (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) := by
+    rw [abs_div, abs_of_pos hzpos, abs_of_neg hderivneg]
+  rw [habs]
+  have hdne : zetaRderiv s ≠ 0 := ne_of_lt hderivneg
+  field_simp
+
+/-- LEAF 3, closed: the near piece is bounded via oddNear_s_bound in the
+s-variable, connected by the restricted change of variables above. -/
+theorem oddNear_integral_bound (U : ℝ) (hU : 0 < U) (k : ℕ) (hk : 1 ≤ k)
+    (hsum : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
+    (hmul3 : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - zOmegaHom s z (p : ℕ))⁻¹))
+    (hcd1 : ∀ s : ℝ, 1 < s →
+      ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
+    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0) :
+    |∫ u in Set.Ioc (0:ℝ) U,
         (∑ j ∈ Finset.range (k + 1),
           (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
         * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))|
-      ≤ CN * ∑ j ∈ Finset.range (k + 1),
-          dom j * U ^ (k - j) / (Nat.factorial (k - j)) := by
+      ≤ FkOdd k (sOf U) / ((k:ℝ) * Real.log 3) := by
+  have hSU : (1:ℝ) < sOf U := sOf_mem U hU
+  have hrw : ∀ u ∈ Set.Ioc (0:ℝ) U,
+      (∑ j ∈ Finset.range (k + 1),
+        (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+      = FkOdd k (sOf u) * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))) := by
+    intro u hu
+    have hu0 : (0:ℝ) < u := hu.1
+    have hsu1 : (1:ℝ) < sOf u := sOf_mem u hu0
+    have hexp := FkOdd_expansion' k hk (sOf u) hsu1
+      (hsum (sOf u) hsu1) (hmul3 (sOf u) hsu1) (hcd1 (sOf u) hsu1) (hcd2 (sOf u) hsu1)
+    have huos : uOf (sOf u) = u := uOf_sOf u hu0
+    rw [huos] at hexp
+    have hre : (FkOdd k (sOf u) : ℝ) = ∑ j ∈ Finset.range (k + 1),
+        (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)) := by
+      have := congrArg Complex.re hexp
+      simp only [Complex.ofReal_re] at this
+      rw [this, Complex.re_sum]
+      apply Finset.sum_congr rfl
+      intro j _
+      have hcast : (hCoeff (sOf u) j * (u:ℂ) ^ (k - j) / ((Nat.factorial (k - j) : ℕ) : ℂ))
+          = hCoeff (sOf u) j
+            * (((u ^ (k - j) / (Nat.factorial (k - j) : ℝ) : ℝ)) : ℂ) := by
+        push_cast
+        ring
+      rw [hcast, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    rw [← hre]
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioc hrw,
+    ← integral_substitute_Ioc U hU (fun s => FkOdd k s)]
   sorry
