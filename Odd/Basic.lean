@@ -6842,6 +6842,158 @@ theorem oddNear_integral_bound (U : ℝ) (hU : 0 < U) (k : ℕ) (hk : 1 ≤ k)
   exact oddNear_s_bound k (sOf U) hSU hk
 
 
+/-- MAIN1 over the near interval Ioc 0 U: bounded by the dom-weighted sum
+at u = U, times the interval length.  On Ioc 0 U we have exp(-u) <= 1 and
+u^(k-j) <= U^(k-j). -/
+theorem oddSplitMain1_near (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : ℝ)
+    (hd : OddDomFacts dom betaFam bHatOdd S) (U : ℝ) (hU : 0 < U) (k : ℕ) :
+    |∫ u in Set.Ioc (0:ℝ) U, oddSplitMain1 k u|
+      ≤ U * ∑ j ∈ Finset.range (k + 1),
+          dom j * U ^ (k - j) / (Nat.factorial (k - j)) := by
+  have hptwise : ∀ u ∈ Set.Ioc (0:ℝ) U, ‖oddSplitMain1 k u‖
+      ≤ ∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)) := by
+    intro u hu
+    have hu0 : (0:ℝ) < u := hu.1
+    have huU : u ≤ U := hu.2
+    rw [Real.norm_eq_abs, oddSplitMain1, abs_mul,
+      abs_of_pos (Real.exp_pos (-u))]
+    have hexp1 : Real.exp (-u) ≤ 1 := by
+      rw [Real.exp_le_one_iff]; linarith
+    have hsum : |∑ j ∈ Finset.range (k + 1),
+        (hCoeff 1 j).re * u ^ (k - j) / (Nat.factorial (k - j))|
+        ≤ ∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)) := by
+      refine le_trans (Finset.abs_sum_le_sum_abs _ _) (Finset.sum_le_sum ?_)
+      intro j _
+      have hdj : |(hCoeff 1 j).re| ≤ dom j := by
+        refine le_trans ?_ (hd.dom_h j)
+        first
+        | exact Complex.abs_re_le_norm _
+        | exact Complex.abs_re_le_abs _
+      have hpow : u ^ (k - j) ≤ U ^ (k - j) := by
+        first
+        | exact pow_le_pow_left₀ (le_of_lt hu0) huU _
+        | exact pow_le_pow_left (le_of_lt hu0) huU _
+      have hfac : (0:ℝ) < (Nat.factorial (k - j) : ℝ) := by
+        exact_mod_cast Nat.factorial_pos (k - j)
+      rw [abs_div, abs_mul, abs_of_pos hfac, abs_of_nonneg (pow_nonneg (le_of_lt hu0) _)]
+      have hnum : |(hCoeff 1 j).re| * u ^ (k - j) ≤ dom j * U ^ (k - j) :=
+        mul_le_mul hdj hpow (pow_nonneg (le_of_lt hu0) _) (hd.dom_nonneg j)
+      exact div_le_div_of_nonneg_right hnum (le_of_lt hfac)
+    calc |∑ j ∈ Finset.range (k + 1),
+            (hCoeff 1 j).re * u ^ (k - j) / (Nat.factorial (k - j))| * Real.exp (-u)
+        ≤ (∑ j ∈ Finset.range (k + 1),
+            dom j * U ^ (k - j) / (Nat.factorial (k - j))) * 1 :=
+          mul_le_mul hsum hexp1 (le_of_lt (Real.exp_pos _)) (by
+            apply Finset.sum_nonneg
+            intro j _
+            have := hd.dom_nonneg j
+            positivity)
+      _ = _ := by ring
+  have hvol : MeasureTheory.volume.real (Set.Ioc (0:ℝ) U) = U := by
+    unfold MeasureTheory.Measure.real
+    rw [Real.volume_Ioc]
+    simp [ENNReal.toReal_ofReal, le_of_lt hU]
+  have hfin : MeasureTheory.volume (Set.Ioc (0:ℝ) U) < ⊤ := by
+    rw [Real.volume_Ioc]
+    exact ENNReal.ofReal_lt_top
+  have hbound := MeasureTheory.norm_setIntegral_le_of_norm_le_const hfin hptwise
+  rw [Real.norm_eq_abs, hvol] at hbound
+  linarith [hbound]
+
+/-- MAIN2 over the near interval Ioc 0 U, same shape as MAIN1 but the
+coefficient carries the extra 1 + 2 gamma factor. -/
+theorem oddSplitMain2_near (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : ℝ)
+    (hd : OddDomFacts dom betaFam bHatOdd S) (U : ℝ) (hU : 0 < U) (k : ℕ) :
+    |∫ u in Set.Ioc (0:ℝ) U, oddSplitMain2 bHatOdd k u|
+      ≤ U * ((1 + 2 * Real.eulerMascheroniConstant)
+          * ∑ j ∈ Finset.range (k + 1),
+              dom j * U ^ (k - j) / (Nat.factorial (k - j))) := by
+  have hg0 : (0:ℝ) < Real.eulerMascheroniConstant := by
+    first
+    | linarith [Real.one_half_lt_eulerMascheroniConstant]
+    | linarith [one_half_lt_eulerMascheroniConstant]
+  have hptwise : ∀ u ∈ Set.Ioc (0:ℝ) U, ‖oddSplitMain2 bHatOdd k u‖
+      ≤ (1 + 2 * Real.eulerMascheroniConstant)
+        * ∑ j ∈ Finset.range (k + 1),
+            dom j * U ^ (k - j) / (Nat.factorial (k - j)) := by
+    intro u hu
+    have hu0 : (0:ℝ) < u := hu.1
+    have huU : u ≤ U := hu.2
+    rw [Real.norm_eq_abs, oddSplitMain2, abs_mul,
+      abs_of_pos (Real.exp_pos (-2 * u))]
+    have hexp1 : Real.exp (-2 * u) ≤ 1 := by
+      rw [Real.exp_le_one_iff]; linarith
+    have hsum : |∑ j ∈ Finset.range (k + 1),
+        ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+          * u ^ (k - j) / (Nat.factorial (k - j))|
+        ≤ (1 + 2 * Real.eulerMascheroniConstant)
+          * ∑ j ∈ Finset.range (k + 1),
+              dom j * U ^ (k - j) / (Nat.factorial (k - j)) := by
+      rw [Finset.mul_sum]
+      refine le_trans (Finset.abs_sum_le_sum_abs _ _) (Finset.sum_le_sum ?_)
+      intro j _
+      have hbj : |(bHatOdd j).re| ≤ dom j := by
+        refine le_trans ?_ (hd.dom_b j)
+        first
+        | exact Complex.abs_re_le_norm _
+        | exact Complex.abs_re_le_abs _
+      have hhj : |(hCoeff 1 j).re| ≤ dom j := by
+        refine le_trans ?_ (hd.dom_h j)
+        first
+        | exact Complex.abs_re_le_norm _
+        | exact Complex.abs_re_le_abs _
+      have hcoef : |(bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re|
+          ≤ (1 + 2 * Real.eulerMascheroniConstant) * dom j := by
+        refine le_trans (abs_add_le _ _) ?_
+        rw [abs_mul, abs_of_pos (by positivity : (0:ℝ) < 2 * Real.eulerMascheroniConstant)]
+        nlinarith [hbj, hhj, hg0, hd.dom_nonneg j]
+      have hpow : u ^ (k - j) ≤ U ^ (k - j) := by
+        first
+        | exact pow_le_pow_left₀ (le_of_lt hu0) huU _
+        | exact pow_le_pow_left (le_of_lt hu0) huU _
+      have hfac : (0:ℝ) < (Nat.factorial (k - j) : ℝ) := by
+        exact_mod_cast Nat.factorial_pos (k - j)
+      rw [abs_div, abs_mul, abs_of_pos hfac,
+        abs_of_nonneg (pow_nonneg (le_of_lt hu0) _)]
+      have hmul : (1 + 2 * Real.eulerMascheroniConstant) * (dom j * U ^ (k - j))
+          / (Nat.factorial (k - j) : ℝ)
+          = (1 + 2 * Real.eulerMascheroniConstant)
+            * (dom j * U ^ (k - j) / (Nat.factorial (k - j))) := by ring
+      rw [← hmul]
+      have hnn : (0:ℝ) ≤ (1 + 2 * Real.eulerMascheroniConstant) * dom j := by
+        nlinarith [hd.dom_nonneg j, hg0]
+      have hnum : |(bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re|
+            * u ^ (k - j)
+          ≤ (1 + 2 * Real.eulerMascheroniConstant) * dom j * U ^ (k - j) :=
+        mul_le_mul hcoef hpow (pow_nonneg (le_of_lt hu0) _) hnn
+      have hre : (1 + 2 * Real.eulerMascheroniConstant) * dom j * U ^ (k - j)
+          = (1 + 2 * Real.eulerMascheroniConstant) * (dom j * U ^ (k - j)) := by ring
+      rw [hre] at hnum
+      exact div_le_div_of_nonneg_right hnum (le_of_lt hfac)
+    calc |∑ j ∈ Finset.range (k + 1),
+            ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+              * u ^ (k - j) / (Nat.factorial (k - j))| * Real.exp (-2 * u)
+        ≤ ((1 + 2 * Real.eulerMascheroniConstant)
+            * ∑ j ∈ Finset.range (k + 1),
+                dom j * U ^ (k - j) / (Nat.factorial (k - j))) * 1 :=
+          mul_le_mul hsum hexp1 (le_of_lt (Real.exp_pos _)) (by
+            apply mul_nonneg (by positivity)
+            apply Finset.sum_nonneg
+            intro j _
+            have := hd.dom_nonneg j
+            positivity)
+      _ = _ := by ring
+  have hvol : MeasureTheory.volume.real (Set.Ioc (0:ℝ) U) = U := by
+    unfold MeasureTheory.Measure.real
+    rw [Real.volume_Ioc]
+    simp [ENNReal.toReal_ofReal, le_of_lt hU]
+  have hfin : MeasureTheory.volume (Set.Ioc (0:ℝ) U) < ⊤ := by
+    rw [Real.volume_Ioc]
+    exact ENNReal.ofReal_lt_top
+  have hbound := MeasureTheory.norm_setIntegral_le_of_norm_le_const hfin hptwise
+  rw [Real.norm_eq_abs, hvol] at hbound
+  linarith [hbound]
+
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
     fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
