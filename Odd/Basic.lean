@@ -7014,6 +7014,13 @@ theorem dom_decay (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : ℝ)
     positivity
   exact le_trans hterm hsum
 
+/-- sOf is AEMeasurable on Ioi 0, from strict antitonicity.  Monotone
+functions are Borel measurable, so no continuity argument is needed. -/
+theorem sOf_aemeasurable :
+    AEMeasurable sOf (MeasureTheory.volume.restrict (Set.Ioi (0:ℝ))) := by
+  apply aemeasurable_restrict_of_antitoneOn measurableSet_Ioi
+  exact sOf_strictAntiOn.antitoneOn
+
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
     fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
