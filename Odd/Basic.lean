@@ -6783,6 +6783,56 @@ theorem integral_substitute_Ioc (U : ℝ) (hU : 0 < U) (F : ℝ → ℝ) :
   have hdne : zetaRderiv s ≠ 0 := ne_of_lt hderivneg
   field_simp
 
+/-- FkOdd at a fixed exponent tau > 1 is bounded by the full zeta sum,
+uniformly in k: the index set injects into the naturals. -/
+theorem FkOdd_le_zeta (k : ℕ) (tau : ℝ) (htau : 1 < tau) :
+    FkOdd k tau ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-tau) := by
+  unfold FkOdd
+  apply Real.tsum_le_of_sum_le
+  · intro n
+    positivity
+  · intro t
+    have hznn : ∀ m : ℕ, (0:ℝ) ≤ ((m:ℝ) + 1) ^ (-tau) := by
+      intro m; positivity
+    have hzsum : Summable (fun m : ℕ => ((m:ℝ) + 1) ^ (-tau)) := by
+      have hb := Real.summable_nat_rpow.mpr (by linarith : (-tau:ℝ) < -1)
+      apply ((summable_nat_add_iff 1).mpr hb).congr
+      intro m
+      push_cast
+      ring_nf
+    -- map the finset into N by n -> n - 1, then compare with the full sum
+    classical
+    have hinj : ∀ a ∈ t, ∀ b ∈ t, ((a:ℕ) - 1 : ℕ) = ((b:ℕ) - 1 : ℕ) → a = b := by
+      intro a ha b hb hab
+      have ha3 : 3 ≤ (a:ℕ) := a.2.1
+      have hb3 : 3 ≤ (b:ℕ) := b.2.1
+      apply Subtype.ext
+      omega
+    set g : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} → ℕ :=
+      fun x => (x : ℕ) - 1 with hg
+    have hstep : ∑ x ∈ t, ((x:ℕ):ℝ) ^ (-tau)
+        = ∑ m ∈ Finset.image g t, ((m:ℝ) + 1) ^ (-tau) := by
+      rw [Finset.sum_image hinj]
+      apply Finset.sum_congr rfl
+      intro x hx
+      have hx3 : 3 ≤ (x:ℕ) := x.2.1
+      have hcast : ((g x : ℕ):ℝ) + 1 = ((x:ℕ):ℝ) := by
+        rw [hg]
+        have h1 : (1:ℕ) ≤ (x:ℕ) := by omega
+        push_cast [Nat.cast_sub h1]
+        ring
+      rw [hcast]
+    rw [hstep]
+    exact hzsum.sum_le_tsum _ (fun m _ => hznn m)
+
+/-- The near-piece constant: for sigma >= tau > 1, FkOdd k sigma decays like
+3^(-k(sigma-tau)) times a k-independent constant. -/
+theorem FkOdd_le_pow (k : ℕ) (tau sigma : ℝ) (htau : 1 < tau) (hsig : tau ≤ sigma) :
+    FkOdd k sigma ≤ (3:ℝ) ^ (-(k:ℝ) * (sigma - tau)) * (∑' n : ℕ, ((n:ℝ) + 1) ^ (-tau)) := by
+  refine le_trans (FkOdd_tail_ratio k tau sigma htau hsig) ?_
+  apply mul_le_mul_of_nonneg_left (FkOdd_le_zeta k tau htau)
+  positivity
+
 /-- LEAF 3, closed: the near piece is bounded via oddNear_s_bound in the
 s-variable, connected by the restricted change of variables above. -/
 theorem oddNear_integral_bound (U : ℝ) (hU : 0 < U) (k : ℕ) (hk : 1 ≤ k)
