@@ -5539,46 +5539,6 @@ hold only for u >= U.  The integral over Ioi 0 therefore splits at U, and the
 piece on Ioc 0 U -- which is where s is large, not where the expansion lives --
 needs its own bound. -/
 
-/-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
-
-    fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
-
-Route: fOdd_u_form, then the integrand splits as
-oddSplitMain1 + oddSplitMain2 + rest, with the two main integrals above and
-`rest` bounded via gamma_normalised_three (each error factor is O(e^-3u)
-against a polynomial in u). -/
-theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
-    (hsum1 : Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
-      1 / ((n : ℝ) * Real.log n)))
-    (hsum : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
-      Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
-    (hmul3 : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
-      Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - zOmegaHom s z (p : ℕ))⁻¹))
-    (hcd1 : ∀ s : ℝ, 1 < s →
-      ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
-    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0)
-    (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
-    (hf : OddCoeffFacts betaFam bHatOdd)
-    (hdiff : ∀ t : ℝ, 1 ≤ t →
-      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4))
-    -- The certified coefficient sum of PROOF.md (5.5).  S = sum_i |g_i| 3^i
-    -- over the coefficients of G_2 = d_s^2 H (1 - z/3)^3; the certified value
-    -- is S <= 14414 (head i <= 16 by interval recursion, tail by Cauchy).
-    (S : ℝ) (hS0 : 0 ≤ S)
-    (hSbound : ∀ m : ℕ, ∑ j ∈ Finset.range (m + 1),
-        ‖deriv (fun t : ℝ => deriv (fun x : ℝ => hCoeff x j) t) 1‖ * (3:ℝ) ^ j
-      ≤ S * ((m:ℝ) + 3) ^ 3 / 6)
-    (hMR : S / 6 ≤ MR) :
-    |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
-      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
-  rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
-  -- The integrand splits as MAIN1 + MAIN2 + ERR, with
-  --   MAIN1 -> 1/2                        [oddSplitMain1_integral, hCoeff_sum_one]
-  --   MAIN2 -> beta 2^-k                  [oddSplitMain2_integral, order_two_coefficient]
-  --   ERR   -> the Lagrange remainder of hCoeff_taylor, O(e^-3u), integrated
-  --            by gamma_normalised_three and bounded by coeffSum_bound.
-  sorry
-
 /-! ### Step 5: the tail bounds
 
 MAIN1 and MAIN2 give partial sums over j <= k.  Passing to the full series
@@ -6880,3 +6840,44 @@ theorem oddNear_integral_bound (U : ℝ) (hU : 0 < U) (k : ℕ) (hk : 1 ≤ k)
     ← integral_substitute_Ioc U hU (fun s => FkOdd k s),
     MeasureTheory.integral_Ici_eq_integral_Ioi]
   exact oddNear_s_bound k (sOf U) hSU hk
+
+
+/-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
+
+    fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
+
+Route: fOdd_u_form, then the integrand splits as
+oddSplitMain1 + oddSplitMain2 + rest, with the two main integrals above and
+`rest` bounded via gamma_normalised_three (each error factor is O(e^-3u)
+against a polynomial in u). -/
+theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
+    (hsum1 : Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
+      1 / ((n : ℝ) * Real.log n)))
+    (hsum : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
+    (hmul3 : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - zOmegaHom s z (p : ℕ))⁻¹))
+    (hcd1 : ∀ s : ℝ, 1 < s →
+      ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
+    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0)
+    (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (hf : OddCoeffFacts betaFam bHatOdd)
+    (hdiff : ∀ t : ℝ, 1 ≤ t →
+      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4))
+    -- The certified dominating sequence and coefficient sum of PROOF.md (5.5).
+    -- dom bounds |h_j(1)|, |b_j| and betaFam j simultaneously; S = sum_i |g_i| 3^i
+    -- over the coefficients of G_2 = d_s^2 H (1 - z/3)^3, certified S <= 14414
+    -- (head i <= 16 by interval recursion, tail by Cauchy).
+    (dom : ℕ → ℝ) (S : ℝ) (hS0 : 0 ≤ S)
+    (hd : OddDomFacts dom betaFam bHatOdd S)
+    -- the near piece contributes zeta(2) 3^-k; MR must cover both pieces
+    (hMR : S / 6 + (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) ≤ MR) :
+    |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
+      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+  rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
+  -- The integrand splits as MAIN1 + MAIN2 + ERR, with
+  --   MAIN1 -> 1/2                        [oddSplitMain1_integral, hCoeff_sum_one]
+  --   MAIN2 -> beta 2^-k                  [oddSplitMain2_integral, order_two_coefficient]
+  --   ERR   -> the Lagrange remainder of hCoeff_taylor, O(e^-3u), integrated
+  --            by gamma_normalised_three and bounded by coeffSum_bound.
+  sorry
