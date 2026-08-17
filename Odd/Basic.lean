@@ -6994,6 +6994,26 @@ theorem oddSplitMain2_near (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
   rw [Real.norm_eq_abs, hvol] at hbound
   linarith [hbound]
 
+/-- The dominating sequence decays like a polynomial times 3^-j.
+
+From dom_cert and coeffSum_bound: the weighted partial sums are bounded by
+C(m+3,3) S, so each single term satisfies dom j * 3^j <= C(j+3,3) S. -/
+theorem dom_decay (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : ℝ)
+    (hd : OddDomFacts dom betaFam bHatOdd S) (j : ℕ) :
+    dom j * (3:ℝ) ^ j ≤ (Nat.choose (j + 3) 3 : ℝ) * S := by
+  have hsum := coeffSum_bound dom j S (hd.dom_cert j)
+  have hterm : dom j * (3:ℝ) ^ j
+      ≤ ∑ i ∈ Finset.range (j + 1), |dom i| * (3:ℝ) ^ i := by
+    have hmem : j ∈ Finset.range (j + 1) := Finset.self_mem_range_succ j
+    have hle : dom j * (3:ℝ) ^ j ≤ |dom j| * (3:ℝ) ^ j := by
+      apply mul_le_mul_of_nonneg_right (le_abs_self _)
+      positivity
+    refine le_trans hle
+      (Finset.single_le_sum (f := fun i => |dom i| * (3:ℝ) ^ i) ?_ hmem)
+    intro i _
+    positivity
+  exact le_trans hterm hsum
+
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
     fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
