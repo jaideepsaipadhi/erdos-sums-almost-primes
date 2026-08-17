@@ -6827,5 +6827,6 @@ theorem oddNear_integral_bound (U : ℝ) (hU : 0 < U) (k : ℕ) (hk : 1 ≤ k)
       ring
     rw [← hre]
   rw [MeasureTheory.setIntegral_congr_fun measurableSet_Ioc hrw,
-    ← integral_substitute_Ioc U hU (fun s => FkOdd k s)]
-  sorry
+    ← integral_substitute_Ioc U hU (fun s => FkOdd k s),
+    MeasureTheory.integral_Ici_eq_integral_Ioi]
+  exact oddNear_s_bound k (sOf U) hSU hk
