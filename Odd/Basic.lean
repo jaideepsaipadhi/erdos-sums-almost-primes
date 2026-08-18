@@ -7239,7 +7239,14 @@ On Ioi U it is dominated by leaf 1's majorant, whose integrability leaf 2
 establishes; on Ioc 0 U it is bounded on a set of finite measure. -/
 theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : ℝ)
     (hf : OddCoeffFacts betaFam bHatOdd)
-    (hd : OddDomFacts dom betaFam bHatOdd S) (k : ℕ) (hk : 1 ≤ k) :
+    (hd : OddDomFacts dom betaFam bHatOdd S) (k : ℕ) (hk : 1 ≤ k)
+    (hsum : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Summable (fun n : ℕ => ‖zOmegaHom s z n‖))
+    (hmul3 : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
+      Multipliable (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} => (1 - zOmegaHom s z (p : ℕ))⁻¹))
+    (hcd1 : ∀ s : ℝ, 1 < s →
+      ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Complex.exp ((uOf s : ℂ) * z)) 0)
+    (hcd2 : ∀ s : ℝ, 1 < s → ContDiffAt ℂ (k : ℕ∞) (fun z : ℂ => Hodd s z) 0) :
     MeasureTheory.IntegrableOn
       (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
           (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
@@ -7273,7 +7280,22 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
       have hu0 : (0:ℝ) < u := hsub hu
       have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
       congr 1
-      sorry
+      have hexp := FkOdd_expansion' k hk (sOf u) hs1
+        (hsum (sOf u) hs1) (hmul3 (sOf u) hs1) (hcd1 (sOf u) hs1) (hcd2 (sOf u) hs1)
+      rw [uOf_sOf u hu0] at hexp
+      have hre := congrArg Complex.re hexp
+      simp only [Complex.ofReal_re] at hre
+      rw [hre, Complex.re_sum]
+      apply Finset.sum_congr rfl
+      intro j _
+      have hcast : (hCoeff (sOf u) j * (u:ℂ) ^ (k - j)
+            / ((Nat.factorial (k - j) : ℕ) : ℂ))
+          = hCoeff (sOf u) j
+            * (((u ^ (k - j) / (Nat.factorial (k - j) : ℝ) : ℝ)) : ℂ) := by
+        push_cast
+        ring
+      rw [hcast, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+      ring
     have hm := oddSplitMain_aemeasurable bHatOdd k (MeasureTheory.volume.restrict t)
     exact (hI'.sub hm.1).sub hm.2
   -- the far piece: dominated by leaf 1's majorant
