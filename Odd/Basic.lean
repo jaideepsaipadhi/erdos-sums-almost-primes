@@ -7253,10 +7253,29 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
     * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
     - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u with hDdef
   -- measurability of D on any restriction
-  have hDmeas : ∀ (t : Set ℝ), MeasurableSet t →
+  have hDmeas : ∀ (t : Set ℝ), t ⊆ Set.Ioi (0:ℝ) → MeasurableSet t →
       AEMeasurable D (MeasureTheory.volume.restrict t) := by
-    intro t ht
-    sorry
+    intro t hsub ht
+    rw [hDdef]
+    have hI : AEMeasurable
+        (fun u : ℝ => FkOdd k (sOf u)
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+        (MeasureTheory.volume.restrict t) :=
+      (oddIntegrand_aemeasurable k).mono_measure
+        (MeasureTheory.Measure.restrict_mono hsub le_rfl)
+    have hI' : AEMeasurable
+        (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+        (MeasureTheory.volume.restrict t) := by
+      apply hI.congr
+      filter_upwards [MeasureTheory.self_mem_ae_restrict ht] with u hu
+      have hu0 : (0:ℝ) < u := hsub hu
+      have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+      congr 1
+      sorry
+    have hm := oddSplitMain_aemeasurable bHatOdd k (MeasureTheory.volume.restrict t)
+    exact (hI'.sub hm.1).sub hm.2
   -- the far piece: dominated by leaf 1's majorant
   have hfar : MeasureTheory.IntegrableOn D (Set.Ioi U) := by
     sorry
