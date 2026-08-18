@@ -7453,6 +7453,32 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
             ring
           rw [hcast, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
           ring
+        rw [hFk, Real.norm_eq_abs, abs_mul]
+        -- |FkOdd| = FkOdd (nonneg); |J| <= ZU * 2^s / log2 via hderivlb and antitonicity
+        have hsu : sOf U ≤ sOf u := by
+          have : u ≤ U := hu.2
+          rcases eq_or_lt_of_le this with heq | hlt
+          · rw [heq]
+          · exact le_of_lt (sOf_strictAntiOn (Set.mem_Ioi.mpr hu0)
+              (Set.mem_Ioi.mpr hU) hlt)
+        have hFnn : (0:ℝ) ≤ FkOdd k (sOf u) := by
+          unfold FkOdd
+          apply tsum_nonneg
+          intro n; positivity
+        have hZle : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) ≤ ZU := by
+          rw [hZU]
+          apply Summable.tsum_le_tsum _ (zetaR_summable _ hs1) (zetaR_summable _ hSU1)
+          intro n
+          have hn1 : (1:ℝ) ≤ (n:ℝ) + 1 := by
+            have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+            linarith
+          exact Real.rpow_le_rpow_of_exponent_le hn1 (by linarith)
+        have hJ : |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))|
+            ≤ ZU * ((2:ℝ) ^ (sOf u) / Real.log 2) := by
+          sorry
+        have hFbound : FkOdd k (sOf u)
+            ≤ (Z32 + FkOdd k (sOf U)) * (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by
+          sorry
         sorry
       have hmeas : AEMeasurable
           (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
