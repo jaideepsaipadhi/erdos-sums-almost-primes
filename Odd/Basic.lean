@@ -7382,12 +7382,73 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
         norm_num
       rw [hterm]
       exact hle
+    -- zeta(s) <= zeta(2) for s >= 2, termwise
+    have hzetaub : ∀ s : ℝ, 2 ≤ s →
+        (∑' n : ℕ, ((n:ℝ) + 1) ^ (-s)) ≤ ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ)) := by
+      intro t ht
+      have ht1 : (1:ℝ) < t := by linarith
+      apply Summable.tsum_le_tsum _ (zetaR_summable t ht1) (zetaR_summable 2 (by norm_num))
+      intro n
+      have hn1 : (1:ℝ) ≤ (n:ℝ) + 1 := by
+        have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+        linarith
+      exact Real.rpow_le_rpow_of_exponent_le hn1 (by linarith)
+    -- The integrand equals FkOdd k (sOf u) * J(u) on Ioc 0 U (the hrw identity),
+    -- and is bounded there: FkOdd decays like 3^(-k sOf u) while J grows like 2^(sOf u).
     have hIint : MeasureTheory.IntegrableOn
         (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
             (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
           * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
         (Set.Ioc (0:ℝ) U) := by
-      sorry
+      set Z2 := ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ)) with hZ2
+      have hZ2pos : (0:ℝ) < Z2 := by rw [hZ2]; exact zetaR_pos 2 (by norm_num)
+      have hlog2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+      -- uniform bound: |integrand| <= Z2 * Z2 / (log 2 * 2^-2) on Ioc 0 U
+      have hbdd : ∀ u ∈ Set.Ioc (0:ℝ) U,
+          ‖(∑ j ∈ Finset.range (k + 1),
+              (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+            * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))‖
+          ≤ Z2 * (Z2 / (Real.log 2 * (2:ℝ) ^ (-(1:ℝ)))) := by
+        sorry
+      have hmeas : AEMeasurable
+          (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+              (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+            * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+          (MeasureTheory.volume.restrict (Set.Ioc (0:ℝ) U)) := by
+        have hI : AEMeasurable
+            (fun u : ℝ => FkOdd k (sOf u)
+              * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+            (MeasureTheory.volume.restrict (Set.Ioc (0:ℝ) U)) :=
+          (oddIntegrand_aemeasurable k).mono_measure
+            (MeasureTheory.Measure.restrict_mono hIocU le_rfl)
+        apply hI.congr
+        filter_upwards [MeasureTheory.self_mem_ae_restrict measurableSet_Ioc] with u hu
+        have hu0 : (0:ℝ) < u := hu.1
+        have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+        congr 1
+        have hexp := FkOdd_expansion' k hk (sOf u) hs1
+          (hsum (sOf u) hs1) (hmul3 (sOf u) hs1) (hcd1 (sOf u) hs1) (hcd2 (sOf u) hs1)
+        rw [uOf_sOf u hu0] at hexp
+        have hre := congrArg Complex.re hexp
+        simp only [Complex.ofReal_re] at hre
+        rw [hre, Complex.re_sum]
+        apply Finset.sum_congr rfl
+        intro j _
+        have hcast : (hCoeff (sOf u) j * (u:ℂ) ^ (k - j)
+              / ((Nat.factorial (k - j) : ℕ) : ℂ))
+            = hCoeff (sOf u) j
+              * (((u ^ (k - j) / (Nat.factorial (k - j) : ℝ) : ℝ)) : ℂ) := by
+          push_cast
+          ring
+        rw [hcast, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+        ring
+      exact ⟨hmeas.aestronglyMeasurable,
+        MeasureTheory.HasFiniteIntegral.restrict_of_bounded
+          (C := Z2 * (Z2 / (Real.log 2 * (2:ℝ) ^ (-(1:ℝ)))))
+          (by rw [Real.volume_Ioc]; exact ENNReal.ofReal_lt_top)
+          (by
+            filter_upwards [MeasureTheory.self_mem_ae_restrict measurableSet_Ioc] with u hu
+            exact hbdd u hu)⟩
     -- MAIN1 and MAIN2 are continuous, hence integrable on a compact-closure set
     have hc1 : Continuous (fun u : ℝ => oddSplitMain1 k u) := by
       unfold oddSplitMain1
