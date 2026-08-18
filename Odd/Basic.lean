@@ -7544,7 +7544,30 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
               rw [← h20]
               exact Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp
             nlinarith [hFkU, hZ32pos, h2s]
-        sorry
+        -- combine: |F| * |J| <= (Z32+F_U) 2^-s 2^(3/2) * ZU 2^s / log2
+        --                     = (Z32+F_U) ZU 2^(3/2) / log2   since 2^-s 2^s = 1
+        have hJnn : (0:ℝ) ≤ |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))| :=
+          abs_nonneg _
+        have hFabs : |FkOdd k (sOf u)| = FkOdd k (sOf u) := abs_of_nonneg hFnn
+        rw [hFabs]
+        have hBnn : (0:ℝ) ≤ (Z32 + FkOdd k (sOf U)) * (2:ℝ) ^ (-(sOf u))
+            * (2:ℝ) ^ ((3:ℝ)/2) := by
+          apply mul_nonneg (mul_nonneg (by linarith [hZ32pos, hFkU]) _)
+          · exact le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+          · exact le_of_lt (Real.rpow_pos_of_pos (by norm_num) _)
+        have hstep := mul_le_mul hFbound hJ hJnn hBnn
+        refine le_trans hstep ?_
+        have hcancel : (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ (sOf u) = 1 := by
+          rw [← Real.rpow_add (by norm_num : (0:ℝ) < 2)]
+          simp
+        calc (Z32 + FkOdd k (sOf U)) * (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2)
+              * (ZU * ((2:ℝ) ^ (sOf u) / Real.log 2))
+            = (Z32 + FkOdd k (sOf U)) * ZU * ((2:ℝ) ^ ((3:ℝ)/2) / Real.log 2)
+              * ((2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ (sOf u)) := by ring
+          _ = (Z32 + FkOdd k (sOf U)) * ZU * ((2:ℝ) ^ ((3:ℝ)/2) / Real.log 2) := by
+              rw [hcancel, mul_one]
+          _ ≤ (Z32 + FkOdd k (sOf U)) * ZU * ((2:ℝ) ^ ((3:ℝ)/2) / Real.log 2) :=
+              le_refl _
       have hmeas : AEMeasurable
           (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
               (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
