@@ -6795,6 +6795,56 @@ theorem FkOdd_le_pow (k : ℕ) (tau sigma : ℝ) (htau : 1 < tau) (hsig : tau �
   apply mul_le_mul_of_nonneg_left (FkOdd_le_zeta k tau htau)
   positivity
 
+/-- FkOdd k is continuous on Ici S0 for every S0 > 1: the defining tsum
+converges uniformly there, dominated by n^(-S0). -/
+theorem FkOdd_continuousOn_Ici (k : ℕ) (S0 : ℝ) (hS0 : 1 < S0) :
+    ContinuousOn (FkOdd k) (Set.Ici S0) := by
+  unfold FkOdd
+  apply continuousOn_tsum
+    (u := fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
+      ((n:ℕ):ℝ) ^ (-S0))
+    _ (FkOdd_summable k S0 hS0)
+  · intro n x hx
+    have hxS0 : S0 ≤ x := hx
+    have hn0 : (0:ℝ) < (n:ℕ) := by
+      have := n.2.1; positivity
+    have hn3 : (3:ℝ) ≤ (n:ℕ) := by exact_mod_cast n.2.1
+    rw [Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hn0 _)]
+    have hn1 : (1:ℝ) ≤ (n:ℕ) := by linarith [hn3]
+    exact Real.rpow_le_rpow_of_exponent_le hn1 (by linarith)
+  · intro n
+    apply Continuous.continuousOn
+    have hn0 : (0:ℝ) < (n:ℕ) := by
+      have := n.2.1; positivity
+    apply Continuous.rpow continuous_const continuous_neg
+    intro x
+    left
+    exact ne_of_gt hn0
+
+/-- Hence FkOdd k is continuous on all of Ioi 1: every point of Ioi 1 lies in
+Ici S0 for some S0 > 1 strictly below it. -/
+theorem FkOdd_continuousOn_Ioi (k : ℕ) :
+    ContinuousOn (FkOdd k) (Set.Ioi (1:ℝ)) := by
+  intro s hs
+  have hs1 : (1:ℝ) < s := hs
+  set S0 := (1 + s) / 2 with hS0def
+  have hS0 : (1:ℝ) < S0 := by rw [hS0def]; linarith
+  have hsS0 : S0 < s := by rw [hS0def]; linarith
+  have hmem : s ∈ Set.Ici S0 := le_of_lt hsS0
+  have hcont := FkOdd_continuousOn_Ici k S0 hS0
+  have hsub : Set.Ioi S0 ⊆ Set.Ici S0 := by
+    intro x hx
+    rw [Set.mem_Ioi] at hx
+    rw [Set.mem_Ici]
+    exact le_of_lt hx
+  have hwithin : ContinuousWithinAt (FkOdd k) (Set.Ioi S0) s :=
+    (hcont s hmem).mono hsub
+  apply hwithin.mono_of_mem_nhdsWithin
+  first
+  | exact mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds hsS0)
+  | exact nhdsWithin_le_nhds (Ioi_mem_nhds hsS0)
+  | exact Filter.mem_of_superset (nhdsWithin_le_nhds (Ioi_mem_nhds hsS0)) (fun _ h => h)
+
 /-- LEAF 3, closed: the near piece is bounded via oddNear_s_bound in the
 s-variable, connected by the restricted change of variables above. -/
 theorem oddNear_integral_bound (U : ℝ) (hU : 0 < U) (k : ℕ) (hk : 1 ≤ k)
