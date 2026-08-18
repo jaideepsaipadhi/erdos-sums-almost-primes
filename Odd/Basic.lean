@@ -7148,8 +7148,50 @@ theorem oddIntegrand_aemeasurable (k : ℕ) :
       (MeasureTheory.volume.restrict (Set.Ioi (0:ℝ))) := by
   classical
   set zR : ℝ → ℝ := fun s => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) with hzR
+  have hzRIci : ∀ S0 : ℝ, 1 < S0 → ContinuousOn zR (Set.Ici S0) := by
+    intro S0 hS0
+    rw [hzR]
+    have hsum : Summable (fun n : ℕ => ((n:ℝ) + 1) ^ (-S0)) := by
+      have hb := Real.summable_nat_rpow.mpr (by linarith : (-S0:ℝ) < -1)
+      apply ((summable_nat_add_iff 1).mpr hb).congr
+      intro n
+      push_cast
+      ring_nf
+    apply continuousOn_tsum
+      (u := fun n : ℕ => ((n:ℝ) + 1) ^ (-S0)) _ hsum
+    · intro n x hx
+      have hxS0 : S0 ≤ x := hx
+      have hn1 : (1:ℝ) ≤ (n:ℝ) + 1 := by
+        have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+        linarith
+      have hpos : (0:ℝ) < ((n:ℝ) + 1) ^ (-x) := Real.rpow_pos_of_pos (by positivity) _
+      rw [Real.norm_eq_abs, abs_of_pos hpos]
+      exact Real.rpow_le_rpow_of_exponent_le hn1 (by linarith)
+    · intro n
+      apply Continuous.continuousOn
+      apply Continuous.rpow continuous_const continuous_neg
+      intro x
+      left
+      have : (0:ℝ) < (n:ℝ) + 1 := by positivity
+      exact ne_of_gt this
   have hzRcont : ContinuousOn zR (Set.Ioi (1:ℝ)) := by
-    sorry
+    intro t ht
+    have ht1 : (1:ℝ) < t := ht
+    set T0 := (1 + t) / 2 with hT0def
+    have hT0 : (1:ℝ) < T0 := by rw [hT0def]; linarith
+    have htT0 : T0 < t := by rw [hT0def]; linarith
+    have hmem : t ∈ Set.Ici T0 := le_of_lt htT0
+    have hsub : Set.Ioi T0 ⊆ Set.Ici T0 := by
+      intro x hx
+      rw [Set.mem_Ioi] at hx
+      rw [Set.mem_Ici]
+      exact le_of_lt hx
+    have hwithin : ContinuousWithinAt zR (Set.Ioi T0) t :=
+      ((hzRIci T0 hT0) t hmem).mono hsub
+    apply hwithin.mono_of_mem_nhdsWithin
+    first
+    | exact mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds htT0)
+    | exact nhdsWithin_le_nhds (Ioi_mem_nhds htT0)
   -- patched versions, globally measurable
   set F := Set.piecewise (Set.Ioi (1:ℝ)) (FkOdd k) (fun _ => 0) with hF
   set Z := Set.piecewise (Set.Ioi (1:ℝ)) zR (fun _ => 0) with hZ
