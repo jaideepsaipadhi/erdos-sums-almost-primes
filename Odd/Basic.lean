@@ -7307,7 +7307,47 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
         (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
           dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u))
         (Set.Ioi U) := by
-      sorry
+      have hIoi0 : MeasureTheory.IntegrableOn
+          (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
+            dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u))
+          (Set.Ioi (0:ℝ)) := by
+        have hrw : (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
+              dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u))
+            = fun u : ℝ => ∑ j ∈ Finset.range (k + 1),
+              (CE * dom j / (Nat.factorial (k - j))
+                * (u ^ (k - j) * Real.exp (-(3 * u)))) := by
+          funext u
+          have h3u : (-3 : ℝ) * u = -(3 * u) := by ring
+          rw [h3u, Finset.mul_sum, Finset.sum_mul]
+          apply Finset.sum_congr rfl
+          intro j _
+          ring
+        rw [hrw]
+        apply MeasureTheory.integrable_finset_sum
+        intro j _
+        apply MeasureTheory.Integrable.const_mul
+        have hgam : MeasureTheory.IntegrableOn
+            (fun x : ℝ => Real.exp (-x) * x ^ (((k - j : ℕ) : ℝ) + 1 - 1)) (Set.Ioi 0) :=
+          Real.GammaIntegral_convergent (by positivity)
+        simp only [add_sub_cancel_right] at hgam
+        have hgam' : MeasureTheory.IntegrableOn
+            (fun x : ℝ => x ^ ((k - j : ℕ)) * Real.exp (-x)) (Set.Ioi 0) := by
+          apply hgam.congr_fun _ measurableSet_Ioi
+          intro x _
+          simp only
+          rw [← Real.rpow_natCast x (k - j)]
+          ring
+        apply MeasureTheory.Integrable.mono hgam'
+        · apply MeasureTheory.AEStronglyMeasurable.mul <;>
+            (apply Continuous.aestronglyMeasurable; fun_prop)
+        · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+          have hx0 : (0:ℝ) < x := hx
+          rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_mul,
+            abs_of_pos (Real.exp_pos (-(3*x))), abs_of_pos (Real.exp_pos (-x))]
+          apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
+          apply Real.exp_le_exp.mpr
+          linarith
+      exact hIoi0.mono_set hIoiU
     apply MeasureTheory.Integrable.mono' hmaj
       ((hDmeas _ hIoiU measurableSet_Ioi).aestronglyMeasurable)
     filter_upwards [MeasureTheory.self_mem_ae_restrict measurableSet_Ioi] with u hu
