@@ -7359,6 +7359,29 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
     -- D is a difference of three pieces, each integrable on Ioc 0 U
     have hIocmeas : MeasurableSet (Set.Ioc (0:ℝ) U) := measurableSet_Ioc
     -- the integrand transfers from the s-side
+    -- -zeta'(s) >= log 2 * 2^-s, from the n = 1 term alone
+    have hderivlb : ∀ s : ℝ, 1 < s →
+        Real.log 2 * (2:ℝ) ^ (-s) ≤ -zetaRderiv s := by
+      intro t ht
+      unfold zetaRderiv
+      have hsum := log_rpow_summable t ht
+      have hneg : (∑' n : ℕ, (-Real.log ((n:ℝ) + 1)) * ((n:ℝ) + 1) ^ (-t))
+          = -∑' n : ℕ, Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-t) := by
+        rw [← tsum_neg]
+        apply tsum_congr
+        intro n
+        ring
+      rw [hneg, neg_neg]
+      have hle := hsum.le_tsum 1 (fun n _ => by
+        apply mul_nonneg _ (by positivity)
+        apply Real.log_nonneg
+        have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+        linarith)
+      have hterm : Real.log 2 * (2:ℝ) ^ (-t)
+          = Real.log (((1:ℕ):ℝ) + 1) * (((1:ℕ):ℝ) + 1) ^ (-t) := by
+        norm_num
+      rw [hterm]
+      exact hle
     have hIint : MeasureTheory.IntegrableOn
         (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
             (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
