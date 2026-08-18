@@ -7212,6 +7212,42 @@ theorem oddIntegrand_aemeasurable (k : ℕ) :
   have hs1 : sOf u ∈ Set.Ioi (1:ℝ) := sOf_mem u hu0
   simp only [hF, hZ, hD, Set.piecewise_eq_of_mem _ _ _ hs1, hzR]
 
+/-- MAIN1 and MAIN2 are AEMeasurable everywhere: finite sums of
+u^m * exp(-c u), all continuous. -/
+theorem oddSplitMain_aemeasurable (bHatOdd : ℕ → ℂ) (k : ℕ) (μ : MeasureTheory.Measure ℝ) :
+    AEMeasurable (fun u : ℝ => oddSplitMain1 k u) μ ∧
+    AEMeasurable (fun u : ℝ => oddSplitMain2 bHatOdd k u) μ := by
+  constructor
+  · apply Continuous.aemeasurable
+    unfold oddSplitMain1
+    apply Continuous.mul _ (Real.continuous_exp.comp continuous_neg)
+    apply continuous_finset_sum
+    intro j _
+    apply Continuous.div_const
+    exact Continuous.mul continuous_const (continuous_pow _)
+  · apply Continuous.aemeasurable
+    unfold oddSplitMain2
+    apply Continuous.mul _ (Real.continuous_exp.comp (by continuity))
+    apply continuous_finset_sum
+    intro j _
+    apply Continuous.div_const
+    exact Continuous.mul continuous_const (continuous_pow _)
+
+/-- The difference D = integrand - MAIN1 - MAIN2 is integrable on Ioi 0.
+
+On Ioi U it is dominated by leaf 1's majorant, whose integrability leaf 2
+establishes; on Ioc 0 U it is bounded on a set of finite measure. -/
+theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (S : ℝ)
+    (hf : OddCoeffFacts betaFam bHatOdd)
+    (hd : OddDomFacts dom betaFam bHatOdd S) (k : ℕ) (hk : 1 ≤ k) :
+    MeasureTheory.IntegrableOn
+      (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)
+      (Set.Ioi (0:ℝ)) := by
+  sorry
+
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
     fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
