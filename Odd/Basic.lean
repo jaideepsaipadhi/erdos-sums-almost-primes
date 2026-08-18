@@ -7413,15 +7413,22 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
             (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
           * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
         (Set.Ioc (0:ℝ) U) := by
-      set Z2 := ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ)) with hZ2
-      have hZ2pos : (0:ℝ) < Z2 := by rw [hZ2]; exact zetaR_pos 2 (by norm_num)
+      have hSU1 : (1:ℝ) < sOf U := sOf_mem U hU
+      set Z32 := ∑' n : ℕ, ((n:ℝ) + 1) ^ (-((3:ℝ)/2)) with hZ32
+      set ZU := ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf U)) with hZU
+      have hZ32pos : (0:ℝ) < Z32 := by rw [hZ32]; exact zetaR_pos _ (by norm_num)
+      have hZUpos : (0:ℝ) < ZU := by rw [hZU]; exact zetaR_pos _ hSU1
       have hlog2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+      have hFkU : (0:ℝ) ≤ FkOdd k (sOf U) := by
+        unfold FkOdd
+        apply tsum_nonneg
+        intro n; positivity
       -- uniform bound: |integrand| <= Z2 * Z2 / (log 2 * 2^-2) on Ioc 0 U
       have hbdd : ∀ u ∈ Set.Ioc (0:ℝ) U,
           ‖(∑ j ∈ Finset.range (k + 1),
               (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
             * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))‖
-          ≤ Z2 * (Z2 / (Real.log 2 * (2:ℝ) ^ (-(1:ℝ)))) := by
+          ≤ (Z32 + FkOdd k (sOf U)) * ZU * ((2:ℝ) ^ ((3:ℝ)/2) / Real.log 2) := by
         intro u hu
         have hu0 : (0:ℝ) < u := hu.1
         have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
@@ -7481,7 +7488,7 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
         ring
       exact ⟨hmeas.aestronglyMeasurable,
         MeasureTheory.HasFiniteIntegral.restrict_of_bounded
-          (C := Z2 * (Z2 / (Real.log 2 * (2:ℝ) ^ (-(1:ℝ)))))
+          (C := (Z32 + FkOdd k (sOf U)) * ZU * ((2:ℝ) ^ ((3:ℝ)/2) / Real.log 2))
           (by rw [Real.volume_Ioc]; exact ENNReal.ofReal_lt_top)
           (by
             filter_upwards [MeasureTheory.self_mem_ae_restrict measurableSet_Ioc] with u hu
