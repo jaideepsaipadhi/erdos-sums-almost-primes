@@ -7356,7 +7356,36 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
     exact hsplit u huU
   -- the near piece: bounded on a finite-measure set
   have hnear : MeasureTheory.IntegrableOn D (Set.Ioc (0:ℝ) U) := by
-    sorry
+    -- D is a difference of three pieces, each integrable on Ioc 0 U
+    have hIocmeas : MeasurableSet (Set.Ioc (0:ℝ) U) := measurableSet_Ioc
+    -- the integrand transfers from the s-side
+    have hIint : MeasureTheory.IntegrableOn
+        (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+        (Set.Ioc (0:ℝ) U) := by
+      sorry
+    -- MAIN1 and MAIN2 are continuous, hence integrable on a compact-closure set
+    have hc1 : Continuous (fun u : ℝ => oddSplitMain1 k u) := by
+      unfold oddSplitMain1
+      apply Continuous.mul _ (Real.continuous_exp.comp continuous_neg)
+      apply continuous_finset_sum
+      intro j _
+      apply Continuous.div_const
+      exact Continuous.mul continuous_const (continuous_pow _)
+    have hc2 : Continuous (fun u : ℝ => oddSplitMain2 bHatOdd k u) := by
+      unfold oddSplitMain2
+      apply Continuous.mul _ (Real.continuous_exp.comp (by continuity))
+      apply continuous_finset_sum
+      intro j _
+      apply Continuous.div_const
+      exact Continuous.mul continuous_const (continuous_pow _)
+    have hM1 : MeasureTheory.IntegrableOn (fun u : ℝ => oddSplitMain1 k u)
+        (Set.Ioc (0:ℝ) U) := hc1.integrableOn_Ioc
+    have hM2 : MeasureTheory.IntegrableOn (fun u : ℝ => oddSplitMain2 bHatOdd k u)
+        (Set.Ioc (0:ℝ) U) := hc2.integrableOn_Ioc
+    rw [hDdef]
+    exact (hIint.sub hM1).sub hM2
   have hunion : Set.Ioi (0:ℝ) = Set.Ioc (0:ℝ) U ∪ Set.Ioi U := by
     ext x
     simp only [Set.mem_Ioi, Set.mem_union, Set.mem_Ioc]
