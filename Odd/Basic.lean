@@ -7506,7 +7506,20 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
             -- 3^(-k(s-3/2)) * Z32 <= (Z32 + F) * 2^(-s) * 2^(3/2)
             have hkey : (3:ℝ) ^ (-(k:ℝ) * (sOf u - 3/2))
                 ≤ (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by
-              sorry
+              have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
+              have hd0 : (0:ℝ) ≤ sOf u - 3/2 := by linarith [hreg]
+              -- 3^(-k d) <= 3^(-d) <= 2^(-d), where d = s - 3/2
+              have h1 : (3:ℝ) ^ (-(k:ℝ) * (sOf u - 3/2)) ≤ (3:ℝ) ^ (-(sOf u - 3/2)) := by
+                apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+                nlinarith [hk1, hd0]
+              have h2 : (3:ℝ) ^ (-(sOf u - 3/2)) ≤ (2:ℝ) ^ (-(sOf u - 3/2)) :=
+                Real.rpow_le_rpow_of_nonpos (by norm_num) (by norm_num) (by linarith [hd0])
+              have h3 : (2:ℝ) ^ (-(sOf u - 3/2))
+                  = (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by
+                rw [← Real.rpow_add (by norm_num : (0:ℝ) < 2)]
+                congr 1
+                ring
+              linarith [h1, h2, h3.le, h3.ge]
             calc (3:ℝ) ^ (-(k:ℝ) * (sOf u - 3/2)) * Z32
                 ≤ ((2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2)) * Z32 :=
                   mul_le_mul_of_nonneg_right hkey (le_of_lt hZ32pos)
