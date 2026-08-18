@@ -7299,8 +7299,21 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
     have hm := oddSplitMain_aemeasurable bHatOdd k (MeasureTheory.volume.restrict t)
     exact (hI'.sub hm.1).sub hm.2
   -- the far piece: dominated by leaf 1's majorant
+  have hIoiU : Set.Ioi U ⊆ Set.Ioi (0:ℝ) := fun x hx => lt_trans hU hx
+  have hIocU : Set.Ioc (0:ℝ) U ⊆ Set.Ioi (0:ℝ) := fun x hx => hx.1
   have hfar : MeasureTheory.IntegrableOn D (Set.Ioi U) := by
-    sorry
+    -- dominated by leaf 1's majorant, integrable by leaf 2's Gamma argument
+    have hmaj : MeasureTheory.IntegrableOn
+        (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
+          dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u))
+        (Set.Ioi U) := by
+      sorry
+    apply MeasureTheory.Integrable.mono' hmaj
+      ((hDmeas _ hIoiU measurableSet_Ioi).aestronglyMeasurable)
+    filter_upwards [MeasureTheory.self_mem_ae_restrict measurableSet_Ioi] with u hu
+    have huU : U ≤ u := le_of_lt hu
+    rw [Real.norm_eq_abs]
+    exact hsplit u huU
   -- the near piece: bounded on a finite-measure set
   have hnear : MeasureTheory.IntegrableOn D (Set.Ioc (0:ℝ) U) := by
     sorry
