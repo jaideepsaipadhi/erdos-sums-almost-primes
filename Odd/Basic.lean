@@ -7246,7 +7246,36 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
         * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
         - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)
       (Set.Ioi (0:ℝ)) := by
-  sorry
+  classical
+  obtain ⟨CE, hCE, U, hU, hsplit⟩ := oddIntegrand_split dom betaFam bHatOdd S hf hd k
+  set D : ℝ → ℝ := fun u => (∑ j ∈ Finset.range (k + 1),
+      (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+    * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+    - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u with hDdef
+  -- measurability of D on any restriction
+  have hDmeas : ∀ (t : Set ℝ), MeasurableSet t →
+      AEMeasurable D (MeasureTheory.volume.restrict t) := by
+    intro t ht
+    sorry
+  -- the far piece: dominated by leaf 1's majorant
+  have hfar : MeasureTheory.IntegrableOn D (Set.Ioi U) := by
+    sorry
+  -- the near piece: bounded on a finite-measure set
+  have hnear : MeasureTheory.IntegrableOn D (Set.Ioc (0:ℝ) U) := by
+    sorry
+  have hunion : Set.Ioi (0:ℝ) = Set.Ioc (0:ℝ) U ∪ Set.Ioi U := by
+    ext x
+    simp only [Set.mem_Ioi, Set.mem_union, Set.mem_Ioc]
+    constructor
+    · intro hx
+      rcases lt_or_ge U x with h | h
+      · exact Or.inr h
+      · exact Or.inl ⟨hx, h⟩
+    · rintro (⟨h1, _⟩ | h2)
+      · exact h1
+      · linarith
+  rw [hunion]
+  exact hnear.union hfar
 
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
