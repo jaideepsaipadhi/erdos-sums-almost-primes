@@ -7475,7 +7475,27 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
           exact Real.rpow_le_rpow_of_exponent_le hn1 (by linarith)
         have hJ : |(∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))|
             ≤ ZU * ((2:ℝ) ^ (sOf u) / Real.log 2) := by
-          sorry
+          have hden := hderivlb (sOf u) hs1
+          have hdpos : (0:ℝ) < Real.log 2 * (2:ℝ) ^ (-(sOf u)) := by
+            apply mul_pos hlog2
+            exact Real.rpow_pos_of_pos (by norm_num) _
+          have hdenpos : (0:ℝ) < -zetaRderiv (sOf u) := lt_of_lt_of_le hdpos hden
+          have hnumpos : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u)) :=
+            zetaR_pos _ hs1
+          rw [abs_div, abs_of_pos hnumpos, abs_of_pos hdenpos]
+          rw [div_le_iff₀ hdenpos]
+          have hpow : (2:ℝ) ^ (sOf u) * (2:ℝ) ^ (-(sOf u)) = 1 := by
+            rw [← Real.rpow_add (by norm_num : (0:ℝ) < 2)]
+            simp
+          calc (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) ≤ ZU := hZle
+            _ = ZU * ((2:ℝ) ^ (sOf u) / Real.log 2) * (Real.log 2 * (2:ℝ) ^ (-(sOf u))) := by
+                field_simp
+                rw [mul_comm ((2:ℝ) ^ (sOf u)) ((2:ℝ) ^ (-(sOf u))), ← Real.rpow_add (by norm_num : (0:ℝ) < 2)]
+                simp
+            _ ≤ ZU * ((2:ℝ) ^ (sOf u) / Real.log 2) * (-zetaRderiv (sOf u)) := by
+                apply mul_le_mul_of_nonneg_left hden
+                apply mul_nonneg (le_of_lt hZUpos)
+                positivity
         have hFbound : FkOdd k (sOf u)
             ≤ (Z32 + FkOdd k (sOf U)) * (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by
           sorry
