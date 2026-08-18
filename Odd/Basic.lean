@@ -7073,6 +7073,103 @@ theorem sOf_aemeasurable :
   apply aemeasurable_restrict_of_antitoneOn measurableSet_Ioi
   exact sOf_strictAntiOn.antitoneOn
 
+/-- zetaRderiv is continuous on Ici S0 for every S0 > 1, by the same
+uniform-convergence argument as FkOdd. -/
+theorem zetaRderiv_continuousOn_Ici (S0 : ℝ) (hS0 : 1 < S0) :
+    ContinuousOn zetaRderiv (Set.Ici S0) := by
+  unfold zetaRderiv
+  apply continuousOn_tsum
+    (u := fun n : ℕ => Real.log ((n:ℝ) + 1) * ((n:ℝ) + 1) ^ (-S0))
+    _ (log_rpow_summable S0 hS0)
+  · intro n x hx
+    have hxS0 : S0 ≤ x := hx
+    have hn1 : (1:ℝ) ≤ (n:ℝ) + 1 := by
+      have : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+      linarith
+    have hpos : (0:ℝ) < ((n:ℝ) + 1) ^ (-x) := Real.rpow_pos_of_pos (by positivity) _
+    have hlog : (0:ℝ) ≤ Real.log ((n:ℝ) + 1) := Real.log_nonneg hn1
+    rw [Real.norm_eq_abs, abs_mul, abs_neg, abs_of_nonneg hlog,
+      abs_of_pos hpos]
+    apply mul_le_mul_of_nonneg_left _ hlog
+    exact Real.rpow_le_rpow_of_exponent_le hn1 (by linarith)
+  · intro n
+    apply Continuous.continuousOn
+    apply Continuous.mul continuous_const
+    apply Continuous.rpow continuous_const continuous_neg
+    intro x
+    left
+    have : (0:ℝ) < (n:ℝ) + 1 := by positivity
+    exact ne_of_gt this
+
+/-- zetaRderiv is continuous on all of Ioi 1. -/
+theorem zetaRderiv_continuousOn_Ioi : ContinuousOn zetaRderiv (Set.Ioi (1:ℝ)) := by
+  intro s hs
+  have hs1 : (1:ℝ) < s := hs
+  set S0 := (1 + s) / 2 with hS0def
+  have hS0 : (1:ℝ) < S0 := by rw [hS0def]; linarith
+  have hsS0 : S0 < s := by rw [hS0def]; linarith
+  have hmem : s ∈ Set.Ici S0 := le_of_lt hsS0
+  have hcont := zetaRderiv_continuousOn_Ici S0 hS0
+  have hsub : Set.Ioi S0 ⊆ Set.Ici S0 := by
+    intro x hx
+    rw [Set.mem_Ioi] at hx
+    rw [Set.mem_Ici]
+    exact le_of_lt hx
+  have hwithin : ContinuousWithinAt zetaRderiv (Set.Ioi S0) s :=
+    (hcont s hmem).mono hsub
+  apply hwithin.mono_of_mem_nhdsWithin
+  first
+  | exact mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds hsS0)
+  | exact nhdsWithin_le_nhds (Ioi_mem_nhds hsS0)
+
+
+/-- A continuous-on-Ioi-1 function, patched to 0 elsewhere, is globally
+measurable; this is the form that composes with sOf. -/
+theorem patch_measurable (f : ℝ → ℝ) (hf : ContinuousOn f (Set.Ioi (1:ℝ))) :
+    Measurable (Set.piecewise (Set.Ioi (1:ℝ)) f (fun _ => 0)) := by
+  classical
+  apply measurable_of_isOpen
+  intro t ht
+  obtain ⟨u, u_open, hu⟩ : ∃ u : Set ℝ, IsOpen u ∧ f ⁻¹' t ∩ Set.Ioi (1:ℝ)
+      = u ∩ Set.Ioi (1:ℝ) := _root_.continuousOn_iff'.1 hf t ht
+  rw [Set.piecewise_preimage, Set.ite, hu]
+  exact (u_open.measurableSet.inter measurableSet_Ioi).union
+    ((measurable_const ht.measurableSet).diff measurableSet_Ioi)
+
+/-- The integrand of fOdd_u_form is AEMeasurable on Ioi 0.
+
+Composition: sOf is AEMeasurable (antitone), FkOdd k is continuous on Ioi 1
+and sOf lands there, and the Jacobian is built from zetaR and zetaRderiv,
+both continuous on Ioi 1. -/
+theorem oddIntegrand_aemeasurable (k : ℕ) :
+    AEMeasurable
+      (fun u : ℝ => FkOdd k (sOf u)
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+      (MeasureTheory.volume.restrict (Set.Ioi (0:ℝ))) := by
+  classical
+  set zR : ℝ → ℝ := fun s => ∑' n : ℕ, ((n:ℝ) + 1) ^ (-s) with hzR
+  have hzRcont : ContinuousOn zR (Set.Ioi (1:ℝ)) := by
+    sorry
+  -- patched versions, globally measurable
+  set F := Set.piecewise (Set.Ioi (1:ℝ)) (FkOdd k) (fun _ => 0) with hF
+  set Z := Set.piecewise (Set.Ioi (1:ℝ)) zR (fun _ => 0) with hZ
+  set D := Set.piecewise (Set.Ioi (1:ℝ)) zetaRderiv (fun _ => 0) with hD
+  have hFm : Measurable F := patch_measurable _ (FkOdd_continuousOn_Ioi k)
+  have hZm : Measurable Z := patch_measurable _ hzRcont
+  have hDm : Measurable D := patch_measurable _ zetaRderiv_continuousOn_Ioi
+  have hcomp : AEMeasurable (fun u : ℝ => F (sOf u) * (Z (sOf u) / (-D (sOf u))))
+      (MeasureTheory.volume.restrict (Set.Ioi (0:ℝ))) := by
+    apply AEMeasurable.mul
+    · exact hFm.comp_aemeasurable sOf_aemeasurable
+    · apply AEMeasurable.div
+      · exact hZm.comp_aemeasurable sOf_aemeasurable
+      · exact (hDm.comp_aemeasurable sOf_aemeasurable).neg
+  apply hcomp.congr
+  filter_upwards [MeasureTheory.self_mem_ae_restrict measurableSet_Ioi] with u hu
+  have hu0 : (0:ℝ) < u := hu
+  have hs1 : sOf u ∈ Set.Ioi (1:ℝ) := sOf_mem u hu0
+  simp only [hF, hZ, hD, Set.piecewise_eq_of_mem _ _ _ hs1, hzR]
+
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
     fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
