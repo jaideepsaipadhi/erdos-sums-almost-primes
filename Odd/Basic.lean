@@ -7498,7 +7498,39 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
                 positivity
         have hFbound : FkOdd k (sOf u)
             ≤ (Z32 + FkOdd k (sOf U)) * (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by
-          sorry
+          rcases le_or_gt ((3:ℝ)/2) (sOf u) with hreg | hreg
+          · -- regime A: s >= 3/2, use FkOdd_le_pow with tau = 3/2
+            have hA := FkOdd_le_pow k ((3:ℝ)/2) (sOf u) (by norm_num) hreg
+            refine le_trans hA ?_
+            rw [← hZ32]
+            -- 3^(-k(s-3/2)) * Z32 <= (Z32 + F) * 2^(-s) * 2^(3/2)
+            have hkey : (3:ℝ) ^ (-(k:ℝ) * (sOf u - 3/2))
+                ≤ (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by
+              sorry
+            calc (3:ℝ) ^ (-(k:ℝ) * (sOf u - 3/2)) * Z32
+                ≤ ((2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2)) * Z32 :=
+                  mul_le_mul_of_nonneg_right hkey (le_of_lt hZ32pos)
+              _ ≤ (Z32 + FkOdd k (sOf U)) * (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by
+                  have hp1 : (0:ℝ) < (2:ℝ) ^ (-(sOf u)) :=
+                    Real.rpow_pos_of_pos (by norm_num) _
+                  have hp2 : (0:ℝ) < (2:ℝ) ^ ((3:ℝ)/2) :=
+                    Real.rpow_pos_of_pos (by norm_num) _
+                  have hle : Z32 ≤ Z32 + FkOdd k (sOf U) := by linarith
+                  calc ((2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2)) * Z32
+                      = Z32 * (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by ring
+                    _ ≤ (Z32 + FkOdd k (sOf U)) * (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by
+                        apply mul_le_mul_of_nonneg_right _ (le_of_lt hp2)
+                        exact mul_le_mul_of_nonneg_right hle (le_of_lt hp1)
+          · -- regime B: s < 3/2, s is bounded so use antitonicity
+            have hB := FkOdd_antitone k (sOf U) (sOf u) hSU1 hsu
+            refine le_trans hB ?_
+            have h2s : (1:ℝ) ≤ (2:ℝ) ^ (-(sOf u)) * (2:ℝ) ^ ((3:ℝ)/2) := by
+              rw [← Real.rpow_add (by norm_num : (0:ℝ) < 2)]
+              have hexp : (0:ℝ) ≤ -(sOf u) + (3:ℝ)/2 := by linarith [hreg]
+              have h20 : (2:ℝ) ^ (0:ℝ) = 1 := by simp
+              rw [← h20]
+              exact Real.rpow_le_rpow_of_exponent_le (by norm_num) hexp
+            nlinarith [hFkU, hZ32pos, h2s]
         sorry
       have hmeas : AEMeasurable
           (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
