@@ -7046,6 +7046,19 @@ theorem oddSplitMain2_near (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
   rw [Real.norm_eq_abs, hvol] at hbound
   linarith [hbound]
 
+/-- FkOdd k is antitone in s on (1, inf): each term n^(-s) decreases. -/
+theorem FkOdd_antitone (k : ℕ) (s t : ℝ) (hs : 1 < s) (hst : s ≤ t) :
+    FkOdd k t ≤ FkOdd k s := by
+  unfold FkOdd
+  have ht : (1:ℝ) < t := lt_of_lt_of_le hs hst
+  apply Summable.tsum_le_tsum _ (FkOdd_summable k t ht) (FkOdd_summable k s hs)
+  intro n
+  have hn1 : (1:ℝ) ≤ ((n:ℕ):ℝ) := by
+    have := n.2.1
+    have h3 : (3:ℝ) ≤ ((n:ℕ):ℝ) := by exact_mod_cast this
+    linarith
+  exact Real.rpow_le_rpow_of_exponent_le hn1 (by linarith)
+
 /-- The dominating sequence decays like a polynomial times 3^-j.
 
 From dom_cert and coeffSum_bound: the weighted partial sums are bounded by
@@ -7409,6 +7422,30 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
               (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
             * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))‖
           ≤ Z2 * (Z2 / (Real.log 2 * (2:ℝ) ^ (-(1:ℝ)))) := by
+        intro u hu
+        have hu0 : (0:ℝ) < u := hu.1
+        have hs1 : (1:ℝ) < sOf u := sOf_mem u hu0
+        -- the coefficient sum equals FkOdd k (sOf u), bounded by Z2 termwise
+        have hFk : (∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+            = FkOdd k (sOf u) := by
+          have hexp := FkOdd_expansion' k hk (sOf u) hs1
+            (hsum (sOf u) hs1) (hmul3 (sOf u) hs1) (hcd1 (sOf u) hs1) (hcd2 (sOf u) hs1)
+          rw [uOf_sOf u hu0] at hexp
+          have hre := congrArg Complex.re hexp
+          simp only [Complex.ofReal_re] at hre
+          rw [hre, Complex.re_sum]
+          symm
+          apply Finset.sum_congr rfl
+          intro j _
+          have hcast : (hCoeff (sOf u) j * (u:ℂ) ^ (k - j)
+                / ((Nat.factorial (k - j) : ℕ) : ℂ))
+              = hCoeff (sOf u) j
+                * (((u ^ (k - j) / (Nat.factorial (k - j) : ℝ) : ℝ)) : ℂ) := by
+            push_cast
+            ring
+          rw [hcast, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+          ring
         sorry
       have hmeas : AEMeasurable
           (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
