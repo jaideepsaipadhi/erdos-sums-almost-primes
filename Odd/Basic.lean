@@ -7889,6 +7889,31 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
         + 2 * Real.eulerMascheroniConstant * ((hCoeff 1 j).re * 2 ^ j))
       (2 * betaOdd) := by
     sorry
+  -- STEP 2b: MAIN2's full series is 2*beta.
+  have hbnorm : ∀ j : ℕ, ‖bHatOdd j‖ ≤ betaFam j := by
+    intro j
+    apply le_of_tendsto (hf.tendsto_deriv j).norm
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    have ht2 : t ∈ Set.Ioo (1:ℝ) 2 := by
+      constructor
+      · exact ht
+      · sorry
+    exact hf.deriv_bound j t ht2
+  have hsum2h : Summable (fun j : ℕ => hCoeff 1 j * 2 ^ j) :=
+    (hCoeff_sum_two hd1).summable
+  have hsum2c : Summable (fun j : ℕ => bHatOdd j * 2 ^ j) := by
+    apply Summable.of_norm_bounded (g := fun j : ℕ => betaFam j * (2:ℝ) ^ j)
+      hf.fam_summable
+    intro j
+    rw [norm_mul, norm_pow]
+    have h2n : ‖(2:ℂ)‖ = (2:ℝ) := by simp
+    rw [h2n]
+    exact mul_le_mul_of_nonneg_right (hbnorm j) (by positivity)
+  have hre2 : (∑' j : ℕ, (bHatOdd j).re * 2 ^ j)
+      + 2 * Real.eulerMascheroniConstant * (∑' j : ℕ, (hCoeff 1 j).re * 2 ^ j)
+      = 2 * betaOdd := by
+    sorry
+
   -- STEP 3: the two tails, via geom_tail_bound_cx at ratio 1/2 (binom_absorb).
   obtain ⟨C', hC'pos, hC'⟩ := binom_absorb S hS0
   have hdecay : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C' * ((1:ℝ)/2) ^ j := by
