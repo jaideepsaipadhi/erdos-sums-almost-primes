@@ -8073,7 +8073,34 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
         = (∑' j : ℕ, (if k < j then bHatOdd j * 2 ^ j else 0)).re
           + 2 * Real.eulerMascheroniConstant
             * (∑' j : ℕ, (if k < j then hCoeff 1 j * 2 ^ j else 0)).re := by
-      sorry
+      have hsb : Summable (fun j : ℕ => (if k < j then bHatOdd j * 2 ^ j else 0)) := by
+        apply Summable.of_norm_bounded (g := fun j : ℕ => ‖bHatOdd j * 2 ^ j‖)
+          hsum2c.norm
+        intro j
+        by_cases hc : k < j <;> simp [hc]
+      have hsh : Summable (fun j : ℕ => (if k < j then hCoeff 1 j * 2 ^ j else 0)) := by
+        apply Summable.of_norm_bounded (g := fun j : ℕ => ‖hCoeff 1 j * 2 ^ j‖)
+          hsum2h.norm
+        intro j
+        by_cases hc : k < j <;> simp [hc]
+      rw [Complex.re_tsum hsb, Complex.re_tsum hsh, ← tsum_mul_left,
+        ← Summable.tsum_add]
+      · apply tsum_congr
+        intro j
+        by_cases hc : k < j
+        · simp only [hc, if_true]
+          have h2 : ((2:ℂ) ^ j) = (((2:ℝ) ^ j : ℝ) : ℂ) := by push_cast; ring
+          rw [h2, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+            Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+          ring
+        · simp [hc]
+      · apply Summable.congr (hsb.map (Complex.reCLM : ℂ →L[ℝ] ℝ) Complex.reCLM.continuous)
+        intro j
+        rfl
+      · apply Summable.mul_left
+        apply Summable.congr (hsh.map (Complex.reCLM : ℂ →L[ℝ] ℝ) Complex.reCLM.continuous)
+        intro j
+        rfl
     rw [hcong]
     refine le_trans (abs_add_le _ _) ?_
     apply add_le_add
