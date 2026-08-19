@@ -8064,7 +8064,23 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
           * (hCoeff 1 j).re) * 2 ^ j else 0)|
       ≤ C'' * ((3:ℝ)/4) ^ (k+1) / (1 - 3/4)
         + 2 * Real.eulerMascheroniConstant * (C'' * ((3:ℝ)/4) ^ (k+1) / (1 - 3/4)) := by
-    sorry
+    have hg0 : (0:ℝ) < Real.eulerMascheroniConstant := by
+      linarith [Real.one_half_lt_eulerMascheroniConstant]
+    -- the real tail is the real part of the complex tails
+    have hcong : (∑' j : ℕ,
+          (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant
+            * (hCoeff 1 j).re) * 2 ^ j else 0))
+        = (∑' j : ℕ, (if k < j then bHatOdd j * 2 ^ j else 0)).re
+          + 2 * Real.eulerMascheroniConstant
+            * (∑' j : ℕ, (if k < j then hCoeff 1 j * 2 ^ j else 0)).re := by
+      sorry
+    rw [hcong]
+    refine le_trans (abs_add_le _ _) ?_
+    apply add_le_add
+    · exact le_trans (Complex.abs_re_le_norm _) htail2
+    · rw [abs_mul, abs_of_pos (by linarith : (0:ℝ) < 2 * Real.eulerMascheroniConstant)]
+      apply mul_le_mul_of_nonneg_left _ (by linarith)
+      exact le_trans (Complex.abs_re_le_norm _) htail2h
 
   have htail1re : |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
       ≤ C' * ((1:ℝ)/2) ^ (k+1) / (1 - 1/2) := by
