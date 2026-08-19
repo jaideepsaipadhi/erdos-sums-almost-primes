@@ -7823,4 +7823,16 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     simp only [Pi.sub_apply] at e1
     rw [e2] at e1
     exact e1
+  -- STEP 2a: MAIN1's integral is the partial sum, and the full sum is 1/2.
+  have hM1val := oddSplitMain1_integral k hk
+  have hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4) := hdiff 1 le_rfl
+  have hsum1c : HasSum (fun j : ℕ => hCoeff 1 j) (1/2 : ℂ) := hCoeff_sum_one hd1
+  have hsummable1 : Summable (fun j : ℕ => hCoeff 1 j) := hsum1c.summable
+  have hre1 : HasSum (fun j : ℕ => (hCoeff 1 j).re) (1/2 : ℝ) := by
+    have := hsum1c.mapL Complex.reCLM
+    simpa using this
+  -- the partial sum differs from 1/2 by the tail
+  have hpart1 : ∑ j ∈ Finset.range (k + 1), (hCoeff 1 j).re
+      = (1/2 : ℝ) - ∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0) := by
+    sorry
   sorry
