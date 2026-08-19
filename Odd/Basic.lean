@@ -7786,9 +7786,41 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
       ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
   rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
-  -- The integrand splits as MAIN1 + MAIN2 + ERR, with
-  --   MAIN1 -> 1/2                        [oddSplitMain1_integral, hCoeff_sum_one]
-  --   MAIN2 -> beta 2^-k                  [oddSplitMain2_integral, order_two_coefficient]
-  --   ERR   -> the Lagrange remainder of hCoeff_taylor, O(e^-3u), integrated
-  --            by gamma_normalised_three and bounded by coeffSum_bound.
+  obtain ⟨hM1int, hM2int⟩ := oddSplitMain_integrable bHatOdd k
+  have hDint := oddDiff_integrable dom betaFam bHatOdd S hf hd k hk hsum hmul3 hcd1 hcd2
+  -- STEP 1: the integral of the difference is the target quantity, up to the
+  -- two main integrals and their tails.
+  have hsplit_int :
+      (∫ u in Set.Ioi (0:ℝ),
+        ((∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+          - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u))
+      = (∫ u in Set.Ioi (0:ℝ),
+          (∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+        - (∫ u in Set.Ioi (0:ℝ), oddSplitMain1 k u)
+        - (∫ u in Set.Ioi (0:ℝ), oddSplitMain2 bHatOdd k u) := by
+    have hAint : MeasureTheory.IntegrableOn
+        (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+        (Set.Ioi (0:ℝ)) := by
+      have h2 := (hDint.add hM1int).add hM2int
+      apply h2.congr_fun _ measurableSet_Ioi
+      intro u _
+      show (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+          - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) u
+          + (fun u : ℝ => oddSplitMain1 k u) u
+          + (fun u : ℝ => oddSplitMain2 bHatOdd k u) u
+        = _
+      ring
+    have e1 := MeasureTheory.integral_sub (hAint.sub hM1int) hM2int
+    have e2 := MeasureTheory.integral_sub hAint hM1int
+    simp only [Pi.sub_apply] at e1
+    rw [e2] at e1
+    exact e1
   sorry
