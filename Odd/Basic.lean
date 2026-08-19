@@ -8108,6 +8108,19 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     · rw [abs_mul, abs_of_pos (by linarith : (0:ℝ) < 2 * Real.eulerMascheroniConstant)]
       apply mul_le_mul_of_nonneg_left _ (by linarith)
       exact le_trans (Complex.abs_re_le_norm _) htail2h
+  -- STEP 4: the target equals |∫ D| up to the two tails.
+  have hMain : |fOdd k - 1/2 - betaOdd * ((1:ℝ)/2) ^ k|
+      ≤ |∫ u in Set.Ioi (0:ℝ),
+            ((∑ j ∈ Finset.range (k + 1),
+                (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+              * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+              - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)|
+        + |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
+        + (1 / 2 ^ (k+1)) * |∑' j : ℕ,
+            (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant
+              * (hCoeff 1 j).re) * 2 ^ j else 0)| := by
+    sorry
+
 
   have htail1re : |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
       ≤ C' * ((1:ℝ)/2) ^ (k+1) / (1 - 1/2) := by
