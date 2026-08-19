@@ -7832,7 +7832,89 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     have := hsum1c.mapL Complex.reCLM
     simpa using this
   -- the partial sum differs from 1/2 by the tail
+  have hsummre1 : Summable (fun j : ℕ => (hCoeff 1 j).re) := hre1.summable
   have hpart1 : ∑ j ∈ Finset.range (k + 1), (hCoeff 1 j).re
       = (1/2 : ℝ) - ∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0) := by
+    have hlow : Summable (fun j : ℕ => (if j ≤ k then (hCoeff 1 j).re else 0)) := by
+      apply summable_of_finite_support
+      apply Set.Finite.subset (Set.finite_Icc 0 k)
+      intro j hj
+      simp only [Function.mem_support, ne_eq, ite_eq_right_iff, not_forall] at hj
+      obtain ⟨hjk, _⟩ := hj
+      exact ⟨Nat.zero_le j, hjk⟩
+    have hhigh : Summable (fun j : ℕ => (if k < j then (hCoeff 1 j).re else 0)) := by
+      apply Summable.of_norm_bounded (g := fun j : ℕ => |(hCoeff 1 j).re|)
+        hsummre1.abs
+      intro j
+      by_cases hc : k < j
+      · simp [hc, Real.norm_eq_abs]
+      · simp [hc]
+    have hsplit : ∀ j : ℕ, (hCoeff 1 j).re
+        = (if j ≤ k then (hCoeff 1 j).re else 0)
+          + (if k < j then (hCoeff 1 j).re else 0) := by
+      intro j
+      by_cases hc : j ≤ k
+      · simp [hc, Nat.not_lt.mpr hc]
+      · simp [hc, Nat.lt_of_not_le hc]
+    have htotal : (1/2 : ℝ)
+        = (∑' j : ℕ, (if j ≤ k then (hCoeff 1 j).re else 0))
+          + ∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0) := by
+      rw [← Summable.tsum_add hlow hhigh]
+      rw [← hre1.tsum_eq]
+      exact tsum_congr hsplit
+    have hfin : (∑' j : ℕ, (if j ≤ k then (hCoeff 1 j).re else 0))
+        = ∑ j ∈ Finset.range (k + 1), (hCoeff 1 j).re := by
+      rw [tsum_eq_sum (s := Finset.range (k + 1))]
+      · apply Finset.sum_congr rfl
+        intro j hj
+        rw [Finset.mem_range] at hj
+        simp [Nat.lt_succ_iff.mp hj]
+      · intro j hj
+        rw [Finset.mem_range] at hj
+        have hjk : ¬ (j ≤ k) := by omega
+        simp [hjk]
+    rw [hfin] at htotal
+    linarith [htotal]
+  -- STEP 2b: MAIN2's integral is 2^-(k+1) times a partial sum, whose full
+  -- series is 2*beta by order_two_coefficient.
+  have hM2val := oddSplitMain2_integral bHatOdd k hk
+  have hord := order_two_coefficient betaFam bHatOdd hf hdiff hd1
+  have hsum2c : Summable (fun j : ℕ => bHatOdd j * 2 ^ j) := by
     sorry
+  have hsum2h : Summable (fun j : ℕ => hCoeff 1 j * 2 ^ j) := by
+    sorry
+  -- the real part of the combined series is 2*beta
+  have hre2 : HasSum
+      (fun j : ℕ => (bHatOdd j).re * 2 ^ j
+        + 2 * Real.eulerMascheroniConstant * ((hCoeff 1 j).re * 2 ^ j))
+      (2 * betaOdd) := by
+    sorry
+  -- STEP 3: the two tails, via geom_tail_bound_cx at ratio 1/2 (binom_absorb).
+  obtain ⟨C', hC'pos, hC'⟩ := binom_absorb S hS0
+  have hdecay : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C' * ((1:ℝ)/2) ^ j := by
+    intro j
+    refine le_trans (hd.dom_h j) ?_
+    have hdj := dom_decay dom betaFam bHatOdd S hd j
+    have h3pos : (0:ℝ) < (3:ℝ) ^ j := by positivity
+    have hdom_le : dom j ≤ (Nat.choose (j + 3) 3 : ℝ) * S * (3:ℝ) ^ (-(j:ℝ)) := by
+      rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 3), Real.rpow_natCast]
+      rw [le_mul_inv_iff₀ h3pos]
+      linarith [hdj]
+    exact le_trans hdom_le (hC' j)
+  have htail1 := geom_tail_bound_cx (fun j => hCoeff 1 j) C' (1/2) (le_of_lt hC'pos)
+    (by norm_num) (by norm_num) hdecay k
+  -- the real-part tail is bounded by the complex tail
+  have htail1re : |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
+      ≤ C' * ((1:ℝ)/2) ^ (k+1) / (1 - 1/2) := by
+    refine le_trans ?_ htail1
+    have hcong : (∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0))
+        = (∑' j : ℕ, (if k < j then hCoeff 1 j else 0)).re := by
+      rw [Complex.re_tsum]
+      · exact tsum_congr (fun j => by by_cases hc : k < j <;> simp [hc])
+      · apply Summable.of_norm_bounded (g := fun j : ℕ => ‖hCoeff 1 j‖)
+          hsummable1.norm
+        intro j
+        by_cases hc : k < j <;> simp [hc]
+    rw [hcong]
+    exact Complex.abs_re_le_norm _
   sorry
