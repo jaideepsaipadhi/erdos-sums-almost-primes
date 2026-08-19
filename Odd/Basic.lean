@@ -8039,11 +8039,31 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
       _ ≤ C'' * ((3:ℝ)/4) ^ j := hC'' j
   have htail2 := geom_tail_bound_cx (fun j => bHatOdd j * 2 ^ j) C'' (3/4)
     (le_of_lt hC''pos) (by norm_num) (by norm_num) hdecay2 k
+  -- the h_j(1) 2^j tail, same absorption at ratio 3/4
+  have hdecay2h : ∀ j : ℕ, ‖hCoeff 1 j * 2 ^ j‖ ≤ C'' * ((3:ℝ)/4) ^ j := by
+    intro j
+    rw [norm_mul, norm_pow]
+    have h2n : ‖(2:ℂ)‖ = (2:ℝ) := by simp
+    rw [h2n]
+    have hb := hd.dom_h j
+    have hdj := dom_decay dom betaFam bHatOdd S hd j
+    have h3pos : (0:ℝ) < (3:ℝ) ^ j := by positivity
+    have hdom_le : dom j ≤ (Nat.choose (j + 3) 3 : ℝ) * S * (3:ℝ) ^ (-(j:ℝ)) := by
+      rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 3), Real.rpow_natCast]
+      rw [le_mul_inv_iff₀ h3pos]
+      linarith [hdj]
+    calc ‖hCoeff 1 j‖ * (2:ℝ) ^ j
+        ≤ ((Nat.choose (j + 3) 3 : ℝ) * S * (3:ℝ) ^ (-(j:ℝ))) * (2:ℝ) ^ j :=
+          mul_le_mul_of_nonneg_right (le_trans hb hdom_le) (by positivity)
+      _ ≤ C'' * ((3:ℝ)/4) ^ j := hC'' j
+  have htail2h := geom_tail_bound_cx (fun j => hCoeff 1 j * 2 ^ j) C'' (3/4)
+    (le_of_lt hC''pos) (by norm_num) (by norm_num) hdecay2h k
+  -- MAIN2's coefficient tail combines the two
   have htail2re : |∑' j : ℕ,
         (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant
           * (hCoeff 1 j).re) * 2 ^ j else 0)|
       ≤ C'' * ((3:ℝ)/4) ^ (k+1) / (1 - 3/4)
-        + 2 * Real.eulerMascheroniConstant * (C' * ((1:ℝ)/2) ^ (k+1) / (1 - 1/2)) := by
+        + 2 * Real.eulerMascheroniConstant * (C'' * ((3:ℝ)/4) ^ (k+1) / (1 - 3/4)) := by
     sorry
 
   have htail1re : |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
