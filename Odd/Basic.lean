@@ -7721,6 +7721,51 @@ theorem polyGeom_bounded (j : ℕ) :
         push_cast at hstep ⊢
         linarith [hstep, ih]
 
+/-- (j+3)^3 (8/9)^j is bounded, by the same ratio argument as polyGeom_step
+but at 8/9: the ratio is ((j+4)/(j+3))^3 (8/9) < 1 once j+3 > 25.4, and the
+max sits at j = 22. -/
+theorem polyGeom_bounded89 (j : ℕ) :
+    ((j:ℝ) + 3) ^ 3 * ((8:ℝ)/9) ^ j ≤ (26:ℝ) ^ 3 * ((8:ℝ)/9) ^ 22 := by
+  sorry
+
+/-- The absorption at ratio 3/4, for the b_j 2^j tail: dom decays like 3^-j,
+so dom_j 2^j decays like (2/3)^j up to the binomial factor, which (3/4)^j
+absorbs. -/
+theorem binom_absorb_two (S : ℝ) (hS : 0 ≤ S) :
+    ∃ C'' > 0, ∀ j : ℕ,
+      (Nat.choose (j + 3) 3 : ℝ) * S * (3:ℝ) ^ (-(j:ℝ)) * (2:ℝ) ^ j
+        ≤ C'' * ((3:ℝ)/4) ^ j := by
+  refine ⟨(26:ℝ) ^ 3 * ((8:ℝ)/9) ^ 22 * S / 6 + 1, by positivity, ?_⟩
+  intro j
+  have hbin : (Nat.choose (j + 3) 3 : ℝ) ≤ ((j:ℝ) + 3) ^ 3 / 6 := by
+    rw [choose_three_real]
+    have hj : (0:ℝ) ≤ (j:ℝ) := Nat.cast_nonneg j
+    nlinarith [hj]
+  have hsplit : (3:ℝ) ^ (-(j:ℝ)) * (2:ℝ) ^ j = ((8:ℝ)/9) ^ j * ((3:ℝ)/4) ^ j := by
+    rw [← mul_pow]
+    have h89 : ((8:ℝ)/9) * ((3:ℝ)/4) = (2:ℝ)/3 := by norm_num
+    rw [h89]
+    rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 3), Real.rpow_natCast]
+    rw [div_pow]
+    rw [inv_mul_eq_div]
+  have hmul : (Nat.choose (j + 3) 3 : ℝ) * S * (3:ℝ) ^ (-(j:ℝ)) * (2:ℝ) ^ j
+      = (Nat.choose (j + 3) 3 : ℝ) * S * ((3:ℝ) ^ (-(j:ℝ)) * (2:ℝ) ^ j) := by ring
+  rw [hmul, hsplit]
+  have hpg := polyGeom_bounded89 j
+  have h34 : (0:ℝ) < ((3:ℝ)/4) ^ j := by positivity
+  calc (Nat.choose (j + 3) 3 : ℝ) * S * (((8:ℝ)/9) ^ j * ((3:ℝ)/4) ^ j)
+      ≤ (((j:ℝ) + 3) ^ 3 / 6) * S * (((8:ℝ)/9) ^ j * ((3:ℝ)/4) ^ j) := by
+        apply mul_le_mul_of_nonneg_right _ (by positivity)
+        exact mul_le_mul_of_nonneg_right hbin hS
+    _ = (((j:ℝ) + 3) ^ 3 * ((8:ℝ)/9) ^ j) * S / 6 * ((3:ℝ)/4) ^ j := by ring
+    _ ≤ ((26:ℝ) ^ 3 * ((8:ℝ)/9) ^ 22) * S / 6 * ((3:ℝ)/4) ^ j := by
+        apply mul_le_mul_of_nonneg_right _ (le_of_lt h34)
+        apply div_le_div_of_nonneg_right _ (by norm_num)
+        exact mul_le_mul_of_nonneg_right hpg hS
+    _ ≤ ((26:ℝ) ^ 3 * ((8:ℝ)/9) ^ 22 * S / 6 + 1) * ((3:ℝ)/4) ^ j := by
+        apply mul_le_mul_of_nonneg_right _ (le_of_lt h34)
+        linarith
+
 theorem binom_absorb (S : ℝ) (hS : 0 ≤ S) :
     ∃ C' > 0, ∀ j : ℕ,
       (Nat.choose (j + 3) 3 : ℝ) * S * (3:ℝ) ^ (-(j:ℝ)) ≤ C' * ((1:ℝ)/2) ^ j := by
