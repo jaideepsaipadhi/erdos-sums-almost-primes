@@ -5419,6 +5419,62 @@ noncomputable def oddSplitMain2 (bHatOdd : ℕ → ℂ) (k : ℕ) (u : ℝ) : �
     ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
       * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-2 * u)
 
+/-- MAIN1 and MAIN2 are integrable on Ioi 0: finite sums of u^m e^(-cu),
+each a Gamma integral. -/
+theorem oddSplitMain_integrable (bHatOdd : ℕ → ℂ) (k : ℕ) :
+    MeasureTheory.IntegrableOn (fun u : ℝ => oddSplitMain1 k u) (Set.Ioi (0:ℝ)) ∧
+    MeasureTheory.IntegrableOn (fun u : ℝ => oddSplitMain2 bHatOdd k u) (Set.Ioi (0:ℝ)) := by
+  have hterm : ∀ (c : ℝ), 1 ≤ c → ∀ (C : ℕ → ℝ),
+      MeasureTheory.IntegrableOn
+        (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          C j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-c * u))
+        (Set.Ioi (0:ℝ)) := by
+    intro c hc C
+    have hrw : ∀ u : ℝ,
+        (∑ j ∈ Finset.range (k + 1),
+          C j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-c * u)
+        = ∑ j ∈ Finset.range (k + 1),
+          (C j / (Nat.factorial (k - j)) * (u ^ (k - j) * Real.exp (-(c * u)))) := by
+      intro u
+      have hcu : (-c : ℝ) * u = -(c * u) := by ring
+      rw [hcu, Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro j _
+      ring
+    apply MeasureTheory.IntegrableOn.congr_fun _ (fun u _ => (hrw u).symm)
+      measurableSet_Ioi
+    apply MeasureTheory.integrable_finset_sum
+    intro j _
+    apply MeasureTheory.Integrable.const_mul
+    have hgam : MeasureTheory.IntegrableOn
+        (fun x : ℝ => Real.exp (-x) * x ^ (((k - j : ℕ) : ℝ) + 1 - 1)) (Set.Ioi 0) :=
+      Real.GammaIntegral_convergent (by positivity)
+    simp only [add_sub_cancel_right] at hgam
+    have hgam' : MeasureTheory.IntegrableOn
+        (fun x : ℝ => x ^ ((k - j : ℕ)) * Real.exp (-x)) (Set.Ioi 0) := by
+      apply hgam.congr_fun _ measurableSet_Ioi
+      intro x _
+      simp only
+      rw [← Real.rpow_natCast x (k - j)]
+      ring
+    apply MeasureTheory.Integrable.mono hgam'
+    · apply MeasureTheory.AEStronglyMeasurable.mul <;>
+        (apply Continuous.aestronglyMeasurable; fun_prop)
+    · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+      have hx0 : (0:ℝ) < x := hx
+      rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_mul,
+        abs_of_pos (Real.exp_pos (-(c*x))), abs_of_pos (Real.exp_pos (-x))]
+      apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
+      apply Real.exp_le_exp.mpr
+      nlinarith [hc, hx0]
+  constructor
+  · unfold oddSplitMain1
+    have := hterm 1 (by norm_num) (fun j => (hCoeff 1 j).re)
+    simpa using this
+  · unfold oddSplitMain2
+    exact hterm 2 (by norm_num)
+      (fun j => (bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re)
+
 /-- MAIN1 integrates to the PARTIAL sum of the h_j(1).
 
 Note this is the partial sum over j <= k, not the full series: the difference
