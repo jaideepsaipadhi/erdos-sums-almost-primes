@@ -7893,12 +7893,16 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
   have hbnorm : ∀ j : ℕ, ‖bHatOdd j‖ ≤ betaFam j := by
     intro j
     apply le_of_tendsto (hf.tendsto_deriv j).norm
-    filter_upwards [self_mem_nhdsWithin] with t ht
-    have ht2 : t ∈ Set.Ioo (1:ℝ) 2 := by
-      constructor
-      · exact ht
-      · sorry
-    exact hf.deriv_bound j t ht2
+    have hIoo : Set.Ioo (1:ℝ) 2 ∈ nhdsWithin (1:ℝ) (Set.Ioi (1:ℝ)) := by
+      have h2 : Set.Iio (2:ℝ) ∈ nhds (1:ℝ) := Iio_mem_nhds (by norm_num)
+      have := Filter.inter_mem_inf h2 (Filter.mem_principal_self (Set.Ioi (1:ℝ)))
+      rw [nhdsWithin]
+      convert this using 1
+      ext x
+      simp [Set.mem_Ioo, Set.mem_inter_iff, Set.mem_Iio, Set.mem_Ioi]
+      tauto
+    filter_upwards [hIoo] with t ht
+    exact hf.deriv_bound j t ht
   have hsum2h : Summable (fun j : ℕ => hCoeff 1 j * 2 ^ j) :=
     (hCoeff_sum_two hd1).summable
   have hsum2c : Summable (fun j : ℕ => bHatOdd j * 2 ^ j) := by
@@ -7912,7 +7916,28 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
   have hre2 : (∑' j : ℕ, (bHatOdd j).re * 2 ^ j)
       + 2 * Real.eulerMascheroniConstant * (∑' j : ℕ, (hCoeff 1 j).re * 2 ^ j)
       = 2 * betaOdd := by
-    sorry
+    have hb : (∑' j : ℕ, bHatOdd j * 2 ^ j).re = ∑' j : ℕ, (bHatOdd j).re * 2 ^ j := by
+      rw [Complex.re_tsum hsum2c]
+      apply tsum_congr
+      intro j
+      have h2 : ((2:ℂ) ^ j) = (((2:ℝ) ^ j : ℝ) : ℂ) := by push_cast; ring
+      rw [h2, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    have hh : (∑' j : ℕ, hCoeff 1 j * 2 ^ j).re = ∑' j : ℕ, (hCoeff 1 j).re * 2 ^ j := by
+      rw [Complex.re_tsum hsum2h]
+      apply tsum_congr
+      intro j
+      have h2 : ((2:ℂ) ^ j) = (((2:ℝ) ^ j : ℝ) : ℂ) := by push_cast; ring
+      rw [h2, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+      ring
+    have := congrArg Complex.re hord
+    simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.re_ofNat, Complex.im_ofNat] at this
+    rw [hb, hh] at this
+    have him : (∑' j : ℕ, hCoeff 1 j * 2 ^ j).im * (2 * (Real.eulerMascheroniConstant:ℂ)).im = 0 := by
+      simp
+    simp only [Complex.ofReal_im, mul_zero, sub_zero, zero_mul, mul_zero] at this
+    linarith [this]
 
   -- STEP 3: the two tails, via geom_tail_bound_cx at ratio 1/2 (binom_absorb).
   obtain ⟨C', hC'pos, hC'⟩ := binom_absorb S hS0
