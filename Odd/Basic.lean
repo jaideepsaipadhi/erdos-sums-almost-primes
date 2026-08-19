@@ -5648,6 +5648,17 @@ theorem choose_two_real (m : ℕ) :
       push_cast at ih ⊢
       linarith [ih]
 
+/-- C(m+3,3) as a cubic over the reals, by Pascal and choose_two_real. -/
+theorem choose_three_real (m : ℕ) :
+    (Nat.choose (m + 3) 3 : ℝ) = ((m:ℝ) + 3) * ((m:ℝ) + 2) * ((m:ℝ) + 1) / 6 := by
+  induction m with
+  | zero => norm_num
+  | succ n ih =>
+      rw [show n + 1 + 3 = (n + 3) + 1 by ring, Nat.choose_succ_succ' (n + 3) 2]
+      have h2 := choose_two_real (n + 1)
+      push_cast at ih h2 ⊢
+      linarith [ih, h2]
+
 /-- Hockey stick: sum_{m<=n} C(m+2,2) = C(n+3,3). -/
 theorem hockey_stick (n : ℕ) :
     ∑ m ∈ Finset.range (n + 1), (Nat.choose (m + 2) 2 : ℝ)
@@ -7641,6 +7652,50 @@ theorem oddDiff_integrable (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) (
       · linarith
   rw [hunion]
   exact hnear.union hfar
+
+/-- (j+3)^3 (2/3)^j is bounded by its value at j = 4, from polyGeom_step. -/
+theorem polyGeom_bounded (j : ℕ) :
+    ((j:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ j ≤ (7:ℝ) ^ 3 * ((2:ℝ)/3) ^ 4 := by
+  rcases Nat.lt_or_ge j 4 with hlt | hge
+  · interval_cases j <;> norm_num
+  · induction j, hge using Nat.le_induction with
+    | base => norm_num
+    | succ n hn ih =>
+        have hstep := polyGeom_step n hn
+        push_cast at hstep ⊢
+        linarith [hstep, ih]
+
+theorem binom_absorb (S : ℝ) (hS : 0 ≤ S) :
+    ∃ C' > 0, ∀ j : ℕ,
+      (Nat.choose (j + 3) 3 : ℝ) * S * (3:ℝ) ^ (-(j:ℝ)) ≤ C' * ((1:ℝ)/2) ^ j := by
+  refine ⟨(7:ℝ) ^ 3 * ((2:ℝ)/3) ^ 4 * S / 6 + 1, by positivity, ?_⟩
+  intro j
+  have hbin : (Nat.choose (j + 3) 3 : ℝ) ≤ ((j:ℝ) + 3) ^ 3 / 6 := by
+    rw [choose_three_real]
+    have hj : (0:ℝ) ≤ (j:ℝ) := Nat.cast_nonneg j
+    nlinarith [hj]
+  have hsplit : (3:ℝ) ^ (-(j:ℝ)) = ((2:ℝ)/3) ^ j * ((1:ℝ)/2) ^ j := by
+    rw [← mul_pow]
+    have h13 : ((2:ℝ)/3) * ((1:ℝ)/2) = (1:ℝ)/3 := by norm_num
+    rw [h13, div_pow, one_pow]
+    rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 3), Real.rpow_natCast]
+    exact inv_eq_one_div _
+  rw [hsplit]
+  have hpg := polyGeom_bounded j
+  have hhalf : (0:ℝ) < ((1:ℝ)/2) ^ j := by positivity
+  have h23 : (0:ℝ) < ((2:ℝ)/3) ^ j := by positivity
+  calc (Nat.choose (j + 3) 3 : ℝ) * S * (((2:ℝ)/3) ^ j * ((1:ℝ)/2) ^ j)
+      ≤ (((j:ℝ) + 3) ^ 3 / 6) * S * (((2:ℝ)/3) ^ j * ((1:ℝ)/2) ^ j) := by
+        apply mul_le_mul_of_nonneg_right _ (by positivity)
+        exact mul_le_mul_of_nonneg_right hbin hS
+    _ = (((j:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ j) * S / 6 * ((1:ℝ)/2) ^ j := by ring
+    _ ≤ ((7:ℝ) ^ 3 * ((2:ℝ)/3) ^ 4) * S / 6 * ((1:ℝ)/2) ^ j := by
+        apply mul_le_mul_of_nonneg_right _ (le_of_lt hhalf)
+        apply div_le_div_of_nonneg_right _ (by norm_num)
+        exact mul_le_mul_of_nonneg_right hpg hS
+    _ ≤ ((7:ℝ) ^ 3 * ((2:ℝ)/3) ^ 4 * S / 6 + 1) * ((1:ℝ)/2) ^ j := by
+        apply mul_le_mul_of_nonneg_right _ (le_of_lt hhalf)
+        linarith
 
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
