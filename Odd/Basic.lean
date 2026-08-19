@@ -7724,9 +7724,29 @@ theorem polyGeom_bounded (j : ℕ) :
 /-- (j+3)^3 (8/9)^j is bounded, by the same ratio argument as polyGeom_step
 but at 8/9: the ratio is ((j+4)/(j+3))^3 (8/9) < 1 once j+3 > 25.4, and the
 max sits at j = 22. -/
+theorem polyGeom_step89 (j : ℕ) (hj : 22 ≤ j) :
+    ((j:ℝ) + 4) ^ 3 * ((8:ℝ)/9) ^ (j+1) ≤ ((j:ℝ) + 3) ^ 3 * ((8:ℝ)/9) ^ j := by
+  have hj22 : (22:ℝ) ≤ (j:ℝ) := by exact_mod_cast hj
+  have hpos : (0:ℝ) < ((8:ℝ)/9) ^ j := pow_pos (by norm_num) j
+  have hcube : ((j:ℝ) + 4) ^ 3 * (8/9) ≤ ((j:ℝ) + 3) ^ 3 := by
+    nlinarith [hj22, sq_nonneg ((j:ℝ) + 3), sq_nonneg ((j:ℝ) - 22)]
+  have he : ((8:ℝ)/9) ^ (j+1) = ((8:ℝ)/9) ^ j * (8/9) := pow_succ _ _
+  rw [he]
+  calc ((j:ℝ)+4)^3 * (((8:ℝ)/9)^j * (8/9))
+      = (((j:ℝ)+4)^3 * (8/9)) * ((8:ℝ)/9)^j := by ring
+    _ ≤ ((j:ℝ)+3)^3 * ((8:ℝ)/9)^j :=
+        mul_le_mul_of_nonneg_right hcube (le_of_lt hpos)
+
 theorem polyGeom_bounded89 (j : ℕ) :
     ((j:ℝ) + 3) ^ 3 * ((8:ℝ)/9) ^ j ≤ (26:ℝ) ^ 3 * ((8:ℝ)/9) ^ 22 := by
-  sorry
+  rcases Nat.lt_or_ge j 22 with hlt | hge
+  · interval_cases j <;> norm_num
+  · induction j, hge using Nat.le_induction with
+    | base => norm_num
+    | succ n hn ih =>
+        have hstep := polyGeom_step89 n hn
+        push_cast at hstep ⊢
+        linarith [hstep, ih]
 
 /-- The absorption at ratio 3/4, for the b_j 2^j tail: dom decays like 3^-j,
 so dom_j 2^j decays like (2/3)^j up to the binomial factor, which (3/4)^j
