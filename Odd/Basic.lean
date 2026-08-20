@@ -8308,7 +8308,49 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     -- the majorant is integrable on Ioi U and dominates |D| there
     have hmajInt : MeasureTheory.IntegrableOn (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
             dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u)) (Set.Ioi U) := by
-      sorry
+      have hIoi0 : MeasureTheory.IntegrableOn
+          (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
+            dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u))
+          (Set.Ioi (0:ℝ)) := by
+        have hrw : (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
+              dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u))
+            = fun u : ℝ => ∑ j ∈ Finset.range (k + 1),
+              (CE * dom j / (Nat.factorial (k - j))
+                * (u ^ (k - j) * Real.exp (-(3 * u)))) := by
+          funext u
+          have h3u : (-3 : ℝ) * u = -(3 * u) := by ring
+          rw [h3u, Finset.mul_sum, Finset.sum_mul]
+          apply Finset.sum_congr rfl
+          intro j _
+          ring
+        rw [hrw]
+        apply MeasureTheory.integrable_finset_sum
+        intro j _
+        apply MeasureTheory.Integrable.const_mul
+        have hgam : MeasureTheory.IntegrableOn
+            (fun x : ℝ => Real.exp (-x) * x ^ (((k - j : ℕ) : ℝ) + 1 - 1)) (Set.Ioi 0) :=
+          Real.GammaIntegral_convergent (by positivity)
+        simp only [add_sub_cancel_right] at hgam
+        have hgam' : MeasureTheory.IntegrableOn
+            (fun x : ℝ => x ^ ((k - j : ℕ)) * Real.exp (-x)) (Set.Ioi 0) := by
+          apply hgam.congr_fun _ measurableSet_Ioi
+          intro x _
+          simp only
+          rw [← Real.rpow_natCast x (k - j)]
+          ring
+        apply MeasureTheory.Integrable.mono hgam'
+        · apply MeasureTheory.AEStronglyMeasurable.mul <;>
+            (apply Continuous.aestronglyMeasurable; fun_prop)
+        · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+          have hx0 : (0:ℝ) < x := hx
+          rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_mul,
+            abs_of_pos (Real.exp_pos (-(3*x))), abs_of_pos (Real.exp_pos (-x))]
+          apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
+          apply Real.exp_le_exp.mpr
+          linarith
+      apply hIoi0.mono_set
+      intro x hx
+      exact lt_trans hUpos hx
     have habsInt : MeasureTheory.IntegrableOn (fun u : ℝ => |(fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
             (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
           * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
@@ -8318,7 +8360,36 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     refine le_trans (MeasureTheory.setIntegral_mono_on habsInt hmajInt
       measurableSet_Ioi (fun u hu => ?_)) ?_
     · exact hsplitD u (le_of_lt hu)
-    · sorry
+    · have hfull := oddErr_integral_bound dom betaFam bHatOdd S CE (le_of_lt hCEpos) hd k
+      refine le_trans ?_ hfull
+      have hpull : (∫ x in Set.Ioi U,
+            (CE * ∑ j ∈ Finset.range (k + 1),
+              dom j * x ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * x))
+          = CE * ∫ x in Set.Ioi U,
+            (∑ j ∈ Finset.range (k + 1),
+              dom j * x ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * x) := by
+        rw [← MeasureTheory.integral_const_mul]
+        apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioi
+        intro x _
+        ring
+      rw [hpull]
+      apply mul_le_mul_of_nonneg_left _ (le_of_lt hCEpos)
+      apply MeasureTheory.setIntegral_mono_set
+      · sorry
+      · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
+        have hx0 : (0:ℝ) < x := hx
+        have hsumnn : (0:ℝ) ≤ ∑ j ∈ Finset.range (k + 1),
+            dom j * x ^ (k - j) / (Nat.factorial (k - j)) := by
+          apply Finset.sum_nonneg
+          intro j _
+          have h1 := hd.dom_nonneg j
+          have h2 : (0:ℝ) ≤ x ^ (k - j) := by positivity
+          have h3 : (0:ℝ) < (Nat.factorial (k - j) : ℝ) := by
+            exact_mod_cast Nat.factorial_pos (k - j)
+          positivity
+        have hexp : (0:ℝ) < Real.exp (-3 * x) := Real.exp_pos _
+        exact mul_nonneg hsumnn (le_of_lt hexp)
+      · exact MeasureTheory.ae_of_all _ (fun x hx => lt_trans hUpos hx)
   sorry
 
 
