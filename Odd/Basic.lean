@@ -7824,50 +7824,6 @@ theorem poly_tail_bound (k : ℕ) (hk : 1 ≤ k) :
   have hp : (0:ℝ) < (3:ℝ) ^ (-(k:ℝ)) := Real.rpow_pos_of_pos (by norm_num) _
   nlinarith [hkk, hp]
 
-/-- Indicator form of the polynomial tail, matching how the tails are stated. -/
-theorem poly_tail_indicator (k : ℕ) (hk : 1 ≤ k) :
-    ∑' j : ℕ, (if k < j then (((j:ℝ) + 3)) ^ 3 * (3:ℝ) ^ (-(j:ℝ)) else 0)
-        ≤ 2 * ((k:ℝ) + 3) ^ 3 * (3:ℝ) ^ (-(k:ℝ)) := by
-  have hk4 : 4 ≤ k + 4 := by omega
-  -- majorant: indicator of the geometric bound
-  have hmaj : ∀ j : ℕ,
-      (if k < j then (((j:ℝ) + 3)) ^ 3 * (3:ℝ) ^ (-(j:ℝ)) else 0)
-        ≤ (if k < j then (((k:ℝ) + 4)) ^ 3 * (3:ℝ) ^ (-((k:ℝ) + 1))
-              * ((2:ℝ)/3) ^ (j - (k+1)) else 0) := by
-    intro j
-    by_cases hc : k < j
-    · simp only [hc, if_true]
-      obtain ⟨d, rfl⟩ : ∃ d : ℕ, j = k + 1 + d := ⟨j - (k+1), by omega⟩
-      have hd : k + 1 + d - (k + 1) = d := by omega
-      rw [hd]
-      -- (k+4+d)^3 <= (k+4)^3 2^d
-      have hc3 := cube_le_two_pow (k + 4) d hk4
-      have hjc : (((k + 1 + d : ℕ)):ℝ) + 3 = (((k + 4 + d : ℕ)):ℝ) := by
-        push_cast; ring
-      rw [hjc]
-      have hexp : (3:ℝ) ^ (-(((k + 1 + d : ℕ)):ℝ))
-          = (3:ℝ) ^ (-((k:ℝ) + 1)) * ((1:ℝ)/3) ^ d := by
-        have : (-(((k + 1 + d : ℕ)):ℝ)) = (-((k:ℝ) + 1)) + (-(d:ℝ)) := by
-          push_cast; ring
-        rw [this, Real.rpow_add (by norm_num : (0:ℝ) < 3)]
-        congr 1
-        rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 3), Real.rpow_natCast,
-          div_pow, one_pow]
-        exact inv_eq_one_div _
-      rw [hexp]
-      have hpos : (0:ℝ) < (3:ℝ) ^ (-((k:ℝ) + 1)) * ((1:ℝ)/3) ^ d := by positivity
-      have hstep := mul_le_mul_of_nonneg_right hc3 (le_of_lt hpos)
-      refine le_trans hstep ?_
-      have hsplit2 : ((2:ℝ)/3) ^ d = (2:ℝ) ^ d * ((1:ℝ)/3) ^ d := by
-        rw [← mul_pow]; norm_num
-      rw [hsplit2]
-      have hk4c : (((k + 4 : ℕ)):ℝ) = (k:ℝ) + 4 := by push_cast; ring
-      rw [hk4c]
-      ring_nf
-      exact le_refl _
-    · simp [hc]
-  sorry
-
 /-- The absorption at ratio 3/4, for the b_j 2^j tail: dom decays like 3^-j,
 so dom_j 2^j decays like (2/3)^j up to the binomial factor, which (3/4)^j
 absorbs. -/
