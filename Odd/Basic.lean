@@ -8225,4 +8225,26 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
         by_cases hc : k < j <;> simp [hc]
     rw [hcong]
     exact Complex.abs_re_le_norm _
+  -- STEP 4b: split |int D| at U.
+  obtain ⟨CE, hCEpos, U, hUpos, hsplitD⟩ :=
+    oddIntegrand_split dom betaFam bHatOdd S hf hd k
+  have hDint := oddDiff_integrable dom betaFam bHatOdd S hf hd k hk hsum hmul3 hcd1 hcd2
+  have hunion : Set.Ioi (0:ℝ) = Set.Ioc (0:ℝ) U ∪ Set.Ioi U := by
+    ext x
+    simp only [Set.mem_Ioi, Set.mem_union, Set.mem_Ioc]
+    constructor
+    · intro hx
+      rcases lt_or_ge U x with h | h
+      · exact Or.inr h
+      · exact Or.inl ⟨hx, h⟩
+    · rintro (⟨h1, _⟩ | h2)
+      · exact h1
+      · linarith
+  have hdisj : Disjoint (Set.Ioc (0:ℝ) U) (Set.Ioi U) := by
+    rw [Set.disjoint_left]
+    intro x hx hx2
+    rw [Set.mem_Ioc] at hx
+    rw [Set.mem_Ioi] at hx2
+    linarith [hx.2, hx2]
   sorry
+
