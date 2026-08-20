@@ -8246,5 +8246,35 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     rw [Set.mem_Ioc] at hx
     rw [Set.mem_Ioi] at hx2
     linarith [hx.2, hx2]
+  -- the integral splits across the union
+  have hIocInt : MeasureTheory.IntegrableOn (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) (Set.Ioc (0:ℝ) U) := by
+    apply hDint.mono_set
+    rw [hunion]
+    exact Set.subset_union_left
+  have hIoiInt : MeasureTheory.IntegrableOn (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) (Set.Ioi U) := by
+    apply hDint.mono_set
+    rw [hunion]
+    exact Set.subset_union_right
+  have hsplitInt : (∫ u in Set.Ioi (0:ℝ), (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) u)
+      = (∫ u in Set.Ioc (0:ℝ) U, (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) u)
+        + ∫ u in Set.Ioi U, (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) u := by
+    rw [hunion]
+    exact MeasureTheory.setIntegral_union hdisj measurableSet_Ioi hIocInt hIoiInt
   sorry
+
 
