@@ -8305,7 +8305,20 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
           * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
           - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)
       simpa [Real.norm_eq_abs] using this
-    sorry
+    -- the majorant is integrable on Ioi U and dominates |D| there
+    have hmajInt : MeasureTheory.IntegrableOn (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
+            dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u)) (Set.Ioi U) := by
+      sorry
+    have habsInt : MeasureTheory.IntegrableOn (fun u : ℝ => |(fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+          - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) u|) (Set.Ioi U) :=
+      hIoiInt.abs
+    refine le_trans hnorm ?_
+    refine le_trans (MeasureTheory.setIntegral_mono_on habsInt hmajInt
+      measurableSet_Ioi (fun u hu => ?_)) ?_
+    · exact hsplitD u (le_of_lt hu)
+    · sorry
   sorry
 
 
