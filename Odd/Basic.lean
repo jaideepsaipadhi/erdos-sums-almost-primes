@@ -8446,7 +8446,31 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     simp only [Pi.sub_apply] at e1
     rw [e2] at e1
     exact e1
+  have hnearBound : |∫ u in Set.Ioc (0:ℝ) U,
+        ((∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+          - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)|
+      ≤ FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
+        + U * (∑ j ∈ Finset.range (k + 1),
+            dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+        + U * ((1 + 2 * Real.eulerMascheroniConstant)
+            * ∑ j ∈ Finset.range (k + 1),
+                dom j * U ^ (k - j) / (Nat.factorial (k - j))) := by
+    rw [hnearSplit]
+    have htri : ∀ a b c : ℝ, |a - b - c| ≤ |a| + |b| + |c| := by
+      intro a b c
+      have h1 : |a - b - c| ≤ |a - b| + |c| := by
+        have := abs_add_le (a - b) (-c)
+        simpa [sub_eq_add_neg, abs_neg] using this
+      have h2 : |a - b| ≤ |a| + |b| := by
+        have := abs_add_le a (-b)
+        simpa [sub_eq_add_neg, abs_neg] using this
+      linarith [h1, h2]
+    refine le_trans (htri _ _ _) ?_
+    exact add_le_add (add_le_add hnear3 hnearM1) hnearM2
   sorry
+
 
 
 
