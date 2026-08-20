@@ -7818,6 +7818,7 @@ theorem binom_absorb (S : ℝ) (hS : 0 ≤ S) :
         apply mul_le_mul_of_nonneg_right _ (le_of_lt hhalf)
         linarith
 
+set_option maxHeartbeats 1000000 in
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
     fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
@@ -8392,7 +8393,34 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
         have hexp : (0:ℝ) < Real.exp (-3 * x) := Real.exp_pos _
         exact mul_nonneg hsumnn (le_of_lt hexp)
       · exact MeasureTheory.ae_of_all _ (fun x hx => lt_trans hUpos hx)
+  -- NEAR: |int_{Ioc 0 U} D| <= (leaf 3) + (MAIN1 near) + (MAIN2 near)
+  have hSU : (1:ℝ) < sOf U := sOf_mem U hUpos
+  have hnear3 := oddNear_integral_bound U hUpos k hk hsum hmul3 hcd1 hcd2
+  have hnearM1 := oddSplitMain1_near dom betaFam bHatOdd S hd U hUpos k
+  have hnearM2 := oddSplitMain2_near dom betaFam bHatOdd S hd U hUpos k
+  have hM1IocInt : MeasureTheory.IntegrableOn (fun u : ℝ => oddSplitMain1 k u)
+      (Set.Ioc (0:ℝ) U) := by
+    have hc1 : Continuous (fun u : ℝ => oddSplitMain1 k u) := by
+      unfold oddSplitMain1
+      apply Continuous.mul _ (Real.continuous_exp.comp continuous_neg)
+      apply continuous_finset_sum
+      intro j _
+      apply Continuous.div_const
+      exact Continuous.mul continuous_const (continuous_pow _)
+    exact hc1.integrableOn_Ioc
+  have hM2IocInt : MeasureTheory.IntegrableOn (fun u : ℝ => oddSplitMain2 bHatOdd k u)
+      (Set.Ioc (0:ℝ) U) := by
+    have hc2 : Continuous (fun u : ℝ => oddSplitMain2 bHatOdd k u) := by
+      unfold oddSplitMain2
+      apply Continuous.mul _ (Real.continuous_exp.comp
+        (continuous_const.mul continuous_id))
+      apply continuous_finset_sum
+      intro j _
+      apply Continuous.div_const
+      exact Continuous.mul continuous_const (continuous_pow _)
+    exact hc2.integrableOn_Ioc
   sorry
+
 
 
 
