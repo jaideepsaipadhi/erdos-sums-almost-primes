@@ -7997,14 +7997,18 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     apply Summable.congr
       (hsum2c.map (Complex.reCLM : ℂ →L[ℝ] ℝ) Complex.reCLM.continuous)
     intro j
+    show ((bHatOdd j * 2 ^ j).re : ℝ) = (bHatOdd j).re * 2 ^ j
     have h2 : ((2:ℂ) ^ j) = (((2:ℝ) ^ j : ℝ) : ℂ) := by push_cast; ring
-    simp [h2, Complex.mul_re]
+    rw [h2, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+    ring
   have hhr : Summable (fun j : ℕ => (hCoeff 1 j).re * 2 ^ j) := by
     apply Summable.congr
       (hsum2h.map (Complex.reCLM : ℂ →L[ℝ] ℝ) Complex.reCLM.continuous)
     intro j
+    show ((hCoeff 1 j * 2 ^ j).re : ℝ) = (hCoeff 1 j).re * 2 ^ j
     have h2 : ((2:ℂ) ^ j) = (((2:ℝ) ^ j : ℝ) : ℂ) := by push_cast; ring
-    simp [h2, Complex.mul_re]
+    rw [h2, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+    ring
   have hcomb : HasSum (fun j : ℕ => ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j)
       ((∑' j : ℕ, (bHatOdd j).re * 2 ^ j)
         + 2 * Real.eulerMascheroniConstant * ∑' j : ℕ, (hCoeff 1 j).re * 2 ^ j) :=
@@ -8145,6 +8149,7 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
         by_cases hc : k < j
         · simp only [hc, if_true, Real.norm_eq_abs]
           ring_nf
+          exact le_refl _
         · simp only [hc, if_false, norm_zero]
           positivity
       have hsplitg : ∀ j : ℕ, ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j
@@ -8173,6 +8178,10 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
           simp [hjk]
       rw [hfin] at htotal
       linarith [htotal]
+    have hbeta : betaOdd * ((1:ℝ)/2) ^ k
+        = 1 / 2 ^ (k+1) * (2 * betaOdd) := by
+      rw [div_pow, one_pow, pow_succ]
+      field_simp
     have hid : fOdd k - 1/2 - betaOdd * ((1:ℝ)/2) ^ k
         = (∫ u in Set.Ioi (0:ℝ),
             ((∑ j ∈ Finset.range (k + 1),
@@ -8275,6 +8284,29 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
         - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) u := by
     rw [hunion]
     exact MeasureTheory.setIntegral_union hdisj measurableSet_Ioi hIocInt hIoiInt
+  -- FAR: |int_{Ioi U} D| <= CE * C(k+3,3) * S * 3^-(k+1)
+  have hfarBound : |∫ u in Set.Ioi U, (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) u|
+      ≤ CE * (Nat.choose (k + 3) 3 : ℝ) * S * ((1:ℝ)/3) ^ (k + 1) := by
+    have hnorm : |∫ u in Set.Ioi U, (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) u|
+        ≤ ∫ u in Set.Ioi U, |(fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u) u| := by
+      have := MeasureTheory.norm_integral_le_integral_norm
+        (μ := MeasureTheory.volume.restrict (Set.Ioi U))
+        (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+          - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)
+      simpa [Real.norm_eq_abs] using this
+    sorry
   sorry
+
 
 
