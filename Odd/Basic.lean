@@ -7748,6 +7748,21 @@ theorem polyGeom_bounded89 (j : ℕ) :
         push_cast at hstep ⊢
         linarith [hstep, ih]
 
+/-- Cubic growth is dominated by 2^d: (m+d)^3 <= m^3 2^d for m >= 4. -/
+theorem cube_le_two_pow (m d : ℕ) (hm : 4 ≤ m) :
+    (((m + d : ℕ)):ℝ) ^ 3 ≤ ((m:ℝ)) ^ 3 * 2 ^ d := by
+  induction d with
+  | zero => simp
+  | succ n ih =>
+      have hm4 : (4:ℝ) ≤ (m:ℝ) := by exact_mod_cast hm
+      have hn : (0:ℝ) ≤ (n:ℝ) := Nat.cast_nonneg n
+      have hstep : (((m + (n+1) : ℕ)):ℝ) ^ 3 ≤ 2 * (((m + n : ℕ)):ℝ) ^ 3 := by
+        push_cast
+        nlinarith [hm4, hn, sq_nonneg ((m:ℝ) + n), sq_nonneg ((m:ℝ) + n - 4)]
+      calc (((m + (n+1) : ℕ)):ℝ) ^ 3 ≤ 2 * (((m + n : ℕ)):ℝ) ^ 3 := hstep
+        _ ≤ 2 * (((m:ℝ)) ^ 3 * 2 ^ n) := by linarith [ih]
+        _ = ((m:ℝ)) ^ 3 * 2 ^ (n+1) := by ring
+
 /-- The absorption at ratio 3/4, for the b_j 2^j tail: dom decays like 3^-j,
 so dom_j 2^j decays like (2/3)^j up to the binomial factor, which (3/4)^j
 absorbs. -/
