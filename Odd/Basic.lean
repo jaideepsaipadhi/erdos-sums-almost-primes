@@ -7824,6 +7824,12 @@ theorem poly_tail_bound (k : ℕ) (hk : 1 ≤ k) :
   have hp : (0:ℝ) < (3:ℝ) ^ (-(k:ℝ)) := Real.rpow_pos_of_pos (by norm_num) _
   nlinarith [hkk, hp]
 
+/-- Indicator form of the polynomial tail, matching how the tails are stated. -/
+theorem poly_tail_indicator (k : ℕ) (hk : 1 ≤ k) :
+    ∑' j : ℕ, (if k < j then (((j:ℝ) + 3)) ^ 3 * (3:ℝ) ^ (-(j:ℝ)) else 0)
+      ≤ 2 * ((k:ℝ) + 3) ^ 3 * (3:ℝ) ^ (-(k:ℝ)) := by
+  sorry
+
 /-- The absorption at ratio 3/4, for the b_j 2^j tail: dom decays like 3^-j,
 so dom_j 2^j decays like (2/3)^j up to the binomial factor, which (3/4)^j
 absorbs. -/
@@ -7903,7 +7909,8 @@ Route: fOdd_u_form, then the integrand splits as
 oddSplitMain1 + oddSplitMain2 + rest, with the two main integrals above and
 `rest` bounded via gamma_normalised_three (each error factor is O(e^-3u)
 against a polynomial in u). -/
-theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
+theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
+    (hCEpos : 0 < CE) (hUpos : 0 < U)
     (hsum1 : Summable (fun n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k} =>
       1 / ((n : ℝ) * Real.log n)))
     (hsum : ∀ s : ℝ, 1 < s → ∀ z : ℂ, ‖z‖ ≤ 2 →
@@ -7924,7 +7931,22 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     (dom : ℕ → ℝ) (S : ℝ) (hS0 : 0 ≤ S)
     (hd : OddDomFacts dom betaFam bHatOdd S)
     -- the near piece contributes zeta(2) 3^-k; MR must cover both pieces
-    (hMR : S / 6 + (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) ≤ MR) :
+    -- the far-piece bound of LEAF 1, with its constant named
+    (hsplitD : ∀ u : ℝ, U ≤ u →
+      |(∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u|
+      ≤ CE * (∑ j ∈ Finset.range (k + 1),
+          dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u))
+    -- the near-piece weighted sum, certified alongside U
+    (NEARU : ℝ)
+    (hNEARU : U * (2 + 2 * Real.eulerMascheroniConstant)
+        * (∑ j ∈ Finset.range (k + 1),
+            dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+      ≤ NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k)
+    (hMR : CE * S / 18 + S / 3 + (S / 6) * (1 + 2 * Real.eulerMascheroniConstant)
+        + (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU ≤ MR) :
     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
       ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
   rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
@@ -8312,8 +8334,6 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
     rw [hcong]
     exact Complex.abs_re_le_norm _
   -- STEP 4b: split |int D| at U.
-  obtain ⟨CE, hCEpos, U, hUpos, hsplitD⟩ :=
-    oddIntegrand_split dom betaFam bHatOdd S hf hd k
   have hDint := oddDiff_integrable dom betaFam bHatOdd S hf hd k hk hsum hmul3 hcd1 hcd2
   have hunion : Set.Ioi (0:ℝ) = Set.Ioc (0:ℝ) U ∪ Set.Ioi U := by
     ext x
