@@ -8150,6 +8150,24 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
             apply mul_le_mul_of_nonneg_right _ (le_of_lt hrp)
             exact mul_le_mul_of_nonneg_right h4 hS0
         _ = (S / 6) * ((j:ℝ) + 3) ^ 3 * (3:ℝ) ^ (-(j:ℝ)) := by ring
+    -- sum the termwise bound against poly_tail_bound
+    have hsumTail : Summable (fun d : ℕ => (hCoeff 1 (d + (k+1))).re) :=
+      (summable_nat_add_iff (k+1)).2 hsummre1
+    have hmajS : Summable (fun d : ℕ =>
+        (S / 6) * ((((d + (k+1) : ℕ)):ℝ) + 3) ^ 3
+          * (3:ℝ) ^ (-(((d + (k+1) : ℕ)):ℝ))) := by
+      sorry
+    have habs : |∑' d : ℕ, (hCoeff 1 (d + (k+1))).re|
+        ≤ ∑' d : ℕ, (S / 6) * ((((d + (k+1) : ℕ)):ℝ) + 3) ^ 3
+            * (3:ℝ) ^ (-(((d + (k+1) : ℕ)):ℝ)) := by
+      have hnt : |∑' d : ℕ, (hCoeff 1 (d + (k+1))).re|
+          ≤ ∑' d : ℕ, |(hCoeff 1 (d + (k+1))).re| := by
+        have := norm_tsum_le_tsum_norm (f := fun d : ℕ => (hCoeff 1 (d + (k+1))).re)
+          (by simpa [Real.norm_eq_abs] using hsumTail.abs)
+        simpa [Real.norm_eq_abs] using this
+      refine le_trans hnt ?_
+      exact Summable.tsum_le_tsum hterm hsumTail.abs hmajS
+    refine le_trans habs ?_
     sorry
 
   -- STEP 3: the two tails, via geom_tail_bound_cx at ratio 1/2 (binom_absorb).
