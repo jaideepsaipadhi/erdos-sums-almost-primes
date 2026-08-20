@@ -8111,6 +8111,15 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     rw [← hre2]
     exact hcomb
 
+  -- bridge: the indicator tail equals the shifted tail
+  have hbridge1 : (∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0))
+      = ∑' d : ℕ, (hCoeff 1 (d + (k+1))).re := by
+    have hstan := hsummre1.sum_add_tsum_nat_add (k+1)
+    have htot := hre1.tsum_eq
+    rw [htot] at hstan
+    rw [hpart1] at hstan
+    linarith [hstan]
+
   -- STEP 3: the two tails, via geom_tail_bound_cx at ratio 1/2 (binom_absorb).
   obtain ⟨C', hC'pos, hC'⟩ := binom_absorb S hS0
   have hdecay : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C' * ((1:ℝ)/2) ^ j := by
