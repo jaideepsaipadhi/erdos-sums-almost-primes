@@ -7944,16 +7944,6 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
   -- series is 2*beta by order_two_coefficient.
   have hM2val := oddSplitMain2_integral bHatOdd k hk
   have hord := order_two_coefficient betaFam bHatOdd hf hdiff hd1
-  have hsum2c : Summable (fun j : ℕ => bHatOdd j * 2 ^ j) := by
-    sorry
-  have hsum2h : Summable (fun j : ℕ => hCoeff 1 j * 2 ^ j) := by
-    sorry
-  -- the real part of the combined series is 2*beta
-  have hre2 : HasSum
-      (fun j : ℕ => (bHatOdd j).re * 2 ^ j
-        + 2 * Real.eulerMascheroniConstant * ((hCoeff 1 j).re * 2 ^ j))
-      (2 * betaOdd) := by
-    sorry
   -- STEP 2b: MAIN2's full series is 2*beta.
   have hbnorm : ∀ j : ℕ, ‖bHatOdd j‖ ≤ betaFam j := by
     intro j
@@ -8003,6 +7993,26 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
       simp
     simp only [Complex.ofReal_im, mul_zero, sub_zero, zero_mul, mul_zero] at this
     linarith [this]
+  have hbr : Summable (fun j : ℕ => (bHatOdd j).re * 2 ^ j) := by
+    apply Summable.congr
+      (hsum2c.map (Complex.reCLM : ℂ →L[ℝ] ℝ) Complex.reCLM.continuous)
+    intro j
+    have h2 : ((2:ℂ) ^ j) = (((2:ℝ) ^ j : ℝ) : ℂ) := by push_cast; ring
+    simp [h2, Complex.mul_re]
+  have hhr : Summable (fun j : ℕ => (hCoeff 1 j).re * 2 ^ j) := by
+    apply Summable.congr
+      (hsum2h.map (Complex.reCLM : ℂ →L[ℝ] ℝ) Complex.reCLM.continuous)
+    intro j
+    have h2 : ((2:ℂ) ^ j) = (((2:ℝ) ^ j : ℝ) : ℂ) := by push_cast; ring
+    simp [h2, Complex.mul_re]
+  have hcomb : HasSum (fun j : ℕ => ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j)
+      ((∑' j : ℕ, (bHatOdd j).re * 2 ^ j)
+        + 2 * Real.eulerMascheroniConstant * ∑' j : ℕ, (hCoeff 1 j).re * 2 ^ j) :=
+    (hbr.hasSum.add ((hhr.hasSum).mul_left
+      (2 * Real.eulerMascheroniConstant))).congr_fun (fun j => by ring)
+  have hre2s : HasSum (fun j : ℕ => ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j) (2 * betaOdd) := by
+    rw [← hre2]
+    exact hcomb
 
   -- STEP 3: the two tails, via geom_tail_bound_cx at ratio 1/2 (binom_absorb).
   obtain ⟨C', hC'pos, hC'⟩ := binom_absorb S hS0
@@ -8119,7 +8129,60 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
         + (1 / 2 ^ (k+1)) * |∑' j : ℕ,
             (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant
               * (hCoeff 1 j).re) * 2 ^ j else 0)| := by
-    sorry
+    -- MAIN2's partial sum, like MAIN1's, is the full sum minus its tail
+    have hpart2 : ∑ j ∈ Finset.range (k + 1), ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j
+        = 2 * betaOdd - ∑' j : ℕ, (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j else 0) := by
+      have hlow : Summable (fun j : ℕ => (if j ≤ k then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j else 0)) := by
+        apply summable_of_finite_support
+        apply Set.Finite.subset (Set.finite_Icc 0 k)
+        intro j hj
+        simp only [Function.mem_support, ne_eq, ite_eq_right_iff, not_forall] at hj
+        obtain ⟨hjk, _⟩ := hj
+        exact ⟨Nat.zero_le j, hjk⟩
+      have hhigh : Summable (fun j : ℕ => (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j else 0)) := by
+        apply Summable.of_norm_bounded (g := fun j : ℕ => |((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j|) hre2s.summable.abs
+        intro j
+        by_cases hc : k < j
+        · simp only [hc, if_true, Real.norm_eq_abs]
+          ring_nf
+        · simp only [hc, if_false, norm_zero]
+          positivity
+      have hsplitg : ∀ j : ℕ, ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j
+          = (if j ≤ k then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j else 0) + (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j else 0) := by
+        intro j
+        by_cases hc : j ≤ k
+        · simp [hc, Nat.not_lt.mpr hc]
+        · simp [hc, Nat.lt_of_not_le hc]
+      have htotal : (2 * betaOdd)
+          = (∑' j : ℕ, (if j ≤ k then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j else 0))
+            + ∑' j : ℕ, (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j else 0) := by
+        have hsum := hre2s.tsum_eq
+        conv_lhs => rw [← hsum]
+        rw [← Summable.tsum_add hlow hhigh]
+        exact tsum_congr hsplitg
+      have hfin : (∑' j : ℕ, (if j ≤ k then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j else 0))
+          = ∑ j ∈ Finset.range (k + 1), ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j := by
+        rw [tsum_eq_sum (s := Finset.range (k + 1))]
+        · apply Finset.sum_congr rfl
+          intro j hj
+          rw [Finset.mem_range] at hj
+          simp [Nat.lt_succ_iff.mp hj]
+        · intro j hj
+          rw [Finset.mem_range] at hj
+          have hjk : ¬ (j ≤ k) := by omega
+          simp [hjk]
+      rw [hfin] at htotal
+      linarith [htotal]
+    rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2, hsplit_int, hM1val, hM2val,
+      hpart1, hpart2]
+    have h2k : (0:ℝ) < (2:ℝ) ^ (k+1) := by positivity
+    have hbeta : betaOdd * ((1:ℝ)/2) ^ k
+        = 1 / 2 ^ (k+1) * (2 * betaOdd) := by
+      rw [div_pow, one_pow, pow_succ]
+      field_simp
+      ring
+    rw [hbeta]
+    ring_nf
 
 
   have htail1re : |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
