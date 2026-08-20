@@ -8173,16 +8173,43 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
           simp [hjk]
       rw [hfin] at htotal
       linarith [htotal]
-    rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2, hsplit_int, hM1val, hM2val,
-      hpart1, hpart2]
-    have h2k : (0:ℝ) < (2:ℝ) ^ (k+1) := by positivity
-    have hbeta : betaOdd * ((1:ℝ)/2) ^ k
-        = 1 / 2 ^ (k+1) * (2 * betaOdd) := by
-      rw [div_pow, one_pow, pow_succ]
-      field_simp
+    have hid : fOdd k - 1/2 - betaOdd * ((1:ℝ)/2) ^ k
+        = (∫ u in Set.Ioi (0:ℝ),
+            ((∑ j ∈ Finset.range (k + 1),
+                (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+              * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+              - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u))
+          - (∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0))
+          - (1 / 2 ^ (k+1)) * (∑' j : ℕ,
+              (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant
+                * (hCoeff 1 j).re) * 2 ^ j else 0)) := by
+      rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2, hsplit_int, hM1val, hM2val,
+        hpart1, hpart2, hbeta]
       ring
-    rw [hbeta]
-    ring_nf
+    rw [hid]
+    have hgen : ∀ (D A B c : ℝ), 0 ≤ c →
+        |D - A - c * B| ≤ |D| + |A| + c * |B| := by
+      intro D A B c hc
+      have h1 : |D - A - c * B| ≤ |D - A| + |c * B| := by
+        have := abs_add_le (D - A) (-(c * B))
+        simpa [sub_eq_add_neg, abs_neg] using this
+      have h2 : |D - A| ≤ |D| + |A| := by
+        have := abs_add_le D (-A)
+        simpa [sub_eq_add_neg, abs_neg] using this
+      have h3 : |c * B| = c * |B| := by
+        rw [abs_mul, abs_of_nonneg hc]
+      linarith [h1, h2, h3.le, h3.ge]
+    have := hgen
+      (∫ u in Set.Ioi (0:ℝ),
+        ((∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+          - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u))
+      (∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0))
+      (∑' j : ℕ, (if k < j then ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant
+        * (hCoeff 1 j).re) * 2 ^ j else 0))
+      ((1:ℝ) / 2 ^ (k+1)) (by positivity)
+    linarith [this]
 
 
   have htail1re : |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
