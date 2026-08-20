@@ -8419,7 +8419,35 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
       apply Continuous.div_const
       exact Continuous.mul continuous_const (continuous_pow _)
     exact hc2.integrableOn_Ioc
+  -- the near integral splits into the three pieces
+  have hIintIoc : MeasureTheory.IntegrableOn
+      (fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+      (Set.Ioc (0:ℝ) U) := by
+    have h := (hIocInt.add hM1IocInt).add hM2IocInt
+    apply h.congr_fun _ measurableSet_Ioc
+    intro u _
+    simp only [Pi.add_apply]
+    ring
+  have hnearSplit : (∫ u in Set.Ioc (0:ℝ) U,
+        ((∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+          - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u))
+      = (∫ u in Set.Ioc (0:ℝ) U,
+          (∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u))))
+        - (∫ u in Set.Ioc (0:ℝ) U, oddSplitMain1 k u)
+        - ∫ u in Set.Ioc (0:ℝ) U, oddSplitMain2 bHatOdd k u := by
+    have e1 := MeasureTheory.integral_sub (hIintIoc.sub hM1IocInt) hM2IocInt
+    have e2 := MeasureTheory.integral_sub hIintIoc hM1IocInt
+    simp only [Pi.sub_apply] at e1
+    rw [e2] at e1
+    exact e1
   sorry
+
 
 
 
