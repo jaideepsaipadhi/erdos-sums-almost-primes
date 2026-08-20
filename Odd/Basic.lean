@@ -8120,6 +8120,38 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     rw [hpart1] at hstan
     linarith [hstan]
 
+  -- the shifted tail, bounded by the polynomial tail lemma
+  have htail1new : |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
+      ≤ (S / 3) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    rw [hbridge1]
+    have hterm : ∀ d : ℕ, |(hCoeff 1 (d + (k+1))).re|
+        ≤ (S / 6) * ((((d + (k+1) : ℕ)):ℝ) + 3) ^ 3 * (3:ℝ) ^ (-(((d + (k+1) : ℕ)):ℝ)) := by
+      intro d
+      set j := d + (k+1) with hj
+      have h1 : |(hCoeff 1 j).re| ≤ dom j := by
+        refine le_trans ?_ (hd.dom_h j)
+        first
+        | exact Complex.abs_re_le_norm _
+        | exact Complex.abs_re_le_abs _
+      have h2 := dom_decay dom betaFam bHatOdd S hd j
+      have h3pos : (0:ℝ) < (3:ℝ) ^ j := by positivity
+      have h3 : dom j ≤ (Nat.choose (j + 3) 3 : ℝ) * S * (3:ℝ) ^ (-(j:ℝ)) := by
+        rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 3), Real.rpow_natCast]
+        rw [le_mul_inv_iff₀ h3pos]
+        linarith [h2]
+      have h4 : (Nat.choose (j + 3) 3 : ℝ) ≤ ((j:ℝ) + 3) ^ 3 / 6 := by
+        rw [choose_three_real]
+        have hjn : (0:ℝ) ≤ (j:ℝ) := Nat.cast_nonneg j
+        nlinarith [hjn]
+      have hrp : (0:ℝ) < (3:ℝ) ^ (-(j:ℝ)) := Real.rpow_pos_of_pos (by norm_num) _
+      calc |(hCoeff 1 j).re| ≤ dom j := h1
+        _ ≤ (Nat.choose (j + 3) 3 : ℝ) * S * (3:ℝ) ^ (-(j:ℝ)) := h3
+        _ ≤ (((j:ℝ) + 3) ^ 3 / 6) * S * (3:ℝ) ^ (-(j:ℝ)) := by
+            apply mul_le_mul_of_nonneg_right _ (le_of_lt hrp)
+            exact mul_le_mul_of_nonneg_right h4 hS0
+        _ = (S / 6) * ((j:ℝ) + 3) ^ 3 * (3:ℝ) ^ (-(j:ℝ)) := by ring
+    sorry
+
   -- STEP 3: the two tails, via geom_tail_bound_cx at ratio 1/2 (binom_absorb).
   obtain ⟨C', hC'pos, hC'⟩ := binom_absorb S hS0
   have hdecay : ∀ j : ℕ, ‖hCoeff 1 j‖ ≤ C' * ((1:ℝ)/2) ^ j := by
