@@ -7763,6 +7763,67 @@ theorem cube_le_two_pow (m d : ℕ) (hm : 4 ≤ m) :
         _ ≤ 2 * (((m:ℝ)) ^ 3 * 2 ^ n) := by linarith [ih]
         _ = ((m:ℝ)) ^ 3 * 2 ^ (n+1) := by ring
 
+/-- The polynomial-weighted tail: summing dom_decay's bound over j > k keeps
+the (k+3)^3 3^-k shape rather than degrading to a worse geometric ratio. -/
+theorem poly_tail_bound (k : ℕ) (hk : 1 ≤ k) :
+    ∑' d : ℕ, (((k + 4 + d : ℕ)):ℝ) ^ 3 * (3:ℝ) ^ (-((k + 1 + d : ℕ)):ℝ)
+      ≤ 2 * ((k:ℝ) + 3) ^ 3 * (3:ℝ) ^ (-(k:ℝ)) := by
+  have hk4 : 4 ≤ k + 4 := by omega
+  -- termwise: (k+4+d)^3 3^-(k+1+d) <= (k+4)^3 3^-(k+1) (2/3)^d
+  have hterm : ∀ d : ℕ,
+      (((k + 4 + d : ℕ)):ℝ) ^ 3 * (3:ℝ) ^ (-((k + 1 + d : ℕ)):ℝ)
+        ≤ (((k + 4 : ℕ)):ℝ) ^ 3 * (3:ℝ) ^ (-((k + 1 : ℕ)):ℝ) * ((2:ℝ)/3) ^ d := by
+    intro d
+    have hc := cube_le_two_pow (k + 4) d hk4
+    have h3 : (3:ℝ) ^ (-((k + 1 + d : ℕ)):ℝ)
+        = (3:ℝ) ^ (-((k + 1 : ℕ)):ℝ) * (3:ℝ) ^ (-(d:ℝ)) := by
+      rw [← Real.rpow_add (by norm_num : (0:ℝ) < 3)]
+      congr 1
+      push_cast
+      ring
+    rw [h3]
+    have h3d : (3:ℝ) ^ (-(d:ℝ)) = ((1:ℝ)/3) ^ d := by
+      rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 3), Real.rpow_natCast]
+      rw [div_pow, one_pow]
+      exact inv_eq_one_div _
+    rw [h3d]
+    have hpos : (0:ℝ) < (3:ℝ) ^ (-((k + 1 : ℕ)):ℝ) :=
+      Real.rpow_pos_of_pos (by norm_num) _
+    have hcalc : (((k + 4 + d : ℕ)):ℝ) ^ 3 * ((3:ℝ) ^ (-((k + 1 : ℕ)):ℝ) * ((1:ℝ)/3) ^ d)
+        ≤ ((((k + 4 : ℕ)):ℝ) ^ 3 * 2 ^ d) * ((3:ℝ) ^ (-((k + 1 : ℕ)):ℝ) * ((1:ℝ)/3) ^ d) := by
+      apply mul_le_mul_of_nonneg_right hc
+      positivity
+    refine le_trans hcalc ?_
+    have hsplit : ((2:ℝ)/3) ^ d = (2:ℝ) ^ d * ((1:ℝ)/3) ^ d := by
+      rw [← mul_pow]; norm_num
+    rw [hsplit]
+    ring_nf
+    exact le_refl _
+  -- sum the geometric majorant
+  have hgeo : Summable (fun d : ℕ =>
+      (((k + 4 : ℕ)):ℝ) ^ 3 * (3:ℝ) ^ (-((k + 1 : ℕ)):ℝ) * ((2:ℝ)/3) ^ d) :=
+    (summable_geometric_of_lt_one (by norm_num) (by norm_num)).mul_left _
+  have hlhs : Summable (fun d : ℕ =>
+      (((k + 4 + d : ℕ)):ℝ) ^ 3 * (3:ℝ) ^ (-((k + 1 + d : ℕ)):ℝ)) := by
+    apply Summable.of_nonneg_of_le _ hterm hgeo
+    intro d
+    positivity
+  refine le_trans (Summable.tsum_le_tsum hterm hlhs hgeo) ?_
+  rw [tsum_mul_left, tsum_geometric_of_lt_one (by norm_num) (by norm_num)]
+  have hone : (1:ℝ) - 2/3 = 1/3 := by norm_num
+  rw [hone]
+  have h3 : (3:ℝ) ^ (-((k + 1 : ℕ)):ℝ) = (3:ℝ) ^ (-(k:ℝ)) * (1/3) := by
+    rw [show (-((k + 1 : ℕ)):ℝ) = -(k:ℝ) + (-(1:ℝ)) from by push_cast; ring]
+    rw [Real.rpow_add (by norm_num : (0:ℝ) < 3)]
+    norm_num
+  rw [h3]
+  have hkk : (((k + 4 : ℕ)):ℝ) ^ 3 ≤ 2 * ((k:ℝ) + 3) ^ 3 := by
+    have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
+    push_cast
+    nlinarith [hk1, sq_nonneg ((k:ℝ) + 3)]
+  have hp : (0:ℝ) < (3:ℝ) ^ (-(k:ℝ)) := Real.rpow_pos_of_pos (by norm_num) _
+  nlinarith [hkk, hp]
+
 /-- The absorption at ratio 3/4, for the b_j 2^j tail: dom decays like 3^-j,
 so dom_j 2^j decays like (2/3)^j up to the binomial factor, which (3/4)^j
 absorbs. -/
