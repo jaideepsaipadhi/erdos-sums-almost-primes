@@ -8306,9 +8306,7 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
           - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)
       simpa [Real.norm_eq_abs] using this
     -- the majorant is integrable on Ioi U and dominates |D| there
-    have hmajInt : MeasureTheory.IntegrableOn (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
-            dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u)) (Set.Ioi U) := by
-      have hIoi0 : MeasureTheory.IntegrableOn
+    have hmajIoi0 : MeasureTheory.IntegrableOn
           (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
             dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u))
           (Set.Ioi (0:ℝ)) := by
@@ -8348,7 +8346,11 @@ theorem fOdd_expansion_final (MR : ℝ) (k : ℕ) (hk : 1 ≤ k)
           apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
           apply Real.exp_le_exp.mpr
           linarith
-      apply hIoi0.mono_set
+    have hmajInt : MeasureTheory.IntegrableOn
+        (fun u : ℝ => CE * (∑ j ∈ Finset.range (k + 1),
+          dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u))
+        (Set.Ioi U) := by
+      apply hmajIoi0.mono_set
       intro x hx
       exact lt_trans hUpos hx
     have habsInt : MeasureTheory.IntegrableOn (fun u : ℝ => |(fun u : ℝ => (∑ j ∈ Finset.range (k + 1),
