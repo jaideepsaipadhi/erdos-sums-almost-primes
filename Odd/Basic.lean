@@ -8684,7 +8684,40 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       _ ≤ (S0 / 2) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
           apply mul_le_mul_of_nonneg_right _ (le_of_lt h3k)
           exact mul_le_mul_of_nonneg_left hone hS0
+  -- 2^-(k+1)|B| <= (9 S1/128)(k+3)^3 (1/3)^k, using (k+2)/(k+3)^3 <= 3/64
+  have hBb : (1 / 2 ^ (k+1)) * |∑' j : ℕ, (if k < j then
+        ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j
+        else 0)|
+      ≤ (9 * S1 / 128) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    have h2k : (0:ℝ) < (1:ℝ) / 2 ^ (k+1) := by positivity
+    have hstep := mul_le_mul_of_nonneg_left hB (le_of_lt h2k)
+    refine le_trans hstep ?_
+    -- (1/2^(k+1)) * 3 S1 (k+2)(2/3)^k = (3 S1/2)(k+2)(1/3)^k
+    have hcollapse : (1 / 2 ^ (k+1)) * (3 * S1 * ((k:ℝ) + 2) * ((2:ℝ)/3) ^ k)
+        = (3 * S1 / 2) * ((k:ℝ) + 2) * ((1:ℝ)/3) ^ k := by
+      have hsp : ((2:ℝ)/3) ^ k = (2:ℝ) ^ k / 3 ^ k := by
+        rw [div_pow]
+      have hsp2 : ((1:ℝ)/3) ^ k = (1:ℝ) / 3 ^ k := by
+        rw [div_pow, one_pow]
+      rw [hsp, hsp2, pow_succ]
+      have h2 : (2:ℝ) ^ k ≠ 0 := by positivity
+      have h3 : (3:ℝ) ^ k ≠ 0 := by positivity
+      field_simp
+      ring
+    rw [hcollapse]
+    -- (k+2) <= (3/64)(k+3)^3
+    have hpoly : ((k:ℝ) + 2) ≤ (3/64) * (((k:ℝ) + 3) ^ 3) := by
+      have hk0 : (0:ℝ) ≤ (k:ℝ) := Nat.cast_nonneg k
+      nlinarith [hk0, sq_nonneg ((k:ℝ) + 3), sq_nonneg ((k:ℝ) - 1)]
+    have hS1 : (0:ℝ) ≤ 3 * S1 / 2 := by linarith [ht.S1_nonneg]
+    have h3k' : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
+    calc (3 * S1 / 2) * ((k:ℝ) + 2) * ((1:ℝ)/3) ^ k
+        ≤ (3 * S1 / 2) * ((3/64) * (((k:ℝ) + 3) ^ 3)) * ((1:ℝ)/3) ^ k := by
+          apply mul_le_mul_of_nonneg_right _ (le_of_lt h3k')
+          exact mul_le_mul_of_nonneg_left hpoly hS1
+      _ = (9 * S1 / 128) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
   sorry
+
 
 
 
