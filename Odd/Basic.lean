@@ -7941,6 +7941,11 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     (dom : ℕ → ℝ) (S : ℝ) (hS0 : 0 ≤ S)
     (hd : OddDomFacts dom betaFam bHatOdd S)
     (S0 S1 : ℝ) (ht : OddTailFacts bHatOdd S0 S1)
+    -- The near-piece constant.  FkOdd k s <= CN 3^-k holds for each fixed
+    -- s > 1 (the index set has every n >= 3^k), with CN depending on s = sOf U;
+    -- it blows up only as s -> 1, i.e. as U -> infinity.
+    (CN : ℝ) (hCNnn : 0 ≤ CN)
+    (hCN : FkOdd k (sOf U) ≤ CN * ((1:ℝ)/3) ^ k)
     -- the near piece contributes zeta(2) 3^-k; MR must cover both pieces
     -- the far-piece bound of LEAF 1, with its constant named
     (hsplitD : ∀ u : ℝ, U ≤ u →
@@ -7958,8 +7963,7 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       ≤ NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k)
     -- the honest coefficient sum: far piece CE S/18 (three error terms, not the
     -- one of PROOF.md 5.3), both tails, the near piece, and the U-weighted part.
-    (hMR : CE * S / 18 + S0 / 2 + 9 * S1 / 128
-        + (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU ≤ MR) :
+    (hMR : CE * S / 18 + S0 / 2 + 9 * S1 / 128 + CN + NEARU ≤ MR) :
     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
       ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
   rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
@@ -8575,7 +8579,16 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       rw [hpull]
       apply mul_le_mul_of_nonneg_left _ (le_of_lt hCEpos)
       apply MeasureTheory.setIntegral_mono_set
-      · sorry
+      · -- strip the CE factor from hmajIoi0
+        have hCEne : CE ≠ 0 := ne_of_gt hCEpos
+        have hsc : MeasureTheory.IntegrableOn
+            (fun u : ℝ => CE⁻¹ * (CE * (∑ j ∈ Finset.range (k + 1),
+              dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u)))
+            (Set.Ioi (0:ℝ)) :=
+          MeasureTheory.Integrable.const_mul hmajIoi0 CE⁻¹
+        apply hsc.congr_fun _ measurableSet_Ioi
+        intro x _
+        field_simp
       · filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with x hx
         have hx0 : (0:ℝ) < x := hx
         have hsumnn : (0:ℝ) ≤ ∑ j ∈ Finset.range (k + 1),
@@ -8742,8 +8755,50 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     exact add_le_add hnearBound hfarBound
   refine le_trans (add_le_add (add_le_add hInt hAb) hBb) ?_
   have hP : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
-  have hK : (0:ℝ) < ((k:ℝ) + 3) ^ 3 := by positivity
-  -- far: CE C(k+3,3) S (1/3)^(k+1) <= (CE S/18) (k+3)^3 (1/3)^k
+  have hXpos : (0:ℝ) < (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by positivity
+  have hFk : FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
+      ≤ CN * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    have hFnn : (0:ℝ) ≤ FkOdd k (sOf U) := by
+      unfold FkOdd; apply tsum_nonneg; intro n; positivity
+    have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
+    have hl3 : (1:ℝ) ≤ Real.log 3 := by
+      have he : Real.exp 1 < 3 := by
+        have := Real.exp_one_lt_d9
+        linarith
+      have := Real.log_lt_log (Real.exp_pos 1) he
+      rw [Real.log_exp] at this
+      linarith
+    have hlog1 : (1:ℝ) ≤ (k:ℝ) * Real.log 3 := by
+      calc (1:ℝ) = 1 * 1 := by ring
+        _ ≤ (k:ℝ) * Real.log 3 := mul_le_mul hk1 hl3 (by norm_num) (by linarith)
+    have hone : (1:ℝ) ≤ ((k:ℝ) + 3) ^ 3 := by
+      have hk3 : (1:ℝ) ≤ (k:ℝ) + 3 := by linarith
+      first
+      | exact one_le_pow₀ hk3
+      | nlinarith [hk3]
+    calc FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
+        ≤ FkOdd k (sOf U) := by
+          rw [div_le_iff₀ (by linarith : (0:ℝ) < (k:ℝ) * Real.log 3)]
+          nlinarith [hFnn, hlog1]
+      _ ≤ CN * ((1:ℝ)/3) ^ k := hCN
+      _ = CN * 1 * ((1:ℝ)/3) ^ k := by ring
+      _ ≤ CN * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+          apply mul_le_mul_of_nonneg_right _ (le_of_lt hP)
+          exact mul_le_mul_of_nonneg_left hone hCNnn
+  have hnearU : U * (∑ j ∈ Finset.range (k + 1),
+        dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+      + U * ((1 + 2 * Real.eulerMascheroniConstant)
+          * ∑ j ∈ Finset.range (k + 1),
+              dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+      ≤ NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    refine le_trans ?_ hNEARU
+    have he : U * (2 + 2 * Real.eulerMascheroniConstant)
+        * (∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+        = U * (∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+          + U * ((1 + 2 * Real.eulerMascheroniConstant)
+              * ∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j))) := by
+      ring
+    linarith [he]
   have hfar : CE * (Nat.choose (k + 3) 3 : ℝ) * S * ((1:ℝ)/3) ^ (k + 1)
       ≤ (CE * S / 18) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
     have hbin : (Nat.choose (k + 3) 3 : ℝ) ≤ ((k:ℝ) + 3) ^ 3 / 6 := by
@@ -8761,107 +8816,40 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       linarith [hfac]
     have hsucc : ((1:ℝ)/3) ^ (k + 1) = ((1:ℝ)/3) ^ k * (1/3) := pow_succ _ _
     rw [hsucc]
-    have hCES : (0:ℝ) ≤ CE * S := mul_nonneg (le_of_lt hCEpos) hS0
     calc CE * (Nat.choose (k + 3) 3 : ℝ) * S * (((1:ℝ)/3) ^ k * (1/3))
         ≤ CE * (((k:ℝ) + 3) ^ 3 / 6) * S * (((1:ℝ)/3) ^ k * (1/3)) := by
           apply mul_le_mul_of_nonneg_right _ (by positivity)
           apply mul_le_mul_of_nonneg_right _ hS0
           exact mul_le_mul_of_nonneg_left hbin (le_of_lt hCEpos)
       _ = (CE * S / 18) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
-  -- near U-terms: bounded by NEARU (k+3)^3 (1/3)^k via hNEARU
-  have hnearU : U * (∑ j ∈ Finset.range (k + 1),
-        dom j * U ^ (k - j) / (Nat.factorial (k - j)))
-      + U * ((1 + 2 * Real.eulerMascheroniConstant)
-          * ∑ j ∈ Finset.range (k + 1),
-              dom j * U ^ (k - j) / (Nat.factorial (k - j)))
-      ≤ NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
-    refine le_trans ?_ hNEARU
-    have : U * (2 + 2 * Real.eulerMascheroniConstant)
-        * (∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)))
-        = U * (∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)))
-          + U * ((1 + 2 * Real.eulerMascheroniConstant)
-              * ∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j))) := by
-      ring
-    linarith [this]
-  -- the near FkOdd piece: <= zeta(2) (1/3)^k, since sOf U > 1
-  have hFk : FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
-      ≤ (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
-    have hSU1 : (1:ℝ) < sOf U := sOf_mem U hUpos
-    have hZ2 : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ)) := zetaR_pos 2 (by norm_num)
-    have hklog : (0:ℝ) < (k:ℝ) * Real.log 3 := by
-      have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
-      have hl3 : (0:ℝ) < Real.log 3 := Real.log_pos (by norm_num)
-      positivity
-    -- FkOdd k (sOf U) <= zeta(2) 3^-k, by FkOdd_le_pow (tau=2) or antitonicity
-    have hbound : FkOdd k (sOf U)
-        ≤ (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * ((1:ℝ)/3) ^ k := by
-      sorry
-    -- divide by k log 3 >= log 3 > 1, and (k+3)^3 >= 1
-    have hone : (1:ℝ) ≤ ((k:ℝ) + 3) ^ 3 := by
-      have hk3 : (1:ℝ) ≤ (k:ℝ) + 3 := by
-        have : (0:ℝ) ≤ (k:ℝ) := Nat.cast_nonneg k
-        linarith
-      first
-      | exact one_le_pow₀ hk3
-      | exact one_le_pow_of_le' hk3 3
-      | nlinarith [hk3, sq_nonneg ((k:ℝ) + 3), mul_le_mul hk3 hk3 (by norm_num) (by linarith)]
-    have hlog1 : (1:ℝ) ≤ (k:ℝ) * Real.log 3 := by
-      have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
-      have hl3 : (1:ℝ) ≤ Real.log 3 := by
-        have he : Real.exp 1 < 3 := by
-          have := Real.exp_one_lt_d9
-          linarith
-        have := Real.log_lt_log (Real.exp_pos 1) he
-        rw [Real.log_exp] at this
-        linarith
-      calc (1:ℝ) = 1 * 1 := by ring
-        _ ≤ (k:ℝ) * Real.log 3 := by
-            apply mul_le_mul hk1 hl3 (by norm_num) (by linarith)
-    have hP : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
-    calc FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
-        ≤ FkOdd k (sOf U) / 1 := by
-          have hFnn : (0:ℝ) ≤ FkOdd k (sOf U) := by
-            unfold FkOdd; apply tsum_nonneg; intro n; positivity
-          rw [div_one]
-          rw [div_le_iff₀ hklog]
-          nlinarith [hFnn, hlog1]
-      _ = FkOdd k (sOf U) := by ring
-      _ ≤ (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * ((1:ℝ)/3) ^ k := hbound
-      _ ≤ (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
-          nlinarith [hZ2, hone, hP]
-  have hP : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
-  have hK : (1:ℝ) ≤ ((k:ℝ) + 3) ^ 3 := by
-    have : (1:ℝ) ≤ (k:ℝ) + 3 := by positivity
-    nlinarith [this]
-  -- everything is now c * (k+3)^3 (1/3)^k; conclude by hMR
-  have hcombine : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU + CE * S / 18
-      + S0 / 2 + 9 * S1 / 128 ≤ MR := by linarith [hMR]
-  have hXpos : (0:ℝ) < (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by positivity
-  -- abstract the heavy terms so linarith works on small atoms
-  generalize hI1 : (∫ u in Set.Ioc (0:ℝ) U,
-      ((∑ j ∈ Finset.range (k + 1),
-          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
-        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
-        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)) = I1 at *
-  generalize hI2 : (∫ u in Set.Ioi U,
-      ((∑ j ∈ Finset.range (k + 1),
-          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
-        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
-        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)) = I2 at *
-  have hsum := add_le_add (add_le_add (add_le_add (add_le_add hFk hnearU) hfar) hAb) hBb
+  have hsum : FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
+        + U * (∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+        + U * ((1 + 2 * Real.eulerMascheroniConstant)
+            * ∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+        + CE * (Nat.choose (k + 3) 3 : ℝ) * S * ((1:ℝ)/3) ^ (k + 1)
+        + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+        + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+      ≤ CN * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+        + NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+        + CE * S / 18 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+        + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+        + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    linarith [hFk, hnearU, hfar]
   refine le_trans hsum ?_
   have hK : (0:ℝ) ≤ (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := le_of_lt hXpos
-  have hexp : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+  have hexp : CN * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + CE * S / 18 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
-      = ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU + CE * S / 18 + S0 / 2
+      = (CN + NEARU + CE * S / 18 + S0 / 2
           + 9 * S1 / 128) * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k) := by ring
   rw [hexp]
   have hfin : MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       = MR * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k) := by ring
   rw [hfin]
+  have hcombine : CN + NEARU + CE * S / 18 + S0 / 2 + 9 * S1 / 128 ≤ MR := by
+    linarith [hMR]
   exact mul_le_mul_of_nonneg_right hcombine hK
 
 
