@@ -7766,6 +7766,8 @@ theorem cube_le_two_pow (m d : ℕ) (hm : 4 ≤ m) :
 /-- The polynomial-weighted tail: summing dom_decay's bound over j > k keeps
 the (k+3)^3 3^-k shape rather than degrading to a worse geometric ratio. -/
 theorem poly_tail_bound (k : ℕ) (hk : 1 ≤ k) :
+    Summable (fun d : ℕ => (((k + 4 + d : ℕ)):ℝ) ^ 3
+        * (3:ℝ) ^ (-((k + 1 + d : ℕ)):ℝ)) ∧
     ∑' d : ℕ, (((k + 4 + d : ℕ)):ℝ) ^ 3 * (3:ℝ) ^ (-((k + 1 + d : ℕ)):ℝ)
       ≤ 2 * ((k:ℝ) + 3) ^ 3 * (3:ℝ) ^ (-(k:ℝ)) := by
   have hk4 : 4 ≤ k + 4 := by omega
@@ -7808,6 +7810,7 @@ theorem poly_tail_bound (k : ℕ) (hk : 1 ≤ k) :
     apply Summable.of_nonneg_of_le _ hterm hgeo
     intro d
     positivity
+  refine ⟨hlhs, ?_⟩
   refine le_trans (Summable.tsum_le_tsum hterm hlhs hgeo) ?_
   rw [tsum_mul_left, tsum_geometric_of_lt_one (by norm_num) (by norm_num)]
   have hone : (1:ℝ) - 2/3 = 1/3 := by norm_num
@@ -8153,9 +8156,7 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     -- sum the termwise bound against poly_tail_bound
     have hsumTail : Summable (fun d : ℕ => (hCoeff 1 (d + (k+1))).re) :=
       (summable_nat_add_iff (k+1)).2 hsummre1
-    have hpoly : Summable (fun d : ℕ =>
-        (((k + 4 + d : ℕ)):ℝ) ^ 3 * (3:ℝ) ^ (-((k + 1 + d : ℕ)):ℝ)) := by
-      sorry
+    have hpoly := (poly_tail_bound k hk).1
     have hmajS : Summable (fun d : ℕ =>
         (S / 6) * ((((d + (k+1) : ℕ)):ℝ) + 3) ^ 3
           * (3:ℝ) ^ (-(((d + (k+1) : ℕ)):ℝ))) := by
@@ -8178,7 +8179,7 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       refine le_trans hnt ?_
       exact Summable.tsum_le_tsum hterm hsumTail.abs hmajS
     refine le_trans habs ?_
-    have hpt := poly_tail_bound k hk
+    have hpt := (poly_tail_bound k hk).2
     have hidx : (∑' d : ℕ, (S / 6) * ((((d + (k+1) : ℕ)):ℝ) + 3) ^ 3
           * (3:ℝ) ^ (-(((d + (k+1) : ℕ)):ℝ)))
         = (S / 6) * ∑' d : ℕ, (((k + 4 + d : ℕ)):ℝ) ^ 3
