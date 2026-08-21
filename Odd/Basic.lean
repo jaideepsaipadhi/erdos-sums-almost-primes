@@ -7910,6 +7910,21 @@ theorem binom_absorb (S : ℝ) (hS : 0 ≤ S) :
         apply mul_le_mul_of_nonneg_right _ (le_of_lt hhalf)
         linarith
 
+/-- The far-piece hypothesis of `fOdd_expansion_final` is satisfiable: suitable
+CE and U exist, by LEAF 1.  They are parameters of the main theorem rather than
+existentials because `hMR`, `hCN` and `hNEARU` must mention them. -/
+theorem fOdd_expansion_hsplitD_exists (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
+    (S : ℝ) (hf : OddCoeffFacts betaFam bHatOdd)
+    (hd : OddDomFacts dom betaFam bHatOdd S) (k : ℕ) :
+    ∃ CE > 0, ∃ U > 0, ∀ u : ℝ, U ≤ u →
+      |(∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u|
+      ≤ CE * (∑ j ∈ Finset.range (k + 1),
+          dom j * u ^ (k - j) / (Nat.factorial (k - j))) * Real.exp (-3 * u) :=
+  oddIntegrand_split dom betaFam bHatOdd S hf hd k
+
 set_option maxHeartbeats 4000000 in
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
