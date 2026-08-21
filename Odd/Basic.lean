@@ -8153,10 +8153,20 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     -- sum the termwise bound against poly_tail_bound
     have hsumTail : Summable (fun d : ℕ => (hCoeff 1 (d + (k+1))).re) :=
       (summable_nat_add_iff (k+1)).2 hsummre1
+    have hpoly : Summable (fun d : ℕ =>
+        (((k + 4 + d : ℕ)):ℝ) ^ 3 * (3:ℝ) ^ (-((k + 1 + d : ℕ)):ℝ)) := by
+      sorry
     have hmajS : Summable (fun d : ℕ =>
         (S / 6) * ((((d + (k+1) : ℕ)):ℝ) + 3) ^ 3
           * (3:ℝ) ^ (-(((d + (k+1) : ℕ)):ℝ))) := by
-      sorry
+      apply Summable.congr (hpoly.mul_left (S / 6))
+      intro d
+      have hidx : ((((d + (k+1) : ℕ)):ℝ) + 3) = (((k + 4 + d : ℕ)):ℝ) := by
+        push_cast; ring
+      have hidx2 : (-(((d + (k+1) : ℕ)):ℝ)) = (-((k + 1 + d : ℕ)):ℝ) := by
+        push_cast; ring
+      rw [hidx, hidx2]
+      ring
     have habs : |∑' d : ℕ, (hCoeff 1 (d + (k+1))).re|
         ≤ ∑' d : ℕ, (S / 6) * ((((d + (k+1) : ℕ)):ℝ) + 3) ^ 3
             * (3:ℝ) ^ (-(((d + (k+1) : ℕ)):ℝ)) := by
@@ -8168,7 +8178,28 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       refine le_trans hnt ?_
       exact Summable.tsum_le_tsum hterm hsumTail.abs hmajS
     refine le_trans habs ?_
-    sorry
+    have hpt := poly_tail_bound k hk
+    have hidx : (∑' d : ℕ, (S / 6) * ((((d + (k+1) : ℕ)):ℝ) + 3) ^ 3
+          * (3:ℝ) ^ (-(((d + (k+1) : ℕ)):ℝ)))
+        = (S / 6) * ∑' d : ℕ, (((k + 4 + d : ℕ)):ℝ) ^ 3
+            * (3:ℝ) ^ (-((k + 1 + d : ℕ)):ℝ) := by
+      rw [← tsum_mul_left]
+      apply tsum_congr
+      intro d
+      have h1 : ((((d + (k+1) : ℕ)):ℝ) + 3) = (((k + 4 + d : ℕ)):ℝ) := by
+        push_cast; ring
+      have h2 : (-(((d + (k+1) : ℕ)):ℝ)) = (-((k + 1 + d : ℕ)):ℝ) := by
+        push_cast; ring
+      rw [h1, h2]
+      ring
+    rw [hidx]
+    have h3k : (3:ℝ) ^ (-(k:ℝ)) = ((1:ℝ)/3) ^ k := by
+      rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 3), Real.rpow_natCast,
+        div_pow, one_pow]
+      exact inv_eq_one_div _
+    rw [h3k] at hpt
+    have hS6 : (0:ℝ) ≤ S / 6 := by linarith [hS0]
+    nlinarith [hpt, hS6]
 
   -- STEP 3: the two tails, via geom_tail_bound_cx at ratio 1/2 (binom_absorb).
   obtain ⟨C', hC'pos, hC'⟩ := binom_absorb S hS0
