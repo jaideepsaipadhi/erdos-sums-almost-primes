@@ -8777,7 +8777,37 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
               * ∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j))) := by
       ring
     linarith [this]
-  sorry
+  -- the near FkOdd piece: <= zeta(2) (1/3)^k, since sOf U > 1
+  have hFk : FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
+      ≤ (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    sorry
+  have hP : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
+  have hK : (1:ℝ) ≤ ((k:ℝ) + 3) ^ 3 := by
+    have : (1:ℝ) ≤ (k:ℝ) + 3 := by positivity
+    nlinarith [this]
+  -- everything is now c * (k+3)^3 (1/3)^k; conclude by hMR
+  have hcombine : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU + CE * S / 18
+      + S0 / 2 + 9 * S1 / 128 ≤ MR := by linarith [hMR]
+  have hXpos : (0:ℝ) < (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by positivity
+  have hsum := add_le_add (add_le_add (add_le_add (add_le_add hFk hnearU) hfar) hAb) hBb
+  have hmul' := mul_le_mul_of_nonneg_right hcombine (le_of_lt hXpos)
+  have hmul : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+      + NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+      + CE * S / 18 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+      + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+      + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    have hd : ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU + CE * S / 18
+          + S0 / 2 + 9 * S1 / 128) * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k)
+        = (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+          + NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+          + CE * S / 18 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+          + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+          + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
+    have hr : MR * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k)
+        = MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
+    linarith [hmul', hd.le, hd.ge, hr.le, hr.ge]
+  linarith [hsum, hmul]
 
 
 
