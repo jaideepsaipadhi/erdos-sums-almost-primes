@@ -7940,6 +7940,7 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     -- (head i <= 16 by interval recursion, tail by Cauchy).
     (dom : ℕ → ℝ) (S : ℝ) (hS0 : 0 ≤ S)
     (hd : OddDomFacts dom betaFam bHatOdd S)
+    (S0 S1 : ℝ) (ht : OddTailFacts bHatOdd S0 S1)
     -- the near piece contributes zeta(2) 3^-k; MR must cover both pieces
     -- the far-piece bound of LEAF 1, with its constant named
     (hsplitD : ∀ u : ℝ, U ≤ u →
@@ -7955,8 +7956,7 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
         * (∑ j ∈ Finset.range (k + 1),
             dom j * U ^ (k - j) / (Nat.factorial (k - j)))
       ≤ NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k)
-    (hMR : CE * S / 18 + S / 3
-        + 13 * (S / 6) * (1 + 2 * Real.eulerMascheroniConstant)
+    (hMR : CE * S / 18 + S0 / 2 + 3 * S1 / 2
         + (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU ≤ MR) :
     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
       ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
