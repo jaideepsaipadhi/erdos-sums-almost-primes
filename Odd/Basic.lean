@@ -8716,7 +8716,69 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
           apply mul_le_mul_of_nonneg_right _ (le_of_lt h3k')
           exact mul_le_mul_of_nonneg_left hpoly hS1
       _ = (9 * S1 / 128) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
+  -- collect: hMain, hsplitInt, hfarBound, hnearBound, hAb, hBb against hMR
+  refine le_trans hMain ?_
+  -- bound the integral term by far + near
+  have hInt : |∫ u in Set.Ioi (0:ℝ),
+        ((∑ j ∈ Finset.range (k + 1),
+            (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+          * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+          - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)|
+      ≤ (FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
+          + U * (∑ j ∈ Finset.range (k + 1),
+              dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+          + U * ((1 + 2 * Real.eulerMascheroniConstant)
+              * ∑ j ∈ Finset.range (k + 1),
+                  dom j * U ^ (k - j) / (Nat.factorial (k - j))))
+        + CE * (Nat.choose (k + 3) 3 : ℝ) * S * ((1:ℝ)/3) ^ (k + 1) := by
+    rw [hsplitInt]
+    refine le_trans (abs_add_le _ _) ?_
+    exact add_le_add hnearBound hfarBound
+  refine le_trans (add_le_add (add_le_add hInt hAb) hBb) ?_
+  have hP : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
+  have hK : (0:ℝ) < ((k:ℝ) + 3) ^ 3 := by positivity
+  -- far: CE C(k+3,3) S (1/3)^(k+1) <= (CE S/18) (k+3)^3 (1/3)^k
+  have hfar : CE * (Nat.choose (k + 3) 3 : ℝ) * S * ((1:ℝ)/3) ^ (k + 1)
+      ≤ (CE * S / 18) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    have hbin : (Nat.choose (k + 3) 3 : ℝ) ≤ ((k:ℝ) + 3) ^ 3 / 6 := by
+      rw [choose_three_real]
+      have hk0 : (0:ℝ) ≤ (k:ℝ) := Nat.cast_nonneg k
+      have hfac : ((k:ℝ) + 3) * ((k:ℝ) + 2) * ((k:ℝ) + 1)
+          ≤ ((k:ℝ) + 3) * ((k:ℝ) + 3) * ((k:ℝ) + 3) := by
+        have h2 : (k:ℝ) + 2 ≤ (k:ℝ) + 3 := by linarith
+        have h1 : (k:ℝ) + 1 ≤ (k:ℝ) + 3 := by linarith
+        have hp : (0:ℝ) ≤ (k:ℝ) + 3 := by linarith
+        nlinarith [h1, h2, hp]
+      have hcube : ((k:ℝ) + 3) ^ 3
+          = ((k:ℝ) + 3) * ((k:ℝ) + 3) * ((k:ℝ) + 3) := by ring
+      rw [hcube]
+      linarith [hfac]
+    have hsucc : ((1:ℝ)/3) ^ (k + 1) = ((1:ℝ)/3) ^ k * (1/3) := pow_succ _ _
+    rw [hsucc]
+    have hCES : (0:ℝ) ≤ CE * S := mul_nonneg (le_of_lt hCEpos) hS0
+    calc CE * (Nat.choose (k + 3) 3 : ℝ) * S * (((1:ℝ)/3) ^ k * (1/3))
+        ≤ CE * (((k:ℝ) + 3) ^ 3 / 6) * S * (((1:ℝ)/3) ^ k * (1/3)) := by
+          apply mul_le_mul_of_nonneg_right _ (by positivity)
+          apply mul_le_mul_of_nonneg_right _ hS0
+          exact mul_le_mul_of_nonneg_left hbin (le_of_lt hCEpos)
+      _ = (CE * S / 18) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
+  -- near U-terms: bounded by NEARU (k+3)^3 (1/3)^k via hNEARU
+  have hnearU : U * (∑ j ∈ Finset.range (k + 1),
+        dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+      + U * ((1 + 2 * Real.eulerMascheroniConstant)
+          * ∑ j ∈ Finset.range (k + 1),
+              dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+      ≤ NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    refine le_trans ?_ hNEARU
+    have : U * (2 + 2 * Real.eulerMascheroniConstant)
+        * (∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+        = U * (∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)))
+          + U * ((1 + 2 * Real.eulerMascheroniConstant)
+              * ∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j))) := by
+      ring
+    linarith [this]
   sorry
+
 
 
 
