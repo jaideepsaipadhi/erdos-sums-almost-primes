@@ -8666,7 +8666,26 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       linarith [h1, h2]
     refine le_trans (htri _ _ _) ?_
     exact add_le_add (add_le_add hnear3 hnearM1) hnearM2
+  -- STEP 5: collect.  The tails come straight from the certified inputs.
+  have hA := ht.tail_h k
+  have hB := ht.tail_b k
+  have hkk : (0:ℝ) < ((k:ℝ) + 3) ^ 3 := by positivity
+  have h3k : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
+  -- |A| <= (S0/2)(k+3)^3 (1/3)^k, since (k+3)^3 >= 1
+  have hAb : |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
+      ≤ (S0 / 2) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    refine le_trans hA ?_
+    have hone : (1:ℝ) ≤ ((k:ℝ) + 3) ^ 3 := by
+      have : (1:ℝ) ≤ (k:ℝ) + 3 := by positivity
+      nlinarith [this]
+    have hS0 : (0:ℝ) ≤ S0 / 2 := by linarith [ht.S0_nonneg]
+    calc S0 / 2 * ((1:ℝ)/3) ^ k
+        = (S0 / 2) * 1 * ((1:ℝ)/3) ^ k := by ring
+      _ ≤ (S0 / 2) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+          apply mul_le_mul_of_nonneg_right _ (le_of_lt h3k)
+          exact mul_le_mul_of_nonneg_left hone hS0
   sorry
+
 
 
 
