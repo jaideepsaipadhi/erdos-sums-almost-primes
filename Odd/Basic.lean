@@ -6034,6 +6034,19 @@ theorem betaFam_sum_bound (betaFam : ℕ → ℝ) (S : ℝ)
       ≤ (Nat.choose (k + 3) 3 : ℝ) * S :=
   coeffSum_bound betaFam k S (hcert k)
 
+/-- The two tail sums of PROOF.md 5.1's unquantified "(lower order)", now
+certified: S0 <= 44.6 (odd/numerics/s0_recursion.py, first-order pole) and
+S1 <= 453.1 (s1_recursion.py, second-order pole). -/
+structure OddTailFacts (bHatOdd : ℕ → ℂ) (S0 S1 : ℝ) : Prop where
+  S0_nonneg : 0 ≤ S0
+  S1_nonneg : 0 ≤ S1
+  tail_h : ∀ k : ℕ, |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
+    ≤ S0 / 2 * ((1:ℝ)/3) ^ k
+  tail_b : ∀ k : ℕ, |∑' j : ℕ, (if k < j then
+      ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j
+      else 0)|
+    ≤ 3 * S1 * ((k:ℝ) + 2) * ((2:ℝ)/3) ^ k
+
 /-- The certified dominating sequence.  All three of |h_j(1)|, |b_j| and
 betaFam j are bounded by dom j, and CoeffSumCertified dom S holds.  These are
 exactly the r = 0, 1, 2 columns that odd/numerics/hcoeff_recursion.py prints,
