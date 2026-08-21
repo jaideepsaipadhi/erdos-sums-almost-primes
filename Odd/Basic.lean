@@ -114,12 +114,12 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   /-- The certified enclosure of S. -/
   Sodd_enclosure : |Sodd - 0.8593953| ≤ 3.3e-6
   /-- Cauchy bound: the sup of |Htilde| on |z| = 4.5, s in [1,2]. -/
-  MR_bound       : MR ≤ 2402.3
+  MR_bound       : MR ≤ 4200
   /-- The remainder bound that Cauchy's estimate yields. -/
   remainder      : ∀ k : ℕ, |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
                      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
   /-- Certified sweep below the analytic threshold. -/
-  sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 56 → fOdd (k + 1) < fOdd k
+  sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 58 → fOdd (k + 1) < fOdd k
   /-- Euler-Mascheroni, lower bound.  Mathlib has
   `eulerMascheroniConstant_lt_two_thirds` but no lower bound, so this enters as
   an input.  It is a Mathlib gap, not a mathematical one. -/
@@ -128,12 +128,12 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   d_enc          : |dConst - 0.3786950| ≤ 5.3e-8
 /-- The arithmetic core of the odd assembly, with all rpow stripped out.
 
-A = f_k, B = f_{k+1}, P = 2^-k, T = MR (k+3)^3 3^-k, b = beta; T <= 0.0477 P for k >= 57.  The two
+A = f_k, B = f_{k+1}, P = 2^-k, T = MR (k+3)^3 3^-k, b = beta; T <= 0.041 P for k >= 59.  The two
 enclosures give A >= bP - T and B <= bP/2 + 2T/9, so
-A - B >= bP/2 - T(1.3503) >= P(0.1556/2 - 0.0477*1.3503) = 0.0135 P > 0. -/
+A - B >= bP/2 - T(1.3503) >= P(0.1556/2 - 0.041*1.3503) = 0.0226 P > 0. -/
 theorem odd_step (b P T A B : ℝ)
     (hb : (0.1556 : ℝ) ≤ b) (hP : 0 < P) (hT : 0 ≤ T)
-    (hTb : T ≤ (0.0477 : ℝ) * P)
+    (hTb : T ≤ (0.041 : ℝ) * P)
     (hA : |A - b * P| ≤ T)
     (hB : |B - b * P / 2| ≤ T * (3503/10000)) :
     B < A := by
@@ -161,8 +161,8 @@ theorem polyGeom_step (k : ℕ) (hk : 4 ≤ k) :
     _ ≤ ((k:ℝ)+3)^3 * ((2:ℝ)/3)^k :=
         mul_le_mul_of_nonneg_right hcube (le_of_lt hpos)
 
-theorem polyGeom_antitone (k : ℕ) (hk : 57 ≤ k) :
-    ((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k ≤ (60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57 := by
+theorem polyGeom_antitone (k : ℕ) (hk : 59 ≤ k) :
+    ((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k ≤ (62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59 := by
   induction k, hk using Nat.le_induction with
   | base => norm_num
   | succ n hn ih =>
@@ -178,9 +178,9 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
     (hnum : OddNumericalFacts MR) :
     ∀ k : ℕ, 1 ≤ k → fOdd (k + 1) < fOdd k := by
   intro k hk
-  by_cases hsmall : k ≤ 56
+  by_cases hsmall : k ≤ 58
   · exact hnum.sweep_low k hk hsmall
-  · have hk57 : 57 ≤ k := by omega
+  · have hk57 : 59 ≤ k := by omega
     set P : ℝ := ((1:ℝ)/2) ^ k with hPdef
     have hP : 0 < P := pow_pos (by norm_num) k
     set T : ℝ := MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k with hTdef
@@ -189,7 +189,7 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
       apply mul_nonneg (mul_nonneg hMR0 (by positivity))
       exact pow_nonneg (by norm_num) k
     -- T/P = MR (k+3)^3 (2/3)^k, antitone in k, so bounded by its value at 57
-    have hTb : T ≤ (0.0477:ℝ) * P := by
+    have hTb : T ≤ (0.041:ℝ) * P := by
       rw [hTdef, hPdef]
       have hsplit : ((1:ℝ)/3) ^ k = ((2:ℝ)/3) ^ k * ((1:ℝ)/2) ^ k := by
         rw [← mul_pow]; norm_num
@@ -197,21 +197,21 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
       have hmono := polyGeom_antitone k hk57
       have hhalf : (0:ℝ) < ((1:ℝ)/2) ^ k := pow_pos (by norm_num) k
       have hgpos : (0:ℝ) ≤ ((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k := by positivity
-      have hnum60 : (2402.3:ℝ) * ((60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57) ≤ (0.0477:ℝ) := by
+      have hnum60 : (4200:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59) ≤ (0.041:ℝ) := by
         norm_num
       have hMRb := hnum.MR_bound
       have stepA : MR * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k)
-          ≤ (2402.3:ℝ) * ((60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57) := by
+          ≤ (4200:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59) := by
         calc MR * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k)
-            ≤ (2402.3:ℝ) * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k) :=
+            ≤ (4200:ℝ) * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k) :=
               mul_le_mul_of_nonneg_right hMRb hgpos
-          _ ≤ (2402.3:ℝ) * ((60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57) :=
+          _ ≤ (4200:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59) :=
               mul_le_mul_of_nonneg_left hmono (by norm_num)
       calc MR * (((k:ℝ) + 3) ^ 3) * (((2:ℝ)/3) ^ k * ((1:ℝ)/2) ^ k)
           = (MR * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k)) * ((1:ℝ)/2) ^ k := by ring
-        _ ≤ ((2402.3:ℝ) * ((60:ℝ) ^ 3 * ((2:ℝ)/3) ^ 57)) * ((1:ℝ)/2) ^ k :=
+        _ ≤ ((4200:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59)) * ((1:ℝ)/2) ^ k :=
               mul_le_mul_of_nonneg_right stepA (le_of_lt hhalf)
-        _ ≤ (0.0477:ℝ) * ((1:ℝ)/2) ^ k :=
+        _ ≤ (0.041:ℝ) * ((1:ℝ)/2) ^ k :=
               mul_le_mul_of_nonneg_right hnum60 (le_of_lt hhalf)
     have hb : (0.1556 : ℝ) ≤ betaOdd := by
       unfold betaOdd
@@ -235,7 +235,7 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
       rw [e1, e3, ecast] at h
       -- ((k+4)/(k+3))^3 / 3 <= 0.3503 for k >= 57, since (61/60)^3 = 1.05084
       have hratio : ((k:ℝ) + 4) ^ 3 * (1/3) ≤ ((k:ℝ) + 3) ^ 3 * (3503/10000) := by
-        have hk57r : (57:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk57
+        have hk57r : (59:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk57
         nlinarith [hk57r, sq_nonneg ((k:ℝ) + 3)]
       have h3pos : (0:ℝ) < ((1:ℝ)/3) ^ k := pow_pos (by norm_num) k
       rw [hPdef, hTdef]
