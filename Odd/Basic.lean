@@ -7956,7 +7956,9 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
         * (∑ j ∈ Finset.range (k + 1),
             dom j * U ^ (k - j) / (Nat.factorial (k - j)))
       ≤ NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k)
-    (hMR : CE * S / 18 + S0 / 2 + 3 * S1 / 2
+    -- the honest coefficient sum: far piece CE S/18 (three error terms, not the
+    -- one of PROOF.md 5.3), both tails, the near piece, and the U-weighted part.
+    (hMR : CE * S / 18 + S0 / 2 + 9 * S1 / 128
         + (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU ≤ MR) :
     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
       ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
