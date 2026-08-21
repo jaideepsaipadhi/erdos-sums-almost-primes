@@ -7910,7 +7910,7 @@ theorem binom_absorb (S : ℝ) (hS : 0 ≤ S) :
         apply mul_le_mul_of_nonneg_right _ (le_of_lt hhalf)
         linarith
 
-set_option maxHeartbeats 1000000 in
+set_option maxHeartbeats 4000000 in
 /-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
 
     fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
@@ -8676,14 +8676,19 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       ≤ (S0 / 2) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
     refine le_trans hA ?_
     have hone : (1:ℝ) ≤ ((k:ℝ) + 3) ^ 3 := by
-      have : (1:ℝ) ≤ (k:ℝ) + 3 := by positivity
-      nlinarith [this]
-    have hS0 : (0:ℝ) ≤ S0 / 2 := by linarith [ht.S0_nonneg]
+      have hk3 : (1:ℝ) ≤ (k:ℝ) + 3 := by
+        have : (0:ℝ) ≤ (k:ℝ) := Nat.cast_nonneg k
+        linarith
+      first
+      | exact one_le_pow₀ hk3
+      | exact one_le_pow_of_le' hk3 3
+      | nlinarith [hk3, sq_nonneg ((k:ℝ) + 3), mul_le_mul hk3 hk3 (by norm_num) (by linarith)]
+    have hS0h : (0:ℝ) ≤ S0 / 2 := by linarith [ht.S0_nonneg]
     calc S0 / 2 * ((1:ℝ)/3) ^ k
         = (S0 / 2) * 1 * ((1:ℝ)/3) ^ k := by ring
       _ ≤ (S0 / 2) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
           apply mul_le_mul_of_nonneg_right _ (le_of_lt h3k)
-          exact mul_le_mul_of_nonneg_left hone hS0
+          exact mul_le_mul_of_nonneg_left hone hS0h
   -- 2^-(k+1)|B| <= (9 S1/128)(k+3)^3 (1/3)^k, using (k+2)/(k+3)^3 <= 3/64
   have hBb : (1 / 2 ^ (k+1)) * |∑' j : ℕ, (if k < j then
         ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j
@@ -8703,20 +8708,21 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       have h2 : (2:ℝ) ^ k ≠ 0 := by positivity
       have h3 : (3:ℝ) ^ k ≠ 0 := by positivity
       field_simp
-      ring
     rw [hcollapse]
-    -- (k+2) <= (3/64)(k+3)^3
+    -- (k+2) <= (3/64)(k+3)^3, tight at k = 1
     have hpoly : ((k:ℝ) + 2) ≤ (3/64) * (((k:ℝ) + 3) ^ 3) := by
-      have hk0 : (0:ℝ) ≤ (k:ℝ) := Nat.cast_nonneg k
-      nlinarith [hk0, sq_nonneg ((k:ℝ) + 3), sq_nonneg ((k:ℝ) - 1)]
-    have hS1 : (0:ℝ) ≤ 3 * S1 / 2 := by linarith [ht.S1_nonneg]
+      have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
+      nlinarith [hk1, sq_nonneg ((k:ℝ) - 1), sq_nonneg ((k:ℝ) + 3),
+        mul_nonneg (sub_nonneg.mpr hk1) (sq_nonneg ((k:ℝ) + 3))]
+    have hS1h : (0:ℝ) ≤ 3 * S1 / 2 := by linarith [ht.S1_nonneg]
     have h3k' : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
     calc (3 * S1 / 2) * ((k:ℝ) + 2) * ((1:ℝ)/3) ^ k
         ≤ (3 * S1 / 2) * ((3/64) * (((k:ℝ) + 3) ^ 3)) * ((1:ℝ)/3) ^ k := by
           apply mul_le_mul_of_nonneg_right _ (le_of_lt h3k')
-          exact mul_le_mul_of_nonneg_left hpoly hS1
+          exact mul_le_mul_of_nonneg_left hpoly hS1h
       _ = (9 * S1 / 128) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
   -- collect: hMain, hsplitInt, hfarBound, hnearBound, hAb, hBb against hMR
+  rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2] at hMain
   refine le_trans hMain ?_
   -- bound the integral term by far + near
   have hInt : |∫ u in Set.Ioi (0:ℝ),
@@ -8780,7 +8786,49 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
   -- the near FkOdd piece: <= zeta(2) (1/3)^k, since sOf U > 1
   have hFk : FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
       ≤ (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
-    sorry
+    have hSU1 : (1:ℝ) < sOf U := sOf_mem U hUpos
+    have hZ2 : (0:ℝ) < ∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ)) := zetaR_pos 2 (by norm_num)
+    have hklog : (0:ℝ) < (k:ℝ) * Real.log 3 := by
+      have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
+      have hl3 : (0:ℝ) < Real.log 3 := Real.log_pos (by norm_num)
+      positivity
+    -- FkOdd k (sOf U) <= zeta(2) 3^-k, by FkOdd_le_pow (tau=2) or antitonicity
+    have hbound : FkOdd k (sOf U)
+        ≤ (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * ((1:ℝ)/3) ^ k := by
+      sorry
+    -- divide by k log 3 >= log 3 > 1, and (k+3)^3 >= 1
+    have hone : (1:ℝ) ≤ ((k:ℝ) + 3) ^ 3 := by
+      have hk3 : (1:ℝ) ≤ (k:ℝ) + 3 := by
+        have : (0:ℝ) ≤ (k:ℝ) := Nat.cast_nonneg k
+        linarith
+      first
+      | exact one_le_pow₀ hk3
+      | exact one_le_pow_of_le' hk3 3
+      | nlinarith [hk3, sq_nonneg ((k:ℝ) + 3), mul_le_mul hk3 hk3 (by norm_num) (by linarith)]
+    have hlog1 : (1:ℝ) ≤ (k:ℝ) * Real.log 3 := by
+      have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
+      have hl3 : (1:ℝ) ≤ Real.log 3 := by
+        have he : Real.exp 1 < 3 := by
+          have := Real.exp_one_lt_d9
+          linarith
+        have := Real.log_lt_log (Real.exp_pos 1) he
+        rw [Real.log_exp] at this
+        linarith
+      calc (1:ℝ) = 1 * 1 := by ring
+        _ ≤ (k:ℝ) * Real.log 3 := by
+            apply mul_le_mul hk1 hl3 (by norm_num) (by linarith)
+    have hP : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
+    calc FkOdd k (sOf U) / ((k:ℝ) * Real.log 3)
+        ≤ FkOdd k (sOf U) / 1 := by
+          have hFnn : (0:ℝ) ≤ FkOdd k (sOf U) := by
+            unfold FkOdd; apply tsum_nonneg; intro n; positivity
+          rw [div_one]
+          rw [div_le_iff₀ hklog]
+          nlinarith [hFnn, hlog1]
+      _ = FkOdd k (sOf U) := by ring
+      _ ≤ (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * ((1:ℝ)/3) ^ k := hbound
+      _ ≤ (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+          nlinarith [hZ2, hone, hP]
   have hP : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
   have hK : (1:ℝ) ≤ ((k:ℝ) + 3) ^ 3 := by
     have : (1:ℝ) ≤ (k:ℝ) + 3 := by positivity
@@ -8789,25 +8837,32 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
   have hcombine : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU + CE * S / 18
       + S0 / 2 + 9 * S1 / 128 ≤ MR := by linarith [hMR]
   have hXpos : (0:ℝ) < (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by positivity
+  -- abstract the heavy terms so linarith works on small atoms
+  generalize hI1 : (∫ u in Set.Ioc (0:ℝ) U,
+      ((∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)) = I1 at *
+  generalize hI2 : (∫ u in Set.Ioi U,
+      ((∑ j ∈ Finset.range (k + 1),
+          (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
+        * ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(sOf u))) / (-zetaRderiv (sOf u)))
+        - oddSplitMain1 k u - oddSplitMain2 bHatOdd k u)) = I2 at *
   have hsum := add_le_add (add_le_add (add_le_add (add_le_add hFk hnearU) hfar) hAb) hBb
-  have hmul' := mul_le_mul_of_nonneg_right hcombine (le_of_lt hXpos)
-  have hmul : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+  refine le_trans hsum ?_
+  have hK : (0:ℝ) ≤ (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := le_of_lt hXpos
+  have hexp : (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + CE * S / 18 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
-      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
-    have hd : ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU + CE * S / 18
-          + S0 / 2 + 9 * S1 / 128) * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k)
-        = (∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
-          + NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
-          + CE * S / 18 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
-          + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
-          + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
-    have hr : MR * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k)
-        = MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
-    linarith [hmul', hd.le, hd.ge, hr.le, hr.ge]
-  linarith [hsum, hmul]
+      = ((∑' n : ℕ, ((n:ℝ) + 1) ^ (-(2:ℝ))) + NEARU + CE * S / 18 + S0 / 2
+          + 9 * S1 / 128) * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k) := by ring
+  rw [hexp]
+  have hfin : MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+      = MR * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k) := by ring
+  rw [hfin]
+  exact mul_le_mul_of_nonneg_right hcombine hK
 
 
 
