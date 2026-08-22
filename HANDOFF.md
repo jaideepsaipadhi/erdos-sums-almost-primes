@@ -1,3 +1,11 @@
+# Development log
+
+A chronological record of the formalization, kept for the design decisions and
+the Lean-specific lessons.  The early entries are working notes and describe
+targets that have since been met; the "=== COMPLETE ===" section below is the
+accurate final statement for the main theorem, and "=== ODD CASE ===" for the
+companion.
+
 
 MANUSCRIPT RECEIVED (banks-martin-proof.pdf, in repo /docs if committed): the
 complete spec. FORMALIZATION ROADMAP (three tiers):
@@ -200,3 +208,64 @@ VACUITIES FOUND AND CLOSED (each invisible on paper):
   cFac's multipliability -- Lemma 2.2's convergence hypotheses
   dConst's convergence -- d_enclosure was about a tprod junk value
   Sm's integrability -- LOAD-BEARING under Am, deltaM and Theorem 4.1
+
+
+=== ODD CASE (2026-08-22) ===
+
+fOdd_decreasing : forall k, 1 <= k -> fOdd (k+1) < fOdd k
+Zero sorries.  Axioms: propext, Classical.choice, Quot.sound only.
+Audit: lake env lean odd/axcheck.lean -- 14 theorems, all clean.
+
+WHAT THE FORMALIZATION FOUND.  PROOF.md section 5.1 carried an unquantified
+"(lower order)" in the remainder bound.  Making it explicit turned up three
+things it was hiding, and two of them are not lower order:
+
+  * the two coefficient tails.  The main terms integrate to PARTIAL sums over
+    j <= k, so sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k}(b_j + 2 gamma h_j(1))2^j
+    join R_k.  Bounded by the same pole-cancellation device at first and second
+    order: S_0 <= 44.6, S_1 <= 453.1.  These ARE small (5e-8 and 5e-5 of the
+    budget at k = 59).
+
+  * the Jacobian and product errors.  The split leaves three error terms, not
+    one: besides the Lagrange remainder R_j J, also h_j(1)(J - e^-u - 2 gamma
+    e^-2u) and b_j(eps J - e^-2u).  The combined constant is CE <= 5.4891 where
+    the old bound implicitly used 3.  This is the dominant correction: it takes
+    C from 2402.3 to 4838, and K0 from 57 to 59.
+
+  * the near region u <= U.  The expansions hold only for u >= U = 3; below
+    that the integrand is bounded directly (CN <= 364, NEARU <= 24.68).
+
+The certified sweep reaches k = 60, so the ranges still overlap at 59,60 and
+the theorem stands -- but with a two-value margin rather than four.
+
+LEAN LESSONS FROM THIS SESSION:
+
+  * READ THE SIGNATURE.  Summable.congr, Set.subset_union_left, div_le_iff0,
+    abs_add_le, one_le_pow0, IntegrableOn.congr_fun -- each cost 3-6 rounds of
+    permuting call shapes when one grep at the Mathlib source would have
+    settled it.  Rule: if an application fails twice, stop and read the type.
+
+  * ORPHANED DOCSTRINGS.  Inserting a theorem between a /-- ... -/ and its
+    declaration produces "unexpected token '/--'; expected 'lemma'" at a line
+    number that points at the SECOND docstring, not the orphan.  Cost several
+    rounds each time.  Always splice above the docstring, never between.
+
+  * DUPLICATE HYPOTHESIS NAMES SHADOW SILENTLY.  A stale `have hre2 : HasSum
+    ... := by sorry` left above the real `have hre2 : ... = ...` meant rw
+    [<- hre2] used the sorry'd one.  Eight rounds of misdiagnosis, blamed on
+    set/let unfolding.  Check for duplicates before blaming elaboration.
+
+  * INTERVAL ARITHMETIC AND THE DEPENDENCY PROBLEM.  The four constants behind
+    CE are ratios in which zeta's pole at s=1 cancels.  Evaluating them on
+    boxes of s loses the cancellation -- arb sees each occurrence of (s-1)
+    independently -- and the enclosures diverge NO MATTER how narrow the boxes.
+    Five approaches failed this way (direct sums, MVT, Euler-Maclaurin, expm1
+    regularization, the eta function).  The fix is a Taylor model: expand zeta
+    as an arb_series about 1 + E/2, form the constants as series so the
+    cancellation is SYMBOLIC, then evaluate on the whole disc at once.  One
+    shot, tight, no monotonicity assumed.  arb_series.zeta exists and is the
+    right tool; reach for it whenever a bound involves cancelling singularities.
+
+  * DEAD PROOF CODE INTERLEAVES.  The superseded tail route could not be
+    excised at the end: its `have`s sit between live ones.  Remove abandoned
+    branches when you abandon them, not later.
