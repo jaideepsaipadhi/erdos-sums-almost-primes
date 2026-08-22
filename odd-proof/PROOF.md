@@ -150,7 +150,7 @@ R_j J.  The split of the integrand also leaves
 each O(e^-3u) but with its own constant.  Writing CJ, CP, Cb, Cf for the four
 constants of those expansions and CE = CJ + CP + Cb^2 (Cf+1), the coefficient
 of (5.3) is CE/3 times, not 1 times, sum_{j<=k}|h_j''|3^j.  Over the range
-s in (1, sOf(3)] that the split requires, CE <= 5.4891 (ce_taylor.py).
+s in (1, sOf(3)] that the split requires, CE <= 5.48910 (ce_taylor.py; the log prints 5.4890962927).
 
 (c) THE NEAR REGION.  The expansions in (b) hold only for u >= U; the odd
 development uses U = 3.  On 0 < u <= U the integrand is bounded directly,
@@ -227,7 +227,7 @@ which is width rather than signal.
   * S_1 <= 453.1                         s1_recursion.py
   * CN  <= 364                           cn_recursion.py  (recursion + Cauchy)
   * NEARU <= 24.68                       nearu_bound.py   (head + envelope)
-  * CE  <= 5.4891                        ce_taylor.py     (Taylor model)
+  * CE  <= 5.48910                       ce_taylor.py  (log: 5.4890962927)
 
 and on 5.1-5.2, elementary given them.  No constant is fitted to the certified
 f_k^odd; the agreement with those values is a check, not an input.
@@ -269,7 +269,7 @@ overlap at 57..60, so the theorem holds for every k >= 1.  QED
     S_1         <= 453.1                      s1_recursion.py
     CN          <= 364                        cn_recursion.py
     NEARU       <= 24.68                      nearu_bound.py
-    CE          <= 5.4891                     ce_taylor.py
+    CE          <= 5.48910                    ce_taylor.py
     C           4900                          (5.1), see 5.2
     K0^odd      59                            certified sweep reaches 60
 
