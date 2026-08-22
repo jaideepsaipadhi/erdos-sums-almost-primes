@@ -9,6 +9,22 @@ Because H(1,z)(1-z/3) is analytic in |z| < 5 with the pole at z=3 cancelled,
     |h_j(1)| = 3^-j |sum_{i<=j} a_i 3^i| <= 3^-j S_0,
 so  sum_{j>k} |h_j(1)| <= S_0 3^-k / 2,  with NO polynomial factor in k.
 
+CHOICE OF NMAX.  Every NMAX gives a valid bound, and the total head + tail
+DECREASES with it before flattening:
+
+    NMAX      head     tail (s0_cauchy)    S_0
+      13    43.5263        3.5804        47.1067
+      16    43.5378        1.0609        44.5987   <- the value used
+      20    43.5427        0.2096        43.7523
+      24    43.5475        0.0414        43.5889
+
+The head creeps upward past i ~ 13 because the terms have reached the interval
+noise floor and abs() of a zero-centred interval contributes its radius; the
+tail falls by (2/3)^4 per four terms.  The two cross near NMAX ~ 27, where the
+bound is about 43.55.  NMAX = 16 is kept because it matches the split point
+hcoeff_recursion.py uses for S and the extra point is worth nothing here:
+S_0/2 enters a total of 4842, so 44.60 versus 43.59 moves nothing.
+
 Usage: python3 s0_recursion.py [NMAX] [PCUT] [PREC]
 """
 import sys
