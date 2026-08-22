@@ -16,3 +16,9 @@ install_payload.py
 # regenerable intermediates
 numerics/**/cchunks/
 numerics/**/__pycache__/
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.toc
