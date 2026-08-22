@@ -9,7 +9,7 @@ explicit upper bound; the committed `.log` beside it is that run.
 |---|---|---|
 | `hcoeff_recursion.py` | `sum_{i<=16} \|g_i\| 3^i <= 8424` | interval recursion, 1600 s-boxes |
 | `mr_deriv_sweep.py` | `sup_{\|z\|=4.5} \|G_2\| <= 1.97e6` | 200 theta x 40 s boxes |
-| `s0_recursion.py`, `s0_cauchy.py` | `S_0 <= 44.6` | first-order pole; head by recursion, tail by Cauchy |
+| `s0_recursion.py`, `s0_cauchy.py` | `S_0 <= 44.5987` | first-order pole; head by recursion, tail by Cauchy |
 | `s1_recursion.py` | `S_1 <= 453.1` | second-order pole, head by recursion |
 | `cn_recursion.py` | `CN <= 364` | odd Euler-product recursion + Cauchy tail |
 | `nearu_bound.py` | `NEARU <= 24.68` | exact head to k=400 + explicit envelope |

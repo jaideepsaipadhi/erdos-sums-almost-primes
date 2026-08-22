@@ -130,15 +130,19 @@ is O(e^-3u), and int_0^inf u^m e^-3u/m! du = 3^-(m+1) gives, with m = k-j,
 
     |R_k| <= (1/3) 3^-k sum_{j<=k} |h_j''| 3^j + (lower order).            (5.3)
 
-The "(lower order)" is not negligible and is made explicit here; earlier drafts
-left it unquantified.  It is three separate things.
+The "(lower order)" is made explicit here; earlier drafts left it unquantified.
+It is three separate things, and only the second is large: (a) is smaller than
+the main term by five to eight orders of magnitude over the range that matters,
+(b) multiplies the leading term by CE/3 = 1.83 and is what moves the threshold,
+and (c) is a cost of the split this note performs, not an omission in the
+argument it formalizes.
 
 (a) THE TWO COEFFICIENT TAILS.  The main terms of section 4 integrate to the
 PARTIAL sums over j <= k, not to 1/2 and beta 2^-k; the differences
 sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k} (b_j + 2 gamma h_j(1)) 2^j join R_k.
 Both are bounded by the same pole-cancellation device as (5.4)-(5.5), but at
 FIRST and SECOND order rather than third:
-    S_0 := sum_i |a_i| 3^i,  a_i = [z^i] H(1,z)(1 - z/3),        S_0 <= 44.6
+    S_0 := sum_i |a_i| 3^i,  a_i = [z^i] H(1,z)(1 - z/3),        S_0 <= 44.5987
     S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 453.1
 whence |h_j(1)| <= S_0 3^-j and |b_j| <= (j+1) S_1 3^-j, and the two tails
 contribute S_0/2 and 9 S_1/128 to the constant of (5.1).  (s0_recursion.py,
@@ -150,10 +154,13 @@ R_j J.  The split of the integrand also leaves
 each O(e^-3u) but with its own constant.  Writing CJ, CP, Cb, Cf for the four
 constants of those expansions and CE = CJ + CP + Cb^2 (Cf+1), the coefficient
 of (5.3) is CE/3 times, not 1 times, sum_{j<=k}|h_j''|3^j.  Over the range
-s in (1, sOf(3)] that the split requires, CE <= 5.48910 (ce_taylor.py; the log prints 5.4890962927).
+s in (1, sOf(3)] that the split requires, CE <= 5.48910 (ce_taylor.py; the
+log prints 5.4890962927).
 
-(c) THE NEAR REGION.  The expansions in (b) hold only for u >= U; the odd
-development uses U = 3.  On 0 < u <= U the integrand is bounded directly,
+(c) THE NEAR REGION.  This one is not a gap in the argument but a cost of
+making it rigorous: the expansions in (b) are asymptotic, valid only for
+u >= U, and the original treats them as holding throughout.  This note uses
+U = 3 and bounds 0 < u <= U separately.  On 0 < u <= U the integrand is bounded directly,
 contributing CN <= 364 (cn_recursion.py) from the coefficient sum itself and
 NEARU <= 24.68 (nearu_bound.py) from the two main terms.
 
@@ -224,7 +231,7 @@ which is width rather than signal.
 
   * sum_{i<=16} |g_i| 3^i <= 8424        (1600 s-boxes, primes to 1e5)
   * sup_{|z|=4.5, s in [1,2]} |G_2| <= 1.97e6   (200 theta x 40 s boxes)
-  * S_0 <= 44.6                          s0_recursion.py + s0_cauchy.py
+  * S_0 <= 44.5987                       s0_recursion.py + s0_cauchy.py
   * S_1 <= 453.1                         s1_recursion.py
   * CN  <= 364                           cn_recursion.py  (recursion + Cauchy)
   * NEARU <= 24.68                       nearu_bound.py   (head + envelope)
@@ -270,7 +277,7 @@ but the margin is two values rather than four.
     beta        [0.1556300826, 0.1556326142]
     sum|g_i|3^i <= 8424  (i <= 16)            hcoeff_recursion.py, 1600 s-boxes
     sup|G_2|    <= 1.97e6 on |z|=4.5          mr_deriv_sweep.py
-    S_0         <= 44.6                       s0_recursion.py, s0_cauchy.py
+    S_0         <= 44.5987                    s0_recursion.py, s0_cauchy.py
     S_1         <= 453.1                      s1_recursion.py
     CN          <= 364                        cn_recursion.py
     NEARU       <= 24.68                      nearu_bound.py
