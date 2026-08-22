@@ -143,7 +143,7 @@ sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k} (b_j + 2 gamma h_j(1)) 2^j join R_k.
 Both are bounded by the same pole-cancellation device as (5.4)-(5.5), but at
 FIRST and SECOND order rather than third:
     S_0 := sum_i |a_i| 3^i,  a_i = [z^i] H(1,z)(1 - z/3),        S_0 <= 44.5987
-    S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 453.1
+    S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 453.0838
 whence |h_j(1)| <= S_0 3^-j and |b_j| <= (j+1) S_1 3^-j, and the two tails
 contribute S_0/2 and 9 S_1/128 to the constant of (5.1).  (s0_recursion.py,
 s0_cauchy.py, s1_recursion.py.)
@@ -295,7 +295,7 @@ but the margin is two values rather than four.
     sum|g_i|3^i <= 8424  (i <= 16)            hcoeff_recursion.py, 1600 s-boxes
     sup|G_2|    <= 1.97e6 on |z|=4.5          mr_deriv_sweep.py
     S_0         <= 44.5987                    s0_recursion.py, s0_cauchy.py
-    S_1         <= 453.1                      s1_recursion.py
+    S_1         <= 453.0838                   s1_recursion.py
     CN          <= 367.8435                   cn_certified.py
     NEARU       <= 24.6769                    nearu_certified.py
     CE          <= 5.48910                    ce_taylor.py
