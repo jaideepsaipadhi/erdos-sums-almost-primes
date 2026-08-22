@@ -31,7 +31,12 @@ primes = sieve(PSPLIT)
 one = arb(1); R = arb(RN) / arb(RD)
 pi = arb.pi()
 
-# theta grid: c = cos th ranges over [-1,1]; enclose each cell
+# theta grid: c = cos th ranges over [-1,1]; enclose each cell.
+# cos is monotone on [0,pi] and on [pi,2pi], so endpoint union encloses it
+# EXCEPT on a cell straddling pi, where the minimum -1 is interior; the test
+# below adds it.  (With NTH even, pi lands on a cell boundary and the test
+# never fires; it is needed for odd NTH.  Verified by fine sampling at
+# NTH = 399, 400, 401: no sample falls outside the enclosure.)
 best = None
 for t in range(NTH):
     lo = pi * arb(2 * t) / arb(NTH)
