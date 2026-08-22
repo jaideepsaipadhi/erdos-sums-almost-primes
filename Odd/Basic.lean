@@ -8150,6 +8150,13 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     exact hcomb
 
   -- bridge: the indicator tail equals the shifted tail
+  -- SUPERSEDED (kept because it is interleaved with live code): everything
+  -- from here to STEP 4 computes the two tails through binom_absorb /
+  -- geom_tail_bound_cx.  That route bounds |h_j(1)| and |b_j| by dom_j, which
+  -- carries the third-order S = 14414 and is far too lossy -- it gives a tail
+  -- coefficient of ~67000 against a budget of 4900.  The collection now takes
+  -- the tails from ht.tail_h and ht.tail_b instead (S_0 <= 44.6, S_1 <= 453.1,
+  -- first- and second-order poles), so none of this is used.
   have hbridge1 : (∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0))
       = ∑' d : ℕ, (hCoeff 1 (d + (k+1))).re := by
     have hstan := hsummre1.sum_add_tsum_nat_add (k+1)
