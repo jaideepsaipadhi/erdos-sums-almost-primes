@@ -130,6 +130,33 @@ is O(e^-3u), and int_0^inf u^m e^-3u/m! du = 3^-(m+1) gives, with m = k-j,
 
     |R_k| <= (1/3) 3^-k sum_{j<=k} |h_j''| 3^j + (lower order).            (5.3)
 
+The "(lower order)" is not negligible and is made explicit here; earlier drafts
+left it unquantified.  It is three separate things.
+
+(a) THE TWO COEFFICIENT TAILS.  The main terms of section 4 integrate to the
+PARTIAL sums over j <= k, not to 1/2 and beta 2^-k; the differences
+sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k} (b_j + 2 gamma h_j(1)) 2^j join R_k.
+Both are bounded by the same pole-cancellation device as (5.4)-(5.5), but at
+FIRST and SECOND order rather than third:
+    S_0 := sum_i |a_i| 3^i,  a_i = [z^i] H(1,z)(1 - z/3),        S_0 <= 44.6
+    S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 453.1
+whence |h_j(1)| <= S_0 3^-j and |b_j| <= (j+1) S_1 3^-j, and the two tails
+contribute S_0/2 and 9 S_1/128 to the constant of (5.1).  (s0_recursion.py,
+s0_cauchy.py, s1_recursion.py.)
+
+(b) THE JACOBIAN AND PRODUCT ERRORS.  (5.3) bounds only the Lagrange remainder
+R_j J.  The split of the integrand also leaves
+    h_j(1) (J - e^-u - 2 gamma e^-2u)   and   b_j (eps J - e^-2u),
+each O(e^-3u) but with its own constant.  Writing CJ, CP, Cb, Cf for the four
+constants of those expansions and CE = CJ + CP + Cb^2 (Cf+1), the coefficient
+of (5.3) is CE/3 times, not 1 times, sum_{j<=k}|h_j''|3^j.  Over the range
+s in (1, sOf(3)] that the split requires, CE <= 5.4891 (ce_taylor.py).
+
+(c) THE NEAR REGION.  The expansions in (b) hold only for u >= U; the odd
+development uses U = 3.  On 0 < u <= U the integrand is bounded directly,
+contributing CN <= 364 (cn_recursion.py) from the coefficient sum itself and
+NEARU <= 24.68 (nearu_bound.py) from the two main terms.
+
 ### 5.2 The coefficient sum
 
 Factor out the pole:
@@ -145,7 +172,12 @@ and summing over j <= k,
 
     sum_{j<=k} |h_j''| 3^j <= C(k+3, 3) * S,   S := sum_i |g_i| 3^i.       (5.5)
 
-Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give (5.1) with C = S/6.
+Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give the LAGRANGE-REMAINDER part
+of (5.1) with coefficient CE S/18 (the CE of 5.1(b); with CE = 3 this would be
+the S/6 of earlier drafts).  Adding 5.1(a) and 5.1(c),
+    C = CE S/18 + S_0/2 + 9 S_1/128 + CN + NEARU
+      = 4395.5 + 22.3 + 31.9 + 364.0 + 24.7 = 4838.4,
+and (5.1) holds with C = 4900.
 
 A bound |h_j''| <= C 3^-j would be exactly critical -- sums like
 sum_{j<=k} |h_j''| 3^j would then grow linearly in k rather than converge.  It
@@ -187,14 +219,25 @@ which is width rather than signal.
 
 ### 5.4 What is assumed
 
-(5.1) rests on two interval computations,
+(5.1) rests on the interval computations
 
   * sum_{i<=16} |g_i| 3^i <= 8424        (1600 s-boxes, primes to 1e5)
   * sup_{|z|=4.5, s in [1,2]} |G_2| <= 1.97e6   (200 theta x 40 s boxes)
+  * S_0 <= 44.6                          s0_recursion.py + s0_cauchy.py
+  * S_1 <= 453.1                         s1_recursion.py
+  * CN  <= 364                           cn_recursion.py  (recursion + Cauchy)
+  * NEARU <= 24.68                       nearu_bound.py   (head + envelope)
+  * CE  <= 5.4891                        ce_taylor.py     (Taylor model)
 
 and on 5.1-5.2, elementary given them.  No constant is fitted to the certified
-f_k^odd; the agreement with those values (the bound is 350-500x conservative
-at k = 20..40) is a check, not an input.
+f_k^odd; the agreement with those values is a check, not an input.
+
+CE is certified over the whole range s in (1, sOf(3)], not at a sample of
+points.  The four constants are ratios in which zeta's pole at s = 1 cancels,
+so evaluating them on boxes of s loses the cancellation and the enclosures
+diverge however narrow the boxes; expanding zeta as an arb power series about
+1 + E/2 makes the cancellation symbolic, and the resulting series -- whose
+coefficients decay -- evaluate tightly on the whole disc at once.
 
 ## 6. Assembly
 
@@ -222,8 +265,13 @@ overlap at 57..60, so the theorem holds for every k >= 1.  QED
     beta        [0.1556300826, 0.1556326142]
     sum|g_i|3^i <= 8424  (i <= 16)            hcoeff_recursion.py, 1600 s-boxes
     sup|G_2|    <= 1.97e6 on |z|=4.5          mr_deriv_sweep.py
-    C = S/6     2402.3                        (5.1)
-    K0^odd      57                            certified sweep reaches 60
+    S_0         <= 44.6                       s0_recursion.py, s0_cauchy.py
+    S_1         <= 453.1                      s1_recursion.py
+    CN          <= 364                        cn_recursion.py
+    NEARU       <= 24.68                      nearu_bound.py
+    CE          <= 5.4891                     ce_taylor.py
+    C           4900                          (5.1), see 5.2
+    K0^odd      59                            certified sweep reaches 60
 
 The certified values of f_k^odd for k = 1..60 are produced by
 odd/numerics/fodd_run.py at 1000-bit precision, which adapts the main
