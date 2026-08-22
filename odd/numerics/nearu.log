@@ -1,7 +1,6 @@
 U = 3.0,  S0 = 44.6,  S1 = 453.1
 HEAD  max_{k<=400} ratio = 24.6777  (at k = 7)
 
-TAIL k > KMAX: both sums decay like 3^-k against a (k+3)^3 3^-k budget,
-so the ratio is decreasing once past its peak; the head max bounds it.
+TAIL  k > 400: envelope ratio <= 11.255889  (below the head max)
 
 NEARU <= 24.6777

@@ -40,8 +40,19 @@ for k in range(1, KMAX + 1):
 
 print(f"U = {U},  S0 = {S0},  S1 = {S1}")
 print(f"HEAD  max_{{k<={KMAX}}} ratio = {float(worst):.4f}  (at k = {kbest})")
+# TAIL, k > KMAX, by an explicit envelope.  Since P(m,x) <= x^m/m!, the MAIN1
+# sum is at most S0 * sum_j 3^-j U^(k-j)/(k-j)! = S0 e^(3U) 3^-k, so its ratio
+# to the (k+3)^3 3^-k budget is at most S0 e^(3U)/(k+3)^3 -- DECREASING in k.
+# MAIN2 carries an extra 2^-(k-j+1) <= 1 and the same argument applies with
+# S1 (j+1) in place of S0, giving (S1 (k+1) + 2 g S0) e^(6U) 3^-k; both are
+# dominated by the head max well before KMAX.
+from mpmath import e as _e
+# MAIN2's 2^-(m+1) cancels half of (2U)^m, leaving e^(3U) not e^(6U):
+#   term <= c_j 3^-j U^m/(2 m!),  so the sum is <= (1/2) c_max e^(3U) 3^-k.
+envK = (S0 * _e ** (3*U)
+        + (S1 * (KMAX + 1) + 2*g*S0) * _e ** (3*U) / 2) / (mpf(KMAX) + 3) ** 3
 print()
-print("TAIL k > KMAX: both sums decay like 3^-k against a (k+3)^3 3^-k budget,")
-print("so the ratio is decreasing once past its peak; the head max bounds it.")
+print(f"TAIL  k > {KMAX}: envelope ratio <= {float(envK):.6f}"
+      f"  ({'below' if envK <= worst else 'ABOVE'} the head max)")
 print()
-print(f"NEARU <= {float(worst):.4f}")
+print(f"NEARU <= {float(max(worst, envK)):.4f}")
