@@ -266,6 +266,12 @@ LEAN LESSONS FROM THIS SESSION:
     shot, tight, no monotonicity assumed.  arb_series.zeta exists and is the
     right tool; reach for it whenever a bound involves cancelling singularities.
 
+  * A HEAD IS NOT A CONSTANT.  s0 had two scripts -- a recursion for the head
+    and a Cauchy bound for the tail -- and s1 had only the recursion, yet
+    PROOF.md cited its "HEAD sum_{i<=16}" output as S_1 itself.  The script was
+    not lying; it never got its companion.  The real S_1 is 490.17, not 453.08.
+    When a bound is assembled from two artifacts, check that both exist.
+
   * DEAD PROOF CODE INTERLEAVES.  The superseded tail route could not be
     excised at the end: its `have`s sit between live ones.  Remove abandoned
     branches when you abandon them, not later.
