@@ -114,7 +114,7 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   /-- The certified enclosure of S. -/
   Sodd_enclosure : |Sodd - 0.8593953| ≤ 3.3e-6
   /-- Cauchy bound: the sup of |Htilde| on |z| = 4.5, s in [1,2]. -/
-  MR_bound       : MR ≤ 4600
+  MR_bound       : MR ≤ 4900
   /-- The remainder bound that Cauchy's estimate yields. -/
   remainder      : ∀ k : ℕ, |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
                      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
@@ -128,12 +128,12 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   d_enc          : |dConst - 0.3786950| ≤ 5.3e-8
 /-- The arithmetic core of the odd assembly, with all rpow stripped out.
 
-A = f_k, B = f_{k+1}, P = 2^-k, T = MR (k+3)^3 3^-k, b = beta; T <= 0.045 P for k >= 59.  The two
+A = f_k, B = f_{k+1}, P = 2^-k, T = MR (k+3)^3 3^-k, b = beta; T <= 0.048 P for k >= 59.  The two
 enclosures give A >= bP - T and B <= bP/2 + 2T/9, so
-A - B >= bP/2 - T(1.3503) >= P(0.1556/2 - 0.045*1.3503) = 0.0170 P > 0. -/
+A - B >= bP/2 - T(1.3503) >= P(0.1556/2 - 0.048*1.3503) = 0.0130 P > 0. -/
 theorem odd_step (b P T A B : ℝ)
     (hb : (0.1556 : ℝ) ≤ b) (hP : 0 < P) (hT : 0 ≤ T)
-    (hTb : T ≤ (0.045 : ℝ) * P)
+    (hTb : T ≤ (0.048 : ℝ) * P)
     (hA : |A - b * P| ≤ T)
     (hB : |B - b * P / 2| ≤ T * (3503/10000)) :
     B < A := by
@@ -189,7 +189,7 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
       apply mul_nonneg (mul_nonneg hMR0 (by positivity))
       exact pow_nonneg (by norm_num) k
     -- T/P = MR (k+3)^3 (2/3)^k, antitone in k, so bounded by its value at 57
-    have hTb : T ≤ (0.045:ℝ) * P := by
+    have hTb : T ≤ (0.048:ℝ) * P := by
       rw [hTdef, hPdef]
       have hsplit : ((1:ℝ)/3) ^ k = ((2:ℝ)/3) ^ k * ((1:ℝ)/2) ^ k := by
         rw [← mul_pow]; norm_num
@@ -197,21 +197,21 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
       have hmono := polyGeom_antitone k hk57
       have hhalf : (0:ℝ) < ((1:ℝ)/2) ^ k := pow_pos (by norm_num) k
       have hgpos : (0:ℝ) ≤ ((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k := by positivity
-      have hnum60 : (4600:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59) ≤ (0.045:ℝ) := by
+      have hnum60 : (4900:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59) ≤ (0.048:ℝ) := by
         norm_num
       have hMRb := hnum.MR_bound
       have stepA : MR * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k)
-          ≤ (4600:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59) := by
+          ≤ (4900:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59) := by
         calc MR * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k)
-            ≤ (4600:ℝ) * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k) :=
+            ≤ (4900:ℝ) * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k) :=
               mul_le_mul_of_nonneg_right hMRb hgpos
-          _ ≤ (4600:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59) :=
+          _ ≤ (4900:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59) :=
               mul_le_mul_of_nonneg_left hmono (by norm_num)
       calc MR * (((k:ℝ) + 3) ^ 3) * (((2:ℝ)/3) ^ k * ((1:ℝ)/2) ^ k)
           = (MR * (((k:ℝ) + 3) ^ 3 * ((2:ℝ)/3) ^ k)) * ((1:ℝ)/2) ^ k := by ring
-        _ ≤ ((4600:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59)) * ((1:ℝ)/2) ^ k :=
+        _ ≤ ((4900:ℝ) * ((62:ℝ) ^ 3 * ((2:ℝ)/3) ^ 59)) * ((1:ℝ)/2) ^ k :=
               mul_le_mul_of_nonneg_right stepA (le_of_lt hhalf)
-        _ ≤ (0.045:ℝ) * ((1:ℝ)/2) ^ k :=
+        _ ≤ (0.048:ℝ) * ((1:ℝ)/2) ^ k :=
               mul_le_mul_of_nonneg_right hnum60 (le_of_lt hhalf)
     have hb : (0.1556 : ℝ) ≤ betaOdd := by
       unfold betaOdd
