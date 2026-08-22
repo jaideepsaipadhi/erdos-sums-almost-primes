@@ -935,7 +935,7 @@ follows.
 constant & bound & method \\
 \midrule
 $S_0$   & $\le 44.5987$ & first-order pole; recursion (head), Cauchy (tail) \\
-$S_1$   & $\le 453.1$  & second-order pole, recursion \\
+$S_1$   & $\le 453.0838$ & second-order pole, recursion \\
 $C_N$   & $\le 367.8435$ & Moebius prime zeta, recursion $+$ Cauchy tail \\
 $N_U$   & $\le 24.6769$ & exact head to $k = 400$, explicit envelope beyond \\
 $C_E$   & $\le 5.48910$ & Taylor model in $\varepsilon = s-1$ \\
@@ -943,13 +943,20 @@ $C_E$   & $\le 5.48910$ & Taylor model in $\varepsilon = s-1$ \\
 \end{tabular}
 \end{center}
 \noindent
-$C_E$ is certified over the whole range $s \in (1,\,s(3)]$ rather than at a
-sample of points. The four constants making it up are ratios in which the pole
+All five are \texttt{arb} enclosures end to end, with no floating-point step in
+the chain, and two of them needed a change of method to get there. $C_E$ is
+certified over the whole range $s \in (1,\,s(3)]$ rather than at a sample of
+points. The four constants making it up are ratios in which the pole
 of $\zeta$ at $s = 1$ cancels, so interval evaluation on boxes of $s$ loses the
 cancellation and diverges however narrow the boxes are taken; expanding $\zeta$
 as a power series about $1 + E/2$ makes the cancellation symbolic, and the
 resulting series --- whose coefficients decay --- evaluates tightly on the
-whole disc in one step. The scripts are \texttt{s0\_recursion.py},
+whole disc in one step. $C_N$ requires the prime sums $\sum_{p\ge3}p^{-t}$ for $t = s,2s,\dots,200s$;
+enumerating primes to a cutoff will not do, since at $s \approx 1.05$ the
+convergence is slow enough that a cutoff of $10^8$ with Rosser--Schoenfeld
+still leaves a factor of two, which compounds through the recurrence. The
+M\"obius series $P(t) = \sum_n \mu(n)n^{-1}\log\zeta(nt)$ avoids primes
+entirely. The scripts are \texttt{s0\_recursion.py},
 \texttt{s1\_recursion.py}, \texttt{cn\_certified.py}, \texttt{nearu\_certified.py}
 and \texttt{ce\_taylor.py}.
 

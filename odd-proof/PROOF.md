@@ -232,7 +232,7 @@ which is width rather than signal.
   * sum_{i<=16} |g_i| 3^i <= 8424        (1600 s-boxes, primes to 1e5)
   * sup_{|z|=4.5, s in [1,2]} |G_2| <= 1.97e6   (200 theta x 40 s boxes)
   * S_0 <= 44.5987                       s0_recursion.py + s0_cauchy.py
-  * S_1 <= 453.1                         s1_recursion.py
+  * S_1 <= 453.0838                      s1_recursion.py
   * CN  <= 367.8435                      cn_certified.py  (recursion + Cauchy)
   * NEARU <= 24.6769                     nearu_certified.py (head + envelope)
   * CE  <= 5.48910                       ce_taylor.py  (log: 5.4890962927)
@@ -240,12 +240,29 @@ which is width rather than signal.
 and on 5.1-5.2, elementary given them.  No constant is fitted to the certified
 f_k^odd; the agreement with those values is a check, not an input.
 
+All five of the new constants are arb enclosures end to end, with no
+floating-point or mpmath step anywhere in the chain.  Two of them needed a
+change of method to get there, and both failures are worth recording because
+the naive route produces plausible numbers rather than obvious errors.
+
 CE is certified over the whole range s in (1, sOf(3)], not at a sample of
-points.  The four constants are ratios in which zeta's pole at s = 1 cancels,
-so evaluating them on boxes of s loses the cancellation and the enclosures
-diverge however narrow the boxes; expanding zeta as an arb power series about
-1 + E/2 makes the cancellation symbolic, and the resulting series -- whose
-coefficients decay -- evaluate tightly on the whole disc at once.
+points.  The four constants behind it are ratios in which zeta's pole at s = 1
+cancels, so evaluating them on boxes of s loses the cancellation and the
+enclosures diverge however narrow the boxes are taken -- five successive
+approaches failed this way.  Expanding zeta as an arb power series about
+1 + E/2 makes the cancellation symbolic, and the resulting series, whose
+coefficients decay by a factor of ten per order, evaluate tightly on the whole
+disc at once.
+
+CN needs the prime sums P(t) = sum_{p>=3} p^-t for t = s, 2s, ..., 200s.
+Enumerating primes to a cutoff and bounding the remainder does not work here:
+at s ~ 1.05 the series converges so slowly that even a cutoff of 1e8 with the
+Rosser-Schoenfeld bound leaves a factor of two, and compounding that through
+200 recurrence steps inflated CN from 368 to 3820 -- enough to push K0 past
+the certified sweep.  The Moebius series P(t) = sum_n mu(n)/n log zeta(nt)
+avoids primes altogether and is exact to full precision.  The recurrence also
+loses about a digit every 2.3 steps to cancellation, so it is run at 600 bits;
+1200 bits gives the same head to every printed digit.
 
 ## 6. Assembly
 
