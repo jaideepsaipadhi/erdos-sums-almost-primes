@@ -30,8 +30,11 @@ ctx.prec = PREC
 one, R = arb(1), arb('4.5')
 M0 = arb('348.41120457649094528661630450571098660276359846610104712098')  # s0_cauchy.log
 
-# p = 2: f_2(z) = z log2 (z-1)/((2-1)(2-z)); |2-z| >= R-2 on |z|=R
-t2 = R * arb(2).log() * (R + 1) / (R - 2)
+# p = 2: H has NO (1-z/2)^-1 factor -- the Euler product runs over p >= 3 --
+# so the p=2 contribution to d_s log H is just z d/ds log(1-2^-s), which at
+# s = 1 is z log 2.  (An earlier version bounded a 1/(2-z) that does not exist,
+# giving 6.86 in place of 3.12; safe but 2.2x loose.)
+t2 = R * arb(2).log()
 # p = 3: pole cancelled by the explicit factor, leaving |z log3 / 3|
 t3 = R * arb(3).log() / 3
 # p >= 5

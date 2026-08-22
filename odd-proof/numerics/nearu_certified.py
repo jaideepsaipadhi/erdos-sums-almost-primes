@@ -26,7 +26,7 @@ ctx.prec = PREC
 
 U  = arb(3)
 S0 = arb('44.5987')          # s0_cauchy.log
-S1 = arb('490.1654')        # s1_cauchy.log (head + Cauchy tail)
+S1 = arb('486.1946')        # s1_cauchy.log (head + Cauchy tail)
 g  = arb.const_euler()
 one = arb(1)
 
