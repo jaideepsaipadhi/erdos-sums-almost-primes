@@ -54,5 +54,15 @@ for t in range(NTH):
     v = tot.exp()
     best = v if best is None else best.union(v)
 
+M0 = best.upper()
 print("R =", R)
-print("M0 <=", best.upper())
+print("M0 <=", M0)
+
+# Combine with the head from s0_recursion.py so S_0 itself appears in a log.
+HEAD = arb('43.537789114875634')      # s0_head.log: sum_{i<=16} |a_i| 3^i
+NMAX = 16
+q = arb(3) / R
+tail = M0 * q ** (NMAX + 1) / (one - q)
+print("HEAD (i <= %d, from s0_head.log) <= %s" % (NMAX, HEAD))
+print("TAIL (i >  %d, Cauchy at R)      <= %s" % (NMAX, tail))
+print("S_0 = HEAD + TAIL                <= %s" % (HEAD + tail).upper())
