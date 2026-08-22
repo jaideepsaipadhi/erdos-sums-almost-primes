@@ -419,16 +419,16 @@ $C_E S/18 = 4395.5$.
 over $j \le k$, so $\sum_{j>k}h_j(1)$ and $2^{-(k+1)}\sum_{j>k}(b_j+2\gamma
 h_j(1))2^j$ join $R_k$. The same pole-cancellation device at first and second
 order gives $S_0 = \sum_i|a_i|3^i \le 44.5987$ with $a_i = [z^i]H(1,z)(1-z/3)$ and
-$S_1 \le 453.0838$ with $(1-z/3)^2$ against $\partial_sH$, contributing $S_0/2 =
-22.3$ and $9S_1/128 = 31.9$.
+$S_1 \le 490.1653$ with $(1-z/3)^2$ against $\partial_sH$, contributing $S_0/2 =
+22.3$ and $9S_1/128 = 34.5$.
 
 \emph{The near region.} The expansions used above are asymptotic, valid for
 $u \ge U$; the splitting therefore needs the complementary range handled
 separately, which the estimate in its unsplit form does not. With $U = 3$ the
 range $0 < u \le U$ contributes $C_N \le 367.8435$ from the coefficient sum and
-$N_U \le 24.6769$ from the two main terms.
+$N_U \le 26.2665$ from the two main terms.
 
-Together $C_E S/18 + S_0/2 + 9S_1/128 + C_N + N_U = 4842.2$, and we state
+Together $C_E S/18 + S_0/2 + 9S_1/128 + C_N + N_U = 4846.4$, and we state
 \eqref{eq:odd-calibrated} with $C = 4900$. All five constants are certified
 interval computations; see \S\ref{app:numerics}.
 
@@ -935,9 +935,9 @@ follows.
 constant & bound & method \\
 \midrule
 $S_0$   & $\le 44.5987$ & first-order pole; recursion (head), Cauchy (tail) \\
-$S_1$   & $\le 453.0838$ & second-order pole, recursion \\
+$S_1$   & $\le 490.1653$ & second-order pole; recursion $+$ Cauchy tail \\
 $C_N$   & $\le 367.8435$ & Moebius prime zeta, recursion $+$ Cauchy tail \\
-$N_U$   & $\le 24.6769$ & exact head to $k = 400$, explicit envelope beyond \\
+$N_U$   & $\le 26.2665$ & exact head to $k = 400$, explicit envelope beyond \\
 $C_E$   & $\le 5.48910$ & Taylor model in $\varepsilon = s-1$ \\
 \bottomrule
 \end{tabular}
@@ -957,7 +957,7 @@ convergence is slow enough that a cutoff of $10^8$ with Rosser--Schoenfeld
 still leaves a factor of two, which compounds through the recurrence. The
 M\"obius series $P(t) = \sum_n \mu(n)n^{-1}\log\zeta(nt)$ avoids primes
 entirely. The scripts are \texttt{s0\_recursion.py},
-\texttt{s1\_recursion.py}, \texttt{cn\_certified.py}, \texttt{nearu\_certified.py}
+\texttt{s1\_recursion.py}, \texttt{s1\_cauchy.py}, \texttt{cn\_certified.py}, \texttt{nearu\_certified.py}
 and \texttt{ce\_taylor.py}.
 
 The two sweeps behind $\alpha_+$ and $\Gamma$ are run at pinned settings:
