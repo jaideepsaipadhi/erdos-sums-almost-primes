@@ -1,6 +1,6 @@
-# odd/numerics
+# odd-proof/numerics
 
-Certified inputs for `odd/PROOF.md`.  Each script prints an interval or an
+Certified inputs for `odd-proof/PROOF.md`.  Each script prints an interval or an
 explicit upper bound; the committed `.log` beside it is that run.
 
 ## Constants of (5.1)

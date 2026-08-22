@@ -104,8 +104,8 @@ vacuous until closed:
 
 where fOdd k restricts the sum to ODD n >= 3.  Lichtman's conjecture is that
 removing the prime 2 -- which is what drives the increase in the main theorem --
-restores the decrease.  Zero sorries; the same three axioms.  See odd/PROOF.md
-for the argument and odd/numerics/README.md for the certified inputs.
+restores the decrease.  Zero sorries; the same three axioms.  See odd-proof/PROOF.md
+for the argument and odd-proof/numerics/README.md for the certified inputs.
 
 The remainder bound |R_k| <= C (k+3)^3 3^-k holds with C = 4900, giving the
 analytic threshold K0 = 59.  C is derived rather than fitted: it is the sum of
@@ -119,9 +119,9 @@ interval computation.
     Banksmartin/EulerGamma.lean  Euler's integral identity, built from scratch
     Odd/Basic.lean               the odd companion (~8.9k lines)
     numerics/                    certified computations for the main theorem
-    odd/PROOF.md                 the odd argument, sections 1-8
-    odd/numerics/                certified computations for the odd theorem
-    odd/axcheck.lean             axiom audit: lake env lean odd/axcheck.lean
+    odd-proof/PROOF.md                 the odd argument, sections 1-8
+    odd-proof/numerics/                certified computations for the odd theorem
+    odd-proof/axcheck.lean             axiom audit: lake env lean odd-proof/axcheck.lean
     paper/proof.tex              the joint write-up
     HANDOFF.md                   design decisions and Lean-specific lessons
 

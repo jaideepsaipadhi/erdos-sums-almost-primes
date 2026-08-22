@@ -13,7 +13,7 @@ decrease.  This directory is the proof that it does.
 
     PROOF.md          the argument, sections 1-8.  Start here.
     numerics/         the certified inputs; see numerics/README.md
-    axcheck.lean      axiom audit -- `lake env lean odd/axcheck.lean`
+    axcheck.lean      axiom audit -- `lake env lean odd-proof/axcheck.lean`
     NOTES.md          status notes
     superseded/       earlier approaches, kept for provenance
 

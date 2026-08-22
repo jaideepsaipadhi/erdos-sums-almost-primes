@@ -187,7 +187,7 @@ is the pole cancellation in (5.4) that makes S finite.
 
 S is split at i = 16.
 
-HEAD, i <= 16, by direct interval recursion (odd/numerics/hcoeff_recursion.py).
+HEAD, i <= 16, by direct interval recursion (odd-proof/numerics/hcoeff_recursion.py).
 Writing
 
     log H(s,z) = z L_1(s) + sum_{j>=2} z^j L_j(s),
@@ -203,7 +203,7 @@ interval, [1,2] partitioned into 1600 boxes.  Result:
 
 TAIL, i > 16, by Cauchy, which is cheap here because the terms are small.  By
 (5.4) G_2 is analytic in |z| < 5, so on |z| = R = 4.5, |g_i| <= M R^-i with
-M = sup_{|z|=R, s in [1,2]} |G_2| <= 1.97e6 (odd/numerics/mr_deriv_sweep.py),
+M = sup_{|z|=R, s in [1,2]} |G_2| <= 1.97e6 (odd-proof/numerics/mr_deriv_sweep.py),
 giving
 
     sum_{i>16} |g_i| 3^i <= M (3/R)^17/(1 - 3/R) <= 5990.
@@ -255,7 +255,7 @@ so it suffices that |R_k| + |R_{k+1}| < beta 2^-(k+1), for which
 T/P = C(k+3)^3 (2/3)^k is antitone in k (the ratio is ((k+4)/(k+3))^3 (2/3),
 below 1 for k >= 4), with value 0.0477 at k = 57, so the inequality holds for
 all k >= 57.  For k = 1..56 the differences are positive by direct certified
-computation, which now reaches k = 60 (odd/numerics/fodd60.log).  The ranges
+computation, which now reaches k = 60 (odd-proof/numerics/fodd60.log).  The ranges
 overlap at 57..60, so the theorem holds for every k >= 1.  QED
 
 ## 7. The certified constants
@@ -274,7 +274,7 @@ overlap at 57..60, so the theorem holds for every k >= 1.  QED
     K0^odd      59                            certified sweep reaches 60
 
 The certified values of f_k^odd for k = 1..60 are produced by
-odd/numerics/fodd_run.py at 1000-bit precision, which adapts the main
+odd-proof/numerics/fodd_run.py at 1000-bit precision, which adapts the main
 development's panel machinery by replacing the prime zeta P(t) with P(t)-2^-t
 and the large-s tail bound P(s) <= 2.78*2^-s with P_odd(s) <= 1.91*3^-s.
 

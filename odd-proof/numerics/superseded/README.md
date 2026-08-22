@@ -1,4 +1,4 @@
-Earlier attempts, kept for provenance.  None is an input to `odd/PROOF.md`.
+Earlier attempts, kept for provenance.  None is an input to `odd-proof/PROOF.md`.
 
   fodd_certified.py, fodd_head.py, fodd_series.py
       earlier routes to the certified f_k^odd; `fodd_run.py` supersedes them.

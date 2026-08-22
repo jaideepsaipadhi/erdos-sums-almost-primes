@@ -13,7 +13,7 @@ G2C, dConst and rhoConst there ARE the odd Euler product objects, and DBound,
 deltaConv_le, deltaM_abs_le, A2m_le, crit_pos_iff and theorem_7_1 are stated
 generically enough to apply unchanged.
 
-THE PROOF (odd/PROOF.md, derived and verified 2026-08-01):
+THE PROOF (odd-proof/PROOF.md, derived and verified 2026-08-01):
 
   f_k^odd = 1/2 + beta 2^-k + R_k,   beta = d (log 2 - S + gamma) = 0.15563
 
@@ -27,7 +27,7 @@ problem the corresponding function is analytic only in |z| < 2^s and z = 2 is
 ON the boundary -- that is what produces the k^2 competing with 2^-k, hence
 the turnaround at k = 6 and all of sections 4-7 of the main development.
 
-Numerics in odd/README.md: f_k^odd certified for k = 1..20, strictly
+Numerics in odd-proof/README.md: f_k^odd certified for k = 1..20, strictly
 decreasing, tending to 1/2 from above.
 -/
 
@@ -38,7 +38,7 @@ noncomputable section
 def fOdd (k : ℕ) : ℝ :=
   ∑' n : {n : ℕ // 3 ≤ n ∧ ¬ (2 ∣ n) ∧ bigOmega n = k}, 1 / ((n : ℝ) * Real.log n)
 
--- The limit f_k^odd -> 1/2 is derived in odd/PROOF.md section 3 (it is
+-- The limit f_k^odd -> 1/2 is derived in odd-proof/PROOF.md section 3 (it is
 -- H(1,1) = 1 - 2^-1, the omitted Euler factor at z = s = 1) and confirmed
 -- numerically to k = 20.  It is not formalized here because the decreasing
 -- theorem does not use it.
@@ -107,7 +107,7 @@ noncomputable def betaOdd : ℝ :=
 /-- The certified inputs the odd theorem assumes.
 
 As in the main development these are Arb ball computations, not formalized
-results.  `Sodd_enclosure` and `MR_bound` come from odd/numerics/, `d` is
+results.  `Sodd_enclosure` and `MR_bound` come from odd-proof/numerics/, `d` is
 already certified in Banksmartin.Basic, and `sweep_low` is the certified
 sweep over the range below the analytic threshold. -/
 structure OddNumericalFacts (MR : ℝ) : Prop where
@@ -173,7 +173,7 @@ theorem polyGeom_antitone (k : ℕ) (hk : 59 ≤ k) :
 /-- The odd theorem, conditional on the certified inputs.
 
 For k >= 12 the leading term beta 2^-k dominates the Cauchy-bounded remainder;
-below that the certified sweep covers it.  See odd/PROOF.md section 6. -/
+below that the certified sweep covers it.  See odd-proof/PROOF.md section 6. -/
 theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
     (hnum : OddNumericalFacts MR) :
     ∀ k : ℕ, 1 ≤ k → fOdd (k + 1) < fOdd k := by
@@ -258,7 +258,7 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
 /-- THE ODD THEOREM, conditional on the certified inputs -- exactly as
 `erdos_sums_increase_from_six` is conditional on `NumericalFacts`.
 
-`OddNumericalFacts` assumes the analytic content of odd/PROOF.md sections 2-5:
+`OddNumericalFacts` assumes the analytic content of odd-proof/PROOF.md sections 2-5:
 the expansion f_k^odd = 1/2 + beta 2^-k + R_k and the Cauchy bound
 |R_k| <= MR (39/100)^k.  What is proved here is section 6, the assembly. -/
 theorem fOdd_decreasing (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts MR) :
@@ -273,7 +273,7 @@ end
 
 so that prod_{p>=3}(1 - z p^-s)^-1 = zeta(s)^z H(s,z).  Analytic in |z| < 3^s;
 this is the function whose values at z = 1 and z = 2 give the limit 1/2 and
-the leading coefficient.  See odd/PROOF.md section 2. -/
+the leading coefficient.  See odd-proof/PROOF.md section 2. -/
 noncomputable def Hodd (s : ℝ) (z : ℂ) : ℂ :=
   (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *
     ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
@@ -304,7 +304,7 @@ theorem Hodd_at_one (s : ℝ) (hs : 1 ≤ s) :
   simp [Complex.cpow_one]
 
 /-- The limit constant: H(1,1) = 1 - 1/2 = 1/2.  This is where the odd sums'
-limit comes from -- the omitted Euler factor at z = s = 1.  See odd/PROOF.md
+limit comes from -- the omitted Euler factor at z = s = 1.  See odd-proof/PROOF.md
 section 3. -/
 theorem Hodd_one_one : Hodd 1 1 = (1/2 : ℂ) := by
   rw [Hodd_at_one 1 le_rfl]
@@ -331,7 +331,7 @@ theorem Hodd_factor_at_two (p : {p : ℕ // p.Prime ∧ 3 ≤ p}) :
 /-- H(1,2) = d, the constant from the main development.
 
 (1 - 1/2)^2 = 1/4 supplies dConst's prefactor, and the p-th factor matches
-term for term by Hodd_factor_at_two.  See odd/PROOF.md section 4. -/
+term for term by Hodd_factor_at_two.  See odd-proof/PROOF.md section 4. -/
 theorem Hodd_one_two : Hodd 1 2 = ((dConst : ℝ) : ℂ) := by
   unfold Hodd dConst
   rw [dConst_prod_eq_subtype]
@@ -803,7 +803,7 @@ theorem HoddTail_differentiableOn_seven (s : ℝ) (hs : 1 ≤ s) :
 /-- Htilde(s,z) = H(s,z)(1 - z 3^-s): the p = 3 pole factored out, leaving a
 function analytic in |z| < 5^s.  Cauchy's estimate on |z| = R < 5 then bounds
 the Taylor coefficients by M_R R^-k, which is the remainder bound of
-odd/PROOF.md section 5. -/
+odd-proof/PROOF.md section 5. -/
 noncomputable def HoddTilde (s : ℝ) (z : ℂ) : ℂ :=
   Hodd s z * (1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ))
 
@@ -819,12 +819,12 @@ theorem HoddTilde_one_one : HoddTilde 1 1 = (1/3 : ℂ) := by
   push_cast
   norm_num
 
-/-- Cauchy's coefficient estimate, in the form odd/PROOF.md section 5 uses:
+/-- Cauchy's coefficient estimate, in the form odd-proof/PROOF.md section 5 uses:
 if f is analytic on the closed ball of radius R and bounded by C on the
 sphere, its Taylor coefficients at 0 satisfy |a_k| <= C / R^k.
 
 This is the shape of the remainder bound; the value of C for Htilde is the
-certified interval computation (odd/numerics/mr_certified.py) and stays an
+certified interval computation (odd-proof/numerics/mr_certified.py) and stays an
 input, exactly as the contour sups do in the main development. -/
 theorem cauchy_coeff_bound (f : ℂ → ℂ) (R C : ℝ) (hR : 0 < R)
     (hf : DiffContOnCl ℂ f (Metric.ball 0 R))
@@ -986,7 +986,7 @@ Maps Ioi 0 onto Ioo 1 2 with ds = -e^(-u) du, so for integrable g
 
     int_{Ioo 1 2} g(s) ds = int_{Ioi 0} g(1 + e^(-u)) e^(-u) du.
 
-This is the change of variables odd/PROOF.md section 2 performs; the far piece
+This is the change of variables odd-proof/PROOF.md section 2 performs; the far piece
 s >= 2 is handled by the tail bound P_odd(s) <= 1.91 * 3^-s instead. -/
 theorem substitution_near_pole (g : ℝ → ℝ)
     (hg : MeasureTheory.IntegrableOn g (Set.Ioo 1 2) MeasureTheory.volume)
@@ -2606,7 +2606,7 @@ theorem eps_zeta_uniform :
 
 Mirrors `NumericalFacts.beta` in the main development, where the sup of
 |d_s g_i(s)| over s in (1,2), uniform in i, is a certified input rather than a
-derived bound.  Supplied here by odd/numerics/mr_certified.py, whose interval
+derived bound.  Supplied here by odd-proof/numerics/mr_certified.py, whose interval
 sweep ranges over s in [1,2] as well as the z-circle. -/
 structure OddCoeffFacts (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ) : Prop where
   nonneg : ∀ j : ℕ, 0 ≤ betaFam j
@@ -6020,7 +6020,7 @@ theorem coeffSum_bound (a : ℕ → ℝ) (k : ℕ) (S : ℝ)
 
 Each is stated so the interface is fixed; the proofs are the work that
 remains.  The certified input is stated about betaFam, which is what
-odd/numerics/hcoeff_recursion.py computes (sup over s-boxes of the
+odd-proof/numerics/hcoeff_recursion.py computes (sup over s-boxes of the
 convolution, then summed against 3^i). -/
 
 /-- The certified coefficient sum, PROOF.md (5.5) with a = betaFam. -/
@@ -6035,7 +6035,7 @@ theorem betaFam_sum_bound (betaFam : ℕ → ℝ) (S : ℝ)
   coeffSum_bound betaFam k S (hcert k)
 
 /-- The two tail sums of PROOF.md 5.1's unquantified "(lower order)", now
-certified: S0 <= 44.6 (odd/numerics/s0_recursion.py, first-order pole) and
+certified: S0 <= 44.6 (odd-proof/numerics/s0_recursion.py, first-order pole) and
 S1 <= 453.1 (s1_recursion.py, second-order pole). -/
 structure OddTailFacts (bHatOdd : ℕ → ℂ) (S0 S1 : ℝ) : Prop where
   S0_nonneg : 0 ≤ S0
@@ -6049,7 +6049,7 @@ structure OddTailFacts (bHatOdd : ℕ → ℂ) (S0 S1 : ℝ) : Prop where
 
 /-- The certified dominating sequence.  All three of |h_j(1)|, |b_j| and
 betaFam j are bounded by dom j, and CoeffSumCertified dom S holds.  These are
-exactly the r = 0, 1, 2 columns that odd/numerics/hcoeff_recursion.py prints,
+exactly the r = 0, 1, 2 columns that odd-proof/numerics/hcoeff_recursion.py prints,
 so the Lean interface and the numerics agree by construction.
 
 A single sequence is needed because the four error pieces of the split draw on

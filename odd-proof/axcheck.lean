@@ -1,4 +1,4 @@
--- Axiom audit for the odd development.  Run:  lake env lean odd/axcheck.lean
+-- Axiom audit for the odd development.  Run:  lake env lean odd-proof/axcheck.lean
 -- Every line must report exactly [propext, Classical.choice, Quot.sound].
 import Odd.Basic
 #print axioms fOdd_decreasing

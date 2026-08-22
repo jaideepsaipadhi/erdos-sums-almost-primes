@@ -214,7 +214,7 @@ VACUITIES FOUND AND CLOSED (each invisible on paper):
 
 fOdd_decreasing : forall k, 1 <= k -> fOdd (k+1) < fOdd k
 Zero sorries.  Axioms: propext, Classical.choice, Quot.sound only.
-Audit: lake env lean odd/axcheck.lean -- 14 theorems, all clean.
+Audit: lake env lean odd-proof/axcheck.lean -- 14 theorems, all clean.
 
 WHAT THE FORMALIZATION FOUND.  PROOF.md section 5.1 carried an unquantified
 "(lower order)" in the remainder bound.  Making it explicit turned up three
