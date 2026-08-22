@@ -51,6 +51,11 @@ def panel_gl_error_odd(a, b, kmax):
     return out
 
 def tail_large_s_odd(k):
+    # S0 = 1 + exp(-ULO) with ULO = -5.10, so S0 = 166.0 -- genuinely large s,
+    # NOT s near 1.  The constant C_ODD = 1.91 in P_odd(s) <= C_ODD 3^-s holds
+    # comfortably there (the ratio P_odd(s)/3^-s falls to 1.0000 by s = 20);
+    # it is FALSE for s < 2, where the ratio reaches 7.2 at s = 1.05, but that
+    # range is covered by the panel quadrature, not by this tail.
     S0 = 1 + arb(-C.ULO).exp()
     e = C_ODD ** k * arb(3) ** (-k * S0) / (k * arb(3).log())
     return arb(0).union(e.union(-e))
