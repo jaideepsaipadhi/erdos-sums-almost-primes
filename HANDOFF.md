@@ -230,10 +230,10 @@ things it was hiding, and two of them are not lower order:
     one: besides the Lagrange remainder R_j J, also h_j(1)(J - e^-u - 2 gamma
     e^-2u) and b_j(eps J - e^-2u).  The combined constant is CE <= 5.48910 where
     the old bound implicitly used 3.  This is the dominant correction: it takes
-    C from 2402.3 to 4838, and K0 from 57 to 59.
+    C from 2402.3 to 4846, and K0 from 57 to 59.
 
   * the near region u <= U.  The expansions hold only for u >= U = 3; below
-    that the integrand is bounded directly (CN <= 367.8435, NEARU <= 24.6769).
+    that the integrand is bounded directly (CN <= 367.8435, NEARU <= 26.2665).
 
 The certified sweep reaches k = 60, so the ranges still overlap at 59,60 and
 the theorem stands -- but with a two-value margin rather than four.

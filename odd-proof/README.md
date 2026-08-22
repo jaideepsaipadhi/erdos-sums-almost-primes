@@ -40,7 +40,7 @@ k >= 59, the certified sweep covering the rest.
 C is derived, not fitted.  It is
 
     CE*S/18  +  S_0/2  +  9*S_1/128  +  CN  +  NEARU
-    = 4395.5 +   22.3  +     31.9    + 364.0 + 24.7  =  4838.4,
+    = 4395.5 +   22.3  +     34.5    + 367.8 + 26.3  =  4846.4,
 
 the Lagrange remainder, the two coefficient tails, and the near region.  Every
 constant is a certified interval computation with a script and a log in
