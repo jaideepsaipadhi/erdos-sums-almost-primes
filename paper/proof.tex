@@ -397,7 +397,12 @@ $G_2 = \partial_s^2 H\,(1-z/3)^3$, gives
 \begin{equation}\label{eq:odd-calibrated}
   |R_k| \;\le\; C\,(k+3)^3 3^{-k}, \qquad C = 4900 .
 \end{equation}
-This is derived, not calibrated. Three contributions make up $C$.
+This is derived, not calibrated. Three contributions make up $C$, and they are
+of very different sizes: the first multiplies the leading term by $C_E/3 =
+1.83$ and is what sets the threshold; the second is smaller than the main term
+by five to eight orders of magnitude over the range that matters; the third is
+a cost of the splitting performed here rather than a feature of the underlying
+estimate.
 
 \emph{The Lagrange remainder.} Bounding $|h_j(s)-h_j(1)-(s-1)b_j|$ by
 $\tfrac12\sup|h_j''|(s-1)^2$ and integrating $\int_0^\infty u^m e^{-3u}/m!\,du
@@ -417,8 +422,10 @@ order gives $S_0 = \sum_i|a_i|3^i \le 44.5987$ with $a_i = [z^i]H(1,z)(1-z/3)$ a
 $S_1 \le 453.1$ with $(1-z/3)^2$ against $\partial_sH$, contributing $S_0/2 =
 22.3$ and $9S_1/128 = 31.9$.
 
-\emph{The near region.} The expansions above hold for $u \ge U$; with $U = 3$
-the range $0 < u \le U$ contributes $C_N \le 364$ from the coefficient sum and
+\emph{The near region.} The expansions used above are asymptotic, valid for
+$u \ge U$; the splitting therefore needs the complementary range handled
+separately, which the estimate in its unsplit form does not. With $U = 3$ the
+range $0 < u \le U$ contributes $C_N \le 364$ from the coefficient sum and
 $N_U \le 24.7$ from the two main terms.
 
 Together $C_E S/18 + S_0/2 + 9S_1/128 + C_N + N_U = 4838.4$, and we state
