@@ -31,6 +31,15 @@ Then with D_r = sum_j L_j^(r) z^j,
     d_s   H = H D_1          -> [z^i] = sum_m h_m (D_1)_{i-m}
     d_s^2 H = H (D_1^2 + D_2)-> [z^i] = sum_m h_m (D_1^2 + D_2)_{i-m}
 
+WHY THE s-SWEEP IS BENIGN.  PROOF.md (5.4) writes G_2(s,z) = d_s^2 H (1-z3^-s)^3
+but then takes g_j = [z^j] G_2(1,z), at s = 1, where the factor is the constant
+(1-z/3)^3 this script applies.  Sweeping s in [1,2] with that CONSTANT factor
+does not cancel the pole at z = 3^s for s > 1, so the swept quantity is not
+G_2(s,.) away from s = 1 -- but the sup is attained in the first box at every
+NS tested (40, 160, 640, 1600, 3200), i.e. at s = 1, which is exactly what
+(5.5) needs.  The sweep is a check that nothing larger occurs nearby, not a
+different bound.
+
 CONVERGENCE IN NS.  The sup is always attained in the first s-box, adjacent to
 s = 1 where d_s^2 H is most singular, so it is sensitive to box width:
 
