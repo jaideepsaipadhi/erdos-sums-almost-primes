@@ -18,3 +18,7 @@ Earlier attempts, kept for provenance.  None is an input to `odd-proof/PROOF.md`
   fodd30.log, fodd40.log, fodd72.log
       partial and abandoned runs of fodd_run.py.  fodd60.log is the one section
       6 cites: k = 1..60 at 1000 bits, strictly decreasing on [2,60].
+
+  fodd30.log, fodd40.log, fodd72.log
+      partial and abandoned runs of fodd_run.py.  fodd60.log is the one
+      section 6 cites: k = 1..60 at 1000 bits, strictly decreasing on [2,60].

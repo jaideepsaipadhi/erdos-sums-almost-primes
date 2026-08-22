@@ -92,9 +92,9 @@ Write
 
 for the remainder after the two main terms of (4.1).  This section proves
 
-    |R_k| <= C (k+3)^3 3^-k,   C = 2402.3,                                (5.1)
+    |R_k| <= C (k+3)^3 3^-k,   C = 4900,                                (5.1)
 
-and hence, with section 6, the threshold K0^odd = 57.
+and hence, with section 6, the threshold K0^odd = 59.
 
 The rate is 3^-k, not the 4.5^-k of a naive Cauchy estimate: the pole of
 H(s,.) at z = 3^s sets it, and no contour argument does better.  The factor
@@ -208,7 +208,8 @@ giving
 
     sum_{i>16} |g_i| 3^i <= M (3/R)^17/(1 - 3/R) <= 5990.
 
-Hence S <= 14414 and C = S/6 = 2402.3.
+Hence S <= 14414.  This is the S of 5.2; the constant C of (5.1) is
+CE S/18 + S_0/2 + 9 S_1/128 + CN + NEARU = 4838.4, not S/6 -- see 5.2.
 
 BOTH HALVES ARE NECESSARY.  Cauchy from i = 0 gives C = 327869 and K0 = 71,
 too weak to meet the certified sweep: the circle estimate discards the
@@ -247,16 +248,20 @@ so it suffices that |R_k| + |R_{k+1}| < beta 2^-(k+1), for which
 |R_k| < beta 2^-k / 3 is enough.  With (5.1):
 
     k        beta 2^-k / 3      C (k+3)^3 3^-k
-   55         1.440e-18          1.570e-18       fails
-   56         7.200e-19          5.510e-19       holds
-   57         3.600e-19          1.932e-19       holds
-   60         4.499e-20          8.240e-21       holds
+   57         3.600e-19          6.328e-19       fails
+   58         1.800e-19          2.217e-19       fails
+   59         8.999e-20          7.759e-20       holds
+   60         4.500e-20          2.713e-20       holds
 
 T/P = C(k+3)^3 (2/3)^k is antitone in k (the ratio is ((k+4)/(k+3))^3 (2/3),
-below 1 for k >= 4), with value 0.0477 at k = 57, so the inequality holds for
-all k >= 57.  For k = 1..56 the differences are positive by direct certified
-computation, which now reaches k = 60 (odd-proof/numerics/fodd60.log).  The ranges
-overlap at 57..60, so the theorem holds for every k >= 1.  QED
+below 1 for k >= 4), with value 0.0476 at k = 59, so the inequality holds for
+all k >= 59.  For k = 1..58 the differences are positive by direct certified
+computation, which reaches k = 60 (odd-proof/numerics/fodd60.log).  The ranges
+overlap at 59, 60, so the theorem holds for every k >= 1.  QED
+
+With the C = 2402.3 of earlier drafts the first success was k = 57; the
+corrected C moves it to 59.  The certified sweep to 60 still covers the gap,
+but the margin is two values rather than four.
 
 ## 7. The certified constants
 
@@ -282,5 +287,5 @@ and the large-s tail bound P(s) <= 2.78*2^-s with P_odd(s) <= 1.91*3^-s.
 
 As in the main paper, the certified computations are inputs rather than
 formalized results: the value of d, the enclosure of S, the bound on M_R, and
-the sweep over k = 1..11.  The analytic content — sections 2 through 6 above —
+the sweep over k = 1..60.  The analytic content — sections 2 through 6 above —
 is elementary given those.
