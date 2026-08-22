@@ -28,7 +28,7 @@ section 6 needs (the analytic threshold is K0 = 59).
 `S_0`, `S_1`, `CN`, `NEARU` and `CE` quantify what earlier drafts of section 5.1
 left as "(lower order)".  `CE` in particular is not lower order: it multiplies
 the leading term, and moving from the implicit `CE = 3` to the true `5.48910`
-is what takes `C` from 2402.3 to 4838 and `K0` from 57 to 59.
+is what takes `C` from 2402.3 to 4846 and `K0` from 57 to 59.
 
 `ce_taylor.py` supersedes two earlier attempts (a point sweep and a box sweep)
 that could not certify the range: the constants are ratios in which zeta's pole
