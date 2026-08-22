@@ -161,7 +161,7 @@ log prints 5.4890962927).
 making it rigorous: the expansions in (b) are asymptotic, valid only for
 u >= U, and the original treats them as holding throughout.  This note uses
 U = 3 and bounds 0 < u <= U separately.  On 0 < u <= U the integrand is bounded directly,
-contributing CN <= 364 (cn_recursion.py) from the coefficient sum itself and
+contributing CN <= 367.8435 (cn_certified.py) from the coefficient sum itself and
 NEARU <= 24.68 (nearu_bound.py) from the two main terms.
 
 ### 5.2 The coefficient sum
@@ -183,7 +183,7 @@ Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give the LAGRANGE-REMAINDER part
 of (5.1) with coefficient CE S/18 (the CE of 5.1(b); with CE = 3 this would be
 the S/6 of earlier drafts).  Adding 5.1(a) and 5.1(c),
     C = CE S/18 + S_0/2 + 9 S_1/128 + CN + NEARU
-      = 4395.5 + 22.3 + 31.9 + 364.0 + 24.7 = 4838.4,
+      = 4395.5 + 22.3 + 31.9 + 367.8 + 24.7 = 4842.2,
 and (5.1) holds with C = 4900.
 
 A bound |h_j''| <= C 3^-j would be exactly critical -- sums like
@@ -216,7 +216,7 @@ giving
     sum_{i>16} |g_i| 3^i <= M (3/R)^17/(1 - 3/R) <= 5990.
 
 Hence S <= 14414.  This is the S of 5.2; the constant C of (5.1) is
-CE S/18 + S_0/2 + 9 S_1/128 + CN + NEARU = 4838.4, not S/6 -- see 5.2.
+CE S/18 + S_0/2 + 9 S_1/128 + CN + NEARU = 4842.2, not S/6 -- see 5.2.
 
 BOTH HALVES ARE NECESSARY.  Cauchy from i = 0 gives C = 327869 and K0 = 71,
 too weak to meet the certified sweep: the circle estimate discards the
@@ -233,7 +233,7 @@ which is width rather than signal.
   * sup_{|z|=4.5, s in [1,2]} |G_2| <= 1.97e6   (200 theta x 40 s boxes)
   * S_0 <= 44.5987                       s0_recursion.py + s0_cauchy.py
   * S_1 <= 453.1                         s1_recursion.py
-  * CN  <= 364                           cn_recursion.py  (recursion + Cauchy)
+  * CN  <= 367.8435                      cn_certified.py  (recursion + Cauchy)
   * NEARU <= 24.68                       nearu_bound.py   (head + envelope)
   * CE  <= 5.48910                       ce_taylor.py  (log: 5.4890962927)
 
@@ -279,7 +279,7 @@ but the margin is two values rather than four.
     sup|G_2|    <= 1.97e6 on |z|=4.5          mr_deriv_sweep.py
     S_0         <= 44.5987                    s0_recursion.py, s0_cauchy.py
     S_1         <= 453.1                      s1_recursion.py
-    CN          <= 364                        cn_recursion.py
+    CN          <= 367.8435                   cn_certified.py
     NEARU       <= 24.68                      nearu_bound.py
     CE          <= 5.48910                    ce_taylor.py
     C           4900                          (5.1), see 5.2

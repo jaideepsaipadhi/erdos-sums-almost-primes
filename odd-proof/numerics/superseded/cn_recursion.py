@@ -13,6 +13,12 @@ HEAD k <= KMAX by the recursion; TAIL k > KMAX by Cauchy on |z| = R < 3^s,
     FkOdd_k <= M_R R^-k,  M_R = prod_{p>=3} (1 - R p^-s)^-1,
 so FkOdd_k 3^k <= M_R (3/R)^k, decreasing once R > 3.
 
+NOT FULLY CERTIFIED.  s = sOf(3) is found by bisection on mpmath's zeta, and
+the head maximum is taken over floats, so this script gives a high-precision
+value rather than an interval enclosure.  The margin is large -- CN = 364
+against a budget term of the same size in a total of 4838 -- but a referee
+should read this as a computation, not a proof.
+
 Usage: python3 cn_recursion.py [KMAX] [PCUT] [PREC]
 """
 import sys
@@ -36,8 +42,15 @@ print(f"3^s = {3**s}  (Cauchy radius must be < this)")
 
 ps = list(primerange(3, PCUT))
 def P(t):
+    # Prime tail beyond PCUT, by the prime-density integral int x^-t/log x.
+    # It is added only for t < 3 because beyond that it is negligible against
+    # the constant this script bounds (364): at PCUT = 3e5 and s = sOf(3),
+    #   j=1  t=1.05  tail=4.1e-01     j=3  t=3.15  tail=5.7e-14
+    #   j=2  t=2.10  tail=6.2e-08     j=4  t=4.21  tail=6.7e-20
+    # and it falls by ~6 orders per j thereafter.  The j >= 3 omission is
+    # therefore below 1e-13 in total.
     v = sum(mpf(p) ** (-t) for p in ps)
-    if t < 3:                      # prime tail only matters for small t
+    if t < 3:
         v += quad(lambda x: x ** (-t) / log(x), [PCUT, inf])
     return v
 

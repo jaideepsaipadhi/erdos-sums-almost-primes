@@ -22,3 +22,8 @@ Earlier attempts, kept for provenance.  None is an input to `odd-proof/PROOF.md`
   fodd30.log, fodd40.log, fodd72.log
       partial and abandoned runs of fodd_run.py.  fodd60.log is the one
       section 6 cites: k = 1..60 at 1000 bits, strictly decreasing on [2,60].
+
+  cn_recursion.py
+      the mpmath computation of CN, superseded by cn_certified.py.  It gave
+      364 using a prime-density tail integral that is not a rigorous bound;
+      the certified value is 367.8435.
