@@ -31,6 +31,15 @@ Then with D_r = sum_j L_j^(r) z^j,
     d_s   H = H D_1          -> [z^i] = sum_m h_m (D_1)_{i-m}
     d_s^2 H = H (D_1^2 + D_2)-> [z^i] = sum_m h_m (D_1^2 + D_2)_{i-m}
 
+CONVERGENCE IN NS.  The sup is always attained in the first s-box, adjacent to
+s = 1 where d_s^2 H is most singular, so it is sensitive to box width:
+
+    NS      40     160     640    1600    3200
+    S    61452   18612   10044    8424    7891
+
+1600 is the setting of record.  Any NS gives a valid upper bound; finer ones
+are tighter, and the value is still falling at 3200, so 8424 is conservative.
+
 Usage: python3 hcoeff_recursion.py [NMAX] [NS] [PCUT] [PREC]
 """
 import sys
@@ -90,6 +99,7 @@ def main():
         return t0, t1, t2
 
     worst = [[arb(0)] * (NMAX + 1) for _ in range(3)]
+    Sworst = [arb(0), -1]        # sup over s-boxes of sum_j |g_j| 3^j, and its box
 
     for si in range(NS):
         sbox = interval(arb(1) + arb(si) / NS, arb(1) + arb(si + 1) / NS)
@@ -144,6 +154,20 @@ def main():
         mid = [L1sq[i] + L2[i] for i in range(NMAX + 1)]
         d2 = conv(h, mid, NMAX)                      # [z^i] d_s^2 H
 
+        # G_2 = d_s^2 H (1 - z/3)^3 AT THIS s-box, from the SIGNED d2.
+        # Forming g_j from sup_s|d2| taken box by box would difference sups
+        # attained at different s and destroy the pole cancellation that makes
+        # S finite -- the whole point of (5.4).
+        Sbox = arb(0)
+        for j in range(NMAX + 1):
+            g = d2[j]
+            if j >= 1: g -= d2[j - 1]
+            if j >= 2: g += d2[j - 2] / 3
+            if j >= 3: g -= d2[j - 3] / 27
+            Sbox += abs(g) * arb(3) ** j
+        if float(Sbox.upper()) > float(Sworst[0]):
+            Sworst[0] = arb(float(Sbox.upper()))
+            Sworst[1] = si
         for r, arr in enumerate((h, d1, d2)):
             for i in range(NMAX + 1):
                 u = arb(float(abs(arr[i]).upper()))
@@ -163,18 +187,12 @@ def main():
     # G_2 = d_s^2 H * (1 - z/3)^3, whose coefficients decay like R^-j for R < 5.
     # S = sum_j |g_j| 3^j is what the tail sum needs, and the head captures it.
     print()
-    print("G_2 = d_s^2 H (1-z/3)^3 :  g_j and the running S = sum |g_j| 3^j")
-    S = 0.0
-    for j in range(NMAX + 1):
-        g = float(worst[2][j])
-        if j >= 1: g -= float(worst[2][j-1])
-        if j >= 2: g += float(worst[2][j-2]) / 3.0
-        if j >= 3: g -= float(worst[2][j-3]) / 27.0
-        S += abs(g) * 3.0 ** j
-        print("  j=%2d  g_j=%12.5e   |g_j|3^j=%12.5e   S=%12.5e"
-              % (j, g, abs(g) * 3.0 ** j, S))
+    print("G_2 = d_s^2 H (1-z/3)^3 :  S = sup_s sum_{j<=%d} |g_j| 3^j" % NMAX)
+    print("  computed per s-box from the signed coefficients (see the loop).")
+    S = float(Sworst[0])
     print()
-    print("S (head, j <= %d) = %.4f" % (NMAX, S))
+    print("S (head, j <= %d) = %.4f   attained in s-box %d/%d"
+          % (NMAX, S, Sworst[1] + 1, NS))
     print("C_2 ~ S/6 = %.4f" % (S / 6))
 
     C2 = max(float(worst[2][i]) * 3.0 ** i / (i * i) for i in range(1, NMAX + 1))
