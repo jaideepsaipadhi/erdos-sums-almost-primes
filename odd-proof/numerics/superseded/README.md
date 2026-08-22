@@ -14,3 +14,7 @@ Earlier attempts, kept for provenance.  None is an input to `odd-proof/PROOF.md`
   hcoeff.log, hcoeff3.log
       earlier NMAX for the interval recursion.  hcoeff2.log is the run that
       gives the cited sum_{i<=16}|g_i|3^i = 8423.909789 over 1600 s-boxes.
+
+  fodd30.log, fodd40.log, fodd72.log
+      partial and abandoned runs of fodd_run.py.  fodd60.log is the one section
+      6 cites: k = 1..60 at 1000 bits, strictly decreasing on [2,60].
