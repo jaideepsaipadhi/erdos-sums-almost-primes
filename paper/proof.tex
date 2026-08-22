@@ -395,42 +395,62 @@ and bounding the resulting coefficient sum by $\binom{k+3}{3}S$ with
 $S = \sum_i |g_i| 3^i$ over the coefficients of
 $G_2 = \partial_s^2 H\,(1-z/3)^3$, gives
 \begin{equation}\label{eq:odd-calibrated}
-  |R_k| \;\le\; 2402.3\,(k+3)^3 3^{-k},
+  |R_k| \;\le\; C\,(k+3)^3 3^{-k}, \qquad C = 4900 .
 \end{equation}
-the ratio $|R_{k+1}/R_k|$ running from $0.41$ at $k = 9$ down to $0.387$ at
-$k = 20$. We use \eqref{eq:odd-calibrated} throughout. It is calibrated from
-the certified $f_k^{\mathrm{odd}}$, not derived; a derivation would need the
-pole-dominated asymptotics of the coefficients of $H$ and of their
-$s$-derivatives, which we do not attempt.
+This is derived, not calibrated. Three contributions make up $C$.
+
+\emph{The Lagrange remainder.} Bounding $|h_j(s)-h_j(1)-(s-1)b_j|$ by
+$\tfrac12\sup|h_j''|(s-1)^2$ and integrating $\int_0^\infty u^m e^{-3u}/m!\,du
+= 3^{-(m+1)}$ gives $\tfrac13 3^{-k}\sum_{j\le k}|h_j''|3^j$, and
+$\sum_{j\le k}|h_j''|3^j \le \binom{k+3}{3}S$ with $S = \sum_i|g_i|3^i \le
+14414$ over the coefficients of $G_2 = \partial_s^2H\,(1-z/3)^3$. The splitting
+of the integrand leaves not one error term but three: besides $R_jJ$, also
+$h_j(1)(J-e^{-u}-2\gamma e^{-2u})$ and $b_j(\varepsilon J - e^{-2u})$. Writing
+$C_E$ for the combined constant of the three, $C_E \le 5.4891$ over the range
+$s \in (1,\,s(3)]$ that the splitting requires, and this part of $C$ is
+$C_E S/18 = 4395.5$.
+
+\emph{The two coefficient tails.} The main terms integrate to the partial sums
+over $j \le k$, so $\sum_{j>k}h_j(1)$ and $2^{-(k+1)}\sum_{j>k}(b_j+2\gamma
+h_j(1))2^j$ join $R_k$. The same pole-cancellation device at first and second
+order gives $S_0 = \sum_i|a_i|3^i \le 44.6$ with $a_i = [z^i]H(1,z)(1-z/3)$ and
+$S_1 \le 453.1$ with $(1-z/3)^2$ against $\partial_sH$, contributing $S_0/2 =
+22.3$ and $9S_1/128 = 31.9$.
+
+\emph{The near region.} The expansions above hold for $u \ge U$; with $U = 3$
+the range $0 < u \le U$ contributes $C_N \le 364$ from the coefficient sum and
+$N_U \le 24.7$ from the two main terms.
+
+Together $C_E S/18 + S_0/2 + 9S_1/128 + C_N + N_U = 4838.4$, and we state
+\eqref{eq:odd-calibrated} with $C = 4900$. All five constants are certified
+interval computations; see \S\ref{app:numerics}.
 
 \subsection{Assembly}\label{sec:odd-assembly}
-
 From \eqref{eq:odd-expansion},
 \[
   \fkodd - f_{k+1}^{\mathrm{odd}} = \beta\,2^{-(k+1)} + (R_k - R_{k+1}),
 \]
 so it suffices that $|R_k| + |R_{k+1}| < \beta 2^{-(k+1)}$, for which
-$|R_k| < \beta 2^{-k}/3$ is enough. With $R = 4.5$:
-
+$|R_k| < \beta 2^{-k}/3$ is enough. With \eqref{eq:odd-calibrated}:
 \begin{center}
-\begin{tabular}{ccccc}
+\begin{tabular}{cccc}
 \toprule
 $k$ & $\beta 2^{-k}/3$ & $C(k+3)^3 3^{-k}$ & \\
 \midrule
-$11$ & $2.533\times 10^{-5}$ & $2.747\times 10^{-5}$ & fails \\
-$12$ & $1.267\times 10^{-5}$ & $1.071\times 10^{-5}$ & holds \\
-$13$ & $6.333\times 10^{-6}$ & $4.178\times 10^{-6}$ & holds \\
-$15$ & $1.583\times 10^{-6}$ & $6.355\times 10^{-7}$ & holds \\
-$20$ & $4.947\times 10^{-8}$ & $5.734\times 10^{-9}$ & holds \\
+$57$ & $3.600\times 10^{-19}$ & $6.328\times 10^{-19}$ & fails \\
+$58$ & $1.800\times 10^{-19}$ & $2.217\times 10^{-19}$ & fails \\
+$59$ & $8.999\times 10^{-20}$ & $7.759\times 10^{-20}$ & holds \\
+$60$ & $4.500\times 10^{-20}$ & $2.713\times 10^{-20}$ & holds \\
 \bottomrule
 \end{tabular}
 \end{center}
-
 \noindent
-The ratio $T/P = C(k+3)^3(2/3)^k$ is antitone, equal to $0.0477$ at $k = 57$, so the inequality
-holds for all $k \ge 12$. For $k = 1, \dots, 11$ the differences are positive
-by direct certified computation. The ranges overlap (the sweep covers
-$k = 1,\dots,20$), so Theorem~\ref{thm:main-odd} holds for every $k \ge 1$.
+The ratio $T/P = C(k+3)^3(2/3)^k$ is antitone (the step ratio is
+$((k+4)/(k+3))^3(2/3) < 1$ for $k \ge 4$), equal to $0.0476$ at $k = 59$, so
+the inequality holds for all $k \ge 59$. For $k = 1,\dots,58$ the differences
+are positive by direct certified computation, which reaches $k = 60$. The
+ranges overlap at $59,60$, so Theorem~\ref{thm:main-odd} holds for every
+$k \ge 1$.
 \qed
 
 %=======================================================================
@@ -899,8 +919,33 @@ $s \in [1,2]$.
 For the odd case, $M_R$ is computed over $40$ boxes in $s \in [1,2]$ and $100$
 boxes in $\theta$ on the circle, with primes to $5 \times 10^4$ and an
 explicit tail bound. Subdividing in $s$ is essential rather than cosmetic: a
-single box over $[1,2]$ gives only $M_R \le 739605$, which pushes the
-threshold to $k = 21$ and would open a gap against the certified range.
+single box over $[1,2]$ gives only $M_R \le 739605$.
+
+The five constants of \eqref{eq:odd-calibrated} beyond $S$ are certified as
+follows.
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+constant & bound & method \\
+\midrule
+$S_0$   & $\le 44.6$   & first-order pole; recursion (head), Cauchy (tail) \\
+$S_1$   & $\le 453.1$  & second-order pole, recursion \\
+$C_N$   & $\le 364$    & odd Euler-product recursion $+$ Cauchy tail \\
+$N_U$   & $\le 24.68$  & exact head to $k = 400$, explicit envelope beyond \\
+$C_E$   & $\le 5.4891$ & Taylor model in $\varepsilon = s-1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent
+$C_E$ is certified over the whole range $s \in (1,\,s(3)]$ rather than at a
+sample of points. The four constants making it up are ratios in which the pole
+of $\zeta$ at $s = 1$ cancels, so interval evaluation on boxes of $s$ loses the
+cancellation and diverges however narrow the boxes are taken; expanding $\zeta$
+as a power series about $1 + E/2$ makes the cancellation symbolic, and the
+resulting series --- whose coefficients decay --- evaluates tightly on the
+whole disc in one step. The scripts are \texttt{s0\_recursion.py},
+\texttt{s1\_recursion.py}, \texttt{cn\_recursion.py}, \texttt{nearu\_bound.py}
+and \texttt{ce\_taylor.py}.
 
 The two sweeps behind $\alpha_+$ and $\Gamma$ are run at pinned settings:
 primes to $P = 10^5$ and $300$ bits of precision in both, with $1600$ boxes in
