@@ -12,7 +12,22 @@ cancellation SYMBOLIC; the resulting series have small, decaying coefficients
 and evaluate tightly on |delta| <= E/2, which is the whole range at once.
 No monotonicity in s is assumed.
 
-Usage: python3 ce_taylor.py [ORDER] [PREC]
+TRUNCATION.  python-flint's arb_series.zeta() returns 9-10 terms regardless of
+the requested length, so the series here are degree <= 9 and the ORDER argument
+below has no effect (kept for the call signature).  That is far more than
+enough: the coefficients of Cf decay by a factor of about ten per order and the
+implied radius of convergence is ~11.6, so with |delta| <= E/2 = 0.0256 the
+terms fall by ~400x per order --
+
+    n:      6          7          8
+    |c|d^n  1.27e-13   3.28e-16   7.24e-19
+
+and the discarded tail beyond n = 8 is geometric with ratio delta/11.6 =
+0.0022, i.e. about 1.6e-21.  The bound below is therefore safe by twenty
+orders of magnitude.  The `tail` term in ev() covers the last three COMPUTED
+coefficients; the analytic remainder past them is the 1.6e-21 just given.
+
+Usage: python3 ce_taylor.py [ORDER-ignored] [PREC]
 """
 import sys
 from flint import arb, ctx, arb_series
