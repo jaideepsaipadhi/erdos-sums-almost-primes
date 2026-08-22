@@ -7958,11 +7958,16 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     (S0 S1 : ℝ) (ht : OddTailFacts bHatOdd S0 S1)
     -- The near-piece constant.  FkOdd k s <= CN 3^-k holds for each fixed
     -- s > 1 (the index set has every n >= 3^k), with CN depending on s = sOf U;
-    -- it blows up only as s -> 1, i.e. as U -> infinity.
+    -- it blows up only as s -> 1, i.e. as U -> infinity.  CN, NEARU and
+    -- hsplitD must all be instantiated at the SAME U; the certified values
+    -- CN <= 364 and NEARU <= 24.68 are at U = 3 (cn_recursion.py,
+    -- nearu_bound.py), which is also where CE <= 5.48910 is certified.
     (CN : ℝ) (hCNnn : 0 ≤ CN)
     (hCN : FkOdd k (sOf U) ≤ CN * ((1:ℝ)/3) ^ k)
-    -- the near piece contributes zeta(2) 3^-k; MR must cover both pieces
-    -- the far-piece bound of LEAF 1, with its constant named
+    -- the far-piece bound of LEAF 1, with its constant named.  This is
+    -- oddIntegrand_split's conclusion; see fOdd_expansion_hsplitD_exists,
+    -- which discharges it.  It is a parameter only because hMR, hCN and
+    -- hNEARU must name CE and U.
     (hsplitD : ∀ u : ℝ, U ≤ u →
       |(∑ j ∈ Finset.range (k + 1),
           (hCoeff (sOf u) j).re * u ^ (k - j) / (Nat.factorial (k - j)))
