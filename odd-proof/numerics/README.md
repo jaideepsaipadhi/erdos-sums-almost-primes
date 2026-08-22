@@ -12,7 +12,7 @@ explicit upper bound; the committed `.log` beside it is that run.
 | `s0_recursion.py`, `s0_cauchy.py` | `S_0 <= 44.5987` | first-order pole; head by recursion, tail by Cauchy |
 | `s1_recursion.py` | `S_1 <= 453.1` | second-order pole, head by recursion |
 | `cn_certified.py` | `CN <= 367.8435` | odd Euler-product recursion (Moebius prime zeta) + Cauchy tail |
-| `nearu_bound.py` | `NEARU <= 24.68` | exact head to k=400 + explicit envelope |
+| `nearu_certified.py` | `NEARU <= 24.6769` | exact head to k=400 + explicit envelope |
 | `ce_taylor.py` | `CE <= 5.48910` (log: `5.4890962927`) | Taylor model in eps, whole range at once |
 
 Together these give `C = CE S/18 + S_0/2 + 9 S_1/128 + CN + NEARU = 4842.2`,

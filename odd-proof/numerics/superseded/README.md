@@ -27,3 +27,7 @@ Earlier attempts, kept for provenance.  None is an input to `odd-proof/PROOF.md`
       the mpmath computation of CN, superseded by cn_certified.py.  It gave
       364 using a prime-density tail integral that is not a rigorous bound;
       the certified value is 367.8435.
+
+  nearu_bound.py
+      the mpmath computation of NEARU, superseded by nearu_certified.py
+      (24.6777 vs the certified 24.6768).

@@ -162,7 +162,7 @@ making it rigorous: the expansions in (b) are asymptotic, valid only for
 u >= U, and the original treats them as holding throughout.  This note uses
 U = 3 and bounds 0 < u <= U separately.  On 0 < u <= U the integrand is bounded directly,
 contributing CN <= 367.8435 (cn_certified.py) from the coefficient sum itself and
-NEARU <= 24.68 (nearu_bound.py) from the two main terms.
+NEARU <= 24.6769 (nearu_certified.py) from the two main terms.
 
 ### 5.2 The coefficient sum
 
@@ -183,7 +183,7 @@ Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give the LAGRANGE-REMAINDER part
 of (5.1) with coefficient CE S/18 (the CE of 5.1(b); with CE = 3 this would be
 the S/6 of earlier drafts).  Adding 5.1(a) and 5.1(c),
     C = CE S/18 + S_0/2 + 9 S_1/128 + CN + NEARU
-      = 4395.5 + 22.3 + 31.9 + 367.8 + 24.7 = 4842.2,
+      = 4395.5 + 22.3 + 31.9 + 367.8 + 24.7 = 4842.2,   (CN, NEARU certified)
 and (5.1) holds with C = 4900.
 
 A bound |h_j''| <= C 3^-j would be exactly critical -- sums like
@@ -234,7 +234,7 @@ which is width rather than signal.
   * S_0 <= 44.5987                       s0_recursion.py + s0_cauchy.py
   * S_1 <= 453.1                         s1_recursion.py
   * CN  <= 367.8435                      cn_certified.py  (recursion + Cauchy)
-  * NEARU <= 24.68                       nearu_bound.py   (head + envelope)
+  * NEARU <= 24.6769                     nearu_certified.py (head + envelope)
   * CE  <= 5.48910                       ce_taylor.py  (log: 5.4890962927)
 
 and on 5.1-5.2, elementary given them.  No constant is fitted to the certified
@@ -280,7 +280,7 @@ but the margin is two values rather than four.
     S_0         <= 44.5987                    s0_recursion.py, s0_cauchy.py
     S_1         <= 453.1                      s1_recursion.py
     CN          <= 367.8435                   cn_certified.py
-    NEARU       <= 24.68                      nearu_bound.py
+    NEARU       <= 24.6769                    nearu_certified.py
     CE          <= 5.48910                    ce_taylor.py
     C           4900                          (5.1), see 5.2
     K0^odd      59                            certified sweep reaches 60
