@@ -21,7 +21,7 @@
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\fk}{f_k}
-\newcommand{\fkodd}{f_k^{\mathrm{odd}}}
+\newcommand{\fkodd}{g_k}
 \newcommand{\Sodd}{S}
 \newcommand{\TODO}[1]{\textcolor{red}{[TODO: #1]}}
 \usepackage{xcolor}
@@ -132,7 +132,7 @@ For every $k \ge 6$ we have $f_k < f_{k+1}$.
 
 \begin{theorem}\label{thm:main-odd}
 Let $\fkodd = \sum_{n \ \mathrm{odd},\ \Om(n) = k} 1/(n\log n)$. Then
-$\fkodd > f_{k+1}^{\mathrm{odd}}$ for every $k \ge 1$, and
+$\fkodd > g_{k+1}$ for every $k \ge 1$, and
 $\fkodd \to 1/2$.
 \end{theorem}
 
@@ -438,7 +438,7 @@ interval computations; see \S\ref{app:numerics}.
 \subsection{Assembly}\label{sec:odd-assembly}
 From \eqref{eq:odd-expansion},
 \[
-  \fkodd - f_{k+1}^{\mathrm{odd}} = \beta\,2^{-(k+1)} + (R_k - R_{k+1}),
+  \fkodd - g_{k+1} = \beta\,2^{-(k+1)} + (R_k - R_{k+1}),
 \]
 so it suffices that $|R_k| + |R_{k+1}| < \beta 2^{-(k+1)}$, for which
 $|R_k| < \beta 2^{-k}/3$ is enough. With \eqref{eq:odd-calibrated}:
