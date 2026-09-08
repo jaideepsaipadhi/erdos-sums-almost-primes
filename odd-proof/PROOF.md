@@ -130,6 +130,15 @@ is O(e^-3u), and int_0^inf u^m e^-3u/m! du = 3^-(m+1) gives, with m = k-j,
 
     |R_k| <= (1/3) 3^-k sum_{j<=k} |h_j''| 3^j + (lower order).            (5.3)
 
+LEMMA (pole-coefficient bounds).  Let A(z) be analytic on |z| < 5 with
+(1-z/3)^r A(z) = sum_m w_m z^m and W := sum_m 3^m |w_m| < infinity.  Then the
+coefficients a_j = [z^j] A(z) satisfy
+    |a_j| <= W 3^-j C(j+r-1, r-1),
+so |a_j| <= W 3^-j for r = 1, (j+1) W 3^-j for r = 2, and C(j+2,2) W 3^-j for
+r = 3.  Expanding (1-z/3)^-r by the negative binomial series gives
+a_j = 3^-j sum_{m<=j} 3^m w_m C(j-m+r-1, r-1), and bounding the binomial by
+C(j+r-1, r-1) termwise gives the claim.  (5.4)-(5.5) below is the case r = 3.
+
 The "(lower order)" is made explicit here; earlier drafts left it unquantified.
 It is three separate things, and only the second is large: (a) is smaller than
 the main term by five to eight orders of magnitude over the range that matters,
@@ -142,12 +151,15 @@ PARTIAL sums over j <= k, not to 1/2 and beta 2^-k; the differences
 sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k} (b_j + 2 gamma h_j(1)) 2^j join R_k.
 Both are bounded by the same pole-cancellation device as (5.4)-(5.5), but at
 FIRST and SECOND order rather than third:
+(The paper writes S_2 for the S of 5.2, indexing the three constants by pole
+order; the Lean parameter is S.)
+
     S_0 := sum_i |a_i| 3^i,  a_i = [z^i] H(1,z)(1 - z/3),        S_0 <= 44.5987
     S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 486.1945
 Note the second tail's coefficient family is B(z) = d_s H_o(1,z) + 2 gamma
 H_o(1,z), not d_s H_o alone, so its weighted norm is S_1 + 4 gamma S_0 = 589.17
-(< 590) rather than S_1.  Lemma (i) then gives |h_j(1)| <= S_0 3^-j and (ii)
-gives |B_j| <= 590 (j+1) 3^-j, and since
+(< 590) rather than S_1.  The lemma at r = 1 gives |h_j(1)| <= S_0 3^-j, and at
+r = 2 gives |B_j| <= 590 (j+1) 3^-j, and since
     sum_{j>k} (j+1)(2/3)^j = 3(k+4)(2/3)^(k+1),
 the two tails contribute S_0/2 and 5*590/64 = 46.09 to the constant of (5.1),
 using (k+4)/(k+3)^3 <= 5/64 for k >= 1.  (An earlier draft used 9 S_1/128 =
