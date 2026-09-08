@@ -1,10 +1,11 @@
 \documentclass[11pt]{amsart}
 
 \usepackage{amsmath,amssymb,amsthm}
-\usepackage[margin=1.15in]{geometry}
+\usepackage[margin=1.12in]{geometry}
 \usepackage{booktabs}
 \usepackage{hyperref}
-% microtype disabled: bitmap fonts in this TeX install
+\hypersetup{hidelinks}
+\usepackage{xcolor}
 
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
@@ -16,39 +17,34 @@
 \newtheorem{conjecture}[theorem]{Conjecture}
 
 \DeclareMathOperator{\Om}{\Omega}
-\newcommand{\eps}{\varepsilon}
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\C}{\mathbb{C}}
-\newcommand{\N}{\mathbb{N}}
 \newcommand{\fk}{f_k}
 \newcommand{\fkodd}{g_k}
-\newcommand{\Sodd}{S}
-\newcommand{\TODO}[1]{\textcolor{red}{[TODO: #1]}}
-\usepackage{xcolor}
+\newcommand{\R}{\mathbb R}
+\newcommand{\C}{\mathbb C}
+\newcommand{\e}{\mathrm e}
+\newcommand{\dd}{\,\mathrm d}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\norm}[1]{\lVert #1\rVert}
 
 \begin{document}
 
 \title{Monotonicity of Erd\H{o}s sums}
-
 \author{Jaideep Sai Padhi}
 \author{Jared Duker Lichtman}
-
-\date{\today}
+\date{}
 
 \begin{abstract}
-For $k \ge 1$ let $f_k = \sum_{\Om(n) = k} 1/(n \log n)$, where $\Om$ counts
-prime factors with multiplicity. Banks and Martin conjectured that
-$f_1 > f_2 > f_3 > \cdots$; this was disproved by the second author, who
-located a global minimum at $k = 6$. We prove that the sequence is strictly
-\emph{increasing} at every step from $k = 6$ onwards, and that the sums
-restricted to odd $n$
-are strictly \emph{decreasing} for every $k \ge 1$. Taken together these say
-that the failure of the Banks--Martin conjecture is caused entirely by the
-prime $2$. Both results are obtained from a single mechanism: writing the
-generating Dirichlet series as $\zeta(s)^z H(s,z)$, the behaviour of $f_k$ is
-governed by whether the evaluation point $z = 2$ lies inside or on the boundary
-of the disc of analyticity of $H(s,\cdot)$. The analytic reductions are
-formalised in Lean~4 and the numerical inputs are certified in ball arithmetic.
+For $k\geq1$ let $f_k=\sum_{\Omega(n)=k}1/(n\log n)$, where $\Omega$ counts
+prime factors with multiplicity. We prove that $f_k<f_{k+1}$ for every
+$k\geq6$, whereas the sums restricted to odd integers satisfy
+$g_k>g_{k+1}$ for every $k\geq1$. The two
+statements arise from the same analytic distinction. After writing the
+relevant Dirichlet series as $\zeta(s)^zH(s,z)$, the point $z=2$ lies on the
+first singular circle for the unrestricted product and strictly inside that
+circle after the prime $2$ is removed. The analytic reductions are written
+explicitly below. The finite inequalities and coefficient bounds used in the
+last step are certified by ball arithmetic; the separation between analytic
+argument and certified input is stated precisely.
 \end{abstract}
 
 \maketitle
@@ -57,950 +53,1113 @@ formalised in Lean~4 and the numerical inputs are certified in ball arithmetic.
 \section{Introduction}
 %=======================================================================
 
-For $k \ge 1$ let
+For $k\geq1$ put
 \[
-  f_k \;=\; \sum_{\Om(n) = k} \frac{1}{n \log n},
+  f_k=\sum_{\Omega(n)=k}\frac1{n\log n}.
 \]
-where $\Om(n)$ counts the prime factors of $n$ with multiplicity. The weight $1/(n\log n)$ is Erd\H{o}s's \cite{Erdos}, who proved that
-$\sum_{n \in A} 1/(n \log n)$ is bounded uniformly over all primitive sets
-$A$; each $f_k$ converges, and $f_k \to 1$. Writing
-$\mathbb{N}_k = \{n : \Om(n) = k\}$, so that $\mathbb{N}_1$ is the set of
-primes, Zhang \cite{Zhang} proved $f_k < f_1$ for every $k > 1$, and Bayless,
-Kinlaw and Klyve \cite{BKK} showed $f_2 > f_3$. Banks and Martin
-\cite{BanksMartin} predicted that the pattern continues,
+Erd\H{o}s \cite{Erdos} proved that the corresponding sum is bounded uniformly
+over primitive sets. In particular each $f_k$ converges. Zhang \cite{Zhang}
+proved $f_k<f_1$ for $k>1$, and Bayless, Kinlaw and Klyve \cite{BKK} proved
+$f_2>f_3$. Banks and Martin \cite{BanksMartin} conjectured that
 \begin{equation}\label{eq:BM}
-  f_1 > f_2 > f_3 > \cdots,
+  f_1>f_2>f_3>\cdots.
 \end{equation}
-as part of a considerably more general conjecture.
 
-Lichtman \cite{Lichtman19} showed that the conjecture is false, and that the
-sequence attains a global minimum at $k=6$. Gorodetsky, Lichtman and Wong
-\cite{GLW} later established the asymptotic
-\[
-  f_k = 1 - 2^{-k}\bigl(a_1 k^2 + O(k\log(k+1))\bigr),
-  \qquad a_1 = \tfrac14 d \log 2 > 0 ,
-\]
-from which $f_k < f_{k+1}$ for all sufficiently large $k$. The asymptotic does
-not by itself locate the crossover: the implied constant in the error term is
-not explicit, so the argument gives no $k$ beyond which monotonicity is
-guaranteed, and in particular does not decide the small cases where the
-conjecture might still have held.
-
-Our first result closes that gap completely.
-
-The proof has two halves. For $k$ beyond an explicit threshold we bound each
-source of error in the asymptotic separately and show the resulting criterion
-is positive and increasing; below that threshold the inequality is verified by
-certified computation, in three overlapping ranges whose union with the
-analytic range is all of $[6,\infty)$.
-
-Our second result concerns the same sums with the prime $2$ removed. Write
-$\fkodd$ for the sum of $1/(n\log n)$ over odd $n$ with $\Om(n) = k$.
-
-Together the two theorems isolate the r\^ole of the prime $2$: the
-unrestricted sums eventually increase, the odd sums decrease throughout, and
-the difference is caused by $2$ alone. This is not a coincidence of two
-separate calculations. Both follow from a single mechanism, which we isolate
-in \S\ref{sec:mechanism}: writing the generating Dirichlet series as
-$\zeta(s)^z H(s,z)$, the disc of analyticity of $H(s,\cdot)$ has radius $q^s$
-where $q$ is the least prime involved, while the evaluation point relevant to
-the $2^{-k}$ scale is $z = 2$. For the unrestricted sums $q = 2$ and the
-evaluation point sits \emph{on} the boundary at $s = 1$, producing a factor
-$k^2$ that competes with $2^{-k}$; for the odd sums $q = 3$ and it lies
-strictly inside, so the leading behaviour is a constant times $2^{-k}$ with
-nothing competing. The $k^2$ factor is precisely what makes the first theorem
-hard and its absence is precisely what makes the second easy.
-
-This suggests a general statement, recorded as Conjecture~\ref{conj:general}
-in \S\ref{sec:general}: for sums restricted to $n$ with all prime factors in a
-set $\mathcal{P}$, the eventual increase should occur exactly when
-$2 \in \mathcal{P}$.
-
-The analytic reductions in both theorems are formalised in Lean~4, and the
-numerical inputs are computed in rigorous ball arithmetic. We are explicit in
-\S\ref{sec:assumed} about which is which: the formalisation takes the
-certified constants and sweeps as hypotheses and proves the reduction from
-them, so that what is machine-checked and what is computed are cleanly
-separated. Two facts needed along the way are absent from Mathlib and may be
-of independent use: that
-$\zeta(s) - 1/(s-1) \to \gamma$ as $s \to 1^+$, and that $\zeta(s) - 1/(s-1)$
-extends analytically across $s = 1$.
+Lichtman \cite{Lichtman19} disproved \eqref{eq:BM}, showing that $f_k\to1$ and
+that the sequence attains a global minimum at $k=6$. Gorodetsky, Lichtman and
+Wong \cite{GLW} then established
+\begin{equation}\label{eq:GLW-asymptotic}
+  f_k=1-2^{-k}\bigl(a_1k^2+O(k\log(k+1))\bigr),
+  \qquad a_1=\frac{d\log2}{4}>0,
+\end{equation}
+where
+\begin{equation}\label{eq:d-def}
+  d=\frac14\prod_{p\geq3}\left(1-\frac2p\right)^{-1}
+                    \left(1-\frac1p\right)^2.
+\end{equation}
+The implicit constant in \eqref{eq:GLW-asymptotic} does not locate the first
+index at which the sequence begins to increase. Our first theorem does.
 
 \begin{theorem}\label{thm:main-full}
-For every $k \ge 6$ we have $f_k < f_{k+1}$.
+For every $k\geq6$ one has $f_k<f_{k+1}$.
 \end{theorem}
+
+Let
+\[
+  g_k
+   =\sum_{\substack{n\ \mathrm{odd}\\ \Omega(n)=k}}\frac1{n\log n}.
+\]
+The second theorem shows that deleting the prime $2$ reverses the direction of
+monotonicity at every index.
 
 \begin{theorem}\label{thm:main-odd}
-Let $\fkodd = \sum_{n \ \mathrm{odd},\ \Om(n) = k} 1/(n\log n)$. Then
-$\fkodd > g_{k+1}$ for every $k \ge 1$, and
-$\fkodd \to 1/2$.
+For every $k\geq1$ one has
+$g_k>g_{k+1}$, and
+$g_k\to\tfrac12$.
 \end{theorem}
 
+The proof of Theorem~\ref{thm:main-odd} gives the more precise expansion
+\begin{equation}\label{eq:odd-intro-expansion}
+  g_k=\frac12+\beta2^{-k}+R_k,
+  \qquad \abs{R_k}\leq4900(k+3)^3 3^{-k},
+\end{equation}
+where
+\begin{equation}\label{eq:beta-intro}
+  \beta=d\left(\gamma+\log2-
+  \sum_{p\geq3}\frac{\log p}{(p-1)(p-2)}\right)>0.
+\end{equation}
+The $2^{-k}$ term comes from evaluating a regularized Euler product at $z=2$.
+For odd integers the first pole is at $z=3$, so this evaluation takes place
+strictly inside the disc of analyticity. For the unrestricted sums the first
+pole is at $z=2$ itself. The boundary contribution then acquires the factor
+$k^2$ in \eqref{eq:GLW-asymptotic}.
+
+The proof has two kinds of input. Identities, coefficient reductions and
+inequalities are proved in the text. Bounds produced by interval arithmetic
+are isolated as certified propositions. Thus a sentence of the form ``the
+computation gives'' never substitutes for an analytic step: the exact
+inequality supplied by the computation is stated before it is used.
+
 %=======================================================================
-\section{Notation and the integral representation}\label{sec:notation}
+\section{Generating functions and the analytic boundary}
 %=======================================================================
 
-Throughout, $p$ denotes a prime and $\Om(n)$ the number of prime factors of
-$n$ counted with multiplicity. For $s > 1$ set
+For $s>1$ define
 \[
-  P_k(s) = \sum_{\Om(n) = k} n^{-s},
+  P_k(s)=\sum_{\Omega(n)=k}n^{-s},
   \qquad
-  P_k^{\mathrm{odd}}(s) = \sum_{\substack{n \ \mathrm{odd} \\ \Om(n) = k}} n^{-s}.
+  P_k^{\mathrm{odd}}(s)=
+  \sum_{\substack{n\ \mathrm{odd}\\\Omega(n)=k}}n^{-s}.
 \]
 
-\begin{lemma}\label{lem:integral-rep}
-For $k \ge 1$,
-\begin{equation}\label{eq:int-rep}
-  f_k = \int_1^\infty P_k(s)\,ds,
+\begin{lemma}\label{lem:integral-representation}
+For every $k\geq1$,
+\begin{equation}\label{eq:integral-representation}
+  f_k=\int_1^\infty P_k(s)\dd s,
   \qquad
-  \fkodd = \int_1^\infty P_k^{\mathrm{odd}}(s)\,ds .
+  g_k=\int_1^\infty P_k^{\mathrm{odd}}(s)\dd s.
 \end{equation}
 \end{lemma}
 
 \begin{proof}
-For $n \ge 2$ we have $\int_1^\infty n^{-s}\,ds = 1/(n\log n)$, since
-$n^{-s} = e^{-s\log n}$ and $\log n > 0$. Both index sets consist of integers
-$n \ge 2$ (indeed $n \ge 2^k$, since $\Om(n) = k$), and all terms are
-non-negative, so Tonelli's theorem permits the interchange of sum and
-integral. This is Lemma~2.1 of \cite{GLW} in the unrestricted case; the
-argument is insensitive to which set of $n$ is summed over.
-\end{proof}
-
-The generating functions are Euler products,
-\begin{equation}\label{eq:euler}
-  \sum_{k \ge 0} P_k(s) z^k = \prod_{p} (1 - z p^{-s})^{-1},
-  \qquad
-  \sum_{k \ge 0} P_k^{\mathrm{odd}}(s) z^k = \prod_{p \ge 3} (1 - z p^{-s})^{-1}.
-\end{equation}
-
-%=======================================================================
-\section{The mechanism}\label{sec:mechanism}
-%=======================================================================
-
-Both products in \eqref{eq:euler} are written in the form
-$\zeta(s)^z H(s,z)$. For the unrestricted product,
-\begin{equation}\label{eq:H-full}
-  H(s,z) = \prod_{p} (1 - z p^{-s})^{-1} (1 - p^{-s})^{z},
-\end{equation}
-and for the odd product,
-\begin{equation}\label{eq:H-odd}
-  H^{\mathrm{odd}}(s,z)
-    = (1 - 2^{-s})^{z} \prod_{p \ge 3} (1 - z p^{-s})^{-1} (1 - p^{-s})^{z}.
-\end{equation}
-
-\begin{proposition}\label{prop:analyticity}
-$H(s,\cdot)$ is analytic in $|z| < 2^s$, and $H^{\mathrm{odd}}(s,\cdot)$ is
-analytic in $|z| < 3^s$.
-\end{proposition}
-
-\begin{proof}
-The $p$-th factor of either product is
-$(1 - zp^{-s})^{-1}(1 - p^{-s})^{z}$, whose only singularity in $z$ is the
-pole at $z = p^{s}$. The radius of the largest disc free of poles is therefore
-$q^{s}$, where $q$ is the least prime occurring in the product: $q = 2$ in
-\eqref{eq:H-full} and $q = 3$ in \eqref{eq:H-odd}.
-
-That the product converges on that disc is the point of the regularisation.
-Writing $x = p^{-s}$, the logarithm of the $p$-th factor is
+For $n\geq2$,
 \[
-  -\log(1 - zx) + z\log(1 - x)
-    = (z - z)x + O\bigl((|z|^2 + |z|)x^2\bigr),
+  \int_1^\infty n^{-s}\dd s
+   =\int_1^\infty \e^{-s\log n}\dd s
+   =\left[-\frac{\e^{-s\log n}}{\log n}\right]_{s=1}^{\infty}
+   =\frac1{n\log n}.
 \]
-the first-order terms cancelling identically. Hence each factor is
-$1 + O(p^{-2s})$ uniformly for $z$ in a compact subset of $|z| < q^s$, and
-$\sum_p p^{-2s}$ converges for $s > 1/2$. The product is therefore analytic
-there, being a locally uniform limit of analytic functions.
+All summands are non-negative. Tonelli's theorem therefore permits the sum and
+integral to be interchanged in both cases, giving
+\[
+  \int_1^\infty\sum_{\Omega(n)=k}n^{-s}\dd s
+   =\sum_{\Omega(n)=k}\int_1^\infty n^{-s}\dd s=f_k,
+\]
+and the same calculation with the sum restricted to odd $n$ proves the second
+identity.
 \end{proof}
 
-\begin{remark}
-The cancellation of the first-order terms is what distinguishes $H$ from the
-bare Euler product: the latter has no disc of convergence containing $z = 2$
-at $s = 1$ in either case.
-\end{remark}
-
-This is the whole difference between the two theorems. At $s = 1$ the
-evaluation point relevant to the $2^{-k}$ scale is $z = 2$, and
-
-\begin{itemize}
-  \item for the unrestricted sums $z = 2$ lies \emph{on} the boundary
-        $|z| = 2^s$ at $s = 1$;
-  \item for the odd sums $z = 2$ lies strictly \emph{inside} $|z| < 3^s$.
-\end{itemize}
-
-On the boundary one picks up a factor $k^2$ competing with $2^{-k}$; this is
-the source of the $a_1 k^2$ term in \eqref{eq:glw-asymp} below, of the
-turnaround at $k = 6$, and of the error-accounting machinery of
-\S\S\ref{sec:full-criterion}--\ref{sec:full-assembly}. Strictly inside, the
-leading behaviour is a constant times $2^{-k}$ with nothing competing, and the
-proof is correspondingly short (\S\ref{sec:odd}).
-
-\begin{remark}
-Nothing above is special to the prime $2$ as such: what matters is that $2$ is
-the smallest prime, so that removing it moves the radius from $2^s$ to $3^s$
-past the fixed evaluation point $z = 2$. See Conjecture~\ref{conj:general}.
-\end{remark}
-
-%=======================================================================
-\section{The odd sums}\label{sec:odd}
-%=======================================================================
-
-Throughout this section $H = H^{\mathrm{odd}}$ as in \eqref{eq:H-odd}.
-
-\subsection{The expansion}\label{sec:odd-expansion}
-
-Substituting $u = \log \zeta(s)$ in \eqref{eq:int-rep} and expanding
-\begin{equation}\label{eq:eps-of-u}
-  s - 1 = e^{-u} + \gamma e^{-2u} + O(e^{-3u}),
+The generating functions are
+\begin{equation}\label{eq:euler-products}
+  \sum_{k\geq0}P_k(s)z^k=\prod_p(1-zp^{-s})^{-1},
+  \qquad
+  \sum_{k\geq0}P_k^{\mathrm{odd}}(s)z^k
+      =\prod_{p\geq3}(1-zp^{-s})^{-1}.
 \end{equation}
-the contributions to $\fkodd$ organise by powers of $e^{-u}$. Using
-$\int_0^\infty u^k e^{-ju}\,du / k! = j^{-(k+1)}$:
+Write these products as $\zeta(s)^zH(s,z)$ and
+$\zeta(s)^zH_{\mathrm o}(s,z)$, where
 \begin{align}
-  \text{order } e^{-u}  &: \quad H(1,1), \label{eq:order1}\\
-  \text{order } e^{-2u} &: \quad 2^{-(k+1)}
-      \bigl[\, \partial_s H(1,2) + 2\gamma H(1,2) \,\bigr], \label{eq:order2}\\
-  \text{order } e^{-ju} &: \quad O(j^{-(k+1)}), \quad j \ge 3. \label{eq:order3}
+  H(s,z)&=\prod_p(1-zp^{-s})^{-1}(1-p^{-s})^z,
+       \label{eq:H-full}\\
+  H_{\mathrm o}(s,z)&=(1-2^{-s})^z
+       \prod_{p\geq3}(1-zp^{-s})^{-1}(1-p^{-s})^z.
+       \label{eq:H-odd}
 \end{align}
 
-\begin{remark}
-The substitution is $u = \log\zeta(s)$, not $s = 1 + e^{-u}$: only the former
-makes the powers of $u$ appearing in the expansion of $P_k^{\mathrm{odd}}$
-exact powers of the integration variable, so that the Gamma integrals apply
-termwise. The Jacobian is $ds/du = \zeta/(-\zeta')$, which by
-\eqref{eq:eps-of-u} equals $e^{-u} + 2\gamma e^{-2u} + O(e^{-3u})$; the factor
-$2\gamma$ is one $\gamma$ from the Jacobian's own expansion in $\eps$ and one
-from \eqref{eq:eps-of-u}.
-\end{remark}
-
-\subsection{The limit}\label{sec:odd-limit}
-
-\begin{lemma}\label{lem:odd-limit}
-$H(1,1) = 1/2$, and hence $\fkodd \to 1/2$.
-\end{lemma}
-
-\begin{proof}
-Put $z = s = 1$ in \eqref{eq:H-odd}. The general factor becomes
-$(1 - p^{-1})^{-1}(1 - p^{-1}) = 1$, so the product over $p \ge 3$ is
-identically $1$, and $H^{\mathrm{odd}}(1,1) = (1 - 2^{-1})^{1} = 1/2$.
-The claim $\fkodd \to 1/2$ is then \eqref{eq:order1}, the orders $e^{-ju}$
-with $j \ge 2$ contributing $O(2^{-k})$ by \eqref{eq:order2} and
-\eqref{eq:order3}.
-\end{proof}
-
-\begin{remark}
-The same computation for the unrestricted product gives $H(1,1) = 1$,
-recovering $f_k \to 1$.
-\end{remark}
-
-\subsection{The leading term}\label{sec:odd-leading}
-
-\begin{lemma}\label{lem:odd-H12}
-$H(1,2) = \tfrac14 \prod_{p \ge 3} (1 - 1/p)^2 (1 - 2/p)^{-1} = 1/(4C_2) = d$,
-the constant of \cite{GLW}, and
-\[
-  \partial_s \log H(1,2) = 2\log 2 - 2\Sodd,
-  \qquad
-  \Sodd = \sum_{p \ge 3} \frac{\log p}{(p-1)(p-2)} .
-\]
-\end{lemma}
-
-\begin{proof}
-Setting $z = 2$, $s = 1$ in \eqref{eq:H-odd} gives the stated product
-directly, the prefactor being $(1 - 2^{-1})^2 = 1/4$; that this equals
-$1/(4C_2)$, with $C_2$ the twin-prime constant, is the definition of $d$
-in \cite{GLW}.
-
-For the derivative, take logarithms in \eqref{eq:H-odd} at $z = 2$:
-\[
-  \log H^{\mathrm{odd}}(s,2)
-    = 2\log(1 - 2^{-s})
-      + \sum_{p \ge 3}\Bigl[-\log(1 - 2p^{-s}) + 2\log(1 - p^{-s})\Bigr].
-\]
-By the estimate in the proof of Proposition~\ref{prop:analyticity} each
-summand is $O(p^{-2s})$, and differentiating term by term is justified for
-$s > 3/4$ by local uniform convergence of the differentiated series, whose
-$p$-th term is $O(\log p \cdot p^{-2s})$.
-
-Differentiating the prefactor,
-$\partial_s\,2\log(1 - 2^{-s}) = 2\,\frac{2^{-s}\log 2}{1 - 2^{-s}}$, which at
-$s = 1$ is $2\log 2$. Differentiating the $p$-th summand,
-\[
-  \frac{-2\log p \cdot p^{-s}}{1 - 2p^{-s}} + \frac{2\log p \cdot p^{-s}}{1 - p^{-s}}
-  \;\xrightarrow{\ s = 1\ }\;
-  \frac{-2\log p}{p - 2} + \frac{2\log p}{p - 1}
-  = \frac{-2\log p}{(p-1)(p-2)} .
-\]
-Summing gives $\partial_s \log H^{\mathrm{odd}}(1,2) = 2\log 2 - 2\Sodd$.
-\end{proof}
-
-\begin{remark}
-Note that $s = 1$ is interior to the region of convergence here, unlike for
-$\zeta$: the product over $p \ge 3$ converges for $s > 3/4$, since $p^s > 2$
-for $p \ge 3$ and $s > 3/4$ (as $3^{3/4} > 2$), so no factor degenerates.
-\end{remark}
-
-Substituting Lemma~\ref{lem:odd-H12} into \eqref{eq:order2}:
-\begin{equation}\label{eq:odd-expansion}
-  \fkodd = \tfrac12 + \beta\, 2^{-k} + R_k,
-  \qquad
-  \beta = d\,(\log 2 - \Sodd + \gamma).
-\end{equation}
-
-Numerically $\beta = 0.15563$. As a check independent of the derivation,
-Richardson extrapolation of $B(k) = 2^k(\fkodd - 1/2)$ with ratio $3/4$ on the
-certified values gives $0.157522$, $0.156515$, $0.156231$ at $k = 16, 18, 19$,
-converging to $\beta$ from above.
-
-\subsection{The remainder}\label{sec:odd-remainder}
-
-Factor out the pole nearest the origin:
-\[
-  \widetilde H(s,z) = H(s,z)\,(1 - z\,3^{-s}),
-\]
-analytic in $|z| < 5^s$. Cauchy's estimate on $|z| = R < 5$ gives
-$|[z^k]\widetilde H(1,z)| \le M_R R^{-k}$ with
-$M_R = \sup_{|z| = R,\ s \in [1,2]} |\widetilde H(s,z)|$, and hence, summing
-\eqref{eq:order3} over $j \ge 3$,
-\begin{equation}\label{eq:odd-remainder}
-  |R_k| \le M_R R^{-k}.
-\end{equation}
-
-\subsection{Choice of radius}\label{sec:odd-radius}
-
-$R$ may be taken anywhere below $5$. A larger $R$ lowers the threshold $K_0$;
-a smaller $R$ lets the Euler tail start at a smaller prime, which matters for
-the formalisation.
-
-\begin{center}
-\begin{tabular}{cccc}
-\toprule
-$R$ & $M_R$ (certified) & $K_0$ & tail starts at \\
-\midrule
-$4.0$ & $374.367$  & --- & $p \ge 7$ \\
-$4.5$ & $826.705$  & --- & $p \ge 11$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent
-The tail constraint is that the $p$-th factor's correction be bounded by $1$,
-which at radius $R$ and prime $P$ reads $R^2/(1 - R/P) + 1.25R \le P^2$. At
-$R = 4.5$ this fails for $P = 7$ (giving $62.3 > 49$) and first holds at
-$P = 11$.
-
-Neither radius is used below. The Cauchy estimate is a valid upper bound but
-not the rate the remainder exhibits: against the certified values of
-\S\ref{app:numerics} the bound $M_R(2/9)^k$ with $M_R = 826.705058$ fails from
-$k = 13$ onward, short by a factor of $60$ at $k = 20$. The derivation behind
-it is also unsound: the order expansion of \S\ref{sec:odd-expansion} is
-asymptotic, not convergent --- the order-$m$ term is $O(k^{m-1}3^{-k})$ --- so
-it cannot be summed over $m$. Truncating with a Lagrange remainder instead,
-and bounding the resulting coefficient sum by $\binom{k+3}{3}S$ with
-$S = \sum_i |g_i| 3^i$ over the coefficients of
-$G_2 = \partial_s^2 H\,(1-z/3)^3$, gives
-\begin{equation}\label{eq:odd-calibrated}
-  |R_k| \;\le\; C\,(k+3)^3 3^{-k}, \qquad C = 4900 .
-\end{equation}
-This is derived, not calibrated. Three contributions make up $C$, and they are
-of very different sizes: the first multiplies the leading term by $C_E/3 =
-1.83$ and is what sets the threshold; the second is smaller than the main term
-by five to eight orders of magnitude over the range that matters; the third is
-a cost of the splitting performed here rather than a feature of the underlying
-estimate.
-
-\emph{The Lagrange remainder.} Bounding $|h_j(s)-h_j(1)-(s-1)b_j|$ by
-$\tfrac12\sup|h_j''|(s-1)^2$ and integrating $\int_0^\infty u^m e^{-3u}/m!\,du
-= 3^{-(m+1)}$ gives $\tfrac13 3^{-k}\sum_{j\le k}|h_j''|3^j$, and
-$\sum_{j\le k}|h_j''|3^j \le \binom{k+3}{3}S$ with $S = \sum_i|g_i|3^i \le
-14414$ over the coefficients of $G_2 = \partial_s^2H\,(1-z/3)^3$. The splitting
-of the integrand leaves not one error term but three: besides $R_jJ$, also
-$h_j(1)(J-e^{-u}-2\gamma e^{-2u})$ and $b_j(\varepsilon J - e^{-2u})$. Writing
-$C_E$ for the combined constant of the three, $C_E \le 5.48910$ over the range
-$s \in (1,\,s(3)]$ that the splitting requires, and this part of $C$ is
-$C_E S/18 = 4395.5$.
-
-\emph{The two coefficient tails.} The main terms integrate to the partial sums
-over $j \le k$, so $\sum_{j>k}h_j(1)$ and $2^{-(k+1)}\sum_{j>k}(b_j+2\gamma
-h_j(1))2^j$ join $R_k$. The same pole-cancellation device at first and second
-order gives $S_0 = \sum_i|a_i|3^i \le 44.5987$ with $a_i = [z^i]H(1,z)(1-z/3)$ and
-$S_1 \le 486.1945$ with $(1-z/3)^2$ against $\partial_sH$, contributing $S_0/2 =
-22.3$ and $9S_1/128 = 34.2$.
-
-\emph{The near region.} The expansions used above are asymptotic, valid for
-$u \ge U$; the splitting therefore needs the complementary range handled
-separately, which the estimate in its unsplit form does not. With $U = 3$ the
-range $0 < u \le U$ contributes $C_N \le 367.8435$ from the coefficient sum and
-$N_U \le 26.0962$ from the two main terms.
-
-Together $C_E S/18 + S_0/2 + 9S_1/128 + C_N + N_U = 4846.0$, and we state
-\eqref{eq:odd-calibrated} with $C = 4900$. All five constants are certified
-interval computations; see \S\ref{app:numerics}.
-
-\subsection{Assembly}\label{sec:odd-assembly}
-From \eqref{eq:odd-expansion},
-\[
-  \fkodd - g_{k+1} = \beta\,2^{-(k+1)} + (R_k - R_{k+1}),
-\]
-so it suffices that $|R_k| + |R_{k+1}| < \beta 2^{-(k+1)}$, for which
-$|R_k| < \beta 2^{-k}/3$ is enough. With \eqref{eq:odd-calibrated}:
-\begin{center}
-\begin{tabular}{cccc}
-\toprule
-$k$ & $\beta 2^{-k}/3$ & $C(k+3)^3 3^{-k}$ & \\
-\midrule
-$57$ & $3.600\times 10^{-19}$ & $6.328\times 10^{-19}$ & fails \\
-$58$ & $1.800\times 10^{-19}$ & $2.217\times 10^{-19}$ & fails \\
-$59$ & $8.999\times 10^{-20}$ & $7.759\times 10^{-20}$ & holds \\
-$60$ & $4.500\times 10^{-20}$ & $2.713\times 10^{-20}$ & holds \\
-\bottomrule
-\end{tabular}
-\end{center}
-\noindent
-The ratio $T/P = C(k+3)^3(2/3)^k$ is antitone (the step ratio is
-$((k+4)/(k+3))^3(2/3) < 1$ for $k \ge 4$), equal to $0.0476$ at $k = 59$, so
-the inequality holds for all $k \ge 59$. For $k = 1,\dots,58$ the differences
-are positive by direct certified computation, which reaches $k = 60$. The
-ranges overlap at $59,60$, so Theorem~\ref{thm:main-odd} holds for every
-$k \ge 1$.
-\qed
-
-%=======================================================================
-\section{The unrestricted sums: the criterion}\label{sec:full-criterion}
-%=======================================================================
-
-
-We take as given the asymptotic of \cite{GLW}:
-\begin{equation}\label{eq:glw-asymp}
-  f_k = 1 - 2^{-k}\bigl(a_1 k^2 + O(k \log(k+1))\bigr),
-  \qquad a_1 = \tfrac14 d \log 2 .
-\end{equation}
-
-Write $f_k = 1 - 2^{-k}(a_1 k^2 + E(k))$, so that $E$ collects the entire
-secondary error. Then
-\begin{equation}\label{eq:full-difference}
-  f_{k+1} - f_k
-    = 2^{-(k+1)}\bigl[\,a_1(k^2 - 2k - 1) + 2E(k) - E(k+1)\,\bigr],
-\end{equation}
-so $f_{k+1} > f_k$ exactly when
-\begin{equation}\label{eq:criterion}
-  a_1(k^2 - 2k - 1) + 2E(k) - E(k+1) > 0 .
-\end{equation}
-
-Explicitly, $E(k) = 2^{k}(1 - f_k) - a_1 k^2$, and \eqref{eq:criterion} is
-an identity rather than an estimate: it holds for any choice of $a_1$
-whatever, the content being entirely in the lower bound for
-$2E(k) - E(k+1)$ obtained in \S\ref{sec:full-sources}.
-
-\subsection{The source bound}
-
-Write
-\begin{equation}\label{eq:Rbound}
-\begin{aligned}
-  R(k) \;=\; &\tfrac{\log 2}{4}\bigl[(2k-2)U_{\max} + 2V_{\max} + 4U_{\max}\bigr]\\
-       &+ S^{\ast}\bigl[2D(k) + D(k+1)\bigr]
-        + \alpha_+(3k+4)
-        + 3\Bigl(\tfrac{1.45}{k} + 10^{-3}\Bigr),
-\end{aligned}
-\end{equation}
-where $D(\cdot)$ is the $\delta$-table bound of \S\ref{sec:full-sources},
-$U_{\max}, V_{\max}$ bound the signed sums
-\[
-  U_k = \sum_{i \le k} i\,2^i\,\mathrm{Re}\,c_i,
-  \qquad
-  V_k = \sum_{i \le k} i^2\,2^i\,\mathrm{Re}\,c_i,
-  \qquad c_i := [z^i] G_2(1,z),
-\]
-$S^{\ast} = \sum_i 2^i |c_i|$, and $\alpha_+$ is the $s$-uniform bound on the
-first $s$-derivatives of the coefficients. The four groups of terms in
-\eqref{eq:Rbound} correspond to the four sources: the signed $U,V$
-combination, the $\delta$-table convolution, the $S_1$ term, and the
-exponentially small remainder $E_{\exp}$.
-
-\begin{proposition}\label{prop:crit-ge-phi}
-If $|2E(k) - E(k+1)| \le R(k)$, then the left-hand side of
-\eqref{eq:criterion} is at least
-\[
-  \varphi(k) \;:=\; a_1(k^2 - 2k - 1) - R(k).
-\]
-In particular $\varphi(k) > 0$ implies $f_k < f_{k+1}$.
+\begin{proposition}\label{prop:analyticity}
+For fixed real $s>1/2$, the function $H(s,\cdot)$ is analytic in
+$\abs z<2^s$, and $H_{\mathrm o}(s,\cdot)$ is analytic in
+$\abs z<3^s$.
 \end{proposition}
 
 \begin{proof}
-Immediate from \eqref{eq:criterion} and the triangle inequality.
+Let $x=p^{-s}$. For $z$ in a fixed compact set, the logarithm of the $p$th
+regularized factor is
+\begin{align*}
+ -\log(1-zx)+z\log(1-x)
+ &=\sum_{m\geq1}\frac{z^m-z}{m}x^m\\
+ &=\sum_{m\geq2}\frac{z^m-z}{m}x^m
+  =O_K(p^{-2s}).
+\end{align*}
+The estimate is uniform for $z$ in the compact set $K$. Since
+$\sum_pp^{-2s}<\infty$, the product of the regularized factors converges
+locally uniformly wherever none of the factors has a pole. The poles occur at
+$z=p^s$. The nearest one is $2^s$ for \eqref{eq:H-full} and $3^s$ for
+\eqref{eq:H-odd}. A locally uniform limit of analytic functions is analytic,
+which proves the proposition.
+\end{proof}
+
+At $s=1$ the point $z=2$ lies on the first singular circle for $H$ and lies
+strictly inside the first singular circle for $H_{\mathrm o}$. This is the
+analytic distinction used below.
+
+We shall also need the local change of variables used in the odd case.
+
+\begin{lemma}\label{lem:zeta-coordinate}
+Let $u=\log\zeta(s)$ for $s>1$, and let $s=s(u)$ be the inverse function. Put
+$\varepsilon(u)=s(u)-1$ and $J(u)=-s'(u)$. As $u\to\infty$,
+\begin{equation}\label{eq:zeta-coordinate}
+  \varepsilon(u)=\e^{-u}+\gamma\e^{-2u}+O(\e^{-3u}),
+  \qquad
+  J(u)=\e^{-u}+2\gamma\e^{-2u}+O(\e^{-3u}).
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+For $\varepsilon\to0^+$,
+\[
+  \zeta(1+\varepsilon)
+   =\varepsilon^{-1}+\gamma+O(\varepsilon).
+\]
+Set $x=\e^{-u}=1/\zeta(1+\varepsilon)$. Then
+\begin{align*}
+ x&=\frac{\varepsilon}{1+\gamma\varepsilon+O(\varepsilon^2)}
+   =\varepsilon-\gamma\varepsilon^2+O(\varepsilon^3).
+\end{align*}
+Inverting this power series gives
+$\varepsilon=x+\gamma x^2+O(x^3)$, which is the first formula in
+\eqref{eq:zeta-coordinate}. Since $x'= -x$, differentiation gives
+\[
+  \varepsilon'(u)=-x-2\gamma x^2+O(x^3).
+\]
+Thus $J(u)=-\varepsilon'(u)=x+2\gamma x^2+O(x^3)$.
 \end{proof}
 
 %=======================================================================
-\section{Bounding the sources}\label{sec:full-sources}
+\section{The odd sums}
 %=======================================================================
 
-We follow \cite{GLW}~\S3 throughout. Writing $F(s,z) = (s-1)^{-z}G(s,z)$ and
-$G_2(s,z) = (1 - z2^{-s})G(s,z)$, their (3.6) and (3.8) give
+Throughout this section write
 \[
-  I'_k = 2I'_{k,2} - \tfrac{\log 2}{4}2^{-k}B,
+  h_j(s)=[z^j]H_{\mathrm o}(s,z),
   \qquad
-  B = \sum_{i=0}^{k} \frac{2^i}{i!}
-      \Bigl[(k-i)^2 + O\bigl((k-i+1)\log(k-i+2)\bigr)\Bigr]
-      G_2^{(0,i)}(1,0),
+  b_j=h_j'(1)+2\gamma h_j(1).
 \]
-with $I'_{k,2} = 1/2 + O(3^{-k})$, and separately
-$f_k = I_k + O(1/(k2^k))$ with $I_k - I'_k = O(k/2^k)$. Tracking the powers of
-$2^k$ through these substitutions gives, exactly,
-\begin{equation}\label{eq:E-decomp}
-  E(k) = E_{S_1}(k)
-       + \tfrac{\log 2}{4}(V - 2kU)
-       + \tfrac{\log 2}{4}\Delta(k)
-       + E_{\exp}(k),
+Since
+$\zeta(s)^z=\sum_{m\geq0}(\log\zeta(s))^m z^m/m!$, coefficient extraction in
+\eqref{eq:euler-products} gives the exact identity
+\begin{equation}\label{eq:odd-coefficient-extraction}
+  P_k^{\mathrm{odd}}(s)
+  =\sum_{j=0}^k h_j(s)\frac{(\log\zeta(s))^{k-j}}{(k-j)!}.
 \end{equation}
-where $c_i := [z^i]G_2(1,z) = G_2^{(0,i)}(1,0)/i!$ and the four terms are
-treated in \S\S\ref{sec:S1}--\ref{sec:Eexp} below.
-
-\subsection{The \texorpdfstring{$S_1$}{S1} term}\label{sec:S1}
-
-Set $E_{S_1}(k) := 2^k(I_k - I'_k)$. \cite{GLW} bound
-$|G_2^{(0,i)}(s,0) - G_2^{(0,i)}(1,0)| \le (s-1)b_i$ for $s \in [1,2]$, where
-$b_i := \max_{s \in [1,2]} |G_2^{(1,i)}(s,0)|$, giving
-\[
-  2^k(I_k - I'_k) \;\le\; \sum_{i \ge 1}
-    \bigl|[z^i]G_2^{(1,0)}(1,z)\bigr|\,(k+1-i)\,2^{i-1}.
-\]
-
-The quantity $\alpha_+$ of \S\ref{sec:full-criterion} is a bound, uniform over
-$s \in [1,2]$, for the coefficients $[z^i]G_2^{(1,0)}(s,z)$ --- not merely
-their values at $s = 1$. This distinction is not cosmetic: the maximum over
-$s \in [1,2]$ drifts slightly into the interior for larger $i$, so the
-endpoint values do not suffice. The uniform bound is obtained from the
-identity
-\[
-  \log G_2(s,z) = z\bigl[\log(1 - 2^{-s}) + S_1(s) + P(s,1)\bigr]
-    + \sum_{j \ge 2} \frac{z^j P(s,j)}{j},
-\]
-with $P(s,j) := \sum_{p > 2} p^{-js}$ and $S_1(s) := \sum_{p>2}\log(1-p^{-s})$,
-evaluated with $s$ itself carried as a certified interval. Note that the
-linear-in-$z$ term receives contributions from \emph{both} Euler factors.
-
-The evaluation partitions $s \in [1,2]$ into narrow sub-intervals and runs the
-coefficient recursion directly with $s$ carried as an interval, rather than
-using Cauchy contour estimates: the latter are dominated by proximity to the
-pole at $s = 1$ and lose the cancellation that makes the coefficients small,
-by roughly two orders of magnitude.
-
-Writing $\beta_i := \max_{s \in [1,2]}|[z^i]G_2^{(1,0)}(s,z)|$ and
-\begin{equation}\label{eq:alpha-def}
-  \alpha_+ \;\ge\; \tfrac12 \sum_{i \le m} \beta_i 2^i
-  \qquad \text{for every } m,
+Using $u=\log\zeta(s)$ in Lemma~\ref{lem:integral-representation}, and noting
+that $s$ decreases from $\infty$ to $1$ as $u$ increases from $0$ to
+$\infty$, we obtain
+\begin{equation}\label{eq:odd-u-integral}
+  g_k
+  =\sum_{j=0}^k\int_0^\infty
+       \frac{u^{k-j}}{(k-j)!}\,h_j(s(u))J(u)\dd u.
 \end{equation}
-the estimate of this subsection is
+
+\subsection{The first two terms}
+
+\begin{proposition}\label{prop:odd-two-term}
+There is a remainder $R_k$ such that
+\begin{equation}\label{eq:odd-two-term}
+ g_k
+ =H_{\mathrm o}(1,1)
+  +2^{-k-1}\bigl(\partial_sH_{\mathrm o}(1,2)
+                  +2\gamma H_{\mathrm o}(1,2)\bigr)+R_k.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Let $x=\e^{-u}$. By Lemma~\ref{lem:zeta-coordinate},
+$J(u)=x+2\gamma x^2+O(x^3)$ and
+$\varepsilon(u)J(u)=x^2+O(x^3)$. Taylor's theorem at $s=1$ gives
+\[
+  h_j(1+\varepsilon)
+   =h_j(1)+\varepsilon h_j'(1)
+     +\frac{\varepsilon^2}{2}h_j''(1+\theta_{j,u}\varepsilon)
+\]
+for some $0<\theta_{j,u}<1$. Put
+\[
+ r_0(u)=J(u)-\e^{-u}-2\gamma\e^{-2u},
+ \qquad
+ r_1(u)=\varepsilon(u)J(u)-\e^{-2u}.
+\]
+Multiplication by $J(u)$ now gives the exact identity
+\begin{equation}\label{eq:odd-local-product}
+\begin{aligned}
+ h_j(s(u))J(u)
+  &=h_j(1)\e^{-u}+b_j\e^{-2u}+E_j(u),\\
+ E_j(u)
+  &=h_j(1)r_0(u)+h_j'(1)r_1(u)
+    +\frac{\varepsilon(u)^2J(u)}2
+       h_j''(1+\theta_{j,u}\varepsilon(u)).
+\end{aligned}
+\end{equation}
+Thus no error is suppressed in the notation $E_j$: its three summands are the
+Jacobian error, the first-order coordinate error and the Taylor remainder.
+
+Insert \eqref{eq:odd-local-product} into \eqref{eq:odd-u-integral}. Since
+\[
+  \int_0^\infty\frac{u^m}{m!}\e^{-ru}\dd u=r^{-m-1}
+  \qquad(r>0),
+\]
+the first two terms become
+\begin{align}
+ \sum_{j=0}^k h_j(1)
+   &=H_{\mathrm o}(1,1)-\sum_{j>k}h_j(1),
+   \label{eq:first-coefficient-tail}\\
+ \sum_{j=0}^k b_j2^{-(k-j+1)}
+   &=2^{-k-1}\bigl(\partial_sH_{\mathrm o}(1,2)
+                    +2\gamma H_{\mathrm o}(1,2)\bigr)
+     -2^{-k-1}\sum_{j>k}b_j2^j.
+   \label{eq:second-coefficient-tail}
+\end{align}
+Define $R_k$ to be the integral of the $E_j$ terms together with the two tails
+on the right of \eqref{eq:first-coefficient-tail} and
+\eqref{eq:second-coefficient-tail}. This gives \eqref{eq:odd-two-term}.
+\end{proof}
+
+\begin{lemma}\label{lem:odd-constants}
+One has
+\begin{equation}\label{eq:odd-H-values}
+  H_{\mathrm o}(1,1)=\frac12,
+  \qquad
+  H_{\mathrm o}(1,2)=d,
+\end{equation}
+and
+\begin{equation}\label{eq:odd-log-derivative}
+  \partial_s\log H_{\mathrm o}(1,2)
+   =2\log2-2\sum_{p\geq3}\frac{\log p}{(p-1)(p-2)}.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+At $s=z=1$, every factor in the product over $p\geq3$ cancels, and hence
+\[
+  H_{\mathrm o}(1,1)=(1-2^{-1})=\frac12.
+\]
+At $(s,z)=(1,2)$,
+\[
+  H_{\mathrm o}(1,2)
+   =\frac14\prod_{p\geq3}
+      \left(1-\frac2p\right)^{-1}\left(1-\frac1p\right)^2=d.
+\]
+
+For the derivative, take logarithms:
+\[
+ \log H_{\mathrm o}(s,2)
+ =2\log(1-2^{-s})
+  +\sum_{p\geq3}
+     \left[-\log(1-2p^{-s})+2\log(1-p^{-s})\right].
+\]
+The differentiated $p$th summand is $O((\log p)p^{-2s})$ locally uniformly
+near $s=1$, so termwise differentiation is permitted. At $s=1$ the first term
+contributes $2\log2$, while the $p$th summand contributes
+\begin{align*}
+ -\frac{2\log p}{p-2}+\frac{2\log p}{p-1}
+ =-\frac{2\log p}{(p-1)(p-2)}.
+\end{align*}
+Summing over $p\geq3$ proves \eqref{eq:odd-log-derivative}.
+\end{proof}
+
+Combining Proposition~\ref{prop:odd-two-term} and
+Lemma~\ref{lem:odd-constants} gives
+\begin{equation}\label{eq:odd-expansion}
+  g_k=\frac12+\beta2^{-k}+R_k,
+  \qquad
+  \beta=d\left(\gamma+\log2-
+  \sum_{p\geq3}\frac{\log p}{(p-1)(p-2)}\right).
+\end{equation}
+
+\subsection{The remainder}
+
+The following proposition records exactly the interval-arithmetic input used
+for the odd sums. The coefficient sums are weighted $\ell^1$ norms; their
+finiteness follows analytically from Proposition~\ref{prop:analyticity}, while
+the displayed numerical bounds are certified.
+
+\begin{proposition}[Certified odd input]\label{prop:odd-certified}
+Let
+\begin{align*}
+ S_0&=\sum_{m\geq0}3^m
+   \abs{[z^m](1-z/3)H_{\mathrm o}(1,z)},\\
+ S_1&=\sum_{m\geq0}3^m
+   \abs{[z^m](1-z/3)^2\partial_sH_{\mathrm o}(1,z)},\\
+ S_2&=\sup_{1\leq s\leq s(3)}
+   \sum_{m\geq0}3^m
+   \abs{[z^m](1-z/3)^3\partial_s^2H_{\mathrm o}(s,z)}.
+\end{align*}
+The certified computation gives
+\begin{equation}\label{eq:odd-certified-coefficients}
+ S_0\leq44.5987,
+ \qquad S_1\leq486.1945,
+ \qquad S_2\leq14414.
+\end{equation}
+For $u\geq3$, let $E_j(u)$ be the explicit expression in
+\eqref{eq:odd-local-product}. The Taylor-model computation certifies the
+aggregate inequality
+\begin{equation}\label{eq:odd-far-certified}
+ \sum_{j=0}^k\int_3^\infty
+  \frac{u^{k-j}}{(k-j)!}\abs{E_j(u)}\dd u
+ \leq \frac{C_ES_2}{18}(k+3)^3 3^{-k},
+ \qquad C_E\leq5.48910.
+\end{equation}
+For $0<u\leq3$, the non-asymptotic part and the two subtracted main terms
+satisfy the normalized bounds
+\begin{equation}\label{eq:odd-near-certified}
+  \abs{R_{k,\mathrm{near}}}
+  \leq(C_N+N_U)(k+3)^3 3^{-k},
+  \qquad C_N\leq367.8435,
+  \quad N_U\leq26.0962.
+\end{equation}
+Finally, $\beta>0$, the inequality
+\begin{equation}\label{eq:odd-base-59}
+  4900(62)^3 3^{-59}<\frac{\beta}{3}2^{-59}
+\end{equation}
+is certified, and direct interval evaluation gives
+$g_k>g_{k+1}$ for $1\leq k\leq60$.
+\end{proposition}
+
+\begin{lemma}\label{lem:pole-coefficient-bounds}
+Let $A(z)=\sum_{j\geq0}a_jz^j$.
+
+\noindent(i) If $\sum_m3^m\abs{[z^m](1-z/3)A(z)}\leq S$, then
+$\abs{a_j}\leq S3^{-j}$.
+
+\noindent(ii) If
+$\sum_m3^m\abs{[z^m](1-z/3)^2A(z)}\leq S$, then
+$\abs{a_j}\leq S(j+1)3^{-j}$.
+
+\noindent(iii) If
+$\sum_m3^m\abs{[z^m](1-z/3)^3A(z)}\leq S$, then
+\begin{equation}\label{eq:second-derivative-sum}
+  \sum_{j=0}^k3^j\abs{a_j}\leq\binom{k+3}{3}S.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Write $(1-z/3)^rA(z)=\sum_mg_mz^m$. Then
+\[
+  A(z)=\left(\sum_{q\geq0}\binom{q+r-1}{r-1}3^{-q}z^q\right)
+       \left(\sum_{m\geq0}g_mz^m\right).
+\]
+For $r=1$ this gives
+$\abs{a_j}\leq3^{-j}\sum_{m\leq j}3^m\abs{w_m}\leq S3^{-j}$.
+For $r=2$ it gives
+$\abs{a_j}\leq(j+1)3^{-j}S$. For $r=3$,
+\begin{align*}
+ \sum_{j=0}^k3^j\abs{a_j}
+ &\leq\sum_{m=0}^k3^m\abs{w_m}
+       \sum_{q=0}^{k-m}\binom{q+2}{2}\\
+ &=\sum_{m=0}^k3^m\abs{w_m}\binom{k-m+3}{3}
+ \leq\binom{k+3}{3}S.
+\end{align*}
+\end{proof}
+
+\begin{proposition}\label{prop:odd-remainder}
+For every $k\geq1$,
+\begin{equation}\label{eq:odd-remainder}
+  \abs{R_k}\leq4900(k+3)^3 3^{-k}.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+We bound separately the far Taylor remainder, the two coefficient tails in
+\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}, and the
+near range $0<u\leq3$.
+
+For the far range $u\geq3$, the exact error is the sum of the three terms in
+\eqref{eq:odd-local-product}; no asymptotic series is summed. The certified
+Taylor model gives directly
+\begin{equation}\label{eq:odd-taylor-bound}
+ \abs{R_{k,\mathrm{far}}}
+ \leq\frac{C_ES_2}{18}(k+3)^3 3^{-k}
+\end{equation}
+by \eqref{eq:odd-far-certified}.
+
+Lemma~\ref{lem:pole-coefficient-bounds}(i) gives
+\begin{equation}\label{eq:odd-first-tail-bound}
+ \abs{\sum_{j>k}h_j(1)}
+ \leq S_0\sum_{j>k}3^{-j}
+ =\frac{S_0}{2}3^{-k}.
+\end{equation}
+For the second tail, first put
+$B(z)=\partial_sH_{\mathrm o}(1,z)+2\gamma H_{\mathrm o}(1,z)$.
+Since $\gamma<0.578$, multiplication by $1-z/3$ and the triangle inequality
+give
+\begin{align*}
+ \sum_{m\geq0}3^m\abs{[z^m](1-z/3)^2B(z)}
+ &\leq S_1+4\gamma S_0<590.
+\end{align*}
+Hence Lemma~\ref{lem:pole-coefficient-bounds}(ii) gives
+$\abs{b_j}\leq590(j+1)3^{-j}$. Therefore
+\begin{align}
+ 2^{-k-1}\sum_{j>k}\abs{b_j}2^j
+ &\leq590\,2^{-k-1}\sum_{j>k}(j+1)(2/3)^j\notag\\
+ &=590(k+4)3^{-k}\notag\\
+ &\leq\frac{5\cdot590}{64}(k+3)^3 3^{-k},
+ \label{eq:odd-second-tail-bound}
+\end{align}
+where the last inequality follows from
+$(k+4)/(k+3)^3\leq5/64$ for $k\geq1$.
+
+Finally \eqref{eq:odd-near-certified} bounds the near range. Combining
+\eqref{eq:odd-taylor-bound}, \eqref{eq:odd-first-tail-bound},
+\eqref{eq:odd-second-tail-bound} and \eqref{eq:odd-near-certified}, and then
+substituting the certified constants, gives
+\begin{align*}
+ \abs{R_k}
+ &\leq\left(
+ \frac{5.48910\cdot14414}{18}
+ +\frac{44.5987}{2}
+ +\frac{5\cdot590}{64}
+ +367.8435+26.0962\right)(k+3)^3 3^{-k}\\
+ &<4900(k+3)^3 3^{-k}.
+\end{align*}
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main-odd}]
+The limit follows at once from \eqref{eq:odd-expansion} and
+Proposition~\ref{prop:odd-remainder}. For monotonicity,
+\begin{equation}\label{eq:odd-difference}
+ g_k-g_{k+1}
+ =\beta2^{-k-1}+R_k-R_{k+1}.
+\end{equation}
+It is enough to prove
+$\abs{R_m}<\beta2^{-m}/3$ for $m=k,k+1$, because then
+\[
+ \abs{R_k}+\abs{R_{k+1}}
+ <\frac{2\beta}{3}2^{-k-1}+\frac{\beta}{3}2^{-k-1}
+ =\beta2^{-k-1}.
+\]
+Define
+\[
+ q(k)=\frac{3\cdot4900}{\beta}(k+3)^3(2/3)^k.
+\]
+The certified inequality \eqref{eq:odd-base-59} says $q(59)<1$. Moreover
+\[
+ \frac{q(k+1)}{q(k)}
+ =\frac23\left(\frac{k+4}{k+3}\right)^3<1
+ \qquad(k\geq4).
+\]
+Thus $q(k)<1$ for every $k\geq59$, and
+Proposition~\ref{prop:odd-remainder} gives
+$\abs{R_k}<\beta2^{-k}/3$ throughout that range. Equation
+\eqref{eq:odd-difference} proves monotonicity for $k\geq59$. The certified
+direct computation covers $1\leq k\leq60$, so the two ranges cover every
+$k\geq1$.
+\end{proof}
+
+%=======================================================================
+\section{The unrestricted sums: an exact criterion}
+%=======================================================================
+
+Write
+\begin{equation}\label{eq:E-definition}
+  f_k=1-2^{-k}\bigl(a_1k^2+E(k)\bigr),
+  \qquad a_1=\frac{d\log2}{4}.
+\end{equation}
+Then
+\begin{align}
+ f_{k+1}-f_k
+ &=2^{-k-1}\left(a_1(k^2-2k-1)+2E(k)-E(k+1)\right).
+ \label{eq:full-difference}
+\end{align}
+Thus $f_k<f_{k+1}$ if and only if
+\begin{equation}\label{eq:full-criterion}
+ a_1(k^2-2k-1)+2E(k)-E(k+1)>0.
+\end{equation}
+We now derive the decomposition of $E(k)$ used to bound the second term.
+
+Set
+\[
+ F(s,z)=\prod_p(1-zp^{-s})^{-1},
+ \qquad
+ G_2(s,z)=(s-1)^z(1-z2^{-s})F(s,z),
+\]
+and write $c_i=[z^i]G_2(1,z)$. Since
+$G_2(1,z)=H_{\mathrm o}(1,z)$, the power series has radius $3$ and
+\begin{equation}\label{eq:c-moments}
+  \sum_{i\geq0}c_i=\frac12,
+  \qquad
+  \sum_{i\geq0}2^ic_i=d.
+\end{equation}
+Define the absolutely convergent signed moments
+\begin{equation}\label{eq:UV-def}
+ U=\sum_{i\geq0}i2^ic_i,
+ \qquad
+ V=\sum_{i\geq0}i^22^ic_i.
+\end{equation}
+
+Following \cite[\S3]{GLW}, put
+\begin{align}
+ I_k&=\int_1^2[z^k]F(s,z)\dd s,\label{eq:Ik-def}\\
+ I_k'&=\sum_{i+j+\ell=k}c_i
+     \int_1^2\frac{(-\log(s-1))^\ell}{\ell!}2^{-js}\dd s.
+     \label{eq:Ik-prime-def}
+\end{align}
+For $m\geq0$ define
+\begin{equation}\label{eq:Am-def}
+ A_m=2^m\sum_{j+\ell=m}
+     \int_1^2\frac{(-\log(s-1))^\ell}{\ell!}2^{-js}\dd s
+\end{equation}
+and
+\begin{equation}\label{eq:delta-def}
+ \delta_m=A_m-2^{m+1}+\frac{\log2}{4}m^2,
+ \qquad
+ \Delta(k)=\sum_{i=0}^k2^ic_i\delta_{k-i}.
+\end{equation}
+
+\begin{proposition}\label{prop:E-decomposition}
+Let
+\begin{align}
+ E_{S_1}(k)&=-2^k(I_k-I_k'),\label{eq:ES1-def}\\
+ L_k&=2\sum_{i>k}c_i,\qquad
+ Q_k=\sum_{i>k}2^ic_i(k-i)^2,\label{eq:LQ-def}\\
+ T_k&=f_k-I_k,\label{eq:Tk-def}\\
+ E_{\exp}(k)&=2^kL_k-\frac{\log2}{4}Q_k-2^kT_k.
+ \label{eq:Eexp-def}
+\end{align}
+Then the identity
+\begin{equation}\label{eq:E-decomposition}
+ E(k)=E_{S_1}(k)
+      +\frac{\log2}{4}(V-2kU)
+      -\Delta(k)+E_{\exp}(k)
+\end{equation}
+holds for every $k\geq1$.
+\end{proposition}
+
+\begin{proof}
+From \eqref{eq:Ik-prime-def} and \eqref{eq:Am-def},
+\[
+ I_k'=2^{-k}\sum_{i=0}^k2^ic_iA_{k-i}.
+\]
+Insert the definition of $\delta_{k-i}$:
+\begin{align}
+ I_k'
+ &=2\sum_{i=0}^kc_i
+   -\frac{\log2}{4}2^{-k}
+      \sum_{i=0}^k2^ic_i(k-i)^2
+   +2^{-k}\Delta(k).                                  \label{eq:Ik-prime-expanded}
+\end{align}
+By \eqref{eq:c-moments} and \eqref{eq:UV-def},
+\begin{align*}
+ 2\sum_{i=0}^kc_i&=1-L_k,\\
+ \sum_{i=0}^k2^ic_i(k-i)^2
+ &=\sum_{i\geq0}2^ic_i(k-i)^2-Q_k\\
+ &=dk^2-2kU+V-Q_k.
+\end{align*}
+Substitution into \eqref{eq:Ik-prime-expanded} gives
+\begin{align*}
+ I_k'
+ =1-2^{-k}\biggl(&a_1k^2+\frac{\log2}{4}(V-2kU)
+       -\Delta(k)+2^kL_k-\frac{\log2}{4}Q_k\biggr).
+\end{align*}
+Finally $f_k=I_k'+(I_k-I_k')+T_k$. Comparing with
+\eqref{eq:E-definition} yields \eqref{eq:E-decomposition}.
+\end{proof}
+
+%=======================================================================
+\section{Bounds for the four source terms}
+%=======================================================================
+
+\subsection{The $S_1$ term}
+
+For $s\in[1,2]$ set
+\[
+ \beta_i=\sup_{1\leq t\leq2}\abs{[z^i]\partial_sG_2(t,z)},
+ \qquad
+ \alpha_+=\frac12\sum_{i\geq0}\beta_i2^i.
+\]
+The series converges because the first $z$-pole of $\partial_sG_2$ is at
+$z=3^s$.
+
+\begin{lemma}\label{lem:S1-bound}
+For every $k\geq1$,
 \begin{equation}\label{eq:S1-bound}
-  |E_1(k)| \;\le\; \alpha_+ (k+1),
+ \abs{E_{S_1}(k)}\leq\alpha_+(k+1),
 \end{equation}
-which follows from the displayed sum by $(k - i + 1) \le (k+1)$ for every $i$
-in range. The certified sweep gives $\alpha_+ \le 15.4257$.
+and hence
+\begin{equation}\label{eq:S1-difference-bound}
+ \abs{2E_{S_1}(k)-E_{S_1}(k+1)}\leq\alpha_+(3k+4).
+\end{equation}
+\end{lemma}
 
-The sweep is run with primes to $P = 10^5$, $1600$ boxes in $s$, at $300$ bits
-of precision, giving $\alpha_+ = 15.425661$. Two features of the computation
-are worth recording. First, the maximum over $s \in [1,2]$ is not always
-attained at $s = 1$: it drifts into the interior for larger $i$, so the
-endpoint values do not suffice and the $s$-uniformity had to be closed by
-direct evaluation rather than assumed. Second, the recursion must be run with
-$s$ as an interval rather than replaced by a contour estimate, for the reason
-given above.
-
-The certified coefficients decay geometrically:
-
-\begin{center}
-\begin{tabular}{rll}
-\toprule
-$i$ & $\beta_i$ & $\widehat\gamma_i$ \\
-\midrule
- 1 & $1.67926$              & $2.79716$ \\
- 2 & $1.70018$              & $6.38236$ \\
- 3 & $0.93613$              & $5.41714$ \\
- 4 & $0.37329$              & $2.90307$ \\
- 5 & $0.11407$              & $1.12437$ \\
- 6 & $3.0352\times10^{-2}$  & $0.35601$ \\
- 7 & $6.6304\times10^{-3}$  & $9.2248\times10^{-2}$ \\
- 8 & $1.4954\times10^{-3}$  & $2.2660\times10^{-2}$ \\
- 9 & $2.6766\times10^{-4}$  & $4.7018\times10^{-3}$ \\
-10 & $7.5006\times10^{-5}$  & $1.2463\times10^{-3}$ \\
-12 & $6.3579\times10^{-6}$  & $1.0829\times10^{-4}$ \\
-15 & $2.6304\times10^{-7}$  & $5.3099\times10^{-6}$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent
-Both sequences peak at small $i$ --- $\beta_i$ at $i = 2$, $\widehat\gamma_i$
-at $i = 2$ as well --- and thereafter fall off by roughly a factor $4$ per
-step, so the weighted sums $\sum_i \beta_i 2^i$ and
-$\sum_i \widehat\gamma_i 2^i$ converge comfortably and the tails beyond the
-computed head are geometric.
-
-\subsection{The \texorpdfstring{$S_3$}{S3} term: signed, not bounded}\label{sec:S3}
-
-The combination $V - 2kU$ arises from the exact algebraic identity
-$(k-i)^2 - k^2 = i^2 - 2ik$, so that $\sum_i 2^i c_i (i^2 - 2ik) = V - 2kU$;
-it is computed exactly from the certified coefficients rather than bounded.
-This matters because the $c_i$ alternate in sign and the sums are
-correspondingly small: $U = 0 \pm 0.137$ and $V = 0 \pm 2.72$, against
-$\sum_i |c_i|2^i \approx 6.98$. The identity check
-$\sum_i c_i 2^i = G_2(1,2) = d$ confirms the certified head-plus-tail sum.
-
-Combining the two indices,
+\begin{proof}
+The mean value theorem gives
 \[
-  2(V - 2kU) - \bigl(V - 2(k+1)U\bigr) = V + 2U - 2kU,
+ \abs{[z^i]G_2(s,z)-c_i}\leq(s-1)\beta_i.
 \]
-whose worst case over the certified balls is $\ge -V_{\max} + (2-2k)U_{\max}$:
-the coefficient of $U$ is $2 - 2k < 0$ for $k \ge 2$, forcing the adverse
-choice $U = +U_{\max}$, while $V$'s coefficient is $+1$, forcing
-$V = -V_{\max}$. This is an exact optimisation over the interval box, not a
-triangle inequality. The contribution is scaled by $\log 2/4$, as is
-$\Delta(k)$ below, both arising through the same
-$-\tfrac{\log2}{4}2^{-k}B$ route.
+Subtracting \eqref{eq:Ik-prime-def} from the coefficient expansion for $I_k$
+and then setting $s=1+\e^{-t}$ gives
+\begin{align*}
+ \abs{I_k-I_k'}
+ &\leq\sum_{i+j+\ell=k}\beta_i
+   \int_0^\infty\frac{t^\ell}{\ell!}
+       2^{-j(1+\e^{-t})}\e^{-2t}\dd t\\
+ &\leq\sum_{i+j+\ell=k}\beta_i2^{-j}
+   \int_0^\infty\frac{t^\ell}{\ell!}\e^{-2t}\dd t\\
+ &=\sum_{i+j+\ell=k}\beta_i2^{-j-\ell-1}.
+\end{align*}
+Multiplying by $2^k$ and using $k=i+j+\ell$,
+\begin{align*}
+ \abs{E_{S_1}(k)}
+ &\leq\frac12\sum_{i=0}^k\beta_i2^i(k-i+1)
+ \leq\alpha_+(k+1).
+\end{align*}
+The triangle inequality now gives
+\[
+ \abs{2E_{S_1}(k)-E_{S_1}(k+1)}
+ \leq2\alpha_+(k+1)+\alpha_+(k+2)=\alpha_+(3k+4).
+\]
+\end{proof}
 
-\subsection{The \texorpdfstring{$S_2$}{S2} term: evaluating the Lemma 3.3 error}\label{sec:S2}
+\subsection{The signed moment term}
 
-Let $\delta_m := A_m - 2^{m+1} + \tfrac{\log2}{4}m^2$ denote the error term of
-\cite{GLW}'s Lemma~3.3, and
-$\Delta(k) := \sum_i 2^i c_i \delta_{k-i}$ its convolution against the
-coefficients --- the error is incurred at every index $k - i$ appearing in
-$B$, not once at $k$.
+\begin{lemma}\label{lem:UV-bound}
+If $\abs U\leq U_{\max}$ and $\abs V\leq V_{\max}$, then for $k\geq2$,
+\begin{equation}\label{eq:UV-bound}
+ \frac{\log2}{4}\bigl(V+(2-2k)U\bigr)
+ \geq-\frac{\log2}{4}\bigl(V_{\max}+(2k-2)U_{\max}\bigr).
+\end{equation}
+\end{lemma}
 
-The point of this subsection is that $\delta_m$ can be \emph{evaluated}, not
-merely bounded. Setting
-$B_j(u) := 2^{-je^{-u}} - 1 + j\log 2\,e^{-u} \ge 0$, one has the exact
-decomposition
-\begin{equation}\label{eq:delta-decomp}
-  \delta_m = -1 - \tfrac{\log 2}{4}m + \sum_{i=0}^{m} 2^i \beta_i(m-i),
+\begin{proof}
+The coefficient of $V$ is $1$, while the coefficient $2-2k$ of $U$ is
+negative. The minimum over the rectangle
+$[-U_{\max},U_{\max}]\times[-V_{\max},V_{\max}]$ is therefore attained at
+$U=U_{\max}$ and $V=-V_{\max}$, giving \eqref{eq:UV-bound}.
+\end{proof}
+
+Indeed,
+\begin{align}
+ 2(V-2kU)-\bigl(V-2(k+1)U\bigr)=V+(2-2k)U.
+ \label{eq:UV-exact-combination}
+\end{align}
+Thus Lemma~\ref{lem:UV-bound} is an exact optimization, not a termwise
+absolute-value estimate.
+
+\subsection{The $\delta$ term}
+
+The next lemma supplies the self-contained bound used for $\Delta(k)$.
+
+\begin{lemma}\label{lem:delta-decomposition}
+For $j\geq0$ and $u\geq0$ put
+\[
+ B_j(u)=2^{-j\e^{-u}}-1+j\log2\,\e^{-u}
+\]
+and
+\[
+ \eta_i(j)=\frac1{i!}\int_0^\infty u^i\e^{-u}B_j(u)\dd u.
+\]
+Then $B_j(u)\geq0$, $\eta_i(j)\geq0$, and
+\begin{equation}\label{eq:delta-decomposition}
+ \delta_m=-1-\frac{\log2}{4}m+
+          \sum_{i=0}^m2^i\eta_i(m-i).
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+With $s=1+\e^{-u}$ in \eqref{eq:Am-def},
+\[
+ A_m=\sum_{i=0}^m\frac{2^i}{i!}
+       \int_0^\infty u^i\e^{-u}2^{-(m-i)\e^{-u}}\dd u.
+\]
+Use
+$2^{-j\e^{-u}}=1-j\log2\,\e^{-u}+B_j(u)$. The constant term contributes
+\[
+ \sum_{i=0}^m2^i=2^{m+1}-1.
+\]
+The linear term contributes
+\begin{align*}
+ -\log2\sum_{i=0}^m\frac{2^i(m-i)}{i!}
+  \int_0^\infty u^i\e^{-2u}\dd u
+ &=-\frac{\log2}{2}\sum_{i=0}^m(m-i)\\
+ &=-\frac{\log2}{4}m(m+1).
+\end{align*}
+The remaining term is $\sum_{i=0}^m2^i\eta_i(m-i)$. Subtracting
+$2^{m+1}$ and adding $(\log2)m^2/4$ gives
+\eqref{eq:delta-decomposition}. Finally, for $x\geq0$,
+$\e^{-x}\geq1-x$; applying this with $x=j\log2\,\e^{-u}$ proves
+$B_j(u)\geq0$.
+\end{proof}
+
+\begin{lemma}\label{lem:delta-bound}
+For every $m\geq0$,
+\begin{equation}\label{eq:D-bound}
+ \abs{\delta_m}\leq D(m),
+ \qquad
+ D(m)=(\log2)m\log(m+1)+1.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The lower bound follows at once from \eqref{eq:delta-decomposition}:
+\[
+ \delta_m\geq-1-\frac{\log2}{4}m\geq-D(m)
+ \qquad(m\geq1),
+\]
+because $\log(m+1)\geq\log2>1/4$. For $m=0$,
+$\delta_0=-1=-D(0)$.
+
+For the upper bound, write
+$T_m=\sum_{i=0}^m2^i\eta_i(m-i)$. If $x\geq0$, then
+$\e^{-x}-1+x\leq\min(x,x^2/2)$. Hence, with
+$x=(m-i)\log2\,\e^{-u}$,
+\begin{align}
+ T_m
+ \leq\int_0^\infty \e^{-u}
+ \sum_{i=0}^m\frac{(2u)^i}{i!}
+ \min\left((m-i)\log2\,\e^{-u},
+ \frac{(m-i)^2(\log2)^2\e^{-2u}}2\right)\dd u.
+ \label{eq:Tm-integral-bound}
+\end{align}
+Assume $m\geq2$ and put $U_m=\log((m+1)/3)\geq0$. On $0\leq u\leq U_m$
+use the linear bound and
+$\sum_{i=0}^m(m-i)(2u)^i/i!\leq m\e^{2u}$; on $u\geq U_m$ use the quadratic
+bound and
+$\sum_{i=0}^m(m-i)^2(2u)^i/i!\leq m^2\e^{2u}$. Equation
+\eqref{eq:Tm-integral-bound} gives
+\begin{align*}
+ T_m
+ &\leq m\log2\int_0^{U_m}1\dd u
+   +\frac{m^2(\log2)^2}{2}\int_{U_m}^\infty\e^{-u}\dd u\\
+ &=m\log2\log\frac{m+1}{3}
+   +\frac{3m^2(\log2)^2}{2(m+1)}\\
+ &\leq m\log2\log(m+1)
+   +m\log2\left(-\log3+\frac32\log2\right)\\
+ &\leq m\log2\log(m+1),
+\end{align*}
+where the last inequality uses $3>2^{3/2}$. Thus
+\[
+ \delta_m=-1-\frac{\log2}{4}m+T_m
+ \leq(\log2)m\log(m+1)+1=D(m).
+\]
+For $m=1$, $B_0=0$ and
+$0\leq B_1(u)\leq(\log2)^2\e^{-2u}/2$, so
+\[
+ 0\leq T_1=\eta_0(1)
+ \leq\frac{(\log2)^2}{2}\int_0^\infty\e^{-3u}\dd u
+ =\frac{(\log2)^2}{6}.
+\]
+Hence
+$-D(1)< -1-\tfrac14\log2\leq\delta_1<0<D(1)$, which completes the
+remaining case.
+\end{proof}
+
+\begin{lemma}\label{lem:Delta-bound}
+If $S^*=\sum_{i\geq0}2^i\abs{c_i}$, then
+\begin{equation}\label{eq:Delta-bound}
+ \abs{2\Delta(k)-\Delta(k+1)}
+ \leq S^*\bigl(2D(k)+D(k+1)\bigr).
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Since $D$ is increasing,
+\begin{align*}
+ \abs{\Delta(k)}
+ &\leq\sum_{i=0}^k2^i\abs{c_i}D(k-i)
+ \leq S^*D(k).
+\end{align*}
+Apply the triangle inequality to $2\Delta(k)-\Delta(k+1)$.
+\end{proof}
+
+\subsection{The exponentially small term}
+
+The three terms in \eqref{eq:Eexp-def} are respectively a coefficient tail at
+$z=1$, a weighted coefficient tail at $z=2$, and the integral over $s\geq2$.
+The following is the exact numerical input used for them.
+
+\begin{proposition}[Certified unrestricted input]\label{prop:full-certified}
+The interval computations give
+\begin{equation}\label{eq:full-certified-constants}
+ \begin{gathered}
+  d\geq0.3786949,\qquad
+  S^*\leq6.9763,
+  \qquad \alpha_+\leq15.425661,\\
+  \abs U\leq U_{\max}=0.08436,
   \qquad
-  \beta_i(j) := \frac{1}{i!}\int_0^\infty u^i e^{-u} B_j(u)\,du \ge 0 .
+  \abs V\leq V_{\max}=1.907462.
+ \end{gathered}
 \end{equation}
-Since every $\beta_i(j) \ge 0$ and $B_j$ is decreasing in $u$, endpoint
-bracketing gives certified enclosures of $\delta_m$, with exact
-incomplete-gamma panel masses for the $u$-integration.
-
-Bounding $\Delta(k)$ instead by $S^\ast \max_m|\delta_m|$, using \cite{GLW}'s
-stated $|\delta_m| \le Cm\log(m+1)$, discards the same sign cancellation
-exploited in \S\ref{sec:S3} and costs roughly two orders of magnitude.
-
-In the formalisation the bound actually used is the uniform one,
-\begin{equation}\label{eq:Dbound}
-  D(m) := (\log 2)\, m \log(m+1) + 1,
-  \qquad |\delta_m| \le D(m),
+For every $k\geq900$,
+\begin{equation}\label{eq:Eexp-certified}
+ \abs{E_{\exp}(k)}\leq\frac{1.45}{k}+10^{-3}.
 \end{equation}
-and \eqref{eq:Dbound} is \emph{proved} rather than assumed: the upper bound
-follows because the $\beta_i(j)$ in \eqref{eq:delta-decomp} are non-negative
-and $c^\ast(1) < 0$, the lower because
-$(\log 2)m\log(m+1) \ge \tfrac{\log2}{4}m$ for $m \ge 1$, and $m = 0$ anchors
-at $\delta_0 = -1$, $D(0) = 1$. Thus $S^\ast[2D(k) + D(k+1)]$ in
-\eqref{eq:Rbound} is the unsigned route: it discards the cancellation
-described above, at the cost of a larger threshold, in exchange for a bound
-that requires no $\delta$-table at all.
+The direct certificates establish $f_k<f_{k+1}$ on
+\begin{equation}\label{eq:full-sweep-ranges}
+  6\leq k\leq199,
+  \qquad 79\leq k\leq899,
+  \qquad 900\leq k\leq2439.
+\end{equation}
+\end{proposition}
 
-\begin{remark}
-The signed evaluation of \eqref{eq:delta-decomp} is what the certified
-$\delta$-table computes, and it is what brings the threshold down; the
-formalised route uses \eqref{eq:Dbound} instead. The two are alternatives, not
-a chain: \eqref{eq:Dbound} is weaker but self-contained.
-\end{remark}
-
-\subsection{The exponentially small term}\label{sec:Eexp}
-
-$E_{\exp}(k)$ collects three contributions: the $s \ge 2$ tail
-$2^k \cdot O(1/(k2^k))$, the $2^k \cdot O(3^{-k})$ piece from
-$I'_{k,2} = 1/2 + O(3^{-k})$, and the
-$\tfrac{\log2}{4}k^2 \cdot O((3/2)^{-k})$ correction from
-$B' = d + O((3/2)^{-k})$. Each is bounded by transferring
-$\sup|H| \le 101.245$, certified on $|z| = 4.2$, to the relevant inner circles
-by the maximum principle. All are below $10^{-180}$ in the range of interest,
-so that the constant $3(1.45/k + 10^{-3})$ appearing in \eqref{eq:Rbound} is
-enormously conservative.
-
-\subsection{The certified constants}
-
-From \texttt{NumericalFacts}:
-
-\begin{center}
-\begin{tabular}{lll}
-\toprule
-constant & certified bound & r\^ole \\
-\midrule
-$d$        & $|0.3786950 - d| \le 5.3\times10^{-8}$   & $a_1 = \tfrac14 d\log 2$ \\
-$\rho$     & $|-0.1749323 - \rho| \le 6.6\times10^{-8}$ & tail bounds \\
-$S^\ast$   & $\le 6.9763$      & \S\ref{sec:S3} \\
-$\alpha_+$ & $15.425661$       & $\beta_i$ sweep, \S\ref{sec:S1} \\
-$\Gamma$   & $104.5196$        & $\widehat\gamma_i$ sweep, Theorem~6.1 \\
-$U_{\max}$ & $0.08436$         & \S\ref{sec:S3}, valid $k \ge 900$ \\
-$V_{\max}$ & $1.907462$        & \S\ref{sec:S3}, valid $k \ge 900$ \\
-$K_1$      & $2433$            & analytic threshold \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-Here $\alpha_+$ is as in \S\ref{sec:S1}. The constant $\Gamma$ governs the
-refined form of the $S_1$ estimate: writing
-$\widehat\gamma_i := \max_{s \in [1,2]} |[z^i]G_2^{(2,0)}(s,z)|$ for the
-$s$-uniform bound on the \emph{second} $s$-derivatives, set
+The coefficient tails in \eqref{eq:Eexp-certified} are obtained only after the
+pole at $z=3$ has been removed. Put
 \[
-  \Gamma := \tfrac12 \sum_{i \ge 1} \widehat\gamma_i\, 2^i .
+ \widetilde G_2(z)=(1-z/3)G_2(1,z)=\sum_{m\geq0}g_mz^m.
 \]
-Applying Taylor's theorem with second-order remainder to $g_i$ on $(1,2)$ ---
-that is, $g_i(s) = c_i + (s-1)\widehat b_i + R_i(s)$ with
-$|R_i(s)| \le (s-1)^2\widehat\gamma_i/2$ --- replaces the first-order estimate
-of \S\ref{sec:S1} by one whose remainder is quadratic in $s-1$.
-
-What makes the refinement work is that $\Gamma$ is independent of $k$. This
-is the identity $\sum_{l \ge 0} 2^l 3^{-l-1} = 1$: the $l$-th derivative
-contributes $2^l$ while the pole at $z = 3$ contributes $3^{-l-1}$, and the
-two balance exactly.
-
-The $\widehat\gamma_i$ are evaluated by an interval sweep in Arb using the
-closed form $G_2^{(2,0)} = G_2\,(z^2c^2 + zc')$, where $c = c(s,z)$ is as in
-\S\ref{sec:S1}; that closed form is proved rather than assumed. At the pinned
-settings --- primes to $P = 10^5$, $800$ boxes, $300$ bits --- the sweep gives
-$\Gamma = 104.5196$, as a head contribution $203.118$ and a tail $5.921$
-against $\sup|G_2^{(2,0)}|\le 19881.2$ on $|z| = 2.9$.
-
-The refined estimate is what lowers the sweep threshold to $K_0 = 78$, and so
-what lets \texttt{sweep\_mid} begin at $k = 79$ rather than higher; the
-unrefined first-order route of \S\ref{sec:S1} would leave a gap between the
-sweeps.
-
-\begin{remark}\label{rem:two-routes}
-Two routes through \S\ref{sec:S2} are available, and we have taken the weaker
-one. The uniform bound \eqref{eq:Dbound} is self-contained and proved; it
-costs a larger analytic threshold, which the certified sweeps then absorb. The
-$\delta$-table route evaluates \eqref{eq:delta-decomp} and exploits the sign
-cancellation, giving a much smaller threshold at the price of a substantial
-certified computation. Since the sweeps cover the intervening range either
-way, the theorem does not depend on the choice, and we prefer the route that
-rests on less.
-\end{remark}
-
-From \texttt{NumericalFacts}, with the values from the current certified run:
+The certified contour bound is
+$\sup_{\abs z=4.2}\abs{\widetilde G_2(z)}\leq101.245$. Hence
+$\abs{w_m}\leq101.245\,4.2^{-m}$, and from
+$G_2(1,z)=(1-z/3)^{-1}\widetilde G_2(z)$ we obtain
+\begin{equation}\label{eq:ci-geometric-bound}
+ \abs{c_i}
+ \leq101.245\,3^{-i}\sum_{m=0}^i(3/4.2)^m
+ <354.36\,3^{-i}.
+\end{equation}
+Consequently, with $C=354.36$,
+\begin{align*}
+ 2^k\abs{L_k}
+ &\leq C(2/3)^k,\\
+ \frac{\log2}{4}\abs{Q_k}
+ &\leq\frac{\log2}{4}C(2/3)^k
+       \sum_{r\geq1}r^2(2/3)^r
+ =\frac{30C\log2}{4}(2/3)^k.
+\end{align*}
+Both terms are less than $10^{-3}$ in total for $k\geq900$. The remaining
+certified tail inequality is $2^k\abs{T_k}\leq1.45/k$. Substitution into
+\eqref{eq:Eexp-def} proves \eqref{eq:Eexp-certified}; no asymptotic
+$O$-term enters the final criterion.
 
 %=======================================================================
-\section{Assembly and the certified ranges}\label{sec:full-assembly}
+\section{Assembly of the unrestricted theorem}
 %=======================================================================
 
-The proof of Theorem~\ref{thm:main-full} splits $[6,\infty)$ into four ranges.
-The first three are certified computations; the fourth is the analytic
-argument of Proposition~\ref{prop:crit-ge-phi}.
+For $k\geq900$ define
+\begin{align}
+ R(k)=&\ \frac{\log2}{4}
+ \bigl((2k-2)U_{\max}+2V_{\max}+4U_{\max}\bigr)\notag\\
+ &+S^*\bigl(2D(k)+D(k+1)\bigr)
+   +\alpha_+(3k+4)
+   +3\left(\frac{1.45}{k}+10^{-3}\right),
+ \label{eq:R-def}
+\end{align}
+and
+\begin{equation}\label{eq:phi-def}
+ \varphi(k)=a_1(k^2-2k-1)-R(k).
+\end{equation}
 
-\begin{center}
-\begin{tabular}{lll}
-\toprule
-range & source & field \\
-\midrule
-$6 \le k \le 199$    & the prior certified $f_k$ computation      & \texttt{sweep\_low} \\
-$200 \le k \le 899$  & refined criterion sweep ($K_0 = 78$)      & \texttt{sweep\_mid} \\
-$900 \le k \le 2439$ & extended $\delta$-table sweep             & \texttt{sweep\_high} \\
-$k \ge 2440$         & derivative domination, proved here        & \texttt{phi\_at\_k1}, \texttt{phi\_mono} \\
-\bottomrule
-\end{tabular}
-\end{center}
+\begin{proposition}\label{prop:criterion-phi}
+For $k\geq900$,
+\begin{equation}\label{eq:E-difference-lower}
+ 2E(k)-E(k+1)\geq-R(k).
+\end{equation}
+Consequently $\varphi(k)>0$ implies $f_k<f_{k+1}$.
+\end{proposition}
 
-\noindent
-The ranges overlap pairwise, so their union is $[6,\infty)$ and
-Theorem~\ref{thm:main-full} follows.
+\begin{proof}
+Apply \eqref{eq:E-decomposition} at $k$ and $k+1$. The $S_1$ contribution is
+bounded by \eqref{eq:S1-difference-bound}. The signed moment contribution is
+\[
+ \frac{\log2}{4}\bigl(V+(2-2k)U\bigr),
+\]
+which is bounded below by \eqref{eq:UV-bound}. The first line of
+\eqref{eq:R-def} is slightly larger than the resulting quantity, since
+\[
+ V_{\max}+(2k-2)U_{\max}
+ \leq(2k-2)U_{\max}+2V_{\max}+4U_{\max}.
+\]
+The $\Delta$ contribution is bounded by \eqref{eq:Delta-bound}. Finally,
+\eqref{eq:Eexp-certified} gives
+\[
+ \abs{2E_{\exp}(k)-E_{\exp}(k+1)}
+ \leq2\left(\frac{1.45}{k}+10^{-3}\right)
+     +\left(\frac{1.45}{k+1}+10^{-3}\right)
+ \leq3\left(\frac{1.45}{k}+10^{-3}\right).
+\]
+Adding the four lower bounds proves \eqref{eq:E-difference-lower}. Equation
+\eqref{eq:full-difference} then gives
+\[
+ f_{k+1}-f_k\geq2^{-k-1}\varphi(k),
+\]
+which proves the last assertion.
+\end{proof}
 
-For the analytic range, Proposition~\ref{prop:crit-ge-phi} reduces matters to
-positivity of $\varphi$. The certified scan gives
-$\varphi(2440) = 89 \pm 0.35 > 0$, and $\varphi(m) \le \varphi(m+1)$ for every
-$m \ge 2440$; induction gives $\varphi(k) > 0$, hence $f_k < f_{k+1}$, for all
-$k \ge 2440$.
+\begin{lemma}\label{lem:phi-base}
+With the certified constants in Proposition~\ref{prop:full-certified},
+$\varphi(2440)>1158$.
+\end{lemma}
 
-\begin{remark}
-The monotonicity of $\varphi$ above $2440$ is a statement about
-\eqref{eq:Rbound}: the leading term $a_1 k^2$ grows quadratically while $R(k)$
-grows linearly in $k$ apart from the $\delta$-table contribution, which is
-controlled by the same certified table.
-\end{remark}
+\begin{proof}
+Substitution in \eqref{eq:phi-def} gives the following certified one-sided
+bounds:
+\begin{align*}
+ a_1(2440^2-2\cdot2440-1)&>390371.6,\\
+ \frac{\log2}{4}
+ \bigl(4878U_{\max}+2V_{\max}+4U_{\max}\bigr)&<72.1,\\
+ S^*\bigl(2D(2440)+D(2441)\bigr)&<276163.2,\\
+ \alpha_+(3\cdot2440+4)&<112977.6,\\
+ 3\left(\frac{1.45}{2440}+10^{-3}\right)&<0.005.
+\end{align*}
+Therefore
+\[
+ \varphi(2440)
+ >390371.6-72.1-276163.2-112977.6-0.005>1158.
+\]
+\end{proof}
+
+\begin{lemma}\label{lem:phi-monotone}
+The function $k\mapsto\varphi(k)$ is strictly increasing for integers
+$k\geq2440$.
+\end{lemma}
+
+\begin{proof}
+First,
+\[
+ a_1\bigl((k+1)^2-2(k+1)-1-(k^2-2k-1)\bigr)=a_1(2k-1).
+\]
+Moreover
+\begin{align*}
+ D(m+1)-D(m)
+ &=\log2\left(\log(m+2)+m\log\left(1+\frac1{m+1}\right)\right)\\
+ &\leq\log2\bigl(\log(m+2)+1\bigr).
+\end{align*}
+The last term in \eqref{eq:R-def} decreases with $k$. Hence
+\begin{align}
+ R(k+1)-R(k)
+ \leq&\ \frac{\log2}{2}U_{\max}+3\alpha_+\notag\\
+ &+S^*\log2\bigl(2\log(k+2)+\log(k+3)+3\bigr).
+ \label{eq:R-increment-bound}
+\end{align}
+Let the right side of
+\begin{align*}
+ M(x)=&\ a_1(2x-1)-\frac{\log2}{2}U_{\max}-3\alpha_+\\
+ &-S^*\log2\bigl(2\log(x+2)+\log(x+3)+3\bigr)
+\end{align*}
+be defined for real $x\geq2440$. Then
+\[
+ M'(x)=2a_1-S^*\log2\left(\frac2{x+2}+\frac1{x+3}\right)>0,
+\]
+because the certified lower bound for $d$ gives $2a_1>0.1312$, whereas the
+subtracted term is $<0.006$ for $x\geq2440$. Direct substitution gives
+$M(2440)>146$. Thus $M(k)>0$ for every $k\geq2440$. Together with
+\eqref{eq:R-increment-bound}, this yields
+$\varphi(k+1)-\varphi(k)>0$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main-full}]
+By Lemmas~\ref{lem:phi-base} and \ref{lem:phi-monotone},
+$\varphi(k)>0$ for every $k\geq2440$. Proposition~\ref{prop:criterion-phi}
+therefore gives $f_k<f_{k+1}$ on that range. The certified ranges in
+\eqref{eq:full-sweep-ranges} cover every integer from $6$ through $2439$.
+Together the analytic and certified ranges cover all $k\geq6$.
+\end{proof}
 
 %=======================================================================
-\section{A general principle}\label{sec:general}
+\section{A general principle}
 %=======================================================================
 
 \begin{conjecture}\label{conj:general}
-Let $\mathcal{P}$ be a set of primes with least element $q$, and let
-$f_k^{\mathcal{P}} = \sum 1/(n \log n)$ over those $n$ with $\Om(n) = k$ and
-all prime factors in $\mathcal{P}$. Then the $k^2$ term is present --- and
-hence the sequence is eventually increasing --- if and only if $q = 2$.
+Let $\mathcal P$ be a set of primes with least element $q$, and let
+$f_k^{\mathcal P}$ be the sum of $1/(n\log n)$ over integers $n$ with
+$\Omega(n)=k$ and all prime factors in $\mathcal P$. The sequence
+$f_k^{\mathcal P}$ is eventually increasing if and only if $q=2$.
 \end{conjecture}
 
-The heuristic is Proposition~\ref{prop:analyticity}. The regularised product
-$H^{\mathcal{P}}(s,\cdot)$ is analytic in $|z| < q^{s}$, and the evaluation
-point relevant to the $2^{-k}$ scale is $z = 2$; so $z = 2$ lies on the
-boundary at $s = 1$ precisely when $q = 2$, and strictly inside otherwise. On
-the boundary the $k^2$ factor appears and competes with $2^{-k}$; strictly
-inside it does not.
+The regularized Euler product for $\mathcal P$ has its first $z$-singularity
+at $z=q^s$. At $s=1$, the point $z=2$ lies on this singular circle exactly
+when $q=2$. If $q\geq3$, the coefficient extraction at $z=2$ is interior and
+gives a constant multiple of $2^{-k}$, as in Section~3. If $q=2$, the
+extraction takes place at the boundary and may produce the factor $k^2$.
 
-Theorem~\ref{thm:main-full} is the case $\mathcal{P} = \{\text{all primes}\}$,
-$q = 2$, and Theorem~\ref{thm:main-odd} is the case
-$\mathcal{P} = \{p \ge 3\}$, $q = 3$. For $q \ge 3$ the argument of
-\S\ref{sec:odd} applies with only the constants changing: the limit is the
-omitted Euler factors evaluated at $z = s = 1$, the coefficient of $2^{-k}$ is
-$H^{\mathcal{P}}(1,2)\,(\partial_s \log H^{\mathcal{P}}(1,2) + 2\gamma)$, and
-the remainder is controlled by Cauchy's estimate after factoring out the pole
-at $z = q^{s}$.
-
-Two caveats keep this a conjecture rather than a theorem. The first concerns
-the ``if'' direction for general $\mathcal{P}$: the argument of
-\S\ref{sec:odd} needs the regularised product to converge and its coefficients
-to be extractable, and while $\sum_{p \in \mathcal{P}} p^{-2s}$ converges for
-any $\mathcal{P}$, the identification of the limit and of the coefficient of
-$2^{-k}$ uses the full Euler product for $\zeta$. For $\mathcal{P}$ the set of
-all primes above a bound, or a union of arithmetic progressions of primes, the
-missing factors are controlled and the argument should go through unchanged;
-for arbitrary $\mathcal{P}$ we do not claim it.
-
-The second concerns the ``only if'' direction. That $2 \in \mathcal{P}$ places
-$z = 2$ on the boundary is immediate, but that the $k^2$ term is then
-genuinely present --- rather than vanishing by some cancellation --- is a
-statement we have verified only for $\mathcal{P}$ the set of all primes, where
-it is \cite{GLW}.
-
-\begin{remark}
-The two theorems of this paper are the two extreme cases: removing the single
-prime $2$ already moves the radius past the evaluation point, and no smaller
-change does. In that sense the conjecture asserts that nothing between them
-occurs.
-\end{remark}
+Two points remain to turn this mechanism into a theorem for arbitrary
+$\mathcal P$. First, the regularized product must provide enough uniform
+control to identify the limiting constant and the coefficient at $z=2$.
+Second, in the boundary case one must rule out cancellation of the $k^2$
+coefficient. The present paper proves the two extremal cases
+$\mathcal P=\{\text{all primes}\}$ and $\mathcal P=\{p:p\geq3\}$.
 
 %=======================================================================
-\section{What is proved and what is assumed}\label{sec:assumed}
+\section{Certification and formalization}
 %=======================================================================
 
-We separate three things: what is proved in Lean, what is computed in ball
-arithmetic and taken as a hypothesis, and what is inherited from
-\cite{GLW}.
+The logical division is as follows.
 
-\begin{itemize}
-  \item The analytic reductions of \S\S\ref{sec:mechanism}--\ref{sec:odd} and
-        \S\S\ref{sec:full-criterion}--\ref{sec:full-assembly} are formalised in
-        Lean~4 with no \texttt{sorry}, resting only on \texttt{propext},
-        \texttt{Classical.choice} and \texttt{Quot.sound}.
-  \item The numerical inputs are ball-arithmetic computations, taken as
-        hypotheses rather than proved within the formalisation. For
-        Theorem~\ref{thm:main-full} these are collected in a structure
-        \texttt{NumericalFacts}: the enclosures of $d$ and $\rho$, the bounds
-        $S^\ast \le 6.9763$, $\alpha_+ \le 15.4257$ and $\Gamma \le 104.52$,
-        the aggregate source bound and the two $\varphi$ facts at the
-        analytic threshold, and the three sweeps
-        $[6,199]$, $[79,899]$, $[900,2439]$. For
-        Theorem~\ref{thm:main-odd} the corresponding structure carries the
-        enclosure of $\Sodd$, the bound on $M_R$, the expansion
-        \eqref{eq:odd-expansion} with its remainder bound, and the sweep at
-        small $k$.
-  \item Consequently both theorems are proved \emph{conditionally on} those
-        computations, in the same sense and to the same extent. What the
-        formalisation establishes is that no gap remains in the reduction:
-        given the certified inputs, the analytic argument is complete and
-        machine-checked.
-  \item A second form of the main theorem replaces the aggregate source
-        bound by the quantities the certified package actually computes ---
-        the $\beta_i$ sweep, $M_0$, the $S^\ast$ and $\alpha_+$ partial-sum
-        bounds, the $U$/$V$ and $E_{\exp}$ sources --- and derives the source
-        bound from them, so that \S\S\ref{sec:S1}--\ref{sec:Eexp} are
-        load-bearing rather than merely stated.
-  \item Two facts absent from Mathlib were proved in the course of the odd
-        formalisation and may be of independent use:
-        $\lim_{s \to 1^+}(\zeta(s) - 1/(s-1)) = \gamma$, and that
-        $\zeta(s) - 1/(s-1)$ extends analytically across $s = 1$.
-\end{itemize}
+The analytic proof consists of Lemma~\ref{lem:integral-representation},
+Proposition~\ref{prop:analyticity}, the coefficient identities
+\eqref{eq:odd-u-integral} and \eqref{eq:E-decomposition}, the remainder
+reduction in Proposition~\ref{prop:odd-remainder}, and the source estimates in
+Sections~5--6. These reductions are formalized in Lean~4 without
+\texttt{sorry}.
+
+The numerical propositions are Proposition~\ref{prop:odd-certified} and
+Proposition~\ref{prop:full-certified}. Their statements are finite systems of
+interval inequalities. They are established by Arb/FLINT through its Python bindings. The Lean
+formalization imports the resulting intervals
+as hypotheses and proves that those hypotheses imply
+Theorems~\ref{thm:main-full} and \ref{thm:main-odd}.
+
+For the odd theorem, the coefficient bounds in
+\eqref{eq:odd-certified-coefficients} are obtained by cancelling the pole at
+$z=3$ before applying coefficient recursion or Cauchy bounds. The range
+$0<u\leq3$ is evaluated directly; for $u\geq3$ the expansions of
+Proposition~\ref{prop:odd-two-term} apply, with $C_E$ certified as follows.
+
+The constant $C_E$ is certified uniformly on $s\in(1,s(3)]$, not at sample
+points. The four quantities composing it are ratios in which the pole of
+$\zeta$ at $s=1$ cancels. Interval evaluation on boxes of $s$ loses that
+cancellation, since each occurrence of $s-1$ is widened independently, and the
+enclosures diverge however finely $(1,s(3)]$ is partitioned. Expanding $\zeta$
+as a power series in $\sigma=s-s_0$ about $s_0=1+E/2$, where $E=s(3)-1$, makes
+the cancellation symbolic. The resulting series are evaluated on
+$\abs{\sigma}\leq E/2$, which covers the range in one step; their coefficients
+fall off geometrically, and truncating after nine terms contributes less than
+$10^{-20}$.
+
+The constant $C_N$ requires $\Pi(t)=\sum_{p\geq3}p^{-t}$ at
+$t=s,2s,\dots,200s$ for $s=s(3)$. At $s\approx1.05$ these converge too slowly
+to truncate: the Rosser--Schoenfeld bound applied beyond $10^8$ still
+overestimates the tail twofold, and that excess compounds through the
+coefficient recursion. Instead $\Pi$ is evaluated by the M\"obius series
+$\Pi(t)=\sum_{n\geq1}\mu(n)n^{-1}\log\zeta(nt)-2^{-t}$, which requires no prime
+enumeration. The recursion itself is run at $600$ bits, since cancellation
+costs about one digit per three steps over the $200$ terms used.
+
+For the unrestricted theorem, the $s$-uniform coefficient bounds defining
+$\alpha_+$ are obtained by carrying $s$ as an interval over a partition of
+$[1,2]$. The signed moments $U$ and $V$ are evaluated before absolute values
+are taken. This order is essential: replacing them by
+$\sum_i2^i\abs{c_i}$ loses the cancellation used in
+\eqref{eq:UV-exact-combination}.
 
 %=======================================================================
 \appendix
-\section{Certified computations}\label{app:numerics}
+\section{Certified quadrature}
 %=======================================================================
 
-All interval computations use Arb/FLINT through python-flint. The Stieltjes
-constants entering the representation of $\zeta(s)(s-1)$ in \S\ref{sec:S1},
-and the $\zeta$ evaluations used in boundary checks, are FLINT's own certified
-implementations. The $\delta$-table of \S\ref{sec:S2} was cross-validated
-against an independently written high-precision implementation of the original
-integral definition of $A_m$, at $40$--$80$ decimal digits, agreeing to six
-or more significant figures at each test point.
-
-The scripts are \texttt{numerics/} for Theorem~\ref{thm:main-full} and
-\texttt{odd-proof/numerics/} for Theorem~\ref{thm:main-odd}. The two sweeps behind
-$\alpha_+$ and $\Gamma$ use $1000$ and $600$ boxes respectively in
-$s \in [1,2]$.
-
-For the odd case, $M_R$ is computed over $40$ boxes in $s \in [1,2]$ and $100$
-boxes in $\theta$ on the circle, with primes to $5 \times 10^4$ and an
-explicit tail bound. Subdividing in $s$ is essential rather than cosmetic: a
-single box over $[1,2]$ gives only $M_R \le 739605$.
-
-The five constants of \eqref{eq:odd-calibrated} beyond $S$ are certified as
-follows.
-\begin{center}
-\begin{tabular}{lll}
-\toprule
-constant & bound & method \\
-\midrule
-$S_0$   & $\le 44.5987$ & first-order pole; recursion (head), Cauchy (tail) \\
-$S_1$   & $\le 486.1945$ & second-order pole; recursion $+$ Cauchy tail \\
-$C_N$   & $\le 367.8435$ & Moebius prime zeta, recursion $+$ Cauchy tail \\
-$N_U$   & $\le 26.0962$ & exact head to $k = 400$, explicit envelope beyond \\
-$C_E$   & $\le 5.48910$ & Taylor model in $\varepsilon = s-1$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-\noindent
-All five are \texttt{arb} enclosures end to end, with no floating-point step in
-the chain, and two of them needed a change of method to get there. $C_E$ is
-certified over the whole range $s \in (1,\,s(3)]$ rather than at a sample of
-points. The four constants making it up are ratios in which the pole
-of $\zeta$ at $s = 1$ cancels, so interval evaluation on boxes of $s$ loses the
-cancellation and diverges however narrow the boxes are taken; expanding $\zeta$
-as a power series about $1 + E/2$ makes the cancellation symbolic, and the
-resulting series --- whose coefficients decay --- evaluates tightly on the
-whole disc in one step. $C_N$ requires the prime sums $\sum_{p\ge3}p^{-t}$ for $t = s,2s,\dots,200s$;
-enumerating primes to a cutoff will not do, since at $s \approx 1.05$ the
-convergence is slow enough that a cutoff of $10^8$ with Rosser--Schoenfeld
-still leaves a factor of two, which compounds through the recurrence. The
-M\"obius series $P(t) = \sum_n \mu(n)n^{-1}\log\zeta(nt)$ avoids primes
-entirely. The scripts are \texttt{s0\_recursion.py},
-\texttt{s1\_recursion.py}, \texttt{s1\_cauchy.py}, \texttt{cn\_certified.py}, \texttt{nearu\_certified.py}
-and \texttt{ce\_taylor.py}.
-
-The two sweeps behind $\alpha_+$ and $\Gamma$ are run at pinned settings:
-primes to $P = 10^5$ and $300$ bits of precision in both, with $1600$ boxes in
-$s$ for $\alpha_+$ and $800$ for $\Gamma$. The $f_k$ certificate records its
-own parameters --- $2194$ panels of width $0.8$, $52$ Gauss--Legendre points
-per panel, $1400$ bits, Bernstein-ellipse parameter $1.45$ --- together with a
-SHA-256 hash of the payload excluding the hash field itself.
-
-The quadrature error is controlled by \cite[Thm.~19.3]{ATAP}: if $f$ is
-analytic on $[-1,1]$ and continues analytically to the open Bernstein ellipse
-$E_\rho$ --- the ellipse with foci $\pm 1$ whose semimajor and semiminor axes
-sum to $\rho$ --- with $|f| \le M$ there, then $(n+1)$-point Gauss quadrature
-satisfies, for $n \ge 2$,
+The direct values of $f_k$ use Gauss--Legendre quadrature on $2194$ panels of
+width $0.8$, with $52$ nodes per panel and $1400$ bits of precision. The
+quadrature error is bounded by the Bernstein-ellipse estimate
 \begin{equation}\label{eq:trefethen}
-  \Bigl|\int_{-1}^{1} f - \widehat{I}\,\Bigr|
-    \;\le\; \frac{144}{35}\,\frac{M\rho^{-2n}}{\rho^2 - 1}.
+ \left|\int_{-1}^1f(x)\dd x-\widehat I\right|
+ \leq\frac{144}{35}\frac{M\rho^{-2n}}{\rho^2-1},
+ \qquad n\geq2,
 \end{equation}
-The panel decomposition applies \eqref{eq:trefethen} on each of the $2194$
-panels, with $\rho$ determined by the distance from the panel to the nearest
-singularity of the integrand.
+when $f$ is analytic in the corresponding ellipse and bounded there by $M$.
 
-The certified run records python-flint $0.9.0$ under Python $3.12.3$.
-
-In the implementation the per-panel bound is applied in the equivalent form
+With $N=52$ nodes, $n=N-1=51$, and
+$\rho^{-2N}/(1-\rho^{-2})=\rho^{-2(N-1)}/(\rho^2-1)$, the implementation uses
 \[
-  10 \cdot \frac{64}{15}\,
-    \frac{\rho^{-2N}}{1 - \rho^{-2}},
-  \qquad N = 52,
+  10\cdot\frac{64}{15}\frac{\rho^{-2N}}{1-\rho^{-2}}.
 \]
-which coincides identically with \eqref{eq:trefethen} at $n = N - 1 = 51$,
-since $\rho^{-2N}/(1-\rho^{-2}) = \rho^{-2(N-1)}/(\rho^2-1)$; the constant
-$64/15$ is used in place of $144/35$, which is larger by $3.7\%$ and hence
-conservative. With panel width $H = 0.8$ and ellipse parameter
-$\delta = 1.45$ one has $\rho = \delta' + \sqrt{1 + \delta'^2}$ for
-$\delta' = 2\delta/H$, giving $\rho \approx 7.385$ and a per-panel
-discretisation error below $10^{-88}$ --- far smaller than the arithmetic and
-truncation errors it accompanies.
+The factor $64/15$ is $3.7\%$ larger than $144/35$, and the additional factor
+$10$ is a further safety factor. Thus the implemented expression is not merely
+an algebraic rewriting of \eqref{eq:trefethen}; it is a strictly larger bound.
+For panel width $0.8$ and ellipse parameter $1.45$, one has
+$\rho\approx7.385$, so the resulting discretization error is below
+$10^{-88}$ per panel.
 
-%=======================================================================
+The pinned coefficient sweeps use primes up to $10^5$ and $300$ bits of
+precision, with $1600$ boxes in $s$ for $\alpha_+$ and $800$ boxes for the
+second-derivative sweep. The certificate records these parameters together
+with a SHA-256 hash of the numerical payload.
+
 \begin{thebibliography}{9}
 
 \bibitem{BanksMartin}
@@ -1017,7 +1176,7 @@ arXiv:1909.00804.
 \bibitem{GLW}
 O.~Gorodetsky, J.~D. Lichtman and M.~W. Wong,
 \emph{On Erd\H{o}s sums of almost primes},
-C.~R. Math. Acad. Sci. Paris \textbf{362} (2024), 1571--1580;
+C.~R. Math. Acad. Sci. Paris \textbf{362} (2024), 83--91;
 arXiv:2303.08277.
 
 \bibitem{Erdos}
