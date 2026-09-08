@@ -1,0 +1,7 @@
+d      = [0.3786950 +/- 5.31e-8]
+S*    <= 6.976333
+|U|   <= 0.084360, |V| <= 1.907462  (k>=900)
+a+     = 15.425661
+K1     = 2433   certified margin = [1.38e+2 +/- 0.602]
+deriv gap at K1 = [145.256 +/- 3.07e-4] (>0), convexity from k >= 109
+==> Crit(k) > 0 PROVEN for all k >= 2433 (pure arb, no floats)

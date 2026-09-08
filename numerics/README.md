@@ -25,7 +25,7 @@ Caveat 1.3(b) of the manuscript draws.
 | `alpha_bound`   | `beta_certified.json` | `beta_sweep.py` |
 | `Gamma_bound`   | `gamma_constant.json` | `gamma2_sweep.py` |
 | `source_bound`  | `m1_constant.json`, `tail_constants.json` | `crit_refined.py` |
-| `phi_at_k1`, `phi_mono` | stdout | `k1_far_range.py` |
+| `phi_at_k1`, `phi_mono` | `k1_far_range.log` | `k1_far_range.py` |
 | `sweep_low`  [6,199]    | `certificate*.json`  | `certificate.py`, `lowk_verify.py` |
 | `sweep_mid`  [78,899]   | `crit_78_734.json` (78-734, refined) + `crit_certified.json` (735-899, unrefined) | `crit_refined.py` |
 | `sweep_high` [900,2439] | `crit_900_2439.json` | `sweep_900_2439.py` |
