@@ -298,12 +298,12 @@ so it suffices that |R_k| + |R_{k+1}| < beta 2^-(k+1), for which
 T/P = C(k+3)^3 (2/3)^k is antitone in k (the ratio is ((k+4)/(k+3))^3 (2/3),
 below 1 for k >= 4), with value 0.0476 at k = 59, so the inequality holds for
 all k >= 59.  For k = 1..58 the differences are positive by direct certified
-computation, which reaches k = 60 (odd-proof/numerics/fodd60.log).  The ranges
-overlap at 59, 60, so the theorem holds for every k >= 1.  QED
+computation, which reaches k = 75 (odd-proof/numerics/fodd75.log).  The ranges
+overlap on 59..75, so the theorem holds for every k >= 1.  QED
 
 With the C = 2402.3 of earlier drafts the first success was k = 57; the
 corrected C moves it to 59.  The certified sweep to 60 still covers the gap,
-but the margin is two values rather than four.
+and the sweep to 75 leaves sixteen values of overlap.
 
 ## 7. The certified constants
 
@@ -319,9 +319,9 @@ but the margin is two values rather than four.
     NEARU       <= 26.0962                    nearu_certified.py
     CE          <= 5.48910                    ce_taylor.py
     C           4900                          (5.1), see 5.2
-    K0^odd      59                            certified sweep reaches 60
+    K0^odd      59                            certified sweep reaches 75
 
-The certified values of f_k^odd for k = 1..60 are produced by
+The certified values of f_k^odd for k = 1..75 are produced by
 odd-proof/numerics/fodd_run.py at 1000-bit precision, which adapts the main
 development's panel machinery by replacing the prime zeta P(t) with P(t)-2^-t
 and the large-s tail bound P(s) <= 2.78*2^-s with P_odd(s) <= 1.91*3^-s.
@@ -330,5 +330,5 @@ and the large-s tail bound P(s) <= 2.78*2^-s with P_odd(s) <= 1.91*3^-s.
 
 As in the main paper, the certified computations are inputs rather than
 formalized results: the value of d, the enclosure of S, the bound on M_R, and
-the sweep over k = 1..60.  The analytic content — sections 2 through 6 above —
+the sweep over k = 1..75.  The analytic content — sections 2 through 6 above —
 is elementary given those.

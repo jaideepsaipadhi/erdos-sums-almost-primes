@@ -31,3 +31,8 @@ Earlier attempts, kept for provenance.  None is an input to `odd-proof/PROOF.md`
   nearu_bound.py
       the mpmath computation of NEARU, superseded by nearu_certified.py
       (24.6777 vs the certified 24.6768).
+
+  fodd60.log
+      the k = 1..60 sweep, superseded by fodd75.log.  Both are valid; 75 gives
+      sixteen values of overlap with the analytic threshold K0 = 59 rather than
+      two.

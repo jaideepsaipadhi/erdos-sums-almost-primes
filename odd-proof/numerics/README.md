@@ -20,7 +20,7 @@ and (5.1) is stated with `C = 4900`.
 
 ## Certified values of f_k^odd
 
-`fodd_run.py` at 1000-bit precision; `fodd60.log` reaches k = 60, which is what
+`fodd_run.py` at 1000-bit precision; `fodd75.log` reaches k = 75, which is what
 section 6 needs (the analytic threshold is K0 = 59).
 
 ## Notes
