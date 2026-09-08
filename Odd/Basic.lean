@@ -6040,12 +6040,21 @@ S1 <= 453.1 (s1_recursion.py, second-order pole). -/
 structure OddTailFacts (bHatOdd : ℕ → ℂ) (S0 S1 : ℝ) : Prop where
   S0_nonneg : 0 ≤ S0
   S1_nonneg : 0 ≤ S1
+  /-- The tail's coefficient family is B = d_s H_o + 2 gamma H_o, whose weighted
+  norm is S1 + 4 gamma S0.  Nonnegativity is carried as a field because Mathlib
+  has no lower bound for gamma (cf. OddNumericalFacts.gamma_gt). -/
+  Bnorm_nonneg : 0 ≤ S1 + 4 * Real.eulerMascheroniConstant * S0
   tail_h : ∀ k : ℕ, |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
     ≤ S0 / 2 * ((1:ℝ)/3) ^ k
+  -- The coefficient family here is B(z) = d_s H_o(1,z) + 2 gamma H_o(1,z),
+  -- so its weighted norm is S1 + 4 gamma S0 (<= 590 for the certified values),
+  -- NOT S1 alone.  With |B_j| <= 590 (j+1) 3^-j and
+  -- sum_{j>k}(j+1)(2/3)^j = 3(k+4)(2/3)^(k+1), the tail is 2*590*(k+4)(2/3)^k.
   tail_b : ∀ k : ℕ, |∑' j : ℕ, (if k < j then
       ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j
       else 0)|
-    ≤ 3 * S1 * ((k:ℝ) + 2) * ((2:ℝ)/3) ^ k
+    ≤ 2 * (S1 + 4 * Real.eulerMascheroniConstant * S0) * ((k:ℝ) + 4)
+        * ((2:ℝ)/3) ^ k
 
 /-- The certified dominating sequence.  All three of |h_j(1)|, |b_j| and
 betaFam j are bounded by dom j, and CoeffSumCertified dom S holds.  These are
@@ -7983,7 +7992,9 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       ≤ NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k)
     -- the honest coefficient sum: far piece CE S/18 (three error terms, not the
     -- one of PROOF.md 5.3), both tails, the near piece, and the U-weighted part.
-    (hMR : CE * S / 18 + S0 / 2 + 9 * S1 / 128 + CN + NEARU ≤ MR) :
+    (hMR : CE * S / 18 + S0 / 2
+        + 5 * (S1 + 4 * Real.eulerMascheroniConstant * S0) / 64
+        + CN + NEARU ≤ MR) :
     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
       ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
   rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2]
@@ -8733,13 +8744,17 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
   have hBb : (1 / 2 ^ (k+1)) * |∑' j : ℕ, (if k < j then
         ((bHatOdd j).re + 2 * Real.eulerMascheroniConstant * (hCoeff 1 j).re) * 2 ^ j
         else 0)|
-      ≤ (9 * S1 / 128) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+      ≤ (5 * (S1 + 4 * Real.eulerMascheroniConstant * S0) / 64)
+        * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
     have h2k : (0:ℝ) < (1:ℝ) / 2 ^ (k+1) := by positivity
     have hstep := mul_le_mul_of_nonneg_left hB (le_of_lt h2k)
     refine le_trans hstep ?_
     -- (1/2^(k+1)) * 3 S1 (k+2)(2/3)^k = (3 S1/2)(k+2)(1/3)^k
-    have hcollapse : (1 / 2 ^ (k+1)) * (3 * S1 * ((k:ℝ) + 2) * ((2:ℝ)/3) ^ k)
-        = (3 * S1 / 2) * ((k:ℝ) + 2) * ((1:ℝ)/3) ^ k := by
+    have hcollapse : (1 / 2 ^ (k+1))
+          * (2 * (S1 + 4 * Real.eulerMascheroniConstant * S0) * ((k:ℝ) + 4)
+             * ((2:ℝ)/3) ^ k)
+        = (S1 + 4 * Real.eulerMascheroniConstant * S0) * ((k:ℝ) + 4)
+          * ((1:ℝ)/3) ^ k := by
       have hsp : ((2:ℝ)/3) ^ k = (2:ℝ) ^ k / 3 ^ k := by
         rw [div_pow]
       have hsp2 : ((1:ℝ)/3) ^ k = (1:ℝ) / 3 ^ k := by
@@ -8750,17 +8765,19 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       field_simp
     rw [hcollapse]
     -- (k+2) <= (3/64)(k+3)^3, tight at k = 1
-    have hpoly : ((k:ℝ) + 2) ≤ (3/64) * (((k:ℝ) + 3) ^ 3) := by
+    have hpoly : ((k:ℝ) + 4) ≤ (5/64) * (((k:ℝ) + 3) ^ 3) := by
       have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
       nlinarith [hk1, sq_nonneg ((k:ℝ) - 1), sq_nonneg ((k:ℝ) + 3),
         mul_nonneg (sub_nonneg.mpr hk1) (sq_nonneg ((k:ℝ) + 3))]
-    have hS1h : (0:ℝ) ≤ 3 * S1 / 2 := by linarith [ht.S1_nonneg]
+    have hS1h : (0:ℝ) ≤ S1 + 4 * Real.eulerMascheroniConstant * S0 :=
+      ht.Bnorm_nonneg
     have h3k' : (0:ℝ) < ((1:ℝ)/3) ^ k := by positivity
-    calc (3 * S1 / 2) * ((k:ℝ) + 2) * ((1:ℝ)/3) ^ k
-        ≤ (3 * S1 / 2) * ((3/64) * (((k:ℝ) + 3) ^ 3)) * ((1:ℝ)/3) ^ k := by
+    calc (S1 + 4 * Real.eulerMascheroniConstant * S0) * ((k:ℝ) + 4) * ((1:ℝ)/3) ^ k
+        ≤ (S1 + 4 * Real.eulerMascheroniConstant * S0) * ((5/64) * (((k:ℝ) + 3) ^ 3)) * ((1:ℝ)/3) ^ k := by
           apply mul_le_mul_of_nonneg_right _ (le_of_lt h3k')
           exact mul_le_mul_of_nonneg_left hpoly hS1h
-      _ = (9 * S1 / 128) * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
+      _ = (5 * (S1 + 4 * Real.eulerMascheroniConstant * S0) / 64)
+            * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by ring
   -- collect: hMain, hsplitInt, hfarBound, hnearBound, hAb, hBb against hMR
   rw [fOdd_u_form k hk hsum1 hsum hmul3 hcd1 hcd2] at hMain
   refine le_trans hMain ?_
@@ -8855,12 +8872,12 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
             * ∑ j ∈ Finset.range (k + 1), dom j * U ^ (k - j) / (Nat.factorial (k - j)))
         + CE * (Nat.choose (k + 3) 3 : ℝ) * S * ((1:ℝ)/3) ^ (k + 1)
         + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
-        + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+        + 5 * (S1 + 4 * Real.eulerMascheroniConstant * S0) / 64 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       ≤ CN * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
         + NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
         + CE * S / 18 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
         + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
-        + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+        + 5 * (S1 + 4 * Real.eulerMascheroniConstant * S0) / 64 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
     linarith [hFk, hnearU, hfar]
   refine le_trans hsum ?_
   have hK : (0:ℝ) ≤ (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := le_of_lt hXpos
@@ -8868,14 +8885,14 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
       + NEARU * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + CE * S / 18 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       + S0 / 2 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
-      + 9 * S1 / 128 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+      + 5 * (S1 + 4 * Real.eulerMascheroniConstant * S0) / 64 * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       = (CN + NEARU + CE * S / 18 + S0 / 2
-          + 9 * S1 / 128) * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k) := by ring
+          + 5 * (S1 + 4 * Real.eulerMascheroniConstant * S0) / 64) * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k) := by ring
   rw [hexp]
   have hfin : MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
       = MR * ((((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k) := by ring
   rw [hfin]
-  have hcombine : CN + NEARU + CE * S / 18 + S0 / 2 + 9 * S1 / 128 ≤ MR := by
+  have hcombine : CN + NEARU + CE * S / 18 + S0 / 2 + 5 * (S1 + 4 * Real.eulerMascheroniConstant * S0) / 64 ≤ MR := by
     linarith [hMR]
   exact mul_le_mul_of_nonneg_right hcombine hK
 

@@ -144,8 +144,14 @@ Both are bounded by the same pole-cancellation device as (5.4)-(5.5), but at
 FIRST and SECOND order rather than third:
     S_0 := sum_i |a_i| 3^i,  a_i = [z^i] H(1,z)(1 - z/3),        S_0 <= 44.5987
     S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 486.1945
-whence |h_j(1)| <= S_0 3^-j and |b_j| <= (j+1) S_1 3^-j, and the two tails
-contribute S_0/2 and 9 S_1/128 to the constant of (5.1).  (s0_recursion.py, s0_cauchy.py,
+Note the second tail's coefficient family is B(z) = d_s H_o(1,z) + 2 gamma
+H_o(1,z), not d_s H_o alone, so its weighted norm is S_1 + 4 gamma S_0 = 589.17
+(< 590) rather than S_1.  Lemma (i) then gives |h_j(1)| <= S_0 3^-j and (ii)
+gives |B_j| <= 590 (j+1) 3^-j, and since
+    sum_{j>k} (j+1)(2/3)^j = 3(k+4)(2/3)^(k+1),
+the two tails contribute S_0/2 and 5*590/64 = 46.09 to the constant of (5.1),
+using (k+4)/(k+3)^3 <= 5/64 for k >= 1.  (An earlier draft used 9 S_1/128 =
+34.19 here, which omitted the 2 gamma h_j(1) part.)  (s0_recursion.py, s0_cauchy.py,
 s1_recursion.py, s1_cauchy.py.)
 
 (b) THE JACOBIAN AND PRODUCT ERRORS.  (5.3) bounds only the Lagrange remainder
@@ -182,8 +188,8 @@ and summing over j <= k,
 Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give the LAGRANGE-REMAINDER part
 of (5.1) with coefficient CE S/18 (the CE of 5.1(b); with CE = 3 this would be
 the S/6 of earlier drafts).  Adding 5.1(a) and 5.1(c),
-    C = CE S/18 + S_0/2 + 9 S_1/128 + CN + NEARU
-      = 4395.5 + 22.3 + 34.2 + 367.8 + 26.1 = 4846.0,
+    C = CE S/18 + S_0/2 + 5*590/64 + CN + NEARU
+      = 4395.5 + 22.3 + 46.1 + 367.8 + 26.1 = 4857.9,
 and (5.1) holds with C = 4900.
 
 A bound |h_j''| <= C 3^-j would be exactly critical -- sums like
@@ -216,7 +222,7 @@ giving
     sum_{i>16} |g_i| 3^i <= M (3/R)^17/(1 - 3/R) <= 5990.
 
 Hence S <= 14414.  This is the S of 5.2; the constant C of (5.1) is
-CE S/18 + S_0/2 + 9 S_1/128 + CN + NEARU = 4846.0, not S/6 -- see 5.2.
+CE S/18 + S_0/2 + 5*590/64 + CN + NEARU = 4857.9, not S/6 -- see 5.2.
 
 BOTH HALVES ARE NECESSARY.  Cauchy from i = 0 gives C = 327869 and K0 = 71,
 too weak to meet the certified sweep: the circle estimate discards the
