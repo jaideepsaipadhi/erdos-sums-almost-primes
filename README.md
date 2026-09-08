@@ -1,8 +1,13 @@
 # The Erdős sums of almost primes increase strictly from k = 6
 
 A Lean 4 formalization of the analytic reduction in *The Erdős sums of almost
-primes increase strictly from k = 6* (Padhi–Lichtman), which disproves the
-Banks–Martin conjecture, together with the certified computations it depends on.
+primes* (Padhi–Lichtman), together with the certified computations it depends on.
+
+The Banks–Martin conjecture was disproved, and the global minimum located at
+k = 6, in Lichtman's *Almost primes and the Banks–Martin conjecture*
+(arXiv:1909.00804). What is new here is that the increase is strict at every
+step from k = 6 onward -- a minimum at 6 does not imply f_k < f_{k+1} for all
+k >= 6 -- together with the odd companion below.
 
 ## The theorem
 

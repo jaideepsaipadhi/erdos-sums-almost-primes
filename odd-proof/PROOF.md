@@ -302,6 +302,7 @@ but the margin is two values rather than four.
     sup|G_2|    <= 1.97e6 on |z|=4.5          mr_deriv_sweep.py
     S_0         <= 44.5987                    s0_recursion.py, s0_cauchy.py
     S_1         <= 486.1945                   s1_recursion.py, s1_cauchy.py
+    S_1+4gS_0   <= 590                        the tail's coefficient family
     CN          <= 367.8435                   cn_certified.py
     NEARU       <= 26.0962                    nearu_certified.py
     CE          <= 5.48910                    ce_taylor.py
