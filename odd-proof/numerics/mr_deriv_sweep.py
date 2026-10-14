@@ -29,7 +29,7 @@ G_2 <= 1967216.5 and hence the tail sum_{i>16}|g_i|3^i <= 5990.  NS = 40 is
 coarse: the companion sweep in hcoeff_recursion.py falls sevenfold between
 NS = 40 and NS = 1600, so this is very likely several-fold loose too.  That
 direction is safe -- a larger G_2 gives a larger tail, a larger S, and a larger
-C -- and the budget still closes with margin (total 4846 against MR = 4900), so
+C -- and the budget still closes with margin (total 4857.9 against MR = 4900), so
 the value is left as the conservative one rather than re-run.
 
 Usage: python3 mr_deriv_sweep.py [R] [NTHETA] [NS] [PCUT] [PREC]

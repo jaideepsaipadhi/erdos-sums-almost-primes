@@ -23,7 +23,7 @@ noise floor and abs() of a zero-centred interval contributes its radius; the
 tail falls by (2/3)^4 per four terms.  The two cross near NMAX ~ 27, where the
 bound is about 43.55.  NMAX = 16 is kept because it matches the split point
 hcoeff_recursion.py uses for S and the extra point is worth nothing here:
-S_0/2 enters a total of 4846, so 44.60 versus 43.59 moves nothing.
+S_0/2 enters a total of 4857.9, so 44.60 versus 43.59 moves nothing.
 
 Usage: python3 s0_recursion.py [NMAX] [PCUT] [PREC]
 """

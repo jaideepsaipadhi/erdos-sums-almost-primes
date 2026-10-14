@@ -442,10 +442,10 @@ $\sum_m3^m\abs{[z^m](1-z/3)^3A(z)}\leq S$, then
 \end{lemma}
 
 \begin{proof}
-Write $(1-z/3)^rA(z)=\sum_mg_mz^m$. Then
+Write $(1-z/3)^rA(z)=\sum_mw_mz^m$. Then
 \[
   A(z)=\left(\sum_{q\geq0}\binom{q+r-1}{r-1}3^{-q}z^q\right)
-       \left(\sum_{m\geq0}g_mz^m\right).
+       \left(\sum_{m\geq0}w_mz^m\right).
 \]
 For $r=1$ this gives
 $\abs{a_j}\leq3^{-j}\sum_{m\leq j}3^m\abs{w_m}\leq S3^{-j}$.
@@ -550,8 +550,8 @@ Thus $q(k)<1$ for every $k\geq59$, and
 Proposition~\ref{prop:odd-remainder} gives
 $\abs{R_k}<\beta2^{-k}/3$ throughout that range. Equation
 \eqref{eq:odd-difference} proves monotonicity for $k\geq59$. The certified
-direct computation covers $1\leq k\leq60$, so the two ranges cover every
-$k\geq1$.
+direct computation covers $1\leq k\leq75$, so the two ranges cover every
+$k\geq1$, with sixteen indices of overlap.
 \end{proof}
 
 %=======================================================================
@@ -902,7 +902,7 @@ The direct certificates establish $f_k<f_{k+1}$ on
 The coefficient tails in \eqref{eq:Eexp-certified} are obtained only after the
 pole at $z=3$ has been removed. Put
 \[
- \widetilde G_2(z)=(1-z/3)G_2(1,z)=\sum_{m\geq0}g_mz^m.
+ \widetilde G_2(z)=(1-z/3)G_2(1,z)=\sum_{m\geq0}w_mz^m.
 \]
 The certified contour bound is
 $\sup_{\abs z=4.2}\abs{\widetilde G_2(z)}\leq101.245$. Hence
@@ -1133,27 +1133,28 @@ $\sum_i2^i\abs{c_i}$ loses the cancellation used in
 \section{Certified quadrature}
 %=======================================================================
 
-The direct values of $f_k$ use Gauss--Legendre quadrature on $2194$ panels of
-width $0.8$, with $52$ nodes per panel and $1400$ bits of precision. The
-quadrature error is bounded by the Bernstein-ellipse estimate
-\begin{equation}\label{eq:trefethen}
- \left|\int_{-1}^1f(x)\dd x-\widehat I\right|
- \leq\frac{144}{35}\frac{M\rho^{-2n}}{\rho^2-1},
- \qquad n\geq2,
-\end{equation}
-when $f$ is analytic in the corresponding ellipse and bounded there by $M$.
+The direct values of $f_k$ are computed from the transformed integrand
+$F(u)=P_k(1+\e^{-u})\e^{-u}$, which is analytic on the strip
+$\abs{\operatorname{Im}u}<\pi/2$. The range $u\in[-5.10,\,3.5k]$ is divided
+into panels of width $H=0.8$, each mapped affinely to $[-1,1]$ and integrated
+by Gauss--Legendre quadrature with $N=52$ nodes at $1400$ bits of precision;
+the number of panels is therefore proportional to $k$.
 
-With $N=52$ nodes, $n=N-1=51$, and
-$\rho^{-2N}/(1-\rho^{-2})=\rho^{-2(N-1)}/(\rho^2-1)$, the implementation uses
-\[
-  10\cdot\frac{64}{15}\frac{\rho^{-2N}}{1-\rho^{-2}}.
-\]
-The factor $64/15$ is $3.7\%$ larger than $144/35$, and the additional factor
-$10$ is a further safety factor. Thus the implemented expression is not merely
-an algebraic rewriting of \eqref{eq:trefethen}; it is a strictly larger bound.
-For panel width $0.8$ and ellipse parameter $1.45$, one has
-$\rho\approx7.385$, so the resulting discretization error is below
-$10^{-88}$ per panel.
+For $f$ analytic inside the Bernstein ellipse $E_\rho$ and bounded there by
+$M$, the $N$-node Gauss rule satisfies
+\begin{equation}\label{eq:trefethen}
+ \left|\int_{-1}^1f(x)\dd x-\widehat I_N\right|
+ \leq\frac{64}{15}\,\frac{M\rho^{-2N}}{1-\rho^{-2}}
+\end{equation}
+\cite[Thm.~19.3]{ATAP}. The implementation evaluates the right side of
+\eqref{eq:trefethen} multiplied by a further factor $10$, together with the
+interval-scaling factor $H/2$. The margin over \eqref{eq:trefethen} is thus
+exactly that factor $10$; no part of it is obtained by rewriting the
+inequality. The ellipse is taken with semi-minor axis $\delta=1.45<\pi/2$ in
+the $u$ variable, giving $\rho\approx7.385$, and $M$ is bounded using
+$\abs{P_k(s)}\leq P_k(\operatorname{Re}s)$ together with the monotonicity of
+$P_k$ on the reals. The resulting discretization error is below $10^{-88}$
+per panel.
 
 The pinned coefficient sweeps use primes up to $10^5$ and $300$ bits of
 precision, with $1600$ boxes in $s$ for $\alpha_+$ and $800$ boxes for the
