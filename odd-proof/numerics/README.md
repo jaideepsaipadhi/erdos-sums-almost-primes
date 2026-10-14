@@ -18,6 +18,16 @@ explicit upper bound; the committed `.log` beside it is that run.
 Together these give `C = CE S/18 + S_0/2 + 5*590/64 + CN + NEARU = 4857.9`,
 and (5.1) is stated with `C = 4900`.
 
+The 0.9% of margin there is an artefact of the `NS = 1600` setting, not of the
+method: `hcoeff3200.log` halves the box width and gives head `7890.6376` in
+place of `8423.9098`, hence `S_2 <= 13881` and `C = 4695.2` — 4.2% of margin.
+The head is still falling at `NS = 3200`.  Nothing downstream moves either
+way: `K0 = 59` at `C = 4900`, at `C = 4700` and at `C = 4695.2`, and
+`MR <= 4900` stays true a fortiori, so the finer run is recorded here as
+headroom under the stated budget rather than substituted into it.  It matters
+only as an answer to the obvious referee question — whether the 0.9% is the
+method running out of room (it is not) or the sweep being coarse (it is).
+
 ## Certified values of f_k^odd
 
 `fodd_run.py` at 1000-bit precision; `fodd75.log` reaches k = 75, which is what

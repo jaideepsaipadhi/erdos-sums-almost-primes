@@ -473,7 +473,7 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
       ≤ phiBound aOneConst Umax Vmax Sstar alph (m + 1)
   /-- Theorem 1.1, the prior certified f_k computation: 6 <= k <= 199. -/
   sweep_low     : ∀ k : ℕ, 6 ≤ k → k ≤ 199 → f k < f (k + 1)
-  /-- Theorem 6.2, the refined criterion sweep: 79 <= k <= 899. -/
+  /-- Theorem 6.2, the refined criterion sweep: 78 <= k <= 899. -/
   sweep_mid     : ∀ k : ℕ, 78 ≤ k → k ≤ 899 → f k < f (k + 1)
   /-- Section 5, the extended delta-table sweep: 900 <= k <= 2439. -/
   sweep_high    : ∀ k : ℕ, 900 ≤ k → k ≤ 2439 → f k < f (k + 1)
@@ -13276,7 +13276,7 @@ theorem lemma_3_8_integral_r1 (i : ℕ) (s : ℝ) (hsmem : s ∈ Set.Ioo (1 : �
 
 The four ranges of the manuscript, in order:
   [6, 199]      sweep_low   -- the prior certified f_k computation
-  [200, 899]    sweep_mid   -- Theorem 6.2's refined criterion sweep (K0 = 79)
+  [78, 899]     sweep_mid   -- Theorem 6.2's refined criterion sweep (K0 = 78)
   [900, 2439]   sweep_high  -- the extended delta-table sweep of section 5
   [2440, inf)   theorem_7_1 -- the derivative-domination argument, PROVED here
 
