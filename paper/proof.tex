@@ -912,13 +912,11 @@ $G_2(1,z)=(1-z/3)^{-1}\widetilde G_2(z)$ we obtain
  \leq101.245\,3^{-i}\sum_{m=0}^i(3/4.2)^m
  <354.36\,3^{-i}.
 \end{equation}
-By \eqref{eq:ci-equals-hi} the $c_i$ are the coefficients $h_i(1)$ of
-Section~3, so Lemma~\ref{lem:pole-coefficient-bounds}(i) applies with the
-certified $\Sigma_0$ and gives the sharper
-$\abs{c_i}\leq\Sigma_0 3^{-i}\leq44.5987\,3^{-i}$, which dispenses with the
-contour bound altogether. We retain \eqref{eq:ci-geometric-bound} because it
-is the form carried by the formalization; nothing below needs the sharper
-constant. Consequently, with $C=354.36$,
+By \eqref{eq:ci-equals-hi} the $c_i$ are the coefficients $h_i(1)$, so
+Lemma~\ref{lem:pole-coefficient-bounds}(i) sharpens
+\eqref{eq:ci-geometric-bound} to $\abs{c_i}\leq\Sigma_03^{-i}$ and the contour
+bound is not needed at all. The weaker form suffices below. With
+$C=354.36$,
 \begin{align*}
  2^k\abs{L_k}
  &\leq C(2/3)^k,\\
@@ -927,10 +925,9 @@ constant. Consequently, with $C=354.36$,
        \sum_{r\geq1}r^2(2/3)^r
  =\frac{30C\log2}{4}(2/3)^k.
 \end{align*}
-Both terms are below $10^{-3}$ in total already for $k\geq37$, so neither
-constrains the threshold; the remaining certified tail inequality
-$2^k\abs{T_k}\leq1.45/k$ is what restricts \eqref{eq:Eexp-certified} to
-$k\geq900$. Substitution into \eqref{eq:Eexp-def} proves
+Both terms are below $10^{-3}$ in total from $k\geq37$ on; it is the
+remaining certified tail inequality $2^k\abs{T_k}\leq1.45/k$ that restricts
+\eqref{eq:Eexp-certified} to $k\geq900$. Substitution into \eqref{eq:Eexp-def} proves
 \eqref{eq:Eexp-certified}; no asymptotic $O$-term enters the final criterion.
 
 %=======================================================================
@@ -1008,11 +1005,9 @@ Therefore
  \varphi(2440)
  >390371.6-72.1-276163.2-112977.6-0.005>1158.
 \]
-The threshold $2440$ is not optimal: the same substitution gives
-$\varphi(2432)<0<\varphi(2433)$, so the criterion in fact closes from
-$k=2433$, with margin $139$ in place of $1158$. We state $2440$ because it is
-the threshold carried by the formalization, and the certified range in
-\eqref{eq:full-sweep-ranges} reaches $2439$ either way.
+The same substitution gives $\varphi(2432)<0<\varphi(2433)$, so the criterion
+first closes at $k=2433$, with margin $139$. We carry $2440$, which
+\eqref{eq:full-sweep-ranges} covers with room to spare.
 \end{proof}
 
 \begin{lemma}\label{lem:phi-monotone}
@@ -1106,15 +1101,22 @@ formalization imports the resulting intervals
 as hypotheses and proves that those hypotheses imply
 Theorems~\ref{thm:main-full} and \ref{thm:main-odd}.
 
+Two constants are stated above more conservatively than the computation
+requires, so that the text and the formalization carry the same values: the
+threshold $2440$ of Lemma~\ref{lem:phi-base} in place of $2433$, and
+\eqref{eq:ci-geometric-bound} in place of the sharper bound that
+Lemma~\ref{lem:pole-coefficient-bounds}(i) supplies. Neither changes the
+ranges covered.
+
 For the odd theorem, the coefficient bounds in
 \eqref{eq:odd-certified-coefficients} are obtained by cancelling the pole at
 $z=3$ before applying coefficient recursion or Cauchy bounds. The range
 $0<u\leq3$ is evaluated directly; for $u\geq3$ the expansions of
 Proposition~\ref{prop:odd-two-term} apply, with $C_E$ certified as follows.
 
-The constant $C_E$ is certified uniformly on $s\in(1,s(3)]$, not at sample
-points. The four quantities composing it are ratios in which the pole of
-$\zeta$ at $s=1$ cancels. Interval evaluation on boxes of $s$ loses that
+The constant $C_E$ is certified on the whole of $(1,s(3)]$. The four
+quantities composing it are ratios in which the pole of $\zeta$ at $s=1$
+cancels. Interval evaluation on boxes of $s$ loses that
 cancellation, since each occurrence of $s-1$ is widened independently, and the
 enclosures diverge however finely $(1,s(3)]$ is partitioned. Expanding $\zeta$
 as a power series in $\sigma=s-s_0$ about $s_0=1+E/2$, where $E=s(3)-1$, makes
@@ -1159,10 +1161,9 @@ $M$, the $N$-node Gauss rule satisfies
  \leq\frac{64}{15}\,\frac{M\rho^{-2N}}{1-\rho^{-2}}
 \end{equation}
 \cite[Thm.~19.3]{ATAP}. The implementation evaluates the right side of
-\eqref{eq:trefethen} multiplied by a further factor $10$, together with the
-interval-scaling factor $H/2$. The margin over \eqref{eq:trefethen} is thus
-exactly that factor $10$; no part of it is obtained by rewriting the
-inequality. The ellipse is taken with semi-minor axis $\delta=1.45<\pi/2$ in
+\eqref{eq:trefethen} with a further factor $10$, together with the
+interval-scaling factor $H/2$; the margin is that factor. The ellipse is taken
+with semi-minor axis $\delta=1.45<\pi/2$ in
 the $u$ variable, giving $\rho\approx7.385$, and $M$ is bounded using
 $\abs{P_k(s)}\leq P_k(\operatorname{Re}s)$ together with the monotonicity of
 $P_k$ on the reals. The resulting discretization error is below $10^{-88}$
