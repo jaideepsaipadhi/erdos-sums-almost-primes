@@ -204,6 +204,12 @@ the S/6 of earlier drafts).  Adding 5.1(a) and 5.1(c),
       = 4395.5 + 22.3 + 46.1 + 367.8 + 26.1 = 4857.9,
 and (5.1) holds with C = 4900.
 
+The 0.9% of margin reflects the NS = 1600 box width, not the method.  Halving
+it (odd-proof/numerics/hcoeff3200.log) gives head 7890.6 in place of 8423.9,
+hence S <= 13881 and C = 4695.2, i.e. 4.2% of margin; the head is still
+falling there.  K0 = 59 at either value and MR <= 4900 holds a fortiori, so
+this section stays stated at NS = 1600 and the finer run is headroom only.
+
 A bound |h_j''| <= C 3^-j would be exactly critical -- sums like
 sum_{j<=k} |h_j''| 3^j would then grow linearly in k rather than converge.  It
 is the pole cancellation in (5.4) that makes S finite.

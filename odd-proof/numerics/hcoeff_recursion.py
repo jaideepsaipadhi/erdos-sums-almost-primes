@@ -46,8 +46,14 @@ s = 1 where d_s^2 H is most singular, so it is sensitive to box width:
     NS      40     160     640    1600    3200
     S    61452   18612   10044    8424    7891
 
-1600 is the setting of record.  Any NS gives a valid upper bound; finer ones
-are tighter, and the value is still falling at 3200, so 8424 is conservative.
+1600 is the setting of record (hcoeff2.log, S = 8423.9098); NS = 3200 is
+logged in hcoeff3200.log at S = 7890.6376.  Any NS gives a valid upper bound;
+finer ones are tighter, and the value is still falling at 3200, so 8424 is
+conservative.  Carrying 7891 instead would give S_2 <= 13881 and C = 4695.2
+rather than 4857.9, i.e. 4.2% of margin under MR = 4900 in place of 0.9%.
+K0 = 59 at either value, so nothing downstream moves; PROOF.md and the Lean
+development stay stated at NS = 1600 and the finer run is margin, not a
+substitution.
 
 Usage: python3 hcoeff_recursion.py [NMAX] [NS] [PCUT] [PREC]
 """
@@ -167,6 +173,15 @@ def main():
         # Forming g_j from sup_s|d2| taken box by box would difference sups
         # attained at different s and destroy the pole cancellation that makes
         # S finite -- the whole point of (5.4).
+        # A NaN here would lose every subsequent ">" comparison and be reported
+        # as S = 0, so reject it loudly.  NaNs appear only at absurdly coarse
+        # NS, where p^sbox is wide enough that (p^s - 1) straddles 0 and the
+        # reciprocals below are undefined; NS >= 40 is far from that regime.
+        for j in range(NMAX + 1):
+            if not (d2[j].is_finite() and d1[j].is_finite() and h[j].is_finite()):
+                sys.exit("non-finite coefficient at i=%d in s-box %d/%d: the "
+                         "s-boxes are too wide (raise NS)" % (j, si + 1, NS))
+
         Sbox = arb(0)
         for j in range(NMAX + 1):
             g = d2[j]
