@@ -545,7 +545,7 @@ Proposition~\ref{prop:odd-remainder} gives
 $\abs{R_k}<\beta2^{-k}/3$ throughout that range. Equation
 \eqref{eq:odd-difference} proves monotonicity for $k\geq59$. The certified
 direct computation covers $1\leq k\leq75$, so the two ranges cover every
-$k\geq1$, with sixteen indices of overlap.
+$k\geq1$. They overlap on sixteen indices.
 \end{proof}
 
 %=======================================================================
@@ -576,16 +576,15 @@ Set
  G_2(s,z)=(s-1)^z(1-z2^{-s})F(s,z),
 \]
 and write $c_i=[z^i]G_2(1,z)$. Since
-$G_2(1,z)=H_{\mathrm o}(1,z)$, the power series has radius $3$, the
-coefficients coincide with those of Section~3,
-\begin{equation}\label{eq:ci-equals-hi}
-  c_i=h_i(1),
-\end{equation}
-and
+$G_2(1,z)=H_{\mathrm o}(1,z)$, the power series has radius $3$ and
 \begin{equation}\label{eq:c-moments}
   \sum_{i\geq0}c_i=\frac12,
   \qquad
   \sum_{i\geq0}2^ic_i=d.
+\end{equation}
+The coefficients are those of Section~3:
+\begin{equation}\label{eq:ci-equals-hi}
+  c_i=h_i(1).
 \end{equation}
 Define the absolutely convergent signed moments
 \begin{equation}\label{eq:UV-def}
@@ -914,9 +913,8 @@ $G_2(1,z)=(1-z/3)^{-1}\widetilde G_2(z)$ we obtain
 \end{equation}
 By \eqref{eq:ci-equals-hi} the $c_i$ are the coefficients $h_i(1)$, so
 Lemma~\ref{lem:pole-coefficient-bounds}(i) sharpens
-\eqref{eq:ci-geometric-bound} to $\abs{c_i}\leq\Sigma_03^{-i}$ and the contour
-bound is not needed at all. The weaker form suffices below. With
-$C=354.36$,
+\eqref{eq:ci-geometric-bound} to $\abs{c_i}\leq\Sigma_03^{-i}$, dispensing with
+the contour bound; the weaker form suffices below. With $C=354.36$,
 \begin{align*}
  2^k\abs{L_k}
  &\leq C(2/3)^k,\\
@@ -925,10 +923,11 @@ $C=354.36$,
        \sum_{r\geq1}r^2(2/3)^r
  =\frac{30C\log2}{4}(2/3)^k.
 \end{align*}
-Both terms are below $10^{-3}$ in total from $k\geq37$ on; it is the
-remaining certified tail inequality $2^k\abs{T_k}\leq1.45/k$ that restricts
-\eqref{eq:Eexp-certified} to $k\geq900$. Substitution into \eqref{eq:Eexp-def} proves
-\eqref{eq:Eexp-certified}; no asymptotic $O$-term enters the final criterion.
+Both terms are less than $10^{-3}$ in total for $k\geq900$. The remaining
+certified tail inequality is $2^k\abs{T_k}\leq1.45/k$. Substitution into
+\eqref{eq:Eexp-def} proves \eqref{eq:Eexp-certified}; no asymptotic
+$O$-term enters the final criterion. The first two terms are in fact below
+$10^{-3}$ from $k\geq37$ on, so the threshold $900$ comes from $T_k$ alone.
 
 %=======================================================================
 \section{Assembly of the unrestricted theorem}
@@ -1006,8 +1005,7 @@ Therefore
  >390371.6-72.1-276163.2-112977.6-0.005>1158.
 \]
 The same substitution gives $\varphi(2432)<0<\varphi(2433)$, so the criterion
-first closes at $k=2433$, with margin $139$. We carry $2440$, which
-\eqref{eq:full-sweep-ranges} covers with room to spare.
+first closes at $k=2433$, with margin $139$. We carry $2440$, which \eqref{eq:full-sweep-ranges} covers.
 \end{proof}
 
 \begin{lemma}\label{lem:phi-monotone}
@@ -1111,18 +1109,18 @@ ranges covered.
 For the odd theorem, the coefficient bounds in
 \eqref{eq:odd-certified-coefficients} are obtained by cancelling the pole at
 $z=3$ before applying coefficient recursion or Cauchy bounds. The range
-$0<u\leq3$ is evaluated directly; for $u\geq3$ the expansions of
-Proposition~\ref{prop:odd-two-term} apply, with $C_E$ certified as follows.
+$0<u\leq3$ is evaluated directly, while the range $u\geq3$ uses the Taylor
+model made explicit in Proposition~\ref{prop:odd-two-term}.
 
 The constant $C_E$ is certified on the whole of $(1,s(3)]$. The four
-quantities composing it are ratios in which the pole of $\zeta$ at $s=1$
+quantities entering it are ratios in which the pole of $\zeta$ at $s=1$
 cancels. Interval evaluation on boxes of $s$ loses that
 cancellation, since each occurrence of $s-1$ is widened independently, and the
 enclosures diverge however finely $(1,s(3)]$ is partitioned. Expanding $\zeta$
 as a power series in $\sigma=s-s_0$ about $s_0=1+E/2$, where $E=s(3)-1$, makes
 the cancellation symbolic. The resulting series are evaluated on
-$\abs{\sigma}\leq E/2$, which covers the range in one step; their coefficients
-fall off geometrically, and truncating after nine terms contributes less than
+$\abs{\sigma}\leq E/2$, which is the whole range; their coefficients fall off
+geometrically, and truncating after nine terms contributes less than
 $10^{-20}$.
 
 The constant $C_N$ requires $\Pi(t)=\sum_{p\geq3}p^{-t}$ at
@@ -1161,10 +1159,9 @@ $M$, the $N$-node Gauss rule satisfies
  \leq\frac{64}{15}\,\frac{M\rho^{-2N}}{1-\rho^{-2}}
 \end{equation}
 \cite[Thm.~19.3]{ATAP}. The implementation evaluates the right side of
-\eqref{eq:trefethen} with a further factor $10$, together with the
-interval-scaling factor $H/2$; the margin is that factor. The ellipse is taken
-with semi-minor axis $\delta=1.45<\pi/2$ in
-the $u$ variable, giving $\rho\approx7.385$, and $M$ is bounded using
+\eqref{eq:trefethen} with the interval-scaling factor $H/2$ and a further
+factor $10$ of margin. The ellipse is taken with semi-minor axis
+$\delta=1.45<\pi/2$ in the $u$ variable, giving $\rho\approx7.385$, and $M$ is bounded using
 $\abs{P_k(s)}\leq P_k(\operatorname{Re}s)$ together with the monotonicity of
 $P_k$ on the reals. The resulting discretization error is below $10^{-88}$
 per panel.
