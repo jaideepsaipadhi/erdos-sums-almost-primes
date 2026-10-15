@@ -104,7 +104,8 @@ beta = d (log 2 - S + gamma), numerically 0.15563. -/
 noncomputable def betaOdd : ℝ :=
   dConst * (Real.log 2 - Sodd + Real.eulerMascheroniConstant)
 
-/-- `0.57715 < gamma`, which `OddNumericalFacts.gamma_gt` assumed.
+/-- `0.57715 < gamma`.  This was `OddNumericalFacts.gamma_gt`, an assumed
+field, until it was proved here.
 
 Mathlib's only lower bound is `one_half_lt_eulerMascheroniConstant`, too weak
 here.  The usable route is `eulerMascheroniSeq_lt_eulerMascheroniConstant`,
@@ -151,22 +152,6 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
                      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
   /-- Certified sweep below the analytic threshold. -/
   sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 58 → fOdd (k + 1) < fOdd k
-  /-- Euler-Mascheroni, lower bound.  Mathlib's only lower bound is
-  `one_half_lt_eulerMascheroniConstant`, too weak here, so this enters as an
-  input.  It is a Mathlib gap, not a mathematical one.
-
-  The constant is what the argument USES, not the sharpest known value.  It
-  feeds exactly one step, `0.1556 <= betaOdd = d (log 2 - Sodd + gamma)`, and
-  with `d` and `Sodd` at the worst ends of their own enclosures that step needs
-  `gamma >= 0.5771362`.  Stating `0.57715` leaves `betaOdd` a margin of
-  `5.2e-6` and is still `7.1e-5` below the true `0.5772157`.
-
-  That gap is the whole cost of a future proof.  Mathlib's usable route is
-  `eulerMascheroniSeq_lt_eulerMascheroniConstant`, `harmonic n - log (n+1) <
-  gamma`, whose error is about `1/(2n)`: `0.57715` needs `n > 7614`, where the
-  `0.5772156` this once read would have needed `n > 7703978`.  The sharper
-  constant was 1012 times more expensive to prove and bought nothing. -/
-  gamma_gt       : (0.57715 : ℝ) < Real.eulerMascheroniConstant
   /-- The certified enclosure of d, from the main development. -/
   d_enc          : |dConst - 0.3786950| ≤ 5.3e-8
 /-- The arithmetic core of the odd assembly, with all rpow stripped out.
@@ -258,7 +243,7 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
               mul_le_mul_of_nonneg_right hnum60 (le_of_lt hhalf)
     have hb : (0.1556 : ℝ) ≤ betaOdd := by
       unfold betaOdd
-      have hg := hnum.gamma_gt
+      have hg := gamma_lower_bound
       have hd := abs_le.mp hnum.d_enc
       have hS := abs_le.mp hnum.Sodd_enclosure
       have hl2 := Real.log_two_gt_d9
@@ -6087,7 +6072,8 @@ structure OddTailFacts (bHatOdd : ℕ → ℂ) (S0 S1 : ℝ) : Prop where
   S1_nonneg : 0 ≤ S1
   /-- The tail's coefficient family is B = d_s H_o + 2 gamma H_o, whose weighted
   norm is S1 + 4 gamma S0.  Nonnegativity is carried as a field because Mathlib
-  has no lower bound for gamma (cf. OddNumericalFacts.gamma_gt). -/
+  has no usable lower bound for gamma (cf. `gamma_lower_bound`, which
+  supplies one). -/
   Bnorm_nonneg : 0 ≤ S1 + 4 * Real.eulerMascheroniConstant * S0
   tail_h : ∀ k : ℕ, |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
     ≤ S0 / 2 * ((1:ℝ)/3) ^ k
