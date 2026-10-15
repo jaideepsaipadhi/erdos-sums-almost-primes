@@ -49,6 +49,25 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
+      # The run log is served from a host this project's tooling cannot reach,
+      # so a red build otherwise reports only "lake build failed" with no Lean
+      # error attached.  Annotations ARE readable over the API, so on failure
+      # re-run the build (a cache hit, seconds) and echo what Lean actually
+      # said as annotations.  Without this, iterating on a proof from outside
+      # the runner is guessing.
+      - name: Surface Lean errors as annotations
+        if: failure()
+        run: |
+          lake build > relog.txt 2>&1 || true
+          echo "--- first 80 lines mentioning error ---"
+          grep -nE "error|sorry|unsolved goals|unknown (identifier|constant)" \
+            relog.txt | head -80 | while IFS= read -r line; do
+              echo "::error::${line}"
+            done
+          tail -40 relog.txt | while IFS= read -r line; do
+              echo "::error::tail: ${line}"
+            done
+
       # Compiler-reported, not text-matched.  A grep for the word finds it in
       # comments and docstrings; Lean emits "declaration uses 'sorry'" only for
       # the real thing.  The rebuild here is a cache hit and costs seconds.
