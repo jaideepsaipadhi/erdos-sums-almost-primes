@@ -56,9 +56,13 @@ Re s = 1 + e^{−Re u} cos(Im u) > 1 there and P_k is an absolutely convergent
 Dirichlet series for Re s > 1. For each panel, mapped affinely to [−1, 1],
 the n-point Gauss rule error is bounded via the Bernstein ellipse E_ρ with
 semi-minor axis β = 2δ/H (δ = 1.45 < π/2), ρ = β + √(1+β²), using the bound
-of Trefethen (Approximation Theory and Approximation Practice, Thm 19.3):
+of Trefethen (Is Gauss quadrature better than Clenshaw--Curtis?, SIAM Rev.
+50 (2008), 67--87, Thm 4.5 / eq. (4.14); = ATAP Thm 19.3):
 
     |I − I_n| ≤ (64/15) · M · ρ^{−2n} / (1 − ρ^{−2}),
+
+where n is the NUMBER OF NODES.  The source states the exponent as ρ^{−(2n+2)}
+with I_n built on n+1 nodes, which is the same thing.
 
 applied with an additional factor 10 of safety and the interval-scaling
 factor H/2, where M ≥ sup_{E_ρ} |F|. The sup is controlled by the termwise
@@ -67,6 +71,13 @@ M ≤ P_k(σ_min) · e^{−(a−ext)}, with σ_min = 1 + cos(δ) e^{−(b+ext)} 
 ext = √((H/2)² + δ²) the ellipse's extent in Re u beyond the panel [a, b].
 P_k(σ_min) is itself evaluated as a rigorous enclosure (upper endpoint used),
 costing one extra recursion pass per panel.
+
+Magnitude: the bound is largest on the leftmost panel [-5.10, -4.30] and at
+the smallest k, where CQ * M * H/2 is 1.1e-87 (k=1) and 1.6e-88 (k=2),
+falling off exponentially with the panel's left endpoint.  The manuscript's
+appendix quoted 1e-88 per panel, which the k = 1 and k = 2 panels exceed; it
+now quotes 1e-86.  Either way the quadrature term is some sixty orders of
+magnitude below the enclosure widths it feeds.
 
 **(D) Nodes and weights.** Gauss–Legendre nodes are certified by interval
 Newton: from a refined midpoint x̂, the operator N(X) = x̂ − P_n(x̂)/P_n′(X)

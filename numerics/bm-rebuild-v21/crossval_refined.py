@@ -137,7 +137,7 @@ def main(cert_path, klo=100, khi=200, prec=800):
         print(f"GATE PASSED: refined enclosure E1 in M2 +/- Gamma consistent at all "
               f"{tested} tested points. Worst deviation ratio {worst[1]:.4f} at k={worst[0]} "
               f"(expected ~0.01; Gamma = {float(Gamma):.2f}).")
-        print("K0 = 79 (refined) is ACCEPTED pending the [810,899] slice completion.")
+        print("Refined K0 is ACCEPTED.  The [810,899] slice has since been\n               completed (crit_certified.json covers 735-899) and the\n               regenerated constants give K0 = 78, not the 79 this message\n               carried while the slice was outstanding.")
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv) > 1 else "certificate.json")

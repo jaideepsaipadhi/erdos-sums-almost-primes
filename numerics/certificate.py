@@ -86,8 +86,10 @@ payload = {
   "enclosures": entries,
   "monotonicity_f_k_increasing": pairs,
   "monotonicity_squarefree_decreasing": pairs_sf,
-  "caveats": ["Quadrature constant taken from Trefethen ATAP Thm 19.3 in conservative "
-              "form with additional 10x factor; verify exact statement before citation.",
+  "caveats": ["Quadrature constant 64/15 with denominator (1-rho^-2) is the Gauss "
+              "bound of Trefethen, SIAM Rev. 50 (2008) 67-87, Thm 4.5 eq. (4.14) "
+              "(= ATAP Thm 19.3), applied at rho^-2N with N the node count and an "
+              "additional 10x factor.  Verified against the source 2026-10-14.",
               "Enclosure bounds [lo,hi] are outward-rounded decimals; binary balls are tighter."]
 }
 blob = json.dumps(payload, indent=1, sort_keys=True)

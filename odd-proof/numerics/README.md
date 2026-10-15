@@ -24,14 +24,43 @@ place of `8423.9098`, hence `S_2 <= 13881` and `C = 4695.2` — 4.2% of margin.
 The head is still falling at `NS = 3200`.  Nothing downstream moves either
 way: `K0 = 59` at `C = 4900`, at `C = 4700` and at `C = 4695.2`, and
 `MR <= 4900` stays true a fortiori, so the finer run is recorded here as
-headroom under the stated budget rather than substituted into it.  It matters
-only as an answer to the obvious referee question — whether the 0.9% is the
-method running out of room (it is not) or the sweep being coarse (it is).
+headroom under the stated budget rather than substituted into it.  It answers
+the obvious question about that margin: the 0.9% is the box width, not the
+method running out of room.
 
-## Certified values of f_k^odd
+## Certified values of g_k
 
 `fodd_run.py` at 1000-bit precision; `fodd75.log` reaches k = 75, which is what
 section 6 needs (the analytic threshold is K0 = 59).
+
+## Reproducing
+
+    pip install python-flint sympy      # s1_cauchy.py needs sympy as well
+
+Every log below was regenerated from a clean checkout on 2026-10-14 and
+matched the committed file exactly, to every printed digit:
+
+    python3 ce_taylor.py                      -> ce_taylor.log
+    python3 nearu_certified.py                -> nearu.log
+    python3 cn_certified.py                   -> cn.log
+    python3 s0_recursion.py 16                -> s0_head.log
+    python3 s0_cauchy.py                      -> s0_cauchy.log
+    python3 s1_recursion.py                   -> s1_head.log
+    python3 s1_cauchy.py                      -> s1_cauchy.log
+    python3 hcoeff_recursion.py 16 1600       -> hcoeff2.log
+    python3 hcoeff_recursion.py 16 3200       -> hcoeff3200.log
+    python3 mr_deriv_sweep.py                 -> mr_deriv_sweep.log
+
+Two of those arguments are not the defaults, and running the script bare does
+NOT reproduce its log:
+
+  * `s0_recursion.py` defaults to NMAX = 40; the log of record is NMAX = 16,
+    the split point used by s0_cauchy.py for the tail.
+  * `hcoeff_recursion.py` defaults to NMAX = 40, NS = 40.
+
+`mr_deriv_sweep.log` and the `fodd*` logs were captured with `nohup ... 2>&1`,
+so their progress lines are interleaved with the results; compare the result
+lines only.
 
 ## Notes
 

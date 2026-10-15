@@ -189,7 +189,37 @@ MACHINE-VERIFIED (the analytic reduction, end to end):
 ASSUMED (NumericalFacts, plus the analytic-layer certified inputs):
   d, rho enclosures; S*, alpha_+, Gamma bounds; Umax, Vmax
   phi(2440) > 0 and phi monotone above 2440; the aggregate source bound
-  the three criterion sweeps: [6,199], [79,899], [900,2439]
+  the three criterion sweeps: [6,199], [78,899], [900,2439]
+
+Note on the hypothesis set.  source_bound, phi_at_k1 and phi_mono are not
+interval bounds: they are the conclusions of the manuscript's Proposition 6.1
+and Lemmas 6.2-6.3.  theorem_7_1 takes all three as hypotheses (hE, hphi1,
+hmono) and proves the passage from them to f k < f (k+1) on [2440, inf).
+
+The two top-level theorems differ in how much of that is discharged:
+
+  erdos_sums_increase_from_six   (NumericalFacts)
+      passes all three straight through -- Prop 6.1 and Lemmas 6.2-6.3 all
+      assumed.
+  erdos_sums_increase_from_six'  (NumericalFactsFull)
+      still assumes phi_at_k1 and phi_mono, but PROVES the source bound via
+      source_bound_full, from beta_nonneg / g_deriv / g_deriv_bound / M0_bound
+      / alpha_dom / Sstar_dom / UV_bound / Eexp_bound.  Its own docstring says
+      why: it "replaces [the aggregate] with the quantities the Arb package
+      actually computes, so that Proposition 2.5, Theorem 4.1 and section 3.5
+      are *used* in deriving it".
+
+So Lemmas 6.2-6.3 are outside the formalization in both versions; Proposition
+6.1 is outside it in the first and inside it in the second.  Section 8 of the
+manuscript now says so.
+
+Two fields are unreachable: rho_enclosure and Gamma_bound.  Gam is consumed
+only by RBound2, which is consumed only by source_bound_refined -- a proved
+theorem that nothing references (1 occurrence in the file, its own
+statement).  That is the earlier refinement of section 6, E_1 in M_2 +/-
+Gamma, which the current manuscript does not present.  rhoConst appears in no
+proof at all.  Both are harmless as hypotheses but they make the advertised
+trusted base look larger than the one the theorems actually use.
   f = (log zetaTilde)' and f'; contour sups M, M0, M2; beta_i and gammahat_i
 
 THE CAVEAT THAT MATTERS: NumericalFacts is a hypothesis.  The theorem is
@@ -220,10 +250,10 @@ WHAT THE FORMALIZATION FOUND.  PROOF.md section 5.1 carried an unquantified
 "(lower order)" in the remainder bound.  Making it explicit turned up three
 things it was hiding, and two of them are not lower order:
 
-  * the two coefficient tails.  The main terms integrate to PARTIAL sums over
+  * the two coefficient tails.  The main terms integrate to partial sums over
     j <= k, so sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k}(b_j + 2 gamma h_j(1))2^j
     join R_k.  Bounded by the same pole-cancellation device at first and second
-    order: S_0 <= 44.6, S_1 <= 453.1.  These ARE small (5e-8 and 5e-5 of the
+    order: S_0 <= 44.6, S_1 <= 486.2.  These are small (5e-8 and 5e-5 of the
     budget at k = 59).
 
   * the Jacobian and product errors.  The split leaves three error terms, not
@@ -262,15 +292,17 @@ LEAN LESSONS FROM THIS SESSION:
     Five approaches failed this way (direct sums, MVT, Euler-Maclaurin, expm1
     regularization, the eta function).  The fix is a Taylor model: expand zeta
     as an arb_series about 1 + E/2, form the constants as series so the
-    cancellation is SYMBOLIC, then evaluate on the whole disc at once.  One
+    cancellation is symbolic, then evaluate on the whole disc at once.  One
     shot, tight, no monotonicity assumed.  arb_series.zeta exists and is the
     right tool; reach for it whenever a bound involves cancelling singularities.
 
   * A HEAD IS NOT A CONSTANT.  s0 had two scripts -- a recursion for the head
     and a Cauchy bound for the tail -- and s1 had only the recursion, yet
     PROOF.md cited its "HEAD sum_{i<=16}" output as S_1 itself.  The script was
-    not lying; it never got its companion.  The real S_1 is 490.17, not 453.08.
-    When a bound is assembled from two artifacts, check that both exist.
+    not lying; it never got its companion.  That took S_1 from 453.08 to
+    490.17, and a later pass to 486.1945 after a p = 2 pole was removed that H
+    does not have.  When a bound is assembled from two artifacts, check that
+    both exist.
 
   * DEAD PROOF CODE INTERLEAVES.  The superseded tail route could not be
     excised at the end: its `have`s sit between live ones.  Remove abandoned

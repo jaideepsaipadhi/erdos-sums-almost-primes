@@ -30,12 +30,12 @@
 \begin{abstract}
 For $k\geq1$ let $f_k=\sum_{\Omega(n)=k}1/(n\log n)$, where $\Omega$ counts
 prime factors with multiplicity. We prove that $f_k<f_{k+1}$ for every
-$k\geq6$, whereas the sums restricted to odd integers satisfy
-$g_k>g_{k+1}$ for every $k\geq1$. The two
+$k\geq6$, whereas the sums $g_k$ of $1/(n\log n)$ over odd $n$ with
+$\Omega(n)=k$ satisfy $g_k>g_{k+1}$ for every $k\geq1$. The two
 statements arise from the same analytic distinction. After writing the
 relevant Dirichlet series as $\zeta(s)^zH(s,z)$, the point $z=2$ lies on the
-first singular circle for the unrestricted product and strictly inside that
-circle after the prime $2$ is removed. The analytic reductions are written
+first singular circle for the unrestricted product, and strictly inside the
+first singular circle of the product with the prime $2$ removed. The analytic reductions are written
 explicitly below. The finite inequalities and coefficient bounds used in the
 last step are certified by ball arithmetic; the separation between analytic
 argument and certified input is stated precisely.
@@ -71,8 +71,11 @@ where
   d=\frac14\prod_{p\geq3}\left(1-\frac2p\right)^{-1}
                     \left(1-\frac1p\right)^2.
 \end{equation}
-The implicit constant in \eqref{eq:GLW-asymptotic} does not locate the first
-index at which the sequence begins to increase. Our first theorem does.
+Neither of these yields monotonicity beyond the minimum. A global minimum at
+$k=6$ leaves open whether $f_k<f_{k+1}$ holds at every index above it, and the
+implicit constant in \eqref{eq:GLW-asymptotic} does not make explicit a range
+on which the increase can be read off. Our first theorem gives that
+monotonicity in full.
 
 \begin{theorem}\label{thm:main-full}
 For every $k\geq6$ one has $f_k<f_{k+1}$.
@@ -173,7 +176,14 @@ $\zeta(s)^zH_{\mathrm o}(s,z)$, where
 \begin{proposition}\label{prop:analyticity}
 For fixed real $s>1/2$, the function $H(s,\cdot)$ is analytic in
 $\abs z<2^s$, and $H_{\mathrm o}(s,\cdot)$ is analytic in
-$\abs z<3^s$.
+$\abs z<3^s$. The convergence is moreover locally uniform in $(s,z)$ jointly,
+so each $\partial_s^rH_{\mathrm o}(s,\cdot)$ is again analytic in
+$\abs z<3^s$, and
+\begin{equation}\label{eq:coeff-commute}
+  \frac{\dd^r}{\dd s^r}[z^j]H_{\mathrm o}(s,z)
+   =[z^j]\partial_s^rH_{\mathrm o}(s,z);
+\end{equation}
+the same holds for $H$ in $\abs z<2^s$.
 \end{proposition}
 
 \begin{proof}
@@ -190,7 +200,15 @@ $\sum_pp^{-2s}<\infty$, the product of the regularized factors converges
 locally uniformly wherever none of the factors has a pole. The poles occur at
 $z=p^s$. The nearest one is $2^s$ for \eqref{eq:H-full} and $3^s$ for
 \eqref{eq:H-odd}. A locally uniform limit of analytic functions is analytic,
-which proves the proposition.
+which proves the first assertion.
+
+The estimate is uniform in $s$ as well on any compact subset of
+$(1/2,\infty)$, since $p^{-2s}\leq p^{-2s_0}$ there, and on a compact subset
+of $\{(s,z):\abs z<3^s\}$ no factor comes near a pole. The convergence is
+therefore locally uniform in the two variables jointly, so differentiation in
+$s$ may be carried out under the product. Since $[z^j]$ is a Cauchy integral
+over a circle that may be held fixed on such a subset, the two operations
+commute, which is \eqref{eq:coeff-commute}.
 \end{proof}
 
 At $s=1$ the point $z=2$ lies on the first singular circle for $H$ and lies
@@ -393,22 +411,37 @@ The certified computation gives
  \qquad \Sigma_1\leq486.1945,
  \qquad \Sigma_2\leq14414.
 \end{equation}
-For $u\geq3$, let $E_j(u)$ be the explicit expression in
-\eqref{eq:odd-local-product}. The Taylor-model computation certifies the
-aggregate inequality
+Split the remainder of Proposition~\ref{prop:odd-two-term} at $u=3$: with
+$E_j$ the explicit expression in \eqref{eq:odd-local-product}, put
+\begin{equation}\label{eq:near-far-split}
+ R_{k,\mathrm{far}}=\sum_{j=0}^k\int_3^\infty
+   \frac{u^{k-j}}{(k-j)!}E_j(u)\dd u,
+ \qquad
+ R_{k,\mathrm{near}}=\sum_{j=0}^k\int_0^3
+   \frac{u^{k-j}}{(k-j)!}E_j(u)\dd u,
+\end{equation}
+so that $R_k$ is $R_{k,\mathrm{far}}+R_{k,\mathrm{near}}$ together with the two
+coefficient tails of
+\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}. For the
+far range the Taylor-model computation certifies the aggregate inequality
 \begin{equation}\label{eq:odd-far-certified}
  \sum_{j=0}^k\int_3^\infty
   \frac{u^{k-j}}{(k-j)!}\abs{E_j(u)}\dd u
  \leq \frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k},
  \qquad C_E\leq5.48910.
 \end{equation}
-For $0<u\leq3$, the non-asymptotic part and the two subtracted main terms
-satisfy the normalized bounds
+For the near range the two groups of terms in \eqref{eq:odd-local-product} are
+certified separately. With $s(3)$ the value of $s$ at $u=3$,
 \begin{equation}\label{eq:odd-near-certified}
-  \abs{R_{k,\mathrm{near}}}
-  \leq(C_N+N_U)(k+3)^3 3^{-k},
+  P_k^{\mathrm{odd}}(s(3))\leq C_N3^{-k}\quad(k\geq1),
   \qquad C_N\leq367.8435,
-  \quad N_U\leq26.0962.
+\end{equation}
+and the two subtracted main terms satisfy
+\begin{equation}\label{eq:odd-near-main}
+ \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}
+  \bigl(\abs{h_j(1)}\e^{-u}+\abs{b_j}\e^{-2u}\bigr)\dd u
+ \leq N_U(k+3)^3 3^{-k},
+ \qquad N_U\leq26.0962.
 \end{equation}
 Finally, $\beta>0$, the inequality
 \begin{equation}\label{eq:odd-base-59}
@@ -501,9 +534,30 @@ $\abs{b_j}\leq590(j+1)3^{-j}$. Therefore
 where the last inequality follows from
 $(k+4)/(k+3)^3\leq5/64$ for $k\geq1$.
 
-Finally \eqref{eq:odd-near-certified} bounds the near range. Combining
+For the near range, $\abs{E_j}$ is at most the true integrand plus the two
+subtracted main terms. The latter contribute at most $N_U(k+3)^33^{-k}$ by
+\eqref{eq:odd-near-main}. For the former, \eqref{eq:odd-coefficient-extraction}
+and the substitution $s=s(u)$ give the exact identity
+\[
+ \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}h_j(s(u))J(u)\dd u
+ =\int_{s(3)}^\infty P_k^{\mathrm{odd}}(s)\dd s.
+\]
+Every odd $n$ with $\Omega(n)=k$ satisfies $n\geq3^k$, so for $s\geq s(3)$
+\[
+ P_k^{\mathrm{odd}}(s)
+ =\sum_{\substack{n\ \mathrm{odd}\\\Omega(n)=k}}n^{-s(3)}n^{-(s-s(3))}
+ \leq3^{-k(s-s(3))}P_k^{\mathrm{odd}}(s(3)),
+\]
+and integrating over $s\geq s(3)$ gives, by \eqref{eq:odd-near-certified},
+\begin{equation}\label{eq:odd-near-bridge}
+ \int_{s(3)}^\infty P_k^{\mathrm{odd}}(s)\dd s
+ \leq\frac{P_k^{\mathrm{odd}}(s(3))}{k\log3}
+ \leq\frac{C_N}{k\log3}3^{-k}
+ \leq C_N(k+3)^3 3^{-k}.
+\end{equation}
+Hence $\abs{R_{k,\mathrm{near}}}\leq(C_N+N_U)(k+3)^33^{-k}$. Combining
 \eqref{eq:odd-taylor-bound}, \eqref{eq:odd-first-tail-bound},
-\eqref{eq:odd-second-tail-bound} and \eqref{eq:odd-near-certified}, and then
+\eqref{eq:odd-second-tail-bound} and this bound, and then
 substituting the certified constants, gives
 \begin{align*}
  \abs{R_k}
@@ -545,7 +599,7 @@ Proposition~\ref{prop:odd-remainder} gives
 $\abs{R_k}<\beta2^{-k}/3$ throughout that range. Equation
 \eqref{eq:odd-difference} proves monotonicity for $k\geq59$. The certified
 direct computation covers $1\leq k\leq75$, so the two ranges cover every
-$k\geq1$, with sixteen indices of overlap.
+$k\geq1$. They overlap on sixteen indices.
 \end{proof}
 
 %=======================================================================
@@ -576,16 +630,15 @@ Set
  G_2(s,z)=(s-1)^z(1-z2^{-s})F(s,z),
 \]
 and write $c_i=[z^i]G_2(1,z)$. Since
-$G_2(1,z)=H_{\mathrm o}(1,z)$, the power series has radius $3$, the
-coefficients coincide with those of Section~3,
-\begin{equation}\label{eq:ci-equals-hi}
-  c_i=h_i(1),
-\end{equation}
-and
+$G_2(1,z)=H_{\mathrm o}(1,z)$, the power series has radius $3$ and
 \begin{equation}\label{eq:c-moments}
   \sum_{i\geq0}c_i=\frac12,
   \qquad
   \sum_{i\geq0}2^ic_i=d.
+\end{equation}
+The coefficients are those of Section~3:
+\begin{equation}\label{eq:ci-equals-hi}
+  c_i=h_i(1).
 \end{equation}
 Define the absolutely convergent signed moments
 \begin{equation}\label{eq:UV-def}
@@ -912,13 +965,10 @@ $G_2(1,z)=(1-z/3)^{-1}\widetilde G_2(z)$ we obtain
  \leq101.245\,3^{-i}\sum_{m=0}^i(3/4.2)^m
  <354.36\,3^{-i}.
 \end{equation}
-By \eqref{eq:ci-equals-hi} the $c_i$ are the coefficients $h_i(1)$ of
-Section~3, so Lemma~\ref{lem:pole-coefficient-bounds}(i) applies with the
-certified $\Sigma_0$ and gives the sharper
-$\abs{c_i}\leq\Sigma_0 3^{-i}\leq44.5987\,3^{-i}$, which dispenses with the
-contour bound altogether. We retain \eqref{eq:ci-geometric-bound} because it
-is the form carried by the formalization; nothing below needs the sharper
-constant. Consequently, with $C=354.36$,
+By \eqref{eq:ci-equals-hi} the $c_i$ are the coefficients $h_i(1)$, so
+Lemma~\ref{lem:pole-coefficient-bounds}(i) sharpens
+\eqref{eq:ci-geometric-bound} to $\abs{c_i}\leq\Sigma_03^{-i}$, dispensing with
+the contour bound; the weaker form suffices below. With $C=354.36$,
 \begin{align*}
  2^k\abs{L_k}
  &\leq C(2/3)^k,\\
@@ -927,11 +977,11 @@ constant. Consequently, with $C=354.36$,
        \sum_{r\geq1}r^2(2/3)^r
  =\frac{30C\log2}{4}(2/3)^k.
 \end{align*}
-Both terms are below $10^{-3}$ in total already for $k\geq37$, so neither
-constrains the threshold; the remaining certified tail inequality
-$2^k\abs{T_k}\leq1.45/k$ is what restricts \eqref{eq:Eexp-certified} to
-$k\geq900$. Substitution into \eqref{eq:Eexp-def} proves
-\eqref{eq:Eexp-certified}; no asymptotic $O$-term enters the final criterion.
+Both terms are less than $10^{-3}$ in total for $k\geq900$. The remaining
+certified tail inequality is $2^k\abs{T_k}\leq1.45/k$. Substitution into
+\eqref{eq:Eexp-def} proves \eqref{eq:Eexp-certified}; no asymptotic
+$O$-term enters the final criterion. The first two terms are in fact below
+$10^{-3}$ from $k\geq37$ on, so the threshold $900$ comes from $T_k$ alone.
 
 %=======================================================================
 \section{Assembly of the unrestricted theorem}
@@ -1008,11 +1058,8 @@ Therefore
  \varphi(2440)
  >390371.6-72.1-276163.2-112977.6-0.005>1158.
 \]
-The threshold $2440$ is not optimal: the same substitution gives
-$\varphi(2432)<0<\varphi(2433)$, so the criterion in fact closes from
-$k=2433$, with margin $139$ in place of $1158$. We state $2440$ because it is
-the threshold carried by the formalization, and the certified range in
-\eqref{eq:full-sweep-ranges} reaches $2439$ either way.
+The same substitution gives $\varphi(2432)<0<\varphi(2433)$, so the criterion
+first closes at $k=2433$, with margin $139$. We carry $2440$, which \eqref{eq:full-sweep-ranges} covers.
 \end{proof}
 
 \begin{lemma}\label{lem:phi-monotone}
@@ -1067,24 +1114,47 @@ Together the analytic and certified ranges cover all $k\geq6$.
 %=======================================================================
 
 \begin{conjecture}\label{conj:general}
-Let $\mathcal P$ be a set of primes with least element $q$, and let
-$f_k^{\mathcal P}$ be the sum of $1/(n\log n)$ over integers $n$ with
+Let $\mathcal P$ be a set of primes with least element $q$ and thin
+complement,
+\begin{equation}\label{eq:thin-complement}
+  \sum_{p\notin\mathcal P}\frac1p<\infty,
+\end{equation}
+and let $f_k^{\mathcal P}$ be the sum of $1/(n\log n)$ over integers $n$ with
 $\Omega(n)=k$ and all prime factors in $\mathcal P$. The sequence
 $f_k^{\mathcal P}$ is eventually increasing if and only if $q=2$.
 \end{conjecture}
 
-The regularized Euler product for $\mathcal P$ has its first $z$-singularity
-at $z=q^s$. At $s=1$, the point $z=2$ lies on this singular circle exactly
-when $q=2$. If $q\geq3$, the coefficient extraction at $z=2$ is interior and
-gives a constant multiple of $2^{-k}$, as in Section~3. If $q=2$, the
-extraction takes place at the boundary and may produce the factor $k^2$.
+Some hypothesis of this kind is needed. For $\mathcal P=\{2\}$ one has
+$f_k^{\mathcal P}=1/(2^kk\log2)$, and for $\mathcal P=\{2,3\}$ the sequence
+again decreases to $0$; in both cases $q=2$ and the conclusion fails. What
+goes wrong is that a sparse $\mathcal P$ leaves $\sum_{p\in\mathcal P}p^{-s}$
+bounded as $s\to1^+$, so the generating function has no $\zeta(s)^z$ factor
+and $f_k^{\mathcal P}$ decays geometrically to $0$ whatever $q$ is.
 
-Two points remain to turn this mechanism into a theorem for arbitrary
-$\mathcal P$. First, the regularized product must provide enough uniform
-control to identify the limiting constant and the coefficient at $z=2$.
-Second, in the boundary case one must rule out cancellation of the $k^2$
-coefficient. The present paper proves the two extremal cases
-$\mathcal P=\{\text{all primes}\}$ and $\mathcal P=\{p:p\geq3\}$.
+Under \eqref{eq:thin-complement} that cannot happen, and the singularity
+structure is the one the two theorems above exploit:
+\[
+ \prod_{p\in\mathcal P}(1-zp^{-s})^{-1}
+  =\prod_p(1-zp^{-s})^{-1}\prod_{p\notin\mathcal P}(1-zp^{-s}),
+\]
+where the second product converges locally uniformly by
+\eqref{eq:thin-complement} and is therefore entire in $z$. Its zeros cancel
+exactly the poles at $z=p^s$ with $p\notin\mathcal P$, leaving the first
+$z$-singularity at $z=q^s$. At $s=1$ the point $z=2$ lies on that singular
+circle exactly when $q=2$. If $q\geq3$ the coefficient extraction at $z=2$ is
+interior and gives a constant multiple of $2^{-k}$, as in Section~3; if $q=2$
+it takes place at the boundary and may produce the factor $k^2$.
+
+Three points remain to turn this mechanism into a theorem for arbitrary
+$\mathcal P$ satisfying \eqref{eq:thin-complement}. First, the regularized
+product must provide enough uniform control to identify the limiting constant
+and the coefficient at $z=2$. Second, in the boundary case one must rule out
+cancellation of the $k^2$ coefficient. Third, in the interior case one must
+show that the constant multiplying $2^{-k}$ is positive, which is what makes
+the sequence decrease rather than increase; for $\mathcal P=\{p:p\geq3\}$ this
+is the inequality $\beta>0$ of \eqref{eq:beta-intro}. The present paper proves
+the two extremal cases $\mathcal P=\{\text{all primes}\}$ and
+$\mathcal P=\{p:p\geq3\}$.
 
 %=======================================================================
 \section{Certification and formalization}
@@ -1092,7 +1162,9 @@ $\mathcal P=\{\text{all primes}\}$ and $\mathcal P=\{p:p\geq3\}$.
 
 The logical division is as follows.
 
-The analytic proof consists of Lemma~\ref{lem:integral-representation},
+The analytic proof is the whole of Sections~2--6 apart from the two numerical
+propositions named below: in particular
+Lemmas~\ref{lem:integral-representation} and \ref{lem:zeta-coordinate},
 Proposition~\ref{prop:analyticity}, the coefficient identities
 \eqref{eq:odd-u-integral} and \eqref{eq:E-decomposition}, the remainder
 reduction in Proposition~\ref{prop:odd-remainder}, and the source estimates in
@@ -1104,23 +1176,46 @@ Proposition~\ref{prop:full-certified}. Their statements are finite systems of
 interval inequalities. They are established by Arb/FLINT through its Python bindings. The Lean
 formalization imports the resulting intervals
 as hypotheses and proves that those hypotheses imply
-Theorems~\ref{thm:main-full} and \ref{thm:main-odd}.
+Theorem~\ref{thm:main-full} and the monotonicity assertion of
+Theorem~\ref{thm:main-odd}; the two formal statements are
+\texttt{erdos\_sums\_increase\_from\_six} and \texttt{fOdd\_decreasing}. The
+limit $g_k\to\frac12$ of Theorem~\ref{thm:main-odd} is proved in the text,
+from \eqref{eq:odd-expansion} and Proposition~\ref{prop:odd-remainder}, but is
+not formalized, the monotonicity argument making no use of it.
+
+For Theorem~\ref{thm:main-full} the hypotheses are not only the interval
+bounds of Proposition~\ref{prop:full-certified}. Lemmas~\ref{lem:phi-base} and
+\ref{lem:phi-monotone} enter as hypotheses, under the names
+\texttt{phi\_at\_k1} and \texttt{phi\_mono}, and are not reproved there; their
+proofs in Section~6 are analytic. Proposition~\ref{prop:criterion-phi} enters
+as a hypothesis in the same way in one of the two formal versions, and is
+proved in the other, from the primitive certified quantities rather than from
+the aggregate bound \eqref{eq:Eexp-certified}. What the formalization proves
+from these is the passage to $f_k<f_{k+1}$ for $k\geq2440$, together with the
+assembly of the four ranges.
+
+Two constants are stated above more conservatively than the computation
+requires, so that the text and the formalization carry the same values: the
+threshold $2440$ of Lemma~\ref{lem:phi-base} in place of $2433$, and
+\eqref{eq:ci-geometric-bound} in place of the sharper bound that
+Lemma~\ref{lem:pole-coefficient-bounds}(i) supplies. Neither changes the
+ranges covered.
 
 For the odd theorem, the coefficient bounds in
 \eqref{eq:odd-certified-coefficients} are obtained by cancelling the pole at
 $z=3$ before applying coefficient recursion or Cauchy bounds. The range
-$0<u\leq3$ is evaluated directly; for $u\geq3$ the expansions of
-Proposition~\ref{prop:odd-two-term} apply, with $C_E$ certified as follows.
+$0<u\leq3$ is evaluated directly, while the range $u\geq3$ uses the Taylor
+model made explicit in Proposition~\ref{prop:odd-two-term}.
 
-The constant $C_E$ is certified uniformly on $s\in(1,s(3)]$, not at sample
-points. The four quantities composing it are ratios in which the pole of
-$\zeta$ at $s=1$ cancels. Interval evaluation on boxes of $s$ loses that
+The constant $C_E$ is certified on the whole of $(1,s(3)]$. The four
+quantities entering it are ratios in which the pole of $\zeta$ at $s=1$
+cancels. Interval evaluation on boxes of $s$ loses that
 cancellation, since each occurrence of $s-1$ is widened independently, and the
 enclosures diverge however finely $(1,s(3)]$ is partitioned. Expanding $\zeta$
 as a power series in $\sigma=s-s_0$ about $s_0=1+E/2$, where $E=s(3)-1$, makes
 the cancellation symbolic. The resulting series are evaluated on
-$\abs{\sigma}\leq E/2$, which covers the range in one step; their coefficients
-fall off geometrically, and truncating after nine terms contributes less than
+$\abs{\sigma}\leq E/2$, which is the whole range; their coefficients fall off
+geometrically, and truncating after nine terms contributes less than
 $10^{-20}$.
 
 The constant $C_N$ requires $\Pi(t)=\sum_{p\geq3}p^{-t}$ at
@@ -1150,7 +1245,7 @@ $F(u)=P_k(1+\e^{-u})\e^{-u}$, which is analytic on the strip
 $\abs{\operatorname{Im}u}<\pi/2$. The range $u\in[-5.10,\,3.5k]$ is divided
 into panels of width $H=0.8$, each mapped affinely to $[-1,1]$ and integrated
 by Gauss--Legendre quadrature with $N=52$ nodes at $1400$ bits of precision;
-the number of panels is therefore proportional to $k$.
+the number of panels therefore grows linearly with the largest $k$ computed.
 
 For $f$ analytic inside the Bernstein ellipse $E_\rho$ and bounded there by
 $M$, the $N$-node Gauss rule satisfies
@@ -1158,15 +1253,18 @@ $M$, the $N$-node Gauss rule satisfies
  \left|\int_{-1}^1f(x)\dd x-\widehat I_N\right|
  \leq\frac{64}{15}\,\frac{M\rho^{-2N}}{1-\rho^{-2}}
 \end{equation}
-\cite[Thm.~19.3]{ATAP}. The implementation evaluates the right side of
-\eqref{eq:trefethen} multiplied by a further factor $10$, together with the
-interval-scaling factor $H/2$. The margin over \eqref{eq:trefethen} is thus
-exactly that factor $10$; no part of it is obtained by rewriting the
-inequality. The ellipse is taken with semi-minor axis $\delta=1.45<\pi/2$ in
-the $u$ variable, giving $\rho\approx7.385$, and $M$ is bounded using
+\cite[Thm.~4.5]{TrefCC}, where the rule is indexed so that $I_n$ uses $n+1$
+nodes and the stated exponent $\rho^{-(2n+2)}$ is the $\rho^{-2N}$ above; the
+bound appears as \cite[Thm.~19.3]{ATAP}. The implementation evaluates the right side of
+\eqref{eq:trefethen} with the interval-scaling factor $H/2$ and a further
+factor $10$ of margin. The ellipse is taken with semi-minor axis
+$\delta=1.45<\pi/2$ in the $u$ variable, giving $\rho\approx7.385$, and $M$ is bounded using
 $\abs{P_k(s)}\leq P_k(\operatorname{Re}s)$ together with the monotonicity of
-$P_k$ on the reals. The resulting discretization error is below $10^{-88}$
-per panel.
+$P_k$ on the reals. The resulting discretization error is below $10^{-86}$
+per panel. The bound is largest on the leftmost panel and at the smallest $k$,
+where it is $1.1\times10^{-87}$, and falls off exponentially with the panel's
+left endpoint; it is therefore negligible beside the widths actually
+reported.
 
 The pinned coefficient sweeps use primes up to $10^5$ and $300$ bits of
 precision, with $1600$ boxes in $s$ for $\alpha_+$ and $800$ boxes for the
@@ -1197,6 +1295,11 @@ P.~Erd\H{o}s,
 \emph{Note on sequences of integers no one of which is divisible by any
 other},
 J.~London Math. Soc. \textbf{10} (1935), 126--128.
+
+\bibitem{TrefCC}
+L.~N. Trefethen,
+\emph{Is Gauss quadrature better than Clenshaw--Curtis?},
+SIAM Rev. \textbf{50} (2008), 67--87.
 
 \bibitem{ATAP}
 L.~N. Trefethen,
