@@ -349,23 +349,30 @@ theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
           Real.log_nonneg (by norm_num)
         have hb1 : Real.log 2 / 2 * Umax ≤ 0.6931471808 / 2 * 0.08436 :=
           mul_le_mul (by linarith) hU hU0 (by norm_num)
-        have h3 : 3 * Real.log ((2440:ℝ) + 3) ≤ 3 * (12 * Real.log 2) := by
-          linarith [h4096]
-        have h36 : 36 * Real.log 2 ≤ 36 * 0.6931471808 := by linarith [hlog2u]
-        have hinner : (4:ℝ) + 3 * Real.log ((2440:ℝ) + 3)
+        -- (2440:R)+3 and 2443 are the same number but different atoms, and
+        -- whether the goal carries the folded or the unfolded form depends on
+        -- what norm_num did to it.  Bridge them explicitly so linarith can
+        -- identify the two either way.
+        have hfold : Real.log ((2440:ℝ) + 3) = Real.log 2443 := by norm_num
+        have h4096' : Real.log 2443 ≤ 12 * Real.log 2 := by
+          rw [← hfold]; exact h4096
+        have hlogpos' : (0:ℝ) ≤ Real.log 2443 := by rw [← hfold]; exact hlogpos
+        have hinner : (4:ℝ) + 3 * Real.log 2443
                         ≤ 4 + 36 * 0.6931471808 := by
-          linarith [h3, h36]
-        have hinner0 : (0:ℝ) ≤ 4 + 3 * Real.log ((2440:ℝ) + 3) := by linarith
-        have hb2a : Real.log 2 * (4 + 3 * Real.log ((2440:ℝ) + 3))
+          linarith [h4096', hlog2u]
+        have hinner0 : (0:ℝ) ≤ 4 + 3 * Real.log 2443 := by linarith
+        have hb2a : Real.log 2 * (4 + 3 * Real.log 2443)
                       ≤ 0.6931471808 * (4 + 36 * 0.6931471808) :=
           mul_le_mul (by linarith) hinner hinner0 (by norm_num)
-        have hb2b : (0:ℝ) ≤ Real.log 2 * (4 + 3 * Real.log ((2440:ℝ) + 3)) :=
+        have hb2b : (0:ℝ) ≤ Real.log 2 * (4 + 3 * Real.log 2443) :=
           mul_nonneg hlog2.le hinner0
-        have hb2 : Sstar * (Real.log 2 * (4 + 3 * Real.log ((2440:ℝ) + 3)))
+        have hb2 : Sstar * (Real.log 2 * (4 + 3 * Real.log 2443))
                      ≤ 6.9764 * (0.6931471808 * (4 + 36 * 0.6931471808)) :=
           mul_le_mul hS hb2a hb2b (by norm_num)
         push_cast
-        nlinarith [hb1, hb2, hal, haa]
+        try norm_num
+        try rw [hfold]
+        nlinarith [hb1, hb2, hal, haa, hfold, hlogpos, hlogpos']
     | succ p hp ih =>
         have hp3 : (0:ℝ) < (p:ℝ) + 3 := by positivity
         have hpge : (2440:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
