@@ -68,11 +68,22 @@ def fk_for(drop):
                 fk[k] += we * Pk[k]
     return fk
 
+# An INFINITE thin complement: the primes at index 2^n.  Sum of 1/p over it is
+# about 0.56, and the tail past 10^6 is ~1e-6, so truncating is harmless for a
+# midpoint explorer.  This matters because the conjecture's hypothesis is a
+# THIN complement, which permits infinite ones, and every finite case below
+# sits in a strictly smaller class.
+INF = (3, 7, 19, 53, 131, 311, 719, 1619, 3671, 8161, 17863, 38873, 84017,
+       180503, 386093, 821641)
+
 CASES = [("drop {2}      q=3  (proved: decreasing)", (2,)),
          ("drop {3}      q=2  (OPEN: says increasing)", (3,)),
          ("drop {2,3}    q=5  (OPEN: says decreasing)", (2, 3)),
          ("drop {5}      q=2  (OPEN: says increasing)", (5,)),
-         ("drop nothing  q=2  (proved: increasing)", ())]
+         ("drop nothing  q=2  (proved: increasing)", ()),
+         ("drop INF      q=2  (OPEN, infinite thin)", INF),
+         ("drop {2}uINF  q=5  (OPEN, infinite thin)", (2,) + INF),
+         ("drop {2,5}uINF q=11 (OPEN, infinite thin)", (2, 5) + INF)]
 
 ctx.prec = PREC
 print("KMAX=%d PREC=%d   NON-CERTIFIED midpoints\n" % (KMAX, PREC))

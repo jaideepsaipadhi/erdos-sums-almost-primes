@@ -259,14 +259,26 @@ complement, and a `q >= 5` set.
 | drop {2,3} | 5 | decreasing | decreasing | never |
 | drop {5} | 2 | increasing | increasing | k = 7 |
 
-All five agree.  The control matters as much as the open cases: the full set
+| drop INF | 2 | increasing | increasing | k = 13 |
+| drop {2} u INF | 5 | decreasing | decreasing | never |
+| drop {2,5} u INF | 11 | decreasing | decreasing | never |
+
+`INF` is the primes at index `2^n` -- `3, 7, 19, 53, 131, ...` -- an INFINITE
+thin complement (`sum 1/p` about `0.56`).  That class is the one the
+conjecture's hypothesis actually names; every finite complement above sits in
+a strictly smaller class, so these three are the first tests inside the real
+hypothesis.  The `q = 2` case needed `k = 24` to settle: it turns at `k = 13`
+and then rises for eleven consecutive steps.
+
+All eight agree.  The control matters as much as the open cases: the full set
 turns at `k = 6`, which is exactly the threshold Theorem 1.1 proves, so the
 pipeline reproduces a known answer before being trusted on unknown ones.
 
 Two things the table shows that the conjecture does not say.  The turnaround
-index depends on `P` and moves later as the removed prime gets smaller
-(6, then 7 dropping 5, then 9 dropping 3) -- removing a smaller prime removes
-more mass and delays the crossover.  And the `q >= 3` cases decrease from
+index depends on `P` and moves later as more mass is removed: 6 for the full
+set, 7 dropping `{5}`, 9 dropping `{3}`, and 13 for the infinite complement,
+whose `sum 1/p` is about `0.56`.  Removing a smaller prime, or more primes,
+delays the crossover.  And the `q >= 3` cases decrease from
 `k = 2` onward with no turnaround at all, where the `q = 2` cases all decrease
 first and turn.
 

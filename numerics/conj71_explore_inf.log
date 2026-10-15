@@ -1,0 +1,24 @@
+KMAX=14 PREC=300   NON-CERTIFIED midpoints
+
+drop nothing          q=2  (proved: increasing)  INCREASING    turns at k=6   (59s)
+   f_k, k=10..14: 0.997149517 0.998198893 0.998887818 0.999325861 0.999597625
+   signs k=2..14: -----++++++++
+
+drop INF              q=2  (OPEN, infinite thin)  NOT SETTLED   turns at k=13   (57s)
+   f_k, k=10..14: 0.524174359 0.524070633 0.524041537 0.524040248 0.524047249
+   signs k=2..14: ------------+
+
+drop {2} u INF        q=5  (OPEN, infinite thin)  DECREASING    turns at k=<=2   (59s)
+   f_k, k=10..14: 0.262203439 0.262119850 0.262078313 0.262057628 0.262047312
+   signs k=2..14: -------------
+
+drop {2,5} u INF      q=11 (OPEN, infinite thin)  DECREASING    turns at k=<=2   (59s)
+   f_k, k=10..14: 0.209753471 0.209691274 0.209660359 0.209644960 0.209637280
+   signs k=2..14: -------------
+
+KMAX=24 PREC=300   NON-CERTIFIED midpoints
+
+drop INF   q=2  (OPEN, infinite thin)       INCREASING    turns at k=13   (118s)
+   f_k, k=20..24: 0.524072305 0.524073033 0.524073466 0.524073718 0.524073864
+   signs k=2..24: ------------+++++++++++
+
