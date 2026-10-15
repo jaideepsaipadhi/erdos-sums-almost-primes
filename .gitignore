@@ -1,5 +1,4 @@
 /.lake
-.github/workflows/
 
 # session scratch
 payload*
