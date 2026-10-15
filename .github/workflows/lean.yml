@@ -100,6 +100,21 @@ jobs:
           fi
           echo "axiom audit clean"
 
+      # A probe file, not part of the library: Lean reports every command in it
+      # independently, so one run says which Mathlib names exist and which
+      # proof route closes.  Never fails the build -- its output IS the result.
+      - name: Probe (dConst lower bound route)
+        if: always()
+        run: |
+          if [ -f probe/dprobe.lean ]; then
+            lake env lean probe/dprobe.lean > probe.txt 2>&1 || true
+            echo "--- probe output ---"
+            cat probe.txt
+            while IFS= read -r line; do echo "::notice::${line}"; done < probe.txt
+          else
+            echo "no probe file"
+          fi
+
       - name: Upload axiom report
         if: always()
         uses: actions/upload-artifact@v4
