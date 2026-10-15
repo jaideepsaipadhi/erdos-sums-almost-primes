@@ -104,6 +104,37 @@ beta = d (log 2 - S + gamma), numerically 0.15563. -/
 noncomputable def betaOdd : ℝ :=
   dConst * (Real.log 2 - Sodd + Real.eulerMascheroniConstant)
 
+/-- `0.57715 < gamma`, which `OddNumericalFacts.gamma_gt` assumed.
+
+Mathlib's only lower bound is `one_half_lt_eulerMascheroniConstant`, too weak
+here.  The usable route is `eulerMascheroniSeq_lt_eulerMascheroniConstant`,
+`harmonic n - log (n+1) < gamma`, whose gap to `gamma` is about `1/(2n)`.
+
+`n = 8191` is chosen so that `n + 1 = 8192 = 2^13` and the logarithm is
+`13 log 2` EXACTLY.  That matters: the margin here is `4.6e-6`, and Mathlib's
+`log 2` is good to `3.4e-9`, whereas any `n + 1` that is not a power of two
+would need a bound on `log (n+1)` of its own -- at `n = 7614`, the smallest n
+that works at all, to `4e-7`, where the obvious bound is off by `2.6e-3`.
+
+    harmonic 8191         = 9.588067975783...
+    0.57715 + 13 log 2   <= 9.588063350400
+-/
+set_option maxRecDepth 2000000 in
+theorem gamma_lower_bound : (0.57715 : ℝ) < Real.eulerMascheroniConstant := by
+  have hseq := Real.eulerMascheroniSeq_lt_eulerMascheroniConstant 8191
+  have hl2 : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
+  have hlog : Real.log 8192 = 13 * Real.log 2 := by
+    rw [show (8192:ℝ) = 2 ^ (13:ℕ) by norm_num, Real.log_pow]
+    push_cast; ring
+  have hH : (9.5880634 : ℚ) < harmonic 8191 := by
+    norm_num [harmonic, Finset.sum_range_succ]
+  have hHr : (9.5880634 : ℝ) < (harmonic 8191 : ℝ) := by exact_mod_cast hH
+  have hlow : (0.57715 : ℝ) < (harmonic 8191 : ℝ) - Real.log 8192 := by
+    rw [hlog]; linarith
+  simp only [Real.eulerMascheroniSeq] at hseq
+  try norm_num at hseq
+  linarith [hseq, hlow]
+
 /-- The certified inputs the odd theorem assumes.
 
 As in the main development these are Arb ball computations, not formalized
