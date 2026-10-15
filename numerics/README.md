@@ -123,6 +123,33 @@ Rerun on 2026-10-14 against the committed artifacts:
 | `python3 k1_far_range.py` | `k1_far_range.log` reproduced identically: `K1 = 2433`, certified margin `138 +/- 0.602`, derivative gap `145.256` |
 | `python3 crit_refined.py 78 734` | `sweep_78_734.log` reproduced identically (`k=78: crit_lower = 0.91`, `k=734: 33754.05`), and `crit_78_734.json` regenerated **byte-identical** to the committed file |
 | `python3 crossval_refined.py ../certificate.json` | gate passes 101/101, worst deviation ratio `0.0001` against an expected `~0.01` |
+| `python3 beta_sweep.py` (7m09s) | `beta_certified.json` and `bhat_signed.json` regenerated **byte-identical**; invariant `sup >= |value at s=1|` holds for all i; assembled `alpha_+ = 15.425661`, matching the paper and `NumericalFacts.alpha_bound` |
+| `python3 gamma2_sweep.py` (5m54s) | `gamma2_certified.json` and `gamma2_s1_signed.json` regenerated **byte-identical**; invariant holds; `sum_{i<=24} ghat_i 2^i = 203.11826010925864`, the stored `head`, so `Gamma = (head+tail)/2 = 104.51964366990232` |
+
+`alpha_+` is not the bare weighted sum of `beta_certified.json`: it is
+`(sum_{i=1..30} beta_i 2^i)/2 + M1 (2/2.9)^31 / (1 - 2/2.9) / 2`
+(`k1_far_range.py` lines 56-61).  Dropping the tail gives 15.3849 and looks
+like a mismatch; with it the value is exact.
+
+### Two stored constants no script regenerates
+
+    m1_constant.json     M1_R2.9     = 2543.6624045073563   -> alpha_+ tail
+    gamma_constant.json  M2sup_R2.9  = 19881.155667290404   -> Gamma tail
+                         (and Gamma itself, = (head + tail)/2)
+
+Both are contour sups on `|z| = 2.9`.  They are read by `crit_refined.py`,
+`crossval_refined.py`, `k1_far_range.py` and `crit_assembly.py`, and feed two
+constants in the trusted base, but nothing in the repository computes them:
+`grep M2sup *.py` returns nothing, and no script opens either file for
+writing.  Everything else above regenerates; these do not, so they cannot be
+checked from here.
+
+The odd case has the analogue and it does have a script --
+`odd-proof/numerics/mr_deriv_sweep.py`, a theta x s interval sweep of
+`sup_{|z|=R} |d_s^a Htilde|`, which reproduces its log exactly.  That is the
+template for the missing one.
+
+
 
 The certificate path is an argument, not a default: `crossval_refined.py`
 looks for `certificate.json` in the working directory, and it lives one level
