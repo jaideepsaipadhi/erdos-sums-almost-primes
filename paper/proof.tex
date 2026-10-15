@@ -393,22 +393,37 @@ The certified computation gives
  \qquad \Sigma_1\leq486.1945,
  \qquad \Sigma_2\leq14414.
 \end{equation}
-For $u\geq3$, let $E_j(u)$ be the explicit expression in
-\eqref{eq:odd-local-product}. The Taylor-model computation certifies the
-aggregate inequality
+Split the remainder of Proposition~\ref{prop:odd-two-term} at $u=3$: with
+$E_j$ the explicit expression in \eqref{eq:odd-local-product}, put
+\begin{equation}\label{eq:near-far-split}
+ R_{k,\mathrm{far}}=\sum_{j=0}^k\int_3^\infty
+   \frac{u^{k-j}}{(k-j)!}E_j(u)\dd u,
+ \qquad
+ R_{k,\mathrm{near}}=\sum_{j=0}^k\int_0^3
+   \frac{u^{k-j}}{(k-j)!}E_j(u)\dd u,
+\end{equation}
+so that $R_k$ is $R_{k,\mathrm{far}}+R_{k,\mathrm{near}}$ together with the two
+coefficient tails of
+\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}. For the
+far range the Taylor-model computation certifies the aggregate inequality
 \begin{equation}\label{eq:odd-far-certified}
  \sum_{j=0}^k\int_3^\infty
   \frac{u^{k-j}}{(k-j)!}\abs{E_j(u)}\dd u
  \leq \frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k},
  \qquad C_E\leq5.48910.
 \end{equation}
-For $0<u\leq3$, the non-asymptotic part and the two subtracted main terms
-satisfy the normalized bounds
+For the near range the two groups of terms in \eqref{eq:odd-local-product} are
+certified separately. With $s(3)$ the value of $s$ at $u=3$,
 \begin{equation}\label{eq:odd-near-certified}
-  \abs{R_{k,\mathrm{near}}}
-  \leq(C_N+N_U)(k+3)^3 3^{-k},
+  P_k^{\mathrm{odd}}(s(3))\leq C_N3^{-k}\quad(k\geq1),
   \qquad C_N\leq367.8435,
-  \quad N_U\leq26.0962.
+\end{equation}
+and the two subtracted main terms satisfy
+\begin{equation}\label{eq:odd-near-main}
+ \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}
+  \bigl(\abs{h_j(1)}\e^{-u}+\abs{b_j}\e^{-2u}\bigr)\dd u
+ \leq N_U(k+3)^3 3^{-k},
+ \qquad N_U\leq26.0962.
 \end{equation}
 Finally, $\beta>0$, the inequality
 \begin{equation}\label{eq:odd-base-59}
@@ -501,9 +516,30 @@ $\abs{b_j}\leq590(j+1)3^{-j}$. Therefore
 where the last inequality follows from
 $(k+4)/(k+3)^3\leq5/64$ for $k\geq1$.
 
-Finally \eqref{eq:odd-near-certified} bounds the near range. Combining
+For the near range, $\abs{E_j}$ is at most the true integrand plus the two
+subtracted main terms. The latter contribute at most $N_U(k+3)^33^{-k}$ by
+\eqref{eq:odd-near-main}. For the former, \eqref{eq:odd-coefficient-extraction}
+and the substitution $s=s(u)$ give the exact identity
+\[
+ \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}h_j(s(u))J(u)\dd u
+ =\int_{s(3)}^\infty P_k^{\mathrm{odd}}(s)\dd s.
+\]
+Every odd $n$ with $\Omega(n)=k$ satisfies $n\geq3^k$, so for $s\geq s(3)$
+\[
+ P_k^{\mathrm{odd}}(s)
+ =\sum_{\substack{n\ \mathrm{odd}\\\Omega(n)=k}}n^{-s(3)}n^{-(s-s(3))}
+ \leq3^{-k(s-s(3))}P_k^{\mathrm{odd}}(s(3)),
+\]
+and integrating over $s\geq s(3)$ gives, by \eqref{eq:odd-near-certified},
+\begin{equation}\label{eq:odd-near-bridge}
+ \int_{s(3)}^\infty P_k^{\mathrm{odd}}(s)\dd s
+ \leq\frac{P_k^{\mathrm{odd}}(s(3))}{k\log3}
+ \leq\frac{C_N}{k\log3}3^{-k}
+ \leq C_N(k+3)^3 3^{-k}.
+\end{equation}
+Hence $\abs{R_{k,\mathrm{near}}}\leq(C_N+N_U)(k+3)^33^{-k}$. Combining
 \eqref{eq:odd-taylor-bound}, \eqref{eq:odd-first-tail-bound},
-\eqref{eq:odd-second-tail-bound} and \eqref{eq:odd-near-certified}, and then
+\eqref{eq:odd-second-tail-bound} and this bound, and then
 substituting the certified constants, gives
 \begin{align*}
  \abs{R_k}
