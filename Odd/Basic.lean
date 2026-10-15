@@ -120,10 +120,22 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
                      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
   /-- Certified sweep below the analytic threshold. -/
   sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 58 → fOdd (k + 1) < fOdd k
-  /-- Euler-Mascheroni, lower bound.  Mathlib has
-  `eulerMascheroniConstant_lt_two_thirds` but no lower bound, so this enters as
-  an input.  It is a Mathlib gap, not a mathematical one. -/
-  gamma_gt       : (0.5772156 : ℝ) < Real.eulerMascheroniConstant
+  /-- Euler-Mascheroni, lower bound.  Mathlib's only lower bound is
+  `one_half_lt_eulerMascheroniConstant`, too weak here, so this enters as an
+  input.  It is a Mathlib gap, not a mathematical one.
+
+  The constant is what the argument USES, not the sharpest known value.  It
+  feeds exactly one step, `0.1556 <= betaOdd = d (log 2 - Sodd + gamma)`, and
+  with `d` and `Sodd` at the worst ends of their own enclosures that step needs
+  `gamma >= 0.5771362`.  Stating `0.57715` leaves `betaOdd` a margin of
+  `5.2e-6` and is still `7.1e-5` below the true `0.5772157`.
+
+  That gap is the whole cost of a future proof.  Mathlib's usable route is
+  `eulerMascheroniSeq_lt_eulerMascheroniConstant`, `harmonic n - log (n+1) <
+  gamma`, whose error is about `1/(2n)`: `0.57715` needs `n > 7614`, where the
+  `0.5772156` this once read would have needed `n > 7703978`.  The sharper
+  constant was 1012 times more expensive to prove and bought nothing. -/
+  gamma_gt       : (0.57715 : ℝ) < Real.eulerMascheroniConstant
   /-- The certified enclosure of d, from the main development. -/
   d_enc          : |dConst - 0.3786950| ≤ 5.3e-8
 /-- The arithmetic core of the odd assembly, with all rpow stripped out.
