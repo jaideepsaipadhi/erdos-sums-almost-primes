@@ -33,6 +33,24 @@ method running out of room.
 `fodd_run.py` at 1000-bit precision; `fodd75.log` reaches k = 75, which is what
 section 6 needs (the analytic threshold is K0 = 59).
 
+**Reproduced 2026-10-15, byte-identical across all 75 values.**  The run takes
+about 95 minutes, which is longer than some environments allow a single job to
+live, so `fodd_run.py` now also accepts a panel range and `fodd_combine.py`
+assembles the pieces -- the same split `certified.py`/`combine.py` already use
+for the unrestricted case:
+
+    python3 fodd_run.py 75 1000 0 27        # -> ochunks/o0000_0027.txt
+    python3 fodd_run.py 75 1000 27 54       # ... any partition of [0,335)
+    python3 fodd_combine.py 75 1000         # checks coverage, adds tails
+
+`fodd_combine.py` refuses to report unless the chunks cover every panel with
+no gap and no overlap, and it adds the two tail balls once, after summing.
+Chunks already on disk are skipped, so a re-run costs nothing and an
+interrupted sweep resumes.
+
+Panel cost is very uneven -- about 0.7s each for the first fifty and about 20s
+each thereafter -- so equal-width chunks are not equal-time ones.
+
 ## Reproducing
 
     pip install python-flint sympy      # s1_cauchy.py needs sympy as well
