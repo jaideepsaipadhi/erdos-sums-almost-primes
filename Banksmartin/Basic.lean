@@ -1,4 +1,3 @@
-import PrimeNumberTheoremAnd.IEANTN.Mertens
 import Mathlib
 import Banksmartin.EulerGamma
 
