@@ -6035,8 +6035,10 @@ theorem betaFam_sum_bound (betaFam : ℕ → ℝ) (S : ℝ)
   coeffSum_bound betaFam k S (hcert k)
 
 /-- The two tail sums of PROOF.md 5.1's unquantified "(lower order)", now
-certified: S0 <= 44.6 (odd-proof/numerics/s0_recursion.py, first-order pole) and
-S1 <= 453.1 (s1_recursion.py, second-order pole). -/
+certified: S0 <= 44.5987 (odd-proof/numerics/s0_recursion.py head +
+s0_cauchy.py tail, first-order pole) and S1 <= 486.1945 (s1_recursion.py head
+453.0838 + s1_cauchy.py tail 33.1107, second-order pole).  An earlier note here
+gave S1 <= 453.1, which was the head alone. -/
 structure OddTailFacts (bHatOdd : ℕ → ℂ) (S0 S1 : ℝ) : Prop where
   S0_nonneg : 0 ≤ S0
   S1_nonneg : 0 ≤ S1
@@ -8171,7 +8173,7 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
   -- geom_tail_bound_cx.  That route bounds |h_j(1)| and |b_j| by dom_j, which
   -- carries the third-order S = 14414 and is far too lossy -- it gives a tail
   -- coefficient of ~67000 against a budget of 4900.  The collection now takes
-  -- the tails from ht.tail_h and ht.tail_b instead (S_0 <= 44.6, S_1 <= 453.1,
+  -- the tails from ht.tail_h and ht.tail_b instead (S_0 <= 44.6, S_1 <= 486.2,
   -- first- and second-order poles), so none of this is used.
   have hbridge1 : (∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0))
       = ∑' d : ℕ, (hCoeff 1 (d + (k+1))).re := by

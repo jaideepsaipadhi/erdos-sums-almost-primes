@@ -423,23 +423,31 @@ noncomputable def SstarConst : ℝ := 6.9763
 /-- MANUSCRIPT section 3.5: alpha_+ is the constant in B_1(k) <= alpha_+ (k+1).
 
 A LITERAL BY DESIGN, not an omission.  alpha_+ = (1 / 2) sum_i beta_i 2^i where
-beta_i = max_{s in [1,2]} |[z^i] G2^(1,0)(s,z)|, evaluated by a 1000-box
+beta_i = max_{s in [1,2]} |[z^i] G2^(1,0)(s,z)|, evaluated by a 1600-box
 interval sweep in Arb.  It is the output of a certified computation, not a
 quantity Lean can define and evaluate.  E1k_le_alpha takes it as a parameter
-with its bounding hypothesis, which is the honest treatment. -/
+with its bounding hypothesis, which is the honest treatment.
+
+This records the manuscript's value.  The regenerated sweep gives 15.4257,
+which is what NumericalFacts.alpha_bound carries; this definition is not
+referenced. -/
 noncomputable def alphaConst : ℝ := 15.5716
 
 /-- MANUSCRIPT Theorem 6.1: Gamma = (1 / 2) sum_{i>=1} gammahat_i 2^i, the
 k-independent remainder bound.
 
 A LITERAL BY DESIGN, as alphaConst is.  gammahat_i = max_{s in [1,2]}
-|[z^i] G2^(2,0)(s,z)|, evaluated by a 600-box interval sweep in Arb using the
+|[z^i] G2^(2,0)(s,z)|, evaluated by an 800-box interval sweep in Arb using the
 closed form G2^(2,0) = G2(z^2 c^2 + z c') -- which IS proved here, as
 hasDerivAt_G2manu_second.  theorem_6_1 takes Gamma as a parameter with its
 bounding hypothesis.
 
 The k-INDEPENDENCE of Gamma, which is what makes the refinement work, is
-proved: it is geom_two_three, sum_l 2^l 3^(-l-1) = 1. -/
+proved: it is geom_two_three, sum_l 2^l 3^(-l-1) = 1.
+
+This records the manuscript's value.  The regenerated sweep gives 104.5196,
+which is what NumericalFacts.Gamma_bound carries; this definition is not
+referenced. -/
 noncomputable def GammaConst : ℝ := 105.41
 
 /-- The certified inputs: everything the analytic reduction takes on trust.
@@ -457,9 +465,9 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
   /-- Section 3.4: S* <= 6.9763. -/
   Sstar_bound   : Sstar ≤ 6.9763
-  /-- Section 3.5: alpha_+ from the 1000-box beta_i sweep. -/
+  /-- Section 3.5: alpha_+ from the 1600-box beta_i sweep. -/
   alpha_bound   : alph ≤ 15.4257
-  /-- Theorem 6.1: Gamma from the 600-box gammahat_i sweep. -/
+  /-- Theorem 6.1: Gamma from the 800-box gammahat_i sweep. -/
   Gamma_bound   : Gam ≤ 104.52
   /-- Section 7: the aggregate source bound for k >= 2440. -/
   source_bound  : ∀ k : ℕ, 2440 ≤ k →
