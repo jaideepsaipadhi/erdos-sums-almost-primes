@@ -1,7 +1,7 @@
 import Mathlib
 
 /-!
-# Euler's integral for the Euler-Mascheroni constant (SCAFFOLD)
+# Euler's integral for the Euler-Mascheroni constant
 
 Target: `gamma = - int_{u > 0} exp(-u) * log u du`, needed for the upper bound
 of manuscript Theorem 4.1 (the gap-5 evaluation).
@@ -25,7 +25,7 @@ Strategy for the middle step, on a neighbourhood s in (1/2, 3/2):
     integrable; at infinity exp(-u) dominates any power times log.
   * invoke `hasDerivAt_integral_of_dominated_loc_of_deriv_le`.
 
-Each `sorry` below is a separate, self-contained obligation.
+The obligations below were originally left open; none remains.
 -/
 
 open MeasureTheory Real

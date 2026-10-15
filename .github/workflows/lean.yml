@@ -32,14 +32,18 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
-      - name: No sorry anywhere
+      # Compiler-reported, not text-matched.  A grep for the word finds it in
+      # comments and docstrings; Lean emits "declaration uses 'sorry'" only for
+      # the real thing.  The rebuild here is a cache hit and costs seconds.
+      - name: No sorry (compiler-reported)
         run: |
-          if grep -rnE '(^|[^A-Za-z_])sorry([^A-Za-z_]|$)' \
-               --include='*.lean' Banksmartin Odd odd-proof *.lean; then
-            echo "::error::a sorry is present"
+          lake build 2>&1 | tee build.log
+          if grep -q "declaration uses 'sorry'" build.log; then
+            echo "::error::the compiler reports a declaration using sorry"
+            grep -n "declaration uses 'sorry'" build.log
             exit 1
           fi
-          echo "no sorry found"
+          echo "compiler reports no declaration using sorry"
 
       - name: Axiom audit (odd case)
         run: |
