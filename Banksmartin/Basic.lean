@@ -247,6 +247,137 @@ theorem theorem_7_1 (aa Umax Vmax Sstar alph : ℝ) (k1 : ℕ)
         exact hphi1
   exact crit_pos_iff aa k (lt_of_lt_of_le (hphi k hk) (crit_ge_phi aa Umax Vmax Sstar alph k (hE k hk)))
 
+/-! ### phi is monotone above 2440 -- a lemma, not a numerical fact
+
+`phiBound k = aa (k^2 - 2k - 1) - RBound k`, and `RBound` is linear in `k` plus
+`Sstar` times `DBound` terms plus a positive decreasing tail.  Nothing in it
+mentions a prime, a contour or a limit, so the `phi_mono` field of
+`NumericalFacts` / `NumericalFactsFull` is derivable rather than assumed.  The
+only input not already in those structures is an upper bound on `Umax`, which
+the manuscript states as `|U| <= 0.08436`.  `Vmax` enters `RBound` only as
+`+ 2 Vmax`, constant in `k`, so it cancels from the difference and is not
+needed here at all.
+
+The argument is the one `numerics/bm-rebuild-v21/k1_far_range.py` runs in Arb
+at lines 89-92: the quadratic's increment `aa (2m-1)` outruns `RBound`'s, which
+is `O(log m)`.
+-/
+
+/-- `log (x+1) - log x <= 1/x` for `x > 0`. -/
+theorem log_succ_sub_le_inv (x : ℝ) (hx : 0 < x) :
+    Real.log (x + 1) - Real.log x ≤ 1 / x := by
+  have hx1 : (0:ℝ) < x + 1 := by linarith
+  have h := Real.log_le_sub_one_of_pos (show (0:ℝ) < (x + 1) / x by positivity)
+  rw [Real.log_div (ne_of_gt hx1) (ne_of_gt hx)] at h
+  have he : (x + 1) / x - 1 = 1 / x := by field_simp
+  rw [he] at h
+  exact h
+
+/-- The second difference of `DBound` grows only logarithmically. -/
+theorem DBound_second_diff_le (m : ℕ) (hm : 1 ≤ m) :
+    DBound (m + 1) + DBound (m + 2) - 2 * DBound m
+      ≤ Real.log 2 * (4 + 3 * Real.log ((m : ℝ) + 3)) := by
+  have hm1 : (1:ℝ) ≤ (m:ℝ) := by exact_mod_cast hm
+  have h1 : (0:ℝ) < (m:ℝ) + 1 := by linarith
+  have hlog2 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hL2 : Real.log ((m:ℝ) + 2) ≤ Real.log ((m:ℝ) + 3) :=
+    Real.log_le_log (by linarith) (by linarith)
+  have hgap : Real.log ((m:ℝ) + 3) - Real.log ((m:ℝ) + 1) ≤ 2 / ((m:ℝ) + 1) := by
+    have h := Real.log_le_sub_one_of_pos
+      (show (0:ℝ) < ((m:ℝ) + 3) / ((m:ℝ) + 1) by positivity)
+    rw [Real.log_div (by linarith) (by linarith)] at h
+    have he : ((m:ℝ) + 3) / ((m:ℝ) + 1) - 1 = 2 / ((m:ℝ) + 1) := by
+      field_simp
+    rw [he] at h
+    exact h
+  have hmul : 2 * (m:ℝ) * (2 / ((m:ℝ) + 1)) ≤ 4 := by
+    have hr : 2 * (m:ℝ) * (2 / ((m:ℝ) + 1)) = 4 * (m:ℝ) / ((m:ℝ) + 1) := by
+      field_simp; ring
+    rw [hr, div_le_iff h1]
+    linarith
+  have hA : ((m:ℝ) + 1) * Real.log ((m:ℝ) + 2)
+              ≤ ((m:ℝ) + 1) * Real.log ((m:ℝ) + 3) :=
+    mul_le_mul_of_nonneg_left hL2 (by linarith)
+  have hB : 2 * (m:ℝ) * (Real.log ((m:ℝ) + 3) - Real.log ((m:ℝ) + 1))
+              ≤ 2 * (m:ℝ) * (2 / ((m:ℝ) + 1)) :=
+    mul_le_mul_of_nonneg_left hgap (by linarith)
+  have hbracket :
+      ((m:ℝ) + 1) * Real.log ((m:ℝ) + 2) + ((m:ℝ) + 2) * Real.log ((m:ℝ) + 3)
+        - 2 * (m:ℝ) * Real.log ((m:ℝ) + 1)
+      ≤ 4 + 3 * Real.log ((m:ℝ) + 3) := by
+    linarith [hA, hB, hmul]
+  have hscaled := mul_le_mul_of_nonneg_left hbracket hlog2.le
+  simp only [DBound]
+  push_cast
+  simp only [show ((m:ℝ) + 1) + 1 = (m:ℝ) + 2 from by ring,
+             show ((m:ℝ) + 2) + 1 = (m:ℝ) + 3 from by ring]
+  nlinarith [hscaled]
+
+/-- `phi_mono` as a theorem.  The hypotheses are the bounds the structures
+already carry, plus `hU`, which the manuscript states and they do not. -/
+theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
+    (haa : (0.0656 : ℝ) ≤ aa)
+    (hU0 : 0 ≤ Umax) (hU : Umax ≤ 0.08436)
+    (hS0 : 0 ≤ Sstar) (hS : Sstar ≤ 6.9764)
+    (hal0 : 0 ≤ alph) (hal : alph ≤ 15.4257)
+    (m : ℕ) (hm : 2440 ≤ m) :
+    phiBound aa Umax Vmax Sstar alph m
+      ≤ phiBound aa Umax Vmax Sstar alph (m + 1) := by
+  have hlog2u : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
+  have hlog2l : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
+  have hlog2 : (0:ℝ) < Real.log 2 := by linarith
+  -- the key inequality, by induction from 2440
+  have key : ∀ n : ℕ, 2440 ≤ n →
+      Real.log 2 / 2 * Umax
+        + Sstar * (Real.log 2 * (4 + 3 * Real.log ((n:ℝ) + 3)))
+        + 3 * alph
+      ≤ aa * (2 * (n:ℝ) - 1) := by
+    intro n hn
+    induction n, hn using Nat.le_induction with
+    | base =>
+        have h4096 : Real.log ((2440:ℝ) + 3) ≤ 12 * Real.log 2 := by
+          have h1 : Real.log ((2440:ℝ) + 3) ≤ Real.log 4096 :=
+            Real.log_le_log (by norm_num) (by norm_num)
+          have h2 : Real.log (4096:ℝ) = 12 * Real.log 2 := by
+            rw [show (4096:ℝ) = 2 ^ (12:ℕ) by norm_num, Real.log_pow]
+            push_cast; ring
+          linarith
+        have hlogpos : (0:ℝ) ≤ Real.log ((2440:ℝ) + 3) :=
+          Real.log_nonneg (by norm_num)
+        push_cast
+        nlinarith [h4096, hlogpos, hlog2u, hlog2l, hU, hU0, hS, hS0, hal, hal0,
+                   haa, mul_nonneg hS0 hlog2.le]
+    | succ p hp ih =>
+        have hp3 : (0:ℝ) < (p:ℝ) + 3 := by positivity
+        have hpge : (2440:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
+        have hstep : Real.log ((p:ℝ) + 4) - Real.log ((p:ℝ) + 3) ≤ 1 / ((p:ℝ) + 3) := by
+          have := log_succ_sub_le_inv ((p:ℝ) + 3) hp3
+          simpa [show ((p:ℝ) + 3) + 1 = (p:ℝ) + 4 from by ring] using this
+        have hsmall : 1 / ((p:ℝ) + 3) ≤ 1 / 2443 := by
+          apply one_div_le_one_div_of_le (by norm_num)
+          linarith
+        have hSlog : Sstar * Real.log 2 ≤ 6.9764 * 0.6931471808 := by
+          nlinarith [hS, hS0, hlog2u, hlog2.le]
+        push_cast
+        push_cast at ih
+        nlinarith [ih, hstep, hsmall, hSlog, haa, hS0, hlog2.le,
+                   mul_nonneg hS0 hlog2.le]
+  -- assemble
+  have hD := DBound_second_diff_le m (by omega)
+  have hkey := key m hm
+  have hm0 : (0:ℝ) < (m:ℝ) := by
+    have : (2440:ℝ) ≤ (m:ℝ) := by exact_mod_cast hm
+    linarith
+  have hm1 : (0:ℝ) < (m:ℝ) + 1 := by linarith
+  have htail : 3 * (1.45 / ((m:ℝ) + 1) + 1e-3) ≤ 3 * (1.45 / (m:ℝ) + 1e-3) := by
+    have : (1.45:ℝ) / ((m:ℝ) + 1) ≤ 1.45 / (m:ℝ) := by
+      apply div_le_div_of_nonneg_left (by norm_num) hm0 (by linarith)
+    linarith
+  simp only [phiBound, RBound]
+  push_cast
+  simp only [show ((m:ℝ) + 1) + 1 = (m:ℝ) + 2 from by ring]
+  nlinarith [hkey, hD, htail, hS0, mul_le_mul_of_nonneg_left hD hS0]
+
 lemma B_nonneg (j : ℕ) (u : ℝ) :
     0 ≤ (2 : ℝ) ^ (-(j : ℝ) * Real.exp (-u)) - 1 + j * Real.log 2 * Real.exp (-u) := by
   set x : ℝ := (j : ℝ) * Real.log 2 * Real.exp (-u) with hx
