@@ -76,14 +76,46 @@ check.  That is a strictly better trade even though the field count barely
 moves -- a `forall` is a much larger thing to be asked to believe than a
 number.
 
-## Tier B — a Mathlib gap, not a mathematical one
+## Tier B — a Mathlib gap, and it is stated 1200x tighter than it needs to be
 
 * `OddNumericalFacts.gamma_gt : 0.5772156 < eulerMascheroniConstant`
 
-The source already says this.  Mathlib has
-`eulerMascheroniConstant_lt_two_thirds` but no lower bound.  This is
-self-contained, has nothing to do with this paper, and is the one item here
-that would be worth upstreaming.
+Mathlib does have a lower bound, just a weak one
+(`Real.one_half_lt_eulerMascheroniConstant`), alongside
+`eulerMascheroniConstant_lt_two_thirds`.  The usable route is
+
+    Real.eulerMascheroniSeq_lt_eulerMascheroniConstant n
+      : harmonic n - log (n+1) < gamma
+
+whose gap to `gamma` is about `1/(2n)`.  So the cost of proving a lower bound
+is set entirely by how tight that bound is -- and this one is far tighter than
+the argument needs.
+
+`gamma_gt` is used once, to get `0.1556 <= betaOdd` where
+`betaOdd = d (log 2 - Sodd + gamma)`.  Taking `d` and `Sodd` at the worst ends
+of their own certified enclosures (`d >= 0.3786950 - 5.3e-8`,
+`Sodd <= 0.8593953 + 3.3e-6`), what the argument actually requires is
+
+    gamma >= 0.5771362259        (true gamma is 0.5772156649, margin 7.9e-5)
+
+against the stated `0.5772156`, whose margin is `6.5e-8`.  Through the
+Mathlib route that is the difference between
+
+    as stated:   error < 6.5e-8   ->  harmonic n for n > 7,703,978
+    as required: error < 7.9e-5   ->  harmonic n for n > 6,294
+
+`harmonic 7.7e6` is not going to evaluate in the kernel; `harmonic 6300` is a
+rational with a few thousand digits, which is heavy but not absurd.  So the
+first move on this field is not to prove it -- it is to **weaken it to what
+the proof uses**, which costs nothing, is in the safe direction (a weaker
+hypothesis is a stronger theorem), and is a Lean-only change: `0.5772156`
+appears nowhere in the paper or in `PROOF.md`.
+
+One caution before doing it.  Weakening the constant shrinks the margin in the
+downstream `0.1556 <= betaOdd` step from `7.9e-5` to a few parts in `1e-6`.
+The inequality stays strictly true, but the tactic that discharges it may need
+more help, so the two changes belong in one CI iteration rather than being
+assumed independent.
 
 ## Tier C — irreducible without verified interval arithmetic
 
