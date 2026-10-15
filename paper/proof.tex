@@ -1111,24 +1111,47 @@ Together the analytic and certified ranges cover all $k\geq6$.
 %=======================================================================
 
 \begin{conjecture}\label{conj:general}
-Let $\mathcal P$ be a set of primes with least element $q$, and let
-$f_k^{\mathcal P}$ be the sum of $1/(n\log n)$ over integers $n$ with
+Let $\mathcal P$ be a set of primes with least element $q$ and thin
+complement,
+\begin{equation}\label{eq:thin-complement}
+  \sum_{p\notin\mathcal P}\frac1p<\infty,
+\end{equation}
+and let $f_k^{\mathcal P}$ be the sum of $1/(n\log n)$ over integers $n$ with
 $\Omega(n)=k$ and all prime factors in $\mathcal P$. The sequence
 $f_k^{\mathcal P}$ is eventually increasing if and only if $q=2$.
 \end{conjecture}
 
-The regularized Euler product for $\mathcal P$ has its first $z$-singularity
-at $z=q^s$. At $s=1$, the point $z=2$ lies on this singular circle exactly
-when $q=2$. If $q\geq3$, the coefficient extraction at $z=2$ is interior and
-gives a constant multiple of $2^{-k}$, as in Section~3. If $q=2$, the
-extraction takes place at the boundary and may produce the factor $k^2$.
+Some hypothesis of this kind is needed. For $\mathcal P=\{2\}$ one has
+$f_k^{\mathcal P}=1/(2^kk\log2)$, and for $\mathcal P=\{2,3\}$ the sequence
+again decreases to $0$; in both cases $q=2$ and the conclusion fails. What
+goes wrong is that a sparse $\mathcal P$ leaves $\sum_{p\in\mathcal P}p^{-s}$
+bounded as $s\to1^+$, so the generating function has no $\zeta(s)^z$ factor
+and $f_k^{\mathcal P}$ decays geometrically to $0$ whatever $q$ is.
 
-Two points remain to turn this mechanism into a theorem for arbitrary
-$\mathcal P$. First, the regularized product must provide enough uniform
-control to identify the limiting constant and the coefficient at $z=2$.
-Second, in the boundary case one must rule out cancellation of the $k^2$
-coefficient. The present paper proves the two extremal cases
-$\mathcal P=\{\text{all primes}\}$ and $\mathcal P=\{p:p\geq3\}$.
+Under \eqref{eq:thin-complement} that cannot happen, and the singularity
+structure is the one the two theorems above exploit:
+\[
+ \prod_{p\in\mathcal P}(1-zp^{-s})^{-1}
+  =\prod_p(1-zp^{-s})^{-1}\prod_{p\notin\mathcal P}(1-zp^{-s}),
+\]
+where the second product converges locally uniformly by
+\eqref{eq:thin-complement} and is therefore entire in $z$. Its zeros cancel
+exactly the poles at $z=p^s$ with $p\notin\mathcal P$, leaving the first
+$z$-singularity at $z=q^s$. At $s=1$ the point $z=2$ lies on that singular
+circle exactly when $q=2$. If $q\geq3$ the coefficient extraction at $z=2$ is
+interior and gives a constant multiple of $2^{-k}$, as in Section~3; if $q=2$
+it takes place at the boundary and may produce the factor $k^2$.
+
+Three points remain to turn this mechanism into a theorem for arbitrary
+$\mathcal P$ satisfying \eqref{eq:thin-complement}. First, the regularized
+product must provide enough uniform control to identify the limiting constant
+and the coefficient at $z=2$. Second, in the boundary case one must rule out
+cancellation of the $k^2$ coefficient. Third, in the interior case one must
+show that the constant multiplying $2^{-k}$ is positive, which is what makes
+the sequence decrease rather than increase; for $\mathcal P=\{p:p\geq3\}$ this
+is the inequality $\beta>0$ of \eqref{eq:beta-intro}. The present paper proves
+the two extremal cases $\mathcal P=\{\text{all primes}\}$ and
+$\mathcal P=\{p:p\geq3\}$.
 
 %=======================================================================
 \section{Certification and formalization}
