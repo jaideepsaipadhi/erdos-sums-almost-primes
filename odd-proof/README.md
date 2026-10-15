@@ -39,7 +39,7 @@ k >= 59, the certified sweep covering the rest.
 
 C is derived, not fitted.  It is
 
-    CE*S/18  +  S_0/2  +  9*S_1/128  +  CN  +  NEARU
+    CE*S/18  +  S_0/2  +  5*590/64   +  CN  +  NEARU
     = 4395.5 +   22.3  +     46.1    + 367.8 + 26.1  =  4857.9,
 
 the Lagrange remainder, the two coefficient tails, and the near region.  Every

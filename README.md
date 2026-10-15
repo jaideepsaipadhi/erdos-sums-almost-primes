@@ -1,7 +1,7 @@
-# The Erdős sums of almost primes increase strictly from k = 6
+# Monotonicity of Erdős sums
 
-A Lean 4 formalization of the analytic reduction in *The Erdős sums of almost
-primes* (Padhi–Lichtman), together with the certified computations it depends on.
+A Lean 4 formalization of the analytic reduction in *Monotonicity of Erdős
+sums* (Padhi–Lichtman), together with the certified computations it depends on.
 
 The Banks–Martin conjecture was disproved, and the global minimum located at
 k = 6, in Lichtman's *Almost primes and the Banks–Martin conjecture*
@@ -115,7 +115,7 @@ for the argument and odd-proof/numerics/README.md for the certified inputs.
 The remainder bound |R_k| <= C (k+3)^3 3^-k holds with C = 4900, giving the
 analytic threshold K0 = 59.  C is derived rather than fitted: it is the sum of
 the Lagrange-remainder term CE*S/18, the two coefficient tails S_0/2 and
-9S_1/128, and the near-region contributions CN and NEARU, each a certified
+5*590/64, and the near-region contributions CN and NEARU, each a certified
 interval computation.
 
 ## Layout
