@@ -10,6 +10,13 @@
 #   * there is no `sorry` anywhere -- checked by the compiler, not by grep
 #   * the odd-case axiom audit reports only propext, Classical.choice,
 #     Quot.sound (odd-proof/axcheck.lean)
+#
+# The runner is pinned rather than `ubuntu-latest`, which migrates to Ubuntu 26
+# on 2026-10-19: a green check should not change meaning underneath us.  The
+# disk is reclaimed first because this build does not fit a stock runner --
+# Mathlib's oleans plus PrimeNumberTheoremAnd built from source came within a
+# few hundred MB of the 14 GB image, which surfaced once as a `tar` failure
+# saving the cache and once as an outright "No space left on device".
 name: lean
 
 on:
@@ -19,10 +26,20 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
+
+      # ~25 GB of preinstalled toolchains this build never touches.
+      - name: Reclaim disk
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android \
+                      /opt/ghc /usr/local/.ghcup \
+                      /opt/hostedtoolcache/CodeQL /usr/local/share/boost || true
+          sudo docker image prune --all --force > /dev/null 2>&1 || true
+          df -h / | tail -1
 
       - name: Build (elan + mathlib cache + lake build)
         uses: leanprover/lean-action@v1
@@ -32,14 +49,22 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
-      - name: No sorry anywhere
+      # Compiler-reported, not text-matched.  A grep for the word finds it in
+      # comments and docstrings; Lean emits "declaration uses 'sorry'" only for
+      # the real thing.  The rebuild here is a cache hit and costs seconds.
+      - name: No sorry (compiler-reported)
         run: |
-          if grep -rnE '(^|[^A-Za-z_])sorry([^A-Za-z_]|$)' \
-               --include='*.lean' Banksmartin Odd odd-proof *.lean; then
-            echo "::error::a sorry is present"
+          lake build 2>&1 | tee build.log
+          if grep -q "declaration uses 'sorry'" build.log; then
+            echo "::error::the compiler reports a declaration using sorry"
+            grep -n "declaration uses 'sorry'" build.log
             exit 1
           fi
-          echo "no sorry found"
+          echo "compiler reports no declaration using sorry"
+
+      - name: Disk after build
+        if: always()
+        run: df -h / | tail -1
 
       - name: Axiom audit (odd case)
         run: |
