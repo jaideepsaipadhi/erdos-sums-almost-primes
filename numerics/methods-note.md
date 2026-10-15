@@ -72,6 +72,13 @@ ext = √((H/2)² + δ²) the ellipse's extent in Re u beyond the panel [a, b].
 P_k(σ_min) is itself evaluated as a rigorous enclosure (upper endpoint used),
 costing one extra recursion pass per panel.
 
+Magnitude: the bound is largest on the leftmost panel [-5.10, -4.30] and at
+the smallest k, where CQ * M * H/2 is 1.1e-87 (k=1) and 1.6e-88 (k=2),
+falling off exponentially with the panel's left endpoint.  The manuscript's
+appendix quoted 1e-88 per panel, which the k = 1 and k = 2 panels exceed; it
+now quotes 1e-86.  Either way the quadrature term is some sixty orders of
+magnitude below the enclosure widths it feeds.
+
 **(D) Nodes and weights.** Gauss–Legendre nodes are certified by interval
 Newton: from a refined midpoint x̂, the operator N(X) = x̂ − P_n(x̂)/P_n′(X)
 is evaluated over an inflated ball X; verification N(X) ⊆ X proves the exact

@@ -1234,7 +1234,7 @@ $F(u)=P_k(1+\e^{-u})\e^{-u}$, which is analytic on the strip
 $\abs{\operatorname{Im}u}<\pi/2$. The range $u\in[-5.10,\,3.5k]$ is divided
 into panels of width $H=0.8$, each mapped affinely to $[-1,1]$ and integrated
 by Gauss--Legendre quadrature with $N=52$ nodes at $1400$ bits of precision;
-the number of panels is therefore proportional to $k$.
+the number of panels therefore grows linearly with the largest $k$ computed.
 
 For $f$ analytic inside the Bernstein ellipse $E_\rho$ and bounded there by
 $M$, the $N$-node Gauss rule satisfies
@@ -1249,8 +1249,11 @@ bound appears as \cite[Thm.~19.3]{ATAP}. The implementation evaluates the right 
 factor $10$ of margin. The ellipse is taken with semi-minor axis
 $\delta=1.45<\pi/2$ in the $u$ variable, giving $\rho\approx7.385$, and $M$ is bounded using
 $\abs{P_k(s)}\leq P_k(\operatorname{Re}s)$ together with the monotonicity of
-$P_k$ on the reals. The resulting discretization error is below $10^{-88}$
-per panel.
+$P_k$ on the reals. The resulting discretization error is below $10^{-86}$
+per panel. The bound is largest on the leftmost panel and at the smallest $k$,
+where it is $1.1\times10^{-87}$, and falls off exponentially with the panel's
+left endpoint; it is therefore negligible beside the widths actually
+reported.
 
 The pinned coefficient sweeps use primes up to $10^5$ and $300$ bits of
 precision, with $1600$ boxes in $s$ for $\alpha_+$ and $800$ boxes for the
