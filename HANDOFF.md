@@ -191,20 +191,35 @@ ASSUMED (NumericalFacts, plus the analytic-layer certified inputs):
   phi(2440) > 0 and phi monotone above 2440; the aggregate source bound
   the three criterion sweeps: [6,199], [78,899], [900,2439]
 
-Note on the hypothesis set.  NumericalFacts also carries source_bound,
-phi_at_k1 and phi_mono, which are not interval bounds: they are the
-conclusions of the manuscript's Proposition 6.1 and Lemmas 6.2-6.3, proved
-analytically there and ASSUMED here.  theorem_7_1 takes all three as
-hypotheses (hE, hphi1, hmono) and proves the passage from them to
-f k < f (k+1) on [2440, inf).  So section 6's analysis is outside the
-formalization, between two parts that are inside it.  Section 8 of the
+Note on the hypothesis set.  source_bound, phi_at_k1 and phi_mono are not
+interval bounds: they are the conclusions of the manuscript's Proposition 6.1
+and Lemmas 6.2-6.3.  theorem_7_1 takes all three as hypotheses (hE, hphi1,
+hmono) and proves the passage from them to f k < f (k+1) on [2440, inf).
+
+The two top-level theorems differ in how much of that is discharged:
+
+  erdos_sums_increase_from_six   (NumericalFacts)
+      passes all three straight through -- Prop 6.1 and Lemmas 6.2-6.3 all
+      assumed.
+  erdos_sums_increase_from_six'  (NumericalFactsFull)
+      still assumes phi_at_k1 and phi_mono, but PROVES the source bound via
+      source_bound_full, from beta_nonneg / g_deriv / g_deriv_bound / M0_bound
+      / alpha_dom / Sstar_dom / UV_bound / Eexp_bound.  Its own docstring says
+      why: it "replaces [the aggregate] with the quantities the Arb package
+      actually computes, so that Proposition 2.5, Theorem 4.1 and section 3.5
+      are *used* in deriving it".
+
+So Lemmas 6.2-6.3 are outside the formalization in both versions; Proposition
+6.1 is outside it in the first and inside it in the second.  Section 8 of the
 manuscript now says so.
 
-Two fields are vestigial: rho_enclosure and Gamma_bound.  rhoConst and Gam
-appear in no proof -- they belong to an earlier refinement of section 6
-(Theorem 6.1, E_1 in M_2 +/- Gamma) that the current manuscript does not
-present.  They are harmless as hypotheses but they make the advertised
-trusted base look larger than the one actually used.
+Two fields are unreachable: rho_enclosure and Gamma_bound.  Gam is consumed
+only by RBound2, which is consumed only by source_bound_refined -- a proved
+theorem that nothing references (1 occurrence in the file, its own
+statement).  That is the earlier refinement of section 6, E_1 in M_2 +/-
+Gamma, which the current manuscript does not present.  rhoConst appears in no
+proof at all.  Both are harmless as hypotheses but they make the advertised
+trusted base look larger than the one the theorems actually use.
   f = (log zetaTilde)' and f'; contour sups M, M0, M2; beta_i and gammahat_i
 
 THE CAVEAT THAT MATTERS: NumericalFacts is a hypothesis.  The theorem is

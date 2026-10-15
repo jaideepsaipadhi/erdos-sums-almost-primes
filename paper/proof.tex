@@ -1184,14 +1184,15 @@ from \eqref{eq:odd-expansion} and Proposition~\ref{prop:odd-remainder}, but is
 not formalized, the monotonicity argument making no use of it.
 
 For Theorem~\ref{thm:main-full} the hypotheses are not only the interval
-bounds of Proposition~\ref{prop:full-certified}. The formalization also takes
-as given the conclusions of Proposition~\ref{prop:criterion-phi} and of
-Lemmas~\ref{lem:phi-base} and \ref{lem:phi-monotone}, under the names
-\texttt{source\_bound}, \texttt{phi\_at\_k1} and \texttt{phi\_mono}, and
-proves from them the passage to $f_k<f_{k+1}$ for $k\geq2440$ together with
-the assembly of the four ranges. The proofs of those three statements, in
-Section~6, are analytic and are not formalized; what is machine-checked for
-the unrestricted theorem is everything on either side of them.
+bounds of Proposition~\ref{prop:full-certified}. Lemmas~\ref{lem:phi-base} and
+\ref{lem:phi-monotone} enter as hypotheses, under the names
+\texttt{phi\_at\_k1} and \texttt{phi\_mono}, and are not reproved there; their
+proofs in Section~6 are analytic. Proposition~\ref{prop:criterion-phi} enters
+as a hypothesis in the same way in one of the two formal versions, and is
+proved in the other, from the primitive certified quantities rather than from
+the aggregate bound \eqref{eq:Eexp-certified}. What the formalization proves
+from these is the passage to $f_k<f_{k+1}$ for $k\geq2440$, together with the
+assembly of the four ranges.
 
 Two constants are stated above more conservatively than the computation
 requires, so that the text and the formalization carry the same values: the
