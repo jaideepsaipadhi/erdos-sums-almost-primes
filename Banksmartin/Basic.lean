@@ -349,9 +349,12 @@ theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
           Real.log_nonneg (by norm_num)
         have hb1 : Real.log 2 / 2 * Umax ≤ 0.6931471808 / 2 * 0.08436 :=
           mul_le_mul (by linarith) hU hU0 (by norm_num)
+        have h3 : 3 * Real.log ((2440:ℝ) + 3) ≤ 3 * (12 * Real.log 2) := by
+          linarith [h4096]
+        have h36 : 36 * Real.log 2 ≤ 36 * 0.6931471808 := by linarith [hlog2u]
         have hinner : (4:ℝ) + 3 * Real.log ((2440:ℝ) + 3)
                         ≤ 4 + 36 * 0.6931471808 := by
-          nlinarith [h4096, hlog2u]
+          linarith [h3, h36]
         have hinner0 : (0:ℝ) ≤ 4 + 3 * Real.log ((2440:ℝ) + 3) := by linarith
         have hb2a : Real.log 2 * (4 + 3 * Real.log ((2440:ℝ) + 3))
                       ≤ 0.6931471808 * (4 + 36 * 0.6931471808) :=
@@ -387,6 +390,12 @@ theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
           mul_le_mul hSlog hDle hD0 (by norm_num)
         push_cast
         push_cast at ih
+        -- push_cast leaves the argument as (p:R) + 1 + 3; hprod speaks of
+        -- (p:R) + 4.  Same number, different atom, and linarith compares
+        -- atoms, so normalise first or the two never meet.
+        try simp only [show ((p:ℝ) + 1 + 3) = (p:ℝ) + 4 from by ring]
+        try ring_nf
+        try ring_nf at ih hprod
         nlinarith [ih, hprod, haa]
   -- assemble
   have hD := DBound_second_diff_le m (by omega)
