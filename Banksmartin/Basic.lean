@@ -650,7 +650,6 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
       ≤ RBound Umax Vmax Sstar alph k
   /-- Section 7: phi(2440) = [89 +- 0.35] > 0, a certified scan. -/
   phi_at_k1     : 0 < phiBound aOneConst Umax Vmax Sstar alph 2440
-  /-- Section 7: phi increasing above 2440. -/
   /-- `phi_mono` stood here.  It is now proved -- `phiBound_mono_of_bounds` --
   and what it needed that this structure did not carry is an upper bound on
   `Umax`, which the manuscript states as `|U| <= 0.08436`.  The three
