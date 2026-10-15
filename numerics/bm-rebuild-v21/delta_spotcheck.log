@@ -1,0 +1,26 @@
+$ python3 -u delta_spotcheck.py 9
+stored: 1395 values, m = 1046..2440
+checking 9 of them
+
+m=1046 prec= 2601  ok        recomputed rad 0.000e+00 vs stored [2.5333e-467 +/- 3.21e-472]  (4.7s)
+m=1220 prec= 2984  ok        recomputed rad 0.000e+00 vs stored [2.8386e-530 +/- 1.84e-535]  (7.5s)
+m=1394 prec= 3366  ok        recomputed rad 0.000e+00 vs stored [7.1825e-593 +/- 4.77e-598]  (11.6s)
+m=1568 prec= 3749  ok        recomputed rad 0.000e+00 vs stored [9.2702e-656 +/- 2.98e-661]  (17.3s)
+m=1742 prec= 4132  ok        recomputed rad 0.000e+00 vs stored [1.1450e-718 +/- 1.83e-723]  (23.9s)
+m=1916 prec= 4515  ok        recomputed rad 0.000e+00 vs stored [1.3122e-781 +/- 8.98e-787]  (30.7s)
+m=2090 prec= 4898  ok        recomputed rad 0.000e+00 vs stored [1.5520e-844 +/- 9.08e-851]  (40.7s)
+m=2264 prec= 5280  ok        recomputed rad 0.000e+00 vs stored [4.0544e-907 +/- 4.50e-912]  (53.5s)
+m=2440 prec= 5668  ok        recomputed rad 0.000e+00 vs stored [6.2090e-971 +/- 2.36e-976]  (69.6s)
+
+9 of 9 agree
+
+Settings of record: 9 samples, stride 174, m = 1046..2440, each at the
+precision its own shard entry records.  Wall clock 260s single-core.
+
+This is a SAMPLE, not a reproduction.  The full extension is ~9.4 core-hours
+(delta_arb scales near m^2.6: 4.7s at m=1046, 69.6s at m=2440) and the
+original run used 256 cores.  What the sample establishes is that the
+committed shards were produced by the delta_arb in this tree at the
+precisions they record -- it would catch a drifted precision rule, a
+truncated shard, or a stride off-by-one.  It would not catch a wrong value
+at an m that was not sampled.
