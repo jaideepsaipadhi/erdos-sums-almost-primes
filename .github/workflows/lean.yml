@@ -1,0 +1,64 @@
+# Builds the Lean development and audits it.
+#
+# Manual by default: this is a private repository, so Actions minutes are
+# metered, and the build is long -- PrimeNumberTheoremAnd is a dependency and
+# has no prebuilt cache, so only Mathlib comes from `lake exe cache get`.
+# Run it from the Actions tab ("Run workflow"), or let it fire on a PR to main.
+#
+# What it establishes, which nothing else in this repository does:
+#   * the development compiles against the pinned toolchain and manifest
+#   * there is no `sorry` anywhere -- checked by the compiler, not by grep
+#   * the odd-case axiom audit reports only propext, Classical.choice,
+#     Quot.sound (odd-proof/axcheck.lean)
+name: lean
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build (elan + mathlib cache + lake build)
+        uses: leanprover/lean-action@v1
+        with:
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
+
+      - name: No sorry anywhere
+        run: |
+          if grep -rnE '(^|[^A-Za-z_])sorry([^A-Za-z_]|$)' \
+               --include='*.lean' Banksmartin Odd odd-proof *.lean; then
+            echo "::error::a sorry is present"
+            exit 1
+          fi
+          echo "no sorry found"
+
+      - name: Axiom audit (odd case)
+        run: |
+          lake env lean odd-proof/axcheck.lean | tee axioms.txt
+          if grep -q "sorryAx" axioms.txt; then
+            echo "::error::sorryAx appears in the axiom audit"
+            exit 1
+          fi
+          # every reported line must be exactly the three permitted axioms
+          if grep "depends on axioms" axioms.txt \
+             | grep -vE "\[propext, Classical\.choice, Quot\.sound\]"; then
+            echo "::error::an unexpected axiom was reported"
+            exit 1
+          fi
+          echo "axiom audit clean"
+
+      - name: Upload axiom report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axiom-report
+          path: axioms.txt
