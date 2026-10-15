@@ -149,6 +149,27 @@ The odd case has the analogue and it does have a script --
 `sup_{|z|=R} |d_s^a Htilde|`, which reproduces its log exactly.  That is the
 template for the missing one.
 
+Until it exists, `bm-rebuild-v21/m1_crosscheck.py` gives an independent
+NON-CERTIFIED estimate of the same two sups, by a different route: it builds
+`G_2(s,z) = ((s-1) zeta(s))^z H_o(s,z)` directly on `|z| = 2.9` and
+differentiates in `s` by finite differences, so an error in the derivative
+algebra cannot be shared with whatever produced the stored values.  It
+self-tests first, extracting `c_i = [z^i] G_2(1,z)` by FFT and comparing with
+`ci_certified.json` (worst absolute deviation 7.2e-07 over i <= 7), and
+refuses to report if that fails.
+
+    python3 m1_crosscheck.py            # ~1 min
+
+Result: `sup |d_s G_2| ~ 129` against the stored `M1 = 2543.66`, and
+`sup |d_s^2 G_2| ~ 3.5e3` against the stored `M2sup = 19881.16`.  Both stored
+constants bound the estimate, by factors of about 20 and 6 -- the slack a
+triangle-inequality derivation would produce, and in the safe direction.  The
+profile in `s` is monotone decreasing from `s = 1`, so the maximum is at the
+endpoint and there is no interior spike to miss.
+
+This corroborates; it does not certify.  Double precision, a finite grid, and
+primes truncated at 1e5 can only fail to find a violation.
+
 
 
 The certificate path is an argument, not a default: `crossval_refined.py`
