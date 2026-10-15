@@ -56,9 +56,13 @@ Re s = 1 + e^{−Re u} cos(Im u) > 1 there and P_k is an absolutely convergent
 Dirichlet series for Re s > 1. For each panel, mapped affinely to [−1, 1],
 the n-point Gauss rule error is bounded via the Bernstein ellipse E_ρ with
 semi-minor axis β = 2δ/H (δ = 1.45 < π/2), ρ = β + √(1+β²), using the bound
-of Trefethen (Approximation Theory and Approximation Practice, Thm 19.3):
+of Trefethen (Is Gauss quadrature better than Clenshaw--Curtis?, SIAM Rev.
+50 (2008), 67--87, Thm 4.5 / eq. (4.14); = ATAP Thm 19.3):
 
     |I − I_n| ≤ (64/15) · M · ρ^{−2n} / (1 − ρ^{−2}),
+
+where n is the NUMBER OF NODES.  The source states the exponent as ρ^{−(2n+2)}
+with I_n built on n+1 nodes, which is the same thing.
 
 applied with an additional factor 10 of safety and the interval-scaling
 factor H/2, where M ≥ sup_{E_ρ} |F|. The sup is controlled by the termwise

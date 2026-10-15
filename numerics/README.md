@@ -89,3 +89,20 @@ unaffected.  The criterion sweep is `crit_78_734.json`.
 
 `cchunks/` (407 MB of PREC=1400 panels feeding `ci_certified.json`) is not in
 the repository; `ci_certified.py` regenerates it.
+
+## The quadrature constant
+
+`certified.py` uses `CQ = 10 * (64/15) * rho^(-2*NGL) / (1 - rho^(-2))` with
+`NGL = 52` nodes.  That is the Gauss bound of Trefethen, *Is Gauss quadrature
+better than Clenshaw--Curtis?*, SIAM Rev. 50 (2008), 67-87, Theorem 4.5
+eq. (4.14) -- stated there as `rho^(-(2n+2))` with `I_n` built on `n+1` nodes,
+which is the same quantity -- carried in ATAP as Theorem 19.3, times a factor
+10 of margin.  Checked against the source on 2026-10-14; the paper's appendix
+cites both.
+
+The four `certificate*.json` files predate that check and still carry the
+caveat "verify exact statement before citation" in their `caveats` field.
+They are left as they are on purpose: `certificate.py` hashes the payload
+*including* `caveats`, so editing the text by hand would break the stored
+`sha256_of_payload_without_hash`.  All four currently verify, and the wording
+will correct itself the next time they are regenerated.
