@@ -269,7 +269,9 @@ theorem log_succ_sub_le_inv (x : ℝ) (hx : 0 < x) :
   have hx1 : (0:ℝ) < x + 1 := by linarith
   have h := Real.log_le_sub_one_of_pos (show (0:ℝ) < (x + 1) / x by positivity)
   rw [Real.log_div (ne_of_gt hx1) (ne_of_gt hx)] at h
-  have he : (x + 1) / x - 1 = 1 / x := by field_simp
+  have he : (x + 1) / x - 1 = 1 / x := by
+    field_simp
+    try ring
   rw [he] at h
   exact h
 
@@ -288,12 +290,13 @@ theorem DBound_second_diff_le (m : ℕ) (hm : 1 ≤ m) :
     rw [Real.log_div (by linarith) (by linarith)] at h
     have he : ((m:ℝ) + 3) / ((m:ℝ) + 1) - 1 = 2 / ((m:ℝ) + 1) := by
       field_simp
+      try ring
     rw [he] at h
     exact h
   have hmul : 2 * (m:ℝ) * (2 / ((m:ℝ) + 1)) ≤ 4 := by
     have hr : 2 * (m:ℝ) * (2 / ((m:ℝ) + 1)) = 4 * (m:ℝ) / ((m:ℝ) + 1) := by
       field_simp; ring
-    rw [hr, div_le_iff h1]
+    rw [hr, div_le_iff₀ h1]
     linarith
   have hA : ((m:ℝ) + 1) * Real.log ((m:ℝ) + 2)
               ≤ ((m:ℝ) + 1) * Real.log ((m:ℝ) + 3) :=
@@ -309,8 +312,8 @@ theorem DBound_second_diff_le (m : ℕ) (hm : 1 ≤ m) :
   have hscaled := mul_le_mul_of_nonneg_left hbracket hlog2.le
   simp only [DBound]
   push_cast
-  simp only [show ((m:ℝ) + 1) + 1 = (m:ℝ) + 2 from by ring,
-             show ((m:ℝ) + 2) + 1 = (m:ℝ) + 3 from by ring]
+  try simp only [show ((m:ℝ) + 1) + 1 = (m:ℝ) + 2 from by ring,
+                 show ((m:ℝ) + 2) + 1 = (m:ℝ) + 3 from by ring]
   nlinarith [hscaled]
 
 /-- `phi_mono` as a theorem.  The hypotheses are the bounds the structures
@@ -344,9 +347,22 @@ theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
           linarith
         have hlogpos : (0:ℝ) ≤ Real.log ((2440:ℝ) + 3) :=
           Real.log_nonneg (by norm_num)
+        have hb1 : Real.log 2 / 2 * Umax ≤ 0.6931471808 / 2 * 0.08436 :=
+          mul_le_mul (by linarith) hU hU0 (by norm_num)
+        have hinner : (4:ℝ) + 3 * Real.log ((2440:ℝ) + 3)
+                        ≤ 4 + 36 * 0.6931471808 := by
+          nlinarith [h4096, hlog2u]
+        have hinner0 : (0:ℝ) ≤ 4 + 3 * Real.log ((2440:ℝ) + 3) := by linarith
+        have hb2a : Real.log 2 * (4 + 3 * Real.log ((2440:ℝ) + 3))
+                      ≤ 0.6931471808 * (4 + 36 * 0.6931471808) :=
+          mul_le_mul (by linarith) hinner hinner0 (by norm_num)
+        have hb2b : (0:ℝ) ≤ Real.log 2 * (4 + 3 * Real.log ((2440:ℝ) + 3)) :=
+          mul_nonneg hlog2.le hinner0
+        have hb2 : Sstar * (Real.log 2 * (4 + 3 * Real.log ((2440:ℝ) + 3)))
+                     ≤ 6.9764 * (0.6931471808 * (4 + 36 * 0.6931471808)) :=
+          mul_le_mul hS hb2a hb2b (by norm_num)
         push_cast
-        nlinarith [h4096, hlogpos, hlog2u, hlog2l, hU, hU0, hS, hS0, hal, hal0,
-                   haa, mul_nonneg hS0 hlog2.le]
+        nlinarith [hb1, hb2, hal, haa]
     | succ p hp ih =>
         have hp3 : (0:ℝ) < (p:ℝ) + 3 := by positivity
         have hpge : (2440:ℝ) ≤ (p:ℝ) := by exact_mod_cast hp
@@ -356,12 +372,22 @@ theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
         have hsmall : 1 / ((p:ℝ) + 3) ≤ 1 / 2443 := by
           apply one_div_le_one_div_of_le (by norm_num)
           linarith
-        have hSlog : Sstar * Real.log 2 ≤ 6.9764 * 0.6931471808 := by
-          nlinarith [hS, hS0, hlog2u, hlog2.le]
+        have hSlog : Sstar * Real.log 2 ≤ 6.9764 * 0.6931471808 :=
+          mul_le_mul hS (by linarith) hlog2.le (by norm_num)
+        have hSL0 : (0:ℝ) ≤ Sstar * Real.log 2 := mul_nonneg hS0 hlog2.le
+        have hD0 : (0:ℝ) ≤ Real.log ((p:ℝ) + 4) - Real.log ((p:ℝ) + 3) := by
+          have := Real.log_le_log (show (0:ℝ) < (p:ℝ) + 3 by positivity)
+            (show ((p:ℝ) + 3) ≤ (p:ℝ) + 4 by linarith)
+          linarith
+        have hDle : Real.log ((p:ℝ) + 4) - Real.log ((p:ℝ) + 3) ≤ 1 / 2443 := by
+          linarith [hstep, hsmall]
+        have hprod : (Sstar * Real.log 2)
+                       * (Real.log ((p:ℝ) + 4) - Real.log ((p:ℝ) + 3))
+                     ≤ (6.9764 * 0.6931471808) * (1 / 2443) :=
+          mul_le_mul hSlog hDle hD0 (by norm_num)
         push_cast
         push_cast at ih
-        nlinarith [ih, hstep, hsmall, hSlog, haa, hS0, hlog2.le,
-                   mul_nonneg hS0 hlog2.le]
+        nlinarith [ih, hprod, haa]
   -- assemble
   have hD := DBound_second_diff_le m (by omega)
   have hkey := key m hm
@@ -375,7 +401,7 @@ theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
     linarith
   simp only [phiBound, RBound]
   push_cast
-  simp only [show ((m:ℝ) + 1) + 1 = (m:ℝ) + 2 from by ring]
+  try simp only [show ((m:ℝ) + 1) + 1 = (m:ℝ) + 2 from by ring]
   nlinarith [hkey, hD, htail, hS0, mul_le_mul_of_nonneg_left hD hS0]
 
 lemma B_nonneg (j : ℕ) (u : ℝ) :
