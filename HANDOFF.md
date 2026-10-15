@@ -190,6 +190,21 @@ ASSUMED (NumericalFacts, plus the analytic-layer certified inputs):
   d, rho enclosures; S*, alpha_+, Gamma bounds; Umax, Vmax
   phi(2440) > 0 and phi monotone above 2440; the aggregate source bound
   the three criterion sweeps: [6,199], [78,899], [900,2439]
+
+Note on the hypothesis set.  NumericalFacts also carries source_bound,
+phi_at_k1 and phi_mono, which are not interval bounds: they are the
+conclusions of the manuscript's Proposition 6.1 and Lemmas 6.2-6.3, proved
+analytically there and ASSUMED here.  theorem_7_1 takes all three as
+hypotheses (hE, hphi1, hmono) and proves the passage from them to
+f k < f (k+1) on [2440, inf).  So section 6's analysis is outside the
+formalization, between two parts that are inside it.  Section 8 of the
+manuscript now says so.
+
+Two fields are vestigial: rho_enclosure and Gamma_bound.  rhoConst and Gam
+appear in no proof -- they belong to an earlier refinement of section 6
+(Theorem 6.1, E_1 in M_2 +/- Gamma) that the current manuscript does not
+present.  They are harmless as hypotheses but they make the advertised
+trusted base look larger than the one actually used.
   f = (log zetaTilde)' and f'; contour sups M, M0, M2; beta_i and gammahat_i
 
 THE CAVEAT THAT MATTERS: NumericalFacts is a hypothesis.  The theorem is
