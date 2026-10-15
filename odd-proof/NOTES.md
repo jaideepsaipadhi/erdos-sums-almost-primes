@@ -14,7 +14,7 @@ assuming them.  They are not load-bearing for `fOdd_decreasing`:
 - `eps_zeta_uniform` - |eps zeta(1+eps) - 1 - gamma eps| <= C eps^2
 - `uOf_strictAnti`, `uOf_image`, `sOf` - the u = log zeta substitution
 - `uOf_change_of_variables`, `integral_substitute`
-- `fOdd_u_form` - f_k^odd as a u-integral with exact powers
+- `fOdd_u_form` - g_k as a u-integral with exact powers
 - `jacobian_signed`, `eps_of_u_signed`, `jacobian_u_signed`
 - `hCoeff_taylor` - signed second-order coefficient expansion
 - `gamma_normalised{,_two,_three}` - the three Gamma integrals

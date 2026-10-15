@@ -8,7 +8,7 @@ k = 7 .. K0-1 with certified interval arithmetic. GLW verified k <= 20.
 f_k = I'_k + (I_k - I'_k) + tail, where:
 - I'_k = sum_i c_i * A_{k-i}/2^{k-i}   -- dominant, from certified c_i and the
   certified A_m (delta) table. Cheap.
-- (I_k - I'_k) = the S1 correction, EVALUATED (not bounded) via GLW's
+- (I_k - I'_k) = the S1 correction, evaluated (not bounded) via GLW's
   s = 1+e^{-t} substitution, which removes the s->1 singularity. Certified
   interval quadrature with QUADRATIC convergence (midpoint+derivative panels).
 - tail = explicit O(1/(k 2^k)) bound.

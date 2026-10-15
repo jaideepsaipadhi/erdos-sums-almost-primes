@@ -43,12 +43,13 @@ same theorem.
 
 Theorem 6.1 (the refined enclosure) is consumed by `E1k_le_refined`, which
 combines it with `A2m_le` to give |E_1(k)| <= (Bhat/2)(k+1) + Gamma.  That is
-the bound behind the manuscript's K0 = 79; the coverage of [79,899] itself
-comes from the certified sweep, which no formalization can replace.
+the bound behind K0, which the regenerated constants bring from the
+manuscript's 79 to 78; the coverage of [78,899] itself comes from the
+certified sweep, which no formalization can replace.
 
 ## What is proved, and what is assumed
 
-MACHINE-CHECKED, in Banksmartin/Basic.lean:
+Machine-checked, in Banksmartin/Basic.lean:
 
   * Section 2, the exact reduction: Lemmas 2.1, 2.2, 2.4, Proposition 2.5, and
     both coefficient identities (sum c_i = 1/2, sum 2^i c_i = d)
@@ -58,10 +59,10 @@ MACHINE-CHECKED, in Banksmartin/Basic.lean:
   * Section 6: Theorem 6.1, including the k-independence of Gamma
   * Section 7: Theorem 7.1, and the four-range assembly
 
-ASSUMED -- the NumericalFacts structure.  Its fields are the Arb ball
+Assumed -- the NumericalFacts structure.  Its fields are the Arb ball
 computations in numerics/: the constant enclosures, the beta_i and gammahat_i
 sweeps, U_max and V_max, phi(2440) > 0 with its monotonicity, and the criterion
-sweeps over [6,199], [79,899] and [900,2439].
+sweeps over [6,199], [78,899] and [900,2439].
 
 NumericalFacts has no Lean instance and cannot have one: sweep_low and its
 siblings quantify over f k, an infinite sum over {n : Omega(n) = k}, which no
@@ -100,7 +101,7 @@ vacuous until closed:
 
   * cFac's multipliability -- Lemma 2.2's hypotheses
   * dConst's convergence -- d_enclosure was a claim about a junk value
-  * Sm's integrability -- LOAD-BEARING under Am, delta_m and Theorem 4.1
+  * Sm's integrability -- load-bearing under Am, delta_m and Theorem 4.1
 
 ## The odd companion
 
