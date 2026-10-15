@@ -2,13 +2,13 @@
 
 **Theorem.** Let
 
-    f_k^odd = sum over odd n >= 3 with Omega(n) = k of 1/(n log n).
+    g_k = sum over odd n >= 3 with Omega(n) = k of 1/(n log n).
 
-Then f_k^odd > f_{k+1}^odd for every k >= 1, and f_k^odd -> 1/2.
+Then g_k > g_{k+1} for every k >= 1, and g_k -> 1/2.
 
-This is the companion to the main result of *The Erdős sums of almost primes
-increase strictly from k = 6*, which shows the unrestricted sums f_k are
-strictly **increasing** from k = 6, disproving Banks–Martin.  The two together
+This is the companion to the main result of *Monotonicity of Erdős sums*,
+which shows the unrestricted sums f_k are strictly increasing from k = 6,
+disproving Banks–Martin.  The two together
 say that the failure of Banks–Martin is caused entirely by the prime 2.
 
 ---
@@ -22,7 +22,7 @@ For s > 1 put
 so that (by the same argument as Lemma 2.1 of the main paper, applied to the
 odd n)
 
-    f_k^odd = int_1^inf P_k^odd(s) ds.                                    (1.1)
+    g_k = int_1^inf P_k^odd(s) ds.                                    (1.1)
 
 The generating function is the Euler product over odd primes:
 
@@ -34,21 +34,19 @@ Write (1.2) as zeta(s)^z H(s,z), so that
 
     H(s,z) = (1 - 2^-s)^z prod_{p>=3} (1 - z p^-s)^-1 (1 - p^-s)^z.       (2.1)
 
-**The key structural point.** H(s,·) is analytic in |z| < 3^s, because the
-factor with the smallest pole is p = 3.  In the unrestricted problem the
-corresponding function is analytic only in |z| < 2^s, so the evaluation point
-z = 2 lies ON the boundary; here it lies strictly INSIDE.  This is the whole
-reason the odd case is easier: on the boundary one picks up a k^2 factor
-competing with 2^-k, which is what produces the turnaround at k = 6 and forces
-the delta-table and criterion machinery of sections 4-7 of the main paper.
-Inside, the leading behaviour is a constant times 2^-k with nothing to
-compete with it.
+H(s,·) is analytic in |z| < 3^s, since the nearest pole comes from p = 3.
+For the unrestricted product the radius is 2^s, so the evaluation point z = 2
+lies on the first singular circle; here it lies strictly inside it.  On the
+boundary the evaluation acquires a factor k^2 against 2^-k, which turns the
+unrestricted sequence around at k = 6 and forces the delta-table and criterion
+machinery of sections 4-7 of the main paper.  Inside, the leading term is a
+constant times 2^-k.
 
 Substituting u = log zeta(s) in (1.1) and expanding
 
     s - 1 = e^-u + gamma e^-2u + O(e^-3u),                                (2.2)
 
-the contributions to f_k^odd organise by powers of e^-u.  Using
+the contributions to g_k organise by powers of e^-u.  Using
 int_0^inf u^k e^-ju / k! du = j^-(k+1):
 
     order e^-u :   H(1,1)                                                 (2.3)
@@ -61,7 +59,7 @@ From (2.1) at z = s = 1 the product telescopes against zeta, leaving
 
     H(1,1) = 1 - 2^-1 = 1/2,
 
-so by (2.3), f_k^odd -> 1/2.  Equivalently: the limit is the omitted Euler
+so by (2.3), g_k -> 1/2.  Equivalently: the limit is the omitted Euler
 factor evaluated at z = s = 1.  (For the unrestricted sums the same
 computation gives 1.)
 
@@ -77,10 +75,10 @@ the same constant d = 0.3786950 that appears in the main paper, and
 
 Substituting into (2.4):
 
-    f_k^odd = 1/2 + beta 2^-k + R_k,    beta = d (log 2 - S + gamma).      (4.1)
+    g_k = 1/2 + beta 2^-k + R_k,    beta = d (log 2 - S + gamma).      (4.1)
 
-**Numerically** beta = 0.15563, and (4.1) is confirmed against the certified
-values of f_k^odd: Richardson extrapolation of B(k) = 2^k (f_k^odd - 1/2) with
+Numerically beta = 0.15563, and (4.1) is confirmed against the certified
+values of g_k: Richardson extrapolation of B(k) = 2^k (g_k - 1/2) with
 ratio 3/4 gives 0.157522, 0.156515, 0.156231 at k = 16, 18, 19, converging to
 beta from above.
 
@@ -88,7 +86,7 @@ beta from above.
 
 Write
 
-    R_k = f_k^odd - 1/2 - beta 2^-k
+    R_k = g_k - 1/2 - beta 2^-k
 
 for the remainder after the two main terms of (4.1).  This section proves
 
@@ -104,7 +102,7 @@ three.
 ### 5.1 Why the order expansion cannot be summed
 
 Section 2 organises the integrand by powers of e^-u, with (2.5) recording the
-order-m contribution as O(m^-(k+1)).  That expansion is ASYMPTOTIC, not
+order-m contribution as O(m^-(k+1)).  That expansion is asymptotic, not
 convergent, and must not be summed over m.
 
 eps^r times the Jacobian contributes at order e^-(r+1)u, so the order-m term
@@ -114,7 +112,7 @@ contribution is
 
     m^-(k+1) sum_{i<=k} c_i^(m) m^i ~ [C_{m-1}/(m-1)!] k^(m-1) 3^-k/(m-3).
 
-The power of k GROWS with m; summing over m >= 3 diverges.  Earlier drafts of
+The power of k grows with m; summing over m >= 3 diverges.  Earlier drafts of
 this note summed it, and the bound they reported -- M_R (2/9)^k with
 M_R = 826.705058 -- is numerically false, failing from k = 13 onward against
 the certified values of section 7.
@@ -146,13 +144,13 @@ the main term by five to eight orders of magnitude over the range that matters,
 and (c) is a cost of the split this note performs, not an omission in the
 argument it formalizes.
 
-(a) THE TWO COEFFICIENT TAILS.  The main terms of section 4 integrate to the
-PARTIAL sums over j <= k, not to 1/2 and beta 2^-k; the differences
+(a) The two coefficient tails.  The main terms of section 4 integrate to the
+partial sums over j <= k, not to 1/2 and beta 2^-k; the differences
 sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k} (b_j + 2 gamma h_j(1)) 2^j join R_k.
 Both are bounded by the same pole-cancellation device as (5.4)-(5.5), but at
-FIRST and SECOND order rather than third:
-(The paper writes S_2 for the S of 5.2, indexing the three constants by pole
-order; the Lean parameter is S.)
+first and second order rather than third:
+(The paper writes Sigma_0, Sigma_1, Sigma_2 for S_0, S_1 and the S of 5.2,
+indexing the three constants by pole order; the Lean parameter is S.)
 
     S_0 := sum_i |a_i| 3^i,  a_i = [z^i] H(1,z)(1 - z/3),        S_0 <= 44.5987
     S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 486.1945
@@ -166,7 +164,7 @@ using (k+4)/(k+3)^3 <= 5/64 for k >= 1.  (An earlier draft used 9 S_1/128 =
 34.19 here, which omitted the 2 gamma h_j(1) part.)  (s0_recursion.py, s0_cauchy.py,
 s1_recursion.py, s1_cauchy.py.)
 
-(b) THE JACOBIAN AND PRODUCT ERRORS.  (5.3) bounds only the Lagrange remainder
+(b) The Jacobian and product errors.  (5.3) bounds only the Lagrange remainder
 R_j J.  The split of the integrand also leaves
     h_j(1) (J - e^-u - 2 gamma e^-2u)   and   b_j (eps J - e^-2u),
 each O(e^-3u) but with its own constant.  Writing CJ, CP, Cb, Cf for the four
@@ -175,7 +173,7 @@ of (5.3) is CE/3 times, not 1 times, sum_{j<=k}|h_j''|3^j.  Over the range
 s in (1, sOf(3)] that the split requires, CE <= 5.48910 (ce_taylor.py; the
 log prints 5.4890962927).
 
-(c) THE NEAR REGION.  This one is not a gap in the argument but a cost of
+(c) The near region.  This one is not a gap in the argument but a cost of
 making it rigorous: the expansions in (b) are asymptotic, valid only for
 u >= U, and the original treats them as holding throughout.  This note uses
 U = 3 and bounds 0 < u <= U separately.  On 0 < u <= U the integrand is bounded directly,
@@ -188,16 +186,16 @@ Factor out the pole:
 
     G_2(s,z) = d_s^2 H(s,z) (1 - z 3^-s)^3,                                (5.4)
 
-analytic in |z| < 5^s.  With g_j = [z^j] G_2(1,z), expanding (1 - z/3)^-3 by
+analytic in |z| < 5^s.  With w_j = [z^j] G_2(1,z), expanding (1 - z/3)^-3 by
 the negative binomial series gives
 
-    h_j'' = 3^-j sum_{i<=j} g_i 3^i C(j-i+2, 2),
+    h_j'' = 3^-j sum_{i<=j} w_i 3^i C(j-i+2, 2),
 
 and summing over j <= k,
 
-    sum_{j<=k} |h_j''| 3^j <= C(k+3, 3) * S,   S := sum_i |g_i| 3^i.       (5.5)
+    sum_{j<=k} |h_j''| 3^j <= C(k+3, 3) * S,   S := sum_i |w_i| 3^i.       (5.5)
 
-Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give the LAGRANGE-REMAINDER part
+Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give the Lagrange-remainder part
 of (5.1) with coefficient CE S/18 (the CE of 5.1(b); with CE = 3 this would be
 the S/6 of earlier drafts).  Adding 5.1(a) and 5.1(c),
     C = CE S/18 + S_0/2 + 5*590/64 + CN + NEARU
@@ -218,7 +216,7 @@ is the pole cancellation in (5.4) that makes S finite.
 
 S is split at i = 16.
 
-HEAD, i <= 16, by direct interval recursion (odd-proof/numerics/hcoeff_recursion.py).
+Head, i <= 16, by direct interval recursion (odd-proof/numerics/hcoeff_recursion.py).
 Writing
 
     log H(s,z) = z L_1(s) + sum_{j>=2} z^j L_j(s),
@@ -227,33 +225,33 @@ Writing
 
 the coefficients of H follow from h_m = (1/m) sum_{j<=m} j L_j h_{m-j}, those
 of d_s^2 H from d_s^2 H = H (D_1^2 + D_2) with D_r = sum_j L_j^(r) z^j, and the
-g_i from the product with (1 - z/3)^3.  Every step carries s as a certified
+w_i from the product with (1 - z/3)^3.  Every step carries s as a certified
 interval, [1,2] partitioned into 1600 boxes.  Result:
 
-    sum_{i<=16} |g_i| 3^i <= 8424.
+    sum_{i<=16} |w_i| 3^i <= 8424.
 
-TAIL, i > 16, by Cauchy, which is cheap here because the terms are small.  By
-(5.4) G_2 is analytic in |z| < 5, so on |z| = R = 4.5, |g_i| <= M R^-i with
+Tail, i > 16, by Cauchy, which is cheap here because the terms are small.  By
+(5.4) G_2 is analytic in |z| < 5, so on |z| = R = 4.5, |w_i| <= M R^-i with
 M = sup_{|z|=R, s in [1,2]} |G_2| <= 1.97e6 (odd-proof/numerics/mr_deriv_sweep.py),
 giving
 
-    sum_{i>16} |g_i| 3^i <= M (3/R)^17/(1 - 3/R) <= 5990.
+    sum_{i>16} |w_i| 3^i <= M (3/R)^17/(1 - 3/R) <= 5990.
 
 Hence S <= 14414.  This is the S of 5.2; the constant C of (5.1) is
 CE S/18 + S_0/2 + 5*590/64 + CN + NEARU = 4857.9, not S/6 -- see 5.2.
 
-BOTH HALVES ARE NECESSARY.  Cauchy from i = 0 gives C = 327869 and K0 = 71,
+Both halves are necessary.  Cauchy from i = 0 gives C = 327869 and K0 = 71,
 too weak to meet the certified sweep: the circle estimate discards the
 cancellation among the true coefficients, costing about 5.5e5.  The recursion
 alone cannot reach large i: interval width in s compounds through the
-recurrence, and past i ~ 14 the computed |g_i| 3^i stop decreasing and rise,
+recurrence, and past i ~ 14 the computed |w_i| 3^i stop decreasing and rise,
 which is width rather than signal.
 
 ### 5.4 What is assumed
 
 (5.1) rests on the interval computations
 
-  * sum_{i<=16} |g_i| 3^i <= 8424        (1600 s-boxes, primes to 1e5)
+  * sum_{i<=16} |w_i| 3^i <= 8424        (1600 s-boxes, primes to 1e5)
   * sup_{|z|=4.5, s in [1,2]} |G_2| <= 1.97e6   (200 theta x 40 s boxes)
   * S_0 <= 44.5987                       s0_recursion.py + s0_cauchy.py
   * S_1 <= 486.1945                      s1_recursion.py + s1_cauchy.py
@@ -262,7 +260,7 @@ which is width rather than signal.
   * CE  <= 5.48910                       ce_taylor.py  (log: 5.4890962927)
 
 and on 5.1-5.2, elementary given them.  No constant is fitted to the certified
-f_k^odd; the agreement with those values is a check, not an input.
+g_k; the agreement with those values is a check, not an input.
 
 All five of the new constants are arb enclosures end to end, with no
 floating-point or mpmath step anywhere in the chain.  Two of them needed a
@@ -290,7 +288,7 @@ loses about a digit every 2.3 steps to cancellation, so it is run at 600 bits;
 
 ## 6. Assembly
 
-    f_k^odd - f_{k+1}^odd = beta 2^-(k+1) + (R_k - R_{k+1}),
+    g_k - g_{k+1} = beta 2^-(k+1) + (R_k - R_{k+1}),
 
 so it suffices that |R_k| + |R_{k+1}| < beta 2^-(k+1), for which
 |R_k| < beta 2^-k / 3 is enough.  With (5.1):
@@ -316,7 +314,7 @@ and the sweep to 75 leaves sixteen values of overlap.
     d           0.3786950 +/- 5.3e-8         main development
     S_odd       [0.8593920314, 0.8593986014]  head to 5e6, tail 2(log P + 1)/P
     beta        [0.1556300826, 0.1556326142]
-    sum|g_i|3^i <= 8424  (i <= 16)            hcoeff_recursion.py, 1600 s-boxes
+    sum|w_i|3^i <= 8424  (i <= 16)            hcoeff_recursion.py, 1600 s-boxes
     sup|G_2|    <= 1.97e6 on |z|=4.5          mr_deriv_sweep.py
     S_0         <= 44.5987                    s0_recursion.py, s0_cauchy.py
     S_1         <= 486.1945                   s1_recursion.py, s1_cauchy.py
@@ -327,7 +325,7 @@ and the sweep to 75 leaves sixteen values of overlap.
     C           4900                          (5.1), see 5.2
     K0^odd      59                            certified sweep reaches 75
 
-The certified values of f_k^odd for k = 1..75 are produced by
+The certified values of g_k for k = 1..75 are produced by
 odd-proof/numerics/fodd_run.py at 1000-bit precision, which adapts the main
 development's panel machinery by replacing the prime zeta P(t) with P(t)-2^-t
 and the large-s tail bound P(s) <= 2.78*2^-s with P_odd(s) <= 1.91*3^-s.
