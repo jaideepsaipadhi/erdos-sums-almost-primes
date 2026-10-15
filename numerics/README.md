@@ -131,44 +131,67 @@ Rerun on 2026-10-14 against the committed artifacts:
 (`k1_far_range.py` lines 56-61).  Dropping the tail gives 15.3849 and looks
 like a mismatch; with it the value is exact.
 
-### Two stored constants no script regenerates
+### Two stored constants: now certified
 
     m1_constant.json     M1_R2.9     = 2543.6624045073563   -> alpha_+ tail
     gamma_constant.json  M2sup_R2.9  = 19881.155667290404   -> Gamma tail
                          (and Gamma itself, = (head + tail)/2)
 
 Both are contour sups on `|z| = 2.9`.  They are read by `crit_refined.py`,
-`crossval_refined.py`, `k1_far_range.py` and `crit_assembly.py`, and feed two
-constants in the trusted base, but nothing in the repository computes them:
-`grep M2sup *.py` returns nothing, and no script opens either file for
-writing.  Everything else above regenerates; these do not, so they cannot be
-checked from here.
+`crossval_refined.py`, `k1_far_range.py` and `crit_assembly.py`, and they feed
+the trusted base as the Cauchy tails `|beta_i| <= M1 2.9^-i` and
+`|gammahat_i| <= M2sup 2.9^-i` (the second is `verify.py`'s "Cauchy tail at
+2.9" check).  For a long time nothing in the repository produced them: they
+were stored with no derivation on file.
 
-The odd case has the analogue and it does have a script --
-`odd-proof/numerics/mr_deriv_sweep.py`, a theta x s interval sweep of
-`sup_{|z|=R} |d_s^a Htilde|`, which reproduces its log exactly.  That is the
-template for the missing one.
+`m1_certified.py` now does, by the method of the odd case's
+`mr_deriv_sweep.py` -- an interval sweep in `theta` and `s`, with the
+`s`-derivatives taken analytically rather than by finite differences.  Two
+things differ from that template.  The factor `((s-1) zeta(s))^z`, absent in
+the odd case, contributes `z A(s)` to `log G_2` and is handled by the same
+certified Stieltjes expansion `beta_sweep.py` uses.  And the sweep is a branch
+and bound rather than a uniform grid, because a uniform grid must be fine
+enough for its worst box everywhere, and the worst box here is at `s = 1`,
+`theta = 0`, where the `p = 3` Euler factor's pole sits at `|z| = 3` and the
+enclosure of `1 - z 3^-s` is nearly as wide as it is long.
 
-Until it exists, `bm-rebuild-v21/m1_crosscheck.py` gives an independent
-NON-CERTIFIED estimate of the same two sups, by a different route: it builds
-`G_2(s,z) = ((s-1) zeta(s))^z H_o(s,z)` directly on `|z| = 2.9` and
-differentiates in `s` by finite differences, so an error in the derivative
-algebra cannot be shared with whatever produced the stored values.  It
-self-tests first, extracting `c_i = [z^i] G_2(1,z)` by FFT and comparing with
-`ci_certified.json` (worst absolute deviation 7.2e-07 over i <= 7), and
-refuses to report if that fails.
+    python3 m1_certified.py 64 32 1000 100000 300 26      # setting of record
 
-    python3 m1_crosscheck.py            # ~1 min
+It self-tests before sweeping: it evaluates `G_2(1, 2)` from its own formula
+and compares with `sum_i c_i 2^i` assembled from `ci_certified.json` and
+`tail_constants.json`, and refuses to report if the two intervals are
+disjoint.  The tie-in is taken at `|z| = 2`, not at 2.9: the certified `c_i`
+tail at 2.9 is `(2.9/3)^31/(1-2.9/3)`, about 10, far too wide to test
+anything, while at 2 it is about `1e-6`.
 
 Result: `sup |d_s G_2| ~ 129` against the stored `M1 = 2543.66`, and
-`sup |d_s^2 G_2| ~ 3.5e3` against the stored `M2sup = 19881.16`.  Both stored
-constants bound the estimate, by factors of about 20 and 6 -- the slack a
-triangle-inequality derivation would produce, and in the safe direction.  The
-profile in `s` is monotone decreasing from `s = 1`, so the maximum is at the
-endpoint and there is no interior spike to miss.
+`sup |d_s^2 G_2| ~ 3510` against the stored `M2sup = 19881.16`.  Both stored
+constants are upper bounds, by factors of about 20 and 5.7 -- the slack a
+triangle-inequality derivation produces, and in the safe direction.  Both sups
+are attained at `s = 1`; for `d_s G_2` the maximising point on the circle is
+`z = -2.9` (theta = pi), which is worth knowing because a sweep seeded only
+near theta = 0 will miss it.
 
-This corroborates; it does not certify.  Double precision, a finite grid, and
-primes truncated at 1e5 can only fail to find a violation.
+`m1_crosscheck.py` remains as an independent NON-CERTIFIED estimate by a
+different route -- double precision, finite differences in `s`, a finite grid
+-- and agrees: 128.83 and 3509.32.  Its own self-test is a RELATIVE
+comparison against `ci_certified.json` despite printing the word "absolute",
+so it is sensitive to `PCUT`; run it at the default `1e5`, where it passes at
+`7.2e-07`.
+
+Two traps this exercise produced, both worth knowing before touching the
+script:
+
+  * `1/(den*den)` is not `inv*inv`.  Near the `p = 3` pole the ball
+    `den = 1 - z 3^-s` has radius comparable to its own modulus, so `den*den`
+    straddles zero and the quotient blows up by three orders of magnitude --
+    733632 where the true term is 2120.  Squaring the inverse, a ball bounded
+    away from zero, is conditioned correctly.
+  * the worklist is a stack, so the traversal is depth first.  A partial run
+    reports the maximum over the boxes visited SO FAR, which can look
+    converged and be wrong; the progress lines are marked `[PARTIAL]` for
+    that reason.  Only the final block is a bound.
+
 
 
 

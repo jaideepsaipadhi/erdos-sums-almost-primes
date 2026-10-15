@@ -84,7 +84,7 @@ def selftest():
         mine = (coef[i] / R ** i).real
         worst = max(worst, abs(mine - w))
         print("  c_%d  mine %18.10f   certified %18.10f" % (i, mine, w))
-    print("  worst absolute deviation: %.2e" % worst)
+    print("  worst relative deviation: %.2e" % worst)
     # absolute, not relative: ci_certified.json prints to ~10 decimals, so the
     # small coefficients carry only a few significant digits as stored.
     if worst > 1e-6:
