@@ -176,9 +176,26 @@ log prints 5.4890962927).
 (c) The near region.  This one is not a gap in the argument but a cost of
 making it rigorous: the expansions in (b) are asymptotic, valid only for
 u >= U, and the original treats them as holding throughout.  This note uses
-U = 3 and bounds 0 < u <= U separately.  On 0 < u <= U the integrand is bounded directly,
-contributing CN <= 367.8435 (cn_certified.py) from the coefficient sum itself and
-NEARU <= 26.0962 (nearu_certified.py) from the two main terms.
+U = 3 and bounds 0 < u <= U separately.  On 0 < u <= U the two groups are
+bounded separately: NEARU <= 26.0962 (nearu_certified.py) covers the two
+subtracted main terms, and CN <= 367.8435 (cn_certified.py) covers the true
+integrand.
+
+What cn_certified.py certifies is a POINTWISE bound, FkOdd k (sOf 3) <=
+CN 3^-k, not an integral, and the bridge to the integral is an analytic step
+that neither this note nor the manuscript used to state.  It is short.  By
+(1.1) and s = s(u),
+
+    sum_{j<=k} int_0^3 (u^(k-j)/(k-j)!) h_j(s(u)) J(u) du
+      = int_{s(3)}^inf P_k^odd(s) ds,
+
+and every odd n with Omega(n) = k has n >= 3^k, so for s >= s(3)
+
+    P_k^odd(s) = sum n^-s(3) n^-(s-s(3)) <= 3^(-k(s-s(3))) P_k^odd(s(3)),
+
+whence int_{s(3)}^inf P_k^odd <= P_k^odd(s(3))/(k log 3) <= CN 3^-k/(k log 3),
+comfortably inside the CN (k+3)^3 3^-k budget (at k = 1 it is 334.8 against
+23542).  The manuscript now carries this as (4.19).
 
 ### 5.2 The coefficient sum
 
