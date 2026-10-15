@@ -22,6 +22,23 @@ Caveat 1.3(b) of the manuscript draws.
 |---|---|---|
 | `d_enclosure`, `rho_enclosure` | computed inline | `bm-rebuild-v21/ci_certified.py` |
 | `Sstar_bound`   | `ci_certified.json`   | `ci_certified.py` |
+
+**`S*` was stated 3.3e-5 too small.**  The certified sum is
+`6.97633273` -- head `i <= 30` alone is `6.97633205`, tail `6.7e-7` -- so the
+`S* <= 6.9763` that stood in the paper, in `SstarConst` and in both
+`Sstar_bound` fields was not an upper bound: `6.97633` had been rounded down
+where an upper bound must round up.  `U` and `V` beside it in the same
+proposition are rounded up correctly (`0.08436`, `1.907462`, against certified
+`0.0843596939` and `1.9074617159`), so this was an isolated slip rather than a
+convention.  Now `6.9764` in all three places.
+
+Nothing downstream moves.  `k1_far_range.py` computes `S*` itself and never
+reads the stated constant, so every certified number -- `phi(2440)`, `K0`, the
+criterion sweeps -- was always computed against `6.97633`.  What was wrong was
+the *stated* bound, and in Lean that mattered more than it looks: a hypothesis
+no real `S*` can satisfy makes the theorem that assumes it vacuous exactly
+where it is applied.
+
 | `alpha_bound`   | `beta_certified.json` | `beta_sweep.py` |
 | `Gamma_bound`   | `gamma_constant.json` | `gamma2_sweep.py` |
 | `source_bound`  | `m1_constant.json`, `tail_constants.json` | `crit_refined.py` |

@@ -418,7 +418,7 @@ numeric value, SstarValue the mathematical object it encloses, and the
 enclosure is one of the things NumericalFacts assumes.  The final theorems take
 S* as a parameter with its bound, so neither constant is load-bearing on its
 own. -/
-noncomputable def SstarConst : ℝ := 6.9763
+noncomputable def SstarConst : ℝ := 6.9764
 
 /-- MANUSCRIPT section 3.5: alpha_+ is the constant in B_1(k) <= alpha_+ (k+1).
 
@@ -463,8 +463,14 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
   /-- Lemma 3.6: the certified enclosure of rho. -/
   rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
-  /-- Section 3.4: S* <= 6.9763. -/
-  Sstar_bound   : Sstar ≤ 6.9763
+  /-- Section 3.4: S* <= 6.9764.  This read 6.9763 until the certified sum was
+  recomputed: it is 6.97633273, and the head i <= 30 alone is 6.97633205, so
+  6.9763 was not an upper bound -- 6.97633 rounded down where an upper bound
+  must round up.  Nothing downstream moves, because the numerics compute S*
+  internally (k1_far_range.py) and never read the stated value.  But the
+  hypothesis was unsatisfiable by the real S*, which made the theorems
+  assuming it vacuous at the point of use. -/
+  Sstar_bound   : Sstar ≤ 6.9764
   /-- Section 3.5: alpha_+ from the 1600-box beta_i sweep. -/
   alpha_bound   : alph ≤ 15.4257
   /-- Theorem 6.1: Gamma from the 800-box gammahat_i sweep. -/
@@ -6763,7 +6769,7 @@ noncomputable def cCoeff (i : ℕ) : ℂ :=
   iteratedDeriv i G2at1 0 / (Nat.factorial i : ℂ)
 
 /-- MANUSCRIPT section 3.4: the genuine S* = sum_{i>=0} 2^i |c_i|.
-SstarConst above is the certified literal 6.9763; this is the object it
+SstarConst above is the certified literal 6.9764; this is the object it
 approximates.  Connecting them requires the Cauchy tail |c_i| <= M / 4.2^i of
 Lemma 3.7, which is a certified arc bound (M = 326) and so a hypothesis. -/
 noncomputable def SstarValue : ℝ :=
@@ -13316,7 +13322,9 @@ rather than merely proved. -/
 structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 : ℝ) : Prop where
   d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
   rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
-  Sstar_bound   : Sstar ≤ 6.9763
+  /-- See the note on `NumericalFacts.Sstar_bound`: 6.9763 was not an upper
+  bound for the certified 6.97633273. -/
+  Sstar_bound   : Sstar ≤ 6.9764
   alpha_bound   : alph ≤ 15.4257
   Gamma_bound   : Gam ≤ 104.52
   beta_nonneg   : ∀ i, 0 ≤ beta i
