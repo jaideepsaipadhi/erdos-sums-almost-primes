@@ -761,8 +761,6 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   source_bound  : ∀ k : ℕ, 2440 ≤ k →
     |2 * E aOneConst k - E aOneConst (k + 1)|
       ≤ RBound Umax Vmax Sstar alph k
-  /-- Section 7: phi(2440) = [89 +- 0.35] > 0, a certified scan. -/
-  phi_at_k1     : 0 < phiBound aOneConst Umax Vmax Sstar alph 2440
   /-- `phi_mono` stood here.  It is now proved -- `phiBound_mono_of_bounds` --
   and what it needed that this structure did not carry is an upper bound on
   `Umax`, which the manuscript states as `|U| <= 0.08436`.  The three
@@ -772,6 +770,8 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   by inspection, is replaced by scalars `verify.py` can check. -/
   Umax_nonneg   : 0 ≤ Umax
   U_bound       : Umax ≤ 0.08436
+  Vmax_nonneg   : 0 ≤ Vmax
+  V_bound       : Vmax ≤ 1.90747
   Sstar_nonneg  : 0 ≤ Sstar
   alph_nonneg   : 0 ≤ alph
   /-- Theorem 1.1, the prior certified f_k computation: 6 <= k <= 199. -/
@@ -13596,7 +13596,12 @@ theorem erdos_sums_increase_from_six (Sstar alph Gam Umax Vmax : ℝ)
   by_cases h3 : k ≤ 2439
   · exact hnum.sweep_high k (by omega) h3
   · exact theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
-      hnum.phi_at_k1
+      (phiBound_pos_at_2440 aOneConst Umax Vmax Sstar alph
+          (aOneConst_ge_of_d hnum.d_enclosure)
+          hnum.Umax_nonneg hnum.U_bound
+          hnum.Vmax_nonneg hnum.V_bound
+          hnum.Sstar_nonneg hnum.Sstar_bound
+          hnum.alph_nonneg hnum.alpha_bound)
         (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
           (aOneConst_ge_of_d hnum.d_enclosure)
           hnum.Umax_nonneg hnum.U_bound
@@ -13641,7 +13646,6 @@ structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 :
   /-- Section 7: the exponentially small source, at the two indices used. -/
   Eexp_bound    : ∀ k : ℕ, 2440 ≤ k → ∀ m : ℕ,
     |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3
-  phi_at_k1     : 0 < phiBound aOneConst Umax Vmax Sstar alph 2440
   /-- `phi_mono` stood here.  It is now proved -- `phiBound_mono_of_bounds` --
   and what it needed that this structure did not carry is an upper bound on
   `Umax`, which the manuscript states as `|U| <= 0.08436`.  The three
@@ -13651,6 +13655,8 @@ structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 :
   by inspection, is replaced by scalars `verify.py` can check. -/
   Umax_nonneg   : 0 ≤ Umax
   U_bound       : Umax ≤ 0.08436
+  Vmax_nonneg   : 0 ≤ Vmax
+  V_bound       : Vmax ≤ 1.90747
   Sstar_nonneg  : 0 ≤ Sstar
   alph_nonneg   : 0 ≤ alph
   sweep_low     : ∀ k : ℕ, 6 ≤ k → k ≤ 199 → f k < f (k + 1)
@@ -13675,7 +13681,12 @@ theorem erdos_sums_increase_from_six' (beta : ℕ → ℝ)
   by_cases h3 : k ≤ 2439
   · exact hnum.sweep_high k (by omega) h3
   · refine theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
-      hnum.phi_at_k1
+      (phiBound_pos_at_2440 aOneConst Umax Vmax Sstar alph
+          (aOneConst_ge_of_d hnum.d_enclosure)
+          hnum.Umax_nonneg hnum.U_bound
+          hnum.Vmax_nonneg hnum.V_bound
+          hnum.Sstar_nonneg hnum.Sstar_bound
+          hnum.alph_nonneg hnum.alpha_bound)
         (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
           (aOneConst_ge_of_d hnum.d_enclosure)
           hnum.Umax_nonneg hnum.U_bound
