@@ -1158,7 +1158,9 @@ $M$, the $N$-node Gauss rule satisfies
  \left|\int_{-1}^1f(x)\dd x-\widehat I_N\right|
  \leq\frac{64}{15}\,\frac{M\rho^{-2N}}{1-\rho^{-2}}
 \end{equation}
-\cite[Thm.~19.3]{ATAP}. The implementation evaluates the right side of
+\cite[Thm.~4.5]{TrefCC}, where the rule is indexed so that $I_n$ uses $n+1$
+nodes and the stated exponent $\rho^{-(2n+2)}$ is the $\rho^{-2N}$ above; the
+bound appears as \cite[Thm.~19.3]{ATAP}. The implementation evaluates the right side of
 \eqref{eq:trefethen} with the interval-scaling factor $H/2$ and a further
 factor $10$ of margin. The ellipse is taken with semi-minor axis
 $\delta=1.45<\pi/2$ in the $u$ variable, giving $\rho\approx7.385$, and $M$ is bounded using
@@ -1195,6 +1197,11 @@ P.~Erd\H{o}s,
 \emph{Note on sequences of integers no one of which is divisible by any
 other},
 J.~London Math. Soc. \textbf{10} (1935), 126--128.
+
+\bibitem{TrefCC}
+L.~N. Trefethen,
+\emph{Is Gauss quadrature better than Clenshaw--Curtis?},
+SIAM Rev. \textbf{50} (2008), 67--87.
 
 \bibitem{ATAP}
 L.~N. Trefethen,
