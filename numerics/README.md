@@ -85,7 +85,7 @@ unaffected.  The criterion sweep is `crit_78_734.json`.
     python3 crit_refined.py 78 734
     python3 sweep_900_2439.py
     python3 k1_far_range.py
-    python3 crossval_refined.py
+    python3 crossval_refined.py ../certificate.json
 
 `cchunks/` (407 MB of PREC=1400 panels feeding `ci_certified.json`) is not in
 the repository; `ci_certified.py` regenerates it.
@@ -113,6 +113,28 @@ are worth knowing about when the certified route is the thing in question:
 
 Neither is certified, and nothing depends on them; they exist to disagree
 with the certified route if it is wrong.
+
+## Reproduced from clean
+
+Rerun on 2026-10-14 against the committed artifacts:
+
+| command (from `bm-rebuild-v21/`) | result |
+|---|---|
+| `python3 k1_far_range.py` | `k1_far_range.log` reproduced identically: `K1 = 2433`, certified margin `138 +/- 0.602`, derivative gap `145.256` |
+| `python3 crit_refined.py 78 734` | `sweep_78_734.log` reproduced identically (`k=78: crit_lower = 0.91`, `k=734: 33754.05`), and `crit_78_734.json` regenerated **byte-identical** to the committed file |
+| `python3 crossval_refined.py ../certificate.json` | gate passes 101/101, worst deviation ratio `0.0001` against an expected `~0.01` |
+
+The certificate path is an argument, not a default: `crossval_refined.py`
+looks for `certificate.json` in the working directory, and it lives one level
+up, so the bare command fails with FileNotFoundError.
+
+The acceptance gate passing is what discharges the PROVISIONAL marker in
+`crit_refined.py`'s header and the "pending the [810,899] slice" wording that
+`crossval_refined.py` printed; the slice is covered by `crit_certified.json`
+(735-899) and the regenerated constants give `K0 = 78`.
+
+Not yet rerun here: `ci_certified.py` (regenerates 407 MB of panels),
+`beta_sweep.py`, `gamma2_sweep.py`, and the delta-table job.
 
 ## The quadrature constant
 

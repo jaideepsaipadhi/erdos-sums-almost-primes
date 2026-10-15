@@ -1,7 +1,11 @@
 """Refined criterion sweep: E1(k) enclosed as M2(k) +/- Gamma (signed main term
 + certified k-independent remainder). PROVISIONAL until the his-box acceptance
 gate (|implied E1 - M2| <= Gamma at all certificate points) passes.
-Old bound & K0=735 remain the proven fallback; this is additive."""
+Old bound & K0=735 remain the proven fallback; this is additive.
+
+That gate has since passed: crossval_refined.py reports 101/101 consistent
+with a worst deviation ratio of 0.0001 against an expected ~0.01, so the
+PROVISIONAL marker above is discharged."""
 from flint import arb, ctx
 import json, re, sys, time
 from delta_conv import load_all, Delta
