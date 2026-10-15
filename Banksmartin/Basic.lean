@@ -615,14 +615,6 @@ The k-INDEPENDENCE of Gamma, which is what makes the refinement work, is
 proved: it is geom_two_three, sum_l 2^l 3^(-l-1) = 1. -/
 noncomputable def GammaConst : ℝ := 105.41
 
-/-- The certified inputs: everything the analytic reduction takes on trust.
-
-Each field is an Arb ball computation from the companion package, exactly the
-division Caveat 1.3(b) draws.  The analytic reduction is machine-verified;
-these are not.
-
-Umax and Vmax are parameters rather than fields because a Prop cannot carry
-data; the manuscript's values are 0.08436 and 1.90747, valid for k >= 900. -/
 /-- `aOneConst = dConst * log 2 / 4 >= 0.0656`, from the certified `d`. -/
 theorem aOneConst_ge_of_d (h : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8) :
     (0.0656 : ℝ) ≤ aOneConst := by
@@ -633,6 +625,14 @@ theorem aOneConst_ge_of_d (h : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8) :
   unfold aOneConst
   linarith [hprod]
 
+/-- The certified inputs: everything the analytic reduction takes on trust.
+
+Each field is an Arb ball computation from the companion package, exactly the
+division Caveat 1.3(b) draws.  The analytic reduction is machine-verified;
+these are not.
+
+Umax and Vmax are parameters rather than fields because a Prop cannot carry
+data; the manuscript's values are 0.08436 and 1.90747, valid for k >= 900. -/
 structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   /-- Section 3.2: the certified enclosure of d. -/
   d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
