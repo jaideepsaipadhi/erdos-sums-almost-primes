@@ -33,6 +33,35 @@ method running out of room.
 `fodd_run.py` at 1000-bit precision; `fodd75.log` reaches k = 75, which is what
 section 6 needs (the analytic threshold is K0 = 59).
 
+## Reproducing
+
+    pip install python-flint sympy      # s1_cauchy.py needs sympy as well
+
+Every log below was regenerated from a clean checkout on 2026-10-14 and
+matched the committed file exactly, to every printed digit:
+
+    python3 ce_taylor.py                      -> ce_taylor.log
+    python3 nearu_certified.py                -> nearu.log
+    python3 cn_certified.py                   -> cn.log
+    python3 s0_recursion.py 16                -> s0_head.log
+    python3 s0_cauchy.py                      -> s0_cauchy.log
+    python3 s1_recursion.py                   -> s1_head.log
+    python3 s1_cauchy.py                      -> s1_cauchy.log
+    python3 hcoeff_recursion.py 16 1600       -> hcoeff2.log
+    python3 hcoeff_recursion.py 16 3200       -> hcoeff3200.log
+    python3 mr_deriv_sweep.py                 -> mr_deriv_sweep.log
+
+Two of those arguments are not the defaults, and running the script bare does
+NOT reproduce its log:
+
+  * `s0_recursion.py` defaults to NMAX = 40; the log of record is NMAX = 16,
+    the split point used by s0_cauchy.py for the tail.
+  * `hcoeff_recursion.py` defaults to NMAX = 40, NS = 40.
+
+`mr_deriv_sweep.log` and the `fodd*` logs were captured with `nohup ... 2>&1`,
+so their progress lines are interleaved with the results; compare the result
+lines only.
+
 ## Notes
 
 `S_0`, `S_1`, `CN`, `NEARU` and `CE` quantify what earlier drafts of section 5.1
