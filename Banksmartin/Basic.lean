@@ -13500,7 +13500,7 @@ theorem erdos_sums_increase_from_six (Sstar alph Gam Umax Vmax : ℝ)
         (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
           (aOneConst_ge_of_d hnum.d_enclosure)
           hnum.Umax_nonneg hnum.U_bound
-          hnum.Sstar_nonneg (le_trans hnum.Sstar_bound (by norm_num))
+          hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)
         hnum.source_bound k (by omega)
 
@@ -13579,7 +13579,7 @@ theorem erdos_sums_increase_from_six' (beta : ℕ → ℝ)
         (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
           (aOneConst_ge_of_d hnum.d_enclosure)
           hnum.Umax_nonneg hnum.U_bound
-          hnum.Sstar_nonneg (le_trans hnum.Sstar_bound (by norm_num))
+          hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)
         ?_ k (by omega)
     intro m hm
