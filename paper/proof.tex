@@ -30,12 +30,12 @@
 \begin{abstract}
 For $k\geq1$ let $f_k=\sum_{\Omega(n)=k}1/(n\log n)$, where $\Omega$ counts
 prime factors with multiplicity. We prove that $f_k<f_{k+1}$ for every
-$k\geq6$, whereas the sums restricted to odd integers satisfy
-$g_k>g_{k+1}$ for every $k\geq1$. The two
+$k\geq6$, whereas the sums $g_k$ of $1/(n\log n)$ over odd $n$ with
+$\Omega(n)=k$ satisfy $g_k>g_{k+1}$ for every $k\geq1$. The two
 statements arise from the same analytic distinction. After writing the
 relevant Dirichlet series as $\zeta(s)^zH(s,z)$, the point $z=2$ lies on the
-first singular circle for the unrestricted product and strictly inside that
-circle after the prime $2$ is removed. The analytic reductions are written
+first singular circle for the unrestricted product, and strictly inside the
+first singular circle of the product with the prime $2$ removed. The analytic reductions are written
 explicitly below. The finite inequalities and coefficient bounds used in the
 last step are certified by ball arithmetic; the separation between analytic
 argument and certified input is stated precisely.
@@ -71,8 +71,11 @@ where
   d=\frac14\prod_{p\geq3}\left(1-\frac2p\right)^{-1}
                     \left(1-\frac1p\right)^2.
 \end{equation}
-The implicit constant in \eqref{eq:GLW-asymptotic} does not locate the first
-index at which the sequence begins to increase. Our first theorem does.
+Neither of these yields monotonicity beyond the minimum. A global minimum at
+$k=6$ leaves open whether $f_k<f_{k+1}$ holds at every index above it, and the
+implicit constant in \eqref{eq:GLW-asymptotic} does not make explicit a range
+on which the increase can be read off. Our first theorem gives that
+monotonicity in full.
 
 \begin{theorem}\label{thm:main-full}
 For every $k\geq6$ one has $f_k<f_{k+1}$.
