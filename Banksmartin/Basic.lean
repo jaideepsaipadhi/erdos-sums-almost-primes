@@ -316,6 +316,16 @@ theorem DBound_second_diff_le (m : ℕ) (hm : 1 ≤ m) :
                  show ((m:ℝ) + 2) + 1 = (m:ℝ) + 3 from by ring]
   nlinarith [hscaled]
 
+/-- `aOneConst = dConst * log 2 / 4 >= 0.0656`, from the certified `d`. -/
+theorem aOneConst_ge_of_d (h : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8) :
+    (0.0656 : ℝ) ≤ aOneConst := by
+  have hb := abs_le.mp h
+  have hd : (0.37869494 : ℝ) ≤ dConst := by linarith [hb.1, hb.2]
+  have hprod : (0.37869494 : ℝ) * 0.6931471803 ≤ dConst * Real.log 2 :=
+    mul_le_mul hd Real.log_two_gt_d9.le (by norm_num) (by linarith)
+  unfold aOneConst
+  linarith [hprod]
+
 /-- `phi_mono` as a theorem.  The hypotheses are the bounds the structures
 already carry, plus `hU`, which the manuscript states and they do not. -/
 theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
@@ -641,9 +651,17 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   /-- Section 7: phi(2440) = [89 +- 0.35] > 0, a certified scan. -/
   phi_at_k1     : 0 < phiBound aOneConst Umax Vmax Sstar alph 2440
   /-- Section 7: phi increasing above 2440. -/
-  phi_mono      : ∀ m : ℕ, 2440 ≤ m →
-    phiBound aOneConst Umax Vmax Sstar alph m
-      ≤ phiBound aOneConst Umax Vmax Sstar alph (m + 1)
+  /-- `phi_mono` stood here.  It is now proved -- `phiBound_mono_of_bounds` --
+  and what it needed that this structure did not carry is an upper bound on
+  `Umax`, which the manuscript states as `|U| <= 0.08436`.  The three
+  nonnegativity fields are free in any instantiation: all of these parameters
+  are bounds on absolute values.  A universally quantified assumption about a
+  quadratic, which no finite computation can discharge and no reader can check
+  by inspection, is replaced by scalars `verify.py` can check. -/
+  Umax_nonneg   : 0 ≤ Umax
+  U_bound       : Umax ≤ 0.08436
+  Sstar_nonneg  : 0 ≤ Sstar
+  alph_nonneg   : 0 ≤ alph
   /-- Theorem 1.1, the prior certified f_k computation: 6 <= k <= 199. -/
   sweep_low     : ∀ k : ℕ, 6 ≤ k → k ≤ 199 → f k < f (k + 1)
   /-- Theorem 6.2, the refined criterion sweep: 78 <= k <= 899. -/
@@ -13466,7 +13484,13 @@ theorem erdos_sums_increase_from_six (Sstar alph Gam Umax Vmax : ℝ)
   by_cases h3 : k ≤ 2439
   · exact hnum.sweep_high k (by omega) h3
   · exact theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
-      hnum.phi_at_k1 hnum.phi_mono hnum.source_bound k (by omega)
+      hnum.phi_at_k1
+        (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
+          (aOneConst_ge_of_d hnum.d_enclosure)
+          hnum.Umax_nonneg hnum.U_bound
+          hnum.Sstar_nonneg hnum.Sstar_bound
+          hnum.alph_nonneg hnum.alpha_bound)
+        hnum.source_bound k (by omega)
 
 end
 
@@ -13504,9 +13528,17 @@ structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 :
   Eexp_bound    : ∀ k : ℕ, 2440 ≤ k → ∀ m : ℕ,
     |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3
   phi_at_k1     : 0 < phiBound aOneConst Umax Vmax Sstar alph 2440
-  phi_mono      : ∀ m : ℕ, 2440 ≤ m →
-    phiBound aOneConst Umax Vmax Sstar alph m
-      ≤ phiBound aOneConst Umax Vmax Sstar alph (m + 1)
+  /-- `phi_mono` stood here.  It is now proved -- `phiBound_mono_of_bounds` --
+  and what it needed that this structure did not carry is an upper bound on
+  `Umax`, which the manuscript states as `|U| <= 0.08436`.  The three
+  nonnegativity fields are free in any instantiation: all of these parameters
+  are bounds on absolute values.  A universally quantified assumption about a
+  quadratic, which no finite computation can discharge and no reader can check
+  by inspection, is replaced by scalars `verify.py` can check. -/
+  Umax_nonneg   : 0 ≤ Umax
+  U_bound       : Umax ≤ 0.08436
+  Sstar_nonneg  : 0 ≤ Sstar
+  alph_nonneg   : 0 ≤ alph
   sweep_low     : ∀ k : ℕ, 6 ≤ k → k ≤ 199 → f k < f (k + 1)
   sweep_mid     : ∀ k : ℕ, 78 ≤ k → k ≤ 899 → f k < f (k + 1)
   sweep_high    : ∀ k : ℕ, 900 ≤ k → k ≤ 2439 → f k < f (k + 1)
@@ -13529,7 +13561,13 @@ theorem erdos_sums_increase_from_six' (beta : ℕ → ℝ)
   by_cases h3 : k ≤ 2439
   · exact hnum.sweep_high k (by omega) h3
   · refine theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
-      hnum.phi_at_k1 hnum.phi_mono ?_ k (by omega)
+      hnum.phi_at_k1
+        (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
+          (aOneConst_ge_of_d hnum.d_enclosure)
+          hnum.Umax_nonneg hnum.U_bound
+          hnum.Sstar_nonneg hnum.Sstar_bound
+          hnum.alph_nonneg hnum.alpha_bound)
+        ?_ k (by omega)
     intro m hm
     exact source_bound_full m (by omega) Sstar alph Umax Vmax beta hnum.beta_nonneg
       hnum.g_deriv hnum.g_deriv_bound M0 hnum.M0_nonneg hnum.M0_bound
