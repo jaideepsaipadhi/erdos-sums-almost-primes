@@ -1184,15 +1184,29 @@ from \eqref{eq:odd-expansion} and Proposition~\ref{prop:odd-remainder}, but is
 not formalized, the monotonicity argument making no use of it.
 
 For Theorem~\ref{thm:main-full} the hypotheses are not only the interval
-bounds of Proposition~\ref{prop:full-certified}. Lemmas~\ref{lem:phi-base} and
-\ref{lem:phi-monotone} enter as hypotheses, under the names
-\texttt{phi\_at\_k1} and \texttt{phi\_mono}, and are not reproved there; their
-proofs in Section~6 are analytic. Proposition~\ref{prop:criterion-phi} enters
-as a hypothesis in the same way in one of the two formal versions, and is
-proved in the other, from the primitive certified quantities rather than from
-the aggregate bound \eqref{eq:Eexp-certified}. What the formalization proves
-from these is the passage to $f_k<f_{k+1}$ for $k\geq2440$, together with the
-assembly of the four ranges.
+bounds of Proposition~\ref{prop:full-certified}. Proposition~\ref{prop:criterion-phi}
+enters as a hypothesis in one of the two formal versions, and is proved in the
+other, from the primitive certified quantities rather than from the aggregate
+bound \eqref{eq:Eexp-certified}. What the formalization proves from these is
+the passage to $f_k<f_{k+1}$ for $k\geq2440$, together with the assembly of
+the four ranges.
+
+Lemmas~\ref{lem:phi-base} and \ref{lem:phi-monotone} were formerly hypotheses
+of that development as well. They are now proved in it, as
+\texttt{phiBound\_pos\_at\_2440} and \texttt{phiBound\_mono\_of\_bounds}, from
+upper bounds on the parameters alone: $\varphi$ is an explicit expression in
+$k$, so neither lemma is a statement about primes, contours or limits, and
+what the formalization had been assuming was arithmetic. Proving them needed
+one quantity the certified hypotheses did not carry, the bound
+$\abs U\leq U_{\max}$ of \eqref{eq:full-certified-constants}, which is now
+among them. The sharpness required is not uniform: the base case turns on
+$\log2441$ to a tenth of a percent, where $\log2441\leq12\log2$ is already too
+weak, while the monotonicity step needs only $\log2441\leq12\log2$ itself.
+
+For the odd theorem the lower bound on $\gamma$ was likewise a hypothesis and
+is now proved, as \texttt{gamma\_lower\_bound}, from
+$\mathrm{harmonic}(n)-\log(n+1)<\gamma$ at $n=8191$, chosen so that
+$n+1=2^{13}$ and the logarithm is $13\log2$ exactly.
 
 Two constants are stated above more conservatively than the computation
 requires, so that the text and the formalization carry the same values: the
