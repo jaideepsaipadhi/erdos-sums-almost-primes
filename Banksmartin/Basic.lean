@@ -13834,3 +13834,27 @@ theorem source_bound_refined (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ)
 theorem G2deriv1_at_zero (f1 : ℝ) : G2deriv1 f1 0 = 0 := by
   unfold G2deriv1
   rw [cBracket_at_zero, mul_zero]
+
+/-! ### PROBE ONLY -- not part of the development
+
+Can the kernel evaluate `harmonic n` at the size `gamma_gt` would need?
+`gamma_gt : 0.57715 < gamma` would be proved from
+`eulerMascheroniSeq_lt_eulerMascheroniConstant` at `n = 7614`, i.e. from
+`harmonic 7614 - log 7615 > 0.57715`.  `harmonic 7614` is a rational with a
+numerator of about 3300 digits, reached by 7614 additions each needing a gcd.
+
+These two probes bracket the question: 200 (89-digit numerator) and 2000
+(867 digits).  If 2000 is cheap, 7614 is plausible; if 2000 is already slow
+or blows up, the route is closed and `gamma_gt` needs an upstream Mathlib
+bound instead.  This section is to be deleted either way.
+-/
+
+-- Smallest first, each with the recursion limit the failure message asked
+-- for, so the answer is "at what n does this die" rather than "it died".
+set_option maxRecDepth 40000 in
+theorem probe_harmonic_50 : (4.4992 : ℚ) < harmonic 50 := by
+  norm_num [harmonic, Finset.sum_range_succ]
+
+set_option maxRecDepth 40000 in
+theorem probe_harmonic_200 : (5.8775 : ℚ) < harmonic 200 := by
+  norm_num [harmonic, Finset.sum_range_succ]
