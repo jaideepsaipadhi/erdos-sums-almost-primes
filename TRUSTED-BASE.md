@@ -24,7 +24,7 @@ The two unrestricted structures overlap heavily; `NumericalFactsFull` is the
 primitive one, from which `erdos_sums_increase_from_six'` derives the far range
 rather than assuming it.
 
-## Tier A — not numerical facts at all
+## Tier A — not numerical facts at all (one of two now proved)
 
 Two fields of `NumericalFactsFull` (and the same two of `NumericalFacts`)
 quantify over an **explicit elementary formula** and nothing else:
@@ -63,7 +63,12 @@ Note that `Vmax` enters `RBound` only as `+ 2 Vmax`, constant in `k`, so it
 cancels in the difference: `phi_mono` does not need it at all.  It is needed
 for `phi_at_k1`, which is a single evaluation.
 
-**The proposal.**  Add one field
+**DONE.**  `phi_mono` is now proved (`phiBound_mono_of_bounds`) and gone from
+both structures, which instead carry `U_bound : Umax <= 0.08436` and the three
+nonnegativity facts the proof needs.  What follows is the reasoning that led
+there, kept because `phi_at_k1` is the same shape.
+
+**The proposal was.**  Add one field
 
     U_bound : Umax <= <the value k1_far_range.py already certifies>
     V_bound : Vmax <= <likewise>          -- needed only for phi_at_k1
