@@ -173,7 +173,14 @@ $\zeta(s)^zH_{\mathrm o}(s,z)$, where
 \begin{proposition}\label{prop:analyticity}
 For fixed real $s>1/2$, the function $H(s,\cdot)$ is analytic in
 $\abs z<2^s$, and $H_{\mathrm o}(s,\cdot)$ is analytic in
-$\abs z<3^s$.
+$\abs z<3^s$. The convergence is moreover locally uniform in $(s,z)$ jointly,
+so each $\partial_s^rH_{\mathrm o}(s,\cdot)$ is again analytic in
+$\abs z<3^s$, and
+\begin{equation}\label{eq:coeff-commute}
+  \frac{\dd^r}{\dd s^r}[z^j]H_{\mathrm o}(s,z)
+   =[z^j]\partial_s^rH_{\mathrm o}(s,z);
+\end{equation}
+the same holds for $H$ in $\abs z<2^s$.
 \end{proposition}
 
 \begin{proof}
@@ -190,7 +197,15 @@ $\sum_pp^{-2s}<\infty$, the product of the regularized factors converges
 locally uniformly wherever none of the factors has a pole. The poles occur at
 $z=p^s$. The nearest one is $2^s$ for \eqref{eq:H-full} and $3^s$ for
 \eqref{eq:H-odd}. A locally uniform limit of analytic functions is analytic,
-which proves the proposition.
+which proves the first assertion.
+
+The estimate is uniform in $s$ as well on any compact subset of
+$(1/2,\infty)$, since $p^{-2s}\leq p^{-2s_0}$ there, and on a compact subset
+of $\{(s,z):\abs z<3^s\}$ no factor comes near a pole. The convergence is
+therefore locally uniform in the two variables jointly, so differentiation in
+$s$ may be carried out under the product. Since $[z^j]$ is a Cauchy integral
+over a circle that may be held fixed on such a subset, the two operations
+commute, which is \eqref{eq:coeff-commute}.
 \end{proof}
 
 At $s=1$ the point $z=2$ lies on the first singular circle for $H$ and lies
