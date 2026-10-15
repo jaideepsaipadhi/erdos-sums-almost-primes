@@ -90,6 +90,30 @@ unaffected.  The criterion sweep is `crit_78_734.json`.
 `cchunks/` (407 MB of PREC=1400 panels feeding `ci_certified.json`) is not in
 the repository; `ci_certified.py` regenerates it.
 
+## Supporting and cross-check scripts
+
+The table above lists what backs each `NumericalFacts` field.  These are the
+rest of the pipeline and its validation layer, which that table does not name:
+
+| script | role |
+|---|---|
+| `certified.py`, `runner.sh`, `combine.py` | the panel run: `runner.sh` drives `certified.py` over `cchunks/`, resumable; `combine.py` reads the chunks back and reports the enclosures and the monotonicity verdicts |
+| `bm-rebuild-v21/delta_table.py`, `delta_shard.py`, `delta-job/` | the contiguous certified `delta_m` table, sharded and resumable, at precision ~2.2m + 300 bits; `merge_verify.py` reassembles and checks |
+| `bm-rebuild-v21/conv_tail.py` | certified `Delta(k) = sum_i 2^i c_i delta_{k-i}` from the table plus a tail ball |
+| `bm-rebuild-v21/crit_assembly.py` | assembles the criterion from the pieces.  Its header constants are marked PROVISIONAL; `crit_refined.py` is the one of record |
+| `measure_impact.py` | sensitivity study: rebuilds `U`, `V`, `S*` with the interval radii shrunk, to see how much of each constant is genuine width |
+
+Two of these are independent cross-checks rather than parts of the chain, and
+are worth knowing about when the certified route is the thing in question:
+
+| script | checks |
+|---|---|
+| `bm-rebuild-v21/ci_crosscheck.py` | recomputes `c_i` by direct Euler-product evaluation on \|z\|=1 with Cauchy/FFT extraction, taking the prime tail from `mpmath.primezeta` -- a different code path and a different library from the certified log-series route |
+| `bm-rebuild-v21/delta_ref.py` | a reference implementation of the GLW Lemma 3.3 quantities written straight from the paper, against which the optimised `delta_*` route is compared |
+
+Neither is certified, and nothing depends on them; they exist to disagree
+with the certified route if it is wrong.
+
 ## The quadrature constant
 
 `certified.py` uses `CQ = 10 * (64/15) * rho^(-2*NGL) / (1 - rho^(-2))` with
