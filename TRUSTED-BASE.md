@@ -14,17 +14,27 @@ today.
 
 ## The count
 
-| structure | fields |
-|---|---|
-| `NumericalFacts` | 11 |
-| `NumericalFactsFull` | 19 |
-| `OddNumericalFacts` | 6 |
+| structure | fields | was |
+|---|---|---|
+| `NumericalFacts` | 15 | 11 |
+| `NumericalFactsFull` | 23 | 19 |
+| `OddNumericalFacts` | 5 | 6 |
+
+The two unrestricted counts went **up** by four while the base got smaller,
+which is the point of the Tier A trade: `phi_mono` and `phi_at_k1` left, and
+six scalars (`U_bound`, `V_bound`, and four nonnegativity facts) arrived to
+support their proofs.  Six checkable numbers in place of two unfalsifiable
+`forall`s is the right direction even though the table reads the wrong way.
+`OddNumericalFacts` lost `gamma_gt` and gained nothing.
+
+Counted from the structure bodies with docstrings stripped -- counting them in
+is how `recomputed`, a word in a comment, briefly became a sixteenth field.
 
 The two unrestricted structures overlap heavily; `NumericalFactsFull` is the
 primitive one, from which `erdos_sums_increase_from_six'` derives the far range
 rather than assuming it.
 
-## Tier A — not numerical facts at all (one of two now proved)
+## Tier A — not numerical facts at all (both now proved, both gone)
 
 Two fields of `NumericalFactsFull` (and the same two of `NumericalFacts`)
 quantify over an **explicit elementary formula** and nothing else:
@@ -63,10 +73,14 @@ Note that `Vmax` enters `RBound` only as `+ 2 Vmax`, constant in `k`, so it
 cancels in the difference: `phi_mono` does not need it at all.  It is needed
 for `phi_at_k1`, which is a single evaluation.
 
-**DONE.**  `phi_mono` is now proved (`phiBound_mono_of_bounds`) and gone from
-both structures, which instead carry `U_bound : Umax <= 0.08436` and the three
-nonnegativity facts the proof needs.  What follows is the reasoning that led
-there, kept because `phi_at_k1` is the same shape.
+**DONE, both of them.**  `phi_mono` is proved as `phiBound_mono_of_bounds`
+and `phi_at_k1` as `phiBound_pos_at_2440`; neither is a field of either
+structure any more.  In their place the structures carry five scalars --
+`U_bound : Umax <= 0.08436`, `V_bound : Vmax <= 1.90747`, and the three
+nonnegativity facts `Umax_nonneg`, `Vmax_nonneg`, `Sstar_nonneg`,
+`alph_nonneg` -- every one of which the Arb sweeps already produce and
+`verify.py` can check.  Tier A is empty.  What follows is the reasoning that
+led there, kept because it is the argument the two proofs follow.
 
 **The proposal was.**  Add one field
 
@@ -111,9 +125,11 @@ Mathlib route that is the difference between
 
 `harmonic 7.7e6` is not going to evaluate in the kernel; `harmonic 7614` is a
 rational with a few thousand digits, which is heavy but not absurd.  **DONE:**
-the field now reads `0.57715 < gamma`, which leaves `betaOdd` a margin of
-`5.2e-6` and needs `n > 7614` in place of `n > 7703978`.  What remains is the
-proof itself.  The reasoning was that the first move on this field is not to
+the field was first weakened to `0.57715 < gamma`, which leaves `betaOdd` a
+margin of `5.2e-6` and needs `n > 7614` in place of `n > 7703978`, and is now
+proved outright as `Odd.gamma_lower_bound`, at `n = 8191` so that
+`log 8192 = 13 log 2` closes the logarithm against Mathlib's enclosure rather
+than needing its own.  `gamma_gt` is removed from `OddNumericalFacts`.  The reasoning was that the first move on this field is not to
 prove it -- it is to weaken it to what the proof uses, which costs nothing, is in the safe direction (a weaker
 hypothesis is a stronger theorem), and is a Lean-only change: `0.5772156`
 appears nowhere in the paper or in `PROOF.md`.
@@ -166,7 +182,20 @@ specific.
 
 Hold Caveat 1.3b as the stated position -- Tier C is not going anywhere
 without a verified interval layer, and claiming otherwise would be dishonest
-about what is machine-checked.  But Tier A should not be inside the caveat at
-all: it is there by convenience, not by necessity, and two `forall`-statements
-about a quadratic are the weakest things in the base to be asking a reader to
-take on trust.
+about what is machine-checked.
+
+Tiers A and B are now closed, which is the whole of what could be closed
+without that layer.  Three fields left the base: two `forall`-statements about
+a quadratic, which no finite computation could ever have discharged and which
+a reader could not have checked by inspection, and one constant that Mathlib
+could supply all along.  What replaced the first two is five scalars the
+numerics already certify -- a `forall` is a much larger thing to be asked to
+believe than a number, so the trade is real even though the field count barely
+moved.
+
+What is left in the base is exactly Tier C, and every item in it is there for
+the same reason: it is a fact about an analytic object -- an infinite product
+over primes, a supremum over a contour, a Cauchy estimate -- and not a fact
+about an explicit formula.  Closing any of it means building verified interval
+arithmetic in Lean.  That is a project in its own right, not a loose end of
+this one.
