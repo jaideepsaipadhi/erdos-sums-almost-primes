@@ -13738,8 +13738,12 @@ or blows up, the route is closed and `gamma_gt` needs an upstream Mathlib
 bound instead.  This section is to be deleted either way.
 -/
 
-theorem probe_harmonic_200 : (5.8775 : ℚ) < harmonic 200 := by
+-- Smallest first, each with the recursion limit the failure message asked
+-- for, so the answer is "at what n does this die" rather than "it died".
+set_option maxRecDepth 40000 in
+theorem probe_harmonic_50 : (4.4992 : ℚ) < harmonic 50 := by
   norm_num [harmonic, Finset.sum_range_succ]
 
-theorem probe_harmonic_2000 : (8.1779 : ℚ) < harmonic 2000 := by
+set_option maxRecDepth 40000 in
+theorem probe_harmonic_200 : (5.8775 : ℚ) < harmonic 200 := by
   norm_num [harmonic, Finset.sum_range_succ]
