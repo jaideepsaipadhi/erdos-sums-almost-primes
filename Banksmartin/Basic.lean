@@ -316,16 +316,6 @@ theorem DBound_second_diff_le (m : ℕ) (hm : 1 ≤ m) :
                  show ((m:ℝ) + 2) + 1 = (m:ℝ) + 3 from by ring]
   nlinarith [hscaled]
 
-/-- `aOneConst = dConst * log 2 / 4 >= 0.0656`, from the certified `d`. -/
-theorem aOneConst_ge_of_d (h : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8) :
-    (0.0656 : ℝ) ≤ aOneConst := by
-  have hb := abs_le.mp h
-  have hd : (0.37869494 : ℝ) ≤ dConst := by linarith [hb.1, hb.2]
-  have hprod : (0.37869494 : ℝ) * 0.6931471803 ≤ dConst * Real.log 2 :=
-    mul_le_mul hd Real.log_two_gt_d9.le (by norm_num) (by linarith)
-  unfold aOneConst
-  linarith [hprod]
-
 /-- `phi_mono` as a theorem.  The hypotheses are the bounds the structures
 already carry, plus `hU`, which the manuscript states and they do not. -/
 theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
@@ -633,6 +623,16 @@ these are not.
 
 Umax and Vmax are parameters rather than fields because a Prop cannot carry
 data; the manuscript's values are 0.08436 and 1.90747, valid for k >= 900. -/
+/-- `aOneConst = dConst * log 2 / 4 >= 0.0656`, from the certified `d`. -/
+theorem aOneConst_ge_of_d (h : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8) :
+    (0.0656 : ℝ) ≤ aOneConst := by
+  have hb := abs_le.mp h
+  have hd : (0.37869494 : ℝ) ≤ dConst := by linarith [hb.1, hb.2]
+  have hprod : (0.37869494 : ℝ) * 0.6931471803 ≤ dConst * Real.log 2 :=
+    mul_le_mul hd Real.log_two_gt_d9.le (by norm_num) (by linarith)
+  unfold aOneConst
+  linarith [hprod]
+
 structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   /-- Section 3.2: the certified enclosure of d. -/
   d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
