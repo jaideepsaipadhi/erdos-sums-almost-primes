@@ -1,0 +1,22 @@
+KMAX=14 PREC=300   NON-CERTIFIED midpoints
+
+drop {2}      q=3  (proved: decreasing)     DECREASING    turns at k=<=2   (58s)
+   f_k, k=10..14: 0.500196851 0.500094340 0.500045456 0.500022012 0.500010707
+   signs k=2..14: -------------
+
+drop {3}      q=2  (OPEN: says increasing)  INCREASING    turns at k=9   (60s)
+   f_k, k=10..14: 0.666169208 0.666306797 0.666423907 0.666510071 0.666568784
+   signs k=2..14: --------+++++
+
+drop {2,3}    q=5  (OPEN: says decreasing)  DECREASING    turns at k=<=2   (64s)
+   f_k, k=10..14: 0.333522321 0.333427344 0.333380178 0.333356702 0.333344998
+   signs k=2..14: -------------
+
+drop {5}      q=2  (OPEN: says increasing)  INCREASING    turns at k=7   (62s)
+   f_k, k=10..14: 0.798797076 0.799194612 0.799481805 0.799676102 0.799802007
+   signs k=2..14: ------+++++++
+
+drop nothing  q=2  (proved: increasing)     INCREASING    turns at k=6   (61s)
+   f_k, k=10..14: 0.997149517 0.998198893 0.998887818 0.999325861 0.999597625
+   signs k=2..14: -----++++++++
+

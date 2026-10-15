@@ -240,3 +240,38 @@ They are left as they are on purpose: `certificate.py` hashes the payload
 *including* `caveats`, so editing the text by hand would break the stored
 `sha256_of_payload_without_hash`.  All four currently verify, and the wording
 will correct itself the next time they are regenerated.
+
+## Conjecture 7.1 beyond the two proved cases
+
+`conj71_explore.py` tests the general principle numerically for sets of primes
+the paper does not cover.  Removing finitely many primes keeps the complement
+thin trivially, so these are legitimate instances, and two of them probe
+exactly what neither proved case does: a `q = 2` set with a nontrivial
+complement, and a `q >= 5` set.
+
+    python3 conj71_explore.py 14 300        # about 5 minutes, -> conj71_explore.log
+
+| P | q | Conjecture 7.1 | observed | turns at |
+|---|---|---|---|---|
+| all primes | 2 | increasing | increasing | k = 6 |
+| drop {2} | 3 | decreasing | decreasing | never |
+| drop {3} | 2 | increasing | increasing | k = 9 |
+| drop {2,3} | 5 | decreasing | decreasing | never |
+| drop {5} | 2 | increasing | increasing | k = 7 |
+
+All five agree.  The control matters as much as the open cases: the full set
+turns at `k = 6`, which is exactly the threshold Theorem 1.1 proves, so the
+pipeline reproduces a known answer before being trusted on unknown ones.
+
+Two things the table shows that the conjecture does not say.  The turnaround
+index depends on `P` and moves later as the removed prime gets smaller
+(6, then 7 dropping 5, then 9 dropping 3) -- removing a smaller prime removes
+more mass and delays the crossover.  And the `q >= 3` cases decrease from
+`k = 2` onward with no turnaround at all, where the `q = 2` cases all decrease
+first and turn.
+
+This is evidence, not a certificate.  It reuses the certified panel and
+quadrature machinery but NOT its error terms, which were derived for the full
+and odd cases; the script reports midpoints.  Extending the certified error
+analysis to general `P` would be needed before any of this could be stated as
+a result.
