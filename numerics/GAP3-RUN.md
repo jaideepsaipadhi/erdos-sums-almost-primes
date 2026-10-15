@@ -25,9 +25,9 @@
 
 ## Trust anchor
 The k<=20 self-check reproduces the range GLW verified by hand. If it comes
-back all-positive with tight intervals AND the monotonicity gaps are certified,
-THAT is what validates the pipeline -- not the code looking right. Only then
-trust k>20 output.
+back all-positive with tight intervals and the monotonicity gaps are
+certified, the pipeline is validated; the code looking right is not evidence.
+Only then trust k>20 output.
 
 ## If widths won't shrink enough
 The per-panel enclosure can be tightened further (2nd-derivative term on D_i).

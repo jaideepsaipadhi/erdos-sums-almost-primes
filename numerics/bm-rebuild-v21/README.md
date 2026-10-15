@@ -20,4 +20,6 @@ gamma2_certified.json / gamma2_s1_signed.json (second s-derivative sweep,
 600 boxes, invariant held, finite-difference validated to ratios 0.999-1.001),
 s2_table.py (certified A2/S2 series), gamma2_sweep.py + crit_refined.py
 (provenance: the sweep and the refined criterion, K0=79 provisional,
-contiguous positive [79,810] verified, [810,899] slice pending).
+contiguous positive [79,810] verified, [810,899] slice pending).  That note
+is a snapshot: the finished state is K0 = 78 with [78,899] covered, recorded
+in numerics/README.md.

@@ -51,5 +51,6 @@ that omitted.
 ## Superseded
 
 `superseded/README-g_k-route.md` is the earlier plan, which went through
-`fOdd k = f k - g_{k-1}` with `g_k = int_1^inf 2^-s P_k(s) ds`.  The current
-proof works with `fOdd k` directly.
+`fOdd k = f k - G_{k-1}` with `G_k = int_1^inf 2^-s P_k(s) ds`.  That file
+writes these as `g_k`, from before the paper took that name for the odd sums
+themselves.  The current proof works with `fOdd k` directly.
