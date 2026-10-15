@@ -109,10 +109,12 @@ Mathlib route that is the difference between
     as stated:   error < 6.5e-8   ->  harmonic n for n > 7,703,978
     as required: error < 7.9e-5   ->  harmonic n for n > 6,294
 
-`harmonic 7.7e6` is not going to evaluate in the kernel; `harmonic 6300` is a
-rational with a few thousand digits, which is heavy but not absurd.  So the
-first move on this field is not to prove it -- it is to **weaken it to what
-the proof uses**, which costs nothing, is in the safe direction (a weaker
+`harmonic 7.7e6` is not going to evaluate in the kernel; `harmonic 7614` is a
+rational with a few thousand digits, which is heavy but not absurd.  **DONE:**
+the field now reads `0.57715 < gamma`, which leaves `betaOdd` a margin of
+`5.2e-6` and needs `n > 7614` in place of `n > 7703978`.  What remains is the
+proof itself.  The reasoning was that the first move on this field is not to
+prove it -- it is to weaken it to what the proof uses, which costs nothing, is in the safe direction (a weaker
 hypothesis is a stronger theorem), and is a Lean-only change: `0.5772156`
 appears nowhere in the paper or in `PROOF.md`.
 
