@@ -732,6 +732,129 @@ theorem aOneConst_ge_of_d (h : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8) :
   unfold aOneConst
   linarith [hprod]
 
+/-- Partial products bound an infinite product from below when every factor is
+at least 1.  Mathlib has no `Finset.prod_le_hasProd` -- the multiplicative
+order lemmas want an `OrderedCommMonoid`, which ℝ is not under multiplication
+-- so this is proved from the net definition directly: for any finite `t`
+containing `s`, the product over `t` splits as (product over `t \ s`) times
+(product over `s`), and the first factor is at least 1. -/
+theorem prod_le_hasProd_of_one_le {ι : Type*} (s : Finset ι) (f : ι → ℝ) (a : ℝ)
+    (h1 : ∀ i, 1 ≤ f i) (hp : HasProd f a) : ∏ i ∈ s, f i ≤ a := by
+  have hnet : Filter.Tendsto (fun t : Finset ι => ∏ i ∈ t, f i) Filter.atTop (nhds a) := hp
+  refine ge_of_tendsto hnet ?_
+  filter_upwards [Filter.eventually_ge_atTop s] with t hst
+  have hsplit : (∏ i ∈ t \ s, f i) * (∏ i ∈ s, f i) = ∏ i ∈ t, f i :=
+    Finset.prod_sdiff hst
+  have hcompl : (1 : ℝ) ≤ ∏ i ∈ t \ s, f i :=
+    Finset.one_le_prod (fun i _ => h1 i)
+  have hs0 : (0 : ℝ) ≤ ∏ i ∈ s, f i :=
+    Finset.prod_nonneg (fun i _ => le_trans zero_le_one (h1 i))
+  nlinarith [hsplit, hcompl, hs0]
+
+/-- The dConst Euler factor, in closed form.  This is the `hexact` step of
+`dConst_family_multipliable` stated on its own:
+
+    (1 - 2/p)⁻¹ (1 - 1/p)² = (p-1)²/(p(p-2)) = 1 + 1/(p(p-2)).
+
+Rational in `p`, with no logarithm anywhere -- which is why a lower bound on
+dConst is reachable in the kernel while the two-sided enclosure is not. -/
+theorem dConst_factor_sub_one (p : ℕ) (hp : 3 ≤ p) :
+    (1 - 2 / (p : ℝ))⁻¹ * (1 - 1 / (p : ℝ)) ^ 2 - 1
+      = 1 / ((p : ℝ) * ((p : ℝ) - 2)) := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hp2 : (0 : ℝ) < (p : ℝ) - 2 := by linarith
+  have hne : (1 : ℝ) - 2 / (p : ℝ) ≠ 0 := by
+    rw [sub_ne_zero]
+    intro hcon
+    field_simp at hcon
+    linarith
+  field_simp
+  ring
+
+/-- Every dConst factor is at least 1, since 1/(p(p-2)) > 0 for p ≥ 3. -/
+theorem dConst_factor_one_le (p : ℕ) (hp : 3 ≤ p) :
+    (1 : ℝ) ≤ (1 - 2 / (p : ℝ))⁻¹ * (1 - 1 / (p : ℝ)) ^ 2 := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hden : (0 : ℝ) < (p : ℝ) * ((p : ℝ) - 2) := by nlinarith
+  have hpos : (0 : ℝ) < 1 / ((p : ℝ) * ((p : ℝ) - 2)) := by positivity
+  have := dConst_factor_sub_one p hp
+  linarith
+
+/-- The 94 primes 3 ≤ p ≤ 499, as a `Finset` of the p ≥ 3 prime subtype. -/
+def dLowerSet : Finset {p : ℕ // p.Prime ∧ 3 ≤ p} :=
+  {
+      ⟨3, by norm_num⟩, ⟨5, by norm_num⟩, ⟨7, by norm_num⟩, ⟨11, by norm_num⟩, ⟨13, by
+      norm_num⟩, ⟨17, by norm_num⟩, ⟨19, by norm_num⟩, ⟨23, by norm_num⟩, ⟨29, by
+      norm_num⟩, ⟨31, by norm_num⟩, ⟨37, by norm_num⟩, ⟨41, by norm_num⟩, ⟨43, by
+      norm_num⟩, ⟨47, by norm_num⟩, ⟨53, by norm_num⟩, ⟨59, by norm_num⟩, ⟨61, by
+      norm_num⟩, ⟨67, by norm_num⟩, ⟨71, by norm_num⟩, ⟨73, by norm_num⟩, ⟨79, by
+      norm_num⟩, ⟨83, by norm_num⟩, ⟨89, by norm_num⟩, ⟨97, by norm_num⟩, ⟨101, by
+      norm_num⟩, ⟨103, by norm_num⟩, ⟨107, by norm_num⟩, ⟨109, by norm_num⟩, ⟨113, by
+      norm_num⟩, ⟨127, by norm_num⟩, ⟨131, by norm_num⟩, ⟨137, by norm_num⟩, ⟨139, by
+      norm_num⟩, ⟨149, by norm_num⟩, ⟨151, by norm_num⟩, ⟨157, by norm_num⟩, ⟨163, by
+      norm_num⟩, ⟨167, by norm_num⟩, ⟨173, by norm_num⟩, ⟨179, by norm_num⟩, ⟨181, by
+      norm_num⟩, ⟨191, by norm_num⟩, ⟨193, by norm_num⟩, ⟨197, by norm_num⟩, ⟨199, by
+      norm_num⟩, ⟨211, by norm_num⟩, ⟨223, by norm_num⟩, ⟨227, by norm_num⟩, ⟨229, by
+      norm_num⟩, ⟨233, by norm_num⟩, ⟨239, by norm_num⟩, ⟨241, by norm_num⟩, ⟨251, by
+      norm_num⟩, ⟨257, by norm_num⟩, ⟨263, by norm_num⟩, ⟨269, by norm_num⟩, ⟨271, by
+      norm_num⟩, ⟨277, by norm_num⟩, ⟨281, by norm_num⟩, ⟨283, by norm_num⟩, ⟨293, by
+      norm_num⟩, ⟨307, by norm_num⟩, ⟨311, by norm_num⟩, ⟨313, by norm_num⟩, ⟨317, by
+      norm_num⟩, ⟨331, by norm_num⟩, ⟨337, by norm_num⟩, ⟨347, by norm_num⟩, ⟨349, by
+      norm_num⟩, ⟨353, by norm_num⟩, ⟨359, by norm_num⟩, ⟨367, by norm_num⟩, ⟨373, by
+      norm_num⟩, ⟨379, by norm_num⟩, ⟨383, by norm_num⟩, ⟨389, by norm_num⟩, ⟨397, by
+      norm_num⟩, ⟨401, by norm_num⟩, ⟨409, by norm_num⟩, ⟨419, by norm_num⟩, ⟨421, by
+      norm_num⟩, ⟨431, by norm_num⟩, ⟨433, by norm_num⟩, ⟨439, by norm_num⟩, ⟨443, by
+      norm_num⟩, ⟨449, by norm_num⟩, ⟨457, by norm_num⟩, ⟨461, by norm_num⟩, ⟨463, by
+      norm_num⟩, ⟨467, by norm_num⟩, ⟨479, by norm_num⟩, ⟨487, by norm_num⟩, ⟨491, by
+      norm_num⟩, ⟨499, by norm_num⟩
+  }
+
+/-- **A certified lower bound on `d`, proved rather than assumed.**
+
+`dConst = (1/4) ∏'_{p ≥ 3} (1 - 2/p)⁻¹(1 - 1/p)²`, every factor of which
+exceeds 1 by `dConst_factor_one_le`.  So the product over the finite set
+`dLowerSet` is a lower bound for the whole product, and **no tail estimate is
+involved at all** -- which is the entire reason this is reachable here, when
+the two-sided `5.3e-8` enclosure that the `d_enclosure` field used to
+assume is not.
+
+The 94 primes p ≤ 499 give `0.378591358693...`; the true value is `0.3786950`.
+What the development needs is `0.3785631789`, from `aOneConst ≥ 0.0656` with
+`Real.log_two_gt_d9` in place of the true `log 2`.  Margin `2.8e-5`.
+
+Regenerate the numeral with `numerics/gen_dconst_lower.py`. -/
+set_option maxRecDepth 100000 in
+set_option maxHeartbeats 4000000 in
+theorem dConst_lower_bound : (0.3785913 : ℝ) ≤ dConst := by
+  have hsub : dConst = (1 / 4) * ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 := by
+    unfold dConst
+    rw [dConst_prod_eq_subtype]
+  have hone : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 : ℝ) ≤ (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 :=
+    fun p => dConst_factor_one_le (p : ℕ) p.2.2
+  have hpart := prod_le_hasProd_of_one_le dLowerSet
+    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2)
+    _ hone dConst_family_multipliable.hasProd
+  have heval : (∏ p ∈ dLowerSet,
+      (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2)
+      ≥ (4 * 0.3785913 : ℝ) := by
+    norm_num [dLowerSet, Finset.prod_insert, Finset.mem_insert,
+      Finset.mem_singleton, Subtype.mk.injEq]
+  rw [hsub]
+  linarith [hpart, heval]
+
+/-- `aOneConst ≥ 0.0656`, with no numerical hypothesis.  This is
+`aOneConst_ge_of_d` with its assumption discharged by `dConst_lower_bound`. -/
+theorem aOneConst_ge : (0.0656 : ℝ) ≤ aOneConst := by
+  have hd := dConst_lower_bound
+  have hprod : (0.3785913 : ℝ) * 0.6931471803 ≤ dConst * Real.log 2 :=
+    mul_le_mul hd Real.log_two_gt_d9.le (by norm_num) (by linarith)
+  unfold aOneConst
+  linarith [hprod]
+
 /-- The certified inputs: everything the analytic reduction takes on trust.
 
 Each field is an Arb ball computation from the companion package, exactly the
@@ -741,8 +864,6 @@ these are not.
 Umax and Vmax are parameters rather than fields because a Prop cannot carry
 data; the manuscript's values are 0.08436 and 1.90747, valid for k >= 900. -/
 structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
-  /-- Section 3.2: the certified enclosure of d. -/
-  d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
   /-- Lemma 3.6: the certified enclosure of rho. -/
   rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
   /-- Section 3.4: S* <= 6.9764.  This read 6.9763 until the certified sum was
@@ -13597,13 +13718,13 @@ theorem erdos_sums_increase_from_six (Sstar alph Gam Umax Vmax : ℝ)
   · exact hnum.sweep_high k (by omega) h3
   · exact theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
       (phiBound_pos_at_2440 aOneConst Umax Vmax Sstar alph
-          (aOneConst_ge_of_d hnum.d_enclosure)
+          aOneConst_ge
           hnum.Umax_nonneg hnum.U_bound
           hnum.Vmax_nonneg hnum.V_bound
           hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)
         (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
-          (aOneConst_ge_of_d hnum.d_enclosure)
+          aOneConst_ge
           hnum.Umax_nonneg hnum.U_bound
           hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)
@@ -13620,7 +13741,6 @@ This version replaces it with the quantities the Arb package actually computes,
 so that Proposition 2.5, Theorem 4.1 and section 3.5 are *used* in deriving it
 rather than merely proved. -/
 structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 : ℝ) : Prop where
-  d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
   rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
   /-- See the note on `NumericalFacts.Sstar_bound`: 6.9763 was not an upper
   bound for the certified 6.97633273. -/
@@ -13682,13 +13802,13 @@ theorem erdos_sums_increase_from_six' (beta : ℕ → ℝ)
   · exact hnum.sweep_high k (by omega) h3
   · refine theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
       (phiBound_pos_at_2440 aOneConst Umax Vmax Sstar alph
-          (aOneConst_ge_of_d hnum.d_enclosure)
+          aOneConst_ge
           hnum.Umax_nonneg hnum.U_bound
           hnum.Vmax_nonneg hnum.V_bound
           hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)
         (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
-          (aOneConst_ge_of_d hnum.d_enclosure)
+          aOneConst_ge
           hnum.Umax_nonneg hnum.U_bound
           hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)
