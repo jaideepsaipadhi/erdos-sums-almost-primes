@@ -315,6 +315,106 @@ theorem DBound_second_diff_le (m : ℕ) (hm : 1 ≤ m) :
                  show ((m:ℝ) + 2) + 1 = (m:ℝ) + 3 from by ring]
   nlinarith [hscaled]
 
+/-- `log 2441 <= 7.8165136`, from `2441 = 2048 * (2441/2048)` and
+`log (1+x) <= x`.  The cruder `log 2441 <= 12 log 2 = 8.318` is far too lossy
+here: it would push `RBound 2440` above the quadratic and the criterion would
+not close. -/
+theorem log_2441_le : Real.log 2441 ≤ 7.8165136 := by
+  have hsplit : Real.log (2441:ℝ) = Real.log 2048 + Real.log (2441/2048) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num)]
+    norm_num
+  have h2048 : Real.log (2048:ℝ) = 11 * Real.log 2 := by
+    rw [show (2048:ℝ) = 2 ^ (11:ℕ) by norm_num, Real.log_pow]
+    push_cast; ring
+  have hfrac : Real.log ((2441:ℝ)/2048) ≤ 2441/2048 - 1 :=
+    Real.log_le_sub_one_of_pos (by norm_num)
+  have hl2 : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
+  rw [hsplit, h2048]
+  linarith [hfrac, hl2]
+
+/-- `log 2442 <= 7.8170019`, the same way. -/
+theorem log_2442_le : Real.log 2442 ≤ 7.8170019 := by
+  have hsplit : Real.log (2442:ℝ) = Real.log 2048 + Real.log (2442/2048) := by
+    rw [← Real.log_mul (by norm_num) (by norm_num)]
+    norm_num
+  have h2048 : Real.log (2048:ℝ) = 11 * Real.log 2 := by
+    rw [show (2048:ℝ) = 2 ^ (11:ℕ) by norm_num, Real.log_pow]
+    push_cast; ring
+  have hfrac : Real.log ((2442:ℝ)/2048) ≤ 2442/2048 - 1 :=
+    Real.log_le_sub_one_of_pos (by norm_num)
+  have hl2 : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
+  rw [hsplit, h2048]
+  linarith [hfrac, hl2]
+
+theorem DBound_2440_le : DBound 2440 ≤ 13222 := by
+  have hl2 : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
+  have hl20 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hfold : Real.log ((2440:ℝ) + 1) = Real.log 2441 := by norm_num
+  have hb0 : (0:ℝ) ≤ Real.log 2441 := Real.log_nonneg (by norm_num)
+  have ha : Real.log 2 * 2440 ≤ 0.6931471808 * 2440 := by linarith
+  have hmul : Real.log 2 * 2440 * Real.log 2441
+                ≤ 0.6931471808 * 2440 * 7.8165136 :=
+    mul_le_mul ha log_2441_le hb0 (by norm_num)
+  simp only [DBound]
+  push_cast
+  try norm_num
+  linarith [hmul, hfold]
+
+theorem DBound_2441_le : DBound 2441 ≤ 13228 := by
+  have hl2 : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
+  have hl20 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hfold : Real.log ((2441:ℝ) + 1) = Real.log 2442 := by norm_num
+  have hb0 : (0:ℝ) ≤ Real.log 2442 := Real.log_nonneg (by norm_num)
+  have ha : Real.log 2 * 2441 ≤ 0.6931471808 * 2441 := by linarith
+  have hmul : Real.log 2 * 2441 * Real.log 2442
+                ≤ 0.6931471808 * 2441 * 7.8170019 :=
+    mul_le_mul ha log_2442_le hb0 (by norm_num)
+  simp only [DBound]
+  push_cast
+  try norm_num
+  linarith [hmul, hfold]
+
+/-- `phi_at_k1` as a theorem: `phi(2440) > 0` from the parameter bounds.
+Needs an upper bound on `Vmax` as well as on `Umax`; the manuscript states
+both (`0.08436` and `1.90747`).  The margin is about 418 out of 390236, a
+tenth of a percent, so the `log 2441` bound above has to be the sharp one. -/
+theorem phiBound_pos_at_2440 (aa Umax Vmax Sstar alph : ℝ)
+    (haa : (0.0656 : ℝ) ≤ aa)
+    (hU0 : 0 ≤ Umax) (hU : Umax ≤ 0.08436)
+    (hV0 : 0 ≤ Vmax) (hV : Vmax ≤ 1.90747)
+    (hS0 : 0 ≤ Sstar) (hS : Sstar ≤ 6.9764)
+    (hal0 : 0 ≤ alph) (hal : alph ≤ 15.4257) :
+    0 < phiBound aa Umax Vmax Sstar alph 2440 := by
+  have hl2 : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
+  have hl20 : (0:ℝ) < Real.log 2 := Real.log_pos (by norm_num)
+  have hD1 := DBound_2440_le
+  have hD2 := DBound_2441_le
+  have hD10 : (0:ℝ) ≤ DBound 2440 := DBound_nonneg 2440
+  have hD20 : (0:ℝ) ≤ DBound 2441 := DBound_nonneg 2441
+  have hfoldD : DBound (2440 + 1) = DBound 2441 := by norm_num
+  have hinner0 : (0:ℝ) ≤ (2 * (2440:ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax := by
+    nlinarith [hU0, hV0]
+  have hinner : (2 * (2440:ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax
+                  ≤ 4878 * 0.08436 + 2 * 1.90747 + 4 * 0.08436 := by
+    nlinarith [hU, hV, hU0, hV0]
+  have hq4 : Real.log 2 / 4 ≤ 0.6931471808 / 4 := by linarith
+  have hq40 : (0:ℝ) ≤ Real.log 2 / 4 := by linarith
+  have ht1 : Real.log 2 / 4 * ((2 * (2440:ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax)
+               ≤ 73 := by
+    have := mul_le_mul hq4 hinner hinner0 (by norm_num)
+    nlinarith [this]
+  have hsum : 2 * DBound 2440 + DBound 2441 ≤ 2 * 13222 + 13228 := by linarith
+  have hsum0 : (0:ℝ) ≤ 2 * DBound 2440 + DBound 2441 := by linarith
+  have ht2 : Sstar * (2 * DBound 2440 + DBound 2441) ≤ 276769 := by
+    have := mul_le_mul hS hsum hsum0 (by norm_num)
+    nlinarith [this]
+  have ht3 : alph * (3 * (2440:ℝ) + 4) ≤ 112979 := by nlinarith [hal]
+  have hq : (390235:ℝ) ≤ aa * ((2440:ℝ) ^ 2 - 2 * 2440 - 1) := by nlinarith [haa]
+  simp only [phiBound, RBound]
+  push_cast
+  try norm_num
+  nlinarith [ht1, ht2, ht3, hq, hfoldD, hD1, hD2]
+
 /-- `phi_mono` as a theorem.  The hypotheses are the bounds the structures
 already carry, plus `hU`, which the manuscript states and they do not. -/
 theorem phiBound_mono_of_bounds (aa Umax Vmax Sstar alph : ℝ)
