@@ -409,7 +409,7 @@ theorem phiBound_pos_at_2440 (aa Umax Vmax Sstar alph : ℝ)
     have := mul_le_mul hS hsum hsum0 (by norm_num)
     nlinarith [this]
   have ht3 : alph * (3 * (2440:ℝ) + 4) ≤ 112979 := by nlinarith [hal]
-  have hq : (390236:ℝ) ≤ aa * ((2440:ℝ) ^ 2 - 2 * 2440 - 1) := by nlinarith [haa]
+  have hq : (390235:ℝ) ≤ aa * ((2440:ℝ) ^ 2 - 2 * 2440 - 1) := by nlinarith [haa]
   simp only [phiBound, RBound]
   push_cast
   try norm_num
