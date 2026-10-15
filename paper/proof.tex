@@ -1159,7 +1159,9 @@ $\mathcal P=\{p:p\geq3\}$.
 
 The logical division is as follows.
 
-The analytic proof consists of Lemma~\ref{lem:integral-representation},
+The analytic proof is the whole of Sections~2--6 apart from the two numerical
+propositions named below: in particular
+Lemmas~\ref{lem:integral-representation} and \ref{lem:zeta-coordinate},
 Proposition~\ref{prop:analyticity}, the coefficient identities
 \eqref{eq:odd-u-integral} and \eqref{eq:E-decomposition}, the remainder
 reduction in Proposition~\ref{prop:odd-remainder}, and the source estimates in
@@ -1171,7 +1173,12 @@ Proposition~\ref{prop:full-certified}. Their statements are finite systems of
 interval inequalities. They are established by Arb/FLINT through its Python bindings. The Lean
 formalization imports the resulting intervals
 as hypotheses and proves that those hypotheses imply
-Theorems~\ref{thm:main-full} and \ref{thm:main-odd}.
+Theorem~\ref{thm:main-full} and the monotonicity assertion of
+Theorem~\ref{thm:main-odd}; the two formal statements are
+\texttt{erdos\_sums\_increase\_from\_six} and \texttt{fOdd\_decreasing}. The
+limit $g_k\to\frac12$ of Theorem~\ref{thm:main-odd} is proved in the text,
+from \eqref{eq:odd-expansion} and Proposition~\ref{prop:odd-remainder}, but is
+not formalized, the monotonicity argument making no use of it.
 
 Two constants are stated above more conservatively than the computation
 requires, so that the text and the formalization carry the same values: the
