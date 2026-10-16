@@ -856,6 +856,7 @@ theorem aOneConst_ge : (0.0656 : ℝ) ≤ aOneConst := by
   unfold aOneConst
   linarith [hprod]
 
+set_option maxRecDepth 4000000 in
 /-- The 668 primes 3 ≤ p ≤ 4999. -/
 def dLowerSetSharp : Finset {p : ℕ // p.Prime ∧ 3 ≤ p} :=
   {
@@ -1040,6 +1041,8 @@ def dLowerSetSharp : Finset {p : ℕ // p.Prime ∧ 3 ≤ p} :=
       ⟨4999, by norm_num⟩
   }
 
+set_option maxRecDepth 4000000 in
+set_option maxHeartbeats 16000000 in
 /-- A sharper lower bound on `d`, for the odd side.
 
 `betaOdd = d(log 2 - Sodd + γ) ≥ 0.1556` needs `d ≥ 0.3786822527`, against the
@@ -1055,8 +1058,6 @@ constant, since that distinction is what made the 66-prime version of
 `dConst_lower_bound` wrong.
 
 Regenerate with `numerics/gen_dconst_lower.py 5000`. -/
-set_option maxRecDepth 1000000 in
-set_option maxHeartbeats 8000000 in
 theorem dConst_lower_bound_sharp : (0.378687 : ℝ) ≤ dConst := by
   have hsub : dConst = (1 / 4) * ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
       (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 := by

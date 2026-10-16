@@ -73,5 +73,11 @@ body = ", ".join(str(p) for p in ps)
 print("  {" + body + "}")
 print()
 print("-- Lean: the target")
+# set_option must PRECEDE the docstring: a `/-- ... -/` followed by
+# `set_option ... in` is a parse error ("unexpected token 'set_option'").
+# Both the Finset def and the theorem need the raised recursion depth.
+print("set_option maxRecDepth 4000000 in")
+print("set_option maxHeartbeats 16000000 in")
+print("/-- docstring goes HERE, after the set_options -/")
 print("theorem dConst_lower_bound : (%s : ℝ) ≤ dConst := by" % numeral)
 print("  sorry  -- proof assembled separately; this script supplies the numeral")
