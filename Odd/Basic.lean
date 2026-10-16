@@ -311,6 +311,7 @@ theorem fOdd_decreasing (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts M
     ∀ k : ℕ, 1 ≤ k → fOdd (k + 1) < fOdd k :=
   fOdd_decreasing_of_facts MR hMR0 hnum
 
+set_option maxHeartbeats 2000000 in
 /-- **`g_k → 1/2`.**  Theorem 1.2's limit assertion, which section 8 of the
 manuscript recorded as proved in the text but NOT formalized -- the
 monotonicity argument makes no use of it, so it was left out.
@@ -355,7 +356,20 @@ theorem fOdd_tendsto_half (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts
   have hcube : ∀ k : ℕ, 1 ≤ k → (((k:ℝ) + 3) ^ 3) ≤ 64 * (k:ℝ) ^ 3 := by
     intro k hk
     have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
-    nlinarith [hk1, sq_nonneg ((k:ℝ) - 1), sq_nonneg ((k:ℝ) + 1)]
+    -- k + 3 <= 4k for k >= 1, then cube.  Done by explicit mul_le_mul rather
+    -- than nlinarith, which timed out on the cubic.
+    have h4 : (k:ℝ) + 3 ≤ 4 * (k:ℝ) := by linarith
+    have h0 : (0:ℝ) ≤ (k:ℝ) + 3 := by linarith
+    have h0' : (0:ℝ) ≤ 4 * (k:ℝ) := by linarith
+    have hsq : ((k:ℝ) + 3) * ((k:ℝ) + 3) ≤ (4 * (k:ℝ)) * (4 * (k:ℝ)) :=
+      mul_le_mul h4 h4 h0 h0'
+    have hcu : ((k:ℝ) + 3) * ((k:ℝ) + 3) * ((k:ℝ) + 3)
+        ≤ (4 * (k:ℝ)) * (4 * (k:ℝ)) * (4 * (k:ℝ)) :=
+      mul_le_mul hsq h4 h0 (by positivity)
+    calc ((k:ℝ) + 3) ^ 3
+        = ((k:ℝ) + 3) * ((k:ℝ) + 3) * ((k:ℝ) + 3) := by ring
+      _ ≤ (4 * (k:ℝ)) * (4 * (k:ℝ)) * (4 * (k:ℝ)) := hcu
+      _ = 64 * (k:ℝ) ^ 3 := by ring
   -- the majorant
   have hmaj : Filter.Tendsto
       (fun k : ℕ => |betaOdd| * ((1:ℝ)/2) ^ k + 64 * MR * (k:ℝ) ^ 3 * ((1:ℝ)/3) ^ k)
