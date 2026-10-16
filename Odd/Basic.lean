@@ -337,16 +337,20 @@ theorem fOdd_tendsto_half (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts
         = (fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k) + betaOdd * ((1:ℝ)/2) ^ k := by
       ring
     have hpow : (0:ℝ) ≤ ((1:ℝ)/2) ^ k := by positivity
-    calc |fOdd k - 1 / 2|
-        = |(fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k) + betaOdd * ((1:ℝ)/2) ^ k| := by
-          rw [← hsplit]
-      _ ≤ |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k| + |betaOdd * ((1:ℝ)/2) ^ k| :=
-          abs_add _ _
-      _ ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k + |betaOdd| * ((1:ℝ)/2) ^ k := by
-          rw [abs_mul, abs_of_nonneg hpow]
-          linarith [h]
-      _ = |betaOdd| * ((1:ℝ)/2) ^ k + MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
-          ring
+    -- `abs_add` is not a name in this Mathlib, so the triangle inequality is
+    -- done by hand out of abs_le, neg_abs_le and le_abs_self
+    have hb := abs_le.mp h
+    have hlo : -|betaOdd| ≤ betaOdd := neg_abs_le betaOdd
+    have hhi : betaOdd ≤ |betaOdd| := le_abs_self betaOdd
+    have hmul_lo : -(|betaOdd| * ((1:ℝ)/2) ^ k) ≤ betaOdd * ((1:ℝ)/2) ^ k := by
+      have := mul_le_mul_of_nonneg_right hlo hpow
+      linarith [this]
+    have hmul_hi : betaOdd * ((1:ℝ)/2) ^ k ≤ |betaOdd| * ((1:ℝ)/2) ^ k :=
+      mul_le_mul_of_nonneg_right hhi hpow
+    rw [abs_le]
+    constructor
+    · rw [hsplit]; linarith [hb.1, hmul_lo]
+    · rw [hsplit]; linarith [hb.2, hmul_hi]
   -- (k+3)^3 <= 64 k^3 for k >= 1, which puts the second term in k^3 * r^k form
   have hcube : ∀ k : ℕ, 1 ≤ k → (((k:ℝ) + 3) ^ 3) ≤ 64 * (k:ℝ) ^ 3 := by
     intro k hk
@@ -363,10 +367,14 @@ theorem fOdd_tendsto_half (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts
       simpa using this.const_mul |betaOdd|
     have h2 : Filter.Tendsto (fun k : ℕ => 64 * MR * (k:ℝ) ^ 3 * ((1:ℝ)/3) ^ k)
         Filter.atTop (nhds 0) := by
+      -- `tendsto_pow_mul_geometric_of_norm_lt_one` is not a name here; the
+      -- summable version plus `Summable.tendsto_atTop_zero` gives the same thing
       have hg : Filter.Tendsto (fun k : ℕ => ((k:ℝ)) ^ 3 * ((1:ℝ)/3) ^ k)
           Filter.atTop (nhds 0) :=
-        tendsto_pow_mul_geometric_of_norm_lt_one 3
-          (by rw [Real.norm_eq_abs]; rw [abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/3)]; norm_num)
+        (summable_pow_mul_geometric_of_norm_lt_one 3
+          (by rw [Real.norm_eq_abs]
+              rw [abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/3)]
+              norm_num)).tendsto_atTop_zero
       have := hg.const_mul (64 * MR)
       simpa [mul_assoc] using this
     simpa using h1.add h2
