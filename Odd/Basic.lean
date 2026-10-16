@@ -152,25 +152,6 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
                      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
   /-- Certified sweep below the analytic threshold. -/
   sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 58 → fOdd (k + 1) < fOdd k
-  /-- What is left of the old two-sided `d` enclosure
-  (`|dConst - 0.3786950| ≤ 5.3e-8`): only this ONE-SIDED bound is used, and
-  only here, to clear `betaOdd ≥ 0.1556`.
-
-  `Banksmartin.dConst_lower_bound` proves `0.3785913 ≤ dConst` outright, from
-  the 94 primes `p ≤ 499`.  Reaching `0.3786823` needs 668 primes
-  (`p ≤ 4999`), and the 668-element `Finset` literal exceeds `simp`'s step
-  budget when the product is evaluated -- the literal dedups pairwise, so it
-  costs about 223,000 membership rewrites against a default of 100,000.  The
-  known fix is a `List`-backed `Finset` with `Nodup` by `decide`, which makes
-  the evaluation linear rather than quadratic; that is unverified, so it is
-  not claimed here.
-
-  The gap is therefore `9.1e-5` wide, and no part of it is analytic: it is a
-  finite rational computation the kernel has not yet been coaxed into
-  finishing.  Note the ceiling is not the prime count -- `betaOdd`'s own slack
-  caps the achievable margin near `5e-6` at any size, because
-  `Sodd_enclosure` and `gamma_lower_bound` consume the rest of the budget. -/
-  d_lower        : (0.3786823 : ℝ) ≤ dConst
 /-- The arithmetic core of the odd assembly, with all rpow stripped out.
 
 A = f_k, B = f_{k+1}, P = 2^-k, T = MR (k+3)^3 3^-k, b = beta; T <= 0.048 P for k >= 59.  The two
@@ -261,7 +242,7 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
     have hb : (0.1556 : ℝ) ≤ betaOdd := by
       unfold betaOdd
       have hg := gamma_lower_bound
-      have hd := hnum.d_lower
+      have hd := dConst_lower_bound_sharp
       have hS := abs_le.mp hnum.Sodd_enclosure
       have hl2 := Real.log_two_gt_d9
       -- the second factor, at the worst end of Sodd's enclosure and the

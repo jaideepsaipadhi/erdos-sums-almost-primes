@@ -91,6 +91,18 @@ jobs:
       # for the named theorems, which matters because the run log and the
       # artifact blob host are both unreachable from the dev container: the
       # build itself has to do the checking.
+      # A probe file, not part of the library.  Lean reports every command in
+      # it independently, so one run says which names exist and which route
+      # closes.  Never fails the build -- its output IS the result.
+      - name: Probe
+        if: always()
+        run: |
+          if [ -f probe/dprobe.lean ]; then
+            lake env lean probe/dprobe.lean > probe.txt 2>&1 || true
+            cat probe.txt
+            while IFS= read -r line; do echo "::notice::probe: ${line}"; done < probe.txt
+          fi
+
       - name: Axiom audit (unrestricted case)
         run: |
           lake env lean axcheck-bm.lean | tee axioms-bm.txt
