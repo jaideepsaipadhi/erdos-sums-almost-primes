@@ -1077,6 +1077,168 @@ theorem dConst_lower_bound_sharp : (0.3786823 : ℝ) ≤ dConst := by
   rw [hsub]
   linarith [hpart, heval]
 
+/-- The `if 5 ≤ p` in rhoConst is the indicator of {p ≥ 5}.  Mirrors
+`dConst_if_eq_indicator`, and is simpler because the guard is already the
+threshold rather than `2 < p`. -/
+theorem rhoConst_if_eq_indicator :
+    (fun p : Nat.Primes =>
+        (if 5 ≤ (p : ℕ) then (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 else 1))
+      = Set.mulIndicator {p : Nat.Primes | (5 : ℕ) ≤ (p : ℕ)}
+          (fun p : Nat.Primes => (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3) := by
+  funext p
+  by_cases h : p ∈ {q : Nat.Primes | (5 : ℕ) ≤ (q : ℕ)}
+  · have h5 : (5 : ℕ) ≤ (p : ℕ) := h
+    rw [Set.mulIndicator_of_mem h, if_pos h5]
+  · have h5 : ¬((5 : ℕ) ≤ (p : ℕ)) := h
+    rw [Set.mulIndicator_of_notMem h, if_neg h5]
+
+/-- rhoConst's indicator product over all primes equals the p ≥ 5 subtype
+product.  Mirrors `dConst_prod_eq_subtype`. -/
+theorem rhoConst_prod_eq_subtype :
+    (∏' p : Nat.Primes,
+        (if 5 ≤ (p : ℕ) then (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 else 1))
+      = ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+          (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 := by
+  rw [rhoConst_if_eq_indicator]
+  rw [← tprod_subtype {p : Nat.Primes | (5 : ℕ) ≤ (p : ℕ)}
+    (fun p : Nat.Primes => (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3)]
+  exact (primesEquivSubtypeGE 5).tprod_eq
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3)
+
+/-- The rhoConst Euler factor, in closed form:
+
+    (1 - 3/p)⁻¹ (1 - 1/p)³ = (p-1)³/(p²(p-3)) = 1 + (3p-1)/(p²(p-3)).
+
+Rational in `p`, exactly as `dConst_factor_sub_one`, since
+(p-1)³ - p²(p-3) = 3p - 1. -/
+theorem rhoConst_factor_sub_one (p : ℕ) (hp : 5 ≤ p) :
+    (1 - 3 / (p : ℝ))⁻¹ * (1 - 1 / (p : ℝ)) ^ 3 - 1
+      = (3 * (p : ℝ) - 1) / ((p : ℝ) ^ 2 * ((p : ℝ) - 3)) := by
+  have hp5 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hp3 : (0 : ℝ) < (p : ℝ) - 3 := by linarith
+  have hne : (1 : ℝ) - 3 / (p : ℝ) ≠ 0 := by
+    rw [sub_ne_zero]
+    intro hcon
+    field_simp at hcon
+    linarith
+  field_simp
+  ring
+
+/-- Every rhoConst factor is at least 1, since (3p-1)/(p²(p-3)) > 0 for p ≥ 5. -/
+theorem rhoConst_factor_one_le (p : ℕ) (hp : 5 ≤ p) :
+    (1 : ℝ) ≤ (1 - 3 / (p : ℝ))⁻¹ * (1 - 1 / (p : ℝ)) ^ 3 := by
+  have hp5 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hden : (0 : ℝ) < (p : ℝ) ^ 2 * ((p : ℝ) - 3) := by nlinarith
+  have hnum : (0 : ℝ) < 3 * (p : ℝ) - 1 := by linarith
+  have hpos : (0 : ℝ) < (3 * (p : ℝ) - 1) / ((p : ℝ) ^ 2 * ((p : ℝ) - 3)) :=
+    div_pos hnum hden
+  have := rhoConst_factor_sub_one p hp
+  linarith
+
+/-- The rhoConst family is multipliable over p ≥ 5.  Mirrors
+`dConst_family_multipliable`; the comparison constant is 7 rather than 3
+because (3p-1)/(p-3) is largest at p = 5, where it equals 7. -/
+theorem rhoConst_family_multipliable :
+    Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      7 * (1 / ((p : ℕ) : ℝ) ^ 2)) := by
+    have hbase : Summable (fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2) := by
+      simpa using Real.summable_one_div_nat_pow.mpr (by norm_num : 1 < 2)
+    exact (hbase.subtype _).mul_left 7
+  have hsum : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 - 1) := by
+    apply Summable.of_nonneg_of_le _ _ hcomp
+    · intro p
+      rw [rhoConst_factor_sub_one (p : ℕ) p.2.2]
+      have hp5 : (5 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.2
+      have hden : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 2 * (((p : ℕ) : ℝ) - 3) := by nlinarith
+      have hnum : (0 : ℝ) < 3 * ((p : ℕ) : ℝ) - 1 := by linarith
+      exact le_of_lt (div_pos hnum hden)
+    · intro p
+      rw [rhoConst_factor_sub_one (p : ℕ) p.2.2]
+      have hp5 : (5 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.2
+      have hden : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 2 * (((p : ℕ) : ℝ) - 3) := by nlinarith
+      have hsq : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 2 := by positivity
+      rw [show (7 : ℝ) * (1 / ((p : ℕ) : ℝ) ^ 2) = 7 / ((p : ℕ) : ℝ) ^ 2 by ring]
+      rw [div_le_div_iff₀ hden hsq]
+      nlinarith
+  have h := Real.multipliable_one_add_of_summable hsum
+  apply h.congr
+  intro p
+  ring
+
+set_option maxRecDepth 1000000 in
+/-- The 93 primes 5 ≤ p ≤ 499. -/
+def rhoLowerSet : Finset {p : ℕ // p.Prime ∧ 5 ≤ p} :=
+  {
+      ⟨5, by norm_num⟩, ⟨7, by norm_num⟩, ⟨11, by norm_num⟩, ⟨13, by norm_num⟩, ⟨17,
+      by norm_num⟩, ⟨19, by norm_num⟩, ⟨23, by norm_num⟩, ⟨29, by norm_num⟩, ⟨31, by
+      norm_num⟩, ⟨37, by norm_num⟩, ⟨41, by norm_num⟩, ⟨43, by norm_num⟩, ⟨47, by
+      norm_num⟩, ⟨53, by norm_num⟩, ⟨59, by norm_num⟩, ⟨61, by norm_num⟩, ⟨67, by
+      norm_num⟩, ⟨71, by norm_num⟩, ⟨73, by norm_num⟩, ⟨79, by norm_num⟩, ⟨83, by
+      norm_num⟩, ⟨89, by norm_num⟩, ⟨97, by norm_num⟩, ⟨101, by norm_num⟩, ⟨103, by
+      norm_num⟩, ⟨107, by norm_num⟩, ⟨109, by norm_num⟩, ⟨113, by norm_num⟩, ⟨127, by
+      norm_num⟩, ⟨131, by norm_num⟩, ⟨137, by norm_num⟩, ⟨139, by norm_num⟩, ⟨149, by
+      norm_num⟩, ⟨151, by norm_num⟩, ⟨157, by norm_num⟩, ⟨163, by norm_num⟩, ⟨167, by
+      norm_num⟩, ⟨173, by norm_num⟩, ⟨179, by norm_num⟩, ⟨181, by norm_num⟩, ⟨191, by
+      norm_num⟩, ⟨193, by norm_num⟩, ⟨197, by norm_num⟩, ⟨199, by norm_num⟩, ⟨211, by
+      norm_num⟩, ⟨223, by norm_num⟩, ⟨227, by norm_num⟩, ⟨229, by norm_num⟩, ⟨233, by
+      norm_num⟩, ⟨239, by norm_num⟩, ⟨241, by norm_num⟩, ⟨251, by norm_num⟩, ⟨257, by
+      norm_num⟩, ⟨263, by norm_num⟩, ⟨269, by norm_num⟩, ⟨271, by norm_num⟩, ⟨277, by
+      norm_num⟩, ⟨281, by norm_num⟩, ⟨283, by norm_num⟩, ⟨293, by norm_num⟩, ⟨307, by
+      norm_num⟩, ⟨311, by norm_num⟩, ⟨313, by norm_num⟩, ⟨317, by norm_num⟩, ⟨331, by
+      norm_num⟩, ⟨337, by norm_num⟩, ⟨347, by norm_num⟩, ⟨349, by norm_num⟩, ⟨353, by
+      norm_num⟩, ⟨359, by norm_num⟩, ⟨367, by norm_num⟩, ⟨373, by norm_num⟩, ⟨379, by
+      norm_num⟩, ⟨383, by norm_num⟩, ⟨389, by norm_num⟩, ⟨397, by norm_num⟩, ⟨401, by
+      norm_num⟩, ⟨409, by norm_num⟩, ⟨419, by norm_num⟩, ⟨421, by norm_num⟩, ⟨431, by
+      norm_num⟩, ⟨433, by norm_num⟩, ⟨439, by norm_num⟩, ⟨443, by norm_num⟩, ⟨449, by
+      norm_num⟩, ⟨457, by norm_num⟩, ⟨461, by norm_num⟩, ⟨463, by norm_num⟩, ⟨467, by
+      norm_num⟩, ⟨479, by norm_num⟩, ⟨487, by norm_num⟩, ⟨491, by norm_num⟩, ⟨499, by
+      norm_num⟩
+  }
+
+set_option maxRecDepth 1000000 in
+set_option maxHeartbeats 40000000 in
+/-- **A certified bound on `rho`, proved rather than assumed.**
+
+`rhoConst = -(1/9) ∏'_{p ≥ 5} (1 - 3/p)⁻¹(1 - 1/p)³`, every factor of which
+exceeds 1 by `rhoConst_factor_one_le`.  The product over a finite set is
+therefore a lower bound for the whole product -- and because the `-(1/9)`
+makes rhoConst NEGATIVE, that becomes an UPPER bound on rhoConst.
+
+Which direction is reachable matters elsewhere; here it does not, because
+`rho_enclosure` has no consumer anywhere in the development -- `grep` for it
+returns the field declarations and a comment, nothing more.  So any true
+bound discharges it, and the field can go.
+
+The 93 primes p ≤ 499 give `rhoConst ≤ -0.174788567...`; the certified value
+is `-0.1749323`.  Note that for an upper bound on a NEGATIVE quantity the
+numeral must be rounded TOWARD ZERO to stay valid, which is the opposite of
+the `d` case. -/
+theorem rhoConst_upper_bound : rhoConst ≤ (-0.1747885 : ℝ) := by
+  have hsub : rhoConst = -(1 / 9) * ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 := by
+    unfold rhoConst
+    rw [rhoConst_prod_eq_subtype]
+  have hone : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      (1 : ℝ) ≤ (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 :=
+    fun p => rhoConst_factor_one_le (p : ℕ) p.2.2
+  have hpart := prod_le_hasProd_of_one_le rhoLowerSet
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3)
+    _ hone rhoConst_family_multipliable.hasProd
+  have heval : (∏ p ∈ rhoLowerSet,
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3)
+      ≥ (-9 * -0.1747885 : ℝ) := by
+    norm_num (config := { maxSteps := 100000000, maxDischargeDepth := 4 })
+      [rhoLowerSet, Finset.prod_insert, Finset.mem_insert,
+       Finset.mem_singleton, Subtype.mk.injEq]
+  rw [hsub]
+  linarith [hpart, heval]
+
 /-- The certified inputs: everything the analytic reduction takes on trust.
 
 Each field is an Arb ball computation from the companion package, exactly the
@@ -1086,8 +1248,6 @@ these are not.
 Umax and Vmax are parameters rather than fields because a Prop cannot carry
 data; the manuscript's values are 0.08436 and 1.90747, valid for k >= 900. -/
 structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
-  /-- Lemma 3.6: the certified enclosure of rho. -/
-  rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
   /-- Section 3.4: S* <= 6.9764.  This read 6.9763 until the certified sum was
   recomputed: it is 6.97633273, and the head i <= 30 alone is 6.97633205, so
   6.9763 was not an upper bound -- 6.97633 rounded down where an upper bound
@@ -13963,7 +14123,6 @@ This version replaces it with the quantities the Arb package actually computes,
 so that Proposition 2.5, Theorem 4.1 and section 3.5 are *used* in deriving it
 rather than merely proved. -/
 structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 : ℝ) : Prop where
-  rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
   /-- See the note on `NumericalFacts.Sstar_bound`: 6.9763 was not an upper
   bound for the certified 6.97633273. -/
   Sstar_bound   : Sstar ≤ 6.9764

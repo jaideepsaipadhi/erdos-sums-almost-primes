@@ -22,3 +22,9 @@ import Banksmartin.Basic
 #print axioms aOneConst_ge
 #print axioms dConst_lower_bound_sharp
 
+-- the Tier C field that had no consumer at all: rho
+#print axioms rhoConst_factor_sub_one
+#print axioms rhoConst_factor_one_le
+#print axioms rhoConst_family_multipliable
+#print axioms rhoConst_upper_bound
+

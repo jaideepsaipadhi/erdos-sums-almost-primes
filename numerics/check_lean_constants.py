@@ -147,6 +147,30 @@ else:
               v <= PAPER_D_LO,
               "field %s <= paper's certified %s" % (v, PAPER_D_LO))
 
+# --- rho: same shape, opposite sign, and no consumer
+rnum = None
+m = re.search(r"rhoConst_upper_bound\s*:\s*rhoConst\s*≤\s*\((-?[0-9.]+)\s*:", bm)
+if m:
+    rnum = F(m.group(1))
+rps = primes_of(bm, "rhoLowerSet")
+if rnum is not None and rps is not None:
+    RP = F(1)
+    for p in rps:
+        RP *= 1 + F(3 * p - 1, p * p * (p - 3))
+    rub = -F(1, 9) * RP
+    check("rhoConst_upper_bound numeral is actually reached",
+          rnum >= rub,
+          "numeral %.10f >= product bound %.10f over %d primes (p <= %d); "
+          "an upper bound on a NEGATIVE quantity rounds TOWARD ZERO"
+          % (float(rnum), float(rub), len(rps), max(rps)))
+    check("rhoLowerSet members are prime and >= 5",
+          all(p >= 5 and p in set(primes_upto(max(rps) + 1)) for p in rps),
+          "%d entries checked" % len(rps))
+    check("rhoConst_upper_bound is consistent with the paper's -0.1749323",
+          rnum >= F(-1749323, 10 ** 7),
+          "Lean proves rhoConst <= %.10f, weaker than the certified "
+          "-0.1749323 -- no conflict" % float(rnum))
+
 # --- what the consumers need, restated so a reader can see the budget
 print()
 print("requirement budget, against the bounds the LEAN PROOFS have:")
