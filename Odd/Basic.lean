@@ -138,7 +138,10 @@ theorem gamma_lower_bound : (0.57715 : ℝ) < Real.eulerMascheroniConstant := by
   have hH : (95880679 / 10000000 : ℚ) < harmonic 8191 := by
     norm_num [harmonic, Finset.sum_range_succ]
   have hHr : (95880679 / 10000000 : ℝ) < (harmonic 8191 : ℝ) := by
-    exact_mod_cast hH
+    have h2 : ((95880679 / 10000000 : ℚ) : ℝ) < ((harmonic 8191 : ℚ) : ℝ) :=
+      Rat.cast_lt.mpr hH
+    push_cast at h2
+    exact h2
   have hlow : (0.57715 : ℝ) < (harmonic 8191 : ℝ) - Real.log 8192 := by
     rw [hlog]; linarith
   simp only [Real.eulerMascheroniSeq] at hseq
