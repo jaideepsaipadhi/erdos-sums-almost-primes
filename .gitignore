@@ -13,8 +13,12 @@ prune_*.py
 install_payload.py
 
 # regenerable intermediates
-numerics/**/cchunks/
-numerics/**/__pycache__/
+# Unanchored so they cover odd-proof/numerics/ too: the rooted forms these
+# replaced (numerics/**/...) matched only the unrestricted tree, so the odd
+# case's chunk directory and bytecode showed up as untracked.
+**/cchunks/
+**/ochunks/
+**/__pycache__/
 
 # LaTeX build artifacts
 paper/*.aux
