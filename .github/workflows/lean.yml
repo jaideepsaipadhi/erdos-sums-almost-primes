@@ -91,25 +91,12 @@ jobs:
       # for the named theorems, which matters because the run log and the
       # artifact blob host are both unreachable from the dev container: the
       # build itself has to do the checking.
-      # A probe file, not part of the library.  Lean reports every command in
-      # it independently, so one run says which names exist and which route
-      # closes.  Never fails the build -- its output IS the result.
-      - name: Probe
-        if: always()
-        run: |
-          if [ -f probe/dprobe.lean ]; then
-            lake env lean probe/dprobe.lean > probe.txt 2>&1 || true
-            cat probe.txt
-            while IFS= read -r line; do echo "::notice::probe: ${line}"; done < probe.txt
-          fi
-
       - name: Axiom audit (unrestricted case)
         run: |
           # `lean | tee` reports TEE's status, so lean's own exit code is lost
           # and an unknown constant in the audit file would pass silently.
           set -o pipefail
           lake env lean axcheck-bm.lean | tee axioms-bm.txt
-          while IFS= read -r line; do echo "::notice::bm: ${line}"; done < axioms-bm.txt
           if grep -q "sorryAx" axioms-bm.txt; then
             echo "::error::sorryAx in the unrestricted axiom audit"
             exit 1
@@ -134,9 +121,11 @@ jobs:
           got=$(grep -c 'depend' axioms-bm.txt)
           echo "expected ${want} axiom lines, got ${got}"
           if [ "$want" -ne "$got" ]; then
-            echo "::error::axiom audit printed ${got} of ${want} expected lines"
+            echo "::error::unrestricted audit printed ${got} of ${want} lines"
+            while IFS= read -r line; do echo "::error::bm: ${line}"; done < axioms-bm.txt
             exit 1
           fi
+          echo "::notice::unrestricted axiom audit clean: ${got}/${want} declarations"
           echo "unrestricted axiom audit clean: ${got}/${want}"
 
       - name: Axiom audit (odd case)
@@ -147,7 +136,8 @@ jobs:
           got=$(grep -c 'depend' axioms.txt)
           echo "expected ${want} axiom lines, got ${got}"
           if [ "$want" -ne "$got" ]; then
-            echo "::error::odd axiom audit printed ${got} of ${want} expected lines"
+            echo "::error::odd audit printed ${got} of ${want} lines; full output follows"
+            while IFS= read -r line; do echo "::error::odd: ${line}"; done < axioms.txt
             exit 1
           fi
           if grep -q "sorryAx" axioms.txt; then
@@ -160,6 +150,7 @@ jobs:
             echo "::error::an unexpected axiom was reported"
             exit 1
           fi
+          echo "::notice::odd axiom audit clean: ${got}/${want} declarations"
           echo "axiom audit clean"
 
       # The run log is served from a host this project's tooling cannot reach,
@@ -182,7 +173,6 @@ jobs:
           path: |
             axioms.txt
             axioms-bm.txt
-            probe.txt
             full-build.log
             build.log
             relog.txt
