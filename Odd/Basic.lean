@@ -104,6 +104,8 @@ beta = d (log 2 - S + gamma), numerically 0.15563. -/
 noncomputable def betaOdd : ℝ :=
   dConst * (Real.log 2 - Sodd + Real.eulerMascheroniConstant)
 
+set_option maxRecDepth 4000000 in
+set_option maxHeartbeats 0 in
 /-- `0.57715 < gamma`.  This was `OddNumericalFacts.gamma_gt`, an assumed
 field, until it was proved here.
 
@@ -120,7 +122,6 @@ that works at all, to `4e-7`, where the obvious bound is off by `2.6e-3`.
     harmonic 8191         = 9.588067975783...
     0.57715 + 13 log 2   <= 9.588063350400
 -/
-set_option maxRecDepth 2000000 in
 theorem gamma_lower_bound : (0.57715 : ℝ) < Real.eulerMascheroniConstant := by
   have hseq := Real.eulerMascheroniSeq_lt_eulerMascheroniConstant 8191
   have hl2 : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
