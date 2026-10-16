@@ -104,6 +104,38 @@ beta = d (log 2 - S + gamma), numerically 0.15563. -/
 noncomputable def betaOdd : ℝ :=
   dConst * (Real.log 2 - Sodd + Real.eulerMascheroniConstant)
 
+/-- `0.57715 < gamma`.  This was `OddNumericalFacts.gamma_gt`, an assumed
+field, until it was proved here.
+
+Mathlib's only lower bound is `one_half_lt_eulerMascheroniConstant`, too weak
+here.  The usable route is `eulerMascheroniSeq_lt_eulerMascheroniConstant`,
+`harmonic n - log (n+1) < gamma`, whose gap to `gamma` is about `1/(2n)`.
+
+`n = 8191` is chosen so that `n + 1 = 8192 = 2^13` and the logarithm is
+`13 log 2` EXACTLY.  That matters: the margin here is `4.6e-6`, and Mathlib's
+`log 2` is good to `3.4e-9`, whereas any `n + 1` that is not a power of two
+would need a bound on `log (n+1)` of its own -- at `n = 7614`, the smallest n
+that works at all, to `4e-7`, where the obvious bound is off by `2.6e-3`.
+
+    harmonic 8191         = 9.588067975783...
+    0.57715 + 13 log 2   <= 9.588063350400
+-/
+set_option maxRecDepth 2000000 in
+theorem gamma_lower_bound : (0.57715 : ℝ) < Real.eulerMascheroniConstant := by
+  have hseq := Real.eulerMascheroniSeq_lt_eulerMascheroniConstant 8191
+  have hl2 : Real.log 2 < 0.6931471808 := Real.log_two_lt_d9
+  have hlog : Real.log 8192 = 13 * Real.log 2 := by
+    rw [show (8192:ℝ) = 2 ^ (13:ℕ) by norm_num, Real.log_pow]
+    push_cast; ring
+  have hH : (9.5880634 : ℚ) < harmonic 8191 := by
+    norm_num [harmonic, Finset.sum_range_succ]
+  have hHr : (9.5880634 : ℝ) < (harmonic 8191 : ℝ) := by exact_mod_cast hH
+  have hlow : (0.57715 : ℝ) < (harmonic 8191 : ℝ) - Real.log 8192 := by
+    rw [hlog]; linarith
+  simp only [Real.eulerMascheroniSeq] at hseq
+  try norm_num at hseq
+  linarith [hseq, hlow]
+
 /-- The certified inputs the odd theorem assumes.
 
 As in the main development these are Arb ball computations, not formalized
@@ -120,22 +152,6 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
                      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
   /-- Certified sweep below the analytic threshold. -/
   sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 58 → fOdd (k + 1) < fOdd k
-  /-- Euler-Mascheroni, lower bound.  Mathlib's only lower bound is
-  `one_half_lt_eulerMascheroniConstant`, too weak here, so this enters as an
-  input.  It is a Mathlib gap, not a mathematical one.
-
-  The constant is what the argument USES, not the sharpest known value.  It
-  feeds exactly one step, `0.1556 <= betaOdd = d (log 2 - Sodd + gamma)`, and
-  with `d` and `Sodd` at the worst ends of their own enclosures that step needs
-  `gamma >= 0.5771362`.  Stating `0.57715` leaves `betaOdd` a margin of
-  `5.2e-6` and is still `7.1e-5` below the true `0.5772157`.
-
-  That gap is the whole cost of a future proof.  Mathlib's usable route is
-  `eulerMascheroniSeq_lt_eulerMascheroniConstant`, `harmonic n - log (n+1) <
-  gamma`, whose error is about `1/(2n)`: `0.57715` needs `n > 7614`, where the
-  `0.5772156` this once read would have needed `n > 7703978`.  The sharper
-  constant was 1012 times more expensive to prove and bought nothing. -/
-  gamma_gt       : (0.57715 : ℝ) < Real.eulerMascheroniConstant
   /-- The certified enclosure of d, from the main development. -/
   d_enc          : |dConst - 0.3786950| ≤ 5.3e-8
 /-- The arithmetic core of the odd assembly, with all rpow stripped out.
@@ -227,7 +243,7 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
               mul_le_mul_of_nonneg_right hnum60 (le_of_lt hhalf)
     have hb : (0.1556 : ℝ) ≤ betaOdd := by
       unfold betaOdd
-      have hg := hnum.gamma_gt
+      have hg := gamma_lower_bound
       have hd := abs_le.mp hnum.d_enc
       have hS := abs_le.mp hnum.Sodd_enclosure
       have hl2 := Real.log_two_gt_d9
@@ -6056,7 +6072,8 @@ structure OddTailFacts (bHatOdd : ℕ → ℂ) (S0 S1 : ℝ) : Prop where
   S1_nonneg : 0 ≤ S1
   /-- The tail's coefficient family is B = d_s H_o + 2 gamma H_o, whose weighted
   norm is S1 + 4 gamma S0.  Nonnegativity is carried as a field because Mathlib
-  has no lower bound for gamma (cf. OddNumericalFacts.gamma_gt). -/
+  has no usable lower bound for gamma (cf. `gamma_lower_bound`, which
+  supplies one). -/
   Bnorm_nonneg : 0 ≤ S1 + 4 * Real.eulerMascheroniConstant * S0
   tail_h : ∀ k : ℕ, |∑' j : ℕ, (if k < j then (hCoeff 1 j).re else 0)|
     ≤ S0 / 2 * ((1:ℝ)/3) ^ k
