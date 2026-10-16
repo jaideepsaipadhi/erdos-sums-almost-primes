@@ -20,4 +20,4 @@ import Banksmartin.Basic
 #print axioms dConst_factor_one_le
 #print axioms dConst_lower_bound
 #print axioms aOneConst_ge
-#print axioms dConst_lower_bound_sharp
+
