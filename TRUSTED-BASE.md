@@ -198,9 +198,17 @@ confused with the room to `6.9764`, and had put the cutoff at `i ~ 42`.
 
 The correction matters because it changes the diagnosis.  Thirty-six head
 terms is a small number, so the tail is NOT the obstruction.  The obstruction
-is that `cCoeff i` is not kernel-computable for any `i`: the coefficients come
-from a recursion on `H(s,z)`, whose values involve the Euler product over
-primes, so each `c_i` is transcendental rather than rational.  That is the
+is `cCoeff` itself:
+
+    noncomputable def cCoeff (i : ℕ) : ℂ :=
+      iteratedDeriv i G2at1 0 / (Nat.factorial i : ℂ)
+
+a Taylor coefficient of `G2at1`, the Euler-product function -- `G2at1 2` IS
+`dConst`, by `G2at1_two_eq_dConst`.  It is defined through `iteratedDeriv`, so
+there is nothing to compute for any `i`, cheaply or otherwise; a numerical
+bound on `c_i` has to come from the Cauchy estimate on the contour, which is
+the certified arc bound of Lemma 3.7 (`M = 326`) and so a hypothesis by
+construction.  That is the
 same wall as `Sodd`, and it is unlike `d` and `rho`, where the factors were
 rational and a finite product settled a one-sided bound.
 
@@ -269,6 +277,38 @@ analytic heart, not a number: it is where complex analysis enters.
 2,490 and 58 instances -- so they are *in principle* decidable, but each
 instance needs `f k` to enough precision, and `f` is not kernel-computable.
 They would be the last thing to fall, not the first.
+
+## The rule that predicts which fields can fall
+
+Four fields fell in one session and three did not, and the difference is not
+the taxonomy this document started with ("analytic object vs explicit
+formula").  It is this:
+
+**A field can be proved here exactly when the ONE-SIDED bound the development
+actually uses is a finite computation on RATIONAL data.**
+
+Both halves matter, and each is doing work:
+
+*One-sided.*  `d` is used only from below, `rho` not at all, so the tail of
+their infinite products could be discarded entirely -- every factor exceeds 1,
+so a partial product is a bound with no estimate of what was dropped.  `Sodd`
+is needed from ABOVE, so nothing can be discarded, and that alone moves it
+from a 94-prime computation to one needing primes past 1.5e5 with a `log p` in
+each of ~13,800 terms.
+
+*Rational.*  `d` and `rho`'s Euler factors are `1 + 1/(p(p-2))` and
+`1 + (3p-1)/(p^2(p-3))` -- exact rationals, so a partial product is an exact
+rational and `norm_num` can compare it to a numeral.  `S*`'s coefficients are
+`iteratedDeriv i G2at1 0 / i!`, where there is no computation to perform at
+any `i`.  `Sodd`'s summands carry `log p`.  `fOdd k` and `f k` are infinite
+sums whose terms carry `log n`.
+
+So the remaining fields are not a tier away from falling; they fail the second
+test outright, and no amount of compute changes that.  Closing any of them
+means supplying the missing arithmetic -- verified interval arithmetic with
+transcendental functions -- or formalizing the Cauchy estimates that produce
+the bounds instead of computing them.  Those are projects, and this is the
+honest boundary of what the technique reaches.
 
 ## The constraint that shapes all of this
 
