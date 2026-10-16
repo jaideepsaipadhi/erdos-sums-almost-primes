@@ -180,6 +180,30 @@ count of assumptions about the world is well under the field count.
 | the four sweeps | 2-3 each | finite but not kernel-computable |
 | `NumericalFactsFull`'s eight extras | 1 each | the Arb sweeps, coupled to defined objects |
 
+### Why S* is out of reach, corrected
+
+An earlier note here reasoned that the geometric tail bound on the cCoeff is
+too lossy to reach `S* <= 6.9764`.  That is wrong, and the arithmetic behind it
+was wrong twice over.  `S*` is `sum_{i>=0} 2^i |c_i|`, whose head to `i = 30`
+is `6.97633205` and whose total is `6.97633273`.  So:
+
+| bound on the coefficients | tail from i=31 | smallest head cutoff that fits |
+|---|---|---|
+| `|c_i| <= 44.5987*3^-i` (Lemma 3.7(i) + Sigma_0) | 4.65e-04 | **i = 36** |
+| `|c_i| <= 354.36*3^-i` (as stated in print) | 3.70e-03 | i = 41 |
+
+against a budget of `6.9764 - 6.97633205 = 6.795e-05`.  I had quoted that
+budget as `6.8e-06`, which is the TRUE tail beyond `i = 30` (`6.80e-07`)
+confused with the room to `6.9764`, and had put the cutoff at `i ~ 42`.
+
+The correction matters because it changes the diagnosis.  Thirty-six head
+terms is a small number, so the tail is NOT the obstruction.  The obstruction
+is that `cCoeff i` is not kernel-computable for any `i`: the coefficients come
+from a recursion on `H(s,z)`, whose values involve the Euler product over
+primes, so each `c_i` is transcendental rather than rational.  That is the
+same wall as `Sodd`, and it is unlike `d` and `rho`, where the factors were
+rational and a finite product settled a one-sided bound.
+
 `Gam` deserves a note.  It appears ONLY in the two structure signatures, the
 two theorem signatures, and `Gamma_bound` itself -- no other field mentions
 it, and neither top-level theorem uses it.  So `Gamma_bound` constrains a
