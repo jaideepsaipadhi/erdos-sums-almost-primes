@@ -123,8 +123,15 @@ jobs:
           # capped and partial, so counting here is the only way to tell
           # "reported clean" apart from "never reported" -- reading the
           # annotation list cannot distinguish truncation from absence.
+          #
+          # Count 'depend', not 'depends on axioms': an axiom-free declaration
+          # prints "does not depend on any axioms", which the narrower pattern
+          # misses.  Several of the rational-arithmetic lemmas here are
+          # axiom-free, so the narrow count read 10 of 14 and failed a clean
+          # audit.  The CONTENT guard above still keys on "depends on axioms",
+          # which is correct: axiom-free is stricter than clean, not a miss.
           want=$(grep -c '^#print axioms' axcheck-bm.lean)
-          got=$(grep -c 'depends on axioms' axioms-bm.txt)
+          got=$(grep -c 'depend' axioms-bm.txt)
           echo "expected ${want} axiom lines, got ${got}"
           if [ "$want" -ne "$got" ]; then
             echo "::error::axiom audit printed ${got} of ${want} expected lines"
@@ -137,7 +144,7 @@ jobs:
           set -o pipefail
           lake env lean odd-proof/axcheck.lean | tee axioms.txt
           want=$(grep -c '^#print axioms' odd-proof/axcheck.lean)
-          got=$(grep -c 'depends on axioms' axioms.txt)
+          got=$(grep -c 'depend' axioms.txt)
           echo "expected ${want} axiom lines, got ${got}"
           if [ "$want" -ne "$got" ]; then
             echo "::error::odd axiom audit printed ${got} of ${want} expected lines"
