@@ -1258,7 +1258,27 @@ structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
   Sstar_bound   : Sstar ≤ 6.9764
   /-- Section 3.5: alpha_+ from the 1600-box beta_i sweep. -/
   alpha_bound   : alph ≤ 15.4257
-  /-- Theorem 6.1: Gamma from the 800-box gammahat_i sweep. -/
+  /-- Theorem 6.1: Gamma from the 800-box gammahat_i sweep.
+
+  **This field has no consumer.**  `Gam` occurs nowhere in this development
+  except the structure signatures, the theorem signatures, and this line: no
+  other field mentions it, and neither `erdos_sums_increase_from_six` nor
+  `erdos_sums_increase_from_six'` uses it.  So it constrains a bound variable
+  that nothing reads, and nothing the theorems prove rests on it.
+
+  It is kept rather than deleted because CLAUDE.md requires every certified
+  constant to appear in all three places, and `Gam` has no defined counterpart
+  here to prove something about -- unlike `rho`, whose field could be replaced
+  by the proved `rhoConst_upper_bound`.  Deleting this would leave the
+  manuscript's Theorem 6.1 constant with no Lean mirror at all, which is worse
+  drift than a vacuous mirror.
+
+  Two consequences worth stating plainly.  The trusted base is SMALLER than
+  the field count suggests -- this field, `MR_bound`, and the bounds and
+  nonnegativity facts on abstract variables assert nothing about the world.
+  And if the reduction is ever rerouted through Theorem 6.1, this field
+  becomes load-bearing without anything here changing, so the note belongs
+  next to the field rather than only in TRUSTED-BASE.md. -/
   Gamma_bound   : Gam ≤ 104.52
   /-- Section 7: the aggregate source bound for k >= 2440. -/
   source_bound  : ∀ k : ℕ, 2440 ≤ k →
