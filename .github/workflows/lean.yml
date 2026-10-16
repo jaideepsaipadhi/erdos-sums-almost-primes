@@ -91,18 +91,6 @@ jobs:
       # for the named theorems, which matters because the run log and the
       # artifact blob host are both unreachable from the dev container: the
       # build itself has to do the checking.
-      # Mathlib-only probe: answers even when the libraries fail to compile.
-      # `|| true` so its output is information and never the verdict.
-      - name: Probe
-        if: always()
-        run: |
-          for f in probe/*.lean; do
-            [ -f "$f" ] || continue
-            lake env lean "$f" > probe.txt 2>&1 || true
-            cat probe.txt
-            while IFS= read -r line; do echo "::notice::probe: ${line}"; done < probe.txt
-          done
-
       - name: Axiom audit (unrestricted case)
         run: |
           # `lean | tee` reports TEE's status, so lean's own exit code is lost
