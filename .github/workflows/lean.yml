@@ -85,6 +85,27 @@ jobs:
         if: always()
         run: df -h / | tail -1
 
+      # A green `lake build` says something compiled, not that a PARTICULAR
+      # theorem is clean -- an errored declaration still reports as sorryAx to
+      # its dependents.  These audits are what make "green" mean "verified"
+      # for the named theorems, which matters because the run log and the
+      # artifact blob host are both unreachable from the dev container: the
+      # build itself has to do the checking.
+      - name: Axiom audit (unrestricted case)
+        run: |
+          lake env lean axcheck-bm.lean | tee axioms-bm.txt
+          while IFS= read -r line; do echo "::notice::bm: ${line}"; done < axioms-bm.txt
+          if grep -q "sorryAx" axioms-bm.txt; then
+            echo "::error::sorryAx in the unrestricted axiom audit"
+            exit 1
+          fi
+          if grep "depends on axioms" axioms-bm.txt \
+             | grep -vE "\[propext, Classical\.choice, Quot\.sound\]"; then
+            echo "::error::an unexpected axiom in the unrestricted audit"
+            exit 1
+          fi
+          echo "unrestricted axiom audit clean"
+
       - name: Axiom audit (odd case)
         run: |
           lake env lean odd-proof/axcheck.lean | tee axioms.txt
@@ -119,6 +140,7 @@ jobs:
           name: lean-reports
           path: |
             axioms.txt
+            axioms-bm.txt
             probe.txt
             full-build.log
             build.log
