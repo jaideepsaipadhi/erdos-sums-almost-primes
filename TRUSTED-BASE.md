@@ -163,7 +163,32 @@ Counting those nine as debt overstated the trusted base.  The honest count of
 assumptions about the world is six: `rho_enclosure`, `Sodd_enclosure`,
 `source_bound`, `remainder`, and the four sweeps.
 
-## `rho_enclosure` is used nowhere
+## Which fields are load-bearing, by actual use
+
+Counted by searching the development for each field's projection.  Two fields
+have NO consumer, and seven more constrain abstract variables, so the honest
+count of assumptions about the world is well under the field count.
+
+| field | consumers | status |
+|---|---|---|
+| `rho_enclosure` | 0 | **proved and removed** (`rhoConst_upper_bound`) |
+| `Gamma_bound` | 0 | vacuous; kept as the paper's mirror, documented at the field |
+| `Sstar_bound`, `alpha_bound`, `MR_bound` | several | numerals on abstract variables |
+| five nonnegativity fields | several | likewise |
+| `source_bound`, `remainder` | 1, 5 | **the Cauchy estimate** -- real content |
+| `Sodd_enclosure` | 1 | real content, needed from above |
+| the four sweeps | 2-3 each | finite but not kernel-computable |
+| `NumericalFactsFull`'s eight extras | 1 each | the Arb sweeps, coupled to defined objects |
+
+`Gam` deserves a note.  It appears ONLY in the two structure signatures, the
+two theorem signatures, and `Gamma_bound` itself -- no other field mentions
+it, and neither top-level theorem uses it.  So `Gamma_bound` constrains a
+bound variable nothing reads.  It is kept because deleting it would leave the
+manuscript's Theorem 6.1 constant with no Lean mirror, which is worse drift
+than a vacuous one; `rho_enclosure` could go because a proved theorem took
+over its mirroring duty.
+
+## `rho_enclosure` was used nowhere either
 
 `grep` for `rho_enclosure` and `rhoConst` across `Banksmartin/` and `Odd/`
 returns the two field declarations and one comment.  No `hnum.rho_enclosure`
