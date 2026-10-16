@@ -738,7 +738,8 @@ order lemmas want an `OrderedCommMonoid`, which ℝ is not under multiplication
 -- so this is proved from the net definition directly: for any finite `t`
 containing `s`, the product over `t` splits as (product over `t \ s`) times
 (product over `s`), and the first factor is at least 1. -/
-theorem prod_le_hasProd_of_one_le {ι : Type*} (s : Finset ι) (f : ι → ℝ) (a : ℝ)
+theorem prod_le_hasProd_of_one_le {ι : Type*} [DecidableEq ι]
+    (s : Finset ι) (f : ι → ℝ) (a : ℝ)
     (h1 : ∀ i, 1 ≤ f i) (hp : HasProd f a) : ∏ i ∈ s, f i ≤ a := by
   have hnet : Filter.Tendsto (fun t : Finset ι => ∏ i ∈ t, f i) Filter.atTop (nhds a) := hp
   refine ge_of_tendsto hnet ?_
@@ -810,6 +811,8 @@ def dLowerSet : Finset {p : ℕ // p.Prime ∧ 3 ≤ p} :=
       norm_num⟩, ⟨499, by norm_num⟩
   }
 
+set_option maxRecDepth 100000 in
+set_option maxHeartbeats 4000000 in
 /-- **A certified lower bound on `d`, proved rather than assumed.**
 
 `dConst = (1/4) ∏'_{p ≥ 3} (1 - 2/p)⁻¹(1 - 1/p)²`, every factor of which
@@ -824,8 +827,6 @@ What the development needs is `0.3785631789`, from `aOneConst ≥ 0.0656` with
 `Real.log_two_gt_d9` in place of the true `log 2`.  Margin `2.8e-5`.
 
 Regenerate the numeral with `numerics/gen_dconst_lower.py`. -/
-set_option maxRecDepth 100000 in
-set_option maxHeartbeats 4000000 in
 theorem dConst_lower_bound : (0.3785913 : ℝ) ≤ dConst := by
   have hsub : dConst = (1 / 4) * ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
       (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 := by

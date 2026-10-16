@@ -100,9 +100,27 @@ jobs:
           fi
           echo "axiom audit clean"
 
-      - name: Upload axiom report
+      # The run log is served from a host this project's tooling cannot reach,
+      # so annotations were the only readable channel -- and they are capped
+      # and partial.  Reading them and inferring "no error reported" is not
+      # the same as "it compiled": a missing DecidableEq instance in #24 sat
+      # in a probe whose output never became an annotation at all.  Artifacts
+      # ARE fetchable over the API, so the full log goes into one.
+      - name: Collect logs
+        if: always()
+        run: |
+          lake build > full-build.log 2>&1 || true
+          ls -la *.log *.txt 2>/dev/null || true
+
+      - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: axiom-report
-          path: axioms.txt
+          name: lean-reports
+          path: |
+            axioms.txt
+            probe.txt
+            full-build.log
+            build.log
+            relog.txt
+          if-no-files-found: warn
