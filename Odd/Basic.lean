@@ -152,8 +152,6 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
                      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
   /-- Certified sweep below the analytic threshold. -/
   sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 58 → fOdd (k + 1) < fOdd k
-  /-- The certified enclosure of d, from the main development. -/
-  d_enc          : |dConst - 0.3786950| ≤ 5.3e-8
 /-- The arithmetic core of the odd assembly, with all rpow stripped out.
 
 A = f_k, B = f_{k+1}, P = 2^-k, T = MR (k+3)^3 3^-k, b = beta; T <= 0.048 P for k >= 59.  The two
@@ -244,10 +242,18 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
     have hb : (0.1556 : ℝ) ≤ betaOdd := by
       unfold betaOdd
       have hg := gamma_lower_bound
-      have hd := abs_le.mp hnum.d_enc
+      have hd := dConst_lower_bound_sharp
       have hS := abs_le.mp hnum.Sodd_enclosure
       have hl2 := Real.log_two_gt_d9
-      nlinarith [hg, hd.1, hd.2, hS.1, hS.2, hl2]
+      -- the second factor, at the worst end of Sodd's enclosure and the
+      -- proved lower bound for gamma
+      have hfac : (0.4108985803 : ℝ)
+          ≤ Real.log 2 - Sodd + Real.eulerMascheroniConstant := by
+        linarith [hS.2]
+      have hd0 : (0 : ℝ) ≤ dConst := by linarith
+      calc (0.1556 : ℝ) ≤ 0.378687 * 0.4108985803 := by norm_num
+        _ ≤ dConst * (Real.log 2 - Sodd + Real.eulerMascheroniConstant) :=
+            mul_le_mul hd hfac (by norm_num) hd0
     have hA : |(fOdd k - 1/2) - betaOdd * P| ≤ T := by
       rw [hPdef, hTdef]
       have := hnum.remainder k
