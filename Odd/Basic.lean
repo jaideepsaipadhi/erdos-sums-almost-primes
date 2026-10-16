@@ -311,6 +311,83 @@ theorem fOdd_decreasing (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts M
     ∀ k : ℕ, 1 ≤ k → fOdd (k + 1) < fOdd k :=
   fOdd_decreasing_of_facts MR hMR0 hnum
 
+/-- **`g_k → 1/2`.**  Theorem 1.2's limit assertion, which section 8 of the
+manuscript recorded as proved in the text but NOT formalized -- the
+monotonicity argument makes no use of it, so it was left out.
+
+It needs nothing beyond the `remainder` field already assumed.  That field says
+
+    |fOdd k - 1/2 - betaOdd * (1/2)^k| <= MR * (k+3)^3 * (1/3)^k
+
+so the triangle inequality gives
+
+    |fOdd k - 1/2| <= |betaOdd| * (1/2)^k + MR * (k+3)^3 * (1/3)^k
+
+and both terms vanish: the first is geometric, and the second is a cubic
+against `(1/3)^k`, which `tendsto_pow_mul_geometric_of_norm_lt_one` handles
+after `(k+3)^3 <= 64 k^3` for `k >= 1` puts it in the form `k^3 * r^k`. -/
+theorem fOdd_tendsto_half (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts MR) :
+    Filter.Tendsto fOdd Filter.atTop (nhds (1 / 2)) := by
+  -- the triangle-inequality bound
+  have hbound : ∀ k : ℕ, |fOdd k - 1 / 2|
+      ≤ |betaOdd| * ((1:ℝ)/2) ^ k + MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+    intro k
+    have h := hnum.remainder k
+    have hsplit : fOdd k - 1 / 2
+        = (fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k) + betaOdd * ((1:ℝ)/2) ^ k := by
+      ring
+    have hpow : (0:ℝ) ≤ ((1:ℝ)/2) ^ k := by positivity
+    calc |fOdd k - 1 / 2|
+        = |(fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k) + betaOdd * ((1:ℝ)/2) ^ k| := by
+          rw [← hsplit]
+      _ ≤ |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k| + |betaOdd * ((1:ℝ)/2) ^ k| :=
+          abs_add _ _
+      _ ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k + |betaOdd| * ((1:ℝ)/2) ^ k := by
+          rw [abs_mul, abs_of_nonneg hpow]
+          linarith [h]
+      _ = |betaOdd| * ((1:ℝ)/2) ^ k + MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
+          ring
+  -- (k+3)^3 <= 64 k^3 for k >= 1, which puts the second term in k^3 * r^k form
+  have hcube : ∀ k : ℕ, 1 ≤ k → (((k:ℝ) + 3) ^ 3) ≤ 64 * (k:ℝ) ^ 3 := by
+    intro k hk
+    have hk1 : (1:ℝ) ≤ (k:ℝ) := by exact_mod_cast hk
+    nlinarith [hk1, sq_nonneg ((k:ℝ) - 1), sq_nonneg ((k:ℝ) + 1)]
+  -- the majorant
+  have hmaj : Filter.Tendsto
+      (fun k : ℕ => |betaOdd| * ((1:ℝ)/2) ^ k + 64 * MR * (k:ℝ) ^ 3 * ((1:ℝ)/3) ^ k)
+      Filter.atTop (nhds 0) := by
+    have h1 : Filter.Tendsto (fun k : ℕ => |betaOdd| * ((1:ℝ)/2) ^ k)
+        Filter.atTop (nhds 0) := by
+      have := tendsto_pow_atTop_nhds_zero_of_lt_one
+        (by norm_num : (0:ℝ) ≤ 1/2) (by norm_num : (1:ℝ)/2 < 1)
+      simpa using this.const_mul |betaOdd|
+    have h2 : Filter.Tendsto (fun k : ℕ => 64 * MR * (k:ℝ) ^ 3 * ((1:ℝ)/3) ^ k)
+        Filter.atTop (nhds 0) := by
+      have hg : Filter.Tendsto (fun k : ℕ => ((k:ℝ)) ^ 3 * ((1:ℝ)/3) ^ k)
+          Filter.atTop (nhds 0) :=
+        tendsto_pow_mul_geometric_of_norm_lt_one 3
+          (by rw [Real.norm_eq_abs]; rw [abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/3)]; norm_num)
+      have := hg.const_mul (64 * MR)
+      simpa [mul_assoc] using this
+    simpa using h1.add h2
+  -- squeeze
+  have habs : Filter.Tendsto (fun k : ℕ => |fOdd k - 1 / 2|) Filter.atTop (nhds 0) := by
+    refine squeeze_zero' (Filter.Eventually.of_forall (fun k => abs_nonneg _)) ?_ hmaj
+    filter_upwards [Filter.eventually_ge_atTop 1] with k hk
+    have hcu := hcube k hk
+    have hpos : (0:ℝ) ≤ ((1:ℝ)/3) ^ k := by positivity
+    have : MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+        ≤ 64 * MR * (k:ℝ) ^ 3 * ((1:ℝ)/3) ^ k := by
+      have := mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_left hcu hMR0) hpos
+      calc MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
+          = (MR * (((k:ℝ) + 3) ^ 3)) * ((1:ℝ)/3) ^ k := by ring
+        _ ≤ (MR * (64 * (k:ℝ) ^ 3)) * ((1:ℝ)/3) ^ k := this
+        _ = 64 * MR * (k:ℝ) ^ 3 * ((1:ℝ)/3) ^ k := by ring
+    linarith [hbound k]
+  rw [tendsto_iff_norm_sub_tendsto_zero]
+  simpa using habs
+
 end
 
 /-- H(s,z), the regularised odd Euler product:
