@@ -95,8 +95,22 @@ jobs:
         run: |
           # `lean | tee` reports TEE's status, so lean's own exit code is lost
           # and an unknown constant in the audit file would pass silently.
-          set -o pipefail
-          lake env lean axcheck-bm.lean | tee axioms-bm.txt
+          # Capture lean's exit status explicitly.  `lean | tee` reports TEE's
+          # status, so an error in the audit file passed silently; `pipefail`
+          # fixed that but then aborts before any diagnostic can print, which
+          # is just as blind.  This way the status and the output are both in
+          # hand before anything is decided.
+          set +e
+          lake env lean axcheck-bm.lean > axioms-bm.txt 2>&1
+          rc=$?
+          set -e
+          cat axioms-bm.txt
+          echo "::notice::bm lean exit status ${rc}"
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::bm axiom audit: lean exited ${rc}; output follows"
+            while IFS= read -r line; do echo "::error::bm: ${line}"; done < axioms-bm.txt
+            exit 1
+          fi
           if grep -q "sorryAx" axioms-bm.txt; then
             echo "::error::sorryAx in the unrestricted axiom audit"
             exit 1
@@ -130,8 +144,22 @@ jobs:
 
       - name: Axiom audit (odd case)
         run: |
-          set -o pipefail
-          lake env lean odd-proof/axcheck.lean | tee axioms.txt
+          # Capture lean's exit status explicitly.  `lean | tee` reports TEE's
+          # status, so an error in the audit file passed silently; `pipefail`
+          # fixed that but then aborts before any diagnostic can print, which
+          # is just as blind.  This way the status and the output are both in
+          # hand before anything is decided.
+          set +e
+          lake env lean odd-proof/axcheck.lean > axioms.txt 2>&1
+          rc=$?
+          set -e
+          cat axioms.txt
+          echo "::notice::odd lean exit status ${rc}"
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::odd axiom audit: lean exited ${rc}; output follows"
+            while IFS= read -r line; do echo "::error::odd: ${line}"; done < axioms.txt
+            exit 1
+          fi
           want=$(grep -c '^#print axioms' odd-proof/axcheck.lean)
           got=$(grep -c 'depend' axioms.txt)
           echo "expected ${want} axiom lines, got ${got}"
