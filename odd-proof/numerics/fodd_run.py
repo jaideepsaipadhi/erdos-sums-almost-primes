@@ -18,6 +18,11 @@ from flint import arb, ctx
 
 KMAX = int(sys.argv[1]) if len(sys.argv) > 1 else 20
 PREC = int(sys.argv[2]) if len(sys.argv) > 2 else 400
+# Capture the panel range BEFORE overwriting argv: the line below exists so
+# that `import certified` reads KMAX and PREC from argv, and it destroys any
+# further arguments.
+P0 = int(sys.argv[3]) if len(sys.argv) > 3 else None
+P1 = int(sys.argv[4]) if len(sys.argv) > 4 else None
 sys.argv = ["x", str(KMAX), str(PREC)]
 import certified as C
 
@@ -60,12 +65,24 @@ def tail_large_s_odd(k):
     e = C_ODD ** k * arb(3) ** (-k * S0) / (k * arb(3).log())
     return arb(0).union(e.union(-e))
 
-def main():
+def main(p0=0, p1=None):
+    """Panels [p0, p1).  A partial range writes an odd-chunk file instead of
+    reporting, exactly as certified.py's run() does, so the sweep can be done
+    in pieces and combined.  Chunks are skipped if already present, so re-running
+    the same range is free."""
+    p1 = C.NPANEL if p1 is None else p1
     ctx.prec = PREC
+    partial = not (p0 == 0 and p1 == C.NPANEL)
+    if partial:
+        os.makedirs("ochunks", exist_ok=True)
+        out = "ochunks/o%04d_%04d.txt" % (p0, p1)
+        if os.path.exists(out):
+            print("# %s already present, skipping" % out, flush=True)
+            return
     t0 = time.time()
     nodes, weights = C.gl_certified(C.NGL)
     fk = [arb(0)] * (KMAX + 1)
-    for pi in range(C.NPANEL):
+    for pi in range(p0, p1):
         a, b = float(C.EDGES[pi]), float(C.EDGES[pi + 1])
         ha = (arb(b) - arb(a)) / 2
         mid = (arb(b) + arb(a)) / 2
@@ -82,11 +99,24 @@ def main():
         gerr = panel_gl_error_odd(a, b, KMAX)
         for k in range(1, KMAX + 1):
             fk[k] += gerr[k]
-        if (pi + 1) % 25 == 0:
+        if (pi + 1 - p0) % 5 == 0:
             el = time.time() - t0
             print("panel %d/%d  t=%.0fs  eta=%.0fs"
-                  % (pi + 1, C.NPANEL, el, el / (pi + 1) * (C.NPANEL - pi - 1)),
+                  % (pi + 1, p1, el, el / (pi + 1 - p0) * (p1 - pi - 1)),
                   file=sys.stderr, flush=True)
+    if partial:
+        tmp = out + ".tmp"
+        with open(tmp, "w") as f:
+            f.write("#PARAMS KMAX=%d PREC=%d NPANEL=%d p0=%d p1=%d\n"
+                    % (KMAX, PREC, C.NPANEL, p0, p1))
+            for k in range(1, KMAX + 1):
+                f.write("%d %s %s\n" % (k,
+                        fk[k].mid().str(200, radius=False),
+                        arb(fk[k].rad()).str(8, radius=False)))
+            f.write("#END\n")
+        os.replace(tmp, out)
+        print("# wrote %s in %.0fs" % (out, time.time() - t0), flush=True)
+        return
     for k in range(2, KMAX + 1):
         fk[k] += tail_large_s_odd(k) + C.tail_near_1(k)
     print("k   f_k^odd")
@@ -99,4 +129,8 @@ def main():
     print("f_k^odd strictly increasing on [2,%d]: %s" % (KMAX, inc))
 
 if __name__ == "__main__":
-    main()
+    # fodd_run.py KMAX PREC [P0 P1]
+    if P0 is not None and P1 is not None:
+        main(P0, P1)
+    else:
+        main()
