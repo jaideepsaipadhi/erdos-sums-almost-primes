@@ -105,6 +105,9 @@ jobs:
 
       - name: Axiom audit (unrestricted case)
         run: |
+          # `lean | tee` reports TEE's status, so lean's own exit code is lost
+          # and an unknown constant in the audit file would pass silently.
+          set -o pipefail
           lake env lean axcheck-bm.lean | tee axioms-bm.txt
           while IFS= read -r line; do echo "::notice::bm: ${line}"; done < axioms-bm.txt
           if grep -q "sorryAx" axioms-bm.txt; then
@@ -116,11 +119,30 @@ jobs:
             echo "::error::an unexpected axiom in the unrestricted audit"
             exit 1
           fi
-          echo "unrestricted axiom audit clean"
+          # Every #print axioms must have produced a line.  Annotations are
+          # capped and partial, so counting here is the only way to tell
+          # "reported clean" apart from "never reported" -- reading the
+          # annotation list cannot distinguish truncation from absence.
+          want=$(grep -c '^#print axioms' axcheck-bm.lean)
+          got=$(grep -c 'depends on axioms' axioms-bm.txt)
+          echo "expected ${want} axiom lines, got ${got}"
+          if [ "$want" -ne "$got" ]; then
+            echo "::error::axiom audit printed ${got} of ${want} expected lines"
+            exit 1
+          fi
+          echo "unrestricted axiom audit clean: ${got}/${want}"
 
       - name: Axiom audit (odd case)
         run: |
+          set -o pipefail
           lake env lean odd-proof/axcheck.lean | tee axioms.txt
+          want=$(grep -c '^#print axioms' odd-proof/axcheck.lean)
+          got=$(grep -c 'depends on axioms' axioms.txt)
+          echo "expected ${want} axiom lines, got ${got}"
+          if [ "$want" -ne "$got" ]; then
+            echo "::error::odd axiom audit printed ${got} of ${want} expected lines"
+            exit 1
+          fi
           if grep -q "sorryAx" axioms.txt; then
             echo "::error::sorryAx appears in the axiom audit"
             exit 1
