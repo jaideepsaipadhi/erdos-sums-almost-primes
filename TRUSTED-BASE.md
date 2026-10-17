@@ -310,6 +310,72 @@ transcendental functions -- or formalizing the Cauchy estimates that produce
 the bounds instead of computing them.  Those are projects, and this is the
 honest boundary of what the technique reaches.
 
+## The route to an instance, and the trust decision it forces
+
+The structures have NO INSTANCE -- every occurrence in the development is a
+hypothesis binder.  So "completely formalized" means exactly one thing:
+produce an instance of `NumericalFactsFull` and `OddNumericalFacts`, at which
+point the theorems become unconditional.  Note that the numeral fields are
+FREE once you instantiate (take `Sstar := 6.9764` and `Sstar_bound` is
+`le_refl`); the work is entirely in the coupling fields -- `Sstar_dom`,
+`alpha_dom`, `UV_bound`, `M0_bound`, `Eexp_bound`, `g_deriv` -- plus
+`Sodd_enclosure`, the Cauchy estimates, and the sweeps.
+
+**`leancert` is already on the dependency graph.**  It is in
+`lake-manifest.json` with `inherited: true`, coming in transitively through
+Mathlib, and nothing here imports it.  It provides verified interval
+arithmetic with `exp`, `log`, `sqrt`, `atan`; a `leancert` tactic for
+quantified bounds over real intervals; certified partition integration; and --
+directly relevant -- `LeanCert/ANT/Mertens.lean` and
+`LeanCert/Engine/Chebyshev/{Theta,Psi}.lean`, with `logPrimeLB/UB p depth`
+giving RATIONAL enclosures of `log p` and a general Abel-summation checker
+over any rational weight.  No `sorry` in the Mertens module.  (The
+`CertifiedBounds/Li2` interface does carry deliberate `sorry`s -- that module
+must not be imported here.)
+
+What that buys, item by item:
+
+| obligation | status against this route |
+|---|---|
+| `alpha_dom`, `UV_bound`, `M0_bound`, `Eexp_bound`, `g_deriv_bound` | boxed suprema with `exp`/`log` -- the tactic's design target |
+| `Sodd_enclosure` | head is `sum logPrimeUB p depth / ((p-1)(p-2))`; see the tail below |
+| `Sstar_dom` | still blocked: `cCoeff` is `iteratedDeriv`, nothing to evaluate |
+| `source_bound`, `remainder` | still blocked: Cauchy estimates, analysis not computation |
+| the four sweeps | downstream of the above |
+
+The `Sodd` tail is the interesting case, and it is closer than this document
+previously claimed.  LeanCert's `verify_all_theta_*` theorems are all FINITE
+range (`N <= bound`), so the unbounded tail needs an unconditional Chebyshev
+bound, which Mathlib supplies via `primorial_le_4_pow` (`theta x <= x log 4`).
+Partial summation against `w(x) = 1/((x-1)(x-2))` then gives a tail of about
+`2c/N`, so the admissible `6.9e-6` needs `N` near `2.9e5` -- roughly 25,000
+primes in the head.  LeanCert's own Chebyshev tests run at `N` from 599 to
+7690, so this is three to four times beyond demonstrated scale rather than
+orders of magnitude.  That is a real engineering question, not a wall.
+
+**But the whole route runs on `native_decide`.**  There are 430 uses of it in
+LeanCert, and the Chebyshev certificates are discharged that way; the
+`check... = true` hypotheses cannot be `decide`d in the kernel at these sizes.
+`native_decide` adds `Lean.ofReduceBool`, which the axiom audits in this
+repository are written to REJECT -- they require exactly `[propext,
+Classical.choice, Quot.sound]`.
+
+So adopting this route is a decision about what the formalization means, and it
+is not mine to make.  What should be said in its favour, though, is that it
+would be a STRENGTHENING rather than a weakening of the present position.
+Today the numerical propositions are certified by Arb through python-flint, by
+scripts in `numerics/`, with the resulting constants transcribed into Lean by
+hand as hypotheses -- so the trusted base includes Arb, python-flint, those
+scripts, and the transcription, and Lean checks no number at all.  Under
+`native_decide` the trusted base would instead be Lean's compiler evaluating a
+checker whose correctness is a kernel-proved theorem.  That is strictly less to
+trust, even though it is not kernel-pure, and Caveat 1.3b would need rewriting
+rather than merely weakening.
+
+The alternative is kernel-mode only, which keeps the axiom set exactly as it is
+and caps what can be certified at whatever `decide` will evaluate -- far below
+`N = 2.9e5`.
+
 ## The constraint that shapes all of this
 
 There is no Lean toolchain in the working container, and none can be installed
