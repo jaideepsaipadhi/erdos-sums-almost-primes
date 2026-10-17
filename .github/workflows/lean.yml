@@ -199,57 +199,62 @@ jobs:
           ls -la *.log *.txt 2>/dev/null || true
 
       # EXPERIMENT (branch-local, runs LAST so nothing it mutates can affect the
-      # real checks above).  `lake build LeanCert` and `lake build
-      # leancert/LeanCert` both failed with "unknown target"/"unknown package":
-      # the lake-manifest.json entry records a transitive requirement from
-      # somewhere in the tree that is NOT a live dependency of this root, so
-      # Lake does not know the package at all.
+      # real checks above).  Three attempts so far, each ruling something out:
       #
-      # v4.32.1 (the manifest's pin) then FAILED `lake update` on conflicting
-      # Qq/aesop/proofwidgets revs -- it wants Mathlib v4.32.x, we pin
-      # v4.33.0-rc1.  This now requires tag v4.33.0, whose own Mathlib
-      # requirement is v4.33.0, so the transitive trees should be close.
+      #   1. `lake build LeanCert` / `leancert/LeanCert` -> unknown target /
+      #      unknown package.  The lake-manifest.json entry records a
+      #      transitive requirement that is NOT a live dependency of this root,
+      #      so being in the manifest buys nothing.
+      #   2. explicit require at v4.32.1 (the manifest's pin) -> `lake update`
+      #      fails on conflicting Qq/aesop/proofwidgets revs.  It wants Mathlib
+      #      v4.32.x; we pin v4.33.0-rc1.
+      #   3. explicit require at v4.33.0 -> SAME failure.  It wants Mathlib
+      #      v4.33.0; we pin v4.33.0-rc1.  Two different Mathlib revs mean two
+      #      different transitive trees, and Lake will not reconcile them.
       #
-      # So the require has to be explicit.  It is added to the RUNNER's copy of
-      # lakefile.toml only -- the runner is ephemeral, the committed lakefile
-      # and manifest are untouched, and the worst case is this one bounded step
-      # failing.  `lake update leancert` may move the Mathlib pin and strand
-      # the olean cache fetched earlier; if so the build blows the timeout and
-      # that is the answer.
-      - name: Experiment (leancert, explicit require)
+      # So the pins must AGREE.  This attempt bumps the runner's Mathlib from
+      # v4.33.0-rc1 to v4.33.0 and requires leancert v4.33.0 alongside it,
+      # which answers two questions at once: whether leancert then resolves,
+      # and whether THIS DEVELOPMENT still compiles against Mathlib v4.33.0
+      # rather than the release candidate.  The second is the one that decides
+      # whether adopting leancert is a dependency change or a migration.
+      #
+      # Still contained: the runner's copy of lakefile.toml only, restored
+      # afterwards, nothing committed, every command bounded.
+      - name: Experiment (leancert v4.33.0 + matching mathlib)
         if: always()
         run: |
           cp lakefile.toml lakefile.toml.bak
-          cat >> lakefile.toml <<'TOML'
-
-          [[require]]
-          name = "leancert"
-          git = "https://github.com/alerad/leancert.git"
-          rev = "v4.33.0"
-          TOML
-          sed -i 's/^          \[\[require\]\]/[[require]]/; s/^          name = "leancert"/name = "leancert"/; s/^          git = /git = /; s/^          rev = /rev = /' lakefile.toml
-          tail -6 lakefile.toml
-          echo "--- lake update leancert"
-          if timeout 1200 lake update leancert > lu.txt 2>&1; then
+          # No heredoc: its body would be indented inside this YAML block
+          # scalar, and python would reject the leading whitespace.
+          sed -i 's|rev = "v4.33.0-rc1"|rev = "v4.33.0"|' lakefile.toml
+          printf '\n[[require]]\nname = "leancert"\ngit = "https://github.com/alerad/leancert.git"\nrev = "v4.33.0"\n' >> lakefile.toml
+          echo "--- lakefile requires now:"; grep -A3 "\[\[require\]\]" lakefile.toml
+          echo "--- lake update"
+          if timeout 1500 lake update > lu.txt 2>&1; then
             echo "::notice::lc: update OK"
-            if git diff --quiet lake-manifest.json -- 2>/dev/null; then
-              echo "::notice::lc: manifest unchanged"
-            else
-              echo "::notice::lc: mathlib rev after update: $(python3 -c "import json;print([p['rev'] for p in json.load(open('lake-manifest.json'))['packages'] if p['name']=='mathlib'][0])")"
-            fi
+            echo "::notice::lc: mathlib now $(python3 -c "import json;print([p['rev'] for p in json.load(open('lake-manifest.json'))['packages'] if p['name']=='mathlib'][0])")"
+            echo "::notice::lc: leancert present: $(python3 -c "import json;print(any(p['name']=='leancert' for p in json.load(open('lake-manifest.json'))['packages']))")"
           else
             echo "::notice::lc: update FAILED"
             tail -20 lu.txt | while IFS= read -r l; do echo "::notice::lu: ${l}"; done
+            mv lakefile.toml.bak lakefile.toml; exit 0
           fi
-          echo "--- lake build LeanCert"
-          if timeout 2400 lake build LeanCert > lb.txt 2>&1; then
-            echo "::notice::lc: LeanCert BUILT"
+          echo "--- cache get for the new mathlib rev"
+          timeout 900 lake exe cache get > cg.txt 2>&1 && echo "::notice::lc: cache OK" || echo "::notice::lc: cache get failed"
+          echo "--- build OUR libraries against mathlib v4.33.0"
+          if timeout 2700 lake build Banksmartin Odd > lb.txt 2>&1; then
+            echo "::notice::lc: OUR DEVELOPMENT COMPILES against mathlib v4.33.0"
           else
-            echo "::notice::lc: LeanCert build failed/timed out"
-            tail -25 lb.txt | while IFS= read -r l; do echo "::notice::lb: ${l}"; done
+            echo "::notice::lc: our development does NOT compile against v4.33.0 (or timed out)"
+            grep -E "error" lb.txt | head -12 | while IFS= read -r l; do echo "::notice::lb: ${l}"; done
           fi
+          echo "--- build leancert"
+          timeout 2400 lake build LeanCert > lc2.txt 2>&1 \
+            && echo "::notice::lc: LeanCert BUILT" \
+            || { echo "::notice::lc: LeanCert build failed"; tail -12 lc2.txt | while IFS= read -r l; do echo "::notice::lb2: ${l}"; done; }
           if [ -f probe/leancert.lean ]; then
-            timeout 1800 lake env lean probe/leancert.lean > probe.txt 2>&1 || true
+            timeout 1500 lake env lean probe/leancert.lean > probe.txt 2>&1 || true
             while IFS= read -r line; do echo "::notice::probe: ${line}"; done < probe.txt
           fi
           mv lakefile.toml.bak lakefile.toml
