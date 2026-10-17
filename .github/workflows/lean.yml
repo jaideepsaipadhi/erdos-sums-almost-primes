@@ -96,6 +96,31 @@ jobs:
       # for the named theorems, which matters because the run log and the
       # artifact blob host are both unreachable from the dev container: the
       # build itself has to do the checking.
+      # EXPERIMENT (branch-local): leancert is in lake-manifest.json but is not
+      # built, so `import LeanCert` fails.  Try to build it WITHOUT touching
+      # lakefile.toml or running `lake update` -- the latter can move the
+      # Mathlib pin and invalidate the olean cache, turning a 45-minute run
+      # into a full Mathlib rebuild.  Bounded and `|| true`: this step must not
+      # fail the build or run away with the job.
+      - name: Experiment (leancert)
+        if: always()
+        run: |
+          for tgt in leancert/LeanCert LeanCert; do
+            echo "--- trying: lake build ${tgt}"
+            if timeout 2400 lake build "${tgt}" > lc.txt 2>&1; then
+              echo "::notice::leancert: BUILT via ${tgt}"
+              break
+            else
+              echo "::notice::leancert: failed via ${tgt} (rc=$?)"
+              tail -25 lc.txt | while IFS= read -r l; do echo "::notice::lc: ${l}"; done
+            fi
+          done
+          if [ -f probe/leancert.lean ]; then
+            timeout 1800 lake env lean probe/leancert.lean > probe.txt 2>&1 || true
+            cat probe.txt
+            while IFS= read -r line; do echo "::notice::probe: ${line}"; done < probe.txt
+          fi
+
       - name: Axiom audit (unrestricted case)
         run: |
           # `lean | tee` reports TEE's status, so lean's own exit code is lost
