@@ -205,6 +205,11 @@ jobs:
       # somewhere in the tree that is NOT a live dependency of this root, so
       # Lake does not know the package at all.
       #
+      # v4.32.1 (the manifest's pin) then FAILED `lake update` on conflicting
+      # Qq/aesop/proofwidgets revs -- it wants Mathlib v4.32.x, we pin
+      # v4.33.0-rc1.  This now requires tag v4.33.0, whose own Mathlib
+      # requirement is v4.33.0, so the transitive trees should be close.
+      #
       # So the require has to be explicit.  It is added to the RUNNER's copy of
       # lakefile.toml only -- the runner is ephemeral, the committed lakefile
       # and manifest are untouched, and the worst case is this one bounded step
@@ -220,7 +225,7 @@ jobs:
           [[require]]
           name = "leancert"
           git = "https://github.com/alerad/leancert.git"
-          rev = "87a21d739dde0531c0363f9257b12022836372d1"
+          rev = "v4.33.0"
           TOML
           sed -i 's/^          \[\[require\]\]/[[require]]/; s/^          name = "leancert"/name = "leancert"/; s/^          git = /git = /; s/^          rev = /rev = /' lakefile.toml
           tail -6 lakefile.toml

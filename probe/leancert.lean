@@ -4,11 +4,14 @@ EXPERIMENT, quarantined on its own branch.  Not imported by the library.
 Question: can an INSTANCE of the NumericalFacts structures be built here, and
 what does it cost the axiom set?
 
-`leancert` is pinned in lake-manifest.json at tag v4.32.1
-(87a21d739dde0531c0363f9257b12022836372d1), inherited transitively.  At that
+lake-manifest.json pins leancert at tag v4.32.1, inherited transitively -- but
+Lake does not know the package at all (`unknown package`), and requiring v4.32.1
+explicitly makes `lake update` FAIL on conflicting Qq/aesop/proofwidgets revs
+against Mathlib v4.33.0-rc1.  So this targets tag v4.33.0 instead, whose own
+Mathlib requirement is v4.33.0.  At that
 rev the modules we would need -- ANT/Mertens.lean, Engine/Chebyshev/Theta.lean,
 ANT/Abel.lean -- all exist with ZERO sorries.  Names below are taken from that
-tag, not from HEAD: the namespace is `LeanCert.Engine.ChebyshevTheta` at
+tag, not from HEAD: the namespace is `LeanCert.Engine.Chebyshev.Theta` at
 v4.32.1 and `LeanCert.Engine.Chebyshev.Theta` at HEAD, so HEAD's names would
 have been wrong.
 
@@ -27,11 +30,11 @@ Three things to learn, in order:
 -/
 import LeanCert
 
-open LeanCert.Engine.ChebyshevTheta
+open LeanCert.Engine.Chebyshev.Theta
 
-#check @LeanCert.Engine.ChebyshevTheta.logPrimeUB
-#check @LeanCert.Engine.ChebyshevTheta.log_prime_le_logPrimeUB
-#check @LeanCert.Engine.ChebyshevTheta.theta_le_thetaUB
+#check @LeanCert.Engine.Chebyshev.Theta.logPrimeUB
+#check @LeanCert.Engine.Chebyshev.Theta.log_prime_le_logPrimeUB
+#check @LeanCert.Engine.Chebyshev.Theta.theta_le_thetaUB
 #check @LeanCert.ANT.mertensLogSum
 #check @LeanCert.ANT.mertensLogSum_le_mertensLogSumUpperRat
 #check @LeanCert.ANT.verify_mertensLogSum_interval
