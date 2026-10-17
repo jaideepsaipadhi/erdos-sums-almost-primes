@@ -321,9 +321,20 @@ FREE once you instantiate (take `Sstar := 6.9764` and `Sstar_bound` is
 `alpha_dom`, `UV_bound`, `M0_bound`, `Eexp_bound`, `g_deriv` -- plus
 `Sodd_enclosure`, the Cauchy estimates, and the sweeps.
 
-**`leancert` is already on the dependency graph.**  It is in
-`lake-manifest.json` with `inherited: true`, coming in transitively through
-Mathlib, and nothing here imports it.  It provides verified interval
+**`leancert` exists and is referenced here, but is NOT currently usable.**  It
+is in `lake-manifest.json` with `inherited: true`, pulled in transitively, but
+`import LeanCert` FAILS: the module is not on the search path, because nothing
+imports it and so Lake never builds it --
+
+    No directory 'LeanCert' or file 'LeanCert.olean' in the search path
+    probe/leancert.lean:21:0: error: unknown module prefix 'LeanCert'
+
+verified by probe rather than assumed.  Using it would take an explicit
+`[[require]]` in `lakefile.toml` and a from-source build on every CI run, and
+whether rev `87a21d739dde` compiles against Mathlib `v4.33.0-rc1` is still
+unknown -- LeanCert's HEAD pins toolchain `v4.35.0`, and the anonymous git lane
+will not serve that sha to check.  What it provides, read from HEAD and so also
+unconfirmed at the pinned rev: verified interval
 arithmetic with `exp`, `log`, `sqrt`, `atan`; a `leancert` tactic for
 quantified bounds over real intervals; certified partition integration; and --
 directly relevant -- `LeanCert/ANT/Mertens.lean` and
@@ -353,9 +364,17 @@ primes in the head.  LeanCert's own Chebyshev tests run at `N` from 599 to
 7690, so this is three to four times beyond demonstrated scale rather than
 orders of magnitude.  That is a real engineering question, not a wall.
 
-**But the whole route runs on `native_decide`.**  There are 430 uses of it in
-LeanCert, and the Chebyshev certificates are discharged that way; the
-`check... = true` hypotheses cannot be `decide`d in the kernel at these sizes.
+**The route very likely runs on `native_decide`, though this is not yet
+measured.**  There are 430 uses of it in LeanCert and the Chebyshev
+certificates are discharged that way.  But a grep count is not a dependency:
+the bound theorems themselves -- `log_prime_le_logPrimeUB`,
+`mertensLogSum_le_mertensLogSumUpperRat` -- are ordinary proved inequalities
+with no decidability in them, and `native_decide` enters only where a
+`check... = true` hypothesis must be evaluated.  So the axiom cost is plausibly
+zero for the proved bounds and nonzero only at the numeric step.  Which it is
+decides how much of this can stay in the kernel, and it has NOT been
+established: the probe that would have answered it could not get as far as
+importing the library.
 `native_decide` adds `Lean.ofReduceBool`, which the axiom audits in this
 repository are written to REJECT -- they require exactly `[propext,
 Classical.choice, Quot.sound]`.

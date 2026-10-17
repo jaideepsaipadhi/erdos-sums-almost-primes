@@ -96,19 +96,6 @@ jobs:
       # for the named theorems, which matters because the run log and the
       # artifact blob host are both unreachable from the dev container: the
       # build itself has to do the checking.
-      # Probe: imports a dependency the library does not, so it is kept out of
-      # the library and run with `|| true`.  Its output is the result.
-      - name: Probe
-        if: always()
-        run: |
-          for f in probe/*.lean; do
-            [ -f "$f" ] || continue
-            echo "--- $f"
-            lake env lean "$f" > probe.txt 2>&1 || true
-            cat probe.txt
-            while IFS= read -r line; do echo "::notice::probe: ${line}"; done < probe.txt
-          done
-
       - name: Axiom audit (unrestricted case)
         run: |
           # `lean | tee` reports TEE's status, so lean's own exit code is lost
