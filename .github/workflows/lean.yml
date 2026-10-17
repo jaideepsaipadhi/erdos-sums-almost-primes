@@ -242,20 +242,31 @@ jobs:
           fi
           echo "--- cache get for the new mathlib rev"
           timeout 900 lake exe cache get > cg.txt 2>&1 && echo "::notice::lc: cache OK" || echo "::notice::lc: cache get failed"
+          # LeanCert is already known to build at v4.33.0 and its API resolves,
+          # so it is not rebuilt here; all the time goes to the question that
+          # is still open.  `timeout` exits 124 when it kills the command, so
+          # the exit CODE distinguishes "does not compile" from "needs more
+          # than 45 minutes" -- the previous run could not tell those apart,
+          # and grepping for "error" found none, which already suggested a
+          # timeout rather than a failure.
           echo "--- build OUR libraries against mathlib v4.33.0"
-          if timeout 2700 lake build Banksmartin Odd > lb.txt 2>&1; then
+          set +e
+          timeout 9000 lake build Banksmartin Odd > lb.txt 2>&1
+          rc=$?
+          set -e
+          echo "::notice::lc: our-build rc=${rc} (124 = timed out, 0 = compiles)"
+          if [ "$rc" -eq 0 ]; then
             echo "::notice::lc: OUR DEVELOPMENT COMPILES against mathlib v4.33.0"
+          elif [ "$rc" -eq 124 ]; then
+            echo "::notice::lc: timed out after 9000s -- no verdict on compilability"
           else
-            echo "::notice::lc: our development does NOT compile against v4.33.0 (or timed out)"
-            grep -E "error" lb.txt | head -12 | while IFS= read -r l; do echo "::notice::lb: ${l}"; done
+            echo "::notice::lc: our development FAILS to compile against v4.33.0"
+            grep -E "error" lb.txt | head -10 | while IFS= read -r l; do echo "::notice::lb: ${l}"; done
           fi
-          echo "--- build leancert"
-          timeout 2400 lake build LeanCert > lc2.txt 2>&1 \
-            && echo "::notice::lc: LeanCert BUILT" \
-            || { echo "::notice::lc: LeanCert build failed"; tail -12 lc2.txt | while IFS= read -r l; do echo "::notice::lb2: ${l}"; done; }
           if [ -f probe/leancert.lean ]; then
             timeout 1500 lake env lean probe/leancert.lean > probe.txt 2>&1 || true
-            while IFS= read -r line; do echo "::notice::probe: ${line}"; done < probe.txt
+            grep -E "axioms|error|sorry" probe.txt | head -12 \
+              | while IFS= read -r line; do echo "::notice::probe: ${line}"; done
           fi
           mv lakefile.toml.bak lakefile.toml
 
