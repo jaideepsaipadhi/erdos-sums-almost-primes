@@ -2010,9 +2010,21 @@ theorem prime_logderiv_complex_seven (p : ℕ) (hp : 7 ≤ p) (z : ℂ) (hz : �
     exact Complex.mem_slitPlane_iff.mpr (Or.inl hre)
   have hlogc : HasDerivAt (fun r : ℝ => Complex.log (1 - z * (((p : ℝ) ^ (-r) : ℝ) : ℂ)))
       ((z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) s := by
+    -- `HasDerivAt.clog` is stated for a complex variable; here the variable is
+    -- real and only the VALUES are complex, so compose with
+    -- `Complex.hasDerivAt_log` instead.  That gives the derivative as
+    -- (f s)⁻¹ * f' rather than f' / f s, hence the rewrite.
+    have h := (Complex.hasDerivAt_log hslit).comp s hargd
+    have hdiv : (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
+          * (z * ((Real.log (p : ℝ) * a : ℝ) : ℂ))
+        = (z * ((Real.log (p : ℝ) * a : ℝ) : ℂ))
+          / (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ)) := by
+      rw [div_eq_inv_mul]
     first
+      | exact hdiv ▸ h
+      | (rw [← hdiv]; exact h)
+      | simpa [Function.comp_def, div_eq_inv_mul] using h
       | exact hargd.clog hslit
-      | exact HasDerivAt.clog hargd hslit
   have hsum := hlogc.neg.add (hlogrC.const_mul z)
   -- no `rw [<- ha_def]` here: `set` already replaced every p^(-s) by `a`, so
   -- there is no occurrence left to rewrite and the rw fails
