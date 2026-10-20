@@ -242,26 +242,27 @@ jobs:
           fi
           echo "--- cache get for the new mathlib rev"
           timeout 900 lake exe cache get > cg.txt 2>&1 && echo "::notice::lc: cache OK" || echo "::notice::lc: cache get failed"
-          # LeanCert is already known to build at v4.33.0 and its API resolves,
-          # so it is not rebuilt here; all the time goes to the question that
-          # is still open.  `timeout` exits 124 when it kills the command, so
-          # the exit CODE distinguishes "does not compile" from "needs more
-          # than 45 minutes" -- the previous run could not tell those apart,
-          # and grepping for "error" found none, which already suggested a
-          # timeout rather than a failure.
-          echo "--- build OUR libraries against mathlib v4.33.0"
+          # Both prerequisites are now settled, so all the time goes to the one
+          # question still open.
+          #
+          #   * leancert v4.33.0 BUILDS here and its API resolves (run 1).
+          #   * OUR DEVELOPMENT COMPILES against mathlib v4.33.0 -- rc=0, so
+          #     the earlier "does not compile" was a timeout at 2700s exactly
+          #     as the empty error-grep suggested (run 2).
+          #
+          # Run 2 answered the second but lost the probe: I dropped the
+          # `lake build LeanCert` step as "already known to build" without
+          # noticing the probe needs its OLEANS, so the import failed with
+          # unknown module prefix.  The build is back and the our-build is
+          # gone, since rc=0 already settled it.
+          echo "--- build leancert (its oleans are what the probe imports)"
           set +e
-          timeout 9000 lake build Banksmartin Odd > lb.txt 2>&1
-          rc=$?
+          timeout 3600 lake build LeanCert > lc2.txt 2>&1
+          rcl=$?
           set -e
-          echo "::notice::lc: our-build rc=${rc} (124 = timed out, 0 = compiles)"
-          if [ "$rc" -eq 0 ]; then
-            echo "::notice::lc: OUR DEVELOPMENT COMPILES against mathlib v4.33.0"
-          elif [ "$rc" -eq 124 ]; then
-            echo "::notice::lc: timed out after 9000s -- no verdict on compilability"
-          else
-            echo "::notice::lc: our development FAILS to compile against v4.33.0"
-            grep -E "error" lb.txt | head -10 | while IFS= read -r l; do echo "::notice::lb: ${l}"; done
+          echo "::notice::lc: LeanCert build rc=${rcl}"
+          if [ "$rcl" -ne 0 ]; then
+            tail -12 lc2.txt | while IFS= read -r l; do echo "::notice::lb2: ${l}"; done
           fi
           if [ -f probe/leancert.lean ]; then
             timeout 1500 lake env lean probe/leancert.lean > probe.txt 2>&1 || true
