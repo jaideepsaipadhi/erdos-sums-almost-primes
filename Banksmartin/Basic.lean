@@ -14054,6 +14054,70 @@ theorem E1k_le_alpha (k : ℕ) (hk : 1 ≤ k) (beta : ℕ → ℝ)
         positivity
     _ = alpha * ((k : ℝ) + 1) := by ring
 
+/-- `g_deriv` is DERIVABLE from a sup bound on the s-derivative.
+
+`NumericalFactsFull.g_deriv` assumes
+
+    forall i, forall x in Ioo 1 2, HasDerivAt (gManu i) (deriv (gManu i) x) x
+
+which is `DifferentiableAt R (gManu i) x` in disguise -- a limit existing, not
+an interval enclosure, so no Arb run establishes it and no recomputation closes
+it (see the CAUTION on `NumericalFactsFull`).  This theorem replaces it with a
+hypothesis of the kind Arb DOES compute: a uniform bound on the s-derivative of
+`G2manu` on the integration circle.
+
+The route is assembled from pieces already in this file:
+
+  * `gManu_eq_circleIntegral` rewrites `gManu i t` as a contour integral over
+    |z| = 2 in which the t-dependence sits only in `G2manu t z`; the
+    `(1/z)^i * z⁻¹` weight is s-free, which is what makes differentiating under
+    the integral clean.
+  * `lemma_3_8_integral_r1` differentiates under exactly that integral, given
+    `hf` and the sup bound `hM`.
+  * `log_zetaTilde_hasDerivAt` supplies `hf`, which was previously threaded
+    through unproved.
+
+So the only genuinely assumed input left is `hM1`, and unlike `g_deriv` it is a
+numerical statement: the sup of a derivative over a compact circle and a
+bounded s-range.  Substituting it for `g_deriv` makes the structure's docstring
+true, which is the point -- it does not reduce the field count, it moves one
+field from the wrong side of Caveat 1.3b's line to the right side. -/
+theorem g_deriv_of_derivBound (M1 : ℝ) (hM10 : 0 ≤ M1)
+    (hM1 : ∀ x ∈ Set.Ioo (1 : ℝ) 2, ∀ theta : ℝ,
+      Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) x) ≤ M1)
+    (i : ℕ) (x : ℝ) (hx : x ∈ Set.Ioo (1 : ℝ) 2) :
+    HasDerivAt (fun t : ℝ => gManu i t) (deriv (fun t : ℝ => gManu i t) x) x := by
+  -- the contour form, for every t > 1; idiom taken from gManu_tendsto_cCoeff's proof
+  have hci : ∀ t : ℝ, 1 < t →
+      gManu i t = (2 * ((Real.pi : ℝ) : ℂ) * Complex.I)⁻¹
+        • (∫ theta in (0 : ℝ)..(2 * Real.pi),
+          deriv (circleMap 0 (2 : ℝ)) theta
+            * ((1 / circleMap 0 (2 : ℝ) theta) ^ i
+              * ((circleMap 0 (2 : ℝ) theta)⁻¹
+                * G2manu t (circleMap 0 (2 : ℝ) theta)))) := by
+    intro t ht
+    have hkap : 0 < kappaFac t := kappaFac_pos t ht (cFac_pos t ht)
+    rw [gManu_eq_circleIntegral t (le_of_lt ht) hkap i]
+    unfold circleIntegral
+    simp only [smul_eq_mul]
+  -- differentiate under the integral, with hf now proved rather than assumed
+  have hI := lemma_3_8_integral_r1 i x hx
+    (deriv (fun t : ℝ => Real.log (zetaTilde t)))
+    (fun y hy => log_zetaTilde_hasDerivAt y hy) M1 hM10 hM1
+  have hscaled := hI.const_smul (2 * ((Real.pi : ℝ) : ℂ) * Complex.I)⁻¹
+  -- gManu agrees with the scaled integral on a neighbourhood of x
+  have hev : (fun t : ℝ => gManu i t) =ᶠ[nhds x]
+      (fun t : ℝ => (2 * ((Real.pi : ℝ) : ℂ) * Complex.I)⁻¹
+        • (∫ theta in (0 : ℝ)..(2 * Real.pi),
+          deriv (circleMap 0 (2 : ℝ)) theta
+            * ((1 / circleMap 0 (2 : ℝ) theta) ^ i
+              * ((circleMap 0 (2 : ℝ) theta)⁻¹
+                * G2manu t (circleMap 0 (2 : ℝ) theta))))) := by
+    refine Filter.eventuallyEq_of_mem (Ioi_mem_nhds hx.1) ?_
+    intro t ht
+    exact hci t ht
+  exact (hscaled.congr_of_eventuallyEq hev).differentiableAt.hasDerivAt
+
 /-- source_bound_derived with the E_1 hypothesis discharged by E1k_le_alpha.
 
 The section 3.5 inputs (beta_i, the derivative bounds, M_0) now appear
