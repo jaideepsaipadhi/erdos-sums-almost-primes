@@ -310,6 +310,53 @@ transcendental functions -- or formalizing the Cauchy estimates that produce
 the bounds instead of computing them.  Those are projects, and this is the
 honest boundary of what the technique reaches.
 
+## Verified arithmetic would not close the sweeps, and this is why
+
+The paragraph above is easy to misread as "get verified interval arithmetic
+into the development and the sweeps fall."  They do not, and the reason is
+structural rather than a matter of degree.
+
+`sweep_low` and its two siblings assert `f k < f (k + 1)` over a finite range
+of `k`.  Finitely many instances, so the instinct is that a strong enough
+evaluator discharges them one at a time.  But look at what one instance says.
+By `lemma1_foundation`,
+
+    f k = Ik k + Tk k
+    Ik k = integral over Ioc 1 2 of Fk k s        -- a Bochner integral
+    Tk k = tsum over {n // 2 <= n and bigOmega n = k} of 1/(n^2 * log n)
+
+So a single instance of a sweep compares two Lebesgue integrals plus two
+infinite sums over Omega-classes, each summand carrying a `log n`.  That
+proposition is not DECIDABLE -- there is no `Decidable` instance, and there
+could not be one.  Finiteness in `k` buys nothing, because the object sitting
+at each `k` is itself infinite in two separate ways.
+
+This matters for the tool question specifically.  `native_decide` evaluates
+decidable propositions; it cannot be pointed at `f k < f (k + 1)` at all, at
+any depth or any budget.  Neither can `decide`, `norm_num`, or `leancert`'s
+checkers.  Verified interval arithmetic is the machinery at the BOTTOM of a
+proof that has already reduced the statement to rational data -- it is not a
+way to get there.  The reduction is the missing work:
+
+  1. a rigorous Lean enclosure of `Ik k`, i.e. numerical integration with
+     certified error, for the specific integrand `Fk k`; and
+  2. a rigorous tail bound on `Tk k` over `{bigOmega n = k}` -- the same
+     Omega-class tail that Section 5's delta-table handles numerically.
+
+Neither exists in Mathlib, and `leancert` supplies neither: its machinery is
+Chebyshev/Mertens prime sums and Abel summation, not integration over an
+interval against an arbitrary integrand.  `source_bound` is in the same
+position for the same reason, with the extra difficulty of being infinite in
+`k` as well.
+
+The practical consequence is that the trust decision below -- whether to
+accept `Lean.ofReduceBool` in exchange for `native_decide` -- **does not need
+to be made yet**, because no currently remaining field would be closed by
+making it.  It becomes live only after (1) and (2) exist, at which point the
+reduced statement is rational and the question of which evaluator discharges
+it is finally the operative one.  That ordering is worth being explicit about:
+it would be easy to spend the trust and gain nothing.
+
 ## The route to an instance, and the trust decision it forces
 
 The structures have NO INSTANCE -- every occurrence in the development is a
