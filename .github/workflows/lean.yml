@@ -133,8 +133,14 @@ jobs:
           cat axioms-bm.txt
           echo "::notice::bm lean exit status ${rc}"
           if [ "$rc" -ne 0 ]; then
-            echo "::error::bm axiom audit: lean exited ${rc}; output follows"
-            while IFS= read -r line; do echo "::error::bm: ${line}"; done < axioms-bm.txt
+            # Emit the TAIL, not the whole file.  Dumping every line as its
+            # own annotation overruns the ~15 cap, and what survives is the
+            # successful `depends on axioms` prints while lean's actual error
+            # -- which comes last -- is dropped.  Same failure mode as the old
+            # build-error step.
+            echo "::error::bm axiom audit: lean exited ${rc}; tail follows"
+            tail -14 axioms-bm.txt | cut -c1-240 \
+              | while IFS= read -r line; do echo "::error::bm: ${line}"; done
             exit 1
           fi
           if grep -q "sorryAx" axioms-bm.txt; then
