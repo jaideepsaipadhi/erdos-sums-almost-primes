@@ -266,7 +266,12 @@ jobs:
           fi
           if [ -f probe/leancert.lean ]; then
             timeout 1500 lake env lean probe/leancert.lean > probe.txt 2>&1 || true
-            grep -E "axioms|error|sorry" probe.txt | head -12 \
+            # Lean WRAPS long `#print axioms` output, and the previous grep
+            # matched only the first line -- so the axiom list for the
+            # native_decide case came back as "[propext," with the part that
+            # actually matters cut off.  Match the continuation too.
+            grep -E "axioms|error|sorry|ofReduceBool|Quot\.sound|Classical" probe.txt \
+              | head -16 \
               | while IFS= read -r line; do echo "::notice::probe: ${line}"; done
           fi
           mv lakefile.toml.bak lakefile.toml

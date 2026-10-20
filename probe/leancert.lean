@@ -16,11 +16,12 @@ instance to whnf-reduce; `norm_num` evaluates rational arithmetic by simp
 lemmas instead, and can succeed where reduction will not.  The difference
 decides the trust question:
 
-  * norm_num works  -> the whole route can stay in the kernel, and
-    `Lean.ofReduceBool` is never needed.  Adopting leancert costs nothing in
-    trust.
-  * norm_num fails too -> every numeric step needs native_decide, and adopting
-    it means accepting ofReduceBool.  Caveat 1.3b would have to be rewritten.
+ANSWERED: norm_num and simp BOTH fail with unsolved goals.  native_decide
+succeeds.  So kernel-clean numerics are not available here at any size, and
+every numeric step costs whatever native_decide costs.  What remains is to
+MEASURE that cost rather than assume it -- the previous run's axiom line for
+the native case was truncated by Lean's own line wrapping, so `ofReduceBool`
+is predicted and not yet confirmed.
 -/
 import LeanCert
 
@@ -44,14 +45,15 @@ theorem probe_numeric_native : (logPrimeUB 7 10 : ℚ) ≤ 2 := by native_decide
 
 #print axioms probe_numeric_native
 
-/-- D: the end-to-end shape a Sodd head term would take, via whichever of the
-above works.  If this comes back on the three permitted axioms, the route is
-kernel-clean end to end. -/
+/-- D: the end-to-end shape a Sodd head term would take.  norm_num and simp
+both failed on the rational step, so this uses native_decide for it -- which
+makes D the measurement of what a REAL certificate costs, not a hoped-for
+kernel-clean version. -/
 theorem probe_log_seven_le_two : Real.log 7 ≤ 2 := by
   have h := log_prime_le_logPrimeUB 7 10
   have hp : Nat.Prime 7 := by norm_num
   rw [if_pos hp] at h
-  have hq : (logPrimeUB 7 10 : ℚ) ≤ 2 := by norm_num [logPrimeUB]
+  have hq : (logPrimeUB 7 10 : ℚ) ≤ 2 := by native_decide
   have hr : ((logPrimeUB 7 10 : ℚ) : ℝ) ≤ ((2 : ℚ) : ℝ) := Rat.cast_le.mpr hq
   push_cast at hr
   linarith
