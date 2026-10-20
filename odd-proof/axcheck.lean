@@ -18,3 +18,6 @@ import Odd.Basic
 #print axioms eps_zeta_uniform
 #print axioms prime_three_differentiableOn_three
 #print axioms Hodd_differentiableOn_three
+#print axioms HoddTildeFactored_differentiableOn
+#print axioms hCoeff_sum_one_uncond
+#print axioms hCoeff_sum_two_uncond

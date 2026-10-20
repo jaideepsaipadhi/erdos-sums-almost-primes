@@ -1059,6 +1059,66 @@ theorem HoddTilde_factored (s : ℝ) (hs : 1 ≤ s) (z : ℂ)
   rw [Hodd_factored s hs z hmul7]
   field_simp
 
+/-- ITEM 2, correctly stated: the FACTORED form of Htilde is differentiable on
+|z| < 4, unconditionally for s >= 1.
+
+`HoddTilde_differentiableOn` below takes the factorization `hfac` as a
+hypothesis on all of `ball 0 4`, and that hypothesis is unsatisfiable for
+s < log 4 / log 3: `HoddTilde s z` is *defined* as `Hodd s z * (1 - z 3^(-s))`,
+which is 0 at `z = 3^s` (Lean's `0⁻¹ = 0` leaves no pole to cancel), while the
+factored side is generically nonzero there.
+
+The factored side has no inverted p = 3 factor at all -- that is the point of
+factoring -- so its only pole is the p = 5 factor's at |z| = 5^s >= 5, and it
+is differentiable on `ball 0 4` with nothing assumed. -/
+theorem HoddTildeFactored_differentiableOn (s : ℝ) (hs : 1 ≤ s) :
+    DifferentiableOn ℂ (fun z : ℂ =>
+      (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z * (((1 - (3:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *
+      ((1 - z * (((5:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (5:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z) *
+      HoddTail s z) (Metric.ball 0 4) := by
+  -- same idiom as prime_five_differentiableOn_four, with literal bases
+  have h2_le : ((2:ℝ)) ^ (-s) ≤ 1/2 := by
+    have h1 : ((2 : ℝ)) ^ (-s) ≤ ((2 : ℝ)) ^ (-(1 : ℝ)) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+      linarith
+    rw [Real.rpow_neg_one] at h1
+    norm_num at h1
+    linarith
+  have h3_le : ((3:ℝ)) ^ (-s) ≤ 1/3 := by
+    have h1 : ((3 : ℝ)) ^ (-s) ≤ ((3 : ℝ)) ^ (-(1 : ℝ)) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+      linarith
+    rw [Real.rpow_neg_one] at h1
+    norm_num at h1
+    linarith
+  have h2ne : ((((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ)) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  have h3ne : ((((1 - (3:ℝ) ^ (-s) : ℝ)) : ℂ)) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  have hA : DifferentiableOn ℂ
+      (fun z : ℂ => ((((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ)) ^ z) (Metric.ball 0 4) :=
+    fun z _ => (DifferentiableAt.const_cpow differentiableAt_id
+      (Or.inl h2ne)).differentiableWithinAt
+  have hB : DifferentiableOn ℂ
+      (fun z : ℂ => ((((1 - (3:ℝ) ^ (-s) : ℝ)) : ℂ)) ^ z) (Metric.ball 0 4) :=
+    fun z _ => (DifferentiableAt.const_cpow differentiableAt_id
+      (Or.inl h3ne)).differentiableWithinAt
+  exact ((hA.mul hB).mul (prime_five_differentiableOn_four s hs)).mul
+    (HoddTail_differentiableOn_seven s hs)
+
+/-- The two descriptions of Htilde agree away from the p = 3 pole: that is the
+precise sense in which the factorization holds, and the reason `hfac` on all of
+`ball 0 4` cannot be discharged. -/
+theorem HoddTilde_eq_factored_of_ne (s : ℝ) (hs : 1 ≤ s) (z : ℂ)
+    (hz : Norm.norm z ≤ 4) (h3 : 1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ) ≠ 0) :
+    HoddTilde s z =
+      (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z * (((1 - (3:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *
+      ((1 - z * (((5:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (5:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z) *
+      HoddTail s z :=
+  HoddTilde_factored s hs z h3 (prime_factor_multipliable_complex_seven s hs z hz)
+
 /-- ITEM 2: Htilde is differentiable on ball 0 4.
 
 Three factors: two entire prefactors (c^z for constant c > 0), the p = 5
@@ -1848,6 +1908,23 @@ theorem hCoeff_sum_two (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric
   have h := hCoeff_hasSum 1 le_rfl 2 (by norm_num) hdiff
   rw [Hodd_one_two] at h
   exact h
+
+/-! ### The h_j sums, unconditionally
+
+`hCoeff_sum_one` and `hCoeff_sum_two` take the differentiability of `Hodd 1`
+as a hypothesis.  `Hodd_differentiableOn_three` supplies it, so the two facts
+hold outright.  Stated separately rather than by editing those signatures,
+which the `fOdd_expansion_final` chain still threads. -/
+
+/-- `sum_j h_j(1) = H(1,1) = 1/2`, with nothing assumed. -/
+theorem hCoeff_sum_one_uncond : HasSum (fun j : ℕ => hCoeff 1 j) (1/2 : ℂ) :=
+  hCoeff_sum_one (Hodd_differentiableOn_three 1 le_rfl)
+
+/-- `sum_j h_j(1) 2^j = H(1,2) = d`, with nothing assumed. -/
+theorem hCoeff_sum_two_uncond :
+    HasSum (fun j : ℕ => hCoeff 1 j * 2 ^ j) ((dConst : ℝ) : ℂ) :=
+  hCoeff_sum_two (Hodd_differentiableOn_three 1 le_rfl)
+
 
 /-! ### 6c: the coefficient extraction
 
