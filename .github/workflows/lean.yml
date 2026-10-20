@@ -266,13 +266,34 @@ jobs:
           fi
           if [ -f probe/leancert.lean ]; then
             timeout 1500 lake env lean probe/leancert.lean > probe.txt 2>&1 || true
-            # Lean WRAPS long `#print axioms` output, and the previous grep
-            # matched only the first line -- so the axiom list for the
-            # native_decide case came back as "[propext," with the part that
-            # actually matters cut off.  Match the continuation too.
-            grep -E "axioms|error|sorry|ofReduceBool|Quot\.sound|Classical" probe.txt \
-              | head -16 \
-              | while IFS= read -r line; do echo "::notice::probe: ${line}"; done
+            # Lean WRAPS long `#print axioms` output across lines, and the
+            # annotation channel is capped (~15) and drops the rest.  Two
+            # failed attempts at reading the native case's axiom list off this
+            # channel is enough: compute the verdict HERE, where the whole file
+            # is in hand, and emit it as ONE short line that cannot wrap and
+            # will not be cut.  Reassemble by joining lines first, then
+            # extracting the bracketed list.
+            flat=$(tr '\n' ' ' < probe.txt)
+            for d in probe_numeric_native probe_numeric_normnum probe_numeric_simp \
+                     probe_log_seven_le_two; do
+              ax=$(printf '%s' "$flat" \
+                   | grep -o "'${d}' depends on axioms: \[[^]]*\]" \
+                   | head -1 | sed "s/.*axioms: //")
+              if [ -z "$ax" ]; then
+                if printf '%s' "$flat" | grep -q "'${d}' does not depend on any axioms"; then
+                  ax="[] (none)"
+                else
+                  ax="ABSENT (declaration failed to elaborate)"
+                fi
+              fi
+              echo "::notice::probe: AXIOMS ${d} = ${ax}"
+            done
+            if printf '%s' "$flat" | grep -q "ofReduceBool"; then
+              echo "::notice::probe: VERDICT ofReduceBool appears in probe output: YES"
+            else
+              echo "::notice::probe: VERDICT ofReduceBool appears in probe output: NO"
+            fi
+            echo "::notice::probe: VERDICT error count = $(grep -c 'error:' probe.txt)"
           fi
           mv lakefile.toml.bak lakefile.toml
 
