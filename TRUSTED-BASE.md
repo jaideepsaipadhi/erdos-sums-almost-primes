@@ -310,6 +310,46 @@ transcendental functions -- or formalizing the Cauchy estimates that produce
 the bounds instead of computing them.  Those are projects, and this is the
 honest boundary of what the technique reaches.
 
+## One load-bearing field is not a numerical fact at all
+
+`Gamma_bound` turned out to be vacuous.  `g_deriv` is the opposite error and
+the more serious one: it is load-bearing, and it is not numerics.
+
+    g_deriv : forall i, forall x in Ioo 1 2,
+      HasDerivAt (gManu i) (deriv (gManu i) x) x
+
+`HasDerivAt f (deriv f x) x` holds exactly when `f` is differentiable at `x` --
+if it were not, `deriv f x` would be `0` and the statement would be false.  So
+the field asserts that `gManu i` is differentiable on `(1, 2)`.  That is a
+limit existing.  An Arb ball computation bounds a quantity; it cannot show a
+limit exists, so NO run of the certified package establishes this field, and
+rerunning the package with more precision will never close it.
+
+It is used (via `source_bound_full`, at the `NumericalFactsFull` call site), so
+unlike `Gamma_bound` it cannot simply be deleted.
+
+This matters because it misstates who owns the obligation.  `NumericalFacts`'s
+docstring says "each field is an Arb ball computation from the companion
+package, exactly the division Caveat 1.3(b) draws."  For `g_deriv` that is
+false, and the consequence is practical: a reader auditing the trusted base
+would look for the Arb script behind it and find none, and a maintainer would
+try to discharge it by recomputation, which cannot work.  The Lean docstrings
+for the structure and the field now say so.
+
+**This affects the manuscript's Caveat 1.3b as well**, which draws the same
+division between "machine-verified analytic reduction" and "certified
+numerics".  `g_deriv` sits on the numerics side of that line and does not
+belong there -- it is an analytic assumption.  Changing Caveat 1.3b's wording
+is not a change I should make unilaterally, so it is flagged here rather than
+edited: the paper currently understates, by one field, how much is assumed
+mathematically rather than computed.
+
+For scale, the proof that would close it: `G2manu s z = (kappaFac s)^z *
+G2C s z`, so `gManu i s` is the i-th z-derivative at 0 of that product over
+`i!`, and differentiability in `s` requires differentiating an Euler product
+under the iterated-derivative operator -- comparable work to `source_bound`,
+not a tidy-up.
+
 ## Verified arithmetic would not close the sweeps, and this is why
 
 The paragraph above is easy to misread as "get verified interval arithmetic
