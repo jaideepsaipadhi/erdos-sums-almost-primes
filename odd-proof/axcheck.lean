@@ -42,3 +42,4 @@ import Odd.Basic
 -- the radius-2 Cauchy bridge, for tendsto_one
 #print axioms hCoeff_eq_cauchy_coeff_two
 #print axioms hCoeff_eq_circleIntegral_two
+#print axioms hodd_contour_integrand_tendsto

@@ -1849,6 +1849,36 @@ theorem Hodd_tendsto_at_one (z : ℂ) (hz : Norm.norm z ≤ 2) :
   filter_upwards [self_mem_nhdsWithin] with s hs
   exact (Hodd_eq_cpow_mul_G2C s (le_of_lt hs) z hz).symm
 
+/-- Pointwise convergence of the radius-2 contour integrand, the odd analogue
+of `contour_integrand_tendsto`.  The `(1/z)^j * z⁻¹` weight and the Jacobian
+are s-free, so this is `Hodd_tendsto_at_one` with three constants multiplied
+through; the circle |z| = 2 sits exactly on that lemma's boundary, which is why
+its hypothesis is stated non-strictly.
+
+This is the fourth of the five obligations of
+`MeasureTheory.tendsto_integral_filter_of_dominated_convergence` as
+`contour_integral_tendsto` uses it.  The remaining ones are a.e. strong
+measurability (needs an `Hodd` analogue of `contour_integrand_continuous`,
+which follows from `Hodd_differentiableOn_three` and is strictly easier than
+the `G2manu` version, having no `0 < kappaFac s` side condition) and the
+dominating bound, which is where a sup hypothesis on the contour enters. -/
+theorem hodd_contour_integrand_tendsto (j : ℕ) (theta : ℝ) :
+    Filter.Tendsto (fun s : ℝ =>
+        deriv (circleMap 0 (2 : ℝ)) theta
+          * ((1 / circleMap 0 (2 : ℝ) theta) ^ j
+            * ((circleMap 0 (2 : ℝ) theta)⁻¹ * Hodd s (circleMap 0 (2 : ℝ) theta))))
+      (nhdsWithin 1 (Set.Ioi (1 : ℝ)))
+      (nhds (deriv (circleMap 0 (2 : ℝ)) theta
+        * ((1 / circleMap 0 (2 : ℝ) theta) ^ j
+          * ((circleMap 0 (2 : ℝ) theta)⁻¹
+            * Hodd 1 (circleMap 0 (2 : ℝ) theta))))) := by
+  have hz : Norm.norm (circleMap 0 (2 : ℝ) theta) ≤ 2 := by
+    simp [circleMap]
+  exact (((Hodd_tendsto_at_one _ hz).const_mul
+      ((circleMap 0 (2 : ℝ) theta)⁻¹)).const_mul
+        ((1 / circleMap 0 (2 : ℝ) theta) ^ j)).const_mul
+          (deriv (circleMap 0 (2 : ℝ)) theta)
+
 /-- h_0(1) = H(1,0) = 1: the empty product. -/
 theorem hCoeff_zero_at_one : hCoeff 1 0 = 1 := by
   unfold hCoeff
