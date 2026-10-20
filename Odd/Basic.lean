@@ -1911,6 +1911,52 @@ theorem hCoeff_sum_two :
   rw [Hodd_one_two] at h
   exact h
 
+/-! ### The two ContDiffAt hypotheses are satisfiable
+
+`FkOdd_convolution` and everything above it to `fOdd_expansion_final` thread
+
+    hcd1 : ContDiffAt C k (fun z => Complex.exp ((uOf s) * z)) 0
+    hcd2 : ContDiffAt C k (fun z => Hodd s z) 0
+
+through as hypotheses, and nothing proves either.  Both are true, and after
+what happened with the differentiability hypothesis -- stated at a radius where
+it was unsatisfiable, so that every lemma taking it was vacuous at the one s it
+is used at -- an unproved hypothesis in this file is not something to leave
+unchecked.  These are proved here rather than removed from the signatures:
+unlike that one, they are threaded through six theorems with many call sites,
+so stripping them is a separate mechanical pass. -/
+
+/-- `hcd1`: `z |-> exp(c z)` is entire, so smooth at 0 to any order. -/
+theorem contDiffAt_exp_const_mul (c : ℂ) (n : ℕ∞) :
+    ContDiffAt ℂ n (fun z : ℂ => Complex.exp (c * z)) 0 := by
+  have h : ContDiff ℂ n (fun z : ℂ => Complex.exp (c * z)) := by
+    first
+      | exact (contDiff_const.mul contDiff_id).cexp
+      | exact Complex.contDiff_exp.comp (contDiff_const.mul contDiff_id)
+      | fun_prop
+  exact h.contDiffAt
+
+/-- `hcd2`: `Hodd s` is differentiable on `ball 0 3`, hence analytic at the
+interior point 0, hence smooth there to any order.
+
+This is the second thing `Hodd_differentiableOn_three` buys: the hypothesis was
+previously unprovable for the same reason the differentiability one was, since
+there was nothing in the file establishing that `Hodd s` is nice near 0. -/
+theorem Hodd_contDiffAt_zero (s : ℝ) (hs : 1 ≤ s) (n : ℕ∞) :
+    ContDiffAt ℂ n (fun z : ℂ => Hodd s z) 0 := by
+  have hmem : (0 : ℂ) ∈ Metric.ball (0 : ℂ) 3 := by
+    simpa using Metric.mem_ball_self (by norm_num : (0:ℝ) < 3)
+  have hnhds : Metric.ball (0 : ℂ) 3 ∈ nhds (0 : ℂ) :=
+    Metric.ball_mem_nhds 0 (by norm_num)
+  have hana : AnalyticAt ℂ (fun z : ℂ => Hodd s z) 0 := by
+    first
+      | exact (Hodd_differentiableOn_three s hs).analyticAt hnhds
+      | exact ((Hodd_differentiableOn_three s hs).analyticOnNhd
+          Metric.isOpen_ball) 0 hmem
+      | exact ((Hodd_differentiableOn_three s hs).analyticOn
+          Metric.isOpen_ball) 0 hmem
+  exact hana.contDiffAt
+
 /-! ### h_j as a Cauchy coefficient
 
 The bridge the odd Cauchy programme needs, and the piece that was missing: on

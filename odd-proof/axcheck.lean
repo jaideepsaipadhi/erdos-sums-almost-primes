@@ -21,3 +21,5 @@ import Odd.Basic
 #print axioms HoddTildeFactored_differentiableOn
 #print axioms hCoeff_eq_cauchy_coeff
 #print axioms hCoeff_eq_circleIntegral
+#print axioms contDiffAt_exp_const_mul
+#print axioms Hodd_contDiffAt_zero
