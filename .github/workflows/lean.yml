@@ -1,9 +1,14 @@
 # Builds the Lean development and audits it.
 #
 # Manual by default: this is a private repository, so Actions minutes are
-# metered, and the build is long -- PrimeNumberTheoremAnd is a dependency and
-# has no prebuilt cache, so only Mathlib comes from `lake exe cache get`.
-# Run it from the Actions tab ("Run workflow"), or let it fire on a PR to main.
+# metered, and the build is long.  Mathlib comes from `lake exe cache get`;
+# Banksmartin and Odd are always built from source, and the long pole in them
+# is dConst_lower_bound_sharp, whose 668-element Finset product is minutes of
+# norm_num on its own.  (An earlier version of this comment blamed
+# PrimeNumberTheoremAnd for the build length.  It is not a dependency -- it is
+# in neither lakefile.toml nor lake-manifest.json -- so that was never the
+# reason.)  Run it from the Actions tab ("Run workflow"), or let it fire on a
+# PR to main.
 #
 # What it establishes, which nothing else in this repository does:
 #   * the development compiles against the pinned toolchain and manifest
@@ -13,10 +18,10 @@
 #
 # The runner is pinned rather than `ubuntu-latest`, which migrates to Ubuntu 26
 # on 2026-10-19: a green check should not change meaning underneath us.  The
-# disk is reclaimed first because this build does not fit a stock runner --
-# Mathlib's oleans plus PrimeNumberTheoremAnd built from source came within a
-# few hundred MB of the 14 GB image, which surfaced once as a `tar` failure
-# saving the cache and once as an outright "No space left on device".
+# disk is reclaimed first because this build does not fit a stock runner:
+# Mathlib's oleans plus this development came within a few hundred MB of the
+# 14 GB image, which surfaced once as a `tar` failure saving the cache and once
+# as an outright "No space left on device".
 name: lean
 
 on:

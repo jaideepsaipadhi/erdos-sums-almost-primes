@@ -1063,7 +1063,35 @@ theorem HoddTilde_factored (s : ℝ) (hs : 1 ≤ s) (z : ℂ)
 
 Three factors: two entire prefactors (c^z for constant c > 0), the p = 5
 Euler factor whose pole sits at |z| = 5^s >= 5, and the p >= 7 tail.  The
-p = 3 pole is gone -- cancelled by Htilde's own (1 - z 3^-s). -/
+p = 3 pole is gone -- cancelled by Htilde's own (1 - z 3^-s).
+
+WARNING -- TWO REASONS THIS DOES NOT YET SUPPORT THE REMAINDER BOUND.  It is
+currently used nowhere, so nothing downstream is wrong, but do not read it as
+ITEM 2 being done.
+
+(1) `hfac` is UNSATISFIABLE for s < log 4 / log 3 = 1.26186..., which includes
+the near-pole range that matters.  `HoddTilde s z` is *defined* as
+`Hodd s z * (1 - z * 3^(-s))`.  At `z = 3^s` that second factor is 0, so the
+left side is 0; and `Hodd`'s own p = 3 factor is `(1 - 1)⁻¹ = 0` under Lean's
+`0⁻¹ = 0`, so no pole is there to cancel it.  The right side is generically
+nonzero at that point.  Since `3^s < 4` exactly when `s < log 4 / log 3`, the
+point `z = 3^s` lies INSIDE `ball 0 4` for those s and the two sides differ
+there, so `hfac` cannot be discharged -- `HoddTilde_factored` two declarations
+above does not do it either, as it carries the `h3ne` hypothesis that fails at
+precisely this point.  For s >= log 4 / log 3 the point leaves the ball and
+`hfac` is fine, so the lemma is meaningful only on the upper part of [1, 2].
+
+(2) The radius is too small regardless.  `OddNumericalFacts.MR_bound` is a sup
+over |z| = 4.5, and 4.5 is not in `ball 0 4`, so even an unconditional version
+of this lemma would not reach the circle the Cauchy estimate is taken on.
+
+The fix for both is the same and is a definition change, not a proof repair:
+take the FACTORED form as the definition of Htilde.  Its only pole is the p = 5
+factor's, at |z| = 5^s >= 5, so it is differentiable on `ball 0 5`, which
+contains the 4.5 circle; then relate it to `Hodd s z * (1 - z * 3^(-s))` away
+from `z = 3^s`, where the removable singularity is genuinely removable.  That
+ordering also explains why the present statement looks weaker than the
+docstring at the top of this file, which says "|z| = R < 5". -/
 theorem HoddTilde_differentiableOn (s : ℝ) (hs : 1 ≤ s)
     (hfac : ∀ z ∈ Metric.ball (0:ℂ) 4, HoddTilde s z =
       (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z * (((1 - (3:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *

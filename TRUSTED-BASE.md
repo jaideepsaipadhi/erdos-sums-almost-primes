@@ -163,7 +163,64 @@ Counting those nine as debt overstated the trusted base.  The honest count of
 assumptions about the world is six: `rho_enclosure`, `Sodd_enclosure`,
 `source_bound`, `remainder`, and the four sweeps.
 
-## `rho_enclosure` is used nowhere
+## Which fields are load-bearing, by actual use
+
+Counted by searching the development for each field's projection.  Two fields
+have NO consumer, and seven more constrain abstract variables, so the honest
+count of assumptions about the world is well under the field count.
+
+| field | consumers | status |
+|---|---|---|
+| `rho_enclosure` | 0 | **proved and removed** (`rhoConst_upper_bound`) |
+| `Gamma_bound` | 0 | vacuous; kept as the paper's mirror, documented at the field |
+| `Sstar_bound`, `alpha_bound`, `MR_bound` | several | numerals on abstract variables |
+| five nonnegativity fields | several | likewise |
+| `source_bound`, `remainder` | 1, 5 | **the Cauchy estimate** -- real content |
+| `Sodd_enclosure` | 1 | real content, needed from above |
+| the four sweeps | 2-3 each | finite but not kernel-computable |
+| `NumericalFactsFull`'s eight extras | 1 each | the Arb sweeps, coupled to defined objects |
+
+### Why S* is out of reach, corrected
+
+An earlier note here reasoned that the geometric tail bound on the cCoeff is
+too lossy to reach `S* <= 6.9764`.  That is wrong, and the arithmetic behind it
+was wrong twice over.  `S*` is `sum_{i>=0} 2^i |c_i|`, whose head to `i = 30`
+is `6.97633205` and whose total is `6.97633273`.  So:
+
+| bound on the coefficients | tail from i=31 | smallest head cutoff that fits |
+|---|---|---|
+| `|c_i| <= 44.5987*3^-i` (Lemma 3.7(i) + Sigma_0) | 4.65e-04 | **i = 36** |
+| `|c_i| <= 354.36*3^-i` (as stated in print) | 3.70e-03 | i = 41 |
+
+against a budget of `6.9764 - 6.97633205 = 6.795e-05`.  I had quoted that
+budget as `6.8e-06`, which is the TRUE tail beyond `i = 30` (`6.80e-07`)
+confused with the room to `6.9764`, and had put the cutoff at `i ~ 42`.
+
+The correction matters because it changes the diagnosis.  Thirty-six head
+terms is a small number, so the tail is NOT the obstruction.  The obstruction
+is `cCoeff` itself:
+
+    noncomputable def cCoeff (i : ℕ) : ℂ :=
+      iteratedDeriv i G2at1 0 / (Nat.factorial i : ℂ)
+
+a Taylor coefficient of `G2at1`, the Euler-product function -- `G2at1 2` IS
+`dConst`, by `G2at1_two_eq_dConst`.  It is defined through `iteratedDeriv`, so
+there is nothing to compute for any `i`, cheaply or otherwise; a numerical
+bound on `c_i` has to come from the Cauchy estimate on the contour, which is
+the certified arc bound of Lemma 3.7 (`M = 326`) and so a hypothesis by
+construction.  That is the
+same wall as `Sodd`, and it is unlike `d` and `rho`, where the factors were
+rational and a finite product settled a one-sided bound.
+
+`Gam` deserves a note.  It appears ONLY in the two structure signatures, the
+two theorem signatures, and `Gamma_bound` itself -- no other field mentions
+it, and neither top-level theorem uses it.  So `Gamma_bound` constrains a
+bound variable nothing reads.  It is kept because deleting it would leave the
+manuscript's Theorem 6.1 constant with no Lean mirror, which is worse drift
+than a vacuous one; `rho_enclosure` could go because a proved theorem took
+over its mirroring duty.
+
+## `rho_enclosure` was used nowhere either
 
 `grep` for `rho_enclosure` and `rhoConst` across `Banksmartin/` and `Odd/`
 returns the two field declarations and one comment.  No `hnum.rho_enclosure`
@@ -220,6 +277,434 @@ analytic heart, not a number: it is where complex analysis enters.
 2,490 and 58 instances -- so they are *in principle* decidable, but each
 instance needs `f k` to enough precision, and `f` is not kernel-computable.
 They would be the last thing to fall, not the first.
+
+## The rule that predicts which fields can fall
+
+Four fields fell in one session and three did not, and the difference is not
+the taxonomy this document started with ("analytic object vs explicit
+formula").  It is this:
+
+**A field can be proved here exactly when the ONE-SIDED bound the development
+actually uses is a finite computation on RATIONAL data.**
+
+Both halves matter, and each is doing work:
+
+*One-sided.*  `d` is used only from below, `rho` not at all, so the tail of
+their infinite products could be discarded entirely -- every factor exceeds 1,
+so a partial product is a bound with no estimate of what was dropped.  `Sodd`
+is needed from ABOVE, so nothing can be discarded, and that alone moves it
+from a 94-prime computation to one needing primes past 1.5e5 with a `log p` in
+each of ~13,800 terms.
+
+*Rational.*  `d` and `rho`'s Euler factors are `1 + 1/(p(p-2))` and
+`1 + (3p-1)/(p^2(p-3))` -- exact rationals, so a partial product is an exact
+rational and `norm_num` can compare it to a numeral.  `S*`'s coefficients are
+`iteratedDeriv i G2at1 0 / i!`, where there is no computation to perform at
+any `i`.  `Sodd`'s summands carry `log p`.  `fOdd k` and `f k` are infinite
+sums whose terms carry `log n`.
+
+So the remaining fields are not a tier away from falling; they fail the second
+test outright, and no amount of compute changes that.  Closing any of them
+means supplying the missing arithmetic -- verified interval arithmetic with
+transcendental functions -- or formalizing the Cauchy estimates that produce
+the bounds instead of computing them.  Those are projects, and this is the
+honest boundary of what the technique reaches.
+
+## Section 8 of the paper overstates the odd formalization
+
+This is the one finding here that is a defect in the manuscript rather than in
+the Lean, and it is the one worth acting on first.
+
+Section 8 ("Certification and formalization") says:
+
+> The analytic proof is the whole of Sections 2--6 apart from the two numerical
+> propositions named below: in particular ... **the remainder reduction in
+> Proposition~\ref{prop:odd-remainder}** ... These reductions are formalized in
+> Lean 4 without `sorry`.
+
+`prop:odd-remainder` is `|R_k| <= 4900 (k+3)^3 3^(-k)` for all k >= 1, proved
+in the paper from the certified `M_R`.  In Lean it is not a theorem.  It is
+
+    OddNumericalFacts.remainder : forall k,
+      |fOdd k - 1/2 - betaOdd * (1/2)^k| <= MR * (k+3)^3 * (1/3)^k
+
+an assumed field of the hypothesis structure, with `MR_bound : MR <= 4900`
+pinning the constant.  Same statement, opposite status: the paper says proved,
+the development assumes it.
+
+Two further details sharpen this rather than soften it.
+
+*The attempt existed and was empty.*  `fOdd_expansion_final` carries the
+docstring "STEP 5, the target: this is exactly OddNumericalFacts.remainder" --
+it is the theorem meant to discharge the field.  Until the radius fix it took
+an unsatisfiable hypothesis (`DifferentiableOn C (Hodd s) (ball 0 4)`, false at
+s = 1; see the section below), so it established nothing.  So the reduction was
+not partly formalized; it was not formalized at all.
+
+*Section 8's own framing excludes it.*  Section 8 says the numerical
+propositions are exactly `prop:odd-certified` and `prop:full-certified`, and
+that "the Lean formalization imports the resulting intervals as hypotheses".
+`prop:odd-remainder` is neither of those two propositions, and it is not an
+interval -- it is a bound quantified over all k.  So it is imported as a
+hypothesis while sitting outside the category section 8 reserves for imported
+hypotheses.
+
+Not a divergence, checked: PROOF.md section 8 lists the sweep as "k = 1..75"
+while Lean's `sweep_low` assumes only `1 <= k <= 58`.  Section 7 of PROOF.md
+explains it -- the certified computation reaches 75, and 58 is what the
+threshold K0 = 59 requires.  The numerics supply more than Lean asks for, which
+is the harmless direction.
+
+### What to do about it
+
+Two options, and they are not equivalent.
+
+1. **Formalize it.**  The radius repair in the companion branch removes the
+   obstruction that made `fOdd_expansion_final` vacuous, so this is now
+   reachable rather than blocked.  That would make section 8 true as written.
+2. **Correct section 8.**  List `prop:odd-remainder` among the imported
+   hypotheses.  One sentence, and it makes the paper accurate today.
+
+CLAUDE.md says never to sharpen the paper alone; this is the reverse case -- the
+paper currently claims MORE than the development delivers, so (2) removes a
+defect rather than introducing a conservatism.  But it is a claim about the
+project's own status in a co-authored manuscript, so it is flagged here and not
+edited.  Doing (1) and leaving section 8 alone is the better outcome if the
+work is going to happen anyway.
+
+## OddCoeffFacts and OddDomFacts, audited the same way
+
+`remainder` is reachable now that the vacuity is gone, but what it reaches is
+`fOdd_expansion_final`, which rests on two further assumption structures --
+`OddCoeffFacts` (8 fields) and `OddDomFacts` (5).  Those thirteen are the real
+gate, so they get the same audit.
+
+**None is vacuous.**  Every one is used: 6, 3, 4, 5, 2, 3, 1, 1 times
+respectively through `hf`, and 7, 6, 5, 2, 2 through `hd`.  No `Gamma_bound`
+hiding in there.
+
+**But four of the eight `OddCoeffFacts` fields are not numerical facts**, the
+same error as `g_deriv` and for the same reason -- they assert that something
+exists or converges, which an interval computation cannot establish:
+
+| field | what it actually is |
+|---|---|
+| `deriv_exists` | differentiability of `hCoeff · j` on (1,2) |
+| `deriv2_exists` | the same, one derivative up |
+| `tendsto_one` | RIGHT-CONTINUITY of `hCoeff · j` at s = 1 |
+| `tendsto_deriv` | existence of the limit defining `bHatOdd j` |
+
+The other four are genuine: `deriv_bound` and `deriv2_bound` are sup bounds,
+`nonneg` is free once `betaFam` is chosen, and `fam_summable` is a convergence
+property of that choice.  All five `OddDomFacts` fields are honest numerics --
+coefficient bounds and, in `dom_cert`, a finite partial-sum bound for every m.
+
+### All four reduce to sup bounds, and the pattern is already proved upstream
+
+`tendsto_one` is the one I had not noticed, and it is the most clearly
+portable.  `OddCoeffFacts`'s own docstring says "the main development's
+`gManu_tendsto_cCoeff` is the analogue", and that theorem is **proved** on the
+unrestricted side, from
+
+    hM0 : forall s in Ioi 1, forall theta, ||G2manu s (circleMap 0 2 theta)|| <= M0
+
+and nothing else -- a pure sup bound, via `contour_integral_tendsto` and the
+circle representation.  With `hCoeff_eq_circleIntegral` now available, the odd
+port needs only the corresponding dominated-convergence step on |z| = 5/2.
+
+Note where the difficulty sits, and where it does NOT.  `tendsto_one` is
+stated as a one-sided limit because `hCoeff` is USED on (1,2), where s = 1 is a
+boundary point -- the file says as much in the `LprimeOdd` section ("the
+boundary difficulty is confined to hCoeff, which lives on (1,2)"), and that is
+why it cannot be read off differentiability on the open interval.
+
+But the limit is not obstructed, and this is worth being precise about because
+it decides whether the item is tractable.  The p >= 3 Euler product has no pole
+at s = 1 -- the file states this directly for the z = 2 case ("Unlike the zeta
+series, s = 1 is INTERIOR here: the p >= 3 Euler factors have no pole at
+s = 1"), and `logHodd2_continuousOn` accordingly proves continuity across s = 1
+on (3/4, 2).  For general z the same holds on a slightly smaller interval:
+convergence needs `|z| p^(-s) < 1` for every p >= 3, so at |z| = 5/2 the
+binding constraint is p = 3 and the condition is
+
+    5/2 * 3^(-s) < 1   iff   s > log(5/2)/log 3 = 0.8340...
+
+At s = 1 that reads 5/6 < 1 with room, while at s = 3/4 it fails (1.0967).  So
+for |z| <= 5/2 the product converges and is continuous on roughly (0.84, 2),
+with s = 1 INTERIOR -- the one-sidedness of `tendsto_one` is an artifact of
+where `hCoeff` is consumed, not of the function's behaviour.
+
+That makes `tendsto_one` the easier of the four: continuity in s rather than
+differentiability, with the same majorant structure, and no boundary subtlety
+to work around.  The upstream pointwise input is proved unconditionally --
+`G2manu_tendsto_G2at1` takes no hypotheses beyond |z| <= 2 -- so the port needs
+a general-z continuity statement plus the dominated-convergence step on the
+circle, and `contour_integral_tendsto` is hardcoded to G2manu rather than
+generic, so that step has to be written rather than instantiated.
+
+So the shape of the whole odd route is now clear: `deriv_exists` and
+`deriv2_exists` from the general-z derivative build, `tendsto_one` and
+`tendsto_deriv` from the `gManu_tendsto_cCoeff` port, each leaving a sup bound
+behind in place of an analytic assumption.  That does not reduce the field
+count either -- it makes the count mean what the manuscript says it means.
+
+## The odd side assumes strictly more than the unrestricted side
+
+The two structures look comparable by field count (4 odd, 13 unrestricted),
+but they sit at different points in the same argument, and the odd one is
+further back.
+
+On the unrestricted side the Cauchy chain is FORMALIZED.  `M0_bound` assumes a
+sup -- `forall u in Ioi 1, forall theta, ||G2manu u (circleMap 0 2 theta)|| <=
+M0` -- and `gManu_eq_cauchy_coeff`, `lemma_3_8_integral_r1` (differentiation
+under the contour integral) and `E1k_le_alpha` carry it to the coefficient
+bound and then to `alph`.  Only the sup is trusted.
+
+On the odd side the chain is absent and its CONCLUSION is assumed instead:
+
+    remainder : forall k, |fOdd k - 1/2 - betaOdd * (1/2)^k|
+                  <= MR * (k+3)^3 * (1/3)^k
+
+and `MR_bound : MR <= 4900` only pins a numeral -- since `MR` is a parameter,
+that field asserts nothing, and nothing anywhere in the structure says `MR`
+bounds the sup of `|Htilde|`.  The link from the Arb-computed sup to the
+remainder bound is a paper-level step with no Lean counterpart.  So the odd
+side trusts the Cauchy estimate itself, not merely its numerical input.
+
+### The scaffolding that looks like it closes this does not
+
+`Odd/Basic.lean` has `HoddTilde_differentiableOn`, labelled "ITEM 2", which
+would be the first link.  It is **used nowhere**, and two things are wrong
+with it.  Both are now recorded in the Lean docstring as well.
+
+*Its hypothesis is unsatisfiable where it matters.*  The lemma takes `hfac`,
+the factorization, as a hypothesis for all `z` in `ball 0 4`.  But `HoddTilde
+s z` is *defined* as `Hodd s z * (1 - z * 3^(-s))`, and at `z = 3^s` that
+second factor is 0 while `Hodd`'s own p = 3 factor is `(1 - 1)` inverted,
+which under Lean's `0⁻¹ = 0` is 0 rather than a pole.  So the left side is 0
+there and the right side generically is not.  `3^s < 4` exactly when
+`s < log 4 / log 3 = 1.26186...`, so for those s the bad point is inside the
+ball and `hfac` is false.  `HoddTilde_factored`, two declarations above, does
+not discharge it: it carries an `h3ne` hypothesis that fails at that same
+point.  The lemma is therefore vacuous on the lower part of [1, 2] -- the
+near-pole part, which is the part the argument needs.
+
+*And the radius is too small anyway.*  `MR_bound` is a sup over |z| = 4.5.
+That circle is not in `ball 0 4`, so even an unconditional ITEM 2 would not
+reach it.  The file's own header docstring says "|z| = R < 5", so the `4` in
+the statement appears to be an error rather than a deliberate choice.
+
+### The route, which is a definition change
+
+Define Htilde by its FACTORED form.  Its only pole is then the p = 5 factor's,
+at |z| = 5^s >= 5, so it is differentiable on `ball 0 5` -- which contains the
+4.5 circle -- and the `3^s` problem does not arise because no inverted p = 3
+factor appears.  Then relate it to `Hodd s z * (1 - z * 3^(-s))` away from
+`z = 3^s`, where the singularity is genuinely removable.
+
+That is the honest prerequisite for `remainder`, and it is a port of machinery
+that already exists on the unrestricted side rather than new mathematics --
+which makes it the most tractable of the remaining items, and the one I would
+do next.  It does not close `remainder` by itself: that still needs the
+representation theorem linking `fOdd`'s coefficients to Htilde's, which is
+where the real work is.
+
+## One load-bearing field is not a numerical fact at all
+
+`Gamma_bound` turned out to be vacuous.  `g_deriv` is the opposite error and
+the more serious one: it is load-bearing, and it is not numerics.
+
+    g_deriv : forall i, forall x in Ioo 1 2,
+      HasDerivAt (gManu i) (deriv (gManu i) x) x
+
+`HasDerivAt f (deriv f x) x` holds exactly when `f` is differentiable at `x` --
+if it were not, `deriv f x` would be `0` and the statement would be false.  So
+the field asserts that `gManu i` is differentiable on `(1, 2)`.  That is a
+limit existing.  An Arb ball computation bounds a quantity; it cannot show a
+limit exists, so NO run of the certified package establishes this field, and
+rerunning the package with more precision will never close it.
+
+It is used (via `source_bound_full`, at the `NumericalFactsFull` call site), so
+unlike `Gamma_bound` it cannot simply be deleted.
+
+This matters because it misstates who owns the obligation.  `NumericalFacts`'s
+docstring says "each field is an Arb ball computation from the companion
+package, exactly the division Caveat 1.3(b) draws."  For `g_deriv` that is
+false, and the consequence is practical: a reader auditing the trusted base
+would look for the Arb script behind it and find none, and a maintainer would
+try to discharge it by recomputation, which cannot work.  The Lean docstrings
+for the structure and the field now say so.
+
+**This affects the manuscript's Caveat 1.3b as well**, which draws the same
+division between "machine-verified analytic reduction" and "certified
+numerics".  `g_deriv` sits on the numerics side of that line and does not
+belong there -- it is an analytic assumption.  Changing Caveat 1.3b's wording
+is not a change I should make unilaterally, so it is flagged here rather than
+edited: the paper currently understates, by one field, how much is assumed
+mathematically rather than computed.
+
+For scale, the proof that would close it: `G2manu s z = (kappaFac s)^z *
+G2C s z`, so `gManu i s` is the i-th z-derivative at 0 of that product over
+`i!`, and differentiability in `s` requires differentiating an Euler product
+under the iterated-derivative operator -- comparable work to `source_bound`,
+not a tidy-up.
+
+## Verified arithmetic would not close the sweeps, and this is why
+
+The paragraph above is easy to misread as "get verified interval arithmetic
+into the development and the sweeps fall."  They do not, and the reason is
+structural rather than a matter of degree.
+
+`sweep_low` and its two siblings assert `f k < f (k + 1)` over a finite range
+of `k`.  Finitely many instances, so the instinct is that a strong enough
+evaluator discharges them one at a time.  But look at what one instance says.
+By `lemma1_foundation`,
+
+    f k = Ik k + Tk k
+    Ik k = integral over Ioc 1 2 of Fk k s        -- a Bochner integral
+    Tk k = tsum over {n // 2 <= n and bigOmega n = k} of 1/(n^2 * log n)
+
+So a single instance of a sweep compares two Lebesgue integrals plus two
+infinite sums over Omega-classes, each summand carrying a `log n`.  That
+proposition is not DECIDABLE -- there is no `Decidable` instance, and there
+could not be one.  Finiteness in `k` buys nothing, because the object sitting
+at each `k` is itself infinite in two separate ways.
+
+This matters for the tool question specifically.  `native_decide` evaluates
+decidable propositions; it cannot be pointed at `f k < f (k + 1)` at all, at
+any depth or any budget.  Neither can `decide`, `norm_num`, or `leancert`'s
+checkers.  Verified interval arithmetic is the machinery at the BOTTOM of a
+proof that has already reduced the statement to rational data -- it is not a
+way to get there.  The reduction is the missing work:
+
+  1. a rigorous Lean enclosure of `Ik k`, i.e. numerical integration with
+     certified error, for the specific integrand `Fk k`; and
+  2. a rigorous tail bound on `Tk k` over `{bigOmega n = k}` -- the same
+     Omega-class tail that Section 5's delta-table handles numerically.
+
+Neither exists in Mathlib, and `leancert` supplies neither: its machinery is
+Chebyshev/Mertens prime sums and Abel summation, not integration over an
+interval against an arbitrary integrand.  `source_bound` is in the same
+position for the same reason, with the extra difficulty of being infinite in
+`k` as well.
+
+The practical consequence is that the trust decision below -- what to accept
+in exchange for `native_decide` -- **does not need to be made yet**, because no currently remaining field would be closed by
+making it.  It becomes live only after (1) and (2) exist, at which point the
+reduced statement is rational and the question of which evaluator discharges
+it is finally the operative one.  That ordering is worth being explicit about:
+it would be easy to spend the trust and gain nothing.
+
+## The route to an instance, and the trust decision it forces
+
+The structures have NO INSTANCE -- every occurrence in the development is a
+hypothesis binder.  So "completely formalized" means exactly one thing:
+produce an instance of `NumericalFactsFull` and `OddNumericalFacts`, at which
+point the theorems become unconditional.  Note that the numeral fields are
+FREE once you instantiate (take `Sstar := 6.9764` and `Sstar_bound` is
+`le_refl`); the work is entirely in the coupling fields -- `Sstar_dom`,
+`alpha_dom`, `UV_bound`, `M0_bound`, `Eexp_bound`, `g_deriv` -- plus
+`Sodd_enclosure`, the Cauchy estimates, and the sweeps.
+
+**`leancert` exists and is referenced here, but is NOT currently usable.**  It
+is in `lake-manifest.json` with `inherited: true`, pulled in transitively, but
+`import LeanCert` FAILS: the module is not on the search path, because nothing
+imports it and so Lake never builds it --
+
+    No directory 'LeanCert' or file 'LeanCert.olean' in the search path
+    probe/leancert.lean:21:0: error: unknown module prefix 'LeanCert'
+
+verified by probe rather than assumed.  Using it would take an explicit
+`[[require]]` in `lakefile.toml` and a from-source build on every CI run, and
+whether rev `87a21d739dde` compiles against Mathlib `v4.33.0-rc1` is still
+unknown -- LeanCert's HEAD pins toolchain `v4.35.0`, and the anonymous git lane
+will not serve that sha to check.  What it provides, read from HEAD and so also
+unconfirmed at the pinned rev: verified interval
+arithmetic with `exp`, `log`, `sqrt`, `atan`; a `leancert` tactic for
+quantified bounds over real intervals; certified partition integration; and --
+directly relevant -- `LeanCert/ANT/Mertens.lean` and
+`LeanCert/Engine/Chebyshev/{Theta,Psi}.lean`, with `logPrimeLB/UB p depth`
+giving RATIONAL enclosures of `log p` and a general Abel-summation checker
+over any rational weight.  No `sorry` in the Mertens module.  (The
+`CertifiedBounds/Li2` interface does carry deliberate `sorry`s -- that module
+must not be imported here.)
+
+What that buys, item by item:
+
+| obligation | status against this route |
+|---|---|
+| `alpha_dom`, `UV_bound`, `M0_bound`, `Eexp_bound`, `g_deriv_bound` | boxed suprema with `exp`/`log` -- the tactic's design target |
+| `Sodd_enclosure` | head is `sum logPrimeUB p depth / ((p-1)(p-2))`; see the tail below |
+| `Sstar_dom` | still blocked: `cCoeff` is `iteratedDeriv`, nothing to evaluate |
+| `source_bound`, `remainder` | still blocked: Cauchy estimates, analysis not computation |
+| the four sweeps | downstream of the above |
+
+The `Sodd` tail is the interesting case, and it is closer than this document
+previously claimed.  LeanCert's `verify_all_theta_*` theorems are all FINITE
+range (`N <= bound`), so the unbounded tail needs an unconditional Chebyshev
+bound, which Mathlib supplies via `primorial_le_4_pow` (`theta x <= x log 4`).
+Partial summation against `w(x) = 1/((x-1)(x-2))` then gives a tail of about
+`2c/N`, so the admissible `6.9e-6` needs `N` near `2.9e5` -- roughly 25,000
+primes in the head.  LeanCert's own Chebyshev tests run at `N` from 599 to
+7690, so this is three to four times beyond demonstrated scale rather than
+orders of magnitude.  That is a real engineering question, not a wall.
+
+**The route very likely runs on `native_decide`, though this is not yet
+measured.**  There are 430 uses of it in LeanCert and the Chebyshev
+certificates are discharged that way.  But a grep count is not a dependency:
+the bound theorems themselves -- `log_prime_le_logPrimeUB`,
+`mertensLogSum_le_mertensLogSumUpperRat` -- are ordinary proved inequalities
+with no decidability in them, and `native_decide` enters only where a
+`check... = true` hypothesis must be evaluated.  So the axiom cost is plausibly
+zero for the proved bounds and nonzero only at the numeric step.
+
+MEASURED, on the experiment branch, after the probe was made to build.  Two
+results, and the second corrects what this document previously asserted.
+
+*Kernel-clean evaluation is not available at all.*  `norm_num [logPrimeUB]`
+and `simp only [logPrimeUB]; norm_num` both fail with unsolved goals on
+`(logPrimeUB 7 10 : Q) <= 2` -- the smallest instance there is, p = 7 at depth
+10.  If that one will not go through the kernel, no larger one will, so every
+numeric step in a leancert-based certificate costs whatever `native_decide`
+costs.
+
+*But that cost is not `Lean.ofReduceBool`.*  This document used to say
+"`native_decide` adds `Lean.ofReduceBool`".  It does not, on this toolchain:
+
+    probe_numeric_native = [propext, Classical.choice, Quot.sound,
+                            probe_numeric_native._native.native_decide.ax_1_1]
+
+`native_decide` mints a PER-DECLARATION axiom named after the declaration that
+used it, and `ofReduceBool` appears nowhere in the probe output.
+
+That difference is worth having, not a technicality.  A single global axiom is
+one opaque assumption shared by every use, and once it is present an audit
+cannot tell one use from a hundred.  A per-use named axiom is enumerable:
+`#print axioms` on any theorem names exactly the native_decide calls it rests
+on, so the trusted base stays countable and the audits here can be made to
+fail on an unexpected one rather than on the mechanism as such.  The trust is
+still ADDITIONAL -- these are axioms outside the three permitted, and what they
+assert is the correctness of compiled evaluation rather than of the kernel --
+but it is itemised rather than wholesale.
+
+Either way the axiom audits in this repository currently REJECT it: they
+require exactly `[propext, Classical.choice, Quot.sound]`.
+
+So adopting this route is a decision about what the formalization means, and it
+is not mine to make.  What should be said in its favour, though, is that it
+would be a STRENGTHENING rather than a weakening of the present position.
+Today the numerical propositions are certified by Arb through python-flint, by
+scripts in `numerics/`, with the resulting constants transcribed into Lean by
+hand as hypotheses -- so the trusted base includes Arb, python-flint, those
+scripts, and the transcription, and Lean checks no number at all.  Under
+`native_decide` the trusted base would instead be Lean's compiler evaluating a
+checker whose correctness is a kernel-proved theorem.  That is strictly less to
+trust, even though it is not kernel-pure, and Caveat 1.3b would need rewriting
+rather than merely weakening.
+
+The alternative is kernel-mode only, which keeps the axiom set exactly as it is
+and caps what can be certified at whatever `decide` will evaluate -- far below
+`N = 2.9e5`.
 
 ## The constraint that shapes all of this
 
