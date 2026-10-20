@@ -1982,12 +1982,16 @@ theorem prime_logderiv_complex_seven (p : ℕ) (hp : 7 ≤ p) (z : ℂ) (hz : �
       | exact hpow.ofReal_comp
       | exact HasDerivAt.ofReal_comp hpow
       | exact (Complex.ofRealCLM.hasFDerivAt.comp_hasDerivAt s hpow)
-  have hargd : HasDerivAt (fun r : ℝ => 1 - z * (((p : ℝ) ^ (-r) : ℝ) : ℂ))
-      (z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) s := by
-    have h := (hpowC.const_mul z).const_sub 1
-    convert h using 1
+  -- the combinators produce -(z * (-(log p * a))); normalise it explicitly
+  -- rather than through `convert`, which leaves a goal `ring` cannot act on
+  have hargd0 := (hpowC.const_mul z).const_sub 1
+  have hval : -(z * ((((-(Real.log (p : ℝ) * a)) : ℝ) : ℂ)))
+      = z * ((Real.log (p : ℝ) * a : ℝ) : ℂ) := by
     push_cast
     ring
+  rw [hval] at hargd0
+  have hargd : HasDerivAt (fun r : ℝ => 1 - z * (((p : ℝ) ^ (-r) : ℝ) : ℂ))
+      (z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) s := hargd0
   -- |z a| <= 4/7 puts the argument in the slit plane
   have hzaNorm : ‖z * ((a : ℝ) : ℂ)‖ ≤ 4 / 7 := by
     rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ha_pos]
@@ -2010,9 +2014,12 @@ theorem prime_logderiv_complex_seven (p : ℕ) (hp : 7 ≤ p) (z : ℂ) (hz : �
       | exact hargd.clog hslit
       | exact HasDerivAt.clog hargd hslit
   have hsum := hlogc.neg.add (hlogrC.const_mul z)
-  rw [← ha_def]
-  convert hsum using 1
-  ring
+  -- no `rw [<- ha_def]` here: `set` already replaced every p^(-s) by `a`, so
+  -- there is no occurrence left to rewrite and the rw fails
+  first
+    | exact hsum
+    | (convert hsum using 1; ring)
+    | (convert hsum using 1 <;> ring)
 
 /-- The M-test bound: the summand's derivative is `O(log p * p^(-s))`, with the
 constant 14.  From |z| <= 4, |1 - z p^(-s)| >= 3/7 and 1 - p^(-s) >= 6/7, the
