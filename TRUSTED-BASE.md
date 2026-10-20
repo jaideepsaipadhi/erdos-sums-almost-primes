@@ -412,11 +412,35 @@ and nothing else -- a pure sup bound, via `contour_integral_tendsto` and the
 circle representation.  With `hCoeff_eq_circleIntegral` now available, the odd
 port needs only the corresponding dominated-convergence step on |z| = 5/2.
 
-Note where the difficulty sits.  `hCoeff` lives on (1,2) and s = 1 is a
-BOUNDARY point, which is why `tendsto_one` is a one-sided limit rather than
-plain continuity -- the file says as much in the `LprimeOdd` section ("the
-boundary difficulty is confined to hCoeff, which lives on (1,2)"), and it is
-why this cannot be read off differentiability on the open interval.
+Note where the difficulty sits, and where it does NOT.  `tendsto_one` is
+stated as a one-sided limit because `hCoeff` is USED on (1,2), where s = 1 is a
+boundary point -- the file says as much in the `LprimeOdd` section ("the
+boundary difficulty is confined to hCoeff, which lives on (1,2)"), and that is
+why it cannot be read off differentiability on the open interval.
+
+But the limit is not obstructed, and this is worth being precise about because
+it decides whether the item is tractable.  The p >= 3 Euler product has no pole
+at s = 1 -- the file states this directly for the z = 2 case ("Unlike the zeta
+series, s = 1 is INTERIOR here: the p >= 3 Euler factors have no pole at
+s = 1"), and `logHodd2_continuousOn` accordingly proves continuity across s = 1
+on (3/4, 2).  For general z the same holds on a slightly smaller interval:
+convergence needs `|z| p^(-s) < 1` for every p >= 3, so at |z| = 5/2 the
+binding constraint is p = 3 and the condition is
+
+    5/2 * 3^(-s) < 1   iff   s > log(5/2)/log 3 = 0.8340...
+
+At s = 1 that reads 5/6 < 1 with room, while at s = 3/4 it fails (1.0967).  So
+for |z| <= 5/2 the product converges and is continuous on roughly (0.84, 2),
+with s = 1 INTERIOR -- the one-sidedness of `tendsto_one` is an artifact of
+where `hCoeff` is consumed, not of the function's behaviour.
+
+That makes `tendsto_one` the easier of the four: continuity in s rather than
+differentiability, with the same majorant structure, and no boundary subtlety
+to work around.  The upstream pointwise input is proved unconditionally --
+`G2manu_tendsto_G2at1` takes no hypotheses beyond |z| <= 2 -- so the port needs
+a general-z continuity statement plus the dominated-convergence step on the
+circle, and `contour_integral_tendsto` is hardcoded to G2manu rather than
+generic, so that step has to be written rather than instantiated.
 
 So the shape of the whole odd route is now clear: `deriv_exists` and
 `deriv2_exists` from the general-z derivative build, `tendsto_one` and
