@@ -543,11 +543,41 @@ is not a change I should make unilaterally, so it is flagged here rather than
 edited: the paper currently understates, by one field, how much is assumed
 mathematically rather than computed.
 
-For scale, the proof that would close it: `G2manu s z = (kappaFac s)^z *
-G2C s z`, so `gManu i s` is the i-th z-derivative at 0 of that product over
-`i!`, and differentiability in `s` requires differentiating an Euler product
-under the iterated-derivative operator -- comparable work to `source_bound`,
-not a tidy-up.
+### Correction: closing it is much closer than this said
+
+This section first claimed that closing `g_deriv` meant differentiating an
+Euler product under the iterated-derivative operator, work comparable to
+`source_bound`.  That overstated it, and the machinery that makes it cheaper is
+already in the file.
+
+`gManu_eq_circleIntegral` rewrites `gManu i s` as a contour integral over
+|z| = 2 in which the s-dependence sits ONLY in `G2manu s z` -- the `(1/z)^i *
+z⁻¹` weight is s-free, which is exactly what makes differentiation under the
+integral clean, as that lemma's own docstring notes.  And
+`lemma_3_8_integral_r1` already differentiates under that integral.  Composing
+the two gives `g_deriv`; no Euler product needs differentiating, because the
+product has been replaced by an integral of itself.
+
+What the composition needs:
+
+  1. `hf` -- `HasDerivAt (fun t => Real.log (zetaTilde t)) (f x) x` on (1,2).
+     Threaded unproved through six lemmas in the file.  **Now proved**, as
+     `log_zetaTilde_hasDerivAt`: off `t = 1`, `zetaTilde` is
+     `(t-1) * (riemannZeta t).re`, that description holds on a neighbourhood of
+     any `x > 1`, and the rest is `differentiableAt_riemannZeta` plus
+     `zetaTilde_pos`.
+  2. A uniform bound on `‖cBracket (f x) x z‖` over `x` in (1,2) and `z` on the
+     circle.  `lemma_3_9_complex` gives
+     `deriv (fun t => G2manu t z) s = G2manu s z * cBracket (f s) s z`, so with
+     `M0_bound` already assuming the sup of `‖G2manu‖` on that circle, a
+     cBracket bound supplies `lemma_3_8_integral_r1`'s `hM`.  The file has
+     cBracket summability, continuity and tendsto lemmas but no norm bound, so
+     this is the piece that remains.
+
+So `g_deriv` is one uniform bound away from falling, not a project.  That also
+means the paragraph above -- that no Arb run can close it -- stays true while
+its pessimism about cost does not: the remedy is a proof, and the proof is
+mostly written.
 
 ## Verified arithmetic would not close the sweeps, and this is why
 

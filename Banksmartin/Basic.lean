@@ -10625,6 +10625,58 @@ theorem zetaTilde_pos (s : ℝ) (hs : 1 < s) : 0 < zetaTilde s := by
   have h2 : (0 : ℝ) < 1 - (2 : ℝ) ^ (-s) := by linarith
   nlinarith [hk, h2]
 
+/-- `log(zetaTilde)` is differentiable on (1,2).
+
+This DISCHARGES the `hf` hypothesis that six lemmas in this file thread
+through unproved -- `lemma_3_8_integral_r1`, `gManu_eq_circleIntegral`'s
+companion, `lemma_3_9_complex` and the three around them all take
+`HasDerivAt (fun t => Real.log (zetaTilde t)) (f x) x` as given.
+
+`zetaTilde t = (t - 1) * (riemannZeta t).re` off `t = 1`, and since `x > 1`
+that description holds on a whole neighbourhood of `x`, which is what lets the
+`if` be discharged.  `riemannZeta` is complex-differentiable away from its one
+pole at 1; composing with the real embedding and with `.re` gives real
+differentiability, and `zetaTilde_pos` puts the value strictly inside the
+domain of `Real.log`.
+
+Stated in the `HasDerivAt f (deriv f x) x` form the consumers use, so they can
+be instantiated at `f := deriv (fun t => Real.log (zetaTilde t))`. -/
+theorem log_zetaTilde_hasDerivAt (x : ℝ) (hx : x ∈ Set.Ioo (1 : ℝ) 2) :
+    HasDerivAt (fun t : ℝ => Real.log (zetaTilde t))
+      (deriv (fun t : ℝ => Real.log (zetaTilde t)) x) x := by
+  have hx1 : (1 : ℝ) < x := hx.1
+  have hcne : ((x : ℂ)) ≠ 1 := by
+    intro hc
+    have : (x : ℝ) = 1 := by exact_mod_cast hc
+    linarith
+  -- Re zeta through the real embedding: the `real_of_complex` idiom of
+  -- `zetaRderiv_eq_re` in Odd/Basic.lean, which is the proven way to
+  -- differentiate `t |-> (F t).re` here.
+  have hzC : DifferentiableAt ℂ riemannZeta ((x : ℂ)) :=
+    differentiableAt_riemannZeta hcne
+  have hzre : HasDerivAt (fun t : ℝ => (riemannZeta ((t : ℂ))).re)
+      ((deriv riemannZeta ((x : ℂ))).re) x := hzC.hasDerivAt.real_of_complex
+  have hid : HasDerivAt (fun t : ℝ => t - 1) (1 : ℝ) x := by
+    have h := (hasDerivAt_id x).sub_const 1
+    simpa using h
+  have hprod : HasDerivAt (fun t : ℝ => (t - 1) * (riemannZeta ((t : ℂ))).re)
+      ((1 : ℝ) * (riemannZeta ((x : ℂ))).re
+        + (x - 1) * (deriv riemannZeta ((x : ℂ))).re) x := hid.mul hzre
+  -- off t = 1 the `if` takes its else branch, and that holds on a whole
+  -- neighbourhood of x since x > 1
+  have hev : (fun t : ℝ => zetaTilde t)
+      =ᶠ[nhds x] (fun t : ℝ => (t - 1) * (riemannZeta ((t : ℂ))).re) := by
+    filter_upwards [Ioi_mem_nhds hx1] with t ht
+    have htne : t ≠ 1 := ne_of_gt ht
+    unfold zetaTilde
+    rw [if_neg htne]
+  have hzt : DifferentiableAt ℝ (fun t : ℝ => zetaTilde t) x :=
+    hprod.differentiableAt.congr_of_eventuallyEq hev
+  have hpos : 0 < zetaTilde x := zetaTilde_pos x hx1
+  have hlog : DifferentiableAt ℝ (fun t : ℝ => Real.log (zetaTilde t)) x :=
+    hzt.log hpos.ne'
+  exact hlog.hasDerivAt
+
 /-- The p = 2 factor is positive on (1,2]. -/
 theorem one_sub_two_pow_pos (s : ℝ) (hs : 1 < s) : (0 : ℝ) < 1 - (2 : ℝ) ^ (-s) := by
   have hlt : (2 : ℝ) ^ (-s) < 1 := by
