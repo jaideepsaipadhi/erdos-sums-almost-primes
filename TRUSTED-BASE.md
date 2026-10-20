@@ -1,7 +1,7 @@
 # The trusted base: what is assumed, and what need not be
 
 `NumericalFacts`, `NumericalFactsFull` and `OddNumericalFacts` are `Prop`
-structures with no instance.  That is deliberate (manuscript Caveat 1.3b): Lean
+structures with no instance.  That is deliberate (manuscript Section 8): Lean
 proves the reduction, the Arb certificates supply the numbers, and the two meet
 at these structures.  This note is an audit of what is actually in there, since
 "the trusted base" is otherwise a phrase rather than a list.
@@ -453,16 +453,16 @@ unlike `Gamma_bound` it cannot simply be deleted.
 
 This matters because it misstates who owns the obligation.  `NumericalFacts`'s
 docstring says "each field is an Arb ball computation from the companion
-package, exactly the division Caveat 1.3(b) draws."  For `g_deriv` that is
+package, exactly the division Section 8 draws."  For `g_deriv` that is
 false, and the consequence is practical: a reader auditing the trusted base
 would look for the Arb script behind it and find none, and a maintainer would
 try to discharge it by recomputation, which cannot work.  The Lean docstrings
 for the structure and the field now say so.
 
-**This affects the manuscript's Caveat 1.3b as well**, which draws the same
+**This affects the manuscript's Section 8 as well**, which draws the same
 division between "machine-verified analytic reduction" and "certified
 numerics".  `g_deriv` sits on the numerics side of that line and does not
-belong there -- it is an analytic assumption.  Changing Caveat 1.3b's wording
+belong there -- it is an analytic assumption.  Changing Section 8's wording
 is not a change I should make unilaterally, so it is flagged here rather than
 edited: the paper currently understates, by one field, how much is assumed
 mathematically rather than computed.
@@ -653,7 +653,7 @@ hand as hypotheses -- so the trusted base includes Arb, python-flint, those
 scripts, and the transcription, and Lean checks no number at all.  Under
 `native_decide` the trusted base would instead be Lean's compiler evaluating a
 checker whose correctness is a kernel-proved theorem.  That is strictly less to
-trust, even though it is not kernel-pure, and Caveat 1.3b would need rewriting
+trust, even though it is not kernel-pure, and Section 8 would need rewriting
 rather than merely weakening.
 
 The alternative is kernel-mode only, which keeps the axiom set exactly as it is
@@ -676,7 +676,7 @@ specific.
 
 ## Recommendation
 
-Hold Caveat 1.3b as the stated position -- Tier C is not going anywhere
+Hold Section 8 as the stated position -- Tier C is not going anywhere
 without a verified interval layer, and claiming otherwise would be dishonest
 about what is machine-checked.
 
