@@ -20,7 +20,7 @@ T2 (the wall inside T1): Thm 4.1 needs gap-5 integral identity + Euler's
    aE1(a) <= e^{-a} may be provable from the defining integral directly.
 T3 (do NOT formalize): Arb computations (delta-table, prime tails, box sweeps,
    arc sups) stay as NumericalFacts hypothesis = trusted computing base, per
-   manuscript Caveat 1.3b. dConst, rhoConst now genuinely defined; still to
+   manuscript section 8. dConst, rhoConst now genuinely defined; still to
    define as real objects: SstarConst (sum 2^i |c_i| — needs c_i := taylor
    coeff of G2(1,z), i.e. formalize G2 first), alphaConst, GammaConst (deriv
    sups). Defining G2 and c_i in Lean is the natural session opener — it
@@ -224,7 +224,7 @@ trusted base look larger than the one the theorems actually use.
 
 THE CAVEAT THAT MATTERS: NumericalFacts is a hypothesis.  The theorem is
 vacuous unless an instance exists, and the instance comes from the Arb
-computations OUTSIDE Lean.  This is exactly Caveat 1.3(b)'s division, drawn
+computations OUTSIDE Lean.  This is exactly section 8's division, drawn
 explicitly rather than blurred -- but it means the correct claim is "the
 analytic reduction is machine-verified", NOT "Lean proved the theorem".
 
