@@ -10645,45 +10645,36 @@ theorem log_zetaTilde_hasDerivAt (x : ℝ) (hx : x ∈ Set.Ioo (1 : ℝ) 2) :
     HasDerivAt (fun t : ℝ => Real.log (zetaTilde t))
       (deriv (fun t : ℝ => Real.log (zetaTilde t)) x) x := by
   have hx1 : (1 : ℝ) < x := hx.1
-  -- off t = 1 the `if` takes its else branch, and that holds near x
+  have hcne : ((x : ℂ)) ≠ 1 := by
+    intro hc
+    have : (x : ℝ) = 1 := by exact_mod_cast hc
+    linarith
+  -- Re zeta through the real embedding: the `real_of_complex` idiom of
+  -- `zetaRderiv_eq_re` in Odd/Basic.lean, which is the proven way to
+  -- differentiate `t |-> (F t).re` here.
+  have hzC : DifferentiableAt ℂ riemannZeta ((x : ℂ)) :=
+    differentiableAt_riemannZeta hcne
+  have hzre : HasDerivAt (fun t : ℝ => (riemannZeta ((t : ℂ))).re)
+      ((deriv riemannZeta ((x : ℂ))).re) x := hzC.hasDerivAt.real_of_complex
+  have hid : HasDerivAt (fun t : ℝ => t - 1) (1 : ℝ) x := by
+    have h := (hasDerivAt_id x).sub_const 1
+    simpa using h
+  have hprod : HasDerivAt (fun t : ℝ => (t - 1) * (riemannZeta ((t : ℂ))).re)
+      ((1 : ℝ) * (riemannZeta ((x : ℂ))).re
+        + (x - 1) * (deriv riemannZeta ((x : ℂ))).re) x := hid.mul hzre
+  -- off t = 1 the `if` takes its else branch, and that holds on a whole
+  -- neighbourhood of x since x > 1
   have hev : (fun t : ℝ => zetaTilde t)
-      =ᶠ[nhds x] (fun t : ℝ => (t - 1) * (riemannZeta (t : ℂ)).re) := by
-    have hmem : Set.Ioi (1 : ℝ) ∈ nhds x := Ioi_mem_nhds hx1
-    refine Filter.eventuallyEq_of_mem hmem ?_
-    intro t ht
+      =ᶠ[nhds x] (fun t : ℝ => (t - 1) * (riemannZeta ((t : ℂ))).re) := by
+    filter_upwards [Ioi_mem_nhds hx1] with t ht
     have htne : t ≠ 1 := ne_of_gt ht
     unfold zetaTilde
     rw [if_neg htne]
-  have hcne : ((x : ℂ)) ≠ 1 := by
-    rw [Ne, Complex.ofReal_eq_one]
-    linarith
-  have hzC : DifferentiableAt ℂ riemannZeta (x : ℂ) :=
-    differentiableAt_riemannZeta hcne
-  have hofR : DifferentiableAt ℝ (fun t : ℝ => ((t : ℂ))) x :=
-    Complex.ofRealCLM.differentiableAt
-  have hzR : DifferentiableAt ℝ (fun t : ℝ => riemannZeta (t : ℂ)) x := by
-    first
-      | exact DifferentiableAt.comp x (hzC.restrictScalars ℝ) hofR
-      | simpa [Function.comp_def] using
-          DifferentiableAt.comp x (hzC.restrictScalars ℝ) hofR
-      | exact (hzC.restrictScalars ℝ).comp x hofR
-  have hre : DifferentiableAt ℝ (fun t : ℝ => (riemannZeta (t : ℂ)).re) x := by
-    first
-      | exact Complex.reCLM.differentiableAt.comp x hzR
-      | simpa [Function.comp_def] using Complex.reCLM.differentiableAt.comp x hzR
-      | exact hzR.re
-  have hprod : DifferentiableAt ℝ
-      (fun t : ℝ => (t - 1) * (riemannZeta (t : ℂ)).re) x :=
-    (differentiableAt_id.sub_const 1).mul hre
   have hzt : DifferentiableAt ℝ (fun t : ℝ => zetaTilde t) x :=
-    hprod.congr_of_eventuallyEq hev
+    hprod.differentiableAt.congr_of_eventuallyEq hev
   have hpos : 0 < zetaTilde x := zetaTilde_pos x hx1
-  have hlog : DifferentiableAt ℝ (fun t : ℝ => Real.log (zetaTilde t)) x := by
-    first
-      | exact (Real.differentiableAt_log hpos.ne').comp x hzt
-      | simpa [Function.comp_def] using
-          (Real.differentiableAt_log hpos.ne').comp x hzt
-      | exact hzt.log hpos.ne'
+  have hlog : DifferentiableAt ℝ (fun t : ℝ => Real.log (zetaTilde t)) x :=
+    hzt.log hpos.ne'
   exact hlog.hasDerivAt
 
 /-- The p = 2 factor is positive on (1,2]. -/
