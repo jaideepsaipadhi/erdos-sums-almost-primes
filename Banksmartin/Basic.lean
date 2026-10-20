@@ -11292,7 +11292,26 @@ theorem deriv_clog_prime_factor (p : ℕ) (hp : 3 ≤ p) (s : ℝ) (hs : 1 ≤ s
 
 /-- Complex analogue of deriv_prime_term_bound_uniform: the s-free dominating
 bound for the per-prime derivative.  Same constant 27, same crude route, with
-norms in place of absolute values. -/
+norms in place of absolute values.
+
+The radius is 5/2, NOT the 29/10 of the `_wide` family elsewhere in this file,
+and the difference is forced rather than stylistic.  5/2 is the smallest radius
+that serves the odd side (its Cauchy bridge integrates on |z| = 5/2, and it
+cannot drop to 2 because `fam_summable` needs betaFam j * 2^j summable while a
+radius-2 bound gives exactly 2^-j).  It is also the largest radius at which the
+constant 27 survives: at 29/10 and p = 5, s = 1 the true ratio is
+2.9 * 3.9 / ((5-1)(5-2.9)) = 1.346, against a target of 27/25 = 1.08, so the
+conclusion is simply false there and the constant would have to grow -- and 27
+is restated by consumers in fifteen places in this file.  At 5/2 the same point
+gives 2.5 * 3.5 / ((5-1)(5-2.5)) = 0.875 <= 1.08.
+
+Do not widen this to 29/10 to match the `_wide` lemmas without also moving the
+constant everywhere it is restated.
+
+The hypothesis is 5 <= p, not the 3 <= p of the HasDerivAt lemmas above: every
+call site is over {p // p.Prime /\ 5 <= p} (p = 3 goes through
+`hasDerivAt_prime_three_factor`), and at |z| <= 5/2 the bound is FALSE at p = 3
+-- it needs 18.25p^2 - 94.5p + 67.5 >= 0, true for p >= 4.33, failing at 3. -/
 theorem deriv_clog_term_bound_uniform (p : ℕ) (hp : 5 ≤ p) (s : ℝ) (hs : 1 ≤ s)
     (z : ℂ) (hz : Norm.norm z ≤ 5 / 2) :
     Norm.norm (-(z * (z - 1) * ((Real.log ((p : ℕ):ℝ) : ℝ) : ℂ))
