@@ -1162,20 +1162,32 @@ $\mathcal P=\{p:p\geq3\}$.
 
 The logical division is as follows.
 
-The analytic proof is the whole of Sections~2--6 apart from the two numerical
+The analytic proof is the whole of Sections~2--6 apart from the numerical
 propositions named below: in particular
 Lemmas~\ref{lem:integral-representation} and \ref{lem:zeta-coordinate},
 Proposition~\ref{prop:analyticity}, the coefficient identities
-\eqref{eq:odd-u-integral} and \eqref{eq:E-decomposition}, the remainder
-reduction in Proposition~\ref{prop:odd-remainder}, and the source estimates in
-Sections~5--6. These reductions are formalized in Lean~4 without
+\eqref{eq:odd-u-integral} and \eqref{eq:E-decomposition}, and the source
+estimates in Sections~5--6. These reductions are formalized in Lean~4 without
 \texttt{sorry}.
+
+Proposition~\ref{prop:odd-remainder} is not among them, and we state the
+position precisely because it is the one place where the division is not the
+one the reader would expect. Its statement is imported into the formalization
+as a hypothesis, as field \texttt{remainder} of the
+\texttt{OddNumericalFacts} structure, rather than derived there from
+Proposition~\ref{prop:odd-certified}; the derivation is the proof given in
+Section~5 above, which has not been formalized. The Lean development contains
+the intended route to it, but that route still rests on assumed coefficient
+and dominating-sequence data of its own, so it does not discharge the
+hypothesis.
 
 The numerical propositions are Proposition~\ref{prop:odd-certified} and
 Proposition~\ref{prop:full-certified}. Their statements are finite systems of
 interval inequalities. They are established by Arb/FLINT through its Python bindings. The Lean
 formalization imports the resulting intervals
-as hypotheses and proves that those hypotheses imply
+as hypotheses -- together with Proposition~\ref{prop:odd-remainder} and, in
+the full case, the differentiability of the coefficient functions $g_i$ on
+$(1,2)$, neither of which is an interval inequality -- and proves that those hypotheses imply
 Theorem~\ref{thm:main-full} and both assertions of
 Theorem~\ref{thm:main-odd}; the three formal statements are
 \texttt{erdos\_sums\_increase\_from\_six}, \texttt{fOdd\_decreasing} and
