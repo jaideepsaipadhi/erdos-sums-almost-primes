@@ -14189,32 +14189,6 @@ end
 
 #print axioms erdos_sums_increase_from_six
 
-/-- The certified inputs, decomposed into primitives.
-
-`NumericalFacts` above states the section 7 source bound as a single aggregate.
-This version replaces it with the quantities the Arb package actually computes,
-so that Proposition 2.5, Theorem 4.1 and section 3.5 are *used* in deriving it
-rather than merely proved.
-
-CAUTION about `g_deriv`.  `NumericalFacts`'s docstring says "each field is an
-Arb ball computation", and for this structure that is NOT true of every field.
-`g_deriv` asserts
-
-    forall i, forall x in Ioo 1 2, HasDerivAt (gManu i) (deriv (gManu i) x) x
-
-which is equivalent to `DifferentiableAt R (gManu i) x` -- if `gManu i` were
-not differentiable at `x` then `deriv (gManu i) x = 0` and the field would be
-false.  So this is a DIFFERENTIABILITY claim, not a numerical enclosure, and
-no interval computation establishes it: an Arb run bounds a quantity, it does
-not show a limit exists.  It is load-bearing (used via `source_bound_full`),
-so it cannot be dropped the way `Gamma_bound` can.
-
-The remedy is therefore a proof rather than a recomputation, and the proof is
-a real one: `G2manu s z = (kappaFac s)^z * G2C s z`, so `gManu i s` is the
-i-th z-derivative at 0 of that product divided by i!, and differentiating it
-in `s` means differentiating an Euler product under the iterated-derivative
-operator.  That is the same order of work as `source_bound`.
-
 /-- `g_deriv` is DERIVABLE from a sup bound on the s-derivative.
 
 `NumericalFactsFull.g_deriv` assumes
@@ -14278,6 +14252,33 @@ theorem g_deriv_of_derivBound (M1 : ℝ) (hM10 : 0 ≤ M1)
     intro t ht
     exact hci t ht
   exact (hscaled.congr_of_eventuallyEq hev).differentiableAt.hasDerivAt
+
+/-- The certified inputs, decomposed into primitives.
+
+`NumericalFacts` above states the section 7 source bound as a single aggregate.
+This version replaces it with the quantities the Arb package actually computes,
+so that Proposition 2.5, Theorem 4.1 and section 3.5 are *used* in deriving it
+rather than merely proved.
+
+CAUTION about `g_deriv`.  `NumericalFacts`'s docstring says "each field is an
+Arb ball computation", and for this structure that is NOT true of every field.
+`g_deriv` asserts
+
+    forall i, forall x in Ioo 1 2, HasDerivAt (gManu i) (deriv (gManu i) x) x
+
+which is equivalent to `DifferentiableAt R (gManu i) x` -- if `gManu i` were
+not differentiable at `x` then `deriv (gManu i) x = 0` and the field would be
+false.  So this is a DIFFERENTIABILITY claim, not a numerical enclosure, and
+no interval computation establishes it: an Arb run bounds a quantity, it does
+not show a limit exists.  It is load-bearing (used via `source_bound_full`),
+so it cannot be dropped the way `Gamma_bound` can.
+
+The remedy is therefore a proof rather than a recomputation, and the proof is
+a real one: `G2manu s z = (kappaFac s)^z * G2C s z`, so `gManu i s` is the
+i-th z-derivative at 0 of that product divided by i!, and differentiating it
+in `s` means differentiating an Euler product under the iterated-derivative
+operator.  That is the same order of work as `source_bound`.
+
 
 Recorded because the distinction changes who owns the obligation: a numerical
 field is closed by rerunning the certified package, an analytic one is not. -/
