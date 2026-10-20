@@ -1,7 +1,13 @@
 name = "banksmartin"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["Banksmartin"]
+# BOTH libraries.  This read ["Banksmartin"] alone, and since Banksmartin does
+# not import Odd (the dependency runs the other way), `lake build` never
+# compiled Odd/Basic.lean at all -- so neither the build, nor the no-sorry
+# check, nor the axiom audit covered the odd development.  The audit's own
+# error said so ("No directory 'Odd' or file 'Odd.olean' in the search path")
+# but `lake env lean ... | tee` reported tee's exit status, so the step passed.
+defaultTargets = ["Banksmartin", "Odd"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`

@@ -732,6 +732,513 @@ theorem aOneConst_ge_of_d (h : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8) :
   unfold aOneConst
   linarith [hprod]
 
+/-- Partial products bound an infinite product from below when every factor is
+at least 1.  Mathlib has no `Finset.prod_le_hasProd` -- the multiplicative
+order lemmas want an `OrderedCommMonoid`, which ℝ is not under multiplication
+-- so this is proved from the net definition directly: for any finite `t`
+containing `s`, the product over `t` splits as (product over `t \ s`) times
+(product over `s`), and the first factor is at least 1. -/
+theorem prod_le_hasProd_of_one_le {ι : Type*} [DecidableEq ι]
+    (s : Finset ι) (f : ι → ℝ) (a : ℝ)
+    (h1 : ∀ i, 1 ≤ f i) (hp : HasProd f a) : ∏ i ∈ s, f i ≤ a := by
+  have hnet : Filter.Tendsto (fun t : Finset ι => ∏ i ∈ t, f i) Filter.atTop (nhds a) := hp
+  refine ge_of_tendsto hnet ?_
+  filter_upwards [Filter.eventually_ge_atTop s] with t hst
+  have hsplit : (∏ i ∈ t \ s, f i) * (∏ i ∈ s, f i) = ∏ i ∈ t, f i :=
+    Finset.prod_sdiff hst
+  have hcompl : (1 : ℝ) ≤ ∏ i ∈ t \ s, f i :=
+    Finset.one_le_prod (fun i _ => h1 i)
+  have hs0 : (0 : ℝ) ≤ ∏ i ∈ s, f i :=
+    Finset.prod_nonneg (fun i _ => le_trans zero_le_one (h1 i))
+  nlinarith [hsplit, hcompl, hs0]
+
+/-- The dConst Euler factor, in closed form.  This is the `hexact` step of
+`dConst_family_multipliable` stated on its own:
+
+    (1 - 2/p)⁻¹ (1 - 1/p)² = (p-1)²/(p(p-2)) = 1 + 1/(p(p-2)).
+
+Rational in `p`, with no logarithm anywhere -- which is why a lower bound on
+dConst is reachable in the kernel while the two-sided enclosure is not. -/
+theorem dConst_factor_sub_one (p : ℕ) (hp : 3 ≤ p) :
+    (1 - 2 / (p : ℝ))⁻¹ * (1 - 1 / (p : ℝ)) ^ 2 - 1
+      = 1 / ((p : ℝ) * ((p : ℝ) - 2)) := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hp2 : (0 : ℝ) < (p : ℝ) - 2 := by linarith
+  have hne : (1 : ℝ) - 2 / (p : ℝ) ≠ 0 := by
+    rw [sub_ne_zero]
+    intro hcon
+    field_simp at hcon
+    linarith
+  field_simp
+  ring
+
+/-- Every dConst factor is at least 1, since 1/(p(p-2)) > 0 for p ≥ 3. -/
+theorem dConst_factor_one_le (p : ℕ) (hp : 3 ≤ p) :
+    (1 : ℝ) ≤ (1 - 2 / (p : ℝ))⁻¹ * (1 - 1 / (p : ℝ)) ^ 2 := by
+  have hp3 : (3 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hden : (0 : ℝ) < (p : ℝ) * ((p : ℝ) - 2) := by nlinarith
+  have hpos : (0 : ℝ) < 1 / ((p : ℝ) * ((p : ℝ) - 2)) := by positivity
+  have := dConst_factor_sub_one p hp
+  linarith
+
+/-- The 94 primes 3 ≤ p ≤ 499, as a `Finset` of the p ≥ 3 prime subtype. -/
+def dLowerSet : Finset {p : ℕ // p.Prime ∧ 3 ≤ p} :=
+  {
+      ⟨3, by norm_num⟩, ⟨5, by norm_num⟩, ⟨7, by norm_num⟩, ⟨11, by norm_num⟩, ⟨13, by
+      norm_num⟩, ⟨17, by norm_num⟩, ⟨19, by norm_num⟩, ⟨23, by norm_num⟩, ⟨29, by
+      norm_num⟩, ⟨31, by norm_num⟩, ⟨37, by norm_num⟩, ⟨41, by norm_num⟩, ⟨43, by
+      norm_num⟩, ⟨47, by norm_num⟩, ⟨53, by norm_num⟩, ⟨59, by norm_num⟩, ⟨61, by
+      norm_num⟩, ⟨67, by norm_num⟩, ⟨71, by norm_num⟩, ⟨73, by norm_num⟩, ⟨79, by
+      norm_num⟩, ⟨83, by norm_num⟩, ⟨89, by norm_num⟩, ⟨97, by norm_num⟩, ⟨101, by
+      norm_num⟩, ⟨103, by norm_num⟩, ⟨107, by norm_num⟩, ⟨109, by norm_num⟩, ⟨113, by
+      norm_num⟩, ⟨127, by norm_num⟩, ⟨131, by norm_num⟩, ⟨137, by norm_num⟩, ⟨139, by
+      norm_num⟩, ⟨149, by norm_num⟩, ⟨151, by norm_num⟩, ⟨157, by norm_num⟩, ⟨163, by
+      norm_num⟩, ⟨167, by norm_num⟩, ⟨173, by norm_num⟩, ⟨179, by norm_num⟩, ⟨181, by
+      norm_num⟩, ⟨191, by norm_num⟩, ⟨193, by norm_num⟩, ⟨197, by norm_num⟩, ⟨199, by
+      norm_num⟩, ⟨211, by norm_num⟩, ⟨223, by norm_num⟩, ⟨227, by norm_num⟩, ⟨229, by
+      norm_num⟩, ⟨233, by norm_num⟩, ⟨239, by norm_num⟩, ⟨241, by norm_num⟩, ⟨251, by
+      norm_num⟩, ⟨257, by norm_num⟩, ⟨263, by norm_num⟩, ⟨269, by norm_num⟩, ⟨271, by
+      norm_num⟩, ⟨277, by norm_num⟩, ⟨281, by norm_num⟩, ⟨283, by norm_num⟩, ⟨293, by
+      norm_num⟩, ⟨307, by norm_num⟩, ⟨311, by norm_num⟩, ⟨313, by norm_num⟩, ⟨317, by
+      norm_num⟩, ⟨331, by norm_num⟩, ⟨337, by norm_num⟩, ⟨347, by norm_num⟩, ⟨349, by
+      norm_num⟩, ⟨353, by norm_num⟩, ⟨359, by norm_num⟩, ⟨367, by norm_num⟩, ⟨373, by
+      norm_num⟩, ⟨379, by norm_num⟩, ⟨383, by norm_num⟩, ⟨389, by norm_num⟩, ⟨397, by
+      norm_num⟩, ⟨401, by norm_num⟩, ⟨409, by norm_num⟩, ⟨419, by norm_num⟩, ⟨421, by
+      norm_num⟩, ⟨431, by norm_num⟩, ⟨433, by norm_num⟩, ⟨439, by norm_num⟩, ⟨443, by
+      norm_num⟩, ⟨449, by norm_num⟩, ⟨457, by norm_num⟩, ⟨461, by norm_num⟩, ⟨463, by
+      norm_num⟩, ⟨467, by norm_num⟩, ⟨479, by norm_num⟩, ⟨487, by norm_num⟩, ⟨491, by
+      norm_num⟩, ⟨499, by norm_num⟩
+  }
+
+set_option maxRecDepth 100000 in
+set_option maxHeartbeats 4000000 in
+/-- **A certified lower bound on `d`, proved rather than assumed.**
+
+`dConst = (1/4) ∏'_{p ≥ 3} (1 - 2/p)⁻¹(1 - 1/p)²`, every factor of which
+exceeds 1 by `dConst_factor_one_le`.  So the product over the finite set
+`dLowerSet` is a lower bound for the whole product, and **no tail estimate is
+involved at all** -- which is the entire reason this is reachable here, when
+the two-sided `5.3e-8` enclosure that the `d_enclosure` field used to
+assume is not.
+
+The 94 primes p ≤ 499 give `0.378591358693...`; the true value is `0.3786950`.
+What the development needs is `0.3785631789`, from `aOneConst ≥ 0.0656` with
+`Real.log_two_gt_d9` in place of the true `log 2`.  Margin `2.8e-5`.
+
+Regenerate the numeral with `numerics/gen_dconst_lower.py`. -/
+theorem dConst_lower_bound : (0.3785913 : ℝ) ≤ dConst := by
+  have hsub : dConst = (1 / 4) * ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 := by
+    unfold dConst
+    rw [dConst_prod_eq_subtype]
+  have hone : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 : ℝ) ≤ (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 :=
+    fun p => dConst_factor_one_le (p : ℕ) p.2.2
+  have hpart := prod_le_hasProd_of_one_le dLowerSet
+    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2)
+    _ hone dConst_family_multipliable.hasProd
+  have heval : (∏ p ∈ dLowerSet,
+      (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2)
+      ≥ (4 * 0.3785913 : ℝ) := by
+    norm_num [dLowerSet, Finset.prod_insert, Finset.mem_insert,
+      Finset.mem_singleton, Subtype.mk.injEq]
+  rw [hsub]
+  linarith [hpart, heval]
+
+/-- `aOneConst ≥ 0.0656`, with no numerical hypothesis.  This is
+`aOneConst_ge_of_d` with its assumption discharged by `dConst_lower_bound`. -/
+theorem aOneConst_ge : (0.0656 : ℝ) ≤ aOneConst := by
+  have hd := dConst_lower_bound
+  have hprod : (0.3785913 : ℝ) * 0.6931471803 ≤ dConst * Real.log 2 :=
+    mul_le_mul hd Real.log_two_gt_d9.le (by norm_num) (by linarith)
+  unfold aOneConst
+  linarith [hprod]
+
+set_option maxRecDepth 4000000 in
+/-- The 668 primes 3 ≤ p ≤ 4999. -/
+def dLowerSetSharp : Finset {p : ℕ // p.Prime ∧ 3 ≤ p} :=
+  {
+      ⟨3, by norm_num⟩, ⟨5, by norm_num⟩, ⟨7, by norm_num⟩, ⟨11, by norm_num⟩, ⟨13, by
+      norm_num⟩, ⟨17, by norm_num⟩, ⟨19, by norm_num⟩, ⟨23, by norm_num⟩, ⟨29, by
+      norm_num⟩, ⟨31, by norm_num⟩, ⟨37, by norm_num⟩, ⟨41, by norm_num⟩, ⟨43, by
+      norm_num⟩, ⟨47, by norm_num⟩, ⟨53, by norm_num⟩, ⟨59, by norm_num⟩, ⟨61, by
+      norm_num⟩, ⟨67, by norm_num⟩, ⟨71, by norm_num⟩, ⟨73, by norm_num⟩, ⟨79, by
+      norm_num⟩, ⟨83, by norm_num⟩, ⟨89, by norm_num⟩, ⟨97, by norm_num⟩, ⟨101, by
+      norm_num⟩, ⟨103, by norm_num⟩, ⟨107, by norm_num⟩, ⟨109, by norm_num⟩, ⟨113, by
+      norm_num⟩, ⟨127, by norm_num⟩, ⟨131, by norm_num⟩, ⟨137, by norm_num⟩, ⟨139, by
+      norm_num⟩, ⟨149, by norm_num⟩, ⟨151, by norm_num⟩, ⟨157, by norm_num⟩, ⟨163, by
+      norm_num⟩, ⟨167, by norm_num⟩, ⟨173, by norm_num⟩, ⟨179, by norm_num⟩, ⟨181, by
+      norm_num⟩, ⟨191, by norm_num⟩, ⟨193, by norm_num⟩, ⟨197, by norm_num⟩, ⟨199, by
+      norm_num⟩, ⟨211, by norm_num⟩, ⟨223, by norm_num⟩, ⟨227, by norm_num⟩, ⟨229, by
+      norm_num⟩, ⟨233, by norm_num⟩, ⟨239, by norm_num⟩, ⟨241, by norm_num⟩, ⟨251, by
+      norm_num⟩, ⟨257, by norm_num⟩, ⟨263, by norm_num⟩, ⟨269, by norm_num⟩, ⟨271, by
+      norm_num⟩, ⟨277, by norm_num⟩, ⟨281, by norm_num⟩, ⟨283, by norm_num⟩, ⟨293, by
+      norm_num⟩, ⟨307, by norm_num⟩, ⟨311, by norm_num⟩, ⟨313, by norm_num⟩, ⟨317, by
+      norm_num⟩, ⟨331, by norm_num⟩, ⟨337, by norm_num⟩, ⟨347, by norm_num⟩, ⟨349, by
+      norm_num⟩, ⟨353, by norm_num⟩, ⟨359, by norm_num⟩, ⟨367, by norm_num⟩, ⟨373, by
+      norm_num⟩, ⟨379, by norm_num⟩, ⟨383, by norm_num⟩, ⟨389, by norm_num⟩, ⟨397, by
+      norm_num⟩, ⟨401, by norm_num⟩, ⟨409, by norm_num⟩, ⟨419, by norm_num⟩, ⟨421, by
+      norm_num⟩, ⟨431, by norm_num⟩, ⟨433, by norm_num⟩, ⟨439, by norm_num⟩, ⟨443, by
+      norm_num⟩, ⟨449, by norm_num⟩, ⟨457, by norm_num⟩, ⟨461, by norm_num⟩, ⟨463, by
+      norm_num⟩, ⟨467, by norm_num⟩, ⟨479, by norm_num⟩, ⟨487, by norm_num⟩, ⟨491, by
+      norm_num⟩, ⟨499, by norm_num⟩, ⟨503, by norm_num⟩, ⟨509, by norm_num⟩, ⟨521, by
+      norm_num⟩, ⟨523, by norm_num⟩, ⟨541, by norm_num⟩, ⟨547, by norm_num⟩, ⟨557, by
+      norm_num⟩, ⟨563, by norm_num⟩, ⟨569, by norm_num⟩, ⟨571, by norm_num⟩, ⟨577, by
+      norm_num⟩, ⟨587, by norm_num⟩, ⟨593, by norm_num⟩, ⟨599, by norm_num⟩, ⟨601, by
+      norm_num⟩, ⟨607, by norm_num⟩, ⟨613, by norm_num⟩, ⟨617, by norm_num⟩, ⟨619, by
+      norm_num⟩, ⟨631, by norm_num⟩, ⟨641, by norm_num⟩, ⟨643, by norm_num⟩, ⟨647, by
+      norm_num⟩, ⟨653, by norm_num⟩, ⟨659, by norm_num⟩, ⟨661, by norm_num⟩, ⟨673, by
+      norm_num⟩, ⟨677, by norm_num⟩, ⟨683, by norm_num⟩, ⟨691, by norm_num⟩, ⟨701, by
+      norm_num⟩, ⟨709, by norm_num⟩, ⟨719, by norm_num⟩, ⟨727, by norm_num⟩, ⟨733, by
+      norm_num⟩, ⟨739, by norm_num⟩, ⟨743, by norm_num⟩, ⟨751, by norm_num⟩, ⟨757, by
+      norm_num⟩, ⟨761, by norm_num⟩, ⟨769, by norm_num⟩, ⟨773, by norm_num⟩, ⟨787, by
+      norm_num⟩, ⟨797, by norm_num⟩, ⟨809, by norm_num⟩, ⟨811, by norm_num⟩, ⟨821, by
+      norm_num⟩, ⟨823, by norm_num⟩, ⟨827, by norm_num⟩, ⟨829, by norm_num⟩, ⟨839, by
+      norm_num⟩, ⟨853, by norm_num⟩, ⟨857, by norm_num⟩, ⟨859, by norm_num⟩, ⟨863, by
+      norm_num⟩, ⟨877, by norm_num⟩, ⟨881, by norm_num⟩, ⟨883, by norm_num⟩, ⟨887, by
+      norm_num⟩, ⟨907, by norm_num⟩, ⟨911, by norm_num⟩, ⟨919, by norm_num⟩, ⟨929, by
+      norm_num⟩, ⟨937, by norm_num⟩, ⟨941, by norm_num⟩, ⟨947, by norm_num⟩, ⟨953, by
+      norm_num⟩, ⟨967, by norm_num⟩, ⟨971, by norm_num⟩, ⟨977, by norm_num⟩, ⟨983, by
+      norm_num⟩, ⟨991, by norm_num⟩, ⟨997, by norm_num⟩, ⟨1009, by norm_num⟩, ⟨1013,
+      by norm_num⟩, ⟨1019, by norm_num⟩, ⟨1021, by norm_num⟩, ⟨1031, by norm_num⟩,
+      ⟨1033, by norm_num⟩, ⟨1039, by norm_num⟩, ⟨1049, by norm_num⟩, ⟨1051, by
+      norm_num⟩, ⟨1061, by norm_num⟩, ⟨1063, by norm_num⟩, ⟨1069, by norm_num⟩, ⟨1087,
+      by norm_num⟩, ⟨1091, by norm_num⟩, ⟨1093, by norm_num⟩, ⟨1097, by norm_num⟩,
+      ⟨1103, by norm_num⟩, ⟨1109, by norm_num⟩, ⟨1117, by norm_num⟩, ⟨1123, by
+      norm_num⟩, ⟨1129, by norm_num⟩, ⟨1151, by norm_num⟩, ⟨1153, by norm_num⟩, ⟨1163,
+      by norm_num⟩, ⟨1171, by norm_num⟩, ⟨1181, by norm_num⟩, ⟨1187, by norm_num⟩,
+      ⟨1193, by norm_num⟩, ⟨1201, by norm_num⟩, ⟨1213, by norm_num⟩, ⟨1217, by
+      norm_num⟩, ⟨1223, by norm_num⟩, ⟨1229, by norm_num⟩, ⟨1231, by norm_num⟩, ⟨1237,
+      by norm_num⟩, ⟨1249, by norm_num⟩, ⟨1259, by norm_num⟩, ⟨1277, by norm_num⟩,
+      ⟨1279, by norm_num⟩, ⟨1283, by norm_num⟩, ⟨1289, by norm_num⟩, ⟨1291, by
+      norm_num⟩, ⟨1297, by norm_num⟩, ⟨1301, by norm_num⟩, ⟨1303, by norm_num⟩, ⟨1307,
+      by norm_num⟩, ⟨1319, by norm_num⟩, ⟨1321, by norm_num⟩, ⟨1327, by norm_num⟩,
+      ⟨1361, by norm_num⟩, ⟨1367, by norm_num⟩, ⟨1373, by norm_num⟩, ⟨1381, by
+      norm_num⟩, ⟨1399, by norm_num⟩, ⟨1409, by norm_num⟩, ⟨1423, by norm_num⟩, ⟨1427,
+      by norm_num⟩, ⟨1429, by norm_num⟩, ⟨1433, by norm_num⟩, ⟨1439, by norm_num⟩,
+      ⟨1447, by norm_num⟩, ⟨1451, by norm_num⟩, ⟨1453, by norm_num⟩, ⟨1459, by
+      norm_num⟩, ⟨1471, by norm_num⟩, ⟨1481, by norm_num⟩, ⟨1483, by norm_num⟩, ⟨1487,
+      by norm_num⟩, ⟨1489, by norm_num⟩, ⟨1493, by norm_num⟩, ⟨1499, by norm_num⟩,
+      ⟨1511, by norm_num⟩, ⟨1523, by norm_num⟩, ⟨1531, by norm_num⟩, ⟨1543, by
+      norm_num⟩, ⟨1549, by norm_num⟩, ⟨1553, by norm_num⟩, ⟨1559, by norm_num⟩, ⟨1567,
+      by norm_num⟩, ⟨1571, by norm_num⟩, ⟨1579, by norm_num⟩, ⟨1583, by norm_num⟩,
+      ⟨1597, by norm_num⟩, ⟨1601, by norm_num⟩, ⟨1607, by norm_num⟩, ⟨1609, by
+      norm_num⟩, ⟨1613, by norm_num⟩, ⟨1619, by norm_num⟩, ⟨1621, by norm_num⟩, ⟨1627,
+      by norm_num⟩, ⟨1637, by norm_num⟩, ⟨1657, by norm_num⟩, ⟨1663, by norm_num⟩,
+      ⟨1667, by norm_num⟩, ⟨1669, by norm_num⟩, ⟨1693, by norm_num⟩, ⟨1697, by
+      norm_num⟩, ⟨1699, by norm_num⟩, ⟨1709, by norm_num⟩, ⟨1721, by norm_num⟩, ⟨1723,
+      by norm_num⟩, ⟨1733, by norm_num⟩, ⟨1741, by norm_num⟩, ⟨1747, by norm_num⟩,
+      ⟨1753, by norm_num⟩, ⟨1759, by norm_num⟩, ⟨1777, by norm_num⟩, ⟨1783, by
+      norm_num⟩, ⟨1787, by norm_num⟩, ⟨1789, by norm_num⟩, ⟨1801, by norm_num⟩, ⟨1811,
+      by norm_num⟩, ⟨1823, by norm_num⟩, ⟨1831, by norm_num⟩, ⟨1847, by norm_num⟩,
+      ⟨1861, by norm_num⟩, ⟨1867, by norm_num⟩, ⟨1871, by norm_num⟩, ⟨1873, by
+      norm_num⟩, ⟨1877, by norm_num⟩, ⟨1879, by norm_num⟩, ⟨1889, by norm_num⟩, ⟨1901,
+      by norm_num⟩, ⟨1907, by norm_num⟩, ⟨1913, by norm_num⟩, ⟨1931, by norm_num⟩,
+      ⟨1933, by norm_num⟩, ⟨1949, by norm_num⟩, ⟨1951, by norm_num⟩, ⟨1973, by
+      norm_num⟩, ⟨1979, by norm_num⟩, ⟨1987, by norm_num⟩, ⟨1993, by norm_num⟩, ⟨1997,
+      by norm_num⟩, ⟨1999, by norm_num⟩, ⟨2003, by norm_num⟩, ⟨2011, by norm_num⟩,
+      ⟨2017, by norm_num⟩, ⟨2027, by norm_num⟩, ⟨2029, by norm_num⟩, ⟨2039, by
+      norm_num⟩, ⟨2053, by norm_num⟩, ⟨2063, by norm_num⟩, ⟨2069, by norm_num⟩, ⟨2081,
+      by norm_num⟩, ⟨2083, by norm_num⟩, ⟨2087, by norm_num⟩, ⟨2089, by norm_num⟩,
+      ⟨2099, by norm_num⟩, ⟨2111, by norm_num⟩, ⟨2113, by norm_num⟩, ⟨2129, by
+      norm_num⟩, ⟨2131, by norm_num⟩, ⟨2137, by norm_num⟩, ⟨2141, by norm_num⟩, ⟨2143,
+      by norm_num⟩, ⟨2153, by norm_num⟩, ⟨2161, by norm_num⟩, ⟨2179, by norm_num⟩,
+      ⟨2203, by norm_num⟩, ⟨2207, by norm_num⟩, ⟨2213, by norm_num⟩, ⟨2221, by
+      norm_num⟩, ⟨2237, by norm_num⟩, ⟨2239, by norm_num⟩, ⟨2243, by norm_num⟩, ⟨2251,
+      by norm_num⟩, ⟨2267, by norm_num⟩, ⟨2269, by norm_num⟩, ⟨2273, by norm_num⟩,
+      ⟨2281, by norm_num⟩, ⟨2287, by norm_num⟩, ⟨2293, by norm_num⟩, ⟨2297, by
+      norm_num⟩, ⟨2309, by norm_num⟩, ⟨2311, by norm_num⟩, ⟨2333, by norm_num⟩, ⟨2339,
+      by norm_num⟩, ⟨2341, by norm_num⟩, ⟨2347, by norm_num⟩, ⟨2351, by norm_num⟩,
+      ⟨2357, by norm_num⟩, ⟨2371, by norm_num⟩, ⟨2377, by norm_num⟩, ⟨2381, by
+      norm_num⟩, ⟨2383, by norm_num⟩, ⟨2389, by norm_num⟩, ⟨2393, by norm_num⟩, ⟨2399,
+      by norm_num⟩, ⟨2411, by norm_num⟩, ⟨2417, by norm_num⟩, ⟨2423, by norm_num⟩,
+      ⟨2437, by norm_num⟩, ⟨2441, by norm_num⟩, ⟨2447, by norm_num⟩, ⟨2459, by
+      norm_num⟩, ⟨2467, by norm_num⟩, ⟨2473, by norm_num⟩, ⟨2477, by norm_num⟩, ⟨2503,
+      by norm_num⟩, ⟨2521, by norm_num⟩, ⟨2531, by norm_num⟩, ⟨2539, by norm_num⟩,
+      ⟨2543, by norm_num⟩, ⟨2549, by norm_num⟩, ⟨2551, by norm_num⟩, ⟨2557, by
+      norm_num⟩, ⟨2579, by norm_num⟩, ⟨2591, by norm_num⟩, ⟨2593, by norm_num⟩, ⟨2609,
+      by norm_num⟩, ⟨2617, by norm_num⟩, ⟨2621, by norm_num⟩, ⟨2633, by norm_num⟩,
+      ⟨2647, by norm_num⟩, ⟨2657, by norm_num⟩, ⟨2659, by norm_num⟩, ⟨2663, by
+      norm_num⟩, ⟨2671, by norm_num⟩, ⟨2677, by norm_num⟩, ⟨2683, by norm_num⟩, ⟨2687,
+      by norm_num⟩, ⟨2689, by norm_num⟩, ⟨2693, by norm_num⟩, ⟨2699, by norm_num⟩,
+      ⟨2707, by norm_num⟩, ⟨2711, by norm_num⟩, ⟨2713, by norm_num⟩, ⟨2719, by
+      norm_num⟩, ⟨2729, by norm_num⟩, ⟨2731, by norm_num⟩, ⟨2741, by norm_num⟩, ⟨2749,
+      by norm_num⟩, ⟨2753, by norm_num⟩, ⟨2767, by norm_num⟩, ⟨2777, by norm_num⟩,
+      ⟨2789, by norm_num⟩, ⟨2791, by norm_num⟩, ⟨2797, by norm_num⟩, ⟨2801, by
+      norm_num⟩, ⟨2803, by norm_num⟩, ⟨2819, by norm_num⟩, ⟨2833, by norm_num⟩, ⟨2837,
+      by norm_num⟩, ⟨2843, by norm_num⟩, ⟨2851, by norm_num⟩, ⟨2857, by norm_num⟩,
+      ⟨2861, by norm_num⟩, ⟨2879, by norm_num⟩, ⟨2887, by norm_num⟩, ⟨2897, by
+      norm_num⟩, ⟨2903, by norm_num⟩, ⟨2909, by norm_num⟩, ⟨2917, by norm_num⟩, ⟨2927,
+      by norm_num⟩, ⟨2939, by norm_num⟩, ⟨2953, by norm_num⟩, ⟨2957, by norm_num⟩,
+      ⟨2963, by norm_num⟩, ⟨2969, by norm_num⟩, ⟨2971, by norm_num⟩, ⟨2999, by
+      norm_num⟩, ⟨3001, by norm_num⟩, ⟨3011, by norm_num⟩, ⟨3019, by norm_num⟩, ⟨3023,
+      by norm_num⟩, ⟨3037, by norm_num⟩, ⟨3041, by norm_num⟩, ⟨3049, by norm_num⟩,
+      ⟨3061, by norm_num⟩, ⟨3067, by norm_num⟩, ⟨3079, by norm_num⟩, ⟨3083, by
+      norm_num⟩, ⟨3089, by norm_num⟩, ⟨3109, by norm_num⟩, ⟨3119, by norm_num⟩, ⟨3121,
+      by norm_num⟩, ⟨3137, by norm_num⟩, ⟨3163, by norm_num⟩, ⟨3167, by norm_num⟩,
+      ⟨3169, by norm_num⟩, ⟨3181, by norm_num⟩, ⟨3187, by norm_num⟩, ⟨3191, by
+      norm_num⟩, ⟨3203, by norm_num⟩, ⟨3209, by norm_num⟩, ⟨3217, by norm_num⟩, ⟨3221,
+      by norm_num⟩, ⟨3229, by norm_num⟩, ⟨3251, by norm_num⟩, ⟨3253, by norm_num⟩,
+      ⟨3257, by norm_num⟩, ⟨3259, by norm_num⟩, ⟨3271, by norm_num⟩, ⟨3299, by
+      norm_num⟩, ⟨3301, by norm_num⟩, ⟨3307, by norm_num⟩, ⟨3313, by norm_num⟩, ⟨3319,
+      by norm_num⟩, ⟨3323, by norm_num⟩, ⟨3329, by norm_num⟩, ⟨3331, by norm_num⟩,
+      ⟨3343, by norm_num⟩, ⟨3347, by norm_num⟩, ⟨3359, by norm_num⟩, ⟨3361, by
+      norm_num⟩, ⟨3371, by norm_num⟩, ⟨3373, by norm_num⟩, ⟨3389, by norm_num⟩, ⟨3391,
+      by norm_num⟩, ⟨3407, by norm_num⟩, ⟨3413, by norm_num⟩, ⟨3433, by norm_num⟩,
+      ⟨3449, by norm_num⟩, ⟨3457, by norm_num⟩, ⟨3461, by norm_num⟩, ⟨3463, by
+      norm_num⟩, ⟨3467, by norm_num⟩, ⟨3469, by norm_num⟩, ⟨3491, by norm_num⟩, ⟨3499,
+      by norm_num⟩, ⟨3511, by norm_num⟩, ⟨3517, by norm_num⟩, ⟨3527, by norm_num⟩,
+      ⟨3529, by norm_num⟩, ⟨3533, by norm_num⟩, ⟨3539, by norm_num⟩, ⟨3541, by
+      norm_num⟩, ⟨3547, by norm_num⟩, ⟨3557, by norm_num⟩, ⟨3559, by norm_num⟩, ⟨3571,
+      by norm_num⟩, ⟨3581, by norm_num⟩, ⟨3583, by norm_num⟩, ⟨3593, by norm_num⟩,
+      ⟨3607, by norm_num⟩, ⟨3613, by norm_num⟩, ⟨3617, by norm_num⟩, ⟨3623, by
+      norm_num⟩, ⟨3631, by norm_num⟩, ⟨3637, by norm_num⟩, ⟨3643, by norm_num⟩, ⟨3659,
+      by norm_num⟩, ⟨3671, by norm_num⟩, ⟨3673, by norm_num⟩, ⟨3677, by norm_num⟩,
+      ⟨3691, by norm_num⟩, ⟨3697, by norm_num⟩, ⟨3701, by norm_num⟩, ⟨3709, by
+      norm_num⟩, ⟨3719, by norm_num⟩, ⟨3727, by norm_num⟩, ⟨3733, by norm_num⟩, ⟨3739,
+      by norm_num⟩, ⟨3761, by norm_num⟩, ⟨3767, by norm_num⟩, ⟨3769, by norm_num⟩,
+      ⟨3779, by norm_num⟩, ⟨3793, by norm_num⟩, ⟨3797, by norm_num⟩, ⟨3803, by
+      norm_num⟩, ⟨3821, by norm_num⟩, ⟨3823, by norm_num⟩, ⟨3833, by norm_num⟩, ⟨3847,
+      by norm_num⟩, ⟨3851, by norm_num⟩, ⟨3853, by norm_num⟩, ⟨3863, by norm_num⟩,
+      ⟨3877, by norm_num⟩, ⟨3881, by norm_num⟩, ⟨3889, by norm_num⟩, ⟨3907, by
+      norm_num⟩, ⟨3911, by norm_num⟩, ⟨3917, by norm_num⟩, ⟨3919, by norm_num⟩, ⟨3923,
+      by norm_num⟩, ⟨3929, by norm_num⟩, ⟨3931, by norm_num⟩, ⟨3943, by norm_num⟩,
+      ⟨3947, by norm_num⟩, ⟨3967, by norm_num⟩, ⟨3989, by norm_num⟩, ⟨4001, by
+      norm_num⟩, ⟨4003, by norm_num⟩, ⟨4007, by norm_num⟩, ⟨4013, by norm_num⟩, ⟨4019,
+      by norm_num⟩, ⟨4021, by norm_num⟩, ⟨4027, by norm_num⟩, ⟨4049, by norm_num⟩,
+      ⟨4051, by norm_num⟩, ⟨4057, by norm_num⟩, ⟨4073, by norm_num⟩, ⟨4079, by
+      norm_num⟩, ⟨4091, by norm_num⟩, ⟨4093, by norm_num⟩, ⟨4099, by norm_num⟩, ⟨4111,
+      by norm_num⟩, ⟨4127, by norm_num⟩, ⟨4129, by norm_num⟩, ⟨4133, by norm_num⟩,
+      ⟨4139, by norm_num⟩, ⟨4153, by norm_num⟩, ⟨4157, by norm_num⟩, ⟨4159, by
+      norm_num⟩, ⟨4177, by norm_num⟩, ⟨4201, by norm_num⟩, ⟨4211, by norm_num⟩, ⟨4217,
+      by norm_num⟩, ⟨4219, by norm_num⟩, ⟨4229, by norm_num⟩, ⟨4231, by norm_num⟩,
+      ⟨4241, by norm_num⟩, ⟨4243, by norm_num⟩, ⟨4253, by norm_num⟩, ⟨4259, by
+      norm_num⟩, ⟨4261, by norm_num⟩, ⟨4271, by norm_num⟩, ⟨4273, by norm_num⟩, ⟨4283,
+      by norm_num⟩, ⟨4289, by norm_num⟩, ⟨4297, by norm_num⟩, ⟨4327, by norm_num⟩,
+      ⟨4337, by norm_num⟩, ⟨4339, by norm_num⟩, ⟨4349, by norm_num⟩, ⟨4357, by
+      norm_num⟩, ⟨4363, by norm_num⟩, ⟨4373, by norm_num⟩, ⟨4391, by norm_num⟩, ⟨4397,
+      by norm_num⟩, ⟨4409, by norm_num⟩, ⟨4421, by norm_num⟩, ⟨4423, by norm_num⟩,
+      ⟨4441, by norm_num⟩, ⟨4447, by norm_num⟩, ⟨4451, by norm_num⟩, ⟨4457, by
+      norm_num⟩, ⟨4463, by norm_num⟩, ⟨4481, by norm_num⟩, ⟨4483, by norm_num⟩, ⟨4493,
+      by norm_num⟩, ⟨4507, by norm_num⟩, ⟨4513, by norm_num⟩, ⟨4517, by norm_num⟩,
+      ⟨4519, by norm_num⟩, ⟨4523, by norm_num⟩, ⟨4547, by norm_num⟩, ⟨4549, by
+      norm_num⟩, ⟨4561, by norm_num⟩, ⟨4567, by norm_num⟩, ⟨4583, by norm_num⟩, ⟨4591,
+      by norm_num⟩, ⟨4597, by norm_num⟩, ⟨4603, by norm_num⟩, ⟨4621, by norm_num⟩,
+      ⟨4637, by norm_num⟩, ⟨4639, by norm_num⟩, ⟨4643, by norm_num⟩, ⟨4649, by
+      norm_num⟩, ⟨4651, by norm_num⟩, ⟨4657, by norm_num⟩, ⟨4663, by norm_num⟩, ⟨4673,
+      by norm_num⟩, ⟨4679, by norm_num⟩, ⟨4691, by norm_num⟩, ⟨4703, by norm_num⟩,
+      ⟨4721, by norm_num⟩, ⟨4723, by norm_num⟩, ⟨4729, by norm_num⟩, ⟨4733, by
+      norm_num⟩, ⟨4751, by norm_num⟩, ⟨4759, by norm_num⟩, ⟨4783, by norm_num⟩, ⟨4787,
+      by norm_num⟩, ⟨4789, by norm_num⟩, ⟨4793, by norm_num⟩, ⟨4799, by norm_num⟩,
+      ⟨4801, by norm_num⟩, ⟨4813, by norm_num⟩, ⟨4817, by norm_num⟩, ⟨4831, by
+      norm_num⟩, ⟨4861, by norm_num⟩, ⟨4871, by norm_num⟩, ⟨4877, by norm_num⟩, ⟨4889,
+      by norm_num⟩, ⟨4903, by norm_num⟩, ⟨4909, by norm_num⟩, ⟨4919, by norm_num⟩,
+      ⟨4931, by norm_num⟩, ⟨4933, by norm_num⟩, ⟨4937, by norm_num⟩, ⟨4943, by
+      norm_num⟩, ⟨4951, by norm_num⟩, ⟨4957, by norm_num⟩, ⟨4967, by norm_num⟩, ⟨4969,
+      by norm_num⟩, ⟨4973, by norm_num⟩, ⟨4987, by norm_num⟩, ⟨4993, by norm_num⟩,
+      ⟨4999, by norm_num⟩
+  }
+
+set_option maxRecDepth 4000000 in
+set_option maxHeartbeats 2000000000 in
+/-- The sharper lower bound on `d` that the odd side needs.
+
+`betaOdd = d(log 2 - Sodd + γ) ≥ 0.1556` requires `d ≥ 0.378682252653`, against
+the `0.3785631789` the unrestricted side needs, so `dConst_lower_bound`'s 94
+primes fall short and this takes 668.
+
+Note `0.3786823`, not `0.3786822`: truncating the requirement to seven decimals
+gives `0.3786822 * 0.4108985803 = 0.1555999784`, which is BELOW the `0.1556`
+the step needs.  A sufficient bound must round UP.
+
+The evaluation needs an enlarged `simp` step budget, not just recursion depth:
+a `Finset` literal dedups pairwise, so 668 elements cost on the order of
+223,000 membership rewrites against a default of 100,000. -/
+theorem dConst_lower_bound_sharp : (0.3786823 : ℝ) ≤ dConst := by
+  have hsub : dConst = (1 / 4) * ∏' p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 := by
+    unfold dConst
+    rw [dConst_prod_eq_subtype]
+  have hone : ∀ p : {p : ℕ // p.Prime ∧ 3 ≤ p},
+      (1 : ℝ) ≤ (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2 :=
+    fun p => dConst_factor_one_le (p : ℕ) p.2.2
+  have hpart := prod_le_hasProd_of_one_le dLowerSetSharp
+    (fun p : {p : ℕ // p.Prime ∧ 3 ≤ p} =>
+      (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2)
+    _ hone dConst_family_multipliable.hasProd
+  have heval : (∏ p ∈ dLowerSetSharp,
+      (1 - 2 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 2)
+      ≥ (4 * 0.3786823 : ℝ) := by
+    norm_num (config := { maxSteps := 100000000, maxDischargeDepth := 4 })
+      [dLowerSetSharp, Finset.prod_insert, Finset.mem_insert,
+       Finset.mem_singleton, Subtype.mk.injEq]
+  rw [hsub]
+  linarith [hpart, heval]
+
+/-- The `if 5 ≤ p` in rhoConst is the indicator of {p ≥ 5}.  Mirrors
+`dConst_if_eq_indicator`, and is simpler because the guard is already the
+threshold rather than `2 < p`. -/
+theorem rhoConst_if_eq_indicator :
+    (fun p : Nat.Primes =>
+        (if 5 ≤ (p : ℕ) then (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 else 1))
+      = Set.mulIndicator {p : Nat.Primes | (5 : ℕ) ≤ (p : ℕ)}
+          (fun p : Nat.Primes => (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3) := by
+  funext p
+  by_cases h : p ∈ {q : Nat.Primes | (5 : ℕ) ≤ (q : ℕ)}
+  · have h5 : (5 : ℕ) ≤ (p : ℕ) := h
+    rw [Set.mulIndicator_of_mem h, if_pos h5]
+  · have h5 : ¬((5 : ℕ) ≤ (p : ℕ)) := h
+    rw [Set.mulIndicator_of_notMem h, if_neg h5]
+
+/-- rhoConst's indicator product over all primes equals the p ≥ 5 subtype
+product.  Mirrors `dConst_prod_eq_subtype`. -/
+theorem rhoConst_prod_eq_subtype :
+    (∏' p : Nat.Primes,
+        (if 5 ≤ (p : ℕ) then (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 else 1))
+      = ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+          (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 := by
+  rw [rhoConst_if_eq_indicator]
+  rw [← tprod_subtype {p : Nat.Primes | (5 : ℕ) ≤ (p : ℕ)}
+    (fun p : Nat.Primes => (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3)]
+  exact (primesEquivSubtypeGE 5).tprod_eq
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3)
+
+/-- The rhoConst Euler factor, in closed form:
+
+    (1 - 3/p)⁻¹ (1 - 1/p)³ = (p-1)³/(p²(p-3)) = 1 + (3p-1)/(p²(p-3)).
+
+Rational in `p`, exactly as `dConst_factor_sub_one`, since
+(p-1)³ - p²(p-3) = 3p - 1. -/
+theorem rhoConst_factor_sub_one (p : ℕ) (hp : 5 ≤ p) :
+    (1 - 3 / (p : ℝ))⁻¹ * (1 - 1 / (p : ℝ)) ^ 3 - 1
+      = (3 * (p : ℝ) - 1) / ((p : ℝ) ^ 2 * ((p : ℝ) - 3)) := by
+  have hp5 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  have hp3 : (0 : ℝ) < (p : ℝ) - 3 := by linarith
+  have hne : (1 : ℝ) - 3 / (p : ℝ) ≠ 0 := by
+    rw [sub_ne_zero]
+    intro hcon
+    field_simp at hcon
+    linarith
+  field_simp
+  ring
+
+/-- Every rhoConst factor is at least 1, since (3p-1)/(p²(p-3)) > 0 for p ≥ 5. -/
+theorem rhoConst_factor_one_le (p : ℕ) (hp : 5 ≤ p) :
+    (1 : ℝ) ≤ (1 - 3 / (p : ℝ))⁻¹ * (1 - 1 / (p : ℝ)) ^ 3 := by
+  have hp5 : (5 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hden : (0 : ℝ) < (p : ℝ) ^ 2 * ((p : ℝ) - 3) := by nlinarith
+  have hnum : (0 : ℝ) < 3 * (p : ℝ) - 1 := by linarith
+  have hpos : (0 : ℝ) < (3 * (p : ℝ) - 1) / ((p : ℝ) ^ 2 * ((p : ℝ) - 3)) :=
+    div_pos hnum hden
+  have := rhoConst_factor_sub_one p hp
+  linarith
+
+/-- The rhoConst family is multipliable over p ≥ 5.  Mirrors
+`dConst_family_multipliable`; the comparison constant is 7 rather than 3
+because (3p-1)/(p-3) is largest at p = 5, where it equals 7. -/
+theorem rhoConst_family_multipliable :
+    Multipliable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3) := by
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      7 * (1 / ((p : ℕ) : ℝ) ^ 2)) := by
+    have hbase : Summable (fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2) := by
+      simpa using Real.summable_one_div_nat_pow.mpr (by norm_num : 1 < 2)
+    exact (hbase.subtype _).mul_left 7
+  have hsum : Summable (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 - 1) := by
+    apply Summable.of_nonneg_of_le _ _ hcomp
+    · intro p
+      rw [rhoConst_factor_sub_one (p : ℕ) p.2.2]
+      have hp5 : (5 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.2
+      have hden : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 2 * (((p : ℕ) : ℝ) - 3) := by nlinarith
+      have hnum : (0 : ℝ) < 3 * ((p : ℕ) : ℝ) - 1 := by linarith
+      exact le_of_lt (div_pos hnum hden)
+    · intro p
+      rw [rhoConst_factor_sub_one (p : ℕ) p.2.2]
+      have hp5 : (5 : ℝ) ≤ ((p : ℕ) : ℝ) := by exact_mod_cast p.2.2
+      have hden : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 2 * (((p : ℕ) : ℝ) - 3) := by nlinarith
+      have hsq : (0 : ℝ) < ((p : ℕ) : ℝ) ^ 2 := by positivity
+      rw [show (7 : ℝ) * (1 / ((p : ℕ) : ℝ) ^ 2) = 7 / ((p : ℕ) : ℝ) ^ 2 by ring]
+      rw [div_le_div_iff₀ hden hsq]
+      nlinarith
+  have h := Real.multipliable_one_add_of_summable hsum
+  apply h.congr
+  intro p
+  ring
+
+set_option maxRecDepth 1000000 in
+/-- The 93 primes 5 ≤ p ≤ 499. -/
+def rhoLowerSet : Finset {p : ℕ // p.Prime ∧ 5 ≤ p} :=
+  {
+      ⟨5, by norm_num⟩, ⟨7, by norm_num⟩, ⟨11, by norm_num⟩, ⟨13, by norm_num⟩, ⟨17,
+      by norm_num⟩, ⟨19, by norm_num⟩, ⟨23, by norm_num⟩, ⟨29, by norm_num⟩, ⟨31, by
+      norm_num⟩, ⟨37, by norm_num⟩, ⟨41, by norm_num⟩, ⟨43, by norm_num⟩, ⟨47, by
+      norm_num⟩, ⟨53, by norm_num⟩, ⟨59, by norm_num⟩, ⟨61, by norm_num⟩, ⟨67, by
+      norm_num⟩, ⟨71, by norm_num⟩, ⟨73, by norm_num⟩, ⟨79, by norm_num⟩, ⟨83, by
+      norm_num⟩, ⟨89, by norm_num⟩, ⟨97, by norm_num⟩, ⟨101, by norm_num⟩, ⟨103, by
+      norm_num⟩, ⟨107, by norm_num⟩, ⟨109, by norm_num⟩, ⟨113, by norm_num⟩, ⟨127, by
+      norm_num⟩, ⟨131, by norm_num⟩, ⟨137, by norm_num⟩, ⟨139, by norm_num⟩, ⟨149, by
+      norm_num⟩, ⟨151, by norm_num⟩, ⟨157, by norm_num⟩, ⟨163, by norm_num⟩, ⟨167, by
+      norm_num⟩, ⟨173, by norm_num⟩, ⟨179, by norm_num⟩, ⟨181, by norm_num⟩, ⟨191, by
+      norm_num⟩, ⟨193, by norm_num⟩, ⟨197, by norm_num⟩, ⟨199, by norm_num⟩, ⟨211, by
+      norm_num⟩, ⟨223, by norm_num⟩, ⟨227, by norm_num⟩, ⟨229, by norm_num⟩, ⟨233, by
+      norm_num⟩, ⟨239, by norm_num⟩, ⟨241, by norm_num⟩, ⟨251, by norm_num⟩, ⟨257, by
+      norm_num⟩, ⟨263, by norm_num⟩, ⟨269, by norm_num⟩, ⟨271, by norm_num⟩, ⟨277, by
+      norm_num⟩, ⟨281, by norm_num⟩, ⟨283, by norm_num⟩, ⟨293, by norm_num⟩, ⟨307, by
+      norm_num⟩, ⟨311, by norm_num⟩, ⟨313, by norm_num⟩, ⟨317, by norm_num⟩, ⟨331, by
+      norm_num⟩, ⟨337, by norm_num⟩, ⟨347, by norm_num⟩, ⟨349, by norm_num⟩, ⟨353, by
+      norm_num⟩, ⟨359, by norm_num⟩, ⟨367, by norm_num⟩, ⟨373, by norm_num⟩, ⟨379, by
+      norm_num⟩, ⟨383, by norm_num⟩, ⟨389, by norm_num⟩, ⟨397, by norm_num⟩, ⟨401, by
+      norm_num⟩, ⟨409, by norm_num⟩, ⟨419, by norm_num⟩, ⟨421, by norm_num⟩, ⟨431, by
+      norm_num⟩, ⟨433, by norm_num⟩, ⟨439, by norm_num⟩, ⟨443, by norm_num⟩, ⟨449, by
+      norm_num⟩, ⟨457, by norm_num⟩, ⟨461, by norm_num⟩, ⟨463, by norm_num⟩, ⟨467, by
+      norm_num⟩, ⟨479, by norm_num⟩, ⟨487, by norm_num⟩, ⟨491, by norm_num⟩, ⟨499, by
+      norm_num⟩
+  }
+
+set_option maxRecDepth 1000000 in
+set_option maxHeartbeats 40000000 in
+/-- **A certified bound on `rho`, proved rather than assumed.**
+
+`rhoConst = -(1/9) ∏'_{p ≥ 5} (1 - 3/p)⁻¹(1 - 1/p)³`, every factor of which
+exceeds 1 by `rhoConst_factor_one_le`.  The product over a finite set is
+therefore a lower bound for the whole product -- and because the `-(1/9)`
+makes rhoConst NEGATIVE, that becomes an UPPER bound on rhoConst.
+
+Which direction is reachable matters elsewhere; here it does not, because
+`rho_enclosure` has no consumer anywhere in the development -- `grep` for it
+returns the field declarations and a comment, nothing more.  So any true
+bound discharges it, and the field can go.
+
+The 93 primes p ≤ 499 give `rhoConst ≤ -0.174788567...`; the certified value
+is `-0.1749323`.  Note that for an upper bound on a NEGATIVE quantity the
+numeral must be rounded TOWARD ZERO to stay valid, which is the opposite of
+the `d` case. -/
+theorem rhoConst_upper_bound : rhoConst ≤ (-0.1747885 : ℝ) := by
+  have hsub : rhoConst = -(1 / 9) * ∏' p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 := by
+    unfold rhoConst
+    rw [rhoConst_prod_eq_subtype]
+  have hone : ∀ p : {p : ℕ // p.Prime ∧ 5 ≤ p},
+      (1 : ℝ) ≤ (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3 :=
+    fun p => rhoConst_factor_one_le (p : ℕ) p.2.2
+  have hpart := prod_le_hasProd_of_one_le rhoLowerSet
+    (fun p : {p : ℕ // p.Prime ∧ 5 ≤ p} =>
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3)
+    _ hone rhoConst_family_multipliable.hasProd
+  have heval : (∏ p ∈ rhoLowerSet,
+      (1 - 3 / ((p : ℕ) : ℝ))⁻¹ * (1 - 1 / ((p : ℕ) : ℝ)) ^ 3)
+      ≥ (-9 * -0.1747885 : ℝ) := by
+    norm_num (config := { maxSteps := 100000000, maxDischargeDepth := 4 })
+      [rhoLowerSet, Finset.prod_insert, Finset.mem_insert,
+       Finset.mem_singleton, Subtype.mk.injEq]
+  rw [hsub]
+  linarith [hpart, heval]
+
 /-- The certified inputs: everything the analytic reduction takes on trust.
 
 Each field is an Arb ball computation from the companion package, exactly the
@@ -741,10 +1248,6 @@ these are not.
 Umax and Vmax are parameters rather than fields because a Prop cannot carry
 data; the manuscript's values are 0.08436 and 1.90747, valid for k >= 900. -/
 structure NumericalFacts (Sstar alph Gam Umax Vmax : ℝ) : Prop where
-  /-- Section 3.2: the certified enclosure of d. -/
-  d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
-  /-- Lemma 3.6: the certified enclosure of rho. -/
-  rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
   /-- Section 3.4: S* <= 6.9764.  This read 6.9763 until the certified sum was
   recomputed: it is 6.97633273, and the head i <= 30 alone is 6.97633205, so
   6.9763 was not an upper bound -- 6.97633 rounded down where an upper bound
@@ -13597,13 +14100,13 @@ theorem erdos_sums_increase_from_six (Sstar alph Gam Umax Vmax : ℝ)
   · exact hnum.sweep_high k (by omega) h3
   · exact theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
       (phiBound_pos_at_2440 aOneConst Umax Vmax Sstar alph
-          (aOneConst_ge_of_d hnum.d_enclosure)
+          aOneConst_ge
           hnum.Umax_nonneg hnum.U_bound
           hnum.Vmax_nonneg hnum.V_bound
           hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)
         (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
-          (aOneConst_ge_of_d hnum.d_enclosure)
+          aOneConst_ge
           hnum.Umax_nonneg hnum.U_bound
           hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)
@@ -13620,8 +14123,6 @@ This version replaces it with the quantities the Arb package actually computes,
 so that Proposition 2.5, Theorem 4.1 and section 3.5 are *used* in deriving it
 rather than merely proved. -/
 structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 : ℝ) : Prop where
-  d_enclosure   : |(0.3786950 : ℝ) - dConst| ≤ 5.3e-8
-  rho_enclosure : |(-0.1749323 : ℝ) - rhoConst| ≤ 6.6e-8
   /-- See the note on `NumericalFacts.Sstar_bound`: 6.9763 was not an upper
   bound for the certified 6.97633273. -/
   Sstar_bound   : Sstar ≤ 6.9764
@@ -13682,13 +14183,13 @@ theorem erdos_sums_increase_from_six' (beta : ℕ → ℝ)
   · exact hnum.sweep_high k (by omega) h3
   · refine theorem_7_1 aOneConst Umax Vmax Sstar alph 2440
       (phiBound_pos_at_2440 aOneConst Umax Vmax Sstar alph
-          (aOneConst_ge_of_d hnum.d_enclosure)
+          aOneConst_ge
           hnum.Umax_nonneg hnum.U_bound
           hnum.Vmax_nonneg hnum.V_bound
           hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)
         (phiBound_mono_of_bounds aOneConst Umax Vmax Sstar alph
-          (aOneConst_ge_of_d hnum.d_enclosure)
+          aOneConst_ge
           hnum.Umax_nonneg hnum.U_bound
           hnum.Sstar_nonneg hnum.Sstar_bound
           hnum.alph_nonneg hnum.alpha_bound)

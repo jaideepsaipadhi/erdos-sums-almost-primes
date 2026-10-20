@@ -14,17 +14,30 @@ today.
 
 ## The count
 
-| structure | fields |
-|---|---|
-| `NumericalFacts` | 11 |
-| `NumericalFactsFull` | 19 |
-| `OddNumericalFacts` | 6 |
+| structure | fields | was |
+|---|---|---|
+| `NumericalFacts` | 14 | 11 |
+| `NumericalFactsFull` | 22 | 19 |
+| `OddNumericalFacts` | 4 | 6 |
+
+The unrestricted counts went **up** by three while the base got smaller, and
+the table is the wrong way to read this.  Five things left: `phi_mono`,
+`phi_at_k1` and `d_enclosure` on the unrestricted side, `gamma_gt` and `d_enc`
+on the odd side -- every one of them now a theorem.  Six scalars arrived
+(`U_bound`, `V_bound`, four nonnegativity facts) to support the Tier A proofs,
+and those six are **bounds on abstract variables**, which assert nothing about
+the world: they fix a numeral.  So the trade was two unfalsifiable
+`forall`-statements and three facts about infinite products, for six numerals.
+`OddNumericalFacts` went 6 -> 4 and gained nothing at all.
+
+Counted from the structure bodies with docstrings stripped -- counting them in
+is how `recomputed`, a word in a comment, briefly became a sixteenth field.
 
 The two unrestricted structures overlap heavily; `NumericalFactsFull` is the
 primitive one, from which `erdos_sums_increase_from_six'` derives the far range
 rather than assuming it.
 
-## Tier A — not numerical facts at all (one of two now proved)
+## Tier A — not numerical facts at all (both now proved, both gone)
 
 Two fields of `NumericalFactsFull` (and the same two of `NumericalFacts`)
 quantify over an **explicit elementary formula** and nothing else:
@@ -63,10 +76,14 @@ Note that `Vmax` enters `RBound` only as `+ 2 Vmax`, constant in `k`, so it
 cancels in the difference: `phi_mono` does not need it at all.  It is needed
 for `phi_at_k1`, which is a single evaluation.
 
-**DONE.**  `phi_mono` is now proved (`phiBound_mono_of_bounds`) and gone from
-both structures, which instead carry `U_bound : Umax <= 0.08436` and the three
-nonnegativity facts the proof needs.  What follows is the reasoning that led
-there, kept because `phi_at_k1` is the same shape.
+**DONE, both of them.**  `phi_mono` is proved as `phiBound_mono_of_bounds`
+and `phi_at_k1` as `phiBound_pos_at_2440`; neither is a field of either
+structure any more.  In their place the structures carry five scalars --
+`U_bound : Umax <= 0.08436`, `V_bound : Vmax <= 1.90747`, and the three
+nonnegativity facts `Umax_nonneg`, `Vmax_nonneg`, `Sstar_nonneg`,
+`alph_nonneg` -- every one of which the Arb sweeps already produce and
+`verify.py` can check.  Tier A is empty.  What follows is the reasoning that
+led there, kept because it is the argument the two proofs follow.
 
 **The proposal was.**  Add one field
 
@@ -111,9 +128,11 @@ Mathlib route that is the difference between
 
 `harmonic 7.7e6` is not going to evaluate in the kernel; `harmonic 7614` is a
 rational with a few thousand digits, which is heavy but not absurd.  **DONE:**
-the field now reads `0.57715 < gamma`, which leaves `betaOdd` a margin of
-`5.2e-6` and needs `n > 7614` in place of `n > 7703978`.  What remains is the
-proof itself.  The reasoning was that the first move on this field is not to
+the field was first weakened to `0.57715 < gamma`, which leaves `betaOdd` a
+margin of `5.2e-6` and needs `n > 7614` in place of `n > 7703978`, and is now
+proved outright as `Odd.gamma_lower_bound`, at `n = 8191` so that
+`log 8192 = 13 log 2` closes the logarithm against Mathlib's enclosure rather
+than needing its own.  `gamma_gt` is removed from `OddNumericalFacts`.  The reasoning was that the first move on this field is not to
 prove it -- it is to weaken it to what the proof uses, which costs nothing, is in the safe direction (a weaker
 hypothesis is a stronger theorem), and is a Lean-only change: `0.5772156`
 appears nowhere in the paper or in `PROOF.md`.
@@ -124,19 +143,73 @@ The inequality stays strictly true, but the tactic that discharges it may need
 more help, so the two changes belong in one CI iteration rather than being
 assumed independent.
 
-## Tier C — irreducible without verified interval arithmetic
+## Nine fields are not assumptions at all
 
-Everything else, in three kinds.
+Before Tier C, a correction to how this document counted.  `Sstar`, `alph`,
+`Gam`, `Umax`, `Vmax`, `M0` and `MR` are **arguments** of the theorems:
 
-**Infinite products and sums over primes.**  `d_enclosure`, `d_enc`,
-`rho_enclosure`, `Sodd_enclosure`.  `dConst` is a `tprod` over `Nat.Primes`;
-`Sodd` a `tsum` over primes `>= 3`.  Discharging these in Lean means proving
-convergence rates and summing rigorously in the kernel.
+    theorem erdos_sums_increase_from_six (Sstar alph Gam Umax Vmax : ℝ)
+        (hnum : NumericalFacts Sstar alph Gam Umax Vmax) : ...
 
-**Contour suprema and derivative bounds.**  `Sstar_bound`, `alpha_bound`,
-`Gamma_bound`, `MR_bound`, `M0_bound`, `g_deriv`, `g_deriv_bound`,
-`alpha_dom`, `Sstar_dom`.  These are the Arb sweeps.  `M0_bound` quantifies
-over every `theta` and every `u > 1`.
+They are abstract reals, not defined objects.  So `Sstar_bound : Sstar <=
+6.9764`, `alpha_bound`, `Gamma_bound`, `MR_bound` and the five nonnegativity
+facts do not assert anything about the world -- they fix the numeral attached
+to a bound variable, and **no proof of them is possible or needed.**  The real
+content is in the fields that COUPLE those symbols to defined objects:
+`source_bound` (to `E`) and `remainder` (to `fOdd`).  Those are the Cauchy
+estimate, and they are Tier C proper.
+
+Counting those nine as debt overstated the trusted base.  The honest count of
+assumptions about the world is six: `rho_enclosure`, `Sodd_enclosure`,
+`source_bound`, `remainder`, and the four sweeps.
+
+## `rho_enclosure` is used nowhere
+
+`grep` for `rho_enclosure` and `rhoConst` across `Banksmartin/` and `Odd/`
+returns the two field declarations and one comment.  No `hnum.rho_enclosure`
+anywhere.  It is a hypothesis with no consumer, so it is not part of the
+trusted base in any operative sense -- but it IS part of the three-way
+correspondence CLAUDE.md protects, so it is flagged here rather than deleted.
+
+## Tier C — partly closed, and the reason is sharper than "interval arithmetic"
+
+**Infinite products over primes: CLOSED, both of them.**  `d_enclosure` and
+`d_enc` are proved and gone (`dConst_lower_bound`, `dConst_lower_bound_sharp`).
+This was supposed to need a verified interval layer and did not, for a reason
+worth stating because it predicts which other items can fall:
+
+    (1 - 2/p)^-1 (1 - 1/p)^2 = (p-1)^2/(p(p-2)) = 1 + 1/(p(p-2))
+
+The Euler factor is **rational** -- no logarithm in it -- and every factor
+EXCEEDS 1.  So a finite partial product bounds the infinite product from below
+with **no tail estimate at all**, and the development only ever used `d` from
+below.  The two-sided `5.3e-8` enclosure remains unreachable; the one-sided
+bound is a finite rational computation.  94 primes (`p <= 499`) serve the
+unrestricted side, 668 (`p <= 4999`) the odd side, the latter needing `simp`'s
+step budget raised because a `Finset` literal dedups pairwise.
+
+The lesson: the dividing line is not "analytic object vs explicit formula".
+It is **whether the one-sided bound the proof actually uses can be reached by a
+finite computation.**  `d` looked analytic and was arithmetic.
+
+**`Sodd_enclosure`: genuinely out of reach, and now quantified.**
+`Sodd = tsum over p >= 3 of log p/((p-1)(p-2))` is needed from ABOVE, so unlike
+`d` the tail cannot be discarded -- every omitted term makes the bound wrong in
+the dangerous direction.  The budget is tight: `betaOdd >= 0.1556` with the
+proved `d >= 0.3786823` allows `Sodd <= 0.8593986514`, and the partial sum to
+2,000,000 is already `0.8593917315`, leaving `6.9e-6` for the tail.  The actual
+tail beyond 100,000 is `9.5e-6` -- still too big -- so primes past about
+150,000 are required, roughly 13,800 terms, **each carrying a `log p` that
+needs its own rigorous enclosure**, plus a Chebyshev-type bound to control what
+is left.  For scale: 668 *rational* factors took 45 minutes of CI.  This is not
+a budget away, it is a different problem.
+
+**Contour suprema and derivative bounds.**  `M0_bound`, `g_deriv`,
+`g_deriv_bound`, `alpha_dom`, `Sstar_dom`, `UV_bound`, `Eexp_bound`.  These
+are the Arb sweeps, and these are the ones that genuinely couple an abstract
+bound to a defined object.  `M0_bound` quantifies over every `theta` and every
+`u > 1`.  (`Sstar_bound`, `alpha_bound`, `Gamma_bound` and `MR_bound` were
+listed here in error -- see the section on the nine fields above.)
 
 **The Cauchy estimate itself.**  `OddNumericalFacts.remainder` and
 `NumericalFacts.source_bound` / `UV_bound` / `Eexp_bound`.  This is the
@@ -166,7 +239,19 @@ specific.
 
 Hold Caveat 1.3b as the stated position -- Tier C is not going anywhere
 without a verified interval layer, and claiming otherwise would be dishonest
-about what is machine-checked.  But Tier A should not be inside the caveat at
-all: it is there by convenience, not by necessity, and two `forall`-statements
-about a quadratic are the weakest things in the base to be asking a reader to
-take on trust.
+about what is machine-checked.
+
+Tiers A and B are closed, and so is the prime-product half of Tier C.  Three fields left the base: two `forall`-statements about
+a quadratic, which no finite computation could ever have discharged and which
+a reader could not have checked by inspection, and one constant that Mathlib
+could supply all along.  What replaced the first two is five scalars the
+numerics already certify -- a `forall` is a much larger thing to be asked to
+believe than a number, so the trade is real even though the field count barely
+moved.
+
+What is left in the base is exactly Tier C, and every item in it is there for
+the same reason: it is a fact about an analytic object -- an infinite product
+over primes, a supremum over a contour, a Cauchy estimate -- and not a fact
+about an explicit formula.  Closing any of it means building verified interval
+arithmetic in Lean.  That is a project in its own right, not a loose end of
+this one.

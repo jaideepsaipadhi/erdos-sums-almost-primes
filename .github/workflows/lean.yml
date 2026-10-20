@@ -85,9 +85,89 @@ jobs:
         if: always()
         run: df -h / | tail -1
 
+      # A green `lake build` says something compiled, not that a PARTICULAR
+      # theorem is clean -- an errored declaration still reports as sorryAx to
+      # its dependents.  These audits are what make "green" mean "verified"
+      # for the named theorems, which matters because the run log and the
+      # artifact blob host are both unreachable from the dev container: the
+      # build itself has to do the checking.
+      - name: Axiom audit (unrestricted case)
+        run: |
+          # `lean | tee` reports TEE's status, so lean's own exit code is lost
+          # and an unknown constant in the audit file would pass silently.
+          # Capture lean's exit status explicitly.  `lean | tee` reports TEE's
+          # status, so an error in the audit file passed silently; `pipefail`
+          # fixed that but then aborts before any diagnostic can print, which
+          # is just as blind.  This way the status and the output are both in
+          # hand before anything is decided.
+          set +e
+          lake env lean axcheck-bm.lean > axioms-bm.txt 2>&1
+          rc=$?
+          set -e
+          cat axioms-bm.txt
+          echo "::notice::bm lean exit status ${rc}"
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::bm axiom audit: lean exited ${rc}; output follows"
+            while IFS= read -r line; do echo "::error::bm: ${line}"; done < axioms-bm.txt
+            exit 1
+          fi
+          if grep -q "sorryAx" axioms-bm.txt; then
+            echo "::error::sorryAx in the unrestricted axiom audit"
+            exit 1
+          fi
+          if grep "depends on axioms" axioms-bm.txt \
+             | grep -vE "\[propext, Classical\.choice, Quot\.sound\]"; then
+            echo "::error::an unexpected axiom in the unrestricted audit"
+            exit 1
+          fi
+          # Every #print axioms must have produced a line.  Annotations are
+          # capped and partial, so counting here is the only way to tell
+          # "reported clean" apart from "never reported" -- reading the
+          # annotation list cannot distinguish truncation from absence.
+          #
+          # Count 'depend', not 'depends on axioms': an axiom-free declaration
+          # prints "does not depend on any axioms", which the narrower pattern
+          # misses.  Several of the rational-arithmetic lemmas here are
+          # axiom-free, so the narrow count read 10 of 14 and failed a clean
+          # audit.  The CONTENT guard above still keys on "depends on axioms",
+          # which is correct: axiom-free is stricter than clean, not a miss.
+          want=$(grep -c '^#print axioms' axcheck-bm.lean)
+          got=$(grep -c 'depend' axioms-bm.txt)
+          echo "expected ${want} axiom lines, got ${got}"
+          if [ "$want" -ne "$got" ]; then
+            echo "::error::unrestricted audit printed ${got} of ${want} lines"
+            while IFS= read -r line; do echo "::error::bm: ${line}"; done < axioms-bm.txt
+            exit 1
+          fi
+          echo "::notice::unrestricted axiom audit clean: ${got}/${want} declarations"
+          echo "unrestricted axiom audit clean: ${got}/${want}"
+
       - name: Axiom audit (odd case)
         run: |
-          lake env lean odd-proof/axcheck.lean | tee axioms.txt
+          # Capture lean's exit status explicitly.  `lean | tee` reports TEE's
+          # status, so an error in the audit file passed silently; `pipefail`
+          # fixed that but then aborts before any diagnostic can print, which
+          # is just as blind.  This way the status and the output are both in
+          # hand before anything is decided.
+          set +e
+          lake env lean odd-proof/axcheck.lean > axioms.txt 2>&1
+          rc=$?
+          set -e
+          cat axioms.txt
+          echo "::notice::odd lean exit status ${rc}"
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::odd axiom audit: lean exited ${rc}; output follows"
+            while IFS= read -r line; do echo "::error::odd: ${line}"; done < axioms.txt
+            exit 1
+          fi
+          want=$(grep -c '^#print axioms' odd-proof/axcheck.lean)
+          got=$(grep -c 'depend' axioms.txt)
+          echo "expected ${want} axiom lines, got ${got}"
+          if [ "$want" -ne "$got" ]; then
+            echo "::error::odd audit printed ${got} of ${want} lines; full output follows"
+            while IFS= read -r line; do echo "::error::odd: ${line}"; done < axioms.txt
+            exit 1
+          fi
           if grep -q "sorryAx" axioms.txt; then
             echo "::error::sorryAx appears in the axiom audit"
             exit 1
@@ -98,11 +178,30 @@ jobs:
             echo "::error::an unexpected axiom was reported"
             exit 1
           fi
+          echo "::notice::odd axiom audit clean: ${got}/${want} declarations"
           echo "axiom audit clean"
 
-      - name: Upload axiom report
+      # The run log is served from a host this project's tooling cannot reach,
+      # so annotations were the only readable channel -- and they are capped
+      # and partial.  Reading them and inferring "no error reported" is not
+      # the same as "it compiled": a missing DecidableEq instance in #24 sat
+      # in a probe whose output never became an annotation at all.  Artifacts
+      # ARE fetchable over the API, so the full log goes into one.
+      - name: Collect logs
+        if: always()
+        run: |
+          lake build > full-build.log 2>&1 || true
+          ls -la *.log *.txt 2>/dev/null || true
+
+      - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: axiom-report
-          path: axioms.txt
+          name: lean-reports
+          path: |
+            axioms.txt
+            axioms-bm.txt
+            full-build.log
+            build.log
+            relog.txt
+          if-no-files-found: warn
