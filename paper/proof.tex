@@ -1176,12 +1176,15 @@ Proposition~\ref{prop:full-certified}. Their statements are finite systems of
 interval inequalities. They are established by Arb/FLINT through its Python bindings. The Lean
 formalization imports the resulting intervals
 as hypotheses and proves that those hypotheses imply
-Theorem~\ref{thm:main-full} and the monotonicity assertion of
-Theorem~\ref{thm:main-odd}; the two formal statements are
-\texttt{erdos\_sums\_increase\_from\_six} and \texttt{fOdd\_decreasing}. The
-limit $g_k\to\frac12$ of Theorem~\ref{thm:main-odd} is proved in the text,
-from \eqref{eq:odd-expansion} and Proposition~\ref{prop:odd-remainder}, but is
-not formalized, the monotonicity argument making no use of it.
+Theorem~\ref{thm:main-full} and both assertions of
+Theorem~\ref{thm:main-odd}; the three formal statements are
+\texttt{erdos\_sums\_increase\_from\_six}, \texttt{fOdd\_decreasing} and
+\texttt{fOdd\_tendsto\_half}. The limit $g_k\to\frac12$ was formerly left
+unformalized, the monotonicity argument making no use of it; it is now proved
+there as well, and from the same hypothesis, since
+Proposition~\ref{prop:odd-remainder} already bounds
+$\abs{g_k-\frac12-\beta2^{-k}}$ by a multiple of $(k+3)^3 3^{-k}$, and both
+that and $2^{-k}$ vanish.
 
 For Theorem~\ref{thm:main-full} the hypotheses are not only the interval
 bounds of Proposition~\ref{prop:full-certified}. Proposition~\ref{prop:criterion-phi}
