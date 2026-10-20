@@ -512,9 +512,8 @@ interval against an arbitrary integrand.  `source_bound` is in the same
 position for the same reason, with the extra difficulty of being infinite in
 `k` as well.
 
-The practical consequence is that the trust decision below -- whether to
-accept `Lean.ofReduceBool` in exchange for `native_decide` -- **does not need
-to be made yet**, because no currently remaining field would be closed by
+The practical consequence is that the trust decision below -- what to accept
+in exchange for `native_decide` -- **does not need to be made yet**, because no currently remaining field would be closed by
 making it.  It becomes live only after (1) and (2) exist, at which point the
 reduced statement is rational and the question of which evaluator discharges
 it is finally the operative one.  That ordering is worth being explicit about:
@@ -581,13 +580,39 @@ the bound theorems themselves -- `log_prime_le_logPrimeUB`,
 `mertensLogSum_le_mertensLogSumUpperRat` -- are ordinary proved inequalities
 with no decidability in them, and `native_decide` enters only where a
 `check... = true` hypothesis must be evaluated.  So the axiom cost is plausibly
-zero for the proved bounds and nonzero only at the numeric step.  Which it is
-decides how much of this can stay in the kernel, and it has NOT been
-established: the probe that would have answered it could not get as far as
-importing the library.
-`native_decide` adds `Lean.ofReduceBool`, which the axiom audits in this
-repository are written to REJECT -- they require exactly `[propext,
-Classical.choice, Quot.sound]`.
+zero for the proved bounds and nonzero only at the numeric step.
+
+MEASURED, on the experiment branch, after the probe was made to build.  Two
+results, and the second corrects what this document previously asserted.
+
+*Kernel-clean evaluation is not available at all.*  `norm_num [logPrimeUB]`
+and `simp only [logPrimeUB]; norm_num` both fail with unsolved goals on
+`(logPrimeUB 7 10 : Q) <= 2` -- the smallest instance there is, p = 7 at depth
+10.  If that one will not go through the kernel, no larger one will, so every
+numeric step in a leancert-based certificate costs whatever `native_decide`
+costs.
+
+*But that cost is not `Lean.ofReduceBool`.*  This document used to say
+"`native_decide` adds `Lean.ofReduceBool`".  It does not, on this toolchain:
+
+    probe_numeric_native = [propext, Classical.choice, Quot.sound,
+                            probe_numeric_native._native.native_decide.ax_1_1]
+
+`native_decide` mints a PER-DECLARATION axiom named after the declaration that
+used it, and `ofReduceBool` appears nowhere in the probe output.
+
+That difference is worth having, not a technicality.  A single global axiom is
+one opaque assumption shared by every use, and once it is present an audit
+cannot tell one use from a hundred.  A per-use named axiom is enumerable:
+`#print axioms` on any theorem names exactly the native_decide calls it rests
+on, so the trusted base stays countable and the audits here can be made to
+fail on an unexpected one rather than on the mechanism as such.  The trust is
+still ADDITIONAL -- these are axioms outside the three permitted, and what they
+assert is the correctness of compiled evaluation rather than of the kernel --
+but it is itemised rather than wholesale.
+
+Either way the axiom audits in this repository currently REJECT it: they
+require exactly `[propext, Classical.choice, Quot.sound]`.
 
 So adopting this route is a decision about what the formalization means, and it
 is not mine to make.  What should be said in its favour, though, is that it
