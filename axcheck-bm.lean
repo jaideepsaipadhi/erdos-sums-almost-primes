@@ -28,3 +28,4 @@ import Banksmartin.Basic
 #print axioms rhoConst_family_multipliable
 #print axioms rhoConst_upper_bound
 
+#print axioms log_zetaTilde_hasDerivAt
