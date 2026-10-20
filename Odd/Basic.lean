@@ -1911,6 +1911,174 @@ theorem hCoeff_sum_two :
   rw [Hodd_one_two] at h
   exact h
 
+/-! ### The general-z s-derivative of the p >= 7 tail, atom and bound
+
+STEP 1 of giving `OddCoeffFacts.deriv_exists` a proof instead of an assumption.
+
+The file already differentiates in `s` at the single value z = 2, where
+everything is real: `logHodd2`, `HoddR2`, `LprimeOdd`, and
+`logHodd2_hasDerivAt`, which runs `hasDerivAt_of_tendstoLocallyUniformlyOn`
+over `Finset` partial sums with the M-test supplying local uniform convergence.
+`hCoeff s j` needs the same thing for z ON A CIRCLE, since
+`hCoeff_eq_circleIntegral` puts the s-dependence inside `Hodd s z` for
+|z| = 5/2.
+
+The summand is fixed by `prime_factor_eq_exp_complex_seven`:
+
+    -Log (1 - z p^(-s)) + z * log (1 - p^(-s))
+
+with a complex log in the first term and a real one in the second -- the second
+argument is a positive real, so no branch question arises there.  Its
+s-derivative is the z = 2 computation with z in place of 2, as it must be. -/
+
+/-- The per-prime summand's s-derivative, for p >= 7 and |z| <= 4.
+
+The complex log is differentiable here because |z p^(-s)| <= 4/7, so
+`1 - z p^(-s)` has real part at least 3/7 and lies in the slit plane -- which
+is why the tail starts at 7 and not at 3. -/
+theorem prime_logderiv_complex_seven (p : ℕ) (hp : 7 ≤ p) (z : ℂ) (hz : ‖z‖ ≤ 4)
+    (s : ℝ) (hs : 1 ≤ s) :
+    HasDerivAt (fun r : ℝ =>
+        (-Complex.log (1 - z * (((p : ℝ) ^ (-r) : ℝ) : ℂ)))
+          + z * ((Real.log (1 - (p : ℝ) ^ (-r)) : ℝ) : ℂ))
+      (-((z * ((Real.log (p : ℝ) * (p : ℝ) ^ (-s) : ℝ) : ℂ))
+            / (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ)))
+        + z * ((Real.log (p : ℝ) * (p : ℝ) ^ (-s) / (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) s := by
+  have hp7 : (7 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1 / 7 := by
+    rw [ha_def]
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-(1 : ℝ)) :=
+      Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+    rw [Real.rpow_neg_one] at h1
+    have h3 : ((p : ℝ))⁻¹ ≤ 1 / 7 := by
+      rw [inv_eq_one_div]
+      exact one_div_le_one_div_of_le (by norm_num) hp7
+    linarith
+  have h1a : (0 : ℝ) < 1 - a := by linarith
+  -- r |-> p^(-r), real
+  have hpow : HasDerivAt (fun r : ℝ => (p : ℝ) ^ (-r))
+      (-(Real.log (p : ℝ) * a)) s := by
+    have h := HasDerivAt.const_rpow hp0 (hasDerivAt_neg s)
+    rw [ha_def]
+    simpa using h
+  -- the real half: z * log (1 - p^(-r))
+  have hinner : HasDerivAt (fun r : ℝ => 1 - (p : ℝ) ^ (-r))
+      (Real.log (p : ℝ) * a) s := by simpa using hpow.const_sub 1
+  have hlogr : HasDerivAt (fun r : ℝ => Real.log (1 - (p : ℝ) ^ (-r)))
+      (Real.log (p : ℝ) * a / (1 - a)) s := hinner.log (ne_of_gt h1a)
+  have hlogrC : HasDerivAt (fun r : ℝ => ((Real.log (1 - (p : ℝ) ^ (-r)) : ℝ) : ℂ))
+      (((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ)) s := by
+    first
+      | exact hlogr.ofReal_comp
+      | exact HasDerivAt.ofReal_comp hlogr
+      | exact (Complex.ofRealCLM.hasFDerivAt.comp_hasDerivAt s hlogr)
+  -- the complex half: -Log (1 - z p^(-r))
+  have hpowC : HasDerivAt (fun r : ℝ => (((p : ℝ) ^ (-r) : ℝ) : ℂ))
+      (((-(Real.log (p : ℝ) * a) : ℝ) : ℂ)) s := by
+    first
+      | exact hpow.ofReal_comp
+      | exact HasDerivAt.ofReal_comp hpow
+      | exact (Complex.ofRealCLM.hasFDerivAt.comp_hasDerivAt s hpow)
+  have hargd : HasDerivAt (fun r : ℝ => 1 - z * (((p : ℝ) ^ (-r) : ℝ) : ℂ))
+      (z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) s := by
+    have h := (hpowC.const_mul z).const_sub 1
+    convert h using 1
+    push_cast
+    ring
+  -- |z a| <= 4/7 puts the argument in the slit plane
+  have hzaNorm : ‖z * ((a : ℝ) : ℂ)‖ ≤ 4 / 7 := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ha_pos]
+    calc ‖z‖ * a ≤ 4 * a := mul_le_mul_of_nonneg_right hz ha_pos.le
+      _ ≤ 4 * (1 / 7) := by linarith
+      _ = 4 / 7 := by norm_num
+  have hre : (0 : ℝ) < (1 - z * ((a : ℝ) : ℂ)).re := by
+    have hle : (z * ((a : ℝ) : ℂ)).re ≤ ‖z * ((a : ℝ) : ℂ)‖ := by
+      first
+        | exact Complex.re_le_norm _
+        | exact Complex.re_le_abs _
+    simp only [Complex.sub_re, Complex.one_re]
+    linarith
+  have hslit : (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ)) ∈ Complex.slitPlane := by
+    rw [← ha_def]
+    exact Complex.mem_slitPlane_iff.mpr (Or.inl hre)
+  have hlogc : HasDerivAt (fun r : ℝ => Complex.log (1 - z * (((p : ℝ) ^ (-r) : ℝ) : ℂ)))
+      ((z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) s := by
+    first
+      | exact hargd.clog hslit
+      | exact HasDerivAt.clog hargd hslit
+  have hsum := hlogc.neg.add (hlogrC.const_mul z)
+  rw [← ha_def]
+  convert hsum using 1
+  ring
+
+/-- The M-test bound: the summand's derivative is `O(log p * p^(-s))`, with the
+constant 14.  From |z| <= 4, |1 - z p^(-s)| >= 3/7 and 1 - p^(-s) >= 6/7, the
+two terms give 28/3 and 14/3. -/
+theorem prime_logderiv_complex_norm_le (p : ℕ) (hp : 7 ≤ p) (z : ℂ) (hz : ‖z‖ ≤ 4)
+    (s : ℝ) (hs : 1 ≤ s) :
+    ‖(-((z * ((Real.log (p : ℝ) * (p : ℝ) ^ (-s) : ℝ) : ℂ))
+            / (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ)))
+        + z * ((Real.log (p : ℝ) * (p : ℝ) ^ (-s) / (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ))‖
+      ≤ 14 * (Real.log (p : ℝ) * (p : ℝ) ^ (-s)) := by
+  have hp7 : (7 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1 / 7 := by
+    rw [ha_def]
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-(1 : ℝ)) :=
+      Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+    rw [Real.rpow_neg_one] at h1
+    have h3 : ((p : ℝ))⁻¹ ≤ 1 / 7 := by
+      rw [inv_eq_one_div]
+      exact one_div_le_one_div_of_le (by norm_num) hp7
+    linarith
+  have hlogp : 0 ≤ Real.log (p : ℝ) := Real.log_nonneg (by linarith)
+  have hL : 0 ≤ Real.log (p : ℝ) * a := mul_nonneg hlogp ha_pos.le
+  have h1a : (0 : ℝ) < 1 - a := by linarith
+  -- denominators
+  have hzaNorm : ‖z * ((a : ℝ) : ℂ)‖ ≤ 4 / 7 := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ha_pos]
+    calc ‖z‖ * a ≤ 4 * a := mul_le_mul_of_nonneg_right hz ha_pos.le
+      _ ≤ 4 * (1 / 7) := by linarith
+      _ = 4 / 7 := by norm_num
+  have hden : (3 : ℝ) / 7 ≤ ‖1 - z * ((a : ℝ) : ℂ)‖ := by
+    have h := norm_sub_norm_le (1 : ℂ) (z * ((a : ℝ) : ℂ))
+    simp only [norm_one] at h
+    linarith
+  have hdenpos : (0 : ℝ) < ‖1 - z * ((a : ℝ) : ℂ)‖ := by linarith
+  -- first term
+  have ht1 : ‖(z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * ((a : ℝ) : ℂ))‖
+      ≤ (28 / 3) * (Real.log (p : ℝ) * a) := by
+    rw [norm_div, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hL]
+    rw [div_le_iff₀ hdenpos]
+    have hnum : ‖z‖ * (Real.log (p : ℝ) * a) ≤ 4 * (Real.log (p : ℝ) * a) :=
+      mul_le_mul_of_nonneg_right hz hL
+    nlinarith [hden, hL, hdenpos]
+  -- second term
+  have ht2 : ‖z * ((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ)‖
+      ≤ (14 / 3) * (Real.log (p : ℝ) * a) := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+    have hq : (0 : ℝ) ≤ Real.log (p : ℝ) * a / (1 - a) := by positivity
+    rw [abs_of_nonneg hq]
+    have hle : Real.log (p : ℝ) * a / (1 - a) ≤ (7 / 6) * (Real.log (p : ℝ) * a) := by
+      rw [div_le_iff₀ h1a]
+      nlinarith [hL, ha_le]
+    nlinarith [hz, hL, hle, norm_nonneg z]
+  calc ‖(-((z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * ((a : ℝ) : ℂ)))
+        + z * ((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ))‖
+      ≤ ‖(z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * ((a : ℝ) : ℂ))‖
+          + ‖z * ((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ)‖ := by
+        simpa using norm_add_le
+          (-((z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * ((a : ℝ) : ℂ))))
+          (z * ((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ))
+    _ ≤ (28 / 3) * (Real.log (p : ℝ) * a) + (14 / 3) * (Real.log (p : ℝ) * a) := by
+        linarith [ht1, ht2]
+    _ = 14 * (Real.log (p : ℝ) * a) := by ring
+
 /-! ### The two ContDiffAt hypotheses are satisfiable
 
 `FkOdd_convolution` and everything above it to `fOdd_expansion_final` thread

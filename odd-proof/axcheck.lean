@@ -23,3 +23,5 @@ import Odd.Basic
 #print axioms hCoeff_eq_circleIntegral
 #print axioms contDiffAt_exp_const_mul
 #print axioms Hodd_contDiffAt_zero
+#print axioms prime_logderiv_complex_seven
+#print axioms prime_logderiv_complex_norm_le
