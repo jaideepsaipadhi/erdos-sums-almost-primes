@@ -43,8 +43,6 @@ def fOdd (k : ℕ) : ℝ :=
 -- numerically to k = 20.  It is not formalized here because the decreasing
 -- theorem does not use it.
 
-
-
 /-- F_k(s) := Σ_{Ω(n)=k} n^{-s}, the Dirichlet series restricted to
     k-almost-primes. -/
 noncomputable def FkOdd (k : ℕ) (s : ℝ) : ℝ :=
@@ -521,8 +519,6 @@ def compl_b5_equiv :
     apply Subtype.ext
     rfl
 
-
-
 /-- If the p >= 7 tail is multipliable, so is the p >= 5 family, and the
 product splits off the p = 5 factor. -/
 theorem tprod_split_five {M : Type*} [CommMonoid M] [TopologicalSpace M] [T2Space M]
@@ -756,8 +752,6 @@ theorem prime_factor_eq_exp_complex_seven (p : ℕ) (hp : 7 ≤ p) (s : ℝ) (hs
         from mul_comm _ _]
   exact key.symm
 
-
-
 /-- Wide-radius variant (||z|| <= 4). -/
 theorem prime_factor_multipliable_complex_seven (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 4) :
     Multipliable (fun p : {p : ℕ // p.Prime ∧ 7 ≤ p} =>
@@ -877,8 +871,6 @@ theorem correction_sum_differentiableOn_seven (s : ℝ) (hs : 1 ≤ s) :
     rw [Metric.mem_ball, dist_zero_right] at hw
     have hp3 : 7 ≤ (p : ℕ) := p.property.2
     exact prime_correction_bound_complex_seven (p : ℕ) hp3 s hs w hw.le
-
-
 
 /-- Wide-radius variant (radius 4, p >= 5). -/
 theorem HoddTail_eq_exp_sum_seven (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 4) :
@@ -1910,6 +1902,194 @@ theorem hCoeff_sum_two :
   have h := hCoeff_hasSum 1 le_rfl 2 (by norm_num)
   rw [Hodd_one_two] at h
   exact h
+
+/-! ### The general-z s-derivative of the p >= 7 tail, atom and bound
+
+STEP 1 of giving `OddCoeffFacts.deriv_exists` a proof instead of an assumption.
+
+The file already differentiates in `s` at the single value z = 2, where
+everything is real: `logHodd2`, `HoddR2`, `LprimeOdd`, and
+`logHodd2_hasDerivAt`, which runs `hasDerivAt_of_tendstoLocallyUniformlyOn`
+over `Finset` partial sums with the M-test supplying local uniform convergence.
+`hCoeff s j` needs the same thing for z ON A CIRCLE, since
+`hCoeff_eq_circleIntegral` puts the s-dependence inside `Hodd s z` for
+|z| = 5/2.
+
+The summand is fixed by `prime_factor_eq_exp_complex_seven`:
+
+    -Log (1 - z p^(-s)) + z * log (1 - p^(-s))
+
+with a complex log in the first term and a real one in the second -- the second
+argument is a positive real, so no branch question arises there.  Its
+s-derivative is the z = 2 computation with z in place of 2, as it must be. -/
+
+/-- The per-prime summand's s-derivative, for p >= 7 and |z| <= 4.
+
+The complex log is differentiable here because |z p^(-s)| <= 4/7, so
+`1 - z p^(-s)` has real part at least 3/7 and lies in the slit plane -- which
+is why the tail starts at 7 and not at 3. -/
+theorem prime_logderiv_complex_seven (p : ℕ) (hp : 7 ≤ p) (z : ℂ) (hz : ‖z‖ ≤ 4)
+    (s : ℝ) (hs : 1 ≤ s) :
+    HasDerivAt (fun r : ℝ =>
+        (-Complex.log (1 - z * (((p : ℝ) ^ (-r) : ℝ) : ℂ)))
+          + z * ((Real.log (1 - (p : ℝ) ^ (-r)) : ℝ) : ℂ))
+      (-((z * ((Real.log (p : ℝ) * (p : ℝ) ^ (-s) : ℝ) : ℂ))
+            / (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ)))
+        + z * ((Real.log (p : ℝ) * (p : ℝ) ^ (-s) / (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) s := by
+  have hp7 : (7 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1 / 7 := by
+    rw [ha_def]
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-(1 : ℝ)) :=
+      Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+    rw [Real.rpow_neg_one] at h1
+    have h3 : ((p : ℝ))⁻¹ ≤ 1 / 7 := by
+      rw [inv_eq_one_div]
+      exact one_div_le_one_div_of_le (by norm_num) hp7
+    linarith
+  have h1a : (0 : ℝ) < 1 - a := by linarith
+  -- r |-> p^(-r), real
+  have hpow : HasDerivAt (fun r : ℝ => (p : ℝ) ^ (-r))
+      (-(Real.log (p : ℝ) * a)) s := by
+    have h := HasDerivAt.const_rpow hp0 (hasDerivAt_neg s)
+    rw [ha_def]
+    simpa using h
+  -- the real half: z * log (1 - p^(-r))
+  have hinner : HasDerivAt (fun r : ℝ => 1 - (p : ℝ) ^ (-r))
+      (Real.log (p : ℝ) * a) s := by simpa using hpow.const_sub 1
+  have hlogr : HasDerivAt (fun r : ℝ => Real.log (1 - (p : ℝ) ^ (-r)))
+      (Real.log (p : ℝ) * a / (1 - a)) s := hinner.log (ne_of_gt h1a)
+  have hlogrC : HasDerivAt (fun r : ℝ => ((Real.log (1 - (p : ℝ) ^ (-r)) : ℝ) : ℂ))
+      (((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ)) s := by
+    first
+      | exact hlogr.ofReal_comp
+      | exact HasDerivAt.ofReal_comp hlogr
+      | exact (Complex.ofRealCLM.hasFDerivAt.comp_hasDerivAt s hlogr)
+  -- the complex half: -Log (1 - z p^(-r))
+  have hpowC : HasDerivAt (fun r : ℝ => (((p : ℝ) ^ (-r) : ℝ) : ℂ))
+      (((-(Real.log (p : ℝ) * a) : ℝ) : ℂ)) s := by
+    first
+      | exact hpow.ofReal_comp
+      | exact HasDerivAt.ofReal_comp hpow
+      | exact (Complex.ofRealCLM.hasFDerivAt.comp_hasDerivAt s hpow)
+  -- the combinators produce -(z * (-(log p * a))); normalise it explicitly
+  -- rather than through `convert`, which leaves a goal `ring` cannot act on
+  have hargd0 := (hpowC.const_mul z).const_sub 1
+  have hval : -(z * ((((-(Real.log (p : ℝ) * a)) : ℝ) : ℂ)))
+      = z * ((Real.log (p : ℝ) * a : ℝ) : ℂ) := by
+    push_cast
+    ring
+  rw [hval] at hargd0
+  have hargd : HasDerivAt (fun r : ℝ => 1 - z * (((p : ℝ) ^ (-r) : ℝ) : ℂ))
+      (z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) s := hargd0
+  -- |z a| <= 4/7 puts the argument in the slit plane
+  have hzaNorm : ‖z * ((a : ℝ) : ℂ)‖ ≤ 4 / 7 := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ha_pos]
+    calc ‖z‖ * a ≤ 4 * a := mul_le_mul_of_nonneg_right hz ha_pos.le
+      _ ≤ 4 * (1 / 7) := by linarith
+      _ = 4 / 7 := by norm_num
+  have hre : (0 : ℝ) < (1 - z * ((a : ℝ) : ℂ)).re := by
+    have hle : (z * ((a : ℝ) : ℂ)).re ≤ ‖z * ((a : ℝ) : ℂ)‖ := by
+      first
+        | exact Complex.re_le_norm _
+        | exact Complex.re_le_abs _
+    simp only [Complex.sub_re, Complex.one_re]
+    linarith
+  have hslit : (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ)) ∈ Complex.slitPlane := by
+    rw [← ha_def]
+    exact Complex.mem_slitPlane_iff.mpr (Or.inl hre)
+  have hlogc : HasDerivAt (fun r : ℝ => Complex.log (1 - z * (((p : ℝ) ^ (-r) : ℝ) : ℂ)))
+      ((z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) s := by
+    -- `HasDerivAt.clog` is stated for a complex variable; here the variable is
+    -- real and only the VALUES are complex, so compose with
+    -- `Complex.hasDerivAt_log` instead.  That gives the derivative as
+    -- (f s)⁻¹ * f' rather than f' / f s, hence the rewrite.
+    have h := (Complex.hasDerivAt_log hslit).comp s hargd
+    have hdiv : (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))⁻¹
+          * (z * ((Real.log (p : ℝ) * a : ℝ) : ℂ))
+        = (z * ((Real.log (p : ℝ) * a : ℝ) : ℂ))
+          / (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ)) := by
+      rw [div_eq_inv_mul]
+    first
+      | exact hdiv ▸ h
+      | (rw [← hdiv]; exact h)
+      | simpa [Function.comp_def, div_eq_inv_mul] using h
+      | exact hargd.clog hslit
+  have hsum := hlogc.neg.add (hlogrC.const_mul z)
+  -- no `rw [<- ha_def]` here: `set` already replaced every p^(-s) by `a`, so
+  -- there is no occurrence left to rewrite and the rw fails
+  first
+    | exact hsum
+    | (convert hsum using 1; ring)
+    | (convert hsum using 1 <;> ring)
+
+/-- The M-test bound: the summand's derivative is `O(log p * p^(-s))`, with the
+constant 14.  From |z| <= 4, |1 - z p^(-s)| >= 3/7 and 1 - p^(-s) >= 6/7, the
+two terms give 28/3 and 14/3. -/
+theorem prime_logderiv_complex_norm_le (p : ℕ) (hp : 7 ≤ p) (z : ℂ) (hz : ‖z‖ ≤ 4)
+    (s : ℝ) (hs : 1 ≤ s) :
+    ‖(-((z * ((Real.log (p : ℝ) * (p : ℝ) ^ (-s) : ℝ) : ℂ))
+            / (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ)))
+        + z * ((Real.log (p : ℝ) * (p : ℝ) ^ (-s) / (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ))‖
+      ≤ 14 * (Real.log (p : ℝ) * (p : ℝ) ^ (-s)) := by
+  have hp7 : (7 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  have hp0 : (0 : ℝ) < (p : ℝ) := by linarith
+  set a : ℝ := (p : ℝ) ^ (-s) with ha_def
+  have ha_pos : 0 < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1 / 7 := by
+    rw [ha_def]
+    have h1 : (p : ℝ) ^ (-s) ≤ (p : ℝ) ^ (-(1 : ℝ)) :=
+      Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+    rw [Real.rpow_neg_one] at h1
+    have h3 : ((p : ℝ))⁻¹ ≤ 1 / 7 := by
+      rw [inv_eq_one_div]
+      exact one_div_le_one_div_of_le (by norm_num) hp7
+    linarith
+  have hlogp : 0 ≤ Real.log (p : ℝ) := Real.log_nonneg (by linarith)
+  have hL : 0 ≤ Real.log (p : ℝ) * a := mul_nonneg hlogp ha_pos.le
+  have h1a : (0 : ℝ) < 1 - a := by linarith
+  -- denominators
+  have hzaNorm : ‖z * ((a : ℝ) : ℂ)‖ ≤ 4 / 7 := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ha_pos]
+    calc ‖z‖ * a ≤ 4 * a := mul_le_mul_of_nonneg_right hz ha_pos.le
+      _ ≤ 4 * (1 / 7) := by linarith
+      _ = 4 / 7 := by norm_num
+  have hden : (3 : ℝ) / 7 ≤ ‖1 - z * ((a : ℝ) : ℂ)‖ := by
+    have h := norm_sub_norm_le (1 : ℂ) (z * ((a : ℝ) : ℂ))
+    simp only [norm_one] at h
+    linarith
+  have hdenpos : (0 : ℝ) < ‖1 - z * ((a : ℝ) : ℂ)‖ := by linarith
+  -- first term
+  have ht1 : ‖(z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * ((a : ℝ) : ℂ))‖
+      ≤ (28 / 3) * (Real.log (p : ℝ) * a) := by
+    rw [norm_div, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hL]
+    rw [div_le_iff₀ hdenpos]
+    have hnum : ‖z‖ * (Real.log (p : ℝ) * a) ≤ 4 * (Real.log (p : ℝ) * a) :=
+      mul_le_mul_of_nonneg_right hz hL
+    nlinarith [hden, hL, hdenpos]
+  -- second term
+  have ht2 : ‖z * ((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ)‖
+      ≤ (14 / 3) * (Real.log (p : ℝ) * a) := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs]
+    have hq : (0 : ℝ) ≤ Real.log (p : ℝ) * a / (1 - a) := by positivity
+    rw [abs_of_nonneg hq]
+    have hle : Real.log (p : ℝ) * a / (1 - a) ≤ (7 / 6) * (Real.log (p : ℝ) * a) := by
+      rw [div_le_iff₀ h1a]
+      nlinarith [hL, ha_le]
+    nlinarith [hz, hL, hle, norm_nonneg z]
+  calc ‖(-((z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * ((a : ℝ) : ℂ)))
+        + z * ((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ))‖
+      ≤ ‖(z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * ((a : ℝ) : ℂ))‖
+          + ‖z * ((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ)‖ := by
+        simpa using norm_add_le
+          (-((z * ((Real.log (p : ℝ) * a : ℝ) : ℂ)) / (1 - z * ((a : ℝ) : ℂ))))
+          (z * ((Real.log (p : ℝ) * a / (1 - a) : ℝ) : ℂ))
+    _ ≤ (28 / 3) * (Real.log (p : ℝ) * a) + (14 / 3) * (Real.log (p : ℝ) * a) := by
+        linarith [ht1, ht2]
+    _ = 14 * (Real.log (p : ℝ) * a) := by ring
+
 
 /-! ### The two ContDiffAt hypotheses are satisfiable
 
@@ -4760,6 +4940,138 @@ theorem log_rpow_summable_subtype (t : ℝ) (ht : 1 < t) (S : Set ℕ) :
     ring_nf
   exact hshift.subtype S
 
+
+/-- The undifferentiated tail log-series is summable.
+
+Extracted as a lemma because `HoddTail_eq_exp_sum_seven` proves exactly this
+inline, as a local `have hnormsum`, so the fact was not reusable -- and the
+locally-uniform argument below needs it as its pointwise-convergence input.
+The per-prime bound `prime_correction_bound_complex_seven` is standalone, so
+this is a comparison against 43 * p^(-2s). -/
+theorem logTail_summable_complex_seven (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ ≤ 4) :
+    Summable (fun p : {p : ℕ // p.Prime ∧ 7 ≤ p} =>
+      (-Complex.log (1 - z * (((p : ℝ) ^ (-s) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-s)) : ℝ) : ℂ)) := by
+  apply Summable.of_norm
+  have hcomp : Summable (fun p : {p : ℕ // p.Prime ∧ 7 ≤ p} =>
+      43 * (((p : ℕ)) : ℝ) ^ (-(2*s))) := by
+    have h2s : -(2*s) < -1 := by linarith
+    have hbase : Summable (fun n : ℕ => (n : ℝ) ^ (-(2*s))) :=
+      Real.summable_nat_rpow.mpr h2s
+    exact (hbase.subtype _).mul_left 43
+  refine Summable.of_nonneg_of_le (fun p => norm_nonneg _) ?_ hcomp
+  intro p
+  have hp3 : 7 ≤ (p : ℕ) := p.property.2
+  have h := prime_correction_bound_complex_seven (p : ℕ) hp3 s hs z hz
+  have hcast : (43 : ℝ) * ((p : ℕ) : ℝ) ^ (-2*s)
+      = 43 * (((p : ℕ)) : ℝ) ^ (-(2*s)) := by ring_nf
+  rw [← hcast]
+  exact h
+
+/-- STEP 2: the tail log-series may be differentiated in `s` term by term, for
+`z` anywhere in |z| <= 4.
+
+This is `logHodd2_hasDerivAt` with `z` in place of the single value 2, and it
+is the piece that the circle version of `hCoeff` needs.  Same four obligations
+of `hasDerivAt_of_tendstoLocallyUniformlyOn`, in the same order:
+
+  (a) local uniform convergence of the differentiated partial sums, via
+      `tendstoLocallyUniformlyOn_iff_forall_isCompact`, a minimum point `c` of
+      the compact set, and `tendstoUniformlyOn_tsum` against the majorant
+      `14 * (log p * p^(-c))`.  The z = 2 version's majorant is
+      `2 log p / ((p^c - 1)(p^c - 2))`; ours is the step-1 bound, uniform on
+      the compact set because `p^(-x) <= p^(-c)` for `x >= c` and `p >= 7 > 1`.
+  (b) each partial sum differentiates, by `HasDerivAt.sum` over the step-1 atom.
+  (c) pointwise convergence, from `logTail_summable_complex_seven`.
+  (d) membership in the open set. -/
+theorem logTail_hasDerivAt_complex (z : ℂ) (hz : ‖z‖ ≤ 4)
+    (s : ℝ) (hs : 1 < s) (hs2 : s < 2) :
+    HasDerivAt (fun t : ℝ => ∑' p : {p : ℕ // p.Prime ∧ 7 ≤ p},
+        ((-Complex.log (1 - z * (((p : ℝ) ^ (-t) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - (p : ℝ) ^ (-t)) : ℝ) : ℂ)))
+      (∑' p : {p : ℕ // p.Prime ∧ 7 ≤ p},
+        (-((z * ((Real.log ((p : ℕ) : ℝ) * ((p : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ))
+              / (1 - z * ((((p : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ)))
+          + z * ((Real.log ((p : ℕ) : ℝ) * ((p : ℕ) : ℝ) ^ (-s)
+              / (1 - ((p : ℕ) : ℝ) ^ (-s)) : ℝ) : ℂ))) s := by
+  -- g and g' MUST be passed explicitly.  The lemma concludes
+  -- `HasDerivAt f (g' x) x`, so leaving g' implicit asks Lean to solve
+  -- `?g' s =?= (tsum ... in s)` by higher-order unification, which fails with
+  -- "could not unify the conclusion ... with the goal HasDerivAt ?f (?g' ?x) ?x".
+  -- logHodd2_hasDerivAt passes all four for exactly this reason.
+  apply hasDerivAt_of_tendstoLocallyUniformlyOn (s := Set.Ioo (1 : ℝ) 2)
+    (l := Filter.atTop) isOpen_Ioo
+    (g := fun t : ℝ => ∑' p : {p : ℕ // p.Prime ∧ 7 ≤ p},
+      ((-Complex.log (1 - z * (((p : ℝ) ^ (-t) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-t)) : ℝ) : ℂ)))
+    (g' := fun t : ℝ => ∑' p : {p : ℕ // p.Prime ∧ 7 ≤ p},
+      (-((z * ((Real.log ((p : ℕ) : ℝ) * ((p : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ))
+            / (1 - z * ((((p : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ)))
+        + z * ((Real.log ((p : ℕ) : ℝ) * ((p : ℕ) : ℝ) ^ (-t)
+            / (1 - ((p : ℕ) : ℝ) ^ (-t)) : ℝ) : ℂ)))
+    (f := fun N : Finset {p : ℕ // p.Prime ∧ 7 ≤ p} => fun t : ℝ =>
+      ∑ q ∈ N, ((-Complex.log (1 - z * ((((q : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - ((q : ℕ) : ℝ) ^ (-t)) : ℝ) : ℂ)))
+    (f' := fun N : Finset {p : ℕ // p.Prime ∧ 7 ≤ p} => fun t : ℝ =>
+      ∑ q ∈ N, (-((z * ((Real.log ((q : ℕ) : ℝ) * ((q : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ))
+            / (1 - z * ((((q : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ)))
+        + z * ((Real.log ((q : ℕ) : ℝ) * ((q : ℕ) : ℝ) ^ (-t)
+            / (1 - ((q : ℕ) : ℝ) ^ (-t)) : ℝ) : ℂ)))
+  · -- (a) local uniform convergence of the differentiated partial sums
+    rw [tendstoLocallyUniformlyOn_iff_forall_isCompact isOpen_Ioo]
+    intro K hKsub hKcomp
+    rcases K.eq_empty_or_nonempty with hKe | hKne
+    · subst hKe; simp [tendstoUniformlyOn_empty]
+    · obtain ⟨c, hcK, hcmin⟩ := hKcomp.exists_isMinOn hKne continuousOn_id
+      have hc : (1 : ℝ) < c := (hKsub hcK).1
+      -- majorant and its summability, in the form logHodd2_deriv_summable uses:
+      -- the Set is given explicitly and scaled with `mul_left`
+      apply tendstoUniformlyOn_tsum
+        (u := fun q : {p : ℕ // p.Prime ∧ 7 ≤ p} =>
+          14 * (Real.log ((q : ℕ) : ℝ) * ((q : ℕ) : ℝ) ^ (-c)))
+        ((log_rpow_summable_subtype c hc {p : ℕ | p.Prime ∧ 7 ≤ p}).mul_left 14)
+      intro q x hx
+      have hq7 : (7 : ℝ) ≤ ((q : ℕ) : ℝ) := by
+        have := q.2.2
+        exact_mod_cast this
+      have hxc : c ≤ x := hcmin hx
+      have hx1 : (1 : ℝ) < x := lt_of_lt_of_le hc hxc
+      have hmono : ((q : ℕ) : ℝ) ^ (-x) ≤ ((q : ℕ) : ℝ) ^ (-c) :=
+        Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+      have hlog : (0 : ℝ) ≤ Real.log ((q : ℕ) : ℝ) :=
+        Real.log_nonneg (by linarith)
+      have hb := prime_logderiv_complex_norm_le (q : ℕ) q.2.2 z hz x (le_of_lt hx1)
+      calc _ ≤ 14 * (Real.log ((q : ℕ) : ℝ) * ((q : ℕ) : ℝ) ^ (-x)) := hb
+        _ ≤ 14 * (Real.log ((q : ℕ) : ℝ) * ((q : ℕ) : ℝ) ^ (-c)) := by
+            have := mul_le_mul_of_nonneg_left hmono hlog
+            linarith
+  · -- (b) each partial sum has the stated derivative
+    filter_upwards with N t ht
+    have ht1 : (1 : ℝ) < t := ht.1
+    have h := HasDerivAt.sum (u := N)
+      (A := fun q : {p : ℕ // p.Prime ∧ 7 ≤ p} => fun r : ℝ =>
+        (-Complex.log (1 - z * ((((q : ℕ) : ℝ) ^ (-r) : ℝ) : ℂ))) +
+          z * ((Real.log (1 - ((q : ℕ) : ℝ) ^ (-r)) : ℝ) : ℂ))
+      (A' := fun q : {p : ℕ // p.Prime ∧ 7 ≤ p} =>
+        -((z * ((Real.log ((q : ℕ) : ℝ) * ((q : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ))
+            / (1 - z * ((((q : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ)))
+          + z * ((Real.log ((q : ℕ) : ℝ) * ((q : ℕ) : ℝ) ^ (-t)
+              / (1 - ((q : ℕ) : ℝ) ^ (-t)) : ℝ) : ℂ))
+      (fun q _ => prime_logderiv_complex_seven (q : ℕ) q.2.2 z hz t (le_of_lt ht1))
+    have hfn : (fun r : ℝ => ∑ q ∈ N,
+          ((-Complex.log (1 - z * ((((q : ℕ) : ℝ) ^ (-r) : ℝ) : ℂ))) +
+            z * ((Real.log (1 - ((q : ℕ) : ℝ) ^ (-r)) : ℝ) : ℂ)))
+        = ∑ q ∈ N, (fun r : ℝ =>
+            (-Complex.log (1 - z * ((((q : ℕ) : ℝ) ^ (-r) : ℝ) : ℂ))) +
+              z * ((Real.log (1 - ((q : ℕ) : ℝ) ^ (-r)) : ℝ) : ℂ)) := by
+      funext r
+      rw [Finset.sum_apply]
+    rw [hfn]
+    exact h
+  · -- (c) pointwise convergence of the partial sums
+    intro t ht
+    exact (logTail_summable_complex_seven t (le_of_lt ht.1) z hz).hasSum
+  · exact ⟨hs, hs2⟩
 
 /-- For p >= 3 and s > 3/4, p^s > 2.  The key point is 3^(3/4) > 2,
 i.e. 3^3 = 27 > 16 = 2^4. -/
@@ -9316,10 +9628,6 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
   have hcombine : CN + NEARU + CE * S / 18 + S0 / 2 + 5 * (S1 + 4 * Real.eulerMascheroniConstant * S0) / 64 ≤ MR := by
     linarith [hMR]
   exact mul_le_mul_of_nonneg_right hcombine hK
-
-
-
-
 
 
 
