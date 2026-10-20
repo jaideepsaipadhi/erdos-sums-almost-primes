@@ -832,57 +832,39 @@ For every $m\geq0$,
 \end{lemma}
 
 \begin{proof}
-The lower bound follows at once from \eqref{eq:delta-decomposition}:
-\[
- \delta_m\geq-1-\frac{\log2}{4}m\geq-D(m)
- \qquad(m\geq1),
-\]
-because $\log(m+1)\geq\log2>1/4$. For $m=0$,
-$\delta_0=-1=-D(0)$.
+For the lower bound, \eqref{eq:delta-decomposition} gives
+$\delta_m\geq-1-\frac{\log2}{4}m\geq-D(m)$ for $m\geq1$, because
+$\log(m+1)\geq\log2>1/4$; and $\delta_0=-1=-D(0)$.
 
-For the upper bound, write
-$T_m=\sum_{i=0}^m2^i\eta_i(m-i)$. If $x\geq0$, then
-$\e^{-x}-1+x\leq\min(x,x^2/2)$. Hence, with
-$x=(m-i)\log2\,\e^{-u}$,
-\begin{align}
- T_m
- \leq\int_0^\infty \e^{-u}
- \sum_{i=0}^m\frac{(2u)^i}{i!}
+For the upper bound put $T_m=\sum_{i=0}^m2^i\eta_i(m-i)$. Since
+$\e^{-x}-1+x\leq\min(x,x^2/2)$ for $x\geq0$, taking
+$x=(m-i)\log2\,\e^{-u}$ gives
+\begin{equation}\label{eq:Tm-integral-bound}
+ T_m\leq\int_0^\infty \e^{-u}\sum_{i=0}^m\frac{(2u)^i}{i!}
  \min\left((m-i)\log2\,\e^{-u},
  \frac{(m-i)^2(\log2)^2\e^{-2u}}2\right)\dd u.
- \label{eq:Tm-integral-bound}
-\end{align}
-Assume $m\geq2$ and put $U_m=\log((m+1)/3)\geq0$. On $0\leq u\leq U_m$
-use the linear bound and
-$\sum_{i=0}^m(m-i)(2u)^i/i!\leq m\e^{2u}$; on $u\geq U_m$ use the quadratic
-bound and
-$\sum_{i=0}^m(m-i)^2(2u)^i/i!\leq m^2\e^{2u}$. Equation
-\eqref{eq:Tm-integral-bound} gives
-\begin{align*}
- T_m
- &\leq m\log2\int_0^{U_m}1\dd u
-   +\frac{m^2(\log2)^2}{2}\int_{U_m}^\infty\e^{-u}\dd u\\
- &=m\log2\log\frac{m+1}{3}
-   +\frac{3m^2(\log2)^2}{2(m+1)}\\
- &\leq m\log2\log(m+1)
-   +m\log2\left(-\log3+\frac32\log2\right)\\
- &\leq m\log2\log(m+1),
-\end{align*}
-where the last inequality uses $3>2^{3/2}$. Thus
+\end{equation}
+Let $U_m=\max\left(0,\log\frac{m+1}{3}\right)$. On $0\leq u\leq U_m$ use the
+linear bound together with $\sum_{i=0}^m(m-i)(2u)^i/i!\leq m\e^{2u}$, and on
+$u\geq U_m$ the quadratic bound together with
+$\sum_{i=0}^m(m-i)^2(2u)^i/i!\leq m^2\e^{2u}$. Then
+\begin{equation}\label{eq:Tm-split}
+ T_m\leq m\log2\,U_m+\frac{m^2(\log2)^2}{2}\e^{-U_m}.
+\end{equation}
+For $m\geq2$ we have $U_m=\log\frac{m+1}{3}$ and $\e^{-U_m}=\frac3{m+1}$, so
+\eqref{eq:Tm-split} and $\frac{3m^2}{2(m+1)}\leq\frac32m$ give
 \[
- \delta_m=-1-\frac{\log2}{4}m+T_m
- \leq(\log2)m\log(m+1)+1=D(m).
+ T_m\leq m\log2\log\frac{m+1}{3}+\frac{3m^2(\log2)^2}{2(m+1)}
+ \leq m\log2\left(\log(m+1)-\log3+\tfrac32\log2\right)
+ \leq m\log2\log(m+1),
 \]
-For $m=1$, $B_0=0$ and
-$0\leq B_1(u)\leq(\log2)^2\e^{-2u}/2$, so
+the last step because $3>2^{3/2}$. For $m\leq1$ we have $U_m=0$, and
+\eqref{eq:Tm-split} reads $T_m\leq m^2(\log2)^2/2$, which is at most
+$m\log2\log(m+1)$ since $\frac{m\log2}{2}\leq\log(m+1)$ there. In both cases
 \[
- 0\leq T_1=\eta_0(1)
- \leq\frac{(\log2)^2}{2}\int_0^\infty\e^{-3u}\dd u
- =\frac{(\log2)^2}{6}.
+ \delta_m=-1-\frac{\log2}{4}m+T_m\leq T_m\leq(\log2)m\log(m+1)<D(m),
 \]
-Hence
-$-D(1)< -1-\tfrac14\log2\leq\delta_1<0<D(1)$, which completes the
-remaining case.
+which with the lower bound proves \eqref{eq:D-bound}.
 \end{proof}
 
 \begin{lemma}\label{lem:Delta-bound}
