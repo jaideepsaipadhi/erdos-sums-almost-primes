@@ -1727,6 +1727,55 @@ Taylor coefficients of the analytic function Hodd s. -/
 noncomputable def hCoeff (s : ℝ) (j : ℕ) : ℂ :=
   iteratedDeriv j (fun z => Hodd s z) 0 / (Nat.factorial j)
 
+/-! ### The bridge to the unrestricted development
+
+`Hodd` and `G2manu` differ only in their scalar cpow prefactor: `Hodd` carries
+`(1 - 2^-s)^z` and `G2manu` carries `(kappaFac s)^z`, over the SAME product
+over p >= 3, which `reg_tprod_eq_G2C` identifies with `G2C`.  At `s = 1` the
+odd prefactor is exactly `1/2`, which is also `G2at1`'s, so `Hodd 1` and
+`G2at1` are the same function and the odd coefficients at the basepoint are
+the unrestricted `c_i`.
+
+This is worth having explicitly: it means `tendsto_one` does not need its own
+limit theory, and it is a consistency check on the two developments agreeing
+about the same object.
+-/
+
+/-- `Hodd` is its p = 2 cpow factor times `G2C`.  The product over p >= 3 in
+`Hodd`'s definition is literally the one `reg_tprod_eq_G2C` evaluates. -/
+theorem Hodd_eq_cpow_mul_G2C (s : ℝ) (hs : 1 ≤ s) (z : ℂ)
+    (hz : Norm.norm z ≤ 2) :
+    Hodd s z = (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z * G2C s z := by
+  have hprod := reg_tprod_eq_G2C s hs z hz
+  unfold Hodd
+  rw [← hprod]
+
+/-- At the basepoint the odd generating function IS `G2at1`: `1 - 2^-1 = 1/2`
+and the p >= 3 product is `G2C 1 z`. -/
+theorem Hodd_one_eq_G2at1 (z : ℂ) (hz : Norm.norm z ≤ 2) :
+    Hodd 1 z = G2at1 z := by
+  rw [Hodd_eq_cpow_mul_G2C 1 (le_refl 1) z hz]
+  have h2 : ((1 - (2:ℝ) ^ (-(1:ℝ)) : ℝ)) = (1 / 2 : ℝ) := by
+    rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2), Real.rpow_one]
+    norm_num
+  unfold G2at1
+  rw [h2]
+
+/-- The odd coefficients at `s = 1` are the unrestricted `c_j`.  Transferred
+across `Metric.ball 0 2`, which is a neighbourhood of `0`, since
+`Hodd_one_eq_G2at1` holds there and `iteratedDeriv` only sees germs. -/
+theorem hCoeff_one_eq_cCoeff (j : ℕ) : hCoeff 1 j = cCoeff j := by
+  unfold hCoeff cCoeff
+  congr 1
+  apply Filter.EventuallyEq.iteratedDeriv_eq
+  have hball : Metric.ball (0 : ℂ) 2 ∈ nhds (0 : ℂ) := by
+    apply Metric.isOpen_ball.mem_nhds
+    rw [Metric.mem_ball, dist_self]
+    norm_num
+  filter_upwards [hball] with z hz
+  rw [Metric.mem_ball, dist_zero_right] at hz
+  exact Hodd_one_eq_G2at1 z (le_of_lt hz)
+
 /-- h_0(1) = H(1,0) = 1: the empty product. -/
 theorem hCoeff_zero_at_one : hCoeff 1 0 = 1 := by
   unfold hCoeff

@@ -27,3 +27,8 @@ import Odd.Basic
 #print axioms prime_logderiv_complex_norm_le
 #print axioms logTail_summable_complex_seven
 #print axioms logTail_hasDerivAt_complex
+
+-- the bridge to the unrestricted development
+#print axioms Hodd_eq_cpow_mul_G2C
+#print axioms Hodd_one_eq_G2at1
+#print axioms hCoeff_one_eq_cCoeff
