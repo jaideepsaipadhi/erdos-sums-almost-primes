@@ -4994,8 +4994,21 @@ theorem logTail_hasDerivAt_complex (z : ℂ) (hz : ‖z‖ ≤ 4)
               / (1 - z * ((((p : ℕ) : ℝ) ^ (-s) : ℝ) : ℂ)))
           + z * ((Real.log ((p : ℕ) : ℝ) * ((p : ℕ) : ℝ) ^ (-s)
               / (1 - ((p : ℕ) : ℝ) ^ (-s)) : ℝ) : ℂ))) s := by
+  -- g and g' MUST be passed explicitly.  The lemma concludes
+  -- `HasDerivAt f (g' x) x`, so leaving g' implicit asks Lean to solve
+  -- `?g' s =?= (tsum ... in s)` by higher-order unification, which fails with
+  -- "could not unify the conclusion ... with the goal HasDerivAt ?f (?g' ?x) ?x".
+  -- logHodd2_hasDerivAt passes all four for exactly this reason.
   apply hasDerivAt_of_tendstoLocallyUniformlyOn (s := Set.Ioo (1 : ℝ) 2)
     (l := Filter.atTop) isOpen_Ioo
+    (g := fun t : ℝ => ∑' p : {p : ℕ // p.Prime ∧ 7 ≤ p},
+      ((-Complex.log (1 - z * (((p : ℝ) ^ (-t) : ℝ) : ℂ))) +
+        z * ((Real.log (1 - (p : ℝ) ^ (-t)) : ℝ) : ℂ)))
+    (g' := fun t : ℝ => ∑' p : {p : ℕ // p.Prime ∧ 7 ≤ p},
+      (-((z * ((Real.log ((p : ℕ) : ℝ) * ((p : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ))
+            / (1 - z * ((((p : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ)))
+        + z * ((Real.log ((p : ℕ) : ℝ) * ((p : ℕ) : ℝ) ^ (-t)
+            / (1 - ((p : ℕ) : ℝ) ^ (-t)) : ℝ) : ℂ)))
     (f := fun N : Finset {p : ℕ // p.Prime ∧ 7 ≤ p} => fun t : ℝ =>
       ∑ q ∈ N, ((-Complex.log (1 - z * ((((q : ℕ) : ℝ) ^ (-t) : ℝ) : ℂ))) +
         z * ((Real.log (1 - ((q : ℕ) : ℝ) ^ (-t)) : ℝ) : ℂ)))
