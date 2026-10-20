@@ -4,7 +4,7 @@ Everything the Lean development assumes rather than proves comes from here.
 `erdos_sums_increase_from_six` is conditional on a `NumericalFacts` structure;
 these are the Arb ball computations that justify its fields.  The analytic
 reduction is machine-checked, these are not, and that division is the one
-Caveat 1.3(b) of the manuscript draws.
+Section 8 of the manuscript draws.
 
 ## Directories
 

@@ -1242,7 +1242,7 @@ theorem rhoConst_upper_bound : rhoConst ≤ (-0.1747885 : ℝ) := by
 /-- The certified inputs: everything the analytic reduction takes on trust.
 
 Each field is an Arb ball computation from the companion package, exactly the
-division Caveat 1.3(b) draws.  The analytic reduction is machine-verified;
+division Section 8 draws.  The analytic reduction is machine-verified;
 these are not.
 
 Umax and Vmax are parameters rather than fields because a Prop cannot carry
@@ -14242,7 +14242,7 @@ So the only genuinely assumed input left is `hM1`, and unlike `g_deriv` it is a
 numerical statement: the sup of a derivative over a compact circle and a
 bounded s-range.  Substituting it for `g_deriv` makes the structure's docstring
 true, which is the point -- it does not reduce the field count, it moves one
-field from the wrong side of Caveat 1.3b's line to the right side. -/
+field from the wrong side of Section 8's line to the right side. -/
 theorem g_deriv_of_derivBound (M1 : ℝ) (hM10 : 0 ≤ M1)
     (hM1 : ∀ x ∈ Set.Ioo (1 : ℝ) 2, ∀ theta : ℝ,
       Norm.norm (deriv (fun u : ℝ => G2manu u (circleMap 0 (2 : ℝ) theta)) x) ≤ M1)

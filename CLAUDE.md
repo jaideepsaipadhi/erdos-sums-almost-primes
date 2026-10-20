@@ -65,5 +65,5 @@ Two recurring traps:
 
 `lake build`; `#print axioms` targets are in `odd-proof/axcheck.lean`. The
 `*NumericalFacts` structures are assumed hypotheses with no instance — that is
-the trusted computing base, deliberately (manuscript Caveat 1.3b). There must
+the trusted computing base, deliberately (manuscript Section 8). There must
 be no `sorry` anywhere.

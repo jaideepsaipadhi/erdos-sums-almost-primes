@@ -149,6 +149,27 @@ jobs:
             grep -nEi "error|unknown|failed|sorry|timeout|heartbeat|maximum" \
                  axioms-bm.txt | head -8 | cut -c1-240 \
               | while IFS= read -r line; do echo "::error::bm! ${line}"; done
+            # How many of the audited names DID resolve.  This separates "the
+            # module loaded and one constant is missing" from "almost nothing
+            # loaded", which the error text alone does not distinguish.
+            nres=$(grep -c 'depend' axioms-bm.txt); nwant=$(grep -c '^#print axioms' axcheck-bm.lean)
+            echo "::error::bm? resolved ${nres} of ${nwant} audited names"
+            # For every `Unknown constant`, say whether the SOURCE declares it.
+            # An audited name that no source declares is an audit typo and is
+            # fixed here; a name the source DOES declare but the olean lacks is
+            # a build problem, not an audit problem, and must be chased there.
+            # Without this split the two are indistinguishable from outside the
+            # runner, which cost a full cycle of guessing once.
+            grep -oE "Unknown constant [\`']?[A-Za-z_][A-Za-z0-9_'.]*" axioms-bm.txt \
+              | sed -E "s/.*[\`' ]([A-Za-z_][A-Za-z0-9_'.]*)$/\1/" | sort -u | head -4 \
+              | while IFS= read -r nm; do
+                  if grep -qE "^(private )?(theorem|lemma|def|noncomputable def|structure|abbrev) ${nm}( |\(|\{|\[|:)" \
+                       Banksmartin/Basic.lean Odd/Basic.lean; then
+                    echo "::error::bm? ${nm}: DECLARED in source but absent from the olean -> build problem"
+                  else
+                    echo "::error::bm? ${nm}: not declared in any source -> audit lists a name that does not exist"
+                  fi
+                done
             # Emitting nothing is indistinguishable from the cap having eaten
             # the annotations, so when no line matches, say that explicitly and
             # show both ends rather than leaving the next reader to guess.
