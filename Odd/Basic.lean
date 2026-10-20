@@ -1776,6 +1776,79 @@ theorem hCoeff_one_eq_cCoeff (j : ℕ) : hCoeff 1 j = cCoeff j := by
   rw [Metric.mem_ball, dist_zero_right] at hz
   exact Hodd_one_eq_G2at1 z (le_of_lt hz)
 
+/-- `1 - 2^-s` is positive for `1 <= s`: `2^-s <= 1/2`. -/
+theorem oddFac_pos (s : ℝ) (hs : 1 ≤ s) : (0 : ℝ) < 1 - (2:ℝ) ^ (-s) := by
+  have h1 : (2:ℝ) ^ (-s) ≤ (2:ℝ) ^ (-(1:ℝ)) := by
+    apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+    linarith
+  have h2 : (2:ℝ) ^ (-(1:ℝ)) = 1 / 2 := by
+    rw [Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2), Real.rpow_one]; norm_num
+  rw [h2] at h1
+  linarith
+
+/-- The odd prefactor tends to 1/2 as s decreases to 1.  Analogue of
+`kappaFac_tendsto_half`, but elementary: no zeta residue is involved. -/
+theorem oddFac_tendsto_half :
+    Filter.Tendsto (fun s : ℝ => 1 - (2:ℝ) ^ (-s))
+      (nhdsWithin 1 (Set.Ioi (1 : ℝ))) (nhds (1 / 2 : ℝ)) := by
+  have hrw : ∀ s : ℝ, (2:ℝ) ^ (-s) = Real.exp (Real.log 2 * (-s)) :=
+    fun s => Real.rpow_def_of_pos (by norm_num) (-s)
+  have heqf : (fun s : ℝ => 1 - (2:ℝ) ^ (-s))
+      = (fun s : ℝ => 1 - Real.exp (Real.log 2 * (-s))) := by
+    funext s; rw [hrw s]                                   -- RISK 1
+  have hc : Continuous (fun s : ℝ => 1 - Real.exp (Real.log 2 * (-s))) :=
+    continuous_const.sub (Real.continuous_exp.comp (continuous_const.mul continuous_neg))
+  have hval : (1 : ℝ) - Real.exp (Real.log 2 * (-(1:ℝ))) = 1 / 2 := by
+    rw [← hrw 1, Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2), Real.rpow_one]
+    norm_num
+  rw [heqf, ← hval]
+  exact hc.continuousAt.tendsto.mono_left nhdsWithin_le_nhds   -- RISK 3
+
+/-- The odd prefactor's cpow tends to `(1/2)^z`.  Same exp-log route as
+`kappa_cpow_tendsto`, which is needed because cpow is not continuous in its
+base at 0 and so the limit cannot be taken factorwise. -/
+theorem oddFac_cpow_tendsto (z : ℂ) :
+    Filter.Tendsto (fun s : ℝ => (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z)
+      (nhdsWithin 1 (Set.Ioi (1 : ℝ))) (nhds ((((1 / 2 : ℝ)) : ℂ) ^ z)) := by
+  have hk := oddFac_tendsto_half
+  have heq : ∀ s : ℝ, s ∈ Set.Ioi (1 : ℝ) →
+      (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z
+        = Complex.exp (z * ((Real.log (1 - (2:ℝ) ^ (-s)) : ℝ) : ℂ)) := by
+    intro s hs
+    exact ofReal_cpow_eq_exp _ (oddFac_pos s (le_of_lt hs)) z
+  have hlog : Filter.Tendsto (fun s : ℝ => Real.log (1 - (2:ℝ) ^ (-s)))
+      (nhdsWithin 1 (Set.Ioi (1 : ℝ))) (nhds (Real.log (1 / 2 : ℝ))) :=
+    (Real.continuousAt_log (by norm_num)).tendsto.comp hk
+  have hcomp : Filter.Tendsto
+      (fun s : ℝ => Complex.exp (z * ((Real.log (1 - (2:ℝ) ^ (-s)) : ℝ) : ℂ)))
+      (nhdsWithin 1 (Set.Ioi (1 : ℝ)))
+      (nhds (Complex.exp (z * ((Real.log (1 / 2 : ℝ) : ℝ) : ℂ)))) := by
+    apply Complex.continuous_exp.continuousAt.tendsto.comp
+    apply Filter.Tendsto.const_mul
+    exact (Complex.continuous_ofReal.continuousAt).tendsto.comp hlog
+  have hval : Complex.exp (z * ((Real.log (1 / 2 : ℝ) : ℝ) : ℂ))
+      = (((1 / 2 : ℝ)) : ℂ) ^ z :=
+    (ofReal_cpow_eq_exp (1 / 2 : ℝ) (by norm_num) z).symm
+  rw [← hval]
+  apply hcomp.congr'
+  filter_upwards [self_mem_nhdsWithin] with s hs
+  exact (heq s hs).symm
+
+/-- `Hodd s z -> Hodd 1 z` as s decreases to 1, for `|z| <= 2`.  The product
+of `oddFac_cpow_tendsto` and `G2C_tendsto_at_one`, exactly as
+`G2manu_tendsto_G2at1` is the product of `kappa_cpow_tendsto` and the same
+`G2C_tendsto_at_one`.  `Hodd 1 z = G2at1 z` by `Hodd_one_eq_G2at1`. -/
+theorem Hodd_tendsto_at_one (z : ℂ) (hz : Norm.norm z ≤ 2) :
+    Filter.Tendsto (fun s : ℝ => Hodd s z) (nhdsWithin 1 (Set.Ioi (1 : ℝ)))
+      (nhds (Hodd 1 z)) := by
+  have hprod := (oddFac_cpow_tendsto z).mul (G2C_tendsto_at_one z hz)
+  rw [Hodd_one_eq_G2at1 z hz]
+  have hval : G2at1 z = (((1 / 2 : ℝ)) : ℂ) ^ z * G2C 1 z := rfl
+  rw [hval]
+  apply hprod.congr'
+  filter_upwards [self_mem_nhdsWithin] with s hs
+  exact (Hodd_eq_cpow_mul_G2C s (le_of_lt hs) z hz).symm
+
 /-- h_0(1) = H(1,0) = 1: the empty product. -/
 theorem hCoeff_zero_at_one : hCoeff 1 0 = 1 := by
   unfold hCoeff

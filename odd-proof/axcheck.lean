@@ -32,3 +32,9 @@ import Odd.Basic
 #print axioms Hodd_eq_cpow_mul_G2C
 #print axioms Hodd_one_eq_G2at1
 #print axioms hCoeff_one_eq_cCoeff
+
+-- the odd basepoint limit, ported from kappa_cpow_tendsto
+#print axioms oddFac_pos
+#print axioms oddFac_tendsto_half
+#print axioms oddFac_cpow_tendsto
+#print axioms Hodd_tendsto_at_one
