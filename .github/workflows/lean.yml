@@ -133,14 +133,32 @@ jobs:
           cat axioms-bm.txt
           echo "::notice::bm lean exit status ${rc}"
           if [ "$rc" -ne 0 ]; then
-            # Emit the TAIL, not the whole file.  Dumping every line as its
-            # own annotation overruns the ~15 cap, and what survives is the
-            # successful `depends on axioms` prints while lean's actual error
-            # -- which comes last -- is dropped.  Same failure mode as the old
-            # build-error step.
-            echo "::error::bm axiom audit: lean exited ${rc}; tail follows"
-            tail -14 axioms-bm.txt | cut -c1-240 \
-              | while IFS= read -r line; do echo "::error::bm: ${line}"; done
+            # Select by CONTENT, never by position.  Two earlier versions of
+            # this step picked a positional window and both showed the wrong
+            # thing.  Dumping every line overruns the ~15 annotation cap and
+            # what survives is the clean `depends on axioms` prints; `tail -14`
+            # was then written on the assumption that lean's error "comes
+            # last", which is false: stderr is unbuffered and lands at the TOP
+            # of the redirected file, while the buffered #print output flushes
+            # at the END.  So the tail showed nine clean prints and dropped the
+            # error -- an audit that reads as passing yet failed.  Annotations
+            # are the ONLY channel out of this job (both the run-log host and
+            # the artifact blob host are unreachable from the dev container),
+            # so the filter is the thing that has to be right.
+            echo "::error::bm axiom audit: lean exited ${rc}"
+            grep -nEi "error|unknown|failed|sorry|timeout|heartbeat|maximum" \
+                 axioms-bm.txt | head -8 | cut -c1-240 \
+              | while IFS= read -r line; do echo "::error::bm! ${line}"; done
+            # Emitting nothing is indistinguishable from the cap having eaten
+            # the annotations, so when no line matches, say that explicitly and
+            # show both ends rather than leaving the next reader to guess.
+            if ! grep -qEi "error|unknown|failed|sorry" axioms-bm.txt; then
+              echo "::error::bm! no error text in $(wc -l < axioms-bm.txt) lines"
+              head -3 axioms-bm.txt | cut -c1-240 \
+                | while IFS= read -r l; do echo "::error::bm! head: ${l}"; done
+              tail -3 axioms-bm.txt | cut -c1-240 \
+                | while IFS= read -r l; do echo "::error::bm! tail: ${l}"; done
+            fi
             exit 1
           fi
           if grep -q "sorryAx" axioms-bm.txt; then
@@ -168,7 +186,10 @@ jobs:
           echo "expected ${want} axiom lines, got ${got}"
           if [ "$want" -ne "$got" ]; then
             echo "::error::unrestricted audit printed ${got} of ${want} lines"
-            while IFS= read -r line; do echo "::error::bm: ${line}"; done < axioms-bm.txt
+            # Capped, and the NON-reporting lines are the informative ones, so
+            # show what is not a clean print rather than the whole file.
+            grep -vE "depend" axioms-bm.txt | head -8 | cut -c1-240 \
+              | while IFS= read -r line; do echo "::error::bm? ${line}"; done
             exit 1
           fi
           echo "::notice::unrestricted axiom audit clean: ${got}/${want} declarations"
@@ -188,16 +209,28 @@ jobs:
           cat axioms.txt
           echo "::notice::odd lean exit status ${rc}"
           if [ "$rc" -ne 0 ]; then
-            echo "::error::odd axiom audit: lean exited ${rc}; output follows"
-            while IFS= read -r line; do echo "::error::odd: ${line}"; done < axioms.txt
+            # Content-selected, capped; see the unrestricted step above for why
+            # a positional window cannot be trusted here.
+            echo "::error::odd axiom audit: lean exited ${rc}"
+            grep -nEi "error|unknown|failed|sorry|timeout|heartbeat|maximum" \
+                 axioms.txt | head -8 | cut -c1-240 \
+              | while IFS= read -r line; do echo "::error::odd! ${line}"; done
+            if ! grep -qEi "error|unknown|failed|sorry" axioms.txt; then
+              echo "::error::odd! no error text in $(wc -l < axioms.txt) lines"
+              head -3 axioms.txt | cut -c1-240 \
+                | while IFS= read -r l; do echo "::error::odd! head: ${l}"; done
+              tail -3 axioms.txt | cut -c1-240 \
+                | while IFS= read -r l; do echo "::error::odd! tail: ${l}"; done
+            fi
             exit 1
           fi
           want=$(grep -c '^#print axioms' odd-proof/axcheck.lean)
           got=$(grep -c 'depend' axioms.txt)
           echo "expected ${want} axiom lines, got ${got}"
           if [ "$want" -ne "$got" ]; then
-            echo "::error::odd audit printed ${got} of ${want} lines; full output follows"
-            while IFS= read -r line; do echo "::error::odd: ${line}"; done < axioms.txt
+            echo "::error::odd audit printed ${got} of ${want} lines"
+            grep -vE "depend" axioms.txt | head -8 | cut -c1-240 \
+              | while IFS= read -r line; do echo "::error::odd? ${line}"; done
             exit 1
           fi
           if grep -q "sorryAx" axioms.txt; then
