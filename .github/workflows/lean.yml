@@ -46,39 +46,57 @@ jobs:
           sudo docker image prune --all --force > /dev/null 2>&1 || true
           df -h / | tail -1
 
-      - name: Build (elan + mathlib cache + lake build)
+      # Toolchain and Mathlib cache only.  The build itself is the next step,
+      # so that THIS workflow owns the log.
+      - name: Toolchain and mathlib cache
         uses: leanprover/lean-action@v1
         with:
-          build: true
+          build: false
           test: false
           lint: false
           use-mathlib-cache: true
 
-      # The run log is served from a host this project's tooling cannot reach,
-      # so a red build otherwise reports only "lake build failed" with no Lean
-      # error attached.  Annotations ARE readable over the API, so on failure
-      # re-run the build (a cache hit, seconds) and echo what Lean actually
-      # said as annotations.  Without this, iterating on a proof from outside
-      # the runner is guessing.
-      - name: Surface Lean errors as annotations
-        if: failure()
+      # Build ONCE, keeping the output.  The previous arrangement let
+      # lean-action build and then, on failure, ran `lake build` a SECOND time
+      # to recover the error text, on the stated assumption that the re-run
+      # would be "a cache hit, seconds".  That is false exactly when it
+      # matters: if the failure is a Lean error in Banksmartin/Basic.lean or
+      # Odd/Basic.lean, the second build re-elaborates the whole file, so the
+      # recovery step takes as long as the build it is recovering from.  One
+      # run of it sat for over forty minutes and produced no annotations at
+      # all, which is worse than useless -- it holds a runner and reports
+      # nothing.
+      - name: lake build
         run: |
-          lake build > relog.txt 2>&1 || true
-          echo "--- first 80 lines mentioning error ---"
-          grep -nE "error|sorry|unsolved goals|unknown (identifier|constant)" \
-            relog.txt | head -80 | while IFS= read -r line; do
-              echo "::error::${line}"
-            done
-          tail -40 relog.txt | while IFS= read -r line; do
-              echo "::error::tail: ${line}"
-            done
+          set +e
+          lake build 2>&1 | tee build.log
+          echo "${PIPESTATUS[0]}" > build.rc
+          exit 0
+
+      # The run-log host is unreachable from this project's tooling and
+      # artifact upload is blocked too, so ANNOTATIONS are the only channel out
+      # of the runner.  They are capped (~15 per check) and long lines get
+      # truncated, so emit FEW and SHORT: the old step echoed up to 120, which
+      # overran the cap and dropped the first error -- the one that matters --
+      # while keeping forty lines of tail.
+      - name: Report build result
+        run: |
+          rc=$(cat build.rc)
+          echo "::notice::build rc=${rc}"
+          if [ "${rc}" != "0" ]; then
+            grep -nE "error:" build.log | head -8 \
+              | cut -c1-240 \
+              | while IFS= read -r line; do echo "::error::${line}"; done
+            n=$(grep -cE "error:" build.log)
+            echo "::error::total lines matching 'error:' = ${n}"
+            exit 1
+          fi
 
       # Compiler-reported, not text-matched.  A grep for the word finds it in
       # comments and docstrings; Lean emits "declaration uses 'sorry'" only for
       # the real thing.  The rebuild here is a cache hit and costs seconds.
       - name: No sorry (compiler-reported)
         run: |
-          lake build 2>&1 | tee build.log
           if grep -q "declaration uses 'sorry'" build.log; then
             echo "::error::the compiler reports a declaration using sorry"
             grep -n "declaration uses 'sorry'" build.log
