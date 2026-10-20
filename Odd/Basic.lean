@@ -1688,30 +1688,131 @@ theorem hCoeff_zero_at_one : hCoeff 1 0 = 1 := by
   rw [tprod_congr hterm]
   simp
 
+/-- The p = 3 Euler factor is differentiable on |z| < 3: its only pole sits at
+`z = 3^s >= 3`, which the OPEN ball excludes, and the cpow factor is entire.
+Companion to `prime_five_differentiableOn_four` -- the general wide per-prime
+lemma needs p >= 7, so p = 3 and p = 5 each need their own. -/
+theorem prime_three_differentiableOn_three (s : ℝ) (hs : 1 ≤ s) :
+    DifferentiableOn ℂ (fun z : ℂ => (1 - z * ((((3 : ℝ)) ^ (-s) : ℝ) : ℂ))⁻¹ *
+      ((((1 - ((3 : ℝ)) ^ (-s) : ℝ)) : ℂ)) ^ z) (Metric.ball 0 (3)) := by
+  set a : ℝ := ((3 : ℝ)) ^ (-s) with ha_def
+  have ha_pos : (0 : ℝ) < a := by rw [ha_def]; positivity
+  have ha_le : a ≤ 1 / 3 := by
+    rw [ha_def]
+    have h1 : ((3 : ℝ)) ^ (-s) ≤ ((3 : ℝ)) ^ (-(1 : ℝ)) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+      linarith
+    rw [Real.rpow_neg_one] at h1
+    norm_num at h1
+    linarith
+  have h1a_pos : (0 : ℝ) < 1 - a := by linarith
+  have h1a_ne : ((((1 - a : ℝ))) : ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  intro z hz
+  rw [Metric.mem_ball, dist_zero_right] at hz
+  -- strictness comes from |z| < 3, since 3 * (1/3) is exactly 1
+  have hza : Norm.norm (z * ((a : ℝ) : ℂ)) < 1 := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ha_pos]
+    calc Norm.norm z * a < (3) * a := by
+          apply mul_lt_mul_of_pos_right hz ha_pos
+      _ ≤ (3) * (1 / 3) := by
+          apply mul_le_mul_of_nonneg_left ha_le (by norm_num)
+      _ = 1 := by norm_num
+  have hne : (1 : ℂ) - z * ((a : ℝ) : ℂ) ≠ 0 := by
+    intro hcon
+    have := sub_eq_zero.mp hcon
+    rw [← this] at hza
+    simp at hza
+  apply DifferentiableAt.differentiableWithinAt
+  apply DifferentiableAt.mul
+  · have hinner : DifferentiableAt ℂ (fun w : ℂ => 1 - w * ((a : ℝ) : ℂ)) z :=
+      (differentiableAt_const 1).sub (differentiableAt_id.mul (differentiableAt_const _))
+    exact hinner.inv hne
+  · exact DifferentiableAt.const_cpow differentiableAt_id (Or.inl h1a_ne)
+
+/-- `Hodd s` is differentiable on |z| < 3, unconditionally for s >= 1.
+
+This DISCHARGES the `hdiff` hypothesis carried by `hCoeff_hasSum`,
+`hCoeff_sum_one`, `hCoeff_sum_two` and everything above them up to
+`fOdd_expansion_final`.  Until the radius there was corrected from 4 to 3 that
+hypothesis was unsatisfiable at s = 1 -- see the RADIUS note on
+`hCoeff_hasSum` -- so no instance could exist and those lemmas said nothing at
+the one value of s they are used at.
+
+Factor by `Hodd_factored`: an entire cpow prefactor, the p = 3 factor (pole at
+3^s >= 3, excluded by the open ball), the p = 5 factor (pole at 5^s >= 5) and
+the p >= 7 tail (poles at p^s >= 7).  The last two are reused at their
+existing radius 4 via `mono`. -/
+theorem Hodd_differentiableOn_three (s : ℝ) (hs : 1 ≤ s) :
+    DifferentiableOn ℂ (fun w => Hodd s w) (Metric.ball 0 3) := by
+  have hsub : Metric.ball (0:ℂ) 3 ⊆ Metric.ball (0:ℂ) (4:ℝ) := by
+    intro w hw
+    rw [Metric.mem_ball, dist_zero_right] at hw ⊢
+    linarith
+  have h2_le : ((2:ℝ)) ^ (-s) ≤ 1 / 2 := by
+    have h1 : ((2 : ℝ)) ^ (-s) ≤ ((2 : ℝ)) ^ (-(1 : ℝ)) := by
+      apply Real.rpow_le_rpow_of_exponent_le (by norm_num)
+      linarith
+    rw [Real.rpow_neg_one] at h1
+    norm_num at h1
+    linarith
+  have h2_ne : ((((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ)) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    linarith
+  have hA : DifferentiableOn ℂ
+      (fun z : ℂ => ((((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ)) ^ z) (Metric.ball 0 3) :=
+    fun z _ => (DifferentiableAt.const_cpow differentiableAt_id
+      (Or.inl h2_ne)).differentiableWithinAt
+  have heq : ∀ z ∈ Metric.ball (0:ℂ) 3, Hodd s z =
+      (((1 - (2:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z *
+      ((1 - z * (((3:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (3:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z) *
+      ((1 - z * (((5:ℝ) ^ (-s) : ℝ) : ℂ))⁻¹ * (((1 - (5:ℝ) ^ (-s) : ℝ)) : ℂ) ^ z) *
+      HoddTail s z := by
+    intro z hz
+    rw [Metric.mem_ball, dist_zero_right] at hz
+    exact Hodd_factored s hs z
+      (prime_factor_multipliable_complex_seven s hs z (by linarith))
+  apply DifferentiableOn.congr _ heq
+  exact ((hA.mul (prime_three_differentiableOn_three s hs)).mul
+    ((prime_five_differentiableOn_four s hs).mono hsub)).mul
+    ((HoddTail_differentiableOn_seven s hs).mono hsub)
+
 /-- The Taylor series of Hodd converges to its value inside the disc of
-analyticity.  Since Hodd s is differentiable on ball 0 (29/10) -- via
-Hodd_factored, the p=3 and p=5 factors and HoddTail -- the series converges
-for |z| < 29/10, in particular at z = 1 and z = 2.
+analyticity.  Hodd s is differentiable on `ball 0 3` -- via Hodd_factored, the
+p=3 and p=5 factors and HoddTail -- so the series converges for |z| < 5/2, in
+particular at z = 1 and z = 2.
 
 This is the bridge between the h_j of the expansion and the values H(1,1),
-H(1,2) that PROOF.md section 2 collects. -/
-theorem hCoeff_hasSum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 3)
-    (hdiff : DifferentiableOn ℂ (fun w => Hodd s w) (Metric.ball 0 4)) :
+H(1,2) that PROOF.md section 2 collects.
+
+RADIUS.  The disc of analyticity is `ball 0 3` and not the `ball 0 4` this
+lemma used to ask for.  `Hodd s` has the p = 3 Euler factor
+`(1 - z * 3^(-s))⁻¹`, whose pole sits at `z = 3^s`.  For s = 1 that is `z = 3`,
+which lies INSIDE `ball 0 4`, so the old hypothesis was unsatisfiable at s = 1
+and every lemma taking it was vacuous there -- including `hCoeff_sum_one`,
+which is used at exactly s = 1.  `ball 0 3` is open, so it excludes `z = 3`,
+and `3^s > 3` for s > 1; the hypothesis is now both satisfiable and proved,
+by `Hodd_differentiableOn_three` below.  The inner closed ball is 5/2 rather
+than 3 for the same reason: it has to sit strictly inside the disc while still
+containing z = 2, which the power series is evaluated at. -/
+theorem hCoeff_hasSum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 5/2)
+    (hdiff : DifferentiableOn ℂ (fun w => Hodd s w) (Metric.ball 0 3)) :
     HasSum (fun j : ℕ => hCoeff s j * z ^ j) (Hodd s z) := by
-  -- work on a closed ball of radius 3 (contains z = 1 and z = 2, sits inside 4)
-  have hsub : Metric.closedBall (0:ℂ) (3:ℝ) ⊆ Metric.ball (0:ℂ) 4 := by
+  -- work on a closed ball of radius 5/2 (contains z = 1 and z = 2, inside 3)
+  have hsub : Metric.closedBall (0:ℂ) ((5:ℝ)/2) ⊆ Metric.ball (0:ℂ) 3 := by
     intro w hw
     rw [Metric.mem_closedBall, dist_zero_right] at hw
     rw [Metric.mem_ball, dist_zero_right]
     linarith
   have hcb : DifferentiableOn ℂ (fun w => Hodd s w)
-      (Metric.closedBall (0:ℂ) ((3:NNReal) : ℝ)) := by
+      (Metric.closedBall (0:ℂ) (((5/2 : NNReal)) : ℝ)) := by
     apply hdiff.mono
     intro w hw
     apply hsub
     simpa using hw
   have hball := hcb.hasFPowerSeriesOnBall (by norm_num)
-  have hmem : z ∈ Metric.eball (0:ℂ) ((3:NNReal) : ENNReal) := by
+  have hmem : z ∈ Metric.eball (0:ℂ) (((5/2 : NNReal)) : ENNReal) := by
     rw [Metric.mem_eball, edist_zero_right]
     rw [← ENNReal.ofReal_coe_nnreal]
     rw [← ofReal_norm_eq_enorm]
@@ -1735,14 +1836,14 @@ theorem hCoeff_hasSum (s : ℝ) (hs : 1 ≤ s) (z : ℂ) (hz : ‖z‖ < 3)
   field_simp
 
 /-- At z = 1: sum_j h_j(1) = H(1,1) = 1/2. -/
-theorem hCoeff_sum_one (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+theorem hCoeff_sum_one (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 3)) :
     HasSum (fun j : ℕ => hCoeff 1 j) (1/2 : ℂ) := by
   have h := hCoeff_hasSum 1 le_rfl 1 (by norm_num) hdiff
   rw [Hodd_one_one] at h
   simpa using h
 
 /-- At z = 2: sum_j h_j(1) 2^j = H(1,2) = d. -/
-theorem hCoeff_sum_two (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+theorem hCoeff_sum_two (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 3)) :
     HasSum (fun j : ℕ => hCoeff 1 j * 2 ^ j) ((dConst : ℝ) : ℂ) := by
   have h := hCoeff_hasSum 1 le_rfl 2 (by norm_num) hdiff
   rw [Hodd_one_two] at h
@@ -5239,7 +5340,7 @@ is dominated by betaFam j * 2^j, summable by fam_summable. -/
 theorem hCoeff_interchange (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
     (hf : OddCoeffFacts betaFam bHatOdd)
     (hdiff : ∀ t : ℝ, 1 ≤ t →
-      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4))
+      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 3))
     (s : ℝ) (hs : s ∈ Set.Ioo (1:ℝ) 2) :
     HasDerivAt (fun t : ℝ => Hodd t 2)
       (∑' j : ℕ, deriv (fun x : ℝ => hCoeff x j) s * 2 ^ j) s := by
@@ -5451,7 +5552,7 @@ theorem HoddR2_deriv_bridge (s : ℝ) (hs : 3/4 < s) (L : ℝ)
 theorem bHatOdd_sum_two (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
     (hf : OddCoeffFacts betaFam bHatOdd)
     (hdiff : ∀ t : ℝ, 1 ≤ t →
-      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4)) :
+      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 3)) :
     (∑' j : ℕ, bHatOdd j * 2 ^ j)
       = ((2 * dConst * (Real.log 2 - Sodd) : ℝ) : ℂ) := by
   have hlim := hCoeff_deriv_sum_limit betaFam bHatOdd hf
@@ -5521,8 +5622,8 @@ than twice it. -/
 theorem order_two_coefficient (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
     (hf : OddCoeffFacts betaFam bHatOdd)
     (hdiff : ∀ t : ℝ, 1 ≤ t →
-      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4))
-    (hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 3))
+    (hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 3)) :
     (∑' j : ℕ, bHatOdd j * 2 ^ j)
       + 2 * ((Real.eulerMascheroniConstant : ℝ) : ℂ)
           * (∑' j : ℕ, hCoeff 1 j * 2 ^ j)
@@ -5553,7 +5654,7 @@ ERR is bounded by gamma_normalised_three. -/
 
 /-- The main term at order e^-u integrates to 1/2. -/
 theorem main_term_one (k : ℕ) (hk : 1 ≤ k)
-    (hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4)) :
+    (hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 3)) :
     ∑ j ∈ Finset.range (k + 1),
         (hCoeff 1 j).re * (∫ u in Set.Ioi (0:ℝ), u ^ (k - j) * Real.exp (-u))
           / (Nat.factorial (k - j))
@@ -8126,7 +8227,7 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     (betaFam : ℕ → ℝ) (bHatOdd : ℕ → ℂ)
     (hf : OddCoeffFacts betaFam bHatOdd)
     (hdiff : ∀ t : ℝ, 1 ≤ t →
-      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 4))
+      DifferentiableOn ℂ (fun w => Hodd t w) (Metric.ball 0 3))
     -- The certified dominating sequence and coefficient sum of PROOF.md (5.5).
     -- dom bounds |h_j(1)|, |b_j| and betaFam j simultaneously; S = sum_i |g_i| 3^i
     -- over the coefficients of G_2 = d_s^2 H (1 - z/3)^3, certified S <= 14414
@@ -8206,7 +8307,7 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     exact e1
   -- STEP 2a: MAIN1's integral is the partial sum, and the full sum is 1/2.
   have hM1val := oddSplitMain1_integral k hk
-  have hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 4) := hdiff 1 le_rfl
+  have hd1 : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric.ball 0 3) := hdiff 1 le_rfl
   have hsum1c : HasSum (fun j : ℕ => hCoeff 1 j) (1/2 : ℂ) := hCoeff_sum_one hd1
   have hsummable1 : Summable (fun j : ℕ => hCoeff 1 j) := hsum1c.summable
   have hre1 : HasSum (fun j : ℕ => (hCoeff 1 j).re) (1/2 : ℝ) := by

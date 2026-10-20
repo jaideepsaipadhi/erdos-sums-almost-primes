@@ -16,3 +16,5 @@ import Odd.Basic
 #print axioms integral_substitute
 #print axioms jacobian_signed
 #print axioms eps_zeta_uniform
+#print axioms prime_three_differentiableOn_three
+#print axioms Hodd_differentiableOn_three
