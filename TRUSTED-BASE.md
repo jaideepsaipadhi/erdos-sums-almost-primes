@@ -372,6 +372,58 @@ project's own status in a co-authored manuscript, so it is flagged here and not
 edited.  Doing (1) and leaving section 8 alone is the better outcome if the
 work is going to happen anyway.
 
+## OddCoeffFacts and OddDomFacts, audited the same way
+
+`remainder` is reachable now that the vacuity is gone, but what it reaches is
+`fOdd_expansion_final`, which rests on two further assumption structures --
+`OddCoeffFacts` (8 fields) and `OddDomFacts` (5).  Those thirteen are the real
+gate, so they get the same audit.
+
+**None is vacuous.**  Every one is used: 6, 3, 4, 5, 2, 3, 1, 1 times
+respectively through `hf`, and 7, 6, 5, 2, 2 through `hd`.  No `Gamma_bound`
+hiding in there.
+
+**But four of the eight `OddCoeffFacts` fields are not numerical facts**, the
+same error as `g_deriv` and for the same reason -- they assert that something
+exists or converges, which an interval computation cannot establish:
+
+| field | what it actually is |
+|---|---|
+| `deriv_exists` | differentiability of `hCoeff · j` on (1,2) |
+| `deriv2_exists` | the same, one derivative up |
+| `tendsto_one` | RIGHT-CONTINUITY of `hCoeff · j` at s = 1 |
+| `tendsto_deriv` | existence of the limit defining `bHatOdd j` |
+
+The other four are genuine: `deriv_bound` and `deriv2_bound` are sup bounds,
+`nonneg` is free once `betaFam` is chosen, and `fam_summable` is a convergence
+property of that choice.  All five `OddDomFacts` fields are honest numerics --
+coefficient bounds and, in `dom_cert`, a finite partial-sum bound for every m.
+
+### All four reduce to sup bounds, and the pattern is already proved upstream
+
+`tendsto_one` is the one I had not noticed, and it is the most clearly
+portable.  `OddCoeffFacts`'s own docstring says "the main development's
+`gManu_tendsto_cCoeff` is the analogue", and that theorem is **proved** on the
+unrestricted side, from
+
+    hM0 : forall s in Ioi 1, forall theta, ||G2manu s (circleMap 0 2 theta)|| <= M0
+
+and nothing else -- a pure sup bound, via `contour_integral_tendsto` and the
+circle representation.  With `hCoeff_eq_circleIntegral` now available, the odd
+port needs only the corresponding dominated-convergence step on |z| = 5/2.
+
+Note where the difficulty sits.  `hCoeff` lives on (1,2) and s = 1 is a
+BOUNDARY point, which is why `tendsto_one` is a one-sided limit rather than
+plain continuity -- the file says as much in the `LprimeOdd` section ("the
+boundary difficulty is confined to hCoeff, which lives on (1,2)"), and it is
+why this cannot be read off differentiability on the open interval.
+
+So the shape of the whole odd route is now clear: `deriv_exists` and
+`deriv2_exists` from the general-z derivative build, `tendsto_one` and
+`tendsto_deriv` from the `gManu_tendsto_cCoeff` port, each leaving a sup bound
+behind in place of an analytic assumption.  That does not reduce the field
+count either -- it makes the count mean what the manuscript says it means.
+
 ## The odd side assumes strictly more than the unrestricted side
 
 The two structures look comparable by field count (4 odd, 13 unrestricted),
