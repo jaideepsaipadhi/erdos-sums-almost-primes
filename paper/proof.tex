@@ -495,79 +495,61 @@ For every $k\geq1$,
 \end{proposition}
 
 \begin{proof}
-We bound separately the far Taylor remainder, the two coefficient tails in
-\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}, and the
-near range $0<u\leq3$.
+Write $R_k$ as the sum of the far contribution, the near contribution, and the
+two coefficient tails of
+\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}. Only the
+far term is genuinely cubic in $k$; since $(k+3)^3\geq1$ we may bound each of
+the others by a constant multiple of $3^{-k}$ and absorb the cubic factor once,
+at the end.
 
-For the far range $u\geq3$, the exact error is the sum of the three terms in
-\eqref{eq:odd-local-product}; no asymptotic series is summed. The certified
-Taylor model gives directly
-\begin{equation}\label{eq:odd-taylor-bound}
- \abs{R_{k,\mathrm{far}}}
- \leq\frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k}
-\end{equation}
-by \eqref{eq:odd-far-certified}.
+\emph{Far range $u\geq3$.} The exact error is the sum of the three terms of
+\eqref{eq:odd-local-product}---no asymptotic series is summed---so the
+certified Taylor model of \eqref{eq:odd-far-certified} applies directly and
+gives $\abs{R_{k,\mathrm{far}}}\leq\frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k}$.
 
-Lemma~\ref{lem:pole-coefficient-bounds}(i) gives
-\begin{equation}\label{eq:odd-first-tail-bound}
- \abs{\sum_{j>k}h_j(1)}
- \leq \Sigma_0\sum_{j>k}3^{-j}
- =\frac{\Sigma_0}{2}3^{-k}.
-\end{equation}
-For the second tail, first put
-$B(z)=\partial_sH_{\mathrm o}(1,z)+2\gamma H_{\mathrm o}(1,z)$.
-Since $\gamma<0.578$, multiplication by $1-z/3$ and the triangle inequality
-give
-\begin{align*}
- \sum_{m\geq0}3^m\abs{[z^m](1-z/3)^2B(z)}
- &\leq \Sigma_1+4\gamma \Sigma_0<590.
-\end{align*}
-Hence Lemma~\ref{lem:pole-coefficient-bounds}(ii) gives
-$\abs{b_j}\leq590(j+1)3^{-j}$. Therefore
-\begin{align}
+\emph{First tail.} By Lemma~\ref{lem:pole-coefficient-bounds}(i),
+$\Bigl\lvert\sum_{j>k}h_j(1)\Bigr\rvert\leq\Sigma_0\sum_{j>k}3^{-j}=\frac{\Sigma_0}{2}3^{-k}$.
+
+\emph{Second tail.} Put
+$B(z)=\partial_sH_{\mathrm o}(1,z)+2\gamma H_{\mathrm o}(1,z)$. Multiplying by
+$(1-z/3)^2$ and applying the triangle inequality gives, since $\gamma<0.578$,
+\[
+ \sum_{m\geq0}3^m\abs{[z^m](1-z/3)^2B(z)}\leq\Sigma_1+4\gamma\Sigma_0<590,
+\]
+so $\abs{b_j}\leq590(j+1)3^{-j}$ by Lemma~\ref{lem:pole-coefficient-bounds}(ii).
+Summing the resulting geometric series,
+\[
  2^{-k-1}\sum_{j>k}\abs{b_j}2^j
- &\leq590\,2^{-k-1}\sum_{j>k}(j+1)(2/3)^j\notag\\
- &=590(k+4)3^{-k}\notag\\
- &\leq\frac{5\cdot590}{64}(k+3)^3 3^{-k},
- \label{eq:odd-second-tail-bound}
-\end{align}
-where the last inequality follows from
-$(k+4)/(k+3)^3\leq5/64$ for $k\geq1$.
+ \leq590\cdot2^{-k-1}\sum_{j>k}(j+1)(2/3)^j
+ =590(k+4)3^{-k},
+\]
+and $(k+4)\leq\frac{5}{64}(k+3)^3$ for $k\geq1$, with equality at $k=1$.
 
-For the near range, $\abs{E_j}$ is at most the true integrand plus the two
-subtracted main terms. The latter contribute at most $N_U(k+3)^33^{-k}$ by
-\eqref{eq:odd-near-main}. For the former, \eqref{eq:odd-coefficient-extraction}
-and the substitution $s=s(u)$ give the exact identity
+\emph{Near range $0<u\leq3$.} Here $\abs{E_j}$ is at most the true integrand
+plus the two subtracted main terms, and the latter contribute at most
+$N_U(k+3)^33^{-k}$ by \eqref{eq:odd-near-main}. For the former,
+\eqref{eq:odd-coefficient-extraction} and the substitution $s=s(u)$ give the
+exact identity
 \[
  \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}h_j(s(u))J(u)\dd u
  =\int_{s(3)}^\infty P_k^{\mathrm{odd}}(s)\dd s.
 \]
-Every odd $n$ with $\Omega(n)=k$ satisfies $n\geq3^k$, so for $s\geq s(3)$
+Every odd $n$ with $\Omega(n)=k$ satisfies $n\geq3^k$, so
+$P_k^{\mathrm{odd}}(s)\leq3^{-k(s-s(3))}P_k^{\mathrm{odd}}(s(3))$ for
+$s\geq s(3)$; integrating and applying \eqref{eq:odd-near-certified},
 \[
- P_k^{\mathrm{odd}}(s)
- =\sum_{\substack{n\ \mathrm{odd}\\\Omega(n)=k}}n^{-s(3)}n^{-(s-s(3))}
- \leq3^{-k(s-s(3))}P_k^{\mathrm{odd}}(s(3)),
-\]
-and integrating over $s\geq s(3)$ gives, by \eqref{eq:odd-near-certified},
-\begin{equation}\label{eq:odd-near-bridge}
  \int_{s(3)}^\infty P_k^{\mathrm{odd}}(s)\dd s
- \leq\frac{P_k^{\mathrm{odd}}(s(3))}{k\log3}
- \leq\frac{C_N}{k\log3}3^{-k}
- \leq C_N(k+3)^3 3^{-k}.
-\end{equation}
-Hence $\abs{R_{k,\mathrm{near}}}\leq(C_N+N_U)(k+3)^33^{-k}$. Combining
-\eqref{eq:odd-taylor-bound}, \eqref{eq:odd-first-tail-bound},
-\eqref{eq:odd-second-tail-bound} and this bound, and then
-substituting the certified constants, gives
-\begin{align*}
- \abs{R_k}
- &\leq\left(
- \frac{5.48910\cdot14414}{18}
- +\frac{44.5987}{2}
- +\frac{5\cdot590}{64}
- +367.8435+26.0962\right)(k+3)^3 3^{-k}\\
- &<4900(k+3)^3 3^{-k}.
-\end{align*}
+ \leq\frac{P_k^{\mathrm{odd}}(s(3))}{k\log3}\leq C_N3^{-k}.
+\]
+
+Substituting the certified constants, the four contributions are
+\[
+ \abs{R_k}\leq\Bigl(
+ \underbrace{\frac{5.48910\cdot14414}{18}}_{4395.55}
+ +\underbrace{\frac{44.5987}{2}+\frac{5\cdot590}{64}+C_N+N_U}_{462.33}
+ \Bigr)(k+3)^3 3^{-k}<4900(k+3)^3 3^{-k},
+\]
+with $C_N=367.8435$ and $N_U=26.0962$.
 \end{proof}
 
 \begin{proof}[Proof of Theorem~\ref{thm:main-odd}]
