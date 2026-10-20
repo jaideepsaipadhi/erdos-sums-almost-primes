@@ -2313,6 +2313,50 @@ theorem hCoeff_eq_circleIntegral (s : ℝ) (hs : 1 ≤ s) (j : ℕ) :
   rw [h]
   norm_num
 
+/-- The radius-2 Cauchy bridge.  `hCoeff_eq_cauchy_coeff` above uses |z| = 5/2
+because the coefficient BOUND needs it: `OddCoeffFacts.fam_summable` asks for
+`betaFam j * 2^j` summable, and a radius-2 bound gives exactly `2^-j`, which is
+not.  Convergence of a FIXED coefficient carries no such constraint, and
+`tendsto_one` needs the contour where `G2C_tendsto_at_one` and
+`Hodd_tendsto_at_one` are available -- that is |z| <= 2, not 5/2.  Hence this
+second copy; the radius enters only through `closedBall 0 r ⊆ ball 0 3`. -/
+theorem hCoeff_eq_cauchy_coeff_two (s : ℝ) (hs : 1 ≤ s) (j : ℕ) :
+    hCoeff s j
+      = (cauchyPowerSeries (fun z : ℂ => Hodd s z) 0 ((2 : NNReal))).coeff j := by
+  have hR : (0 : NNReal) < 2 := by norm_num
+  have hdiff : DifferentiableOn ℂ (fun z : ℂ => Hodd s z)
+      (Metric.closedBall (0 : ℂ) (((2 : NNReal)) : ℝ)) := by
+    apply (Hodd_differentiableOn_three s hs).mono
+    intro w hw
+    rw [Metric.mem_closedBall, dist_zero_right] at hw
+    rw [Metric.mem_ball, dist_zero_right]
+    norm_num at hw ⊢
+    linarith
+  have hser := hdiff.hasFPowerSeriesOnBall hR
+  have hbridge := iteratedDeriv_eq_factorial_smul_coeff' hser j
+  unfold hCoeff
+  rw [hbridge]
+  have hfac : ((Nat.factorial j : ℕ) : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero j)
+  field_simp
+
+/-- The radius-2 bridge as an explicit circle integral, the shape
+`tendsto_one` is proved from: the `(1/z)^j * z⁻¹` weight is s-free, so the
+whole s-dependence sits in `Hodd s z`, where `Hodd_tendsto_at_one` applies
+pointwise on the contour. -/
+theorem hCoeff_eq_circleIntegral_two (s : ℝ) (hs : 1 ≤ s) (j : ℕ) :
+    hCoeff s j
+      = (2 * ((Real.pi : ℝ) : ℂ) * Complex.I)⁻¹
+        • (circleIntegral (fun z : ℂ => (1 / z) ^ j • z⁻¹ • Hodd s z) 0
+            (((2 : NNReal)) : ℝ)) := by
+  rw [hCoeff_eq_cauchy_coeff_two s hs j]
+  have h := cauchyPowerSeries_apply (fun z : ℂ => Hodd s z) 0
+    (((2 : NNReal)) : ℝ) j 1
+  change ((cauchyPowerSeries (fun z : ℂ => Hodd s z) 0
+    (((2 : NNReal)) : ℝ) j) fun _ => 1) = _
+  rw [h]
+  norm_num
+
 /-! ### 6c: the coefficient extraction
 
     sum_k FkOdd k s * z^k = prod_{p>=3} (1 - z p^-s)^-1 = zeta(s)^z * Hodd s z

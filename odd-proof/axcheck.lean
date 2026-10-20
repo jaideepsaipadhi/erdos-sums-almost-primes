@@ -38,3 +38,7 @@ import Odd.Basic
 #print axioms oddFac_tendsto_half
 #print axioms oddFac_cpow_tendsto
 #print axioms Hodd_tendsto_at_one
+
+-- the radius-2 Cauchy bridge, for tendsto_one
+#print axioms hCoeff_eq_cauchy_coeff_two
+#print axioms hCoeff_eq_circleIntegral_two
