@@ -310,6 +310,67 @@ transcendental functions -- or formalizing the Cauchy estimates that produce
 the bounds instead of computing them.  Those are projects, and this is the
 honest boundary of what the technique reaches.
 
+## The odd side assumes strictly more than the unrestricted side
+
+The two structures look comparable by field count (4 odd, 13 unrestricted),
+but they sit at different points in the same argument, and the odd one is
+further back.
+
+On the unrestricted side the Cauchy chain is FORMALIZED.  `M0_bound` assumes a
+sup -- `forall u in Ioi 1, forall theta, ||G2manu u (circleMap 0 2 theta)|| <=
+M0` -- and `gManu_eq_cauchy_coeff`, `lemma_3_8_integral_r1` (differentiation
+under the contour integral) and `E1k_le_alpha` carry it to the coefficient
+bound and then to `alph`.  Only the sup is trusted.
+
+On the odd side the chain is absent and its CONCLUSION is assumed instead:
+
+    remainder : forall k, |fOdd k - 1/2 - betaOdd * (1/2)^k|
+                  <= MR * (k+3)^3 * (1/3)^k
+
+and `MR_bound : MR <= 4900` only pins a numeral -- since `MR` is a parameter,
+that field asserts nothing, and nothing anywhere in the structure says `MR`
+bounds the sup of `|Htilde|`.  The link from the Arb-computed sup to the
+remainder bound is a paper-level step with no Lean counterpart.  So the odd
+side trusts the Cauchy estimate itself, not merely its numerical input.
+
+### The scaffolding that looks like it closes this does not
+
+`Odd/Basic.lean` has `HoddTilde_differentiableOn`, labelled "ITEM 2", which
+would be the first link.  It is **used nowhere**, and two things are wrong
+with it.  Both are now recorded in the Lean docstring as well.
+
+*Its hypothesis is unsatisfiable where it matters.*  The lemma takes `hfac`,
+the factorization, as a hypothesis for all `z` in `ball 0 4`.  But `HoddTilde
+s z` is *defined* as `Hodd s z * (1 - z * 3^(-s))`, and at `z = 3^s` that
+second factor is 0 while `Hodd`'s own p = 3 factor is `(1 - 1)` inverted,
+which under Lean's `0⁻¹ = 0` is 0 rather than a pole.  So the left side is 0
+there and the right side generically is not.  `3^s < 4` exactly when
+`s < log 4 / log 3 = 1.26186...`, so for those s the bad point is inside the
+ball and `hfac` is false.  `HoddTilde_factored`, two declarations above, does
+not discharge it: it carries an `h3ne` hypothesis that fails at that same
+point.  The lemma is therefore vacuous on the lower part of [1, 2] -- the
+near-pole part, which is the part the argument needs.
+
+*And the radius is too small anyway.*  `MR_bound` is a sup over |z| = 4.5.
+That circle is not in `ball 0 4`, so even an unconditional ITEM 2 would not
+reach it.  The file's own header docstring says "|z| = R < 5", so the `4` in
+the statement appears to be an error rather than a deliberate choice.
+
+### The route, which is a definition change
+
+Define Htilde by its FACTORED form.  Its only pole is then the p = 5 factor's,
+at |z| = 5^s >= 5, so it is differentiable on `ball 0 5` -- which contains the
+4.5 circle -- and the `3^s` problem does not arise because no inverted p = 3
+factor appears.  Then relate it to `Hodd s z * (1 - z * 3^(-s))` away from
+`z = 3^s`, where the singularity is genuinely removable.
+
+That is the honest prerequisite for `remainder`, and it is a port of machinery
+that already exists on the unrestricted side rather than new mathematics --
+which makes it the most tractable of the remaining items, and the one I would
+do next.  It does not close `remainder` by itself: that still needs the
+representation theorem linking `fOdd`'s coefficients to Htilde's, which is
+where the real work is.
+
 ## One load-bearing field is not a numerical fact at all
 
 `Gamma_bound` turned out to be vacuous.  `g_deriv` is the opposite error and
