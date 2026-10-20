@@ -1909,6 +1909,60 @@ theorem hCoeff_sum_two (hdiff : DifferentiableOn ℂ (fun w => Hodd 1 w) (Metric
   rw [Hodd_one_two] at h
   exact h
 
+/-! ### h_j as a Cauchy coefficient
+
+The bridge the odd Cauchy programme needs, and the piece that was missing: on
+the unrestricted side `gManu_eq_cauchy_coeff` and `gManu_eq_circleIntegral`
+turn a Taylor coefficient into a contour integral, which is what makes
+coefficient bounds and differentiation in `s` available at all.  The odd side
+had no such identity -- no `cauchyPowerSeries` and no `circleIntegral` anywhere
+in this file -- because it needed differentiability of `Hodd s` on a closed
+ball, and the hypothesis that should have supplied it was the unsatisfiable
+`ball 0 4` one.  With `Hodd_differentiableOn_three` that obstruction is gone.
+
+Radius 5/2: strictly inside the disc of analyticity `ball 0 3`, and large
+enough to contain the z = 1 and z = 2 at which the coefficients are summed. -/
+
+/-- `h_j(s)` is the j-th Cauchy coefficient of `Hodd s` on |z| = 5/2.
+Patterned on `gManu_eq_cauchy_coeff`. -/
+theorem hCoeff_eq_cauchy_coeff (s : ℝ) (hs : 1 ≤ s) (j : ℕ) :
+    hCoeff s j
+      = (cauchyPowerSeries (fun z : ℂ => Hodd s z) 0 ((5/2 : NNReal))).coeff j := by
+  have hR : (0 : NNReal) < 5/2 := by norm_num
+  have hdiff : DifferentiableOn ℂ (fun z : ℂ => Hodd s z)
+      (Metric.closedBall (0 : ℂ) (((5/2 : NNReal)) : ℝ)) := by
+    apply (Hodd_differentiableOn_three s hs).mono
+    intro w hw
+    rw [Metric.mem_closedBall, dist_zero_right] at hw
+    rw [Metric.mem_ball, dist_zero_right]
+    norm_num at hw ⊢
+    linarith
+  have hser := hdiff.hasFPowerSeriesOnBall hR
+  have hbridge := iteratedDeriv_eq_factorial_smul_coeff' hser j
+  unfold hCoeff
+  rw [hbridge]
+  have hfac : ((Nat.factorial j : ℕ) : ℂ) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero j)
+  field_simp
+
+/-- The same, unfolded to an explicit circle integral.  The s-dependence sits
+entirely in `Hodd s z`; the `(1/z)^j * z⁻¹` weight is s-free, which is what
+would make differentiating under the integral clean -- the odd analogue of
+`gManu_eq_circleIntegral`, and the shape `OddCoeffFacts.deriv_exists` would be
+proved from rather than assumed. -/
+theorem hCoeff_eq_circleIntegral (s : ℝ) (hs : 1 ≤ s) (j : ℕ) :
+    hCoeff s j
+      = (2 * ((Real.pi : ℝ) : ℂ) * Complex.I)⁻¹
+        • (circleIntegral (fun z : ℂ => (1 / z) ^ j • z⁻¹ • Hodd s z) 0
+            (((5/2 : NNReal)) : ℝ)) := by
+  rw [hCoeff_eq_cauchy_coeff s hs j]
+  have h := cauchyPowerSeries_apply (fun z : ℂ => Hodd s z) 0
+    (((5/2 : NNReal)) : ℝ) j 1
+  change ((cauchyPowerSeries (fun z : ℂ => Hodd s z) 0
+    (((5/2 : NNReal)) : ℝ) j) fun _ => 1) = _
+  rw [h]
+  norm_num
+
 /-! ### The h_j sums, unconditionally
 
 `hCoeff_sum_one` and `hCoeff_sum_two` take the differentiability of `Hodd 1`
