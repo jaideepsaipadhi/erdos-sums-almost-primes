@@ -310,6 +310,68 @@ transcendental functions -- or formalizing the Cauchy estimates that produce
 the bounds instead of computing them.  Those are projects, and this is the
 honest boundary of what the technique reaches.
 
+## Section 8 of the paper overstates the odd formalization
+
+This is the one finding here that is a defect in the manuscript rather than in
+the Lean, and it is the one worth acting on first.
+
+Section 8 ("Certification and formalization") says:
+
+> The analytic proof is the whole of Sections 2--6 apart from the two numerical
+> propositions named below: in particular ... **the remainder reduction in
+> Proposition~\ref{prop:odd-remainder}** ... These reductions are formalized in
+> Lean 4 without `sorry`.
+
+`prop:odd-remainder` is `|R_k| <= 4900 (k+3)^3 3^(-k)` for all k >= 1, proved
+in the paper from the certified `M_R`.  In Lean it is not a theorem.  It is
+
+    OddNumericalFacts.remainder : forall k,
+      |fOdd k - 1/2 - betaOdd * (1/2)^k| <= MR * (k+3)^3 * (1/3)^k
+
+an assumed field of the hypothesis structure, with `MR_bound : MR <= 4900`
+pinning the constant.  Same statement, opposite status: the paper says proved,
+the development assumes it.
+
+Two further details sharpen this rather than soften it.
+
+*The attempt existed and was empty.*  `fOdd_expansion_final` carries the
+docstring "STEP 5, the target: this is exactly OddNumericalFacts.remainder" --
+it is the theorem meant to discharge the field.  Until the radius fix it took
+an unsatisfiable hypothesis (`DifferentiableOn C (Hodd s) (ball 0 4)`, false at
+s = 1; see the section below), so it established nothing.  So the reduction was
+not partly formalized; it was not formalized at all.
+
+*Section 8's own framing excludes it.*  Section 8 says the numerical
+propositions are exactly `prop:odd-certified` and `prop:full-certified`, and
+that "the Lean formalization imports the resulting intervals as hypotheses".
+`prop:odd-remainder` is neither of those two propositions, and it is not an
+interval -- it is a bound quantified over all k.  So it is imported as a
+hypothesis while sitting outside the category section 8 reserves for imported
+hypotheses.
+
+Not a divergence, checked: PROOF.md section 8 lists the sweep as "k = 1..75"
+while Lean's `sweep_low` assumes only `1 <= k <= 58`.  Section 7 of PROOF.md
+explains it -- the certified computation reaches 75, and 58 is what the
+threshold K0 = 59 requires.  The numerics supply more than Lean asks for, which
+is the harmless direction.
+
+### What to do about it
+
+Two options, and they are not equivalent.
+
+1. **Formalize it.**  The radius repair in the companion branch removes the
+   obstruction that made `fOdd_expansion_final` vacuous, so this is now
+   reachable rather than blocked.  That would make section 8 true as written.
+2. **Correct section 8.**  List `prop:odd-remainder` among the imported
+   hypotheses.  One sentence, and it makes the paper accurate today.
+
+CLAUDE.md says never to sharpen the paper alone; this is the reverse case -- the
+paper currently claims MORE than the development delivers, so (2) removes a
+defect rather than introducing a conservatism.  But it is a claim about the
+project's own status in a co-authored manuscript, so it is flagged here and not
+edited.  Doing (1) and leaving section 8 alone is the better outcome if the
+work is going to happen anyway.
+
 ## The odd side assumes strictly more than the unrestricted side
 
 The two structures look comparable by field count (4 odd, 13 unrestricted),
