@@ -1241,9 +1241,16 @@ theorem rhoConst_upper_bound : rhoConst ≤ (-0.1747885 : ℝ) := by
 
 /-- The certified inputs: everything the analytic reduction takes on trust.
 
-Each field is an Arb ball computation from the companion package, exactly the
-division Caveat 1.3(b) draws.  The analytic reduction is machine-verified;
-these are not.
+Each field of THIS structure is an Arb ball computation from the companion
+package -- the division section 8 of the manuscript draws.  The analytic
+reduction is machine-verified; these are not.
+
+Two warnings.  First, the citation: older notes in this repository point at
+"Caveat 1.3(b)", which the manuscript does not contain; section 8,
+"Certification and formalization", is where the division is stated.  Second,
+the "Arb ball computation" claim is true of this structure but NOT of
+`NumericalFactsFull`, whose `g_deriv` field is a differentiability statement
+that no interval computation establishes -- see the CAUTION on that structure.
 
 Umax and Vmax are parameters rather than fields because a Prop cannot carry
 data; the manuscript's values are 0.08436 and 1.90747, valid for k >= 900. -/

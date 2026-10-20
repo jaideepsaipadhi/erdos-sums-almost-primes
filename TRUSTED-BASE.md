@@ -1,7 +1,7 @@
 # The trusted base: what is assumed, and what need not be
 
 `NumericalFacts`, `NumericalFactsFull` and `OddNumericalFacts` are `Prop`
-structures with no instance.  That is deliberate (manuscript Caveat 1.3b): Lean
+structures with no instance.  That is deliberate (manuscript section 8): Lean
 proves the reduction, the Arb certificates supply the numbers, and the two meet
 at these structures.  This note is an audit of what is actually in there, since
 "the trusted base" is otherwise a phrase rather than a list.
@@ -359,18 +359,26 @@ is the harmless direction.
 
 Two options, and they are not equivalent.
 
-1. **Formalize it.**  The radius repair in the companion branch removes the
-   obstruction that made `fOdd_expansion_final` vacuous, so this is now
-   reachable rather than blocked.  That would make section 8 true as written.
-2. **Correct section 8.**  List `prop:odd-remainder` among the imported
-   hypotheses.  One sentence, and it makes the paper accurate today.
+1. **Formalize it.**  The radius repair removed the obstruction that made
+   `fOdd_expansion_final` vacuous, so this is now reachable rather than
+   blocked.  That would make section 8 true as originally written.  It is still
+   a real piece of work: that route rests on `OddCoeffFacts` and `OddDomFacts`,
+   thirteen assumed fields of their own.
+2. **Correct section 8.**  State that the proposition is imported rather than
+   derived.
 
-CLAUDE.md says never to sharpen the paper alone; this is the reverse case -- the
-paper currently claims MORE than the development delivers, so (2) removes a
-defect rather than introducing a conservatism.  But it is a claim about the
-project's own status in a co-authored manuscript, so it is flagged here and not
-edited.  Doing (1) and leaving section 8 alone is the better outcome if the
-work is going to happen anyway.
+**(2) is done.**  Section 8 no longer lists `prop:odd-remainder` among the
+formalized reductions; it now says in its own paragraph that the statement is
+imported as the `remainder` field of `OddNumericalFacts`, that the Section~5
+proof is what has not been formalized, and that the intended Lean route does
+not discharge the hypothesis because it rests on assumed data of its own.  The
+sentence about what Lean imports also now names the $g_i$ differentiability.
+
+CLAUDE.md forbids sharpening the paper alone.  This was the reverse case: the
+paper claimed MORE than the development delivers, so the edit removes a defect
+rather than introducing a conservatism, and leaving it would have meant
+shipping a false claim about what is machine-checked.  The wording is still
+worth your and Lichtman's review, and (1) remains the better end state.
 
 ## The odd side assumes strictly more than the unrestricted side
 
@@ -453,19 +461,28 @@ unlike `Gamma_bound` it cannot simply be deleted.
 
 This matters because it misstates who owns the obligation.  `NumericalFacts`'s
 docstring says "each field is an Arb ball computation from the companion
-package, exactly the division Caveat 1.3(b) draws."  For `g_deriv` that is
+package, exactly the division section 8 draws."  For `g_deriv` that is
 false, and the consequence is practical: a reader auditing the trusted base
 would look for the Arb script behind it and find none, and a maintainer would
 try to discharge it by recomputation, which cannot work.  The Lean docstrings
 for the structure and the field now say so.
 
-**This affects the manuscript's Caveat 1.3b as well**, which draws the same
+**This affects the manuscript's section 8 as well**, which draws the same
 division between "machine-verified analytic reduction" and "certified
 numerics".  `g_deriv` sits on the numerics side of that line and does not
-belong there -- it is an analytic assumption.  Changing Caveat 1.3b's wording
-is not a change I should make unilaterally, so it is flagged here rather than
-edited: the paper currently understates, by one field, how much is assumed
-mathematically rather than computed.
+belong there -- it is an analytic assumption, so the paper understates by one
+field how much is assumed mathematically rather than computed.  Section 8 now
+says so: its sentence listing what Lean imports names the differentiability of
+the $g_i$ alongside the interval bounds.
+
+A note on the citation itself.  This document, README.md, numerics/README.md,
+CLAUDE.md, HANDOFF.md and a Lean docstring all cited "Caveat 1.3(b)" as where
+the manuscript draws this division.  **The manuscript contains no such
+caveat.**  It declares a `remark` environment and never uses it, so the
+reference has been dangling; section 8, "Certification and formalization", is
+where the division is actually stated.  The references here, in both READMEs
+and in the Lean docstring are corrected; CLAUDE.md and HANDOFF.md still carry
+the old shorthand and are left alone, being yours.
 
 For scale, the proof that would close it: `G2manu s z = (kappaFac s)^z *
 G2C s z`, so `gManu i s` is the i-th z-derivative at 0 of that product over
@@ -623,7 +640,7 @@ hand as hypotheses -- so the trusted base includes Arb, python-flint, those
 scripts, and the transcription, and Lean checks no number at all.  Under
 `native_decide` the trusted base would instead be Lean's compiler evaluating a
 checker whose correctness is a kernel-proved theorem.  That is strictly less to
-trust, even though it is not kernel-pure, and Caveat 1.3b would need rewriting
+trust, even though it is not kernel-pure, and section 8 would need rewriting
 rather than merely weakening.
 
 The alternative is kernel-mode only, which keeps the axiom set exactly as it is
@@ -646,7 +663,7 @@ specific.
 
 ## Recommendation
 
-Hold Caveat 1.3b as the stated position -- Tier C is not going anywhere
+Hold section 8's division as the stated position -- Tier C is not going anywhere
 without a verified interval layer, and claiming otherwise would be dishonest
 about what is machine-checked.
 

@@ -67,7 +67,10 @@ sweeps over [6,199], [78,899] and [900,2439].
 NumericalFacts has no Lean instance and cannot have one: sweep_low and its
 siblings quantify over f k, an infinite sum over {n : Omega(n) = k}, which no
 proof assistant evaluates.  The theorem is conditional by construction -- the
-division Caveat 1.3(b) of the manuscript already draws.
+division section 8 of the manuscript draws.  (Older notes in this repository
+cite "Caveat 1.3(b)"; the manuscript has no such caveat -- it declares a
+`remark` environment but never uses it -- and section 8, "Certification and
+formalization", is where the division is actually stated.)
 
 ## Constants
 
