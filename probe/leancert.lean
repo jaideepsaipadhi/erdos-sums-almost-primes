@@ -16,12 +16,41 @@ instance to whnf-reduce; `norm_num` evaluates rational arithmetic by simp
 lemmas instead, and can succeed where reduction will not.  The difference
 decides the trust question:
 
-ANSWERED: norm_num and simp BOTH fail with unsolved goals.  native_decide
-succeeds.  So kernel-clean numerics are not available here at any size, and
-every numeric step costs whatever native_decide costs.  What remains is to
-MEASURE that cost rather than assume it -- the previous run's axiom line for
-the native case was truncated by Lean's own line wrapping, so `ofReduceBool`
-is predicted and not yet confirmed.
+ANSWERED, and the second half not as predicted.
+
+(a) `norm_num [logPrimeUB]` and `simp only [logPrimeUB]; norm_num` BOTH fail
+with unsolved goals; `native_decide` succeeds.  So kernel-clean evaluation is
+not available here even at the smallest instance (p = 7, depth 10), and every
+numeric step in a leancert-based certificate costs whatever native_decide
+costs.
+
+(b) What native_decide costs is NOT `Lean.ofReduceBool`.  Measured, with the
+axiom list reassembled inside the runner rather than read off the annotation
+channel that had truncated it twice:
+
+    probe_numeric_native = [propext, Classical.choice, Quot.sound,
+                            probe_numeric_native._native.native_decide.ax_1_1]
+
+So this toolchain's native_decide mints a PER-DECLARATION axiom named after the
+declaration that used it, and `ofReduceBool` appears nowhere (the runner also
+emits a direct yes/no on that, and it is NO).
+
+That is a materially better position than the global-axiom framing I had been
+assuming, and it changes what Caveat 1.3b would have to say.  A global
+`ofReduceBool` is one opaque trust assumption shared by every use, invisible in
+the audit once present.  A per-use named axiom is enumerable: `#print axioms`
+on any theorem lists exactly which native_decide calls it depends on, by name,
+so the trusted base stays countable and the audit in .github/workflows can be
+made to fail on an unexpected one.  The trust is still EXTRA -- these are
+axioms beyond the three permitted, and they assert the correctness of compiled
+evaluation rather than of the kernel -- but it is itemised rather than
+wholesale.
+
+(c) probe D (the end-to-end `Real.log 7 <= 2`) still carries `sorryAx`, so it
+did not go through even with native_decide on its rational step; its remaining
+error was not captured before the annotation cap.  Worth re-running on its own
+if the route is ever actually adopted, since D is the shape a real Sodd head
+term would take.
 -/
 import LeanCert
 
