@@ -23,6 +23,12 @@ Everything is an interval: a claim of the form `X < c` is checked against
 X.upper(), and `X > c` against X.lower().  str(arb) is never used for a
 decision, since it rounds the midpoint and inflates the radius.
 
+Scope has since widened past phi(2440): it also guards Lemma phi-monotone
+(whose 2a_1 > 0.1312 and subtracted-term bounds carry the tightest margins in
+the paper, 4.6e-5 and 6.0e-5, so they break before anything else if d or S^*
+moves), the tail-coefficient constant C = 354.36, and the second-tail bound
+Sigma_1 + 4 gamma Sigma_0 < 590.  Thirteen claims in total.
+
 Exit status is nonzero if any check fails.
     Usage: python3 check_paper_phi.py
 """
@@ -122,6 +128,48 @@ for label, value, sense, pat in terms:
         ok = float(value.lower()) > c
         detail = ">= %.5f, claim > %.5f" % (float(value.lower()), c)
     check("%s %s %s" % (label, sense, claimed.str(10, radius=False)), ok, detail)
+
+# --- Lemma phi-monotone.  Its three numerals carry the tightest margins in
+# the paper -- 2a_1 > 0.1312 clears by 4.6e-5 and the subtracted term by
+# 6e-5 -- so a change to d or S^* would break them before anything else.
+print()
+mono = [
+    ("2a_1", 2 * a1_lo, ">", r"gives \$2a_1>([0-9]+(?:\.[0-9]+)?)\$"),
+    ("S^* log2 (2/(x+2)+1/(x+3)) at x=2440",
+     Sstar * log2 * (arb(2) / 2442 + arb(1) / 2443), "<",
+     r"subtracted term is \$<([0-9]+(?:\.[0-9]+)?)\$ for"),
+    ("M(2440)",
+     a1_lo * (2 * 2440 - 1) - log2 / 2 * Umax - 3 * alph
+     - Sstar * log2 * (2 * arb(2442).log() + arb(2443).log() + 3), ">",
+     r"\$M\(2440\)>([0-9]+(?:\.[0-9]+)?)\$"),
+]
+for label, value, sense, pat in mono:
+    claimed = grab(pat, "the claimed bound for " + label)
+    c = float(claimed.str(20, radius=False))
+    if sense == "<":
+        ok, got = float(value.upper()) < c, float(value.upper())
+    else:
+        ok, got = float(value.lower()) > c, float(value.lower())
+    check("%s %s %s" % (label, sense, claimed.str(10, radius=False)),
+          ok, "actual %.8f, margin %.2e" % (got, abs(got - c)))
+
+# --- two further substitutions elsewhere in the paper that use the same
+# certified inputs, included so one command covers all of them.
+print()
+C = grab(r"With \$C=([0-9]+(?:\.[0-9]+)?)\$", "the tail-coefficient constant C")
+sup = grab(r"\\abs\{\\widetilde G_2\(z\)\}\\leq([0-9]+(?:\.[0-9]+)?)\$", "the |z|=4.2 contour bound")
+geo = sup * arb("4.2") / arb("1.2")        # sum_{m>=0} (3/4.2)^m = 4.2/1.2
+check("C = %s covers sup * sum (3/4.2)^m" % C.str(10, radius=False),
+      float(geo.upper()) <= float(C.str(20, radius=False)),
+      "sup * 3.5 = %.6f" % float(geo.upper()))
+
+S0 = grab(r"\\Sigma_0\\leq([0-9]+(?:\.[0-9]+)?)", "Sigma_0")
+S1 = grab(r"\\Sigma_1\\leq([0-9]+(?:\.[0-9]+)?)", "Sigma_1")
+gam = grab(r"since \$\\gamma<([0-9]+(?:\.[0-9]+)?)\$", "the gamma upper bound used")
+b590 = grab(r"\\Sigma_1\+4\\gamma\\Sigma_0<([0-9]+(?:\.[0-9]+)?)", "the second-tail constant")
+check("Sigma_1 + 4 gamma Sigma_0 < %s" % b590.str(10, radius=False),
+      float((S1 + 4 * gam * S0).upper()) < float(b590.str(20, radius=False)),
+      "actual %.6f" % float((S1 + 4 * gam * S0).upper()))
 
 # --- the conclusion, and the sign change that fixes the threshold
 concl = grab(r">390371.6-[0-9.]+-[0-9.]+-[0-9.]+-[0-9.]+>([0-9]+)\.", "the phi(2440) conclusion")
