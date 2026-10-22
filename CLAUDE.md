@@ -181,7 +181,12 @@ ratio extends continuously to the critical point `(1,2)` with value
 `prod(1 - 2/p) > 0`. Both `H` and `H_P` blow up there; the ratio does not.
 So IF the `k^2` coefficient involves the analytic factor only through its value
 at `(1,2)` and not its `s`-derivatives, the whole boundary case follows from
-all primes alone.
+all primes alone -- and that is **known to hold in the all-primes case
+itself**, since GLW's `a_1 = d log2/4` is exactly `H_o(1,2) log2/4` (see "the
+boundary numerator is an interior object" below). What is left is that the
+same form holds with a general numerator, plus the existence of a `k^2`
+expansion for general `q = 2` at all; neither follows from `eq:GLW-asymptotic`,
+which is the single case `Q` empty.
 
 **The `s`-derivatives do not have to be excluded.** If the coefficient is
 `A Phi(1,2) + B d_s Phi(1,2)` with `A, B` independent of `P`, then because
@@ -202,6 +207,52 @@ complement is not discriminating either: the `Q = {3}` residual of `3.2e-4`
 implies a shift of only `1.6e-4` for `Q = {5}`, which is below the
 extrapolation error. Distinguishing `B = 0` from small `B` needs better
 extrapolation (more and larger `k`), not another `Q`.
+
+### Four traps in the Section 7 write-up, all hit once
+
+- **`H_P` must be defined by the regularized product, never by
+  `zeta^-z prod_{p in P}(1 - z p^-s)^-1`.** The second is `0` at `s = 1` --
+  `zeta(1)^-z = 0` -- and `s = 1` is where every constant in the section is
+  evaluated, so that version makes the factorization false and `H_P(1,1)`,
+  `H_P(1,2)`, `c_P` all undefined. `eq:HP-def` is the definition; the
+  `zeta^-z` form is an identity for `s > 1` only. A referee caught this after
+  it had compiled cleanly through four builds.
+- **`R` must be taken in `(2,3)`, not `(2,q)`.** The step bounding the
+  `O(3^-m)` terms by `O(3^-k sum (3/R)^j) = O(R^-k)` is FALSE for `R >= 3`
+  (at `R = 3.5`, `k = 40` the ratio is 3300), which `q >= 5` would permit.
+  `R < 3` makes the geometric sum dominated by its last term. The conclusion
+  `o(2^-k)` survives either way, which is why it passed inspection.
+- **`1/p <= (log p)/p` fails at `p = 2`** (`log 2 = 0.693`), and `2` is in `Q`
+  for every `P` with `q >= 3`. Use `1/p <= (log p)/(p log 3)` for `p >= 3` and
+  split off `p = 2`.
+- **A three-parameter fit through three points has no residual**, so its
+  agreement with a prediction is not an error bar. Quote the spread across
+  fitting bases instead: for the boundary ratio the `1/k, 1/k^2` basis gives
+  `0.33317 / 0.33323 / 0.33345` across three windows (stable, `5e-4` of `1/3`),
+  while `log k/k` gives `0.32952` and the one-term fit `0.336577` -- so the
+  honest uncertainty is about `1%`, not `3.2e-4`. The script's own
+  `k*(E_Q - ratio)` column drifts `1.043 -> 0.935` without flattening; don't
+  present it as if it had converged.
+
+### The boundary numerator is an interior object, and GLW's constant is its value
+
+Two identities worth keeping. Separating the single factor `L_2` in
+`eq:HP-def` gives, exactly,
+
+    H_P(s,z) = H_{P \ {2}}(s,z) / (1 - z 2^-s),
+
+so for all primes `H = H_o/(1 - z 2^-s)`: the entire `z`-singularity at
+`z = 2^s` is that one explicit pole and its numerator is the ODD product. The
+numerator belongs to a prime set with least element `>= 3`, so Proposition 7.2
+applies to it -- the boundary case's crux is an interior object.
+
+And GLW's `k^2` coefficient is exactly that numerator's value: `eq:d-def`'s `d`
+is `eq:H-odd` at `(1,2)`, so `a_1 = d log2/4 = H_o(1,2) log2/4`, with no
+`s`-derivative and no prime sum. Contrast `beta = d(gamma + (1/2) d_s log
+H_o(1,2))`, which carries both. That contrast is the reason to think the form
+is structural, and it is what makes the `B = 0` case of the reduction the
+expected one. The predicted general coefficient is then
+`a_1 prod_{p in Q}(1 - 2/p) > 0`.
 
 ### The two Section 7 scripts are mpmath, NOT Arb
 

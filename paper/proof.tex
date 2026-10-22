@@ -1418,14 +1418,19 @@ bounded as $s\to1^+$, so the generating function has no $\zeta(s)^z$ factor
 and $f_k^{\mathcal P}$ decays geometrically whatever $q$ is.
 
 Those examples, however, are already excluded by the weaker condition
-$\sum_{p\notin\mathcal P}1/p<\infty$, and that condition is exactly what makes
-the limit of the sequence positive: by
-Proposition~\ref{prop:general-interior}(iv) below, $f_k^{\mathcal P}$ tends to
-$\prod_{p\notin\mathcal P}(1-1/p)$, a convergent product with positive value
-precisely when $\sum_{p\notin\mathcal P}1/p<\infty$, and equal to $0$
-otherwise. The sparse examples are the degenerate case of that product, and
-the hypothesis separates a sequence with a positive limit, whose monotonicity
-is decided by a correction term, from one that decays to $0$.
+$\sum_{p\notin\mathcal P}1/p<\infty$, and that condition is what governs the
+size of the limit. The candidate limit is
+$\prod_{p\notin\mathcal P}(1-1/p)$, which is the value
+$H_{\mathcal P}(1,1)$ of \eqref{eq:HP-def} below, and it is a convergent
+product with positive value precisely when
+$\sum_{p\notin\mathcal P}1/p<\infty$, and $0$ otherwise. That it is indeed the
+limit is proved below for $q\geq3$, in
+Proposition~\ref{prop:general-interior}(iv); for $\mathcal P$ all primes it is
+Lichtman's $f_k\to1$ \cite{Lichtman19}; and for the two sparse examples the
+product is $0$, as are their limits. So the hypothesis separates a sequence
+with a positive limit, whose monotonicity is decided by a correction term, from
+one that decays to $0$ --- the sparse examples being the degenerate case of one
+product rather than a separate phenomenon.
 
 It is worth saying separately why
 \eqref{eq:thin-complement} carries the weight $\log p$ instead. It is not
@@ -1470,21 +1475,43 @@ the extraction needs, and the constant can be identified. Write
  \log L_p(s,z)=\sum_{m\geq2}\frac{z^m-z}{m}p^{-ms},
 \end{equation}
 the second identity being the computation in the proof of
-Proposition~\ref{prop:analyticity}, and put
+Proposition~\ref{prop:analyticity}. Define $H_{\mathcal P}$ by the regularized
+product, as \eqref{eq:H-full} and \eqref{eq:H-odd} define $H$ and
+$H_{\mathrm o}$:
+\begin{equation}\label{eq:HP-def}
+  H_{\mathcal P}(s,z)
+   =\prod_{p\notin\mathcal P}(1-p^{-s})^{z}
+    \prod_{p\in\mathcal P}(1-zp^{-s})^{-1}(1-p^{-s})^{z}
+   =\prod_{p\notin\mathcal P}(1-p^{-s})^{z}
+    \prod_{p\in\mathcal P}L_p(s,z),
+\end{equation}
+which is \eqref{eq:H-full} when $\mathcal P$ is all primes and
+\eqref{eq:H-odd} when $\mathcal P=\{p:p\geq3\}$. For $s>1$, where
+$\zeta(s)^{z}$ is finite and non-zero, \eqref{eq:euler-products} extends to
+$\mathcal P$ as
+\begin{equation}\label{eq:euler-products-P}
+  \sum_{k\geq0}P_k^{\mathcal P}(s)z^k
+   =\prod_{p\in\mathcal P}(1-zp^{-s})^{-1}
+   =\zeta(s)^zH_{\mathcal P}(s,z),
+  \qquad
+  P_k^{\mathcal P}(s)=\sum_{\substack{\Omega(n)=k\\ p\mid n\Rightarrow p\in\mathcal P}}n^{-s},
+\end{equation}
+by the same computation, since
+$\zeta(s)^{-z}=\prod_p(1-p^{-s})^{z}$ there. It is
+\eqref{eq:HP-def} and not the factor $\zeta(s)^{-z}\prod_{\mathcal
+P}(1-zp^{-s})^{-1}$ of \eqref{eq:euler-products-P} that is used below: the
+latter is $0$ at $s=1$, where every constant in this section is evaluated,
+while the former is finite and non-zero there. Put
 $h_j^{\mathcal P}(s)=[z^j]H_{\mathcal P}(s,z)$.
 
 \begin{proposition}\label{prop:general-interior}
 Let $\mathcal P$ be a set of primes with least element $q\geq3$ and complement
 $\mathcal Q$ satisfying \eqref{eq:thin-complement}, and fix
-$R\in(2,q)$. Then:
+$R\in(2,3)$, which is possible with $R<q$ since $q\geq3$. Then:
 \begin{enumerate}
-\item[(i)] for every real $s\geq1$,
-\begin{equation}\label{eq:HP-split}
-  H_{\mathcal P}(s,z)=\prod_{p\in\mathcal P}L_p(s,z)
-    \cdot\prod_{p\in\mathcal Q}(1-p^{-s})^{z},
-\end{equation}
-both products converging absolutely and locally uniformly on $\abs z<q^{s}$,
-where $H_{\mathcal P}(s,\cdot)$ is analytic and zero-free;
+\item[(i)] for every real $s\geq1$ both products in \eqref{eq:HP-def} converge
+absolutely and locally uniformly on $\abs z<q^{s}$, where
+$H_{\mathcal P}(s,\cdot)$ is therefore analytic and zero-free;
 \item[(ii)] $M:=\sup_{s\geq1}\sup_{\abs z=R}\abs{H_{\mathcal P}(s,z)}<\infty$,
 and hence $\abs{h_j^{\mathcal P}(s)}\leq MR^{-j}$ for all $j\geq0$ and all
 $s\geq1$;
@@ -1513,23 +1540,31 @@ $H_{\mathcal P}(1,2)=\prod_{p\in\mathcal P}(1-p^{-1})^2(1-2p^{-1})^{-1}
 \end{proposition}
 
 \begin{proof}
-(i) Substituting $\zeta(s)^{-z}=\prod_p(1-p^{-s})^z$ into the definition
-$H_{\mathcal P}=\zeta(s)^{-z}\prod_{p\in\mathcal P}(1-zp^{-s})^{-1}$ and
-distributing the factors $(1-p^{-s})^z$ over $\mathcal P$ and $\mathcal Q$
-gives \eqref{eq:HP-split} as an identity between absolutely convergent
-products, once each converges. For the first, \eqref{eq:local-reg} gives
-$\log L_p(s,z)=O_R(p^{-2s})$ uniformly for $\abs z\leq R$, by the estimate in
-the proof of Proposition~\ref{prop:analyticity}, which applies because
-$R<q\leq p$ for $p\in\mathcal P$; and $\sum_pp^{-2s}<\infty$. For the second,
-$z\log(1-p^{-s})=O_R(p^{-s})$ and $\sum_{p\in\mathcal Q}p^{-s}\leq
-\sum_{p\in\mathcal Q}p^{-1}<\infty$ for $s\geq1$, the last sum being finite
-because \eqref{eq:thin-complement} implies
-$\sum_{p\notin\mathcal P}1/p<\infty$. Neither product vanishes, since no factor
-does and the logarithms converge. Analyticity in $z$ is
-Proposition~\ref{prop:analyticity} applied to $\mathcal P$.
+(i) Fix $s\geq1$ and a compact $K\subset\{\abs z<q^{s}\}$, say
+$\abs z\leq R'<q^{s}$. For the product over $\mathcal P$,
+\eqref{eq:local-reg} gives $\log L_p(s,z)=O_{R'}(p^{-2s})$ uniformly on $K$ by
+the estimate in the proof of Proposition~\ref{prop:analyticity}, whose
+hypothesis $\abs{zp^{-s}}<1$ holds because $\abs z\leq R'<q^{s}\leq p^{s}$ for
+every $p\in\mathcal P$; and $\sum_pp^{-2s}<\infty$ since $s\geq1$. For the
+product over $\mathcal Q$, $z\log(1-p^{-s})=O_{R'}(p^{-s})$ and
+\[
+  \sum_{p\in\mathcal Q}p^{-s}
+   \leq\sum_{p\in\mathcal Q}\frac1p
+   \leq\frac12+\frac1{\log3}\sum_{p\in\mathcal Q}\frac{\log p}{p}<\infty
+  \qquad(s\geq1),
+\]
+the comparison $1/p\leq(\log p)/(p\log3)$ holding for every $p\geq3$ and the
+term $p=2$ --- which lies in $\mathcal Q$ for every $\mathcal P$ with $q\geq3$,
+and for which the comparison fails since $\log2<1$ --- being split off and
+bounded by $1/2$. So \eqref{eq:thin-complement} gives
+$\sum_{p\in\mathcal Q}1/p<\infty$, which is all that is used here. Both
+products therefore converge absolutely and locally uniformly, so each is
+analytic in $z$ on $\abs z<q^{s}$; and neither vanishes, because the
+convergence of the logarithms exhibits each as the exponential of a finite
+quantity.
 
-(ii) The two estimates in (i) depend on $s$ only through $p^{-s}\leq p^{-1}$,
-so
+(ii) The two estimates in (i), applied with $R'=R<3\leq q\leq q^{s}$, depend on
+$s$ only through $p^{-s}\leq p^{-1}$, so
 \[
   \sup_{s\geq1}\sup_{\abs z=R}\abs{\log H_{\mathcal P}(s,z)}
    \leq C_R\sum_pp^{-2}
@@ -1539,7 +1574,7 @@ so
 which bounds $M$; the bound on $h_j^{\mathcal P}$ is Cauchy's estimate on
 $\abs z=R$.
 
-(iii) Differentiating \eqref{eq:HP-split} logarithmically term by term,
+(iii) Differentiating \eqref{eq:HP-def} logarithmically term by term,
 \begin{equation}\label{eq:HP-dlog}
   \partial_s\log H_{\mathcal P}(s,z)
    =-\sum_{p\in\mathcal P}\log p\sum_{m\geq2}(z^m-z)p^{-ms}
@@ -1548,8 +1583,10 @@ $\abs z=R$.
 For $s\geq1$ and $\abs z\leq R$ the first double sum is dominated termwise by
 $C_R(\log p)p^{-2}$ and the second by $R(\log p)/(p-1)$, summable over
 $\mathcal Q$ exactly by \eqref{eq:thin-complement}. Both bounds are
-independent of $s$, so the differentiation is legitimate, the sum is continuous
-on $[1,\infty)\times\{\abs z\leq R\}$ by dominated convergence, and
+independent of $s$, so by the Weierstrass $M$-test the differentiated series
+converges uniformly there and the differentiation is legitimate; its sum is
+continuous on $[1,\infty)\times\{\abs z\leq R\}$, being a uniformly convergent
+series of continuous functions, and
 $\partial_sH_{\mathcal P}=H_{\mathcal P}\partial_s\log H_{\mathcal P}$ is
 bounded there. Since $[z^j]$ is a Cauchy integral over the circle $\abs z=R$,
 which may be held fixed while $s$ varies, differentiation under the integral
@@ -1563,8 +1600,17 @@ $M'R^{-j}$. At $z=2$ the inner sum in \eqref{eq:HP-dlog} is
 \]
 which gives \eqref{eq:HP-logderiv} after halving.
 
-(iv) By Lemma~\ref{lem:integral-representation} and
-Lemma~\ref{lem:zeta-coordinate},
+(iv) Write $P_k^{\mathcal P}(s)=\sum n^{-s}$ over the $n$ counted by
+$f_k^{\mathcal P}$. The proof of
+Lemma~\ref{lem:integral-representation} used nothing about the index set beyond
+non-negativity of the summands, so it applies verbatim and gives
+$f_k^{\mathcal P}=\int_1^\infty P_k^{\mathcal P}(s)\dd s$. Expanding
+$\zeta(s)^z=\e^{uz}$ with $u=\log\zeta(s)$ and taking the Cauchy product with
+$H_{\mathcal P}(s,z)=\sum_jh_j^{\mathcal P}(s)z^j$ gives
+$P_k^{\mathcal P}(s)=\sum_{j=0}^kh_j^{\mathcal P}(s)u^{k-j}/(k-j)!$, which is
+\eqref{eq:odd-coefficient-extraction} with $\mathcal P$ in place of the odd
+primes; changing variables to $u$ as in \eqref{eq:odd-u-integral}, by
+Lemma~\ref{lem:zeta-coordinate}, then gives
 \[
   f_k^{\mathcal P}
    =\int_0^\infty\sum_{j=0}^k h_j^{\mathcal P}(s(u))
@@ -1586,31 +1632,57 @@ the middle step because the generating function \eqref{eq:euler-products} for
 $\mathcal P$ has non-negative coefficients, so
 $P_k^{\mathcal P}(s_1)\leq2^{-k}\sum_jP_j^{\mathcal P}(s_1)2^j$, and the
 product converges because $2<3^{s_1}\leq q^{s_1}$. On $[1,\infty)$ the
-expansions
-\eqref{eq:zeta-coordinate} apply, and with
+expansions \eqref{eq:zeta-coordinate} apply with remainders that are
+$O(\e^{-3u})$ \emph{uniformly} there: each remainder times $\e^{3u}$ is
+continuous on $[1,\infty)$ and bounded as $u\to\infty$ by
+Lemma~\ref{lem:zeta-coordinate}, hence bounded on $[1,\infty)$. With
 $\int_0^\infty\frac{u^m}{m!}\e^{-au}\dd u=a^{-(m+1)}$,
-\[
-  \int\frac{u^m}{m!}J\dd u=1+\gamma2^{-m}+O(3^{-m}),
+\begin{equation}\label{eq:gen-moments}
+  \int_1^\infty\frac{u^m}{m!}J\dd u=1+\gamma2^{-m}+O(3^{-m}),
   \qquad
-  \int\frac{u^m}{m!}\varepsilon J\dd u=\tfrac12 2^{-m}+O(3^{-m}).
+  \int_1^\infty\frac{u^m}{m!}\varepsilon J\dd u=\tfrac12 2^{-m}+O(3^{-m}),
+\end{equation}
+the restriction to $[1,\infty)$ costing at most
+$\int_0^1u^m/m!\dd u\leq1/(m+1)!$ in each, which is smaller than the error
+terms already present and is absorbed into them throughout.
+Write
+\[
+  h_j^{\mathcal P}(s(u))=h_j^{\mathcal P}(1)
+   +\varepsilon(u)\,(h_j^{\mathcal P})'(1)+r_j(u),
+  \qquad
+  \abs{r_j(u)}\leq\varepsilon(u)\,\Omega(\varepsilon(u))\,R^{-j},
 \]
-Writing $h_j^{\mathcal P}(s(u))=h_j^{\mathcal P}(1)
- +\varepsilon(u)(h_j^{\mathcal P})'(1)+r_j(u)$ with
-$\abs{r_j(u)}\leq\varepsilon(u)\Omega(\varepsilon(u))R^{-j}$, where
-$\Omega(\delta)=\sup_{\abs z=R}\sup_{1\leq s\leq1+\delta}
- \abs{\partial_sH_{\mathcal P}(s,z)-\partial_sH_{\mathcal P}(1,z)}\to0$
-as $\delta\to0$ by the uniform continuity established in (iii), the three
-groups of terms contribute as follows. By (ii) with $R>2$, the tails
+where
+\[
+  \Omega(\delta)=\sup_{\abs z=R}\ \sup_{1\leq s\leq1+\delta}
+   \abs{\partial_sH_{\mathcal P}(s,z)-\partial_sH_{\mathcal P}(1,z)} .
+\]
+Here $r_j(u)=\int_1^{s(u)}\bigl((h_j^{\mathcal P})'(t)-(h_j^{\mathcal
+P})'(1)\bigr)\dd t$, and Cauchy's estimate on $\abs z=R$ applied to
+$\partial_sH_{\mathcal P}(t,\cdot)-\partial_sH_{\mathcal P}(1,\cdot)$ bounds
+the integrand by $\Omega(t-1)R^{-j}$, which gives the stated bound on $r_j$
+since $\Omega$ is non-decreasing and $s(u)-1=\varepsilon(u)$. Moreover
+$\Omega(\delta)\to0$ as $\delta\to0$: by (iii) the function
+$\partial_sH_{\mathcal P}$ is continuous on
+$[1,\infty)\times\{\abs z\leq R\}$, hence uniformly continuous on the compact
+set $[1,2]\times\{\abs z=R\}$, which covers $\delta\leq1$. The three
+groups of terms then contribute as follows. By (ii) with $R>2$, the tails
 $\sum_{j>k}$ of $\sum_jh_j^{\mathcal P}(1)$ and of
 $2^{-k}\sum_jh_j^{\mathcal P}(1)2^{j}$ are $O(R^{-k})$ and
 $O(2^{-k}(2/R)^{k})$, both $o(2^{-k})$, and the $O(3^{-m})$ terms contribute
-$O\bigl(3^{-k}\sum_{j\leq k}MR^{-j}3^{j}\bigr)=O(R^{-k})=o(2^{-k})$; so the
+$O\bigl(3^{-k}\sum_{j\leq k}MR^{-j}3^{j}\bigr)=O(R^{-k})=o(2^{-k})$, the
+middle equality using $R<3$, so that the geometric sum is dominated by its last
+term; so the
 first group gives $H_{\mathcal P}(1,1)+\gamma H_{\mathcal P}(1,2)2^{-k}
- +o(2^{-k})$ and the second
-$\tfrac12\partial_sH_{\mathcal P}(1,2)2^{-k}+o(2^{-k})$. For the third, let
+ +o(2^{-k})$.  The second group is handled the same way, using (iii) in place of
+(ii): its tail $\sum_{j>k}$ of $2^{-k}\sum_j(h_j^{\mathcal P})'(1)2^{j}$ is
+$O(2^{-k}(2/R)^{k})$ and its $O(3^{-m})$ terms are $O(R^{-k})$, so it gives
+$\tfrac12\partial_sH_{\mathcal P}(1,2)2^{-k}+o(2^{-k})$; the series
+$\sum_j(h_j^{\mathcal P})'(1)2^{j}$ converges to
+$\partial_sH_{\mathcal P}(1,2)$ because $R>2$. For the third, let
 $\delta>0$ and choose $U$ with $\Omega(\varepsilon(U))<\delta$, which is
 possible since $\varepsilon(U)\to0$. On $[U,\infty)$ the terms are at most
-$\delta R^{-j}$ times the $\varepsilon J$ integrals above, contributing
+$\delta R^{-j}$ times the second integral of \eqref{eq:gen-moments}, contributing
 $O(\delta2^{-k})$; on $[1,U]$ the integrand is $O_U(1)$ times
 $u^{k-j}/(k-j)!$, and $\int_1^Uu^m/m!\dd u\leq U^{m+1}/(m+1)!$, so that range
 contributes $O_U\bigl(\sum_{j\leq k}R^{-j}U^{k-j+1}/(k-j+1)!\bigr)
@@ -1619,10 +1691,12 @@ $o(2^{-k})$. Collecting the two surviving coefficients gives
 $c_{\mathcal P}=\gamma H_{\mathcal P}(1,2)
  +\tfrac12\partial_sH_{\mathcal P}(1,2)$, which is
 \eqref{eq:general-interior}. Finally $H_{\mathcal P}(s,1)=\prod_{p\in\mathcal
-Q}(1-p^{-s})$ by \eqref{eq:HP-split}, since $L_p(s,1)=1$, giving the limit; and
-the stated product for $H_{\mathcal P}(1,2)$ is \eqref{eq:HP-split} at
-$(s,z)=(1,2)$, each factor of which is positive because $p\geq q\geq3$ on
-$\mathcal P$.
+Q}(1-p^{-s})$ by \eqref{eq:HP-def}, since $L_p(s,1)=1$, giving the limit; and
+the stated product for $H_{\mathcal P}(1,2)$ is \eqref{eq:HP-def} at
+$(s,z)=(1,2)$.  Its factors are positive because $p\geq q\geq3$ on $\mathcal P$,
+and the product is non-zero --- which positivity of the factors alone would not
+give --- by the convergence in (i) at $(s,z)=(1,2)$, legitimate since
+$2<3\leq q$.
 \end{proof}
 
 Positivity of $c_{\mathcal P}$ --- which by \eqref{eq:general-interior} is what
@@ -1636,10 +1710,19 @@ $f_k^{\mathcal P}$ is eventually strictly decreasing.
 \end{corollary}
 
 \begin{proof}
-Moving a prime out of $\mathcal P$ deletes a negative term from the first sum
-of \eqref{eq:HP-logderiv} and adds a positive one to the second, so the right
-side of \eqref{eq:HP-logderiv} increases; over all admissible $\mathcal P$ with
-$q\geq3$ it is therefore smallest at $\mathcal P=\{p:p\geq3\}$, where
+Put $a_p=\frac{\log p}{(p-1)(p-2)}\geq0$ and $b_p=\frac{\log p}{p-1}\geq0$ for
+$p\geq3$. Since $q\geq3$ we have $2\in\mathcal Q$ and
+$\mathcal P=\{p\geq3\}\setminus(\mathcal Q\setminus\{2\})$, with $b_2=\log2$,
+so \eqref{eq:HP-logderiv} rearranges exactly --- for every admissible
+$\mathcal Q$, finite or infinite --- as
+\[
+  \tfrac12\partial_s\log H_{\mathcal P}(1,2)
+   =\log2-\sum_{p\geq3}a_p
+    +\sum_{p\in\mathcal Q\setminus\{2\}}(a_p+b_p),
+\]
+all three sums converging by \eqref{eq:thin-complement}. The last sum has
+non-negative terms, so the right side is least when it is empty, that is at
+$\mathcal Q=\{2\}$ and $\mathcal P=\{p:p\geq3\}$, where
 $\gamma+\tfrac12\partial_s\log H_{\mathcal P}(1,2)$ equals
 $\gamma+\log2-\sum_{p\geq3}\frac{\log p}{(p-1)(p-2)}=\beta/d=0.410970\ldots$,
 positive by \eqref{eq:beta-intro}. Since $H_{\mathcal P}(1,2)>0$ by
@@ -1654,67 +1737,134 @@ interior case. In particular Corollary~\ref{cor:general-positivity} is one of
 the two implications of Conjecture~\ref{conj:general}: it shows that
 $f_k^{\mathcal P}$ is eventually strictly decreasing whenever $q\geq3$, so an
 admissible $\mathcal P$ with $f_k^{\mathcal P}$ eventually increasing must have
-$q=2$. What remains is the converse, and one point in it: in the boundary case
-$q=2$ one must rule out cancellation of the $k^2$ coefficient. That case is genuinely outside the reach of
-Proposition~\ref{prop:general-interior}, whose every step used $R<q$ with
-$R>2$. What can be said is that it reduces to the single case of all primes.
-The proof of \eqref{eq:HP-split} used $R<q$ only to place the poles of the
-factors $L_p$; the identity itself holds for $q=2$ as well, on the smaller disc
-$\abs z<2^{s}$ on which both sides converge, and comparing it with the same
-identity for all primes gives
-\begin{equation}\label{eq:boundary-ratio}
-  \frac{H_{\mathcal P}(s,z)}{H(s,z)}=\prod_{p\in\mathcal Q}(1-zp^{-s}),
-  \qquad \abs z<2^{s}.
-\end{equation}
-Both $H$ and $H_{\mathcal P}$ blow up at the critical point $(s,z)=(1,2)$,
-which lies on the boundary of that disc; the point of
-\eqref{eq:boundary-ratio} is that their \emph{ratio} does not. Since $q=2$
-forces $2\notin\mathcal Q$, every $p\in\mathcal Q$ is at least $3$, so the
-right side of \eqref{eq:boundary-ratio} is a product of factors in $(0,1)$
-which under \eqref{eq:thin-complement} converges to a nonzero limit and extends
-continuously to $(1,2)$ with value $\prod_{p\in\mathcal Q}(1-2/p)>0$. Hence if
-the $k^2$ coefficient depends on the
-analytic factor only through its value at $(s,z)=(1,2)$ --- as the mechanism of
-\cite{GLW}, a pole at $z=2^s$ pinching $z=2$ as $s\to1$, suggests --- then
-non-cancellation for every admissible $\mathcal P$ with $q=2$ follows from
-non-cancellation for all primes.
+$q=2$. What remains is the converse, and the boundary case $q=2$ lies outside
+Proposition~\ref{prop:general-interior}, whose parts (ii), (iii) and (iv) all
+require $R>2$ and so an admissible $R<q$; part~(i) needs neither, and
+\eqref{eq:HP-def} itself is a definition for any $\mathcal P$ whatever.
 
-That hypothesis is testable, and it survives the test. For
-$\mathcal Q=\{3\}$ the ratio in \eqref{eq:boundary-ratio}'s normalization,
+What can be said is that the boundary case reduces to the single case of all
+primes, and that the object the reduction turns on is an interior one. For
+$q=2$ we have $2\in\mathcal P$, and separating that one factor in
+\eqref{eq:HP-def} gives the exact identity
+\begin{equation}\label{eq:boundary-pole}
+  H_{\mathcal P}(s,z)=\frac{H_{\mathcal P\setminus\{2\}}(s,z)}{1-z2^{-s}},
+\end{equation}
+since $L_2=(1-2^{-s})^z(1-z2^{-s})^{-1}$ and moving $2$ into the complement
+contributes exactly the compensating factor $(1-2^{-s})^z$. For
+$\mathcal P$ all primes this is $H=H_{\mathrm o}/(1-z2^{-s})$: the whole
+$z$-singularity of the unrestricted regularized product at $z=2^s$ is that one
+explicit pole, and its numerator is the odd product \eqref{eq:H-odd}. In
+general the numerator $H_{\mathcal P\setminus\{2\}}$ belongs to a set of primes
+with least element at least $3$, so Proposition~\ref{prop:general-interior}
+applies to \emph{it}: it is analytic and zero-free on $\abs z<3^{s}$, in
+particular at the critical point $(s,z)=(1,2)$, where by
+\eqref{eq:boundary-ratio} below it takes the value
+$d\prod_{p\in\mathcal Q}(1-2/p)>0$.
+
+Comparing \eqref{eq:HP-def} for $\mathcal P$ with the same for all primes gives
+\begin{equation}\label{eq:boundary-ratio}
+  \frac{H_{\mathcal P}(s,z)}{H(s,z)}
+  =\frac{H_{\mathcal P\setminus\{2\}}(s,z)}{H_{\mathrm o}(s,z)}
+  =\prod_{p\in\mathcal Q}(1-zp^{-s}),
+\end{equation}
+the first equality on $\abs z<2^{s}$, where all four functions are defined, and
+the second on the larger disc $\abs z<3^{s}$, both sides there being analytic
+by Proposition~\ref{prop:general-interior}(i) applied to
+$\mathcal P\setminus\{2\}$ and to the odd primes. It is the second equality
+that is used at $z=2$, which is interior to $\abs z<3^{s}$ for every $s\geq1$.
+Both $H$ and $H_{\mathcal P}$ blow up at $(1,2)$, which lies on the boundary of
+the smaller disc; the point of \eqref{eq:boundary-ratio} is that their
+\emph{ratio} does not, being equal there to a ratio of two interior objects.
+Since $q=2$
+forces $2\notin\mathcal Q$, every $p\in\mathcal Q$ is at least $3$, so the
+product is one of factors in $(0,1)$ which under \eqref{eq:thin-complement}
+converges to the non-zero value $\prod_{p\in\mathcal Q}(1-2/p)$.
+
+Now the $k^2$ coefficient is known in the all-primes case, and it is exactly
+the numerator's value. By \eqref{eq:GLW-asymptotic} and \eqref{eq:d-def} it is
+$a_1=d(\log2)/4$, and $d=H_{\mathrm o}(1,2)$ --- \eqref{eq:d-def} is
+\eqref{eq:H-odd} at $(s,z)=(1,2)$ --- so
+\begin{equation}\label{eq:GLW-value}
+  a_1=\tfrac14(\log2)\,H_{\mathrm o}(1,2),
+\end{equation}
+the value of the pole's numerator at the critical point times a constant
+carrying no arithmetic of its own. The contrast with the interior case is
+sharp and is the reason to think \eqref{eq:GLW-value} is structural rather than
+a coincidence: the interior constant $\beta=d(\gamma+\tfrac12\partial_s\log
+H_{\mathrm o}(1,2))$ of \eqref{eq:beta-intro} does involve the $s$-derivative of
+the same numerator, and a prime sum with it, whereas $a_1$ involves neither.
+Granting that \eqref{eq:GLW-value} holds with $H_{\mathcal P\setminus\{2\}}$ in
+place of $H_{\mathrm o}$ --- that is, that the residue at the pole sees the
+numerator through its value --- the $k^2$ coefficient for a general admissible
+$\mathcal P$ with $q=2$ is
+\begin{equation}\label{eq:boundary-predicted}
+  a_1^{\mathcal P}=\tfrac14(\log2)\,H_{\mathcal P\setminus\{2\}}(1,2)
+   =a_1\prod_{p\in\mathcal Q}\Bigl(1-\frac2p\Bigr)>0,
+\end{equation}
+and no cancellation occurs for any of them.
+
+This is testable, and the prediction \eqref{eq:boundary-predicted} is the ratio
+$\prod_{p\in\mathcal Q}(1-2/p)$. For $\mathcal Q=\{3\}$ the quantity
 \[
   \Bigl(f_k^{\mathcal P}-\prod_{p\in\mathcal Q}(1-1/p)\Bigr)\Big/(f_k-1),
 \]
-computed independently of any of the above from
-Lemma~\ref{lem:integral-representation}, rises monotonically over
-$24\leq k\leq44$ to $0.31209$, and a two-term fit in $1/k$ through
-$k=36,40,44$ --- the correction is $O(1/k)$, so the raw value at $k=44$ is not
-the thing to read --- gives $0.333227$ against the predicted
-$\prod_{p\in\mathcal Q}(1-2/p)=1/3$, a relative error of
-$3.2\cdot10^{-4}$. The constants of
-Proposition~\ref{prop:general-interior}(iv) can be checked the same way, and
-specialize correctly: at $\mathcal Q=\{2\}$ they return the certified $d$ and
-$\beta$ of \eqref{eq:beta-intro} to the precision of the prime sums involved.
-Both computations are in the repository, as \texttt{genP\_check.py} and
-\texttt{boundary\_check.py}. Unlike everything else in this paper that is
-computed, they use ordinary floating-point arithmetic and not ball arithmetic:
-they are checks on the formulas of this section, carrying no certificate, and
-nothing elsewhere in the paper or in the formalization depends on them.
+computed from \eqref{eq:euler-products-P} and
+Lemma~\ref{lem:integral-representation} independently of everything above,
+rises monotonically over $24\leq k\leq44$ to $0.31209$ against a predicted
+$1/3$; the approach is from below with a correction of order $1/k$, so the
+value at $k=44$ is not the thing to read. Fitting $L+a/k+b/k^2$ through
+$k=36,40,44$ gives $L=0.333227$, and through the two other windows
+$k=24,32,40$ and $k=28,36,44$ gives $0.333171$ and $0.333447$ --- stable, and
+within $5\cdot10^{-4}$ of $1/3$. Two caveats keep this from being quoted more
+sharply. A three-parameter fit through three points has no residual, so the
+agreement is not an error estimate: fitting $L+a\log k/k+b/k$ instead gives
+$0.329517$ and the one-term fit $L+a/k$ gives $0.336577$, so the spread across
+reasonable bases, about $1\%$, is the honest uncertainty. And the choice of the
+$1/k$ basis is not independent of the conclusion, since
+\eqref{eq:GLW-asymptotic} carries a subleading $O(k\log(k+1))$ whose logarithm
+cancels in the ratio only if its coefficient also scales by
+$\prod(1-2/p)$ --- a stronger form of what is being tested. The stability of
+the $1/k$ fits across windows is evidence for that basis, not a proof of it.
+The centring constant $\prod_{p\in\mathcal Q}(1-1/p)$ is likewise not supplied
+by Proposition~\ref{prop:general-interior}, which excludes $q=2$; it is the
+value \eqref{eq:HP-def} gives at $z=1$, and at $\mathcal Q=\varnothing$ it is
+$1$, which is Lichtman's $f_k\to1$.
 
-The computation is evidence for that hypothesis and not a proof of it: it
-cannot distinguish the coefficient being free of the $s$-derivatives from their
-being present with a small coefficient, and the discrepancy $3.2\cdot10^{-4}$
-is of the size one would expect from the extrapolation alone.
+The constants of Proposition~\ref{prop:general-interior}(iv) are checked
+separately, and the two checks should not be conflated. The constant
+\emph{formulas} specialize correctly to the certified values: at
+$\mathcal Q=\{2\}$ they return $H_{\mathcal P}(1,2)=0.378695020$ against
+$d=0.3786950315$ and $c_{\mathcal P}=0.155632714$ against $\beta$, both to
+about $10^{-7}$, the precision of the prime sums involved. The
+\emph{sequence} $f_k^{\mathcal P}$ converges to its asymptotic much more
+slowly, and how slowly depends on $q$: at $\mathcal Q=\{2\}$, where the
+subleading term is the $O(k^3 3^{-k})$ one of \eqref{eq:odd-intro-expansion}
+with the constant $4900$, the ratio of $(f_k^{\mathcal P}-c_0)2^{k}$ to
+$c_{\mathcal P}$ is still $1.13$ at $k=14$, the largest index computed; at
+$\mathcal Q=\{2,3\}$, where $q=5$, it is $1.003$. So it is the $q\geq5$ runs
+that test \eqref{eq:general-interior} end to end, and $\mathcal Q=\{2\}$ that
+calibrates the formulas against a case the paper proves. Both computations are
+in the repository, as \texttt{genP\_check.py} and \texttt{boundary\_check.py}.
+Unlike everything else in this paper that is computed, they use ordinary
+floating-point arithmetic and not ball arithmetic: they are checks on the
+formulas of this section, carrying no certificate, and nothing elsewhere in the
+paper or in the formalization depends on them.
 
-The $s$-derivatives need not be excluded, however, for the reduction to say
-something. Suppose only that the $k^2$ coefficient is
-$A\Phi(1,2)+B\,\partial_s\Phi(1,2)$ for the pole-free analytic factor $\Phi$,
-with $A,B$ depending on the all-primes mechanism and not on $\mathcal P$. By
-\eqref{eq:boundary-ratio} the factor for $\mathcal P$ is
-$\Phi_{\mathcal P}=\Phi\cdot E_{\mathcal Q}$ with
-$E_{\mathcal Q}(s,z)=\prod_{p\in\mathcal Q}(1-zp^{-s})$, and
-$\partial_s\log\Phi_{\mathcal P}=\partial_s\log\Phi
- +\partial_s\log E_{\mathcal Q}$, so the coefficient for $\mathcal P$ is
-$E_{\mathcal Q}(1,2)$ times
+Three things are therefore unverified in the boundary case, and it is worth
+separating them. First, that an expansion
+$f_k^{\mathcal P}=c_0+O(k^22^{-k})$ with a genuine $k^2$ leading term exists at
+all for a general admissible $\mathcal P$ with $q=2$;
+Proposition~\ref{prop:general-interior} does not reach that case, and
+\eqref{eq:GLW-asymptotic} is the single case $\mathcal Q=\varnothing$. Second,
+that its coefficient is \eqref{eq:boundary-predicted}. Third, failing that,
+something weaker still suffices: if the coefficient is
+$A\Phi(1,2)+B\,\partial_s\Phi(1,2)$ for the numerator
+$\Phi_{\mathcal P}=H_{\mathcal P\setminus\{2\}}$ with $A,B$ independent of
+$\mathcal P$, then because
+$\partial_s\log\Phi_{\mathcal P}=\partial_s\log H_{\mathrm o}
+ +\partial_s\log E_{\mathcal Q}$ with
+$E_{\mathcal Q}(s,z)=\prod_{p\in\mathcal Q}(1-zp^{-s})$, the coefficient for
+$\mathcal P$ is $E_{\mathcal Q}(1,2)$ times
 \[
   A\Phi(1,2)+B\,\partial_s\Phi(1,2)
   +B\,\Phi(1,2)\sum_{p\in\mathcal Q}\frac{2\log p}{p-2},
@@ -1723,17 +1873,12 @@ the sum being $\partial_s\log E_{\mathcal Q}(1,2)$, whose terms are positive
 because $p\geq3$ on $\mathcal Q$ and which converges precisely
 by~\eqref{eq:thin-complement} --- the third distinct task that hypothesis
 performs here, after making the limit in \eqref{eq:general-interior} positive
-and the $2^{-k}$ coefficient finite. Since $E_{\mathcal Q}(1,2)>0$, the
-coefficient can vanish only
-if that sum takes one exact value $\kappa$ determined by $A$, $B$ and the
-all-primes data alone. So non-cancellation holds for every admissible
-$\mathcal P$ with $q=2$ except possibly those whose complement satisfies the
-single equation $\sum_{p\in\mathcal Q}2(\log p)/(p-2)=\kappa$; in particular it
-holds for all of them at once as soon as $\kappa\leq0$, the sum being positive
-for every nonempty $\mathcal Q$. That is the remaining point, and it is
-considerably narrower than ``prove the boundary case'': what is needed is the
-form of the $k^2$ coefficient in the single case of all primes, after which at
-most one level set of an explicit functional of $\mathcal Q$ is left in doubt.
+and the $2^{-k}$ coefficient finite. Since $E_{\mathcal Q}(1,2)>0$, such a
+coefficient vanishes only if that sum takes one exact value $\kappa$ fixed by
+$A$, $B$ and the all-primes data, so non-cancellation would fail at most on a
+single level set of an explicit functional of $\mathcal Q$, and nowhere at all
+if $\kappa\leq0$. Against \eqref{eq:GLW-value}, which has $B=0$, that case is
+expected to be empty.
 
 The present paper proves the two cases $\mathcal P=\{\text{all primes}\}$ and
 $\mathcal P=\{p:p\geq3\}$, which are extremal among admissible sets in the
