@@ -893,6 +893,19 @@ The triangle inequality now gives
 
 \subsection{The signed moment term}
 
+The combination of signed moments that has to be bounded is not chosen; it is
+what the difference of two consecutive source terms produces:
+\begin{align}
+ 2(V-2kU)-\bigl(V-2(k+1)U\bigr)=V+(2-2k)U.
+ \label{eq:UV-exact-combination}
+\end{align}
+Since this is an identity, bounding the right-hand side is an exact
+optimization over the rectangle of admissible $(U,V)$, not a termwise
+absolute-value estimate. That is the reason for evaluating the moments before
+absolute values are taken: replacing them by $\sum_i2^i\abs{c_i}$ would
+discard the cancellation in \eqref{eq:UV-exact-combination} and cost a factor
+in $k$.
+
 \begin{lemma}\label{lem:UV-bound}
 If $\abs U\leq U_{\max}$ and $\abs V\leq V_{\max}$, then for $k\geq2$,
 \begin{equation}\label{eq:UV-bound}
@@ -907,14 +920,6 @@ negative. The minimum over the rectangle
 $[-U_{\max},U_{\max}]\times[-V_{\max},V_{\max}]$ is therefore attained at
 $U=U_{\max}$ and $V=-V_{\max}$, giving \eqref{eq:UV-bound}.
 \end{proof}
-
-Indeed,
-\begin{align}
- 2(V-2kU)-\bigl(V-2(k+1)U\bigr)=V+(2-2k)U.
- \label{eq:UV-exact-combination}
-\end{align}
-Thus Lemma~\ref{lem:UV-bound} is an exact optimization, not a termwise
-absolute-value estimate.
 
 \subsection{The $\delta$ term}
 
@@ -1487,9 +1492,7 @@ bits the head agrees to every printed digit.
 For the unrestricted theorem, the $s$-uniform coefficient bounds defining
 $\alpha_+$ are obtained by carrying $s$ as an interval over a partition of
 $[1,2]$. The signed moments $U$ and $V$ are evaluated before absolute values
-are taken. This order is essential: replacing them by
-$\sum_i2^i\abs{c_i}$ loses the cancellation used in
-\eqref{eq:UV-exact-combination}.
+are taken, for the reason given at \eqref{eq:UV-exact-combination}.
 
 \subsection*{Availability and versions}
 \begingroup\sloppy
