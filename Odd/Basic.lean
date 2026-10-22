@@ -40,8 +40,10 @@ def fOdd (k : ℕ) : ℝ :=
 
 -- The limit f_k^odd -> 1/2 is derived in odd-proof/PROOF.md section 3 (it is
 -- H(1,1) = 1 - 2^-1, the omitted Euler factor at z = s = 1) and confirmed
--- numerically to k = 20.  It is not formalized here because the decreasing
--- theorem does not use it.
+-- numerically to k = 20.  It IS formalized here, as fOdd_tendsto_half below:
+-- the decreasing theorem does not need it, but it follows from the same
+-- OddNumericalFacts.remainder hypothesis and the manuscript's Table 1 lists it
+-- as proved.  (This comment said the opposite until 2026-10-22.)
 
 /-- F_k(s) := Σ_{Ω(n)=k} n^{-s}, the Dirichlet series restricted to
     k-almost-primes. -/
@@ -8731,9 +8733,11 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     -- The near-piece constant.  FkOdd k s <= CN 3^-k holds for each fixed
     -- s > 1 (the index set has every n >= 3^k), with CN depending on s = sOf U;
     -- it blows up only as s -> 1, i.e. as U -> infinity.  CN, NEARU and
-    -- hsplitD must all be instantiated at the SAME U; the certified values
-    -- CN <= 364 and NEARU <= 24.68 are at U = 3 (cn_recursion.py,
-    -- nearu_bound.py), which is also where CE <= 5.48910 is certified.
+    -- hsplitD must all be instantiated at the SAME U.  The certified values at
+    -- U = 3 are CN <= 367.8436 (cn_certified.py) and NEARU <= 26.0962
+    -- (nearu_certified.py), which is also where CE <= 5.48910 is certified.
+    -- The 364 and 24.68 quoted here before 2026-10-22 came from the
+    -- superseded cn_recursion.py / nearu_bound.py and were both too small.
     (CN : ℝ) (hCNnn : 0 ≤ CN)
     (hCN : FkOdd k (sOf U) ≤ CN * ((1:ℝ)/3) ^ k)
     -- the far-piece bound of LEAF 1, with its constant named.  This is

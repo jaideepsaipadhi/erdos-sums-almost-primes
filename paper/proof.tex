@@ -1410,47 +1410,88 @@ $\Omega(n)=k$ and all prime factors in $\mathcal P$. The sequence
 $f_k^{\mathcal P}$ is eventually increasing if and only if $q=2$.
 \end{conjecture}
 
-Some hypothesis of this kind is needed. For $\mathcal P=\{2\}$ one has
+\emph{Some} hypothesis is needed. For $\mathcal P=\{2\}$ one has
 $f_k^{\mathcal P}=1/(2^kk\log2)$, and for $\mathcal P=\{2,3\}$ the sequence
 again decreases to $0$; in both cases $q=2$ and the conclusion fails. What
 goes wrong is that a sparse $\mathcal P$ leaves $\sum_{p\in\mathcal P}p^{-s}$
 bounded as $s\to1^+$, so the generating function has no $\zeta(s)^z$ factor
-and $f_k^{\mathcal P}$ decays geometrically to $0$ whatever $q$ is.
+and $f_k^{\mathcal P}$ decays geometrically whatever $q$ is.
 
-Under \eqref{eq:thin-complement} that cannot happen, and the singularity
-structure is the one the two theorems above exploit:
+Those examples, however, are already excluded by the weaker condition
+$\sum_{p\notin\mathcal P}1/p<\infty$, and it is worth saying why
+\eqref{eq:thin-complement} carries the weight $\log p$ instead. It is not
+needed for convergence: the product below converges locally uniformly for
+\emph{any} set of primes, since $\sum_pp^{-\sigma}<\infty$ for $\sigma>1/2$.
+What needs the weight is the $s$-derivative at $s=1$, where the constant
+multiplying $2^{-k}$ lives. That constant involves
+$\sum_{p\notin\mathcal P}\frac{\log p}{p-1}$, which is finite precisely
+under~\eqref{eq:thin-complement} and can diverge under the weaker condition:
+taking the complement to be blocks of primes in $[X_j,X_j^{1+\eta_j}]$ with
+$\eta_j\to0$ slowly and $\log X_j$ growing geometrically makes
+$\sum_{p\notin\mathcal P}1/p$ converge while
+$\sum_{p\notin\mathcal P}(\log p)/p$ diverges. We have not verified that such
+a $\mathcal P$ violates the conclusion, so we state the hypothesis in the safe
+direction: strengthening it makes the conjecture claim less.
+
+The singularity structure is the one the two theorems above exploit. On
+$\abs z<q^\sigma$ the product $\prod_{p\in\mathcal P}(1-zp^{-s})^{-1}$
+converges directly, by the estimate in the proof of
+Proposition~\ref{prop:analyticity}, so its first $z$-singularity is at
+$z=q^s$; the factorization
 \[
  \prod_{p\in\mathcal P}(1-zp^{-s})^{-1}
-  =\prod_p(1-zp^{-s})^{-1}\prod_{p\notin\mathcal P}(1-zp^{-s}),
+  =\prod_p(1-zp^{-s})^{-1}\prod_{p\notin\mathcal P}(1-zp^{-s})
 \]
-where the second product converges locally uniformly by
-\eqref{eq:thin-complement} and is therefore entire in $z$. Its zeros cancel
-exactly the poles at $z=p^s$ with $p\notin\mathcal P$, leaving the first
-$z$-singularity at $z=q^s$. At $s=1$ the point $z=2$ lies on that singular
-circle exactly when $q=2$. If $q\geq3$ the coefficient extraction at $z=2$ is
-interior and gives a constant multiple of $2^{-k}$, as in Section~3; if $q=2$
-it takes place at the boundary and may produce the factor $k^2$.
+then relates it to $\zeta(s)^zH_{\mathcal P}(s,z)$ on the smaller disc
+$\abs z<2^\sigma$ where the middle product also converges. At $s=1$ the point
+$z=2$ lies on the singular circle exactly when $q=2$ --- and $z=2$ is
+distinguished here not because $2$ is prime but because it is where the
+$\gamma\e^{-2u}$ term of $J$ in Lemma~\ref{lem:zeta-coordinate} evaluates the
+regularized product. If $q\geq3$ the extraction at $z=2$ is interior and gives
+a constant multiple of $2^{-k}$, as in Section~3; if $q=2$ it is at the
+boundary, and the mechanism that then produces a factor $k^2$ is the one
+identified by Gorodetsky, Lichtman and Wong \cite{GLW} for
+$\mathcal P=\{\text{all primes}\}$.
 
-Three points remain to turn this mechanism into a theorem for arbitrary
-$\mathcal P$ satisfying \eqref{eq:thin-complement}. First, the regularized
-product must provide enough uniform control to identify the limiting constant
-and the coefficient at $z=2$. Second, in the boundary case one must rule out
-cancellation of the $k^2$ coefficient. Third, in the interior case one must
-show that the constant multiplying $2^{-k}$ is positive, which is what makes
-the sequence decrease rather than increase; for $\mathcal P=\{p:p\geq3\}$ this
-is the inequality $\beta>0$ of \eqref{eq:beta-intro}. The present paper proves
-the two extremal cases $\mathcal P=\{\text{all primes}\}$ and
-$\mathcal P=\{p:p\geq3\}$.
+Two points remain to turn this into a theorem for arbitrary $\mathcal P$
+satisfying \eqref{eq:thin-complement}. First, the regularized product must
+provide enough uniform control to identify the limiting constant and the
+coefficient at $z=2$. Second, in the boundary case one must rule out
+cancellation of the $k^2$ coefficient. The third point one might expect ---
+positivity of the constant multiplying $2^{-k}$ in the interior case, which is
+what makes the sequence decrease --- does not in fact remain open. Writing the
+product as $\zeta(s)^zH_{\mathcal P}(s,z)$ as in \eqref{eq:H-full}, that
+constant is $H_{\mathcal P}(1,2)$ times
+\[
+ \gamma+\tfrac12\partial_s\log H_{\mathcal P}(1,2)
+ =\gamma
+ -\sum_{p\in\mathcal P}\frac{\log p}{(p-1)(p-2)}
+ +\sum_{p\notin\mathcal P}\frac{\log p}{p-1},
+\]
+with $H_{\mathcal P}(1,2)>0$. Moving a prime out of $\mathcal P$ deletes a
+negative term from the first sum and adds a positive one to the second, so the
+right side increases; over all admissible $\mathcal P$ with $q\geq3$ it is
+therefore smallest at $\mathcal P=\{p:p\geq3\}$, where it is
+$\gamma+\log2-\sum_{p\geq3}\frac{\log p}{(p-1)(p-2)}=\beta/d=0.41097\ldots$.
+Hence the single inequality $\beta>0$ of \eqref{eq:beta-intro} already gives
+positivity for every admissible $\mathcal P$ with $q\geq3$. Note that this is
+the one step at which \eqref{eq:thin-complement} is genuinely load-bearing: the
+second sum is finite precisely under that hypothesis.
+
+The present paper proves the two cases $\mathcal P=\{\text{all primes}\}$ and
+$\mathcal P=\{p:p\geq3\}$, which are extremal among admissible sets in the
+sense just described.
 
 %=======================================================================
 \section{Certification and formalization}\label{sec:lean}
 %=======================================================================
 
 What the formalization establishes is an \emph{implication}. The certified
-quantities enter as fields of five hypothesis structures ---
+quantities enter as fields of six hypothesis structures ---
 \texttt{NumericalFacts}, \texttt{NumericalFactsFull},
-\texttt{OddNumericalFacts}, \texttt{OddCoeffFacts}, \texttt{OddDomFacts} ---
-and no instance of any of them is constructed. Lean therefore checks that those
+\texttt{OddNumericalFacts}, \texttt{OddCoeffFacts}, \texttt{OddTailFacts},
+\texttt{OddDomFacts}, with $13$, $21$, $4$, $8$, $5$ and $5$ fields
+respectively --- and no instance of any of them is constructed. Lean therefore checks that those
 hypotheses imply the theorems, and nothing in the kernel checks that the
 hypotheses are true, or even that they are mutually consistent: an
 unsatisfiable field would make the theorems assuming it vacuous rather than
@@ -1489,13 +1530,31 @@ $\abs{2E(k)-E(k+1)}\leq R(k)$ as the single field \texttt{source\_\allowbreak bo
 which is the aggregate of that whole section. Only the second formal version
 discussed below derives it, from the four source terms separately.
 
+\begingroup\sloppy
+It should also be said that the trusted base is not a list of intervals. Some
+fields are intervals; others are quantified or analytic statements that no
+interval computation could discharge: a \texttt{Summable} hypothesis
+(\texttt{OddCoeffFacts.\allowbreak fam\_\allowbreak summable}), two one-sided limits as
+$s\downarrow1$ (\texttt{tendsto\_\allowbreak one} and
+\texttt{tendsto\_\allowbreak deriv}), several suprema quantified over all $m$, $k$ or
+$\theta$ (\texttt{alpha\_\allowbreak dom}, \texttt{Sstar\_\allowbreak dom},
+\texttt{UV\_\allowbreak bound}, \texttt{M0\_\allowbreak bound},
+\texttt{Eexp\_\allowbreak bound}), a certification predicate over all
+$k$ (\texttt{OddDomFacts.\allowbreak dom\_\allowbreak cert}), and the sweeps, which are finitely
+checkable but are $\forall$-statements rather than single enclosures. And six
+of the constants above --- $\Sigma_0$, $\Sigma_1$, $\Sigma_2$, $C_E$, $C_N$,
+$N_U$ --- do not appear in the Lean development at all, in any form: the
+odd-remainder route that would consume them takes them as abstract parameters
+and is not what either odd theorem is proved from. For those six the agreement
+between manuscript and formalization that this section asserts has no content,
+and the reader should rely on the Arb certificates instead.
+\endgroup
+
 The numerical propositions are Proposition~\ref{prop:odd-certified} and
 Proposition~\ref{prop:full-certified}. Their statements are finite systems of
 interval inequalities, established by Arb/FLINT through its Python bindings.
-The Lean formalization imports the resulting intervals as hypotheses ---
-together with Proposition~\ref{prop:odd-remainder} and the differentiability
-noted above, neither of which is an interval inequality --- and proves that
-those hypotheses imply Theorem~\ref{thm:main-full} and both assertions of
+The Lean formalization imports the resulting intervals as hypotheses and proves
+that they imply Theorem~\ref{thm:main-full} and both assertions of
 Theorem~\ref{thm:main-odd}; the three formal statements are
 \texttt{erdos\_\allowbreak sums\_\allowbreak increase\_\allowbreak from\_\allowbreak six}, \texttt{fOdd\_\allowbreak decreasing} and
 \texttt{fOdd\_\allowbreak tendsto\_\allowbreak half}. The differentiability field belongs to
@@ -1590,38 +1649,48 @@ for the reader to find. The certified odd sweep is stated above for
 $1\leq k\leq75$, whereas the field \texttt{OddNumericalFacts.sweep\_\allowbreak low}
 assumes only $1\leq k\leq58$; since the analytic branch begins at $k=59$ that
 is all the assembly needs, and assuming less is the safe direction, but the two
-ranges are not the same. And the field \texttt{NumericalFacts.Gamma\_\allowbreak bound},
+ranges are not the same. And the field \texttt{NumericalFacts.\allowbreak Gamma\_\allowbreak bound},
 carrying $\Gamma\leq104.52$, has no counterpart above and no consumer in the
 development either; it is retained only so that the certified package and the
 text can be compared field by field.
 
 \begin{table}[htbp]
 \centering
-\caption{What the Lean development proves and what it assumes. The assumed
-rows are the trusted base: no instance of any structure is constructed, so
-these are not checked in the kernel.}
+\caption{What the Lean development proves, what it assumes, and what it does
+not mention. The assumed rows are the trusted base: no instance of any
+structure is constructed, so these are not checked in the kernel. The last row
+is not part of that base at all --- those six constants enter the Lean
+development only through comments, so for them there is no formal counterpart
+to compare the manuscript against.}
 \label{tab:lean-status}
-\begin{tabular}{@{}llp{0.40\textwidth}@{}}
+\begin{tabular}{@{}p{0.33\textwidth}lp{0.34\textwidth}@{}}
 \toprule
 Statement & Status & Lean name \\
 \midrule
 Theorem~\ref{thm:main-full} & proved & \texttt{erdos\_\allowbreak sums\_\allowbreak increase\_\allowbreak from\_\allowbreak six} \\
 Theorem~\ref{thm:main-odd}, monotonicity & proved & \texttt{fOdd\_\allowbreak decreasing} \\
 Theorem~\ref{thm:main-odd}, limit & proved & \texttt{fOdd\_\allowbreak tendsto\_\allowbreak half} \\
-Lemma~\ref{lem:phi-base} & proved & \texttt{phiBound\_\allowbreak pos\_\allowbreak at\_\allowbreak 2440} \\
-Lemma~\ref{lem:phi-monotone} & proved & \texttt{phiBound\_\allowbreak mono\_\allowbreak of\_\allowbreak bounds} \\
+$\varphi(2440)>0$, not the stronger
+  Lemma~\ref{lem:phi-base} & proved & \texttt{phiBound\_\allowbreak pos\_\allowbreak at\_\allowbreak 2440} \\
+$\varphi$ non-decreasing on $k\geq2440$, not
+  strictly, as Lemma~\ref{lem:phi-monotone} says & proved & \texttt{phiBound\_\allowbreak mono\_\allowbreak of\_\allowbreak bounds} \\
 $\gamma$ from below & proved & \texttt{gamma\_\allowbreak lower\_\allowbreak bound} \\
 $d$ from below & proved & \texttt{dConst\_\allowbreak lower\_\allowbreak bound}, \texttt{\_\allowbreak sharp} \\
 $\rho$ from above & proved & \texttt{rhoConst\_\allowbreak upper\_\allowbreak bound} \\
 \midrule
-Proposition~\ref{prop:odd-remainder} & assumed & \texttt{OddNumericalFacts.remainder} \\
+Proposition~\ref{prop:odd-remainder} & assumed & \texttt{OddNumericalFacts.\allowbreak remainder} \\
 Section~5 aggregate & assumed & \texttt{NumericalFacts.source\_\allowbreak bound} \\
 \eqref{eq:Eexp-certified} & assumed & \texttt{NumericalFactsFull.Eexp\_\allowbreak bound} \\
 $g_i$ differentiable on $(1,2)$ & assumed & \texttt{NumericalFactsFull.g\_\allowbreak deriv} \\
 $\partial_s$, $\partial_s^2$ of coefficients exist & assumed & \texttt{OddCoeffFacts.deriv\_\allowbreak exists}, \texttt{deriv2\_\allowbreak exists} \\
-$S$ from above & assumed & \texttt{NumericalFacts.Sstar\_\allowbreak bound} \\
+$S^*$ from above & assumed & \texttt{NumericalFacts.Sstar\_\allowbreak bound} \\
+$S$ of \eqref{eq:beta-intro}, enclosed & assumed & \texttt{OddNumericalFacts.\allowbreak Sodd\_\allowbreak enclosure} \\
+$\abs{R_k}$'s constant $4900$ & assumed & \texttt{OddNumericalFacts.\allowbreak MR\_\allowbreak bound} \\
 Sweeps & assumed & \texttt{OddNumericalFacts.sweep\_\allowbreak low} and companions \\
-$\Sigma_i$, $C_E$, $C_N$, $N_U$, $\alpha_+$, $U$, $V$ & assumed & fields of the five structures \\
+$\alpha_+$, $U$, $V$ & assumed & \texttt{alpha\_\allowbreak bound}, \texttt{U\_\allowbreak bound}, \texttt{V\_\allowbreak bound} \\
+$\Gamma\leq104.52$ & assumed, unused & \texttt{NumericalFacts.\allowbreak Gamma\_\allowbreak bound} \\
+\midrule
+$\Sigma_0$, $\Sigma_1$, $\Sigma_2$, $C_E$, $C_N$, $N_U$ & \emph{not in Lean} & see below \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1632,6 +1701,7 @@ $z=3$ before applying coefficient recursion or Cauchy bounds. The range
 $0<u\leq3$ is evaluated directly, while the range $u\geq3$ uses the Taylor
 model made explicit in Proposition~\ref{prop:odd-two-term}.
 
+\begingroup\sloppy
 $\Sigma_2$ is not a single computed number but a sum of two, and since it
 carries $4395.55$ of the $4857.88$ in the ledger of
 Proposition~\ref{prop:odd-remainder} it is worth saying which. The head
@@ -1647,6 +1717,7 @@ narrowest margin of any constant here except $C_E$. Both halves are recorded in
 the repository, and the $40$ boxes in $s$ behind the tail are coarse enough
 that it is likely several-fold loose; that direction is safe, and the budget
 closes either way.
+\endgroup
 
 The constant $C_E$ is certified on the whole of $(1,s(3)]$, and in fact on its
 closure: the four quantities entering \eqref{eq:CE-def} are ratios in which the
