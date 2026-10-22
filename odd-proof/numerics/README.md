@@ -18,6 +18,35 @@ explicit upper bound; the committed `.log` beside it is that run.
 Together these give `C = CE S/18 + S_0/2 + 5*590/64 + CN + NEARU = 4857.9`,
 and (5.1) is stated with `C = 4900`.
 
+## The sign of the `h_j` and the range of (5.1)
+
+`absratio.py` records a defect in the near-range step as the manuscript states
+it.  That step bounds `sum_j int_0^3 u^{k-j}/(k-j)! |h_j(s(u))| J(u) du` by the
+*signed* coefficient identity `sum_j u^{k-j}/(k-j)! h_j(s(u)) = P_k^odd(s(u))`,
+which needs `h_j >= 0`.  The `h_j` alternate:
+
+    h_1(s) = P_3(s) - log zeta(s) = log(1 - 2^-s) - sum_{m>=2} P_3(ms)/m < 0
+
+for every `s`, and at `s = s(3)` the coefficients run
+`1, -0.762, +0.377, -0.126, +0.0353, ...`.  The script computes both sums; the
+signed one reproduces `P_k^odd(s(3))` to 267 digits and peaks at `367.8435` at
+`k = 11`, which is `CN`, so the comparison is against the right quantity.
+
+The inflation is confined to small `k`.  `A_k 3^k` peaks at `15329` at `k = 12`,
+falls back under `CN` at `k = 24`, and is `27.63` at `k = 59` — so `CN` has
+13.3x of slack where the bound is actually used.  The analytic branch is
+invoked only for `k >= K0 = 59`; monotonicity for `k <= 75` comes from the
+certified sweep, which never calls on the remainder bound.  **No certified
+constant moves:** `CN`, `C = 4900` and `K0 = 59` all stand.  What has to change
+is the *range* on which (5.1) is asserted, and the near-range argument itself,
+which must be redone on `|h_j|` (majorant `H_o^+ = H_o e^{-2 h_1 z}`, whose
+coefficients are non-negative, with the `s`-range split: the majorant's crude
+per-term bound stops being integrable around `s ~ 15`, where the true quantity
+is already negligible).  A single all-`k` constant would instead be about
+`19819`, which would push `K0` to `63`.
+
+## Margin under (5.1)
+
 The 0.9% of margin there is an artefact of the `NS = 1600` setting, not of the
 method: `hcoeff3200.log` halves the box width and gives head `7890.6376` in
 place of `8423.9098`, hence `S_2 <= 13881` and `C = 4695.2` — 4.2% of margin.
