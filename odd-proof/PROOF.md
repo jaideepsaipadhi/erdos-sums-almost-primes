@@ -90,9 +90,13 @@ Write
 
 for the remainder after the two main terms of (4.1).  This section proves
 
-    |R_k| <= C (k+3)^3 3^-k,   C = 4900,                                (5.1)
+    |R_k| <= C (k+3)^3 3^-k,   C = 4900,   for k >= 59,                 (5.1)
 
 and hence, with section 6, the threshold K0^odd = 59.
+
+The range in (5.1) is necessary, not conservative; see 5.1(c) below.  It costs
+nothing, since (5.1) is used only for k >= K0^odd = 59 and monotonicity for
+k <= 75 comes from the certified sweep, which does not call on it.
 
 The rate is 3^-k, not the 4.5^-k of a naive Cauchy estimate: the pole of
 H(s,.) at z = 3^s sets it, and no contour argument does better.  The factor
@@ -181,9 +185,38 @@ bounded separately: NEARU <= 26.0962 (nearu_certified.py) covers the two
 subtracted main terms, and CN <= 367.8435 (cn_certified.py) covers the true
 integrand.
 
-What cn_certified.py certifies is a POINTWISE bound, FkOdd k (sOf 3) <=
-CN 3^-k, not an integral, and the bridge to the integral is an analytic step
-that neither this note nor the manuscript used to state.  It is short.  By
+CN does NOT cover the true integrand as stated, and this is where the range in
+(5.1) comes from.  What has to be bounded is a sum of ABSOLUTE values,
+
+    sum_{j<=k} int_0^3 u^{k-j}/(k-j)! |h_j(s(u))| J(u) du,
+
+whereas cn_certified.py bounds the SIGNED coefficient identity
+sum_j u^{k-j}/(k-j)! h_j(s(u)) = P_k^odd(s(u)).  That identity bounds the
+absolute sum only if h_j >= 0, and the h_j alternate:
+
+    h_1(s) = Pi(s) - log zeta(s) = log(1 - 2^-s) - sum_{m>=2} Pi(ms)/m < 0
+
+for every s, with 1, -0.762, +0.377, -0.126, ... at s = sOf(3).
+
+nearabs_certified.py repairs this.  |h_j| <= [z^j] H^+ where
+H^+ = H exp(-2 h_1 z) has non-negative coefficients, so the sum is at most
+P_k^+(s) = sum_i P^odd_{k-i}(s) a(s)^i/i! with a = 2|h_1|.  Every factor is a
+Dirichlet series with positive terms, so P_k^+ decreases in s and a
+left-endpoint Riemann sum bounds the integral with no quadrature error to
+estimate; the s-tail closes as P_k^+(s_N)/(k log 2) because 3^-x <= 2^-x makes
+every term decay by at least 2^-kt, and the k-tail uses Cauchy at R = 3.15,
+just under 3^sOf(3) = 3.1727.  The result, over EVERY k in [59, 200] and not a
+sample, is 3^k T_k <= 34.14, and <= 9.66 beyond 200 -- so CN = 367.8435 covers
+the absolute sum too on k >= 59, with better than tenfold slack, and the ledger
+above is unchanged.
+
+Below k = 59 it does not: 3^k T_k peaks at 15329 near k = 12 and only falls
+under CN at k = 24.  A single constant valid for all k >= 1 would be about
+19819, which would move K0 to 63 -- past OddNumericalFacts.sweep_low (k <= 58)
+-- so restricting the range of (5.1) is much the better repair.
+
+The bridge from the pointwise bound to the integral is an analytic step that
+neither this note nor the manuscript used to state.  It is short.  By
 (1.1) and s = s(u),
 
     sum_{j<=k} int_0^3 (u^(k-j)/(k-j)!) h_j(s(u)) J(u) du
@@ -217,7 +250,7 @@ of (5.1) with coefficient CE S/18 (the CE of 5.1(b); with CE = 3 this would be
 the S/6 of earlier drafts).  Adding 5.1(a) and 5.1(c),
     C = CE S/18 + S_0/2 + 5*590/64 + CN + NEARU
       = 4395.5 + 22.3 + 46.1 + 367.8 + 26.1 = 4857.9,
-and (5.1) holds with C = 4900.
+and (5.1) holds with C = 4900 on k >= 59.
 
 The 0.9% of margin reflects the NS = 1600 box width, not the method.  Halving
 it (odd-proof/numerics/hcoeff3200.log) gives head 7890.6 in place of 8423.9,
@@ -273,6 +306,8 @@ which is width rather than signal.
   * S_0 <= 44.5987                       s0_recursion.py + s0_cauchy.py
   * S_1 <= 486.1945                      s1_recursion.py + s1_cauchy.py
   * CN  <= 367.8435                      cn_certified.py  (recursion + Cauchy)
+  * 3^k T_k <= 34.14  (k >= 59)          nearabs_certified.py (absolute sum;
+                                         what the near range actually needs)
   * NEARU <= 26.0962                     nearu_certified.py (head + envelope)
   * CE  <= 5.48910                       ce_taylor.py  (log: 5.4890962927)
 
@@ -337,6 +372,7 @@ and the sweep to 75 leaves sixteen values of overlap.
     S_1         <= 486.1945                   s1_recursion.py, s1_cauchy.py
     S_1+4gS_0   <= 590                        the tail's coefficient family
     CN          <= 367.8435                   cn_certified.py
+    3^k T_k     <= 34.14    (k >= 59)         nearabs_certified.py
     NEARU       <= 26.0962                    nearu_certified.py
     CE          <= 5.48910                    ce_taylor.py
     C           4900                          (5.1), see 5.2

@@ -41,6 +41,23 @@ The margin at `k = 2433` was 139 before the three numeral corrections to
 `lem:phi-base`; `check_paper_phi.py` now recomputes it from the certified
 constants and reads it out of the manuscript, so the two cannot drift again.
 
+### The remainder bound is stated on `k >= 59` in all three places
+
+Not conservatism — necessity. The near range bounds a sum of **absolute**
+values and the `h_j` alternate in sign (`h_1 = Π(s) − log ζ(s) < 0` always),
+so it goes through a majorant whose bound exceeds `4900(k+3)³3^-k` for
+`k ≤ 23`. The three places are `prop:odd-remainder` and
+`eq:odd-intro-expansion` in the paper, `(5.1)` in `odd-proof/PROOF.md`, and
+`OddNumericalFacts.remainder` in Lean. **Do not widen any of them to `k ≥ 1`**:
+a single all-`k` constant is about `19819`, which moves `K₀` to 63 and past
+`sweep_low`'s `k ≤ 58`, and since no instance of the structure is ever
+constructed, a too-wide field would make the theorems vacuous rather than
+false and nothing would catch it.
+
+`Odd/Basic.lean`'s `fOdd_expansion_final` still carries `hk : 1 ≤ k` and should
+tighten to `59 ≤ k`; it is unbuilt here, so the binder was left alone and the
+reason recorded in its docstring.
+
 ## Before committing changes to `paper/`
 
 Compile twice and confirm a clean build:
@@ -49,6 +66,18 @@ Compile twice and confirm a clean build:
 
 Zero `^!` errors and zero "undefined" warnings on the second pass. Regenerate
 `paper/proof.pdf` and commit it alongside the `.tex`.
+
+A clean build is not the same as a submittable paper — the AI-disclosure
+placeholder compiled into a clean 21-page PDF with zero errors and zero
+undefined references, so every signal the repo had said the paper was fine.
+Run the gate too:
+
+    python3 paper/check_ready.py
+
+It fails while any submission blocker is present (unfinished markers in the
+body, a placeholder AI disclosure, a stale `proof.pdf`, or the `k >= 59`
+remainder range disagreeing across the three places) and prints the blockers
+only the author can clear.
 
 ## Numerics
 
