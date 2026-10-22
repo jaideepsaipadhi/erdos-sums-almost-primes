@@ -491,7 +491,7 @@ With $\Sigma_i$ as in \eqref{eq:sigma-def} and $C_E$ as in
 \eqref{eq:odd-local-product} are bounded separately:
 \begin{align}
  \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}\abs{h_j(s(u))}J(u)\dd u
- &\leq C_N3^{-k}\quad(k\geq59),
+ &\leq C_N3^{-k}\quad(59\leq k\leq200),
  & C_N&\leq367.8435,
  \label{eq:odd-nearabs-certified}\\
  \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}
@@ -519,10 +519,12 @@ because the $h_j$ alternate in sign and the sum has to be majorized rather
 than evaluated in closed form --- see the proof of
 Proposition~\ref{prop:odd-remainder}. Monotonicity below the analytic
 threshold comes from~(v) and never appeals to \eqref{eq:odd-remainder}. On
-$k\geq59$ the certified value is $34.14\cdot3^{-k}$; we carry the weaker
-$C_N\leq367.8435$, which is the bound the first group of terms satisfies for
-every $k\geq1$, so that one constant serves both and the ledger below is
-unchanged.
+$k\geq59$ the computed value is $34.14\cdot3^{-k}$, and we carry the weaker
+$C_N\leq367.8435$ so that the ledger below is unchanged. That numeral is not
+idle: $367.8435$ is the supremum over \emph{all} $k\geq1$ of
+$3^kP_k^{\mathrm{odd}}(s(3))$, the signed quantity whose coefficient identity
+the earlier drafts of this proof used, attained at $k=11$. It is the
+absolute sum, not that one, which needs the restriction.
 
 \begin{lemma}\label{lem:pole-coefficient-bounds}
 Let $A(z)=\sum_{j\geq0}a_jz^j$.
@@ -681,10 +683,44 @@ permits termwise integration, and $\int_0^\infty2^{-kt}\dd t=1/(k\log2)$ gives
 \end{equation}
 Adding the Riemann sum over $[s(3),s_0]$ to \eqref{eq:odd-majorant-tail}
 bounds $\int_{s(3)}^\infty P_k^+$, hence $\int_{s(3)}^\infty A_k$ by
-\eqref{eq:odd-majorant}; the value so obtained is
-\eqref{eq:odd-nearabs-certified}, which gives
-$\int_{s(3)}^\infty A_k(s)\dd s\leq C_N3^{-k}$ for $k\geq59$, the range in
-which \eqref{eq:odd-remainder} is used.
+\eqref{eq:odd-majorant}. For one $k$ this is a finite computation, and
+\eqref{eq:odd-nearabs-certified} is its outcome for each of the $142$ indices
+$59\leq k\leq200$.
+
+That leaves the dependence on $k$, which no finite computation can settle, and
+which has to be reduced exactly as the far range's was. Here the reduction is
+Cauchy's estimate. Because $H_{\mathrm o}^+(s,\cdot)$ has non-negative
+coefficients, its maximum on a circle $\abs z=R$ is attained at $z=R$, so for
+any $R<3^{s(3)}$ and any $s\geq s(3)$,
+\begin{equation}\label{eq:odd-nearabs-cauchy}
+ A_k(s)\leq R^{-k}\zeta(s)^RH_{\mathrm o}(s,R)\e^{a(s)R}
+ =R^{-k}\!\!\prod_{p\geq3}\bigl(1-Rp^{-s}\bigr)^{-1}\e^{a(s)R},
+\end{equation}
+a bound whose only $k$-dependence is the factor $R^{-k}$. Taking $R=3.15$,
+which is below $3^{s(3)}=3.1727\ldots$, and integrating
+\eqref{eq:odd-nearabs-cauchy} over $s$ as before gives
+$3^k\int_{s(3)}^\infty A_k\leq(3/R)^k\cdot\Theta$ with $\Theta$ independent of
+$k$; since $(3/3.15)^{201}<5.6\cdot10^{-5}$, the certified value of $\Theta$
+puts this below $10$ for every $k>200$. Hence
+\begin{equation}\label{eq:odd-nearabs-all-k}
+ \int_{s(3)}^\infty A_k(s)\dd s\leq C_N3^{-k}
+ \qquad\text{for all }k\geq59,
+\end{equation}
+which is the range in which \eqref{eq:odd-remainder} is used. The two branches
+meet at $k=200$ with room to spare: the largest value over the finite range is
+$34.14\cdot3^{-k}$ and the Cauchy branch gives at most $9.66\cdot3^{-k}$,
+against the $C_N=367.8435$ carried in the ledger.
+
+The companion bound \eqref{eq:odd-near-main} reduces the same way. The
+first-order pole bounds $\abs{h_j(1)}\leq\Sigma_03^{-j}$ and
+$\abs{b_j}\leq(j+1)\Sigma_13^{-j}$ of
+Lemma~\ref{lem:pole-coefficient-bounds}(i)--(ii) turn each integral into a
+regularized incomplete gamma value, and $P(m,x)\leq x^m/m!$ makes the
+resulting sums telescope: the first is at most $\Sigma_0\e^{9}3^{-k}$ and the
+second at most $\tfrac12\bigl((k+1)\Sigma_1+2\gamma\Sigma_0\bigr)\e^{9}3^{-k}$.
+Both are of lower order than $(k+3)^33^{-k}$, so the ratio to the budget
+decreases in $k$ and the maximum over a finite head governs; it is taken over
+$1\leq k\leq400$.
 
 Substituting the certified constants, the four contributions are
 \[
@@ -843,7 +879,7 @@ Finally $f_k=I_k'+(I_k-I_k')+T_k$. Comparing with
 \end{proof}
 
 %=======================================================================
-\section{Bounds for the four source terms}
+\section{Bounds for the four source terms}\label{sec:sources}
 %=======================================================================
 
 \subsection{The $S_1$ term}
@@ -1076,9 +1112,17 @@ The interval computations give
  \end{gathered}
 \end{equation}
 For every $k\geq900$,
+\begin{equation}\label{eq:Tk-certified}
+ 2^k\abs{T_k}\leq\frac{1.45}{k},
+\end{equation}
+and consequently, as shown at \eqref{eq:Eexp-def} below,
 \begin{equation}\label{eq:Eexp-certified}
  \abs{E_{\exp}(k)}\leq\frac{1.45}{k}+10^{-3}.
 \end{equation}
+Of the three terms of $E_{\exp}$ only $T_k$ needs a certificate; the other two
+are bounded analytically in Section~\ref{sec:sources}, and
+\eqref{eq:Tk-certified} is recorded here rather than in that derivation so
+that every certified input appears in one place.
 The direct certificates establish $f_k<f_{k+1}$ on
 \begin{equation}\label{eq:full-sweep-ranges}
   6\leq k\leq199,
@@ -1116,10 +1160,11 @@ the contour bound; the weaker form suffices below. With $C=354.36$,
        \sum_{r\geq1}r^2(2/3)^r
  =\frac{30C\log2}{4}(2/3)^k.
 \end{align*}
-Both terms are less than $10^{-3}$ in total for $k\geq900$. The remaining
-certified tail inequality is $2^k\abs{T_k}\leq1.45/k$. Substitution into
-\eqref{eq:Eexp-def} proves \eqref{eq:Eexp-certified}; no asymptotic
-$O$-term enters the final criterion. The first two terms are in fact below
+Both terms are less than $10^{-3}$ in total for $k\geq900$, and both bounds are
+geometric in $k$, so no computation is needed to make them uniform. The third
+term is the one that needs a certificate, namely \eqref{eq:Tk-certified};
+substituting it into \eqref{eq:Eexp-def} proves \eqref{eq:Eexp-certified}, and
+no asymptotic $O$-term enters the final criterion. The first two terms are in fact below
 $10^{-3}$ from $k\geq37$ on, so the threshold $900$ comes from $T_k$ alone.
 
 %=======================================================================
@@ -1563,8 +1608,12 @@ interval-Newton enclosures for the Gauss nodes and weights. The remaining two
 are the tails of \eqref{eq:fk-as-u-integral}, which are bounded as follows and
 are not negligible by inspection.
 
-For the left tail, $u\leq u_-$ corresponds to $s\geq s_-=1+\e^{5.10}=165.02$,
-where $P(s)\leq2.78\cdot2^{-s}$ and hence $P_k(s)\leq2.78^k2^{-ks}$, so
+For the left tail, $u\leq u_-$ corresponds to $s\geq s_-=1+\e^{5.10}=165.02$.
+There $P_1(s)=\sum_pp^{-s}\leq2.78\cdot2^{-s}$, since
+$P_1(s)2^{s}=1+\sum_{p\geq3}(2/p)^{s}$ decreases in $s$ and is already below
+$2.78$ at $s=2$; and $P_k(s)\leq P_1(s)^k$, because expanding $P_1(s)^k$ counts
+every $n$ with $\Omega(n)=k$ at least once. Hence
+$P_k(s)\leq2.78^k2^{-ks}$, and
 \begin{equation}\label{eq:tail-large-s}
  \int_{-\infty}^{u_-}\!\abs{F}\dd u=\int_{s_-}^\infty\! P_k(s)\dd s
  \leq\frac{2.78^k2^{-ks_-}}{k\log2}.
