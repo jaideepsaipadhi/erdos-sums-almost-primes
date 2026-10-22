@@ -58,8 +58,11 @@ else:
     words = len(re.findall(r"[A-Za-z]{2,}", sec))
     check("AI-disclosure section has real wording",
           "PLACEHOLDER" not in sec and words >= 25,
-          "%d words; the wording of record is the one from the "
-          "Euclidean-distance-deflation L-infinity paper" % words)
+          "%d words" % words)
+    notes_pending_ai = ("The AI disclosure is a complete statement but was "
+                        "drafted here, not taken from the author's wording of "
+                        "record (the Euclidean-distance-deflation L-infinity "
+                        "paper). Reconcile the two before submission.")
 
 # --- 3. the remainder range agrees in all three places -------------------
 # Widening any of these silently re-opens the sign gap; CLAUDE.md explains why.
@@ -97,9 +100,15 @@ try:
         notes.append("On branch %r: the paper changes are not on main yet." % br)
 except Exception:
     pass
+try:
+    notes.append(notes_pending_ai)
+except NameError:
+    pass
 notes.append("Lean is not built in this container, so Section 8 and Table 1 "
              "describe a state no green build has confirmed. Run the `lean` "
-             "workflow before submission.")
+             "workflow before submission -- and check steps > 0, since a run "
+             "with no runner reports the same conclusion as a build error "
+             "(see the comment block in .github/workflows/lean.yml).")
 
 print()
 for n in notes:

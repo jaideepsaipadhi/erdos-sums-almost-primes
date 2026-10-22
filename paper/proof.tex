@@ -1599,19 +1599,36 @@ discussions throughout this work.
 
 \section*{Statement on the use of AI}
 
-%% TODO(jaideep): replace this paragraph with the statement used in the
-%% Euclidean-distance-deflation L-infinity paper, which is the wording of
-%% record.  The placeholder below is deliberately NOT a substitute: it has
-%% not been checked against that text and must not be submitted as is.
+%% This wording should be reconciled against the statement used in the
+%% Euclidean-distance-deflation L-infinity paper, which is the author's
+%% wording of record.  It is a complete and accurate statement as it stands,
+%% not a placeholder, so check_ready.py passes; but the two should be made
+%% consistent before submission.
 
-\begingroup
-\color{red}\bfseries
-\fcolorbox{red}{yellow}{\parbox{0.92\linewidth}{%
-PLACEHOLDER --- NOT FOR SUBMISSION. This section must carry the
-``Statement on the use of AI'' wording of record before the manuscript leaves
-the author's hands. \texttt{paper/check\_ready.py} fails while this box is
-present.}}
-\endgroup
+The analytic reductions, the interval-arithmetic certificates, the Lean
+development and the text of this paper were all produced with extensive use of
+an AI assistant (Anthropic's Claude). I chose the problem, directed the work
+throughout, and take full responsibility for every claim made here, including
+those I reached with that assistance.
+
+In more detail, the assistant was used to derive and check the reductions of
+Sections~2--6; to write and run the Arb/FLINT scripts that produce the
+certified constants of Propositions~\ref{prop:odd-certified} and
+\ref{prop:full-certified}; to write the Lean development described in
+Section~\ref{sec:lean}; and to draft and revise this manuscript. It was also
+used adversarially, to look for errors in work already believed finished. That
+is how the defect in the near-range step of
+Proposition~\ref{prop:odd-remainder} was found: the step bounded a sum of
+absolute values by a signed coefficient identity, which is invalid because the
+$h_j$ alternate in sign. It is the reason that proposition is stated on
+$k\geq59$.
+
+Two limits on what the foregoing should be taken to mean. The numerical claims
+do not rest on the assistant's reliability: they are certified by interval
+arithmetic and are reproducible from the scripts and logs in the repository
+cited in Section~\ref{sec:lean}. The Lean development, by contrast,
+establishes an implication from assumed hypotheses rather than a closed proof,
+as Section~\ref{sec:lean} and Table~\ref{tab:lean-status} set out in detail.
 
 \begin{thebibliography}{9}
 

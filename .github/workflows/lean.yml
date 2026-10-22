@@ -53,6 +53,16 @@ on:
   pull_request:
     branches: [main]
 
+# Minutes on a private repository are the binding constraint here, and this
+# build has a 350-minute timeout, so several pushes in quick succession could
+# otherwise have several full builds in flight at once -- all but the last of
+# them already obsolete.  Supersede instead: a newer commit on the same ref
+# cancels the older run.  Five runs piled up on one branch within half an hour
+# on 2026-10-22, which is what prompted this.
+concurrency:
+  group: lean-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-24.04
