@@ -37,13 +37,16 @@ For $k\geq1$ let $f_k=\sum_{\Omega(n)=k}1/(n\log n)$, where $\Omega$ counts
 prime factors with multiplicity. We prove that $f_k<f_{k+1}$ for every
 $k\geq6$, whereas the sums $g_k$ of $1/(n\log n)$ over odd $n$ with
 $\Omega(n)=k$ satisfy $g_k>g_{k+1}$ for every $k\geq1$. The two
-statements arise from the same analytic distinction. After writing the
-relevant Dirichlet series as $\zeta(s)^zH(s,z)$, the point $z=2$ lies on the
-first singular circle for the unrestricted product, and strictly inside the
-first singular circle of the product with the prime $2$ removed. The analytic reductions are written
+statements arise from the same analytic distinction. Writing the generating
+function $\sum_kP_k(s)z^k$ of the associated Dirichlet series as
+$\zeta(s)^zH(s,z)$, at $s=1$ the point $z=2$ lies on the first singular circle
+for the unrestricted product, and strictly inside the first singular circle of
+the product with the prime $2$ removed. The analytic reductions are written
 explicitly below. The finite inequalities and coefficient bounds used in the
-last step are certified by ball arithmetic; the separation between analytic
-argument and certified input is stated precisely.
+last step are certified by ball arithmetic, and the reductions themselves are
+machine-checked in Lean~4 on top of those certified inputs; the separation
+between analytic argument and certified input is stated precisely, and
+tabulated.
 \end{abstract}
 
 \maketitle
@@ -179,10 +182,12 @@ $\zeta(s)^zH_{\mathrm o}(s,z)$, where
 \end{align}
 
 \begin{proposition}\label{prop:analyticity}
-For fixed real $s>1/2$, the function $H(s,\cdot)$ is analytic in
-$\abs z<2^s$, and $H_{\mathrm o}(s,\cdot)$ is analytic in
-$\abs z<3^s$. The convergence is moreover locally uniform in $(s,z)$ jointly,
-so each $\partial_s^rH_{\mathrm o}(s,\cdot)$ is again analytic in
+Let $\sigma=\operatorname{Re}s$. Then $H$ is analytic in the two complex
+variables $(s,z)$ on $\{\sigma>1/2,\ \abs z<2^{\sigma}\}$, and
+$H_{\mathrm o}$ on $\{\sigma>1/2,\ \abs z<3^{\sigma}\}$. In particular, for
+fixed real $s>1/2$ the function $H(s,\cdot)$ is analytic in $\abs z<2^s$ and
+$H_{\mathrm o}(s,\cdot)$ in $\abs z<3^s$; each
+$\partial_s^rH_{\mathrm o}(s,\cdot)$ is again analytic in
 $\abs z<3^s$, and
 \begin{equation}\label{eq:coeff-commute}
   \frac{\dd^r}{\dd s^r}[z^j]H_{\mathrm o}(s,z)
@@ -207,13 +212,22 @@ $z=p^s$. The nearest one is $2^s$ for \eqref{eq:H-full} and $3^s$ for
 \eqref{eq:H-odd}. A locally uniform limit of analytic functions is analytic,
 which proves the first assertion.
 
-The estimate is uniform in $s$ as well on any compact subset of
-$(1/2,\infty)$, since $p^{-2s}\leq p^{-2s_0}$ there, and on a compact subset
-of $\{(s,z):\abs z<3^s\}$ no factor comes near a pole. The convergence is
-therefore locally uniform in the two variables jointly, so differentiation in
-$s$ may be carried out under the product. Since $[z^j]$ is a Cauchy integral
-over a circle that may be held fixed on such a subset, the two operations
-commute, which is \eqref{eq:coeff-commute}.
+Differentiability in $s$ does not follow from this if $s$ is held real:
+uniform convergence of real-variable functions says nothing about the
+derivative of the limit. What is used instead is that the variable $s$ may be
+taken complex. Each $p^{-s}=\e^{-s\log p}$ is entire in $s$, so every
+regularized factor is analytic in $(s,z)$ jointly wherever its denominator does
+not vanish, which on $\{\abs z<3^{\sigma}\}$ it does not, since
+$\abs z<3^{\sigma}\leq p^{\sigma}=\abs{p^{s}}$ for every $p\geq3$. The
+estimate above depends on $s$ only through $\abs{p^{-s}}=p^{-\sigma}$, so it
+holds uniformly on any set with $\sigma\geq s_0>1/2$, and
+$\sum_pp^{-2s_0}<\infty$. The product therefore converges locally uniformly on
+the stated domain in $\mathbb C^2$, and a locally uniform limit of analytic
+functions of several complex variables is analytic; this is the first
+assertion. Analyticity in $s$ gives derivatives of every order at real $s$,
+and since $[z^j]$ is a Cauchy integral over a circle that may be held fixed on
+a compact subset, the two operations commute, which is
+\eqref{eq:coeff-commute}.
 \end{proof}
 
 At $s=1$ the point $z=2$ lies on the first singular circle for $H$ and lies
@@ -233,23 +247,35 @@ $\varepsilon(u)=s(u)-1$ and $J(u)=-s'(u)$. As $u\to\infty$,
 \end{lemma}
 
 \begin{proof}
-For $\varepsilon\to0^+$,
+The point of the argument is that the expansions below are convergent power
+series and not merely asymptotic, which is what allows the second of them to be
+differentiated term by term.
+
+Since $\zeta$ is meromorphic on $\mathbb C$ with a single simple pole, of
+residue $1$, at $s=1$, the function $\varepsilon\mapsto\varepsilon\,
+\zeta(1+\varepsilon)$ is analytic near $\varepsilon=0$ with value $1$ there;
+its expansion is $1+\gamma\varepsilon+O(\varepsilon^2)$. Hence
 \[
-  \zeta(1+\varepsilon)
-   =\varepsilon^{-1}+\gamma+O(\varepsilon).
+ x=\frac1{\zeta(1+\varepsilon)}
+  =\frac{\varepsilon}{\varepsilon\,\zeta(1+\varepsilon)}
 \]
-Set $x=\e^{-u}=1/\zeta(1+\varepsilon)$. Then
-\begin{align*}
- x&=\frac{\varepsilon}{1+\gamma\varepsilon+O(\varepsilon^2)}
-   =\varepsilon-\gamma\varepsilon^2+O(\varepsilon^3).
-\end{align*}
-Inverting this power series gives
-$\varepsilon=x+\gamma x^2+O(x^3)$, which is the first formula in
-\eqref{eq:zeta-coordinate}. Since $x'= -x$, differentiation gives
+is analytic near $\varepsilon=0$, with $x(0)=0$ and
+$x=\varepsilon-\gamma\varepsilon^2+O(\varepsilon^3)$, so in particular
+$\dd x/\dd\varepsilon=1\neq0$ at the origin. By the inverse function theorem
+for analytic functions, $\varepsilon$ is therefore an analytic function of $x$
+near $x=0$, given by a convergent power series
 \[
-  \varepsilon'(u)=-x-2\gamma x^2+O(x^3).
+ \varepsilon=\psi(x)=x+\gamma x^2+O(x^3),
 \]
-Thus $J(u)=-\varepsilon'(u)=x+2\gamma x^2+O(x^3)$.
+which is the first formula in \eqref{eq:zeta-coordinate} once
+$x=\e^{-u}$. Because $\psi$ is analytic rather than merely asymptotic, it may
+be differentiated termwise: $\psi'(x)=1+2\gamma x+O(x^2)$. With
+$x=\e^{-u}$ one has $\dd x/\dd u=-x$, so the chain rule gives
+\[
+  \varepsilon'(u)=\psi'(x)\frac{\dd x}{\dd u}=-x\bigl(1+2\gamma x+O(x^2)\bigr)
+  =-x-2\gamma x^2+O(x^3),
+\]
+and $J(u)=-\varepsilon'(u)=x+2\gamma x^2+O(x^3)$.
 \end{proof}
 
 %=======================================================================
@@ -1293,7 +1319,7 @@ version of the full theorem rather than of
 \texttt{erdos\_\allowbreak sums\_\allowbreak increase\_\allowbreak from\_\allowbreak six}, which does not mention it. The limit $g_k\to\frac12$ was formerly left
 unformalized, the monotonicity argument making no use of it; it is now proved
 there as well, and from the same hypothesis, since
-Proposition~\ref{prop:odd-remainder} already bounds
+\eqref{eq:odd-intro-expansion} already bounds
 $\abs{g_k-\frac12-\beta2^{-k}}$ by a multiple of $(k+3)^3 3^{-k}$, and both
 that and $2^{-k}$ vanish.
 
@@ -1325,7 +1351,8 @@ is now proved, as \texttt{gamma\_\allowbreak lower\_\allowbreak bound}, from
 $\mathrm{harmonic}(n)-\log(n+1)<\gamma$ at $n=8191$, chosen so that
 $n+1=2^{13}$ and the logarithm is $13\log2$ exactly.
 
-The constants $d$ and $\rho$ were hypotheses of both developments and are now
+The constants $d$ of \eqref{eq:d-def} and $\rho$ were hypotheses of both
+developments and are now
 proved in them, as \texttt{dConst\_\allowbreak lower\_\allowbreak bound},
 \texttt{dConst\_\allowbreak lower\_\allowbreak bound\_\allowbreak sharp} and \texttt{rhoConst\_\allowbreak upper\_\allowbreak bound}. What
 makes this possible is that the Euler factors are rational and exceed $1$,
@@ -1420,9 +1447,12 @@ $z=3$ before applying coefficient recursion or Cauchy bounds. The range
 $0<u\leq3$ is evaluated directly, while the range $u\geq3$ uses the Taylor
 model made explicit in Proposition~\ref{prop:odd-two-term}.
 
-The constant $C_E$ is certified on the whole of $(1,s(3)]$. The four
-quantities entering it are ratios in which the pole of $\zeta$ at $s=1$
-cancels. Interval evaluation on boxes of $s$ loses that
+The constant $C_E$ is certified on the whole of $(1,s(3)]$, and in fact on its
+closure: the four quantities entering \eqref{eq:CE-def} are ratios in which the
+pole of $\zeta$ at $s=1$ cancels, so each extends continuously to $s=1$, and
+the Taylor model below is centred at $1+E/2$ with radius $E/2$ and therefore
+covers the closed interval $[1,s(3)]$ on which $\Sigma_2$ takes its own
+supremum. Interval evaluation on boxes of $s$ loses that
 cancellation, since each occurrence of $s-1$ is widened independently, and the
 enclosures diverge however finely $(1,s(3)]$ is partitioned. Expanding $\zeta$
 as a power series in $\sigma=s-s_0$ about $s_0=1+E/2$, where $E=s(3)-1$, makes
@@ -1447,6 +1477,22 @@ $[1,2]$. The signed moments $U$ and $V$ are evaluated before absolute values
 are taken. This order is essential: replacing them by
 $\sum_i2^i\abs{c_i}$ loses the cancellation used in
 \eqref{eq:UV-exact-combination}.
+
+\subsection*{Availability and versions}
+\begingroup\sloppy
+Since the contribution is in part a certification, the artefacts and the
+versions they were produced with are part of the claim. The Lean development,
+the Arb scripts, their logs and the certificate are at
+\url{https://github.com/jaideepsaipadhi/erdos-sums-almost-primes}. The
+formalization is built with Lean~4, toolchain
+\texttt{leanprover/\allowbreak lean4:\allowbreak v4.33.0-rc1}, against Mathlib at revision
+\texttt{79d0395a1825}; the permitted axioms are exactly
+\texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound}, which is
+checked by \texttt{\#print axioms} on each named theorem. The numerics use
+python-flint~0.9.0 against FLINT~3.6.0. The certificate records the parameters
+of every run together with a SHA-256 hash of the numerical payload, and
+\texttt{verify.py} checks the imported intervals against it.
+\endgroup
 
 %=======================================================================
 \appendix
