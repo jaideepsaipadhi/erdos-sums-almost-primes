@@ -91,12 +91,27 @@ scratch, and it is the reason to believe the `f_k^all` column at all.
 
 Two traps, both of which cost time here:
 
-  * **the convergence is slow and one-sided.**  In the boundary case the ratio
-    approaches its limit from below with an `O(1/k)` correction, so the raw
-    value is useless as a check -- at `k = 44` it is `0.31209` against a
-    predicted `1/3`.  Read the two-term `1/k` extrapolation, which gives
-    `0.3332266` (relative error `3.2e-4`).  Below about `k = 20` even that is
-    meaningless.
+  * **the convergence is slow and one-sided, and the printed `3.2e-4` is NOT an
+    error bar.**  The ratio approaches its limit from below with an `O(1/k)`
+    correction, so the raw value is useless as a check -- at `k = 44` it is
+    `0.31209` against a predicted `1/3`, and for `Q = {5}` it is `0.572066`
+    against `0.6`.  Read the two-term `1/k` extrapolation.  But that is a
+    three-parameter fit through three points, so it has zero residual and its
+    closeness to the prediction is a property of the basis, not a measured
+    error.  Judge it by stability instead:
+
+    | Q | two-term, three windows | one-term | `log k/k` basis | spread |
+    |---|---|---|---|---|
+    | `{3}` | `0.333227`, `0.333171`, `0.333447` | `0.336577` | `0.329517` | ~1% |
+    | `{5}` | `0.600056`, `0.600424`, `0.600537` | `0.603172` | `0.596605` | ~0.6% |
+
+    The `1/k` fits are stable under changing the window and the alternatives
+    are not, which is the argument for that basis -- but the choice is not
+    independent of the conclusion, since `eq:GLW-asymptotic`'s `O(k log k)`
+    cancels in the ratio only under a stronger form of the hypothesis being
+    tested.  The script's own `k*(E_Q - ratio)` column drifts monotonically
+    (`1.043 -> 0.935` for `Q={3}`) with no flattening; do not read it as
+    converged.  Below about `k = 20` nothing is readable at all.
   * **`maxdegree` is quadrature depth, not digits**, and the working precision
     has to grow with `k`: the substitution forms `1 + e^-t`, which rounds to
     exactly `1` at the top of the `t`-range unless `dps > ~0.45*t`, and then
