@@ -202,8 +202,9 @@ domain. The factor $(1-x)^z$ is a non-integer power of a complex number, so a
 branch must be fixed; the principal one will do throughout, since $1-x$ then
 lies in the disc of radius $2^{-1/2}<1$ about $1$, on which the principal
 logarithm is analytic and where no branch cut is met. With that convention,
-for $z$ in a fixed compact set $K$ the logarithm of the $p$th regularized
-factor is
+for $(s,z)$ in a compact subset of the domain --- so that
+$\sigma\geq s_0>1/2$ and $\abs z\leq R<2^{s_0}$, whence $\abs{zx}<1$ for every
+$p$ --- the logarithm of the $p$th regularized factor is
 \begin{align*}
  -\log(1-zx)+z\log(1-x)
  &=\sum_{m\geq1}\frac{z^m-z}{m}x^m\\
@@ -982,10 +983,16 @@ and hence
 \end{lemma}
 
 \begin{proof}
-The mean value theorem gives
+Since $[z^i]G_2(\cdot,z)$ is complex-valued, the mean value theorem is not
+available; we integrate instead. By \eqref{eq:coeff-commute} and the
+analyticity of $G_2$ in $s$ established above,
 \[
- \abs{[z^i]G_2(s,z)-c_i}\leq(s-1)\alpha_i.
+ [z^i]G_2(s,z)-c_i=\int_1^s[z^i]\partial_tG_2(t,z)\dd t,
+ \qquad\text{so}\qquad
+ \abs{[z^i]G_2(s,z)-c_i}\leq(s-1)\alpha_i
 \]
+for $1\leq s\leq2$, by the definition of $\alpha_i$ as a supremum over that
+interval.
 Subtracting \eqref{eq:Ik-prime-def} from the coefficient expansion for $I_k$
 and then setting $s=1+\e^{-t}$ gives
 \begin{align*}
@@ -1149,7 +1156,7 @@ Since $D$ is increasing,
 Apply the triangle inequality to $2\Delta(k)-\Delta(k+1)$.
 \end{proof}
 
-\subsection{The exponentially small term}
+\subsection{The exponentially small term}\label{subsec:Eexp}
 
 The three terms in \eqref{eq:Eexp-def} are respectively a coefficient tail at
 $z=1$, a weighted coefficient tail at $z=2$, and the integral over $s\geq2$.
@@ -1171,14 +1178,22 @@ For every $k\geq900$,
 \begin{equation}\label{eq:Tk-certified}
  2^k\abs{T_k}\leq\frac{1.45}{k},
 \end{equation}
-and consequently, as shown at \eqref{eq:Eexp-def} below,
-\begin{equation}\label{eq:Eexp-certified}
- \abs{E_{\exp}(k)}\leq\frac{1.45}{k}+10^{-3}.
+and a contour bound for the regularized generating function
+$\widetilde G_2$ of the $c_i$,
+\begin{equation}\label{eq:contour-certified}
+ \sup_{\abs z=4.2}\bigl\lvert\widetilde G_2(z)\bigr\rvert\leq101.245 .
 \end{equation}
-Of the three terms of $E_{\exp}$ only $T_k$ needs a certificate; the other two
-are bounded analytically in Section~\ref{sec:sources}, and
-\eqref{eq:Tk-certified} is recorded here rather than in that derivation so
-that every certified input appears in one place.
+Together these give
+\begin{equation}\label{eq:Eexp-certified}
+ \abs{E_{\exp}(k)}\leq\frac{1.45}{k}+10^{-3}
+ \qquad(k\geq900),
+\end{equation}
+as derived in \S\ref{subsec:Eexp}. Of the three terms of $E_{\exp}$, two have
+their dependence on $k$ reduced analytically there, to geometric bounds whose
+constant is \eqref{eq:contour-certified}; only $T_k$ needs a certificate that
+is itself uniform in $k$, namely \eqref{eq:Tk-certified}. Both are recorded
+here rather than inside that derivation so that every certified input for the
+unrestricted case appears in one place.
 The direct certificates establish $f_k<f_{k+1}$ on
 \begin{equation}\label{eq:full-sweep-ranges}
   6\leq k\leq199,
@@ -1196,7 +1211,7 @@ pole at $z=3$ has been removed. Put
  \widetilde G_2(z)=(1-z/3)G_2(1,z)=\sum_{m\geq0}w_mz^m.
 \]
 The certified contour bound is
-$\sup_{\abs z=4.2}\abs{\widetilde G_2(z)}\leq101.245$. Hence
+\eqref{eq:contour-certified}. Hence
 $\abs{w_m}\leq101.245\,4.2^{-m}$, and from
 $G_2(1,z)=(1-z/3)^{-1}\widetilde G_2(z)$ we obtain
 \begin{equation}\label{eq:ci-geometric-bound}

@@ -157,7 +157,7 @@ for label, value, sense, pat in mono:
 # certified inputs, included so one command covers all of them.
 print()
 C = grab(r"With \$C=([0-9]+(?:\.[0-9]+)?)\$", "the tail-coefficient constant C")
-sup = grab(r"\\abs\{\\widetilde G_2\(z\)\}\\leq([0-9]+(?:\.[0-9]+)?)\$", "the |z|=4.2 contour bound")
+sup = grab(r"\\widetilde G_2\(z\)\\bigr\\rvert\\leq([0-9]+(?:\.[0-9]+)?)", "the |z|=4.2 contour bound")
 geo = sup * arb("4.2") / arb("1.2")        # sum_{m>=0} (3/4.2)^m = 4.2/1.2
 check("C = %s covers sup * sum (3/4.2)^m" % C.str(10, radius=False),
       float(geo.upper()) <= float(C.str(20, radius=False)),
