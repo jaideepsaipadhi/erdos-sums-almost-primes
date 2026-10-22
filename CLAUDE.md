@@ -41,12 +41,26 @@ The margin at `k = 2433` was 139 before the three numeral corrections to
 `lem:phi-base`; `check_paper_phi.py` now recomputes it from the certified
 constants and reads it out of the manuscript, so the two cannot drift again.
 
+### `C_E <= 5.48910` is the tightest constant in the paper
+
+The four suprema of `eq:CE-def` are attained at `s(3)` and give
+`C_E = 5.4890955…`, so the printed bound has about `4e-6` of margin — roughly
+`8e-7` relative, against 0.86% for the ledger and 8% for `eq:odd-base-59`. It
+is valid (`ce_taylor.log`: `5.4890962927`), but it is the one constant with no
+headroom, so any change to the Taylor-model settings must be re-checked
+against it rather than assumed safe.
+
 ### The remainder bound is stated on `k >= 59` in all three places
 
-Not conservatism — necessity. The near range bounds a sum of **absolute**
-values and the `h_j` alternate in sign (`h_1 = Π(s) − log ζ(s) < 0` always),
-so it goes through a majorant whose bound exceeds `4900(k+3)³3^-k` for
-`k ≤ 23`. The three places are `prop:odd-remainder` and
+Not conservatism, but a property of the **method**, not of the quantity. The
+near range bounds a sum of **absolute** values and the `h_j` alternate in sign
+(`h_1 = Π(s) − log ζ(s) < 0` always), so it goes through a majorant that is
+loosest where `a(s) = 2|h_1(s)|` is largest — at small `k`. The certified
+bound exceeds `C_N 3^-k` for exactly `8 ≤ k ≤ 25`, peaking at `724.55` at
+`k = 14` (`nearabs_certified.py` with `K0 = 1`). Do not quote `15329` here:
+that is `absratio.py`'s **pointwise** sum at `u = 3`, a different quantity from
+the integral that `eq:odd-nearabs-certified` bounds. `k ≥ 26` would serve; 59
+is stated because it is the only range in which (5.1) is ever applied. The three places are `prop:odd-remainder` and
 `eq:odd-intro-expansion` in the paper, `(5.1)` in `odd-proof/PROOF.md`, and
 `OddNumericalFacts.remainder` in Lean. **Do not widen any of them to `k ≥ 1`**:
 a single all-`k` constant is about `19819`, which moves `K₀` to 63 and past
