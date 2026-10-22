@@ -32,9 +32,14 @@ Currently stated conservatively on purpose, each with the reason in the text:
 
 | Stated | Sharper value available | Why not substituted |
 |---|---|---|
-| criterion threshold `2440` | `2433` (margin 139) | Lean `NumericalFacts.phi_at_k1`, `theorem_7_1`'s `[2440, ∞)` |
+| criterion threshold `2440` | `2433` (margin 135) | Lean `NumericalFacts.phi_at_k1`, `theorem_7_1`'s `[2440, ∞)` |
 | `\|c_i\| < 354.36·3^-i` | `44.5987·3^-i` via Lemma 3.7(i) + `Σ₀` | Lean cCoeff tail lemma, `Basic.lean:6768` (uses `4.2^i`) |
 | `S₂ ≤ 14414` (NS=1600) | `13881` (NS=3200, `hcoeff3200.log`) | `K₀ = 59` either way; pure margin under `MR ≤ 4900` |
+| `C_N ≤ 367.8435` in the near range | `34.14` for `k ≥ 59` (`nearabs.log`) | one constant serves both the signed and the absolute sum; keeps `MR ≤ 4900` and the ledger unchanged |
+
+The margin at `k = 2433` was 139 before the three numeral corrections to
+`lem:phi-base`; `check_paper_phi.py` now recomputes it from the certified
+constants and reads it out of the manuscript, so the two cannot drift again.
 
 ## Before committing changes to `paper/`
 

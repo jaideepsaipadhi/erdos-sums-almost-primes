@@ -165,7 +165,7 @@ check("C = %s covers sup * sum (3/4.2)^m" % C.str(10, radius=False),
 
 S0 = grab(r"\\Sigma_0\\leq([0-9]+(?:\.[0-9]+)?)", "Sigma_0")
 S1 = grab(r"\\Sigma_1\\leq([0-9]+(?:\.[0-9]+)?)", "Sigma_1")
-gam = grab(r"since \$\\gamma<([0-9]+(?:\.[0-9]+)?)\$", "the gamma upper bound used")
+gam = grab(r"[Ss]ince \$\\gamma<([0-9]+(?:\.[0-9]+)?)\$", "the gamma upper bound used")
 b590 = grab(r"\\Sigma_1\+4\\gamma\\Sigma_0<([0-9]+(?:\.[0-9]+)?)", "the second-tail constant")
 check("Sigma_1 + 4 gamma Sigma_0 < %s" % b590.str(10, radius=False),
       float((S1 + 4 * gam * S0).upper()) < float(b590.str(20, radius=False)),
@@ -186,7 +186,7 @@ check("phi(2433) > 0, so the criterion closes there",
       float(phi_lo(2433).lower()) > 0,
       "phi(2433) >= %.4f" % float(phi_lo(2433).lower()))
 
-margin = grab(r"first closes at \$k=2433\$, with margin \$([0-9]+)\$", "the stated margin")
+margin = grab(r"gives \$\\varphi\(2433\)>([0-9]+)\$", "the stated margin at k=2433")
 m = float(margin.str(20, radius=False))
 check("stated margin %s at k=2433" % margin.str(10, radius=False),
       float(phi_lo(2433).lower()) > m,
