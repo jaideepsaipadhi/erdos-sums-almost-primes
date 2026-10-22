@@ -8691,9 +8691,31 @@ theorem fOdd_expansion_hsplitD_exists (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ
   oddIntegrand_split dom betaFam bHatOdd S hf hd k
 
 set_option maxHeartbeats 4000000 in
-/-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
+/-- STEP 5, the target: the conclusion below has the shape of
+OddNumericalFacts.remainder.
 
     fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
+
+IT IS NOT WIRED IN, and the gap is larger than the matching shape suggests.
+Nothing in the development consumes this theorem -- `grep fOdd_expansion_final`
+finds only docstrings -- and `fOdd_decreasing` / `fOdd_tendsto_half` still take
+`OddNumericalFacts` as a hypothesis and use `hnum.remainder`.  So this is a
+derivation of the right statement standing beside the assumed field, not a
+discharge of it.  Three things separate the two:
+
+  * five analytic side conditions carried as hypotheses here and threaded
+    unproved through the whole file -- `hsum1`, `hsum`, `hmul3`, `hcd1`,
+    `hcd2`: summability of the defining family, summability of the zOmegaHom
+    Dirichlet series, multipliability of the odd Euler product, and the two
+    ContDiffAt facts.  No lemma anywhere discharges any of them; cf. the note
+    at "The remaining leaves of fOdd_expansion_final";
+  * the certified numerics `hCN`, `hNEARU`, `hsplitD`, `hMR`, which live in
+    OddCoeffFacts / OddDomFacts / OddTailFacts -- so even wired in, this
+    relocates the trust rather than removing it;
+  * the range, below.
+
+Do not describe `remainder` as derived on the strength of this theorem.  Table 1
+of the manuscript lists prop:odd-remainder as assumed, which is correct.
 
 RANGE.  `hk : 1 <= k` below is wider than the conclusion is actually true on
 with `MR <= 4900`, and should tighten to `59 <= k` to match the field it

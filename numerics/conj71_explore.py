@@ -5,7 +5,11 @@ Conjecture 7.1: for P with thin complement and least element q, the sequence
 f_k^P is eventually INCREASING iff q = 2.
 
 The paper proves the two extremes, P = all primes (q=2, increasing) and
-P = {p>=3} (q=3, decreasing).  Everything between is open.  Removing finitely
+P = {p>=3} (q=3, decreasing).  Since this script was written, Corollary 7.3 of
+the manuscript has settled the whole q >= 3 direction, so the cases below with
+q >= 3 are now CONTROLS rather than open instances; the "OPEN" labels printed
+by this script and sitting in conj71_explore.log predate it.  What is still
+open is only q = 2.  Removing finitely
 many primes keeps the complement thin trivially, so these are legitimate test
 cases, and two of them probe exactly what neither proved case does:
 
@@ -78,12 +82,12 @@ INF = (3, 7, 19, 53, 131, 311, 719, 1619, 3671, 8161, 17863, 38873, 84017,
 
 CASES = [("drop {2}      q=3  (proved: decreasing)", (2,)),
          ("drop {3}      q=2  (OPEN: says increasing)", (3,)),
-         ("drop {2,3}    q=5  (OPEN: says decreasing)", (2, 3)),
+         ("drop {2,3}    q=5  (Cor 7.3: decreasing)", (2, 3)),
          ("drop {5}      q=2  (OPEN: says increasing)", (5,)),
          ("drop nothing  q=2  (proved: increasing)", ()),
-         ("drop INF      q=2  (OPEN, infinite thin)", INF),
-         ("drop {2}uINF  q=5  (OPEN, infinite thin)", (2,) + INF),
-         ("drop {2,5}uINF q=11 (OPEN, infinite thin)", (2, 5) + INF)]
+         ("drop INF      q=2  (OPEN: says increasing, infinite thin)", INF),
+         ("drop {2}uINF  q=5  (Cor 7.3, infinite thin)", (2,) + INF),
+         ("drop {2,5}uINF q=11 (Cor 7.3, infinite thin)", (2, 5) + INF)]
 
 ctx.prec = PREC
 print("KMAX=%d PREC=%d   NON-CERTIFIED midpoints\n" % (KMAX, PREC))

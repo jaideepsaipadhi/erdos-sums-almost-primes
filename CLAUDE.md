@@ -136,6 +136,138 @@ Two caveats to clear before submission:
   numbers are smaller than the certified `alpha_+ = 15.425661`, i.e. optimistic
   — do not reuse that script's constants.
 
+## Section 7: point one is closed, point two is reduced
+
+Section 7 used to list two open points plus a third it resolved inline. The
+first is now a theorem and the second is reduced to a single case.
+
+The tool for both is one factorization. With
+`L_p(s,z) = (1-p^-s)^z (1 - z p^-s)^-1`, so that
+`log L_p = sum_{m>=2} (z^m - z) p^-ms / m`,
+
+    H_P(s,z) = prod_{p in P} L_p(s,z) * prod_{p notin P} (1 - p^-s)^z.
+
+Everything `P`-dependent sits in the second product, and the first is
+`P`-independent and converges for any `P` whatever. That is what makes the
+general case tractable at all.
+
+**Point one (interior case `q >= 3`) is Proposition 7.2 + Corollary 7.3**, and
+it gives the full constants:
+
+    f_k^P = prod_{p notin P}(1-1/p) + c_P 2^-k + o(2^-k),
+    c_P   = H_P(1,2) (gamma + (1/2) d_s log H_P(1,2)).
+
+Three things worth not rediscovering:
+
+- **The thin-complement hypothesis does TWO jobs, not one.** The old text said
+  it was load-bearing at exactly one step (positivity). It is also what makes
+  the *leading* constant positive: the limit is `prod_{p notin P}(1-1/p)`,
+  which is `0` unless `sum_{p notin P} 1/p < infty`. The sparse examples
+  (`P = {2}`, `{2,3}`) are the degenerate case of that product, not a separate
+  phenomenon.
+- **The natural error term is `o(2^-k)`, not `O(3^-k)`.** A quantitative
+  remainder needs `sum_{p notin P} (log p)^2/p < infty`, which thin complement
+  does NOT give. Monotonicity only needs the sign of the `2^-k` coefficient, so
+  the qualitative statement is the right one. Do not "strengthen" it to a rate.
+- The proof needs `R` with `2 < R < q`, which is why it says nothing at `q = 2`.
+
+**Point two (boundary case `q = 2`) is reduced, not closed.** Comparing the
+factorization for `P` and for all primes,
+
+    H_P(s,z) / H(s,z) = prod_{p notin P} (1 - z p^-s),    |z| < 2^s,
+
+and `q = 2` forces `2 notin Q`, so every complement prime is `>= 3` and the
+ratio extends continuously to the critical point `(1,2)` with value
+`prod(1 - 2/p) > 0`. Both `H` and `H_P` blow up there; the ratio does not.
+So IF the `k^2` coefficient involves the analytic factor only through its value
+at `(1,2)` and not its `s`-derivatives, the whole boundary case follows from
+all primes alone.
+
+**The `s`-derivatives do not have to be excluded.** If the coefficient is
+`A Phi(1,2) + B d_s Phi(1,2)` with `A, B` independent of `P`, then because
+`Phi_P = Phi * E_Q` and `d_s log E_Q(1,2) = sum_{p in Q} 2 log p/(p-2)` (a
+convergent sum of POSITIVE terms), the coefficient for `P` is `E_Q(1,2)` times
+
+    A Phi(1,2) + B d_s Phi(1,2) + B Phi(1,2) sum_{p in Q} 2 log p/(p-2),
+
+so it vanishes only if that sum equals one exact constant `kappa` fixed by the
+all-primes data. Non-cancellation therefore holds for every admissible `P` with
+`q = 2` outside at most one level set of an explicit functional of `Q`, and for
+all of them at once if `kappa <= 0`. So the remaining point is: get the form of
+the `k^2` coefficient for all primes. Say it that way, not "prove the boundary
+case".
+
+The numerical test does NOT settle `B = 0`, and don't claim it does. A second
+complement is not discriminating either: the `Q = {3}` residual of `3.2e-4`
+implies a shift of only `1.6e-4` for `Q = {5}`, which is below the
+extrapolation error. Distinguishing `B = 0` from small `B` needs better
+extrapolation (more and larger `k`), not another `Q`.
+
+### The two Section 7 scripts are mpmath, NOT Arb
+
+`numerics/genP_check.py` and `numerics/boundary_check.py` are ordinary
+floating-point. They carry no certificate, no `NumericalFacts` field depends on
+them, and the paper says so explicitly. Do not let them drift into the
+certified-constants ledger.
+
+`genP_check.py` at `Q = {2}` is the calibration: `P = {p >= 3}` is a case the
+paper proves, so it must return the certified `d` and `beta`, and it does
+(`0.378695020` vs `0.3786950315`, `0.155632714` vs `0.15563259`, both inside
+the `~1e-7` p-sum error bar). Run that before trusting any other output.
+
+Two traps that cost real time:
+
+- **Working precision must grow with `k`.** Both scripts substitute
+  `s = 1 + e^-t`; at the top of the `t`-range that rounds to exactly `1` and
+  `zeta` is then evaluated at its pole. `dps_for` sets it; don't lower it.
+  `maxdegree` is mpmath's quadrature depth, not digits (4 and 5 agree to 6
+  digits, 3 does not).
+- **Boundary convergence is slow and one-sided.** The ratio rises to its limit
+  with an `O(1/k)` correction: at `k = 44` it is `0.31209` against `1/3`, which
+  looks like a refutation and is not. The two-term `1/k` extrapolation through
+  `k = 36,40,44` gives `0.3332266`, relative error `3.2e-4`. Below `k ~ 20`
+  nothing is readable. Quote the extrapolation, and call it evidence -- it
+  cannot distinguish "no `s`-derivative terms" from "they cancel for this `Q`".
+
+## `source_bound` is already derived; don't list it as open
+
+Checked 2026-10-22. `NumericalFactsFull` has **no `source_bound` field**, and
+`erdos_sums_increase_from_six'` discharges the obligation outright:
+`source_bound_full` (`Basic.lean:14093`) applies `source_bound_derived`
+(`:10002`) with the `E_1` hypothesis supplied by `E1k_le_alpha` (`:14052`, a
+proved theorem), at the call site `:14326`, taking every remaining hypothesis
+from `NumericalFactsFull` fields. So the Cauchy estimate behind `source_bound`
+is proved in Lean; it is an aggregate ASSUMPTION only on the plain
+`NumericalFacts` route, where what replaces it is the seven coupling fields
+`M0_bound`, `g_deriv`, `g_deriv_bound`, `alpha_dom`, `Sstar_dom`, `UV_bound`,
+`Eexp_bound` -- boxed suprema and finite sums, i.e. the easy direction.
+
+`source_bound` was traded for finer, more checkable assumptions. It is NOT
+blocked on certified-integration machinery, and `TRUSTED-BASE.md` said twice
+that it was (both corrected). `remainder` is the one in that position; do not
+name the two together.
+
+## `remainder` already has a Lean derivation, wired to nothing
+
+`Odd/Basic.lean`'s `fOdd_expansion_final` proves a statement of exactly the
+shape of `OddNumericalFacts.remainder`. Verified 2026-10-22: **no term-level
+application of it exists** -- every other mention across all `.lean` is prose,
+plus one `#print axioms` target. `fOdd_decreasing` and `fOdd_tendsto_half`
+still assume `OddNumericalFacts` and use `hnum.remainder`.
+
+Three things stand between the two, and only the first is analysis:
+
+1. five analytic side conditions threaded unproved through the file --
+   `hsum1`, `hsum`, `hmul3`, `hcd1`, `hcd2`;
+2. the certified numerics `hCN`, `hNEARU`, `hsplitD`, `hMR`, which are fields
+   of the other three structures -- so wiring it in would **relocate** the
+   trusted base, not shrink it. The honest count of assumptions about the world
+   does not drop;
+3. the `hk : 1 <= k` binder (see above).
+
+So "derive `remainder` in Lean" is not one open problem, and the gain from (1)
+alone is presentational. Do not report it as derived because the theorem exists.
+
 ## Before committing changes to `paper/`
 
 Compile twice and confirm a clean build:

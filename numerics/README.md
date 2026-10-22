@@ -52,6 +52,56 @@ Supporting: `bhat_signed_N60.json` (b-hat_i), `gamma2_certified.json`
 (gammahat_i), `delta_table.jsonl` (delta_m), `shards/` (256 shards;
 `merge_verify.py` reassembles).
 
+## Section 7, the general principle: `genP_check.py` and `boundary_check.py`
+
+These two back the general-`P` material in section 7 of the manuscript and
+nothing else.  **They are mpmath, not Arb** -- no ball arithmetic, no
+certification -- so they are verification of formulas, not certified inputs,
+and no `NumericalFacts` field depends on them.  Read them that way.
+
+| script | what it checks | log |
+|---|---|---|
+| `genP_check.py` | the interior case `q >= 3`: the constants `c_0` and `c_2` of Proposition 7.2(iv), against `f_k^P` computed independently | `genP.log` |
+| `boundary_check.py` | the boundary case `q = 2`: that the ratio to the all-primes case tends to `prod_{p in Q}(1-2/p)`, which is what the reduction in section 7 needs | `boundary.log` |
+
+`genP_check.py` with `Q = {2}` is the calibration that makes the rest
+meaningful: `P = {p >= 3}` is the case the paper proves, so `c_2` there must
+reproduce the certified `beta` and `H_P(1,2)` the certified `d`.  It gives
+`0.155632714` against `beta = 0.15563259` and `0.378695020` against
+`d = 0.3786950315`, both inside the `~1e-7` error bar the p-sums carry (run to
+`X = 2e6` with the PNT tail `1/X`; the product tail
+`prod_{p>X}(1-1/p)^2/(1-2/p) = 1 - O(1/(X log X))` is deliberately NOT added,
+and is what the last digits of `H_P(1,2)` against `d` reflect).
+
+Read the right column.  In `genP.log` the final `/c_2` ratio is `1.13` at
+`k = 14` for `Q = {2}` but `1.003` for `Q = {2,3}`, and the first is not a
+failure: at `q = 3` the subleading term is the `O(k^3 3^-k)` one whose constant
+the paper bounds by `4900`, so `f_k` is nowhere near its asymptotic at `k = 14`
+and the integral is too expensive to push far enough.  For `q = 3` the
+meaningful check is the constants themselves against the certified `d` and
+`beta`, not the `f_k` column; for `q >= 5` the `f_k` column converges quickly
+(relative deviation `~0.9*(2/3)^k`) and is the end-to-end test.
+
+The all-primes side of `boundary_check.py` has its own check, independent of
+anything in section 7: fitting `f_k - 1 ~ -C k^a 2^-k` to the committed
+`boundary.log` values gives `a = 2.298, 2.279, 2.261, 2.247, 2.234` across
+consecutive pairs from `k = 24` to `44`, decreasing monotonically toward `2`.
+That is the factor `k^2` of Gorodetsky--Lichtman--Wong, reproduced here from
+scratch, and it is the reason to believe the `f_k^all` column at all.
+
+Two traps, both of which cost time here:
+
+  * **the convergence is slow and one-sided.**  In the boundary case the ratio
+    approaches its limit from below with an `O(1/k)` correction, so the raw
+    value is useless as a check -- at `k = 44` it is `0.31209` against a
+    predicted `1/3`.  Read the two-term `1/k` extrapolation, which gives
+    `0.3332266` (relative error `3.2e-4`).  Below about `k = 20` even that is
+    meaningless.
+  * **`maxdegree` is quadrature depth, not digits**, and the working precision
+    has to grow with `k`: the substitution forms `1 + e^-t`, which rounds to
+    exactly `1` at the top of the `t`-range unless `dps > ~0.45*t`, and then
+    `zeta` is evaluated at its pole.  `dps_for` handles this; do not lower it.
+
 ## Checks against the formalization
 
     cd bm-rebuild-v21 && python3 ../verify.py
@@ -254,6 +304,16 @@ will correct itself the next time they are regenerated.
 
 ## Conjecture 7.1 beyond the two proved cases
 
+**Half of this section is now a theorem, and the labels in the log predate it.**
+Corollary 7.3 of the manuscript proves that `f_k^P` is eventually strictly
+decreasing for EVERY admissible `P` with `q >= 3`.  So in the table below the
+rows `drop {2}`, `drop {2,3}`, `drop {2} u INF` and `drop {2,5} u INF` are no
+longer open cases -- they are controls, and they pass.  `conj71_explore.log`
+still prints `(OPEN: says decreasing)` beside them because the run predates
+the corollary; the log is a run record and is left as it stands.  What remains
+open is only the `q = 2` direction: `drop nothing`, `drop {3}`, `drop {5}`,
+`drop INF`.
+
 `conj71_explore.py` tests the general principle numerically for sets of primes
 the paper does not cover.  Removing finitely many primes keeps the complement
 thin trivially, so these are legitimate instances, and two of them probe
@@ -298,3 +358,20 @@ quadrature machinery but NOT its error terms, which were derived for the full
 and odd cases; the script reports midpoints.  Extending the certified error
 analysis to general `P` would be needed before any of this could be stated as
 a result.
+
+### It agrees with `genP_check.py`, which shares no code with it
+
+The two general-`P` pipelines are independent implementations: this one runs
+flint/arb over `certified.py`'s panels, `genP_check.py` runs mpmath over the
+`prod L_p` factorization with `primezeta`.  On the two `P` both compute:
+
+| P | k | this (arb panels) | `genP_check.py` (mpmath) | difference |
+|---|---|---|---|---|
+| drop `{2}`   | 10 | `0.500196851` | `0.500196850821` | `1.8e-10` |
+| drop `{2}`   | 14 | `0.500010707` | `0.500010709023` | `2.0e-9`  |
+| drop `{2,3}` | 10 | `0.333522321` | `0.333522321396` | `4.0e-10` |
+| drop `{2,3}` | 14 | `0.333344998` | `0.333345000033` | `2.0e-9`  |
+
+Both are midpoint computations with no error term, so this is agreement rather
+than verification -- but they fail differently if either is wrong, and they do
+not.  Check any new general-`P` work against both.
