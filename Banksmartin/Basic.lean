@@ -1,6 +1,30 @@
 import Mathlib
 import Banksmartin.EulerGamma
 
+-- MANUSCRIPT CROSS-REFERENCES IN THIS FILE ARE STALE.
+--
+-- The docstrings below cite an earlier numbering of paper/proof.tex, which now
+-- has eight sections and no theorem numbered above 1.2 outside its sections.
+-- Section 8 of the paper asserts a correspondence with this development, so a
+-- reader checking it needs the map.  The determinable part of it:
+--
+--   docstring says        current manuscript
+--   --------------        -------------------
+--   Theorem 4.1           Lemma 5.4 (`lem:delta-bound`), delta_m = O(m log(m+1))
+--   section 3.5           Section 5, where alpha_+ is defined
+--   Proposition 2.5       Proposition 2.2 (`prop:analyticity`)
+--   Caveat 1.3(b)         Section 8's statement that no instance of the
+--                         hypothesis structures is constructed
+--
+-- `Theorem 6.1` and `Theorem 6.2` are NOT remappable: they refer to statements
+-- about Gamma = (1/2) sum_{i>=1} gammahat_i 2^i that the manuscript no longer
+-- contains -- grep proof.tex for `Gamma` or `104.52` and there is nothing.
+-- `NumericalFacts.Gamma_bound` is the surviving trace of them and has no
+-- consumer here either.  The references were left in place rather than
+-- rewritten by guesswork, which would have produced confident but wrong
+-- pointers; they should be corrected deliberately, against the compiled .aux,
+-- when the file is next touched for other reasons.
+
 -- The `first | ... | ...` combinators in this file carry deliberate fallback
 -- branches so the proofs survive Mathlib changes in which branch fires.  The
 -- linter flags alternatives the current Mathlib does not reach; that is
