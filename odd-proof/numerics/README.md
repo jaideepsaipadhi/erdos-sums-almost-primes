@@ -10,8 +10,8 @@ explicit upper bound; the committed `.log` beside it is that run.
 | `hcoeff_recursion.py` | `sum_{i<=16} \|g_i\| 3^i <= 8424` | interval recursion, 1600 s-boxes |
 | `mr_deriv_sweep.py` | `sup_{\|z\|=4.5} \|G_2\| <= 1.97e6` | 200 theta x 40 s boxes |
 | `s0_recursion.py`, `s0_cauchy.py` | `S_0 <= 44.5987` | first-order pole; head by recursion, tail by Cauchy |
-| `s1_recursion.py`, `s1_cauchy.py` | `S_1 <= 486.1945` | second-order pole; head by recursion, tail by Cauchy |
-| `cn_certified.py` | `CN <= 367.8435` | odd Euler-product recursion (Moebius prime zeta) + Cauchy tail |
+| `s1_recursion.py`, `s1_cauchy.py` | `S_1 <= 486.1946` | second-order pole; head by recursion, tail by Cauchy |
+| `cn_certified.py` | `CN <= 367.8436` | odd Euler-product recursion (Moebius prime zeta) + Cauchy tail |
 | `nearu_certified.py` | `NEARU <= 26.0962` | exact head to k=400 + explicit envelope |
 | `ce_taylor.py` | `CE <= 5.48910` (log: `5.4890962927`) | Taylor model in eps, whole range at once |
 
@@ -29,7 +29,7 @@ which needs `h_j >= 0`.  The `h_j` alternate:
 
 for every `s`, and at `s = s(3)` the coefficients run
 `1, -0.762, +0.377, -0.126, +0.0353, ...`.  The script computes both sums; the
-signed one reproduces `P_k^odd(s(3))` to 267 digits and peaks at `367.8435` at
+signed one reproduces `P_k^odd(s(3))` to 267 digits and peaks at `367.8436` at
 `k = 11`, which is `CN`, so the comparison is against the right quantity.
 
 The inflation is confined to small `k`.  `A_k 3^k` peaks at `15329` at `k = 12`,
@@ -44,7 +44,7 @@ to `63` and would also outrun `OddNumericalFacts.sweep_low` (`k <= 58`).
 
 `nearabs_certified.py` carries out the repair and certifies
 
-    3^k T_k <= CN = 367.8435    for every k >= 59,
+    3^k T_k <= CN = 367.8436    for every k >= 59,
 
 i.e. the ABSOLUTE sum obeys the same bound the manuscript already states, so
 the ledger and `C = 4900` need no change at all.  Method: the majorant
@@ -54,7 +54,7 @@ termwise, so `A_k(s) <= P_k^+(s) = sum_i P^odd_{k-i}(s) a(s)^i/i!` with
 `P_k^+` is decreasing in `s` and a **left-endpoint Riemann sum is an upper bound
 outright** — no quadrature error analysis is needed.  The `s`-tail closes
 because `3^{-(k-i)t} 2^{-it} <= 2^{-kt}`, giving `P_k^+(s_N)/(k log 2)`; the
-`k`-tail uses Cauchy at `R = 3.15 < 3^{s(3)} = 3.1727`, where `(3/R)^{201}`
+`k`-tail uses Cauchy at `R = 3.15 < 3^{s(3)} = 3.17383`, where `(3/R)^{201}`
 supplies the decay.
 
 Result (`nearabs.log`, settings `200 8.0 220 60 60 400`): the head is evaluated

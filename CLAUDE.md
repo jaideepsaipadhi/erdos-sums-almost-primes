@@ -35,11 +35,22 @@ Currently stated conservatively on purpose, each with the reason in the text:
 | criterion threshold `2440` | `2433` (margin 135) | Lean `NumericalFacts.phi_at_k1`, `theorem_7_1`'s `[2440, ∞)` |
 | `\|c_i\| < 354.36·3^-i` | `44.5987·3^-i` via Lemma 3.7(i) + `Σ₀` | Lean cCoeff tail lemma, `Basic.lean:6768` (uses `4.2^i`) |
 | `S₂ ≤ 14414` (NS=1600) | `13881` (NS=3200, `hcoeff3200.log`) | `K₀ = 59` either way; pure margin under `MR ≤ 4900` |
-| `C_N ≤ 367.8435` in the near range | `34.14` for `k ≥ 59` (`nearabs.log`) | one constant serves both the signed and the absolute sum; keeps `MR ≤ 4900` and the ledger unchanged |
+| `C_N ≤ 367.8436` in the near range | `34.14` for `k ≥ 59` (`nearabs.log`) | one constant serves both the signed and the absolute sum; keeps `MR ≤ 4900` and the ledger unchanged |
 
 The margin at `k = 2433` was 139 before the three numeral corrections to
 `lem:phi-base`; `check_paper_phi.py` now recomputes it from the certified
 constants and reads it out of the manuscript, so the two cannot drift again.
+
+### Stated constants must round UP, and nothing used to check that
+
+`Σ_1` was in print as `486.1945` while `s1_cauchy.log` certifies
+`486.19450958…`, and `C_N` as `367.8435` against `cn.log`'s `367.84350183…`.
+Both were rounded **down**, so the manuscript asserted bounds its own
+certificates do not establish — and all three existing guards passed, because
+they only ever compared the paper against itself. `check_proof_spine.py` now
+parses `s0_cauchy.log`, `s1_cauchy.log`, `cn.log`, `ce_taylor.log` and
+`nearu.log` and fails if any stated numeral is below the certified value.
+Verified against a deliberately reintroduced `486.1945`.
 
 ### `C_E <= 5.48910` is the tightest constant in the paper
 
@@ -55,9 +66,12 @@ against it rather than assumed safe.
 Not conservatism, but a property of the **method**, not of the quantity. The
 near range bounds a sum of **absolute** values and the `h_j` alternate in sign
 (`h_1 = Π(s) − log ζ(s) < 0` always), so it goes through a majorant that is
-loosest where `a(s) = 2|h_1(s)|` is largest — at small `k`. The certified
-bound exceeds `C_N 3^-k` for exactly `8 ≤ k ≤ 25`, peaking at `724.55` at
-`k = 14` (`nearabs_certified.py` with `K0 = 1`). Do not quote `15329` here:
+loosest where `a(s) = 2|h_1(s)|` is largest — at the left end of the **`s`**
+range, not at small `k`. The certified bound exceeds `C_N 3^-k` for exactly
+`9 ≤ k ≤ 25`, peaking at `699.87` at `k = 14` — run
+`nearabs_certified.py 60 8.0 220 60 60 400 1`, i.e. the settings of record
+with `K0 = 1`. Coarser settings give a looser bound (`724.55` at `NGRID=120,
+MMAX=50`), so quote only the settings-of-record figures. Do not quote `15329` here:
 that is `absratio.py`'s **pointwise** sum at `u = 3`, a different quantity from
 the integral that `eq:odd-nearabs-certified` bounds. `k ≥ 26` would serve; 59
 is stated because it is the only range in which (5.1) is ever applied. The three places are `prop:odd-remainder` and

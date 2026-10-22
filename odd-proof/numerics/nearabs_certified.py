@@ -10,7 +10,7 @@ by the SIGNED identity sum_j u^{k-j}/(k-j)! h_j(s) = P_k^odd(s), which needs
 h_j >= 0.  absratio.py shows that is false (h_1 < 0 for every s, and the h_j
 alternate).  This script bounds T_k directly and certifies
 
-    3^k T_k <= CN = 367.8435    for all k >= 59,
+    3^k T_k <= CN = 367.8436    for all k >= 59,
 
 which is the range on which (5.1) is used: the odd assembly takes the analytic
 branch only for k >= K0 = 59, and monotonicity for k <= 75 comes from the
@@ -40,7 +40,7 @@ s-tail.  For t = s - s_N >= 0, P_{k-i}^odd(s) <= 3^{-(k-i)t} P_{k-i}^odd(s_N)
 Since 3^-x <= 2^-x, each term decays by at least 2^{-kt}, so the tail is at
 most P_k^+(s_N)/(k log 2).
 
-k-tail.  For k > KMAX, Cauchy on |z| = R with R < 3^{s(3)} = 3.1727 and H_o^+
+k-tail.  For k > KMAX, Cauchy on |z| = R with R < 3^{s(3)} = 3.17383 and H_o^+
 having non-negative coefficients (so its maximum on |z| = R is at z = R):
 
     A_k(s) <= R^-k zeta(s)^R H_o(s,R) e^{a(s)R}
@@ -76,7 +76,7 @@ PREC = int(sys.argv[6]) if len(sys.argv) > 6 else 400
 ctx.prec = PREC
 
 three, two = arb(3), arb(2)
-CN = arb('367.8435')
+CN = arb('367.8436')
 K0 = int(sys.argv[7]) if len(sys.argv) > 7 else 59
 
 # ---------------------------------------------------------------- s(3)
@@ -171,7 +171,7 @@ for i, s in enumerate(grid):
 # ---------------------------------------------------------------- head in k
 # EVERY k in [K0, KMAX], not a sample: the values do fall off monotonically in
 # practice, but nothing here proves that, so sampling would not certify the sup.
-print("\n    k     3^k T_k (upper)      vs CN=367.8435")
+print("\n    k     3^k T_k (upper)      vs CN=367.8436")
 worst = arb(0)
 worst_k = None
 for k in range(K0, KMAX + 1):
@@ -229,6 +229,6 @@ ok = (worst <= CN) == True and (ktail <= CN) == True
 print("\nworst over the whole head k in [%d, %d]: %s at k = %d"
       % (K0, KMAX, worst.str(10, radius=False), worst_k))
 print("bound for k > %d:              %s" % (KMAX, ktail.str(10, radius=False)))
-print("\n%s: 3^k T_k <= CN = 367.8435 for all k >= %d"
+print("\n%s: 3^k T_k <= CN = 367.8436 for all k >= %d"
       % ("CERTIFIED" if ok else "NOT ESTABLISHED", K0))
 sys.exit(0 if ok else 1)

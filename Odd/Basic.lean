@@ -166,7 +166,7 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   to be majorized rather than evaluated by the coefficient identity for
   `P_k^odd`.  The resulting bound exceeds `MR (k+3)^3 3^-k` for small `k`: at
   `k = 12` the near-range term alone needs about `15329 * 3^-k` against
-  `CN = 367.8435`, and a single constant valid for all `k >= 1` would be about
+  `CN = 367.8436`, and a single constant valid for all `k >= 1` would be about
   `19819`, which would push the analytic threshold from 59 to 63 and so past
   `sweep_low` below.  On `59 <= k` the certified value is `34.14`, so `CN` and
   `MR <= 4900` both stand.  See `odd-proof/numerics/nearabs_certified.py` and
@@ -6787,7 +6787,7 @@ theorem betaFam_sum_bound (betaFam : ℕ → ℝ) (S : ℝ)
 
 /-- The two tail sums of PROOF.md 5.1's unquantified "(lower order)", now
 certified: S0 <= 44.5987 (odd-proof/numerics/s0_recursion.py head +
-s0_cauchy.py tail, first-order pole) and S1 <= 486.1945 (s1_recursion.py head
+s0_cauchy.py tail, first-order pole) and S1 <= 486.1946 (s1_recursion.py head
 453.0838 + s1_cauchy.py tail 33.1107, second-order pole).  An earlier note here
 gave S1 <= 453.1, which was the head alone. -/
 structure OddTailFacts (bHatOdd : ℕ → ℂ) (S0 S1 : ℝ) : Prop where

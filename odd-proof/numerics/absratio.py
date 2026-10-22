@@ -15,7 +15,7 @@ This script computes, at u = 3 (i.e. s = s(3), where log zeta(s) = 3), both
     S_k = sum_j 3^{k-j}/(k-j)!  h_j(s(3))       (what was used; = P_k^odd(s(3)))
 
 and reports A_k/S_k, the true multiplicative cost of the repair, together with
-A_k 3^k, the constant that would replace C_N <= 367.8435.
+A_k 3^k, the constant that would replace C_N <= 367.8436.
 
 Everything is arb.  P_3 is evaluated by the Moebius series for the prime zeta
 function, exactly as cn_certified.py does and for the same reason: at s ~ 1.05
@@ -129,8 +129,8 @@ for k in list(range(1, 13)) + [20, 30, 50, 75, 100, KMAX]:
              r.str(8, radius=False), float(chk)))
 
 print("\nlargest A_k/S_k over the k sampled: %s" % worst.str(10, radius=False))
-print("a single all-k constant would be about %s in place of C_N = 367.8435"
-      % (arb('367.8435') * worst).str(10, radius=False))
+print("a single all-k constant would be about %s in place of C_N = 367.8436"
+      % (arb('367.8436') * worst).str(10, radius=False))
 
 # --- the conclusion that matters.  The inflation is confined to SMALL k: the
 # --- absolute sum falls back under C_N at k = 24 and keeps falling, and the
@@ -140,7 +140,7 @@ print("a single all-k constant would be about %s in place of C_N = 367.8435"
 # --- costs nothing in certified constants: C_N, MR = 4900 and K0 = 59 all
 # --- stand, and Proposition 3.5 need only be restated on the range where it is
 # --- actually used.
-CN = arb('367.8435')
+CN = arb('367.8436')
 
 
 def A(k):

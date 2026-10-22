@@ -314,7 +314,7 @@ $\infty$, we obtain
 \subsection{The first two terms}
 
 \begin{proposition}\label{prop:odd-two-term}
-With $E_j$, $h_j$ and $b_j$ as in the proof below, put
+With $h_j$ and $b_j$ as above and $E_j$ as in the proof below, put
 \begin{equation}\label{eq:Rk-def}
  R_k=\sum_{j=0}^k\int_0^\infty\frac{u^{k-j}}{(k-j)!}E_j(u)\dd u
      -\sum_{j>k}h_j(1)
@@ -511,7 +511,7 @@ With $\Sigma_i$ as in \eqref{eq:sigma-def} and $C_E$ as in
 \noindent(i) The coefficient norms satisfy
 \begin{equation}\label{eq:odd-certified-coefficients}
  \Sigma_0\leq44.5987,
- \qquad \Sigma_1\leq486.1945,
+ \qquad \Sigma_1\leq486.1946,
  \qquad \Sigma_2\leq14414,
  \qquad C_E\leq5.48910.
 \end{equation}
@@ -528,7 +528,7 @@ With $\Sigma_i$ as in \eqref{eq:sigma-def} and $C_E$ as in
 \begin{align}
  \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}\abs{h_j(s(u))}J(u)\dd u
  &\leq C_N3^{-k}\quad(59\leq k\leq200),
- & C_N&\leq367.8435,
+ & C_N&\leq367.8436,
  \label{eq:odd-nearabs-certified}\\
  \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}
   \bigl(\abs{h_j(1)}\e^{-u}+\abs{b_j}\e^{-2u}\bigr)\dd u
@@ -547,27 +547,33 @@ $1\leq k\leq75$.
 \end{proposition}
 
 \noindent
-Part~(v) is not a coefficient bound but a sweep, and it is what makes the
-range restriction in \eqref{eq:odd-nearabs-certified} harmless.
+Part~(v) is not a coefficient bound but a sweep. The range in
+\eqref{eq:odd-nearabs-certified} is two-sided, and its two ends are discharged
+quite differently: the lower end is harmless because monotonicity below the
+analytic threshold comes from~(v) and never appeals to
+\eqref{eq:odd-remainder}, while the upper end is removed in the proof of
+Proposition~\ref{prop:odd-remainder}, where a Cauchy estimate extends the
+bound past $k=200$.
 
-That restriction is a feature of the method rather than of the inequality. The
-$h_j$ alternate in sign, so the left-hand side has to be majorized rather than
-evaluated in closed form, and the majorant used in the proof of
-Proposition~\ref{prop:odd-remainder} is at its loosest where $a(s)=2\abs{h_1(s)}$
-is largest, which is at small $k$. The bound it yields exceeds $C_N3^{-k}$ for
-$8\leq k\leq25$, peaking at $724.55\cdot3^{-k}$ at $k=14$, and settles to
-$34.14\cdot3^{-k}$ by $k=59$. We make no claim about the left-hand side itself
-outside $k\geq59$: it is the certified bound, not the quantity, that needs the
-restriction, and $k\geq26$ would in fact serve. We state $k\geq59$ because that
-is the only range in which \eqref{eq:odd-remainder} is ever applied, and
-monotonicity below it comes from~(v) without appeal to
-\eqref{eq:odd-remainder}.
+The lower restriction is a feature of the method rather than of the
+inequality. The $h_j$ alternate in sign, so the left-hand side has to be
+majorized rather than evaluated in closed form, and the majorant is at its
+loosest where $a(s)=2\abs{h_1(s)}$ is largest, which is at the left end of the
+$s$-range; the resulting bound is correspondingly weakest for small $k$, where
+the weights $u^{k-j}/(k-j)!$ put least mass away from that end. It exceeds
+$C_N3^{-k}$ exactly for $9\leq k\leq25$, peaking at $699.87\cdot3^{-k}$ at
+$k=14$, and falls to $34.14\cdot3^{-k}$ by $k=59$. We make no claim about the
+left-hand side itself outside the stated range: it is the certified bound, not
+the quantity, that needs the restriction, and $k\geq26$ would in fact serve.
+We state $k\geq59$ because that is the only range in which
+\eqref{eq:odd-remainder} is ever applied.
 
-The numeral $C_N\leq367.8435$ is carried, rather than the $34.14$ actually
+The numeral $C_N\leq367.8436$ is carried, rather than the $34.14$ actually
 computed on $k\geq59$, so that the ledger below is unchanged. It is not idle
-either: $367.8435$ is the supremum over all $k\geq1$ of
+either: it is the least four-decimal bound on the supremum over all $k\geq1$ of
 $3^kP_k^{\mathrm{odd}}(s(3))$, the signed quantity whose coefficient identity
-earlier drafts of this proof used, attained at $k=11$.
+earlier drafts of this proof used; that supremum is $367.84350\ldots$, attained
+at $k=11$.
 
 \begin{lemma}\label{lem:pole-coefficient-bounds}
 Let $A(z)=\sum_{j\geq0}a_jz^j$.
@@ -636,8 +642,10 @@ certifies finitely many numbers, but by
 Lemma~\ref{lem:pole-coefficient-bounds}(iii): applied to the second
 $s$-derivative of $H_{\mathrm o}$ with $S=\Sigma_2$, \eqref{eq:second-derivative-sum}
 gives $\sum_{j\leq k}3^j\abs{\partial_s^2h_j}\leq\binom{k+3}{3}\Sigma_2
-\leq(k+3)^3\Sigma_2/6$, and the remaining factor $3$ comes from the width of
-the $u$-range in \eqref{eq:odd-far-certified}. Hence
+\leq(k+3)^3\Sigma_2/6$. The remaining factor $3$ is not a width --- the far
+range $u\geq3$ is unbounded --- but a rate: the far-range error is
+$O(\e^{-3u})$, which is what the powers of $\zeta$ in \eqref{eq:CE-def}
+encode, and $\int_0^\infty u^m\e^{-3u}\dd u/m!=3^{-m-1}$. Hence
 $\abs{R_{k,\mathrm{far}}}\leq\frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k}$, the
 $18=6\cdot3$ recording those two steps.
 
@@ -756,28 +764,34 @@ $k$. Hence
  3^k\int_{s(3)}^\infty A_k
  \leq\Bigl(\frac3R\Bigr)^{k}\Bigl(\Theta_1+\frac{\Theta_2}{k\log2}\Bigr),
 \]
-and with $R=3.15$, which is below $3^{s(3)}=3.1727\ldots$, the factor
-$(3/3.15)^{201}<5.6\cdot10^{-5}$ puts the right-hand side below $10$ for every
-$k>200$. Therefore
+Take $R=3.15$, which is below $3^{s(3)}=3.1738\ldots$, and $s_1=8$. The
+certified values are then $\Theta_1+\Theta_2/(200\log2)\leq175346$, while
+$(3/3.15)^{201}=5.5075\cdot10^{-5}$, so the right-hand side is at most
+$9.66$ for every $k>200$. Therefore
 \begin{equation}\label{eq:odd-nearabs-all-k}
  \int_{s(3)}^\infty A_k(s)\dd s\leq C_N3^{-k}
  \qquad\text{for all }k\geq59,
 \end{equation}
-which is the range in which \eqref{eq:odd-remainder} is used. The two branches
-meet at $k=200$ with room to spare: the largest value over the finite range is
-$34.14\cdot3^{-k}$ and the Cauchy branch gives at most $9.66\cdot3^{-k}$,
-against the $C_N=367.8435$ carried in the ledger.
+which is the range in which \eqref{eq:odd-remainder} is used. Neither branch is anywhere near binding: over
+$59\leq k\leq200$ the largest value is $34.14\cdot3^{-k}$, at $k=59$, and the
+Cauchy branch gives at most $9.66\cdot3^{-k}$ beyond, against the
+$C_N=367.8436$ carried in the ledger.
 
-The companion bound \eqref{eq:odd-near-main} reduces the same way. The
-first-order pole bounds $\abs{h_j(1)}\leq\Sigma_03^{-j}$ and
-$\abs{b_j}\leq(j+1)\Sigma_13^{-j}$ of
-Lemma~\ref{lem:pole-coefficient-bounds}(i)--(ii) turn each integral into a
-regularized incomplete gamma value, and $P(m,x)\leq x^m/m!$ makes the
-resulting sums telescope: the first is at most $\Sigma_0\e^{9}3^{-k}$ and the
-second at most $\tfrac12\bigl((k+1)\Sigma_1+2\gamma\Sigma_0\bigr)\e^{9}3^{-k}$.
-Both are of lower order than $(k+3)^33^{-k}$, so the ratio to the budget
-decreases in $k$ and the maximum over a finite head governs; it is taken over
-$1\leq k\leq400$.
+The companion bound \eqref{eq:odd-near-main} reduces the same way. Here
+$\abs{h_j(1)}\leq\Sigma_03^{-j}$ by
+Lemma~\ref{lem:pole-coefficient-bounds}(i), while $b_j=h_j'(1)+2\gamma h_j(1)$
+needs both parts: (ii) gives $\abs{h_j'(1)}\leq(j+1)\Sigma_13^{-j}$ and (i)
+again gives the $2\gamma h_j(1)$ term, so
+$\abs{b_j}\leq\bigl((j+1)\Sigma_1+2\gamma\Sigma_0\bigr)3^{-j}$. These turn each
+integral into a regularized incomplete gamma value, and $P(m,x)\leq x^m/m!$
+makes the resulting sums telescope: with $U=3$ the first is at most
+$\Sigma_0\e^{9}3^{-k}$ and the second at most
+$\tfrac12\bigl((k+1)\Sigma_1+2\gamma\Sigma_0\bigr)\e^{9}3^{-k}$. Both are
+linear in $k$ where the budget $(k+3)^33^{-k}$ is cubic, so the ratio of this
+telescoped majorant to the budget decreases in $k$; since at $k=400$ that ratio
+is already $12.08$, below $N_U$, the maximum over the finite head
+$1\leq k\leq400$ governs. It is attained at $k=7$, far outside the range in
+which \eqref{eq:odd-remainder} is used.
 
 Substituting the certified constants, the four contributions are
 \[
@@ -786,7 +800,7 @@ Substituting the certified constants, the four contributions are
  +\underbrace{\frac{44.5987}{2}+\frac{5\cdot590}{64}+C_N+N_U}_{462.34}
  \Bigr)(k+3)^3 3^{-k}<4900(k+3)^3 3^{-k},
 \]
-with $C_N=367.8435$ and $N_U=26.0962$.
+with $C_N=367.8436$ and $N_U=26.0962$.
 \end{proof}
 
 \begin{proof}[Proof of Theorem~\ref{thm:main-odd}]

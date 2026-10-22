@@ -203,8 +203,42 @@ for label, value, claim in (("far", far, far_claim), ("rest", rest, rest_claim))
           "computed <= %.4f, printed %.4f, %s"
           % (v, c, "ok" if c >= v else "UNDERSTATES by %.4f" % (v - c)))
 
+# ------------------------------------- stated constants must ROUND UP
+# This is the hole that let two false inequalities into print.  Sigma_1 was
+# stated as 486.1945 while s1_cauchy.log certifies 486.19450958...; C_N was
+# stated as 367.8435 while cn.log certifies 367.84350183....  Both were rounded
+# DOWN, so the manuscript asserted bounds its own certificates do not
+# establish, and every other guard passed because they only ever compared the
+# paper against itself.  Compare against the logs instead.
+print()
+LOGS = ROOT / "odd-proof" / "numerics"
+certs = [
+    ("Sigma_0", "s0_cauchy.log", r"S_0 = HEAD \+ TAIL\s*<=\s*\[([0-9.]+)", S0),
+    ("Sigma_1", "s1_cauchy.log", r"S_1 = HEAD \+ TAIL\s*<=\s*\[([0-9.]+)", S1),
+    ("C_N", "cn.log", r"CN <= \[([0-9.]+)", CN),
+    ("C_E", "ce_taylor.log", r"CE <= \[([0-9.]+)", CE),
+    ("N_U", "nearu.log", r"NEARU <= \[([0-9.]+)", NU),
+]
+for name, logname, pat, stated in certs:
+    f = LOGS / logname
+    if not f.exists():
+        print("%-56s %s" % ("%s: %s absent" % (name, logname), "skipped"))
+        continue
+    m = re.search(pat, f.read_text())
+    if not m:
+        print("%-56s %s" % ("%s: cannot parse %s" % (name, logname), "skipped"))
+        continue
+    true_val = arb(m.group(1))
+    ok = float(stated.str(30, radius=False)) >= float(true_val.upper())
+    check("%s: stated %s >= certified %s"
+          % (name, stated.str(10, radius=False), true_val.str(12, radius=False)),
+          ok,
+          "rounded %s" % ("up, correct" if ok
+                          else "DOWN -- the stated bound is FALSE"))
+
 print()
 if fails:
     print("FAILED: %d check(s): %s" % (len(fails), ", ".join(fails)))
     sys.exit(1)
-print("the arithmetic spine closes: ledger, base case, q(k), and both range unions")
+print("the arithmetic spine closes: ledger, base case, q(k), both range unions,")
+print("and every stated constant is at or above what its certificate gives")

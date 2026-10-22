@@ -157,7 +157,7 @@ first and second order rather than third:
 indexing the three constants by pole order; the Lean parameter is S.)
 
     S_0 := sum_i |a_i| 3^i,  a_i = [z^i] H(1,z)(1 - z/3),        S_0 <= 44.5987
-    S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 486.1945
+    S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 486.1946
 Note the second tail's coefficient family is B(z) = d_s H_o(1,z) + 2 gamma
 H_o(1,z), not d_s H_o alone, so its weighted norm is S_1 + 4 gamma S_0 = 589.17
 (< 590) rather than S_1.  The lemma at r = 1 gives |h_j(1)| <= S_0 3^-j, and at
@@ -182,7 +182,7 @@ making it rigorous: the expansions in (b) are asymptotic, valid only for
 u >= U, and the original treats them as holding throughout.  This note uses
 U = 3 and bounds 0 < u <= U separately.  On 0 < u <= U the two groups are
 bounded separately: NEARU <= 26.0962 (nearu_certified.py) covers the two
-subtracted main terms, and CN <= 367.8435 (cn_certified.py) covers the true
+subtracted main terms, and CN <= 367.8436 (cn_certified.py) covers the true
 integrand.
 
 CN does NOT cover the true integrand as stated, and this is where the range in
@@ -205,8 +205,8 @@ Dirichlet series with positive terms, so P_k^+ decreases in s and a
 left-endpoint Riemann sum bounds the integral with no quadrature error to
 estimate; the s-tail closes as P_k^+(s_N)/(k log 2) because 3^-x <= 2^-x makes
 every term decay by at least 2^-kt, and the k-tail uses Cauchy at R = 3.15,
-just under 3^sOf(3) = 3.1727.  The result, over EVERY k in [59, 200] and not a
-sample, is 3^k T_k <= 34.14, and <= 9.66 beyond 200 -- so CN = 367.8435 covers
+just under 3^sOf(3) = 3.17383.  The result, over EVERY k in [59, 200] and not a
+sample, is 3^k T_k <= 34.14, and <= 9.66 beyond 200 -- so CN = 367.8436 covers
 the absolute sum too on k >= 59, with better than tenfold slack, and the ledger
 above is unchanged.
 
@@ -304,8 +304,8 @@ which is width rather than signal.
   * sum_{i<=16} |w_i| 3^i <= 8424        (1600 s-boxes, primes to 1e5)
   * sup_{|z|=4.5, s in [1,2]} |G_2| <= 1.97e6   (200 theta x 40 s boxes)
   * S_0 <= 44.5987                       s0_recursion.py + s0_cauchy.py
-  * S_1 <= 486.1945                      s1_recursion.py + s1_cauchy.py
-  * CN  <= 367.8435                      cn_certified.py  (recursion + Cauchy)
+  * S_1 <= 486.1946                      s1_recursion.py + s1_cauchy.py
+  * CN  <= 367.8436                      cn_certified.py  (recursion + Cauchy)
   * 3^k T_k <= 34.14  (k >= 59)          nearabs_certified.py (absolute sum;
                                          what the near range actually needs)
   * NEARU <= 26.0962                     nearu_certified.py (head + envelope)
@@ -369,9 +369,9 @@ and the sweep to 75 leaves sixteen values of overlap.
     sum|w_i|3^i <= 8424  (i <= 16)            hcoeff_recursion.py, 1600 s-boxes
     sup|G_2|    <= 1.97e6 on |z|=4.5          mr_deriv_sweep.py
     S_0         <= 44.5987                    s0_recursion.py, s0_cauchy.py
-    S_1         <= 486.1945                   s1_recursion.py, s1_cauchy.py
+    S_1         <= 486.1946                   s1_recursion.py, s1_cauchy.py
     S_1+4gS_0   <= 590                        the tail's coefficient family
-    CN          <= 367.8435                   cn_certified.py
+    CN          <= 367.8436                   cn_certified.py
     3^k T_k     <= 34.14    (k >= 59)         nearabs_certified.py
     NEARU       <= 26.0962                    nearu_certified.py
     CE          <= 5.48910                    ce_taylor.py
