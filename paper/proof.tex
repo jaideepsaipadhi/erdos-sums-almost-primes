@@ -1208,15 +1208,26 @@ constant is \eqref{eq:contour-certified}; only $T_k$ needs a certificate that
 is itself uniform in $k$, namely \eqref{eq:Tk-certified}. Both are recorded
 here rather than inside that derivation so that every certified input for the
 unrestricted case appears in one place.
-The direct certificates establish $f_k<f_{k+1}$ on
+Finally, $f_k<f_{k+1}$ is certified on
 \begin{equation}\label{eq:full-sweep-ranges}
   6\leq k\leq199,
   \qquad 78\leq k\leq899,
   \qquad 900\leq k\leq2439,
 \end{equation}
-three separate runs whose union is the single range $6\leq k\leq2439$. The
-quadrature behind these values, and the six error sources entering each
-enclosure, are described in Appendix~\ref{app:quadrature}.
+whose union is the single range $6\leq k\leq2439$. These three ranges are not
+established the same way, and the distinction matters to anyone checking the
+certificates. On the first, $f_k$ itself is computed as an enclosure for each
+$k$ and the two enclosures are compared; the quadrature behind those values,
+and the six error sources entering each, are described in
+Appendix~\ref{app:quadrature}. (That computation in fact covers $2\leq k\leq500$;
+only $6\leq k\leq199$ is needed here.) On the other two, it is the left-hand
+side of \eqref{eq:full-criterion} that is evaluated in ball arithmetic at each
+$k$ and found positive --- the same quantity whose closed-form lower bound
+$\varphi$ drives Section~\ref{sec:assembly}, but evaluated per $k$ rather than
+bounded uniformly, which is why it closes well below the threshold $2440$ that
+the uniform bound requires. Within the middle range two assemblies of
+that quantity are involved: the refined one for $78\leq k\leq734$, and the
+earlier, coarser one it improves on for $735\leq k\leq899$.
 \end{proposition}
 
 The coefficient tails in \eqref{eq:Eexp-certified} are obtained only after the
@@ -1253,7 +1264,7 @@ no asymptotic $O$-term enters the final criterion. The first two terms are in fa
 $10^{-3}$ from $k\geq37$ on, so the threshold $900$ comes from $T_k$ alone.
 
 %=======================================================================
-\section{Assembly of the unrestricted theorem}
+\section{Assembly of the unrestricted theorem}\label{sec:assembly}
 %=======================================================================
 
 For $k\geq900$ define

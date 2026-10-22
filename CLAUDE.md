@@ -86,6 +86,40 @@ false and nothing would catch it.
 tighten to `59 ≤ k`; it is unbuilt here, so the binder was left alone and the
 reason recorded in its docstring.
 
+## The committed certificates, and what actually backs each sweep range
+
+`numerics/verify.py` must be **run from `numerics/bm-rebuild-v21/`** — its
+docstring says so, and from anywhere else it silently skips the criterion
+sweeps (`load()` returns `None` and the loop `continue`s) while two unrelated
+checks error out. Run correctly it passes all 12. Don't report it as broken
+without checking the directory first.
+
+What backs `eq:full-sweep-ranges`, verified 2026-10-22:
+
+| artifact | what it holds | range |
+|---|---|---|
+| `numerics/certificate.json` | `f_k` enclosures, compared pairwise | `k = 2..500` |
+| `bm-rebuild-v21/crit_78_734.json` | refined criterion `> 0` (min 0.91) | `78..734` |
+| `bm-rebuild-v21/crit_certified.json` | coarser criterion, first positive at 735 | `735..899` |
+| `bm-rebuild-v21/crit_900_2439.json` | refined criterion `> 0` (min 9724) | `900..2439` |
+
+Union `6..2439` with no gap — but **only because the coarser file covers
+exactly `735..899`**, the slice between the two refined runs. `verify.py`
+frames that file as "the baseline the section 6 refinement improves on" and
+checks only its zero crossing, so its load-bearing role is easy to miss.
+
+Two caveats to clear before submission:
+
+- `crit_78_734.json` and `crit_certified.json` have **no generating script in
+  the repository** (`grep` finds only `verify.py` consuming them). A referee
+  cannot regenerate them, which matters now that Section 8 cites the repo by
+  URL.
+- `crit_assembly.py`, which wrote the superseded `crit_sweep.json`, uses
+  `ALPHA, BETA = "15.374", "-37.226"` and its own docstring calls them
+  "PROVISIONAL … clearly uncertified". That file is not relied on, but the
+  numbers are smaller than the certified `alpha_+ = 15.425661`, i.e. optimistic
+  — do not reuse that script's constants.
+
 ## Before committing changes to `paper/`
 
 Compile twice and confirm a clean build:
