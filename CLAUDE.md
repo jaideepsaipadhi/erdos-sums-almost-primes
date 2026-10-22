@@ -97,6 +97,24 @@ Two recurring traps:
 
 ## Lean
 
+**Nothing Lean has been validated.** Three routes were checked on 2026-10-22
+and all three are closed:
+
+- *Locally* — the toolchain downloads (the `v4.33.0-rc1` GitHub release asset
+  returns 302), but **both Mathlib cache hosts are unreachable**
+  (`mathlib4.lean-cache.cloud` and `lakecache.blob.core.windows.net`), so
+  `lake exe cache get` cannot work and Mathlib would have to be built from
+  source on 2 cores / 7 GB. Not viable.
+- *CI* — runs are accepted and then get **no runner**: `runner=NONE`,
+  `steps=0`, reported as `conclusion: failure` exactly like a build error. See
+  the comment block at the top of `.github/workflows/lean.yml` for the
+  one-command check that tells the two apart.
+- *Billing* — the quota endpoints are not reachable from a repository-scoped
+  session, so the cap has to be read from the GitHub UI.
+
+Until a run comes back with `steps > 0`, Section 8 and Table 1 of the paper
+describe a state no build has confirmed, and `paper/check_ready.py` says so.
+
 `lake build`; `#print axioms` targets are in `odd-proof/axcheck.lean`. The
 `*NumericalFacts` structures are assumed hypotheses with no instance — that is
 the trusted computing base, deliberately (manuscript Caveat 1.3b). There must

@@ -1,5 +1,29 @@
 # Builds the Lean development and audits it.
 #
+# IF A RUN "FAILS" IN SECONDS, READ THIS FIRST.
+#
+# A run with no runner allocated reports exactly the same conclusion as a build
+# error -- `conclusion: failure` -- and the run log lives on a blob host this
+# project's tooling cannot reach, so at a glance the two are indistinguishable.
+# Observed 2026-10-22: four pull_request runs failed within seconds and one
+# workflow_dispatch sat queued for 5.5 minutes and then failed, all with
+#
+#     job status null or completed/failure, runner = NONE, steps = 0,
+#     zero annotations, zero artifacts
+#
+# Zero steps is the tell: no step ever executed, so nothing in this file ran
+# and nothing about the Lean sources was tested.  Check it with
+#
+#     gh api repos/{owner}/{repo}/actions/runs/{id}/jobs \
+#       -q '.jobs[]|"\(.status)/\(.conclusion) runner=\(.runner_name // "NONE") steps=\(.steps|length)"'
+#
+# steps = 0 means runner starvation -- metered minutes exhausted, or runners
+# otherwise unavailable on the account -- and is not something a change to this
+# workflow or to the Lean sources can fix.  A real build failure has steps > 0
+# and surfaces through the annotations below.  The billing endpoints are not
+# reachable from a repository-scoped session, so the quota has to be checked
+# from the GitHub UI.
+#
 # Manual by default: this is a private repository, so Actions minutes are
 # metered, and the build is long.  Mathlib comes from `lake exe cache get`;
 # Banksmartin and Odd are always built from source, and the long pole in them
