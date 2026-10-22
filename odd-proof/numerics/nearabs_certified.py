@@ -77,7 +77,7 @@ ctx.prec = PREC
 
 three, two = arb(3), arb(2)
 CN = arb('367.8435')
-K0 = 59
+K0 = int(sys.argv[7]) if len(sys.argv) > 7 else 59
 
 # ---------------------------------------------------------------- s(3)
 lo, hi = arb('1.05'), arb('1.06')

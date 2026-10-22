@@ -197,19 +197,25 @@ the same holds for $H$ in $\abs z<2^s$.
 \end{proposition}
 
 \begin{proof}
-Let $x=p^{-s}$. For $z$ in a fixed compact set, the logarithm of the $p$th
-regularized factor is
+Let $x=p^{-s}$, so that $\abs x=p^{-\sigma}\leq2^{-\sigma}<2^{-1/2}$ on the
+domain. The factor $(1-x)^z$ is a non-integer power of a complex number, so a
+branch must be fixed; the principal one will do throughout, since $1-x$ then
+lies in the disc of radius $2^{-1/2}<1$ about $1$, on which the principal
+logarithm is analytic and where no branch cut is met. With that convention,
+for $z$ in a fixed compact set $K$ the logarithm of the $p$th regularized
+factor is
 \begin{align*}
  -\log(1-zx)+z\log(1-x)
  &=\sum_{m\geq1}\frac{z^m-z}{m}x^m\\
  &=\sum_{m\geq2}\frac{z^m-z}{m}x^m
-  =O_K(p^{-2s}).
+  =O_K(p^{-2\sigma}),
 \end{align*}
-The estimate is uniform for $z$ in the compact set $K$. Since
-$\sum_pp^{-2s}<\infty$, the product of the regularized factors converges
+the $m=1$ terms cancelling. The estimate is uniform for $z\in K$ and depends
+on $s$ only through $\sigma$. Since
+$\sum_pp^{-2\sigma}<\infty$ for $\sigma>1/2$, the product of the regularized factors converges
 locally uniformly wherever none of the factors has a pole. The poles occur at
-$z=p^s$. The nearest one is $2^s$ for \eqref{eq:H-full} and $3^s$ for
-\eqref{eq:H-odd}. A locally uniform limit of analytic functions is analytic,
+$z=p^s$, of modulus $p^\sigma$; the nearest has modulus $2^{\sigma}$ for
+\eqref{eq:H-full} and $3^{\sigma}$ for \eqref{eq:H-odd}. A locally uniform limit of analytic functions is analytic,
 which proves the first assertion.
 
 Differentiability in $s$ does not follow from this if $s$ is held real:
@@ -307,7 +313,13 @@ $\infty$, we obtain
 \subsection{The first two terms}
 
 \begin{proposition}\label{prop:odd-two-term}
-There is a remainder $R_k$ such that
+With $E_j$, $h_j$ and $b_j$ as in the proof below, put
+\begin{equation}\label{eq:Rk-def}
+ R_k=\sum_{j=0}^k\int_0^\infty\frac{u^{k-j}}{(k-j)!}E_j(u)\dd u
+     -\sum_{j>k}h_j(1)
+     -2^{-k-1}\sum_{j>k}b_j2^j.
+\end{equation}
+Then
 \begin{equation}\label{eq:odd-two-term}
  g_k
  =H_{\mathrm o}(1,1)
@@ -361,9 +373,11 @@ the first two terms become
      -2^{-k-1}\sum_{j>k}b_j2^j.
    \label{eq:second-coefficient-tail}
 \end{align}
-Define $R_k$ to be the integral of the $E_j$ terms together with the two tails
-on the right of \eqref{eq:first-coefficient-tail} and
-\eqref{eq:second-coefficient-tail}. This gives \eqref{eq:odd-two-term}.
+Substituting \eqref{eq:first-coefficient-tail} and
+\eqref{eq:second-coefficient-tail}, and collecting the $E_j$ integrals with the
+two tails, is exactly \eqref{eq:Rk-def}; this gives \eqref{eq:odd-two-term}.
+Note that \eqref{eq:Rk-def} is an identity, not an error term absorbed into an
+$O$: every later estimate is an estimate of those three explicit quantities.
 \end{proof}
 
 \begin{lemma}\label{lem:odd-constants}
@@ -433,8 +447,17 @@ input for the odd sums. Put
    \abs{[z^m](1-z/3)^3\partial_s^2H_{\mathrm o}(s,z)}.
 \end{aligned}
 \end{equation}
-Their finiteness is analytic, from Proposition~\ref{prop:analyticity}; only the
-numerical values below are certified.
+Their finiteness is analytic, and the weights $r=1,2,3$ on the factors
+$(1-z/3)^r$ are what makes it so. Proposition~\ref{prop:analyticity} gives
+$H_{\mathrm o}(1,\cdot)$ only on $\abs z<3$, which by itself would not make a
+sum weighted by $3^m$ converge. But the pole at $z=3$ comes from the single
+Euler factor $(1-z/3)^{-1}$, and after $r-1$ derivatives in $s$ it has order
+$r$; multiplying by $(1-z/3)^r$ cancels it, so each of the three functions
+continues analytically to $\abs z<5$, the next pole being at $z=5$. Their
+coefficients therefore decay like $5^{-m}$ and the weighted sums converge
+geometrically. Finiteness of the supremum in $\Sigma_2$ follows because the
+same bound is uniform for $1\leq s\leq s(3)$, that interval being compact.
+Only the numerical values below are certified.
 
 Next, split the remainder of Proposition~\ref{prop:odd-two-term} at $u=3$:
 with $E_j$ the explicit expression in \eqref{eq:odd-local-product}, put
@@ -451,7 +474,11 @@ coefficient tails of
 $s(3)$ denotes the value of $s$ at $u=3$.
 
 The far range needs one further constant. Write $\varepsilon=s-1$ and
-$J=\zeta(s)/(-\zeta'(s))$, and let
+$J=\zeta(s)/(-\zeta'(s))$; this is the $J$ of
+Lemma~\ref{lem:zeta-coordinate} expressed in $s$ rather than $u$, since
+$\dd u/\dd s=\zeta'(s)/\zeta(s)$ makes $-s'(u)$ equal to
+$\zeta(s)/(-\zeta'(s))$, and the four quantities below compare it with powers
+of $\zeta^{-1}=\e^{-u}$. Let
 \begin{equation}\label{eq:CE-def}
 \begin{gathered}
  C_b=\sup\,\abs{\varepsilon\zeta},\qquad
@@ -512,19 +539,26 @@ $1\leq k\leq75$.
 
 \noindent
 Part~(v) is not a coefficient bound but a sweep, and it is what makes the
-range restriction in \eqref{eq:odd-nearabs-certified} harmless. That
-restriction is necessary, not conservative: the left-hand side exceeds
-$C_N3^{-k}$ for $k\leq23$, peaking near $k=12$ at some $15329\cdot3^{-k}$,
-because the $h_j$ alternate in sign and the sum has to be majorized rather
-than evaluated in closed form --- see the proof of
-Proposition~\ref{prop:odd-remainder}. Monotonicity below the analytic
-threshold comes from~(v) and never appeals to \eqref{eq:odd-remainder}. On
-$k\geq59$ the computed value is $34.14\cdot3^{-k}$, and we carry the weaker
-$C_N\leq367.8435$ so that the ledger below is unchanged. That numeral is not
-idle: $367.8435$ is the supremum over \emph{all} $k\geq1$ of
+range restriction in \eqref{eq:odd-nearabs-certified} harmless.
+
+That restriction is a feature of the method rather than of the inequality. The
+$h_j$ alternate in sign, so the left-hand side has to be majorized rather than
+evaluated in closed form, and the majorant used in the proof of
+Proposition~\ref{prop:odd-remainder} is at its loosest where $a(s)=2\abs{h_1(s)}$
+is largest, which is at small $k$. The bound it yields exceeds $C_N3^{-k}$ for
+$8\leq k\leq25$, peaking at $724.55\cdot3^{-k}$ at $k=14$, and settles to
+$34.14\cdot3^{-k}$ by $k=59$. We make no claim about the left-hand side itself
+outside $k\geq59$: it is the certified bound, not the quantity, that needs the
+restriction, and $k\geq26$ would in fact serve. We state $k\geq59$ because that
+is the only range in which \eqref{eq:odd-remainder} is ever applied, and
+monotonicity below it comes from~(v) without appeal to
+\eqref{eq:odd-remainder}.
+
+The numeral $C_N\leq367.8435$ is carried, rather than the $34.14$ actually
+computed on $k\geq59$, so that the ledger below is unchanged. It is not idle
+either: $367.8435$ is the supremum over all $k\geq1$ of
 $3^kP_k^{\mathrm{odd}}(s(3))$, the signed quantity whose coefficient identity
-the earlier drafts of this proof used, attained at $k=11$. It is the
-absolute sum, not that one, which needs the restriction.
+earlier drafts of this proof used, attained at $k=11$.
 
 \begin{lemma}\label{lem:pole-coefficient-bounds}
 Let $A(z)=\sum_{j\geq0}a_jz^j$.
