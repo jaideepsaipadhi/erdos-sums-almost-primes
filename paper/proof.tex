@@ -687,7 +687,8 @@ By \eqref{eq:c-moments} and \eqref{eq:UV-def},
  &=\sum_{i\geq0}2^ic_i(k-i)^2-Q_k\\
  &=dk^2-2kU+V-Q_k.
 \end{align*}
-Substitution into \eqref{eq:Ik-prime-expanded} gives
+Since $a_1=\tfrac{\log2}{4}d$, substitution into
+\eqref{eq:Ik-prime-expanded} gives
 \begin{align*}
  I_k'
  =1-2^{-k}\biggl(&a_1k^2+\frac{\log2}{4}(V-2kU)
@@ -868,7 +869,8 @@ which with the lower bound proves \eqref{eq:D-bound}.
 \end{proof}
 
 \begin{lemma}\label{lem:Delta-bound}
-If $S^*=\sum_{i\geq0}2^i\abs{c_i}$, then
+If $S^*=\sum_{i\geq0}2^i\abs{c_i}$, then, with $D$ as in
+Lemma~\ref{lem:delta-bound},
 \begin{equation}\label{eq:Delta-bound}
  \abs{2\Delta(k)-\Delta(k+1)}
  \leq S^*\bigl(2D(k)+D(k+1)\bigr).
@@ -1049,12 +1051,12 @@ The last term in \eqref{eq:R-def} decreases with $k$. Hence
  &+S^*\log2\bigl(2\log(k+2)+\log(k+3)+3\bigr).
  \label{eq:R-increment-bound}
 \end{align}
-Let the right side of
+Define, for real $x\geq2440$,
 \begin{align*}
  M(x)=&\ a_1(2x-1)-\frac{\log2}{2}U_{\max}-3\alpha_+\\
- &-S^*\log2\bigl(2\log(x+2)+\log(x+3)+3\bigr)
+ &-S^*\log2\bigl(2\log(x+2)+\log(x+3)+3\bigr).
 \end{align*}
-be defined for real $x\geq2440$. Then
+Then
 \[
  M'(x)=2a_1-S^*\log2\left(\frac2{x+2}+\frac1{x+3}\right)>0,
 \]
