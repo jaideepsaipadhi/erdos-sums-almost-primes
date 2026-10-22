@@ -655,29 +655,42 @@ termwise. Hence, with $a(s)=2\abs{h_1(s)}$,
  A_k(s)\leq[z^k]\bigl(\zeta(s)^zH_{\mathrm o}^+(s,z)\bigr)
  =\sum_{i=0}^kP_{k-i}^{\mathrm{odd}}(s)\frac{a(s)^i}{i!}=:P_k^+(s).
 \end{equation}
-Two features of \eqref{eq:odd-majorant} make it effective. First, every
-$P_j^{\mathrm{odd}}$ is a Dirichlet series with positive terms and, by
-\eqref{eq:odd-h1-negative}, $a$ is a positive combination of such series;
-so $P_k^+$ is decreasing in $s$, and a finite left-endpoint Riemann sum is an
-upper bound for $\int P_k^+$ outright, with no quadrature error to estimate.
-Second, the integral converges at a certified rate: for $s\geq s_0$ every odd
-$n$ with $\Omega(n)=k-i$ satisfies $n\geq3^{k-i}$, so
-$P_{k-i}^{\mathrm{odd}}(s)\leq3^{-(k-i)(s-s_0)}P_{k-i}^{\mathrm{odd}}(s_0)$,
-while $a(s)\leq2^{-(s-s_0)}a(s_0)$ by \eqref{eq:odd-h1-negative}; since
-$3^{-x}\leq2^{-x}$, each term of $P_k^+$ then decays by at least
-$2^{-k(s-s_0)}$ and
+To estimate $\int_{s(3)}^\infty P_k^+$, fix a cut point $s_0>s(3)$ and treat
+the two pieces differently. Each is effective for its own reason.
+
+On the compact piece $[s(3),s_0]$, every $P_j^{\mathrm{odd}}$ is a Dirichlet
+series with positive terms and, by \eqref{eq:odd-h1-negative}, $a$ is a
+positive combination of such series; a sum of products of non-negative
+decreasing functions is decreasing, so $P_k^+$ decreases in $s$. A finite
+left-endpoint Riemann sum over $[s(3),s_0]$ is therefore an upper bound for
+$\int_{s(3)}^{s_0}P_k^+$, with no quadrature error to estimate --- which is
+what makes this step certifiable without any analysis of the quadrature rule
+itself.
+
+On the tail $[s_0,\infty)$ the integral converges at a certified rate. Every
+odd $n$ with $\Omega(n)=k-i$ satisfies $n\geq3^{k-i}$, so for $s\geq s_0$,
+writing $t=s-s_0$, we get
+$P_{k-i}^{\mathrm{odd}}(s)\leq3^{-(k-i)t}P_{k-i}^{\mathrm{odd}}(s_0)$, while
+every Dirichlet term of $a$ has $n\geq2$ and hence
+$a(s)\leq2^{-t}a(s_0)$ by \eqref{eq:odd-h1-negative}. Since
+$3^{-x}\leq2^{-x}$ for $x\geq0$, the $i$th term of $P_k^+$ is multiplied by at
+most $3^{-(k-i)t}2^{-it}\leq2^{-kt}$; all terms being non-negative, Tonelli
+permits termwise integration, and $\int_0^\infty2^{-kt}\dd t=1/(k\log2)$ gives
 \begin{equation}\label{eq:odd-majorant-tail}
  \int_{s_0}^\infty P_k^+(s)\dd s\leq\frac{P_k^+(s_0)}{k\log2}.
 \end{equation}
-Together with \eqref{eq:odd-nearabs-certified} this gives
-$\int_{s(3)}^\infty A_k(s)\dd s\leq C_N3^{-k}$ for $k\geq59$, which is the
-range in which \eqref{eq:odd-remainder} is used.
+Adding the Riemann sum over $[s(3),s_0]$ to \eqref{eq:odd-majorant-tail}
+bounds $\int_{s(3)}^\infty P_k^+$, hence $\int_{s(3)}^\infty A_k$ by
+\eqref{eq:odd-majorant}; the value so obtained is
+\eqref{eq:odd-nearabs-certified}, which gives
+$\int_{s(3)}^\infty A_k(s)\dd s\leq C_N3^{-k}$ for $k\geq59$, the range in
+which \eqref{eq:odd-remainder} is used.
 
 Substituting the certified constants, the four contributions are
 \[
  \abs{R_k}\leq\Bigl(
  \underbrace{\frac{5.48910\cdot14414}{18}}_{4395.55}
- +\underbrace{\frac{44.5987}{2}+\frac{5\cdot590}{64}+C_N+N_U}_{462.33}
+ +\underbrace{\frac{44.5987}{2}+\frac{5\cdot590}{64}+C_N+N_U}_{462.34}
  \Bigr)(k+3)^3 3^{-k}<4900(k+3)^3 3^{-k},
 \]
 with $C_N=367.8435$ and $N_U=26.0962$.
@@ -842,13 +855,27 @@ Set
  \alpha_+=\frac12\sum_{i\geq0}\alpha_i2^i.
 \]
 The series converges, and a pole location at one value of $t$ is not enough to
-see it: what is needed is a bound on the coefficients uniform in $t$. The first
-$z$-pole of $\partial_sG_2(t,\cdot)$ is at $z=3^t$, so for $t\in[1,2]$ all of
-these functions are analytic in $\abs z<3$. Fix $r$ with $2<r<3$. Then
-$M=\sup_{1\leq t\leq2}\sup_{\abs z=r}\abs{\partial_sG_2(t,z)}$ is finite, the
-set $[1,2]\times\{\abs z=r\}$ being compact and $\partial_sG_2$ continuous on
-it, and Cauchy's estimate on the fixed circle $\abs z=r$ gives
-$\alpha_i\leq Mr^{-i}$ uniformly in $t$. Hence
+see it: what is needed is a bound on the coefficients uniform in $t$.
+
+First, $G_2$ is analytic in $s$ on a neighbourhood of $[1,2]$, the apparent
+branch point of $(s-1)^z$ at $s=1$ notwithstanding. Indeed
+$F(s,z)=\zeta(s)^zH(s,z)$ by \eqref{eq:H-full}, so
+\[
+ G_2(s,z)=\bigl((s-1)\zeta(s)\bigr)^z(1-z2^{-s})H(s,z),
+\]
+and $(s-1)\zeta(s)$ is analytic near $s=1$ with value $1$ there, the pole of
+$\zeta$ being simple with residue $1$; hence $\bigl((s-1)\zeta(s)\bigr)^z
+=\exp\bigl(z\log((s-1)\zeta(s))\bigr)$ is analytic there too, and $H$ is
+analytic by Proposition~\ref{prop:analyticity}. (At $s=1$ this also gives
+$G_2(1,z)=H_{\mathrm o}(1,z)$, as used above.)
+
+The first $z$-pole of $\partial_sG_2(t,\cdot)$ is at $z=3^t$, so for
+$t\in[1,2]$ all of these functions are analytic in $\abs z<3$. Fix $r$ with
+$2<r<3$. Then $M=\sup_{1\leq t\leq2}\sup_{\abs z=r}
+\abs{\partial_sG_2(t,z)}$ is finite, the set $[1,2]\times\{\abs z=r\}$ being
+compact and $\partial_sG_2$ continuous on it by the previous paragraph, and
+Cauchy's estimate on the fixed circle $\abs z=r$ gives $\alpha_i\leq Mr^{-i}$
+uniformly in $t$. Hence
 $\sum_{i\geq0}\alpha_i2^i\leq M(1-2/r)^{-1}<\infty$.
 
 \begin{lemma}\label{lem:S1-bound}
@@ -983,7 +1010,7 @@ $\log(m+1)\geq\log2>1/4$; and $\delta_0=-1=-D(0)$.
 For the upper bound put $\Lambda_m=\sum_{i=0}^m2^i\eta_i(m-i)$. Since
 $\e^{-x}-1+x\leq\min(x,x^2/2)$ for $x\geq0$, taking
 $x=(m-i)\log2\,\e^{-u}$ gives
-\begin{equation}\label{eq:Tm-integral-bound}
+\begin{equation}\label{eq:Lambda-integral-bound}
  \Lambda_m\leq\int_0^\infty \e^{-u}\sum_{i=0}^m\frac{(2u)^i}{i!}
  \min\left((m-i)\log2\,\e^{-u},
  \frac{(m-i)^2(\log2)^2\e^{-2u}}2\right)\dd u.
@@ -1170,10 +1197,9 @@ Therefore
  \varphi(2440)
  >390371.6-72.1-276166.8-112977.6-0.005>1155.
 \]
-The same substitution gives $\varphi(2432)<0<\varphi(2433)$, so the criterion
-gives $\varphi(2433)>135$, so the criterion is already in force at $k=2433$.
-Direct evaluation puts the sign change just below that, at
-$\varphi(2432)<0<\varphi(2433)$; we do not rely on it, since certifying
+The same substitution at $k=2433$ gives $\varphi(2433)>135$, so the criterion
+is already in force there. Direct evaluation puts the sign change just below
+that, at $\varphi(2432)<0<\varphi(2433)$; we do not rely on it, since certifying
 $\varphi(2432)<0$ would need a \emph{lower} bound on $R(2432)$, whereas every
 constant in \eqref{eq:full-certified-constants} is one-sided the other way.
 Nothing below requires the first index: we carry the threshold at $2440$, which

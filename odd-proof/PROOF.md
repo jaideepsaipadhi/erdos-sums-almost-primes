@@ -249,7 +249,7 @@ Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give the Lagrange-remainder part
 of (5.1) with coefficient CE S/18 (the CE of 5.1(b); with CE = 3 this would be
 the S/6 of earlier drafts).  Adding 5.1(a) and 5.1(c),
     C = CE S/18 + S_0/2 + 5*590/64 + CN + NEARU
-      = 4395.5 + 22.3 + 46.1 + 367.8 + 26.1 = 4857.9,
+      = 4395.55 + 22.30 + 46.10 + 367.85 + 26.10 = 4857.90,
 and (5.1) holds with C = 4900 on k >= 59.
 
 The 0.9% of margin reflects the NS = 1600 box width, not the method.  Halving
@@ -288,7 +288,7 @@ giving
     sum_{i>16} |w_i| 3^i <= M (3/R)^17/(1 - 3/R) <= 5990.
 
 Hence S <= 14414.  This is the S of 5.2; the constant C of (5.1) is
-CE S/18 + S_0/2 + 5*590/64 + CN + NEARU = 4857.9, not S/6 -- see 5.2.
+CE S/18 + S_0/2 + 5*590/64 + CN + NEARU = 4857.90, not S/6 -- see 5.2.
 
 Both halves are necessary.  Cauchy from i = 0 gives C = 327869 and K0 = 71,
 too weak to meet the certified sweep: the circle estimate discards the
