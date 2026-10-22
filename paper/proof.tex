@@ -420,14 +420,10 @@ Lemma~\ref{lem:odd-constants} gives
 
 \subsection{The remainder}
 
-The following proposition records exactly the interval-arithmetic input used
-for the odd sums. The coefficient sums are weighted $\ell^1$ norms; their
-finiteness follows analytically from Proposition~\ref{prop:analyticity}, while
-the displayed numerical bounds are certified.
-
-\begin{proposition}[Certified odd input]\label{prop:odd-certified}
-Let
-\begin{align*}
+Three weighted $\ell^1$ norms of coefficients carry all of the interval
+input for the odd sums. Put
+\begin{equation}\label{eq:sigma-def}
+\begin{aligned}
  \Sigma_0&=\sum_{m\geq0}3^m
    \abs{[z^m](1-z/3)H_{\mathrm o}(1,z)},\\
  \Sigma_1&=\sum_{m\geq0}3^m
@@ -435,15 +431,13 @@ Let
  \Sigma_2&=\sup_{1\leq s\leq s(3)}
    \sum_{m\geq0}3^m
    \abs{[z^m](1-z/3)^3\partial_s^2H_{\mathrm o}(s,z)}.
-\end{align*}
-The certified computation gives
-\begin{equation}\label{eq:odd-certified-coefficients}
- \Sigma_0\leq44.5987,
- \qquad \Sigma_1\leq486.1945,
- \qquad \Sigma_2\leq14414.
+\end{aligned}
 \end{equation}
-Split the remainder of Proposition~\ref{prop:odd-two-term} at $u=3$: with
-$E_j$ the explicit expression in \eqref{eq:odd-local-product}, put
+Their finiteness is analytic, from Proposition~\ref{prop:analyticity}; only the
+numerical values below are certified.
+
+Next, split the remainder of Proposition~\ref{prop:odd-two-term} at $u=3$:
+with $E_j$ the explicit expression in \eqref{eq:odd-local-product}, put
 \begin{equation}\label{eq:near-far-split}
  R_{k,\mathrm{far}}=\sum_{j=0}^k\int_3^\infty
    \frac{u^{k-j}}{(k-j)!}E_j(u)\dd u,
@@ -453,10 +447,11 @@ $E_j$ the explicit expression in \eqref{eq:odd-local-product}, put
 \end{equation}
 so that $R_k$ is $R_{k,\mathrm{far}}+R_{k,\mathrm{near}}$ together with the two
 coefficient tails of
-\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}.
+\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}. Here
+$s(3)$ denotes the value of $s$ at $u=3$.
 
-For the far range, write $\varepsilon=s-1$ and $J=\zeta(s)/(-\zeta'(s))$, and
-let
+The far range needs one further constant. Write $\varepsilon=s-1$ and
+$J=\zeta(s)/(-\zeta'(s))$, and let
 \begin{equation}\label{eq:CE-def}
 \begin{gathered}
  C_b=\sup\,\abs{\varepsilon\zeta},\qquad
@@ -468,48 +463,66 @@ let
 \end{gathered}
 \end{equation}
 every supremum being over $1<s\leq s(3)$. Each of the four is a ratio in which
-the pole of $\zeta$ at $s=1$ cancels, so none is evaluated on boxes of $s$ --
-arb treats each occurrence of $\varepsilon$ independently and the cancellation
-would be lost; they are computed instead from a Taylor model about
-$1+\varepsilon(3)/2$, which makes the cancellation symbolic and covers the whole
-range at once. The computation certifies the aggregate inequality
+the pole of $\zeta$ at $s=1$ cancels. How they are computed matters, and is
+described in Section~\ref{sec:lean}: evaluating them on boxes of $s$ loses that
+cancellation and the enclosures diverge however finely the range is
+partitioned, so a Taylor model is used instead.
+
+\begin{proposition}[Certified odd input]\label{prop:odd-certified}
+With $\Sigma_i$ as in \eqref{eq:sigma-def} and $C_E$ as in
+\eqref{eq:CE-def}, the following are certified by interval arithmetic.
+
+\noindent(i) The coefficient norms satisfy
+\begin{equation}\label{eq:odd-certified-coefficients}
+ \Sigma_0\leq44.5987,
+ \qquad \Sigma_1\leq486.1945,
+ \qquad \Sigma_2\leq14414,
+ \qquad C_E\leq5.48910.
+\end{equation}
+
+\noindent(ii) On the far range,
 \begin{equation}\label{eq:odd-far-certified}
  \sum_{j=0}^k\int_3^\infty
   \frac{u^{k-j}}{(k-j)!}\abs{E_j(u)}\dd u
- \leq \frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k},
- \qquad C_E\leq5.48910.
+ \leq \frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k}.
 \end{equation}
-For the near range the two groups of terms in \eqref{eq:odd-local-product} are
-certified separately. With $s(3)$ the value of $s$ at $u=3$,
-\begin{equation}\label{eq:odd-nearabs-certified}
+
+\noindent(iii) On the near range the two groups of terms in
+\eqref{eq:odd-local-product} are bounded separately:
+\begin{align}
  \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}\abs{h_j(s(u))}J(u)\dd u
- \leq C_N3^{-k}\quad(k\geq59),
- \qquad C_N\leq367.8435,
-\end{equation}
-and the two subtracted main terms satisfy
-\begin{equation}\label{eq:odd-near-main}
+ &\leq C_N3^{-k}\quad(k\geq59),
+ & C_N&\leq367.8435,
+ \label{eq:odd-nearabs-certified}\\
  \sum_{j=0}^k\int_0^3\frac{u^{k-j}}{(k-j)!}
   \bigl(\abs{h_j(1)}\e^{-u}+\abs{b_j}\e^{-2u}\bigr)\dd u
- \leq N_U(k+3)^3 3^{-k},
- \qquad N_U\leq26.0962.
-\end{equation}
-The restriction to $k\geq59$ in \eqref{eq:odd-nearabs-certified} is the range
-in which \eqref{eq:odd-remainder} is applied, and it is needed: the
-left-hand side exceeds $C_N3^{-k}$ for $k\leq23$, peaking near $k=12$ at some
-$15329\cdot3^{-k}$. That costs nothing, because monotonicity below the
-analytic threshold comes from the certified sweep and never appeals to
-\eqref{eq:odd-remainder}. On $k\geq59$ the certified value is
-$34.14\cdot3^{-k}$; we carry the weaker $C_N\leq367.8435$, which is the bound
-the first group of terms satisfies for every $k\geq1$, so that one constant
-serves both and the ledger below is unchanged.
+ &\leq N_U(k+3)^3 3^{-k},
+ & N_U&\leq26.0962.
+ \label{eq:odd-near-main}
+\end{align}
 
-Finally, $\beta>0$, the inequality
+\noindent(iv) $\beta>0$, and
 \begin{equation}\label{eq:odd-base-59}
-  4900(62)^3 3^{-59}<\frac{\beta}{3}2^{-59}
+  4900(62)^3 3^{-59}<\frac{\beta}{3}2^{-59}.
 \end{equation}
-is certified, and direct interval evaluation gives
-$g_k>g_{k+1}$ for $1\leq k\leq75$.
+
+\noindent(v) Direct interval evaluation gives $g_k>g_{k+1}$ for
+$1\leq k\leq75$.
 \end{proposition}
+
+\noindent
+Part~(v) is not a coefficient bound but a sweep, and it is what makes the
+range restriction in \eqref{eq:odd-nearabs-certified} harmless. That
+restriction is necessary, not conservative: the left-hand side exceeds
+$C_N3^{-k}$ for $k\leq23$, peaking near $k=12$ at some $15329\cdot3^{-k}$,
+because the $h_j$ alternate in sign and the sum has to be majorized rather
+than evaluated in closed form --- see the proof of
+Proposition~\ref{prop:odd-remainder}. Monotonicity below the analytic
+threshold comes from~(v) and never appeals to \eqref{eq:odd-remainder}. On
+$k\geq59$ the certified value is $34.14\cdot3^{-k}$; we carry the weaker
+$C_N\leq367.8435$, which is the bound the first group of terms satisfies for
+every $k\geq1$, so that one constant serves both and the ledger below is
+unchanged.
 
 \begin{lemma}\label{lem:pole-coefficient-bounds}
 Let $A(z)=\sum_{j\geq0}a_jz^j$.
