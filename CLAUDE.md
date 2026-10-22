@@ -52,6 +52,22 @@ parses `s0_cauchy.log`, `s1_cauchy.log`, `cn.log`, `ce_taylor.log` and
 `nearu.log` and fails if any stated numeral is below the certified value.
 Verified against a deliberately reintroduced `486.1945`.
 
+### `Sigma_2 <= 14414` is a TWO-LOG assembly with 0.16 of margin
+
+It is the largest constant in the paper and carries `4395.55` of the `4857.88`
+ledger — 90% of it — and it is not a single logged number:
+
+    head j <= 16   8423.9098   hcoeff2.log      (interval recursion, 1600 s-boxes)
+    tail j > 16    5989.9336   mr_deriv_sweep.log: G_2 <= 1967216.5 at R = 4.5,
+                               tail = G_2 (3/R)^17 / (1 - 3/R)
+    total         14413.8434   against the stated 14414 — margin 0.157
+
+So it is the second-tightest constant after `C_E`. `check_proof_spine.py` now
+recomputes the assembly from both logs. Note `hcoeff2.log`'s own trailing
+`C_2 = 10.8165` / `K0 = 33` lines are a DIFFERENT quantity — don't mistake
+them for `Sigma_2`. The `NS = 40` boxes behind the tail are coarse and likely
+several-fold loose; that direction is safe.
+
 ### `C_E <= 5.48910` is the tightest constant in the paper
 
 The four suprema of `eq:CE-def` are attained at `s(3)` and give

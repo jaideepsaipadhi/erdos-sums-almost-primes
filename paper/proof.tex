@@ -1632,6 +1632,22 @@ $z=3$ before applying coefficient recursion or Cauchy bounds. The range
 $0<u\leq3$ is evaluated directly, while the range $u\geq3$ uses the Taylor
 model made explicit in Proposition~\ref{prop:odd-two-term}.
 
+$\Sigma_2$ is not a single computed number but a sum of two, and since it
+carries $4395.55$ of the $4857.88$ in the ledger of
+Proposition~\ref{prop:odd-remainder} it is worth saying which. The head
+$j\leq16$ is a direct interval recursion on the coefficients over $1600$ boxes
+in $s$, giving $8423.91$; a Cauchy estimate would be far lossier there, because
+it is dominated by the maximum over the circle and discards the cancellation
+among the true coefficients. The tail $j>16$ is then exactly where a Cauchy
+estimate is cheap: with $\sup_{\abs z=4.5}$ of the pole-free part at most
+$1.9673\cdot10^{6}$, the tail is at most that times
+$(3/4.5)^{17}(1-3/4.5)^{-1}$, which is $5989.94$. The two sum to
+$14413.85$, so the stated $\Sigma_2\leq14414$ holds with $0.16$ to spare --- the
+narrowest margin of any constant here except $C_E$. Both halves are recorded in
+the repository, and the $40$ boxes in $s$ behind the tail are coarse enough
+that it is likely several-fold loose; that direction is safe, and the budget
+closes either way.
+
 The constant $C_E$ is certified on the whole of $(1,s(3)]$, and in fact on its
 closure: the four quantities entering \eqref{eq:CE-def} are ratios in which the
 pole of $\zeta$ at $s=1$ cancels, so each extends continuously to $s=1$, and

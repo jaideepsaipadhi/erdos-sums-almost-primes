@@ -236,6 +236,34 @@ for name, logname, pat, stated in certs:
           "rounded %s" % ("up, correct" if ok
                           else "DOWN -- the stated bound is FALSE"))
 
+# Sigma_2 needs its own check: it is not a single logged number but a two-part
+# assembly, and it is the largest constant in the paper (it carries 4395.55 of
+# the 4857.88 ledger, i.e. 90% of it).  Head j <= 16 by interval recursion
+# (hcoeff2.log), tail j > 16 by Cauchy at radius 4.5 on the pole-free part
+# (mr_deriv_sweep.log, G_2), summed as G_2 (3/R)^17/(1-3/R).  Margin is 0.16.
+print()
+h2 = LOGS / "hcoeff2.log"
+md = LOGS / "mr_deriv_sweep.log"
+if h2.exists() and md.exists():
+    mh = re.search(r"S \(head, j <= 16\) = ([0-9.]+)", h2.read_text())
+    mg = re.search(r"G_2 <= ([0-9.]+)", md.read_text())
+    if mh and mg:
+        head = arb(mh.group(1))
+        G2 = arb(mg.group(1))
+        r = arb(3) / arb("4.5")
+        total = head + G2 * r ** 17 / (1 - r)
+        ok = float(S2.str(30, radius=False)) >= float(total.upper())
+        check("Sigma_2: stated %s >= head %s + Cauchy tail"
+              % (S2.str(8, radius=False), head.str(10, radius=False)),
+              ok,
+              "head + tail <= %s, margin %s"
+              % (total.str(12, radius=False),
+                 (S2 - total).str(6, radius=False) if ok else "NEGATIVE -- FALSE"))
+    else:
+        print("%-56s %s" % ("Sigma_2: cannot parse its two logs", "skipped"))
+else:
+    print("%-56s %s" % ("Sigma_2: logs absent", "skipped"))
+
 print()
 if fails:
     print("FAILED: %d check(s): %s" % (len(fails), ", ".join(fails)))
