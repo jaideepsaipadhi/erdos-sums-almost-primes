@@ -38,12 +38,35 @@ falls back under `CN` at `k = 24`, and is `27.63` at `k = 59` — so `CN` has
 invoked only for `k >= K0 = 59`; monotonicity for `k <= 75` comes from the
 certified sweep, which never calls on the remainder bound.  **No certified
 constant moves:** `CN`, `C = 4900` and `K0 = 59` all stand.  What has to change
-is the *range* on which (5.1) is asserted, and the near-range argument itself,
-which must be redone on `|h_j|` (majorant `H_o^+ = H_o e^{-2 h_1 z}`, whose
-coefficients are non-negative, with the `s`-range split: the majorant's crude
-per-term bound stops being integrable around `s ~ 15`, where the true quantity
-is already negligible).  A single all-`k` constant would instead be about
-`19819`, which would push `K0` to `63`.
+is the *range* on which (5.1) is asserted, and the near-range argument itself.
+A single all-`k` constant would instead be about `19819`, which would push `K0`
+to `63` and would also outrun `OddNumericalFacts.sweep_low` (`k <= 58`).
+
+`nearabs_certified.py` carries out the repair and certifies
+
+    3^k T_k <= CN = 367.8435    for every k >= 59,
+
+i.e. the ABSOLUTE sum obeys the same bound the manuscript already states, so
+the ledger and `C = 4900` need no change at all.  Method: the majorant
+`H_o^+ = H_o exp(-2 h_1 z)` has non-negative coefficients dominating `|h_j|`
+termwise, so `A_k(s) <= P_k^+(s) = sum_i P^odd_{k-i}(s) a(s)^i/i!` with
+`a = 2|h_1|`.  Every factor there is a Dirichlet series with positive terms, so
+`P_k^+` is decreasing in `s` and a **left-endpoint Riemann sum is an upper bound
+outright** — no quadrature error analysis is needed.  The `s`-tail closes
+because `3^{-(k-i)t} 2^{-it} <= 2^{-kt}`, giving `P_k^+(s_N)/(k log 2)`; the
+`k`-tail uses Cauchy at `R = 3.15 < 3^{s(3)} = 3.1727`, where `(3/R)^{201}`
+supplies the decay.
+
+Result (`nearabs.log`, settings `200 8.0 220 60 60 400`): the head is evaluated
+at **every** `k` in `[59, 200]` — not a sample, since nothing here proves the
+values fall off — and its worst is `34.1375` at `k = 59`; beyond `k = 200` the
+Cauchy branch gives `9.6571`.  So `CN` has better than tenfold slack where the
+bound is used.
+
+| script | quantity | result |
+|---|---|---|
+| `absratio.py` | the defect, and where it bites | `A_k 3^k` peaks at `15329` (`k=12`), under `CN` from `k=24` |
+| `nearabs_certified.py` | repaired near-range bound | `3^k T_k <= 34.1375` for all `k >= 59` |
 
 ## Margin under (5.1)
 
