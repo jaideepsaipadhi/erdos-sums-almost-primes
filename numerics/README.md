@@ -45,8 +45,61 @@ where it is applied.
 | `source_bound`  | `m1_constant.json`, `tail_constants.json` | `crit_refined.py` |
 | `phi_at_k1`, `phi_mono` | `k1_far_range.log` | `k1_far_range.py` |
 | `sweep_low`  [6,199]    | `certificate*.json`  | `certificate.py`, `lowk_verify.py` |
-| `sweep_mid`  [78,899]   | `crit_78_734.json` (78-734, refined) + `crit_certified.json` (735-899, unrefined) | `crit_refined.py` |
+| `sweep_mid`  [78,899]   | `crit_78_734.json` (78-734, refined) + `crit_650_899.json` (728-899, fallback) | `crit_refined.py`, `crit_fallback.py` |
 | `sweep_high` [900,2439] | `crit_900_2439.json` | `sweep_900_2439.py` |
+
+### The 735-899 slice: what used to back it, and what does now
+
+This table used to credit `crit_refined.py` for `crit_certified.json` as well.
+That was wrong, and the error mattered because `crit_certified.json` was the
+only artifact covering 735-899 -- the slice between the refined run and
+`[900,2439]`.  Solving for the inputs that reproduce it (exactly, at k = 650,
+735 and 899) gives
+
+    |E1(k)| <= alpha*k + beta,   alpha = 15.5716454,  beta = -39.60918
+
+-- i.e. `crit_assembly.py`'s linear bound, whose `crit_sweep(650, 899)` is
+hardcoded in its `__main__`, run with the manuscript's **superseded** `alpha_+`
+(the paper now states `alpha_+ <= 15.425661`) plus a **negative intercept the
+manuscript does not state at all**.  `crit_900_2439.json` fits the same pair,
+exactly, at k = 900, 1500 and 2439.  So neither fallback certificate came from
+the script credited here, and `sweep_900_2439.py` does not reproduce its own
+committed output: rerun, it gives min 10115.96 where the committed file had
+9724.11.
+
+Nothing was false -- the larger `alpha` outweighs the negative `beta`, so both
+committed files were *more* conservative than the certified inputs require, and
+every positivity claim held a fortiori.  The defect was provenance and
+declaration: a referee following this repo could not regenerate either file,
+and `crit_assembly.py` run as committed produces `crit_sweep.json`, whose
+`ALPHA, BETA = "15.374", "-37.226"` its own docstring calls "clearly
+uncertified" and which crosses zero at 726 rather than 735.
+
+Both are now regenerated from committed scripts and declared inputs only:
+
+| file | script | result |
+|---|---|---|
+| `crit_650_899.json` | `crit_fallback.py 650 899 crit_650_899.json` | positive on **[728,899]**, min 27.65 at 728; at k=735 it is 362.62 against the old file's 43.04 |
+| `crit_900_2439.json` | `python3 sweep_900_2439.py` | positive on [900,2439], min 10115.96 (was 9724.11) |
+
+`crit_fallback.py` is `sweep_900_2439.py` generalized to an arbitrary range,
+and it reproduces that script's committed-script output on [900,2439] **bit for
+bit** -- that is its regression test, and the reason to trust it on [650,899].
+It uses the per-`i` fallback `E1b` built from `beta_certified.json` plus the
+`M1` tail, needs no `beta` at all, and reports its own `alpha_+` envelope
+(`15.4256608821`) against `uv_constants.json` as a cross-check.
+
+Two consequences worth keeping:
+
+  * **the union now overlaps instead of abutting.**  It used to work only
+    because `crit_certified.json` covered exactly 735-899, with no slack on
+    either side; `verify.py` checked that file's zero crossing and not its
+    load-bearing role, so a one-off change would have opened a silent gap.  The
+    blocks are now `[78,734] [728,899] [900,2439]`, and `verify.py` checks the
+    union for gaps directly.
+  * `crit_certified.json` is kept, superseded, as the baseline the newer runs
+    improve on. `verify.py` checks that `crit_650_899.json` is nowhere weaker
+    than it (250 shared k, none weaker).
 
 Supporting: `bhat_signed_N60.json` (b-hat_i), `gamma2_certified.json`
 (gammahat_i), `delta_table.jsonl` (delta_m), `shards/` (256 shards;

@@ -63,14 +63,52 @@ for fn in ("crit_900_2439.json","crit_78_734.json"):
           "[%d,%d] n=%d min=%.2f"%(ks[0],ks[-1],len(ks),min(c.values())))
     check("%s contiguous"%fn, ks==list(range(ks[0],ks[-1]+1)))
 
-# crit_certified.json is the UNREFINED criterion (manuscript K0 = 735), kept as
-# the baseline the section 6 refinement improves on.  Its zero crossing is the
-# check, not positivity.
-c=load("crit_certified.json")
+# crit_650_899.json: the fallback-E1 sweep over the slice between the refined
+# run and [900,2439].  It is NOT positive throughout -- it crosses zero inside
+# the range -- so the checks are the crossing point and positivity from there.
+cov=[]
+c=load("crit_650_899.json")
+if c:
+    ks=sorted(int(k) for k in c)
+    pos=[k for k in ks if c[str(k)]>0]
+    check("crit_650_899.json contiguous", ks==list(range(ks[0],ks[-1]+1)))
+    check("crit_650_899.json positive block contiguous",
+          pos==list(range(pos[0],pos[-1]+1)),
+          "positive on [%d,%d] min=%.2f"%(pos[0],pos[-1],min(c[str(k)] for k in pos)))
+    check("crit_650_899.json reaches 899", pos and pos[-1]==899)
+    cov.append((pos[0],pos[-1]))
+else:
+    check("crit_650_899.json present", False)
+
+# crit_certified.json is SUPERSEDED by crit_650_899.json.  It is the older
+# unrefined assembly (crit_assembly.py with alpha = 15.5716454, beta =
+# -39.60918 -- the manuscript's earlier alpha_+, plus a beta the manuscript
+# does not state), kept only as the baseline the newer runs improve on.  Its
+# zero crossing is the check, not positivity, and it must not be weaker than
+# the file that replaced it.
+c=load("crit_certified.json"); cn=load("crit_650_899.json")
 if c:
     ks=sorted(int(k) for k in c)
     first_pos=min(k for k in ks if c[str(k)]>0)
-    check("unrefined K0 = 735", first_pos==735, "first positive k = %d"%first_pos)
+    check("superseded unrefined K0 = 735", first_pos==735,
+          "first positive k = %d"%first_pos)
+    if cn:
+        shared=[k for k in c if k in cn]
+        check("crit_650_899.json dominates crit_certified.json",
+              not [k for k in shared if cn[k] < c[k]],
+              "%d shared k, none weaker"%len(shared))
+
+# The union must cover 78..2439 with no gap.
+for fn,lo,hi in (("crit_78_734.json",None,None),("crit_900_2439.json",None,None)):
+    c=load(fn)
+    if c:
+        ks=sorted(int(k) for k in c); cov.append((ks[0],ks[-1]))
+if cov:
+    cov.sort()
+    gaps=[(cov[i][1],cov[i+1][0]) for i in range(len(cov)-1) if cov[i+1][0]>cov[i][1]+1]
+    check("criterion sweeps cover [%d,%d] with no gap"%(cov[0][0],cov[-1][1]),
+          not gaps, "blocks "+" ".join("[%d,%d]"%b for b in cov)
+          + ("  GAPS: %s"%gaps if gaps else ""))
 
 print()
 sys.exit(1 if FAIL else 0) if FAIL else print("all checks passed")

@@ -1226,8 +1226,13 @@ $k$ and found positive --- the same quantity whose closed-form lower bound
 $\varphi$ drives Section~\ref{sec:assembly}, but evaluated per $k$ rather than
 bounded uniformly, which is why it closes well below the threshold $2440$ that
 the uniform bound requires. Within the middle range two assemblies of
-that quantity are involved: the refined one for $78\leq k\leq734$, and the
-earlier, coarser one it improves on for $735\leq k\leq899$.
+that quantity are involved: the refined one for $78\leq k\leq734$, and for the
+rest of the range the same coarser assembly that covers $900\leq k\leq2439$,
+whose bound on $E_1$ is the one built termwise from the $\beta_i$ rather than
+from their envelope $\alpha_+$. That coarser sweep is in fact positive from
+$k=728$, so the two overlap rather than abut; only $735\leq k\leq899$ is needed
+here, and the overlap is recorded because it is what makes the union of
+\eqref{eq:full-sweep-ranges} robust to a change in either sweep.
 \end{proposition}
 
 The coefficient tails in \eqref{eq:Eexp-certified} are obtained only after the
