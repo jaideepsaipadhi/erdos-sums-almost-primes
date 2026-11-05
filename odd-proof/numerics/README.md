@@ -32,15 +32,29 @@ for every `s`, and at `s = s(3)` the coefficients run
 signed one reproduces `P_k^odd(s(3))` to 267 digits and peaks at `367.8436` at
 `k = 11`, which is `CN`, so the comparison is against the right quantity.
 
-The inflation is confined to small `k`.  `A_k 3^k` peaks at `15329` at `k = 12`,
-falls back under `CN` at `k = 24`, and is `27.63` at `k = 59` — so `CN` has
-13.3x of slack where the bound is actually used.  The analytic branch is
-invoked only for `k >= K0 = 59`; monotonicity for `k <= 75` comes from the
-certified sweep, which never calls on the remainder bound.  **No certified
-constant moves:** `CN`, `C = 4900` and `K0 = 59` all stand.  What has to change
-is the *range* on which (5.1) is asserted, and the near-range argument itself.
-A single all-`k` constant would instead be about `19819`, which would push `K0`
-to `63` and would also outrun `OddNumericalFacts.sweep_low` (`k <= 58`).
+The inflation is confined to small `k`.  **Two different quantities, and they
+must not be mixed up.**  `absratio.py`'s POINTWISE sum `A_k 3^k` at `u = 3`
+peaks at `15329` at `k = 12`, falls back under `CN` at `k = 24`, and is `27.63`
+at `k = 59`.  What `eq:odd-nearabs-certified` actually bounds is the
+INTEGRAL, and for that the figures are different: run with `K0 = 1`
+(`nearabs_certified.py 60 8.0 220 60 60 400 1`) it peaks at `699.87` at
+`k = 14` and exceeds `CN = 367.8436` for exactly `9 <= k <= 25`.  Quote the
+integral figures whenever the subject is (5.1); the paper does.
+
+The analytic branch is invoked only for `k >= K0 = 59`; monotonicity for
+`k <= 74` comes from the certified sweep, which never calls on the remainder
+bound.  **No certified constant moves:** `CN`, `C = 4900` and `K0 = 59` all
+stand.  What has to change is the *range* on which (5.1) is asserted, and the
+near-range argument itself.
+
+An earlier version of this paragraph said a single all-`k` constant "would be
+about `19819`, which would push `K0` to `63`".  **Both halves are wrong.**
+`19819` has no artifact anywhere; the integral's all-`k` sup is about `700`.
+And with `700` in place of `367.84` the ledger becomes about `5190`, giving
+`q(59) = 0.918 * 5190/4900 = 0.973 < 1` — so `K0` would stay at 59 and would
+not outrun `sweep_low` at all.  Restricting the range is still the better
+repair, because the method is loosest at the left end of the `s` range rather
+than at small `k`, but not for the reason stated here.
 
 `nearabs_certified.py` carries out the repair and certifies
 

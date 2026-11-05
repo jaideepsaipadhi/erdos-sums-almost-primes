@@ -96,7 +96,7 @@ and hence, with section 6, the threshold K0^odd = 59.
 
 The range in (5.1) is necessary, not conservative; see 5.1(c) below.  It costs
 nothing, since (5.1) is used only for k >= K0^odd = 59 and monotonicity for
-k <= 75 comes from the certified sweep, which does not call on it.
+k <= 74 comes from the certified sweep, which does not call on it.
 
 The rate is 3^-k, not the 4.5^-k of a naive Cauchy estimate: the pole of
 H(s,.) at z = 3^s sets it, and no contour argument does better.  The factor

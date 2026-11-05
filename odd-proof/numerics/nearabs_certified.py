@@ -13,7 +13,7 @@ alternate).  This script bounds T_k directly and certifies
     3^k T_k <= CN = 367.8436    for all k >= 59,
 
 which is the range on which (5.1) is used: the odd assembly takes the analytic
-branch only for k >= K0 = 59, and monotonicity for k <= 75 comes from the
+branch only for k >= K0 = 59, and monotonicity for k <= 74 comes from the
 certified sweep, which never calls on the remainder bound.  So the repair
 leaves CN, C = 4900 and K0 = 59 untouched.
 

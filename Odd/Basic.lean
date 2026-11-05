@@ -166,12 +166,20 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   `sum_j u^{k-j}/(k-j)! |h_j(s(u))|`, and the coefficients `h_j` alternate in
   sign -- `h_1(s) = Pi(s) - log zeta(s) < 0` for every `s` -- so that sum has
   to be majorized rather than evaluated by the coefficient identity for
-  `P_k^odd`.  The resulting bound exceeds `MR (k+3)^3 3^-k` for small `k`: at
-  `k = 12` the near-range term alone needs about `15329 * 3^-k` against
-  `CN = 367.8436`, and a single constant valid for all `k >= 1` would be about
-  `19819`, which would push the analytic threshold from 59 to 63 and so past
-  `sweep_low` below.  On `59 <= k` the certified value is `34.14`, so `CN` and
-  `MR <= 4900` both stand.  See `odd-proof/numerics/nearabs_certified.py` and
+  `P_k^odd`.  The resulting bound exceeds `CN 3^-k` for small `k`: run with
+  `K0 = 1` the certified integral bound peaks at `699.87` at `k = 14` and
+  exceeds `CN = 367.8436` for exactly `9 <= k <= 25`, so `k >= 26` would in
+  fact serve and 59 is stated because it is the only range in which the bound
+  is ever applied.  On `59 <= k` the certified value is `34.14`, so `CN` and
+  `MR <= 4900` both stand.
+
+  Do NOT quote `15329` or `19819` here, as an earlier version of this docstring
+  did.  `15329` is `absratio.py`'s POINTWISE sum `3^k A_k(s(3))` at `k = 12`, a
+  different quantity from the integral this field's bound concerns, and `19819`
+  has no artifact anywhere.  The consequence drawn from them was also wrong:
+  with an all-`k` constant near `700` the ledger is about `5190` and
+  `q(59) = 0.973 < 1`, so the threshold would stay at 59 rather than moving to
+  63.  See `odd-proof/numerics/nearabs_certified.py` and
   Proposition 3.5 of the manuscript, which is stated on the same range.
 
   Stating this for all `k` would assume more than the paper proves, and since

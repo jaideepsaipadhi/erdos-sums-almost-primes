@@ -135,7 +135,7 @@ print("a single all-k constant would be about %s in place of C_N = 367.8436"
 # --- the conclusion that matters.  The inflation is confined to SMALL k: the
 # --- absolute sum falls back under C_N at k = 24 and keeps falling, and the
 # --- analytic branch of the odd assembly is used only for k >= K0 = 59, where
-# --- the slack is more than tenfold.  Monotonicity for k <= 75 comes from the
+# --- the slack is more than tenfold.  Monotonicity for k <= 74 comes from the
 # --- certified sweep, which never invokes the remainder bound.  So the repair
 # --- costs nothing in certified constants: C_N, MR = 4900 and K0 = 59 all
 # --- stand, and Proposition 3.5 need only be restated on the range where it is

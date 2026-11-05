@@ -121,8 +121,13 @@ mp.dps = 50
 phi1 = hco(mpf(1), KMAX, DROP_PHI)
 print("Phi_P(1,1) = sum_i phi_i(1) =", mp.nstr(sum(phi1), 14),
       "   prod_{p in {2,3}}(1-1/p) =", mp.nstr(mpf(1) / 3, 14))
-print("Phi_P(1,2) = sum_i phi_i(1)2^i =",
-      mp.nstr(sum(phi1[i] * mpf(2) ** i for i in range(KMAX + 1)), 14))
+# NOTE the truncation: this sum is over i <= KMAX only, and 2^i amplifies the
+# omitted tail, so it agrees with the true Phi_P(1,2) only to ~6e-4.  (The
+# (1,1) sum above has no such factor and is good to 1e-8.)  genP_check.py
+# computes the untruncated value; do not read a discrepancy as an error.
+print("Phi_P(1,2) = sum_{i<=%d} phi_i(1)2^i =" % KMAX,
+      mp.nstr(sum(phi1[i] * mpf(2) ** i for i in range(KMAX + 1)), 14),
+      "  [TRUNCATED at i = %d; tail inflated by 2^i]" % KMAX)
 print()
 Ic = {m: I(m) for m in range(1, KMAX + 1)}
 print(" k   f_k^P (direct)        reconstruction        residual      residual/2^-k")
