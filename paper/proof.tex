@@ -1401,7 +1401,7 @@ Together the analytic and certified ranges cover all $k\geq6$.
 \end{proof}
 
 %=======================================================================
-\section{A general principle}
+\section{A general principle}\label{sec:general-principle}
 %=======================================================================
 
 \begin{conjecture}\label{conj:general}
@@ -2289,9 +2289,13 @@ throughout, and take full responsibility for every claim made here, including
 those I reached with that assistance.
 
 In more detail, the assistant was used to derive and check the reductions of
-Sections~2--6; to write and run the Arb/FLINT scripts that produce the
-certified constants of Propositions~\ref{prop:odd-certified} and
-\ref{prop:full-certified}; to write the Lean development described in
+Sections~2--6, the general-$\mathcal P$ results of
+Section~\ref{sec:general-principle} and the quadrature bounds of
+Appendix~\ref{app:quadrature}; to write and run the Arb/FLINT scripts that
+produce the certified constants of Propositions~\ref{prop:odd-certified} and
+\ref{prop:full-certified}, and the ordinary floating-point checks of
+Section~\ref{sec:general-principle}, which carry no certificate and on which
+nothing else depends; to write the Lean development described in
 Section~\ref{sec:lean}; and to draft and revise this manuscript. It was also
 used adversarially, to look for errors in work already believed finished. That
 is how the defect in the near-range step of
