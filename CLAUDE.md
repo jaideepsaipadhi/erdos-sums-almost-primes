@@ -52,6 +52,58 @@ parses `s0_cauchy.log`, `s1_cauchy.log`, `cn.log`, `ce_taylor.log` and
 `nearu.log` and fails if any stated numeral is below the certified value.
 Verified against a deliberately reintroduced `486.1945`.
 
+### Two constants had NO generating artifact, and one of them was stated wrong
+
+Repaired 2026-11-05. `101.245` and `1.45` existed only as hardcoded literals
+(`k0_end_to_end.py`, `measure_impact.py`, `check_paper_phi.py`,
+`k1_far_range.py`), annotated "certified separately", with
+`check_paper_phi.py` reading them back out of the manuscript -- so paper and
+scripts agreed only because each had been copied from the other. Writing the
+artifacts found a real error in one of them.
+
+**`101.245` bounds the POLE-FREE part, not the regularized product.** On
+`|z| = 4.2`, with `rho = 0.1749324` the residue at `z = 3`:
+
+    sup |G_2(1,z) - rho/(3-z)|  =  95.49   <= 101.245   <- what the SCRIPTS use
+    sup |(1 - z/3) G_2(1,z)|    = 228.94    > 101.245   <- what the PAPER said
+
+The scripts' tail envelope `T(i) = rho/3^(i+1) + supH/4.2^i` is residue plus
+Cauchy on the pole-free remainder, and is correct with 5.7% to spare, so
+`U_max`, `V_max` and `S*` were never in doubt. The manuscript's
+`eq:contour-certified` named `(1-z/3)G_2` and then derived
+`|c_i| <= 354.36 3^-i` from it -- a false premise. Corrected derivation gives
+`|c_i| <= 101.31 3^-i`, 3.5x SHARPER, so `354.36` survives a fortiori and is
+kept as the stated constant. **Do not "simplify" eq:contour-certified back to
+the regularized product**; `numerics/contour_certified.py` (log `contour.log`)
+certifies both suprema and cross-checks `rho` against the hardcoded literal.
+If `U_max` or `V_max` ever has to be re-derived, note the sensitivity: feeding
+`supH = 226.1` into `T(i)` gives a `U` tail of `0.1076`, already above the
+stated `U_max = 0.08436`. The margin lives entirely in using the right
+function.
+
+**`1.45` is elementary and enormously loose.** `T_k = f_k - I_k` unfolds to
+`sum_{Omega(n)=k} n^-2/log n`, all terms positive, so with `n >= 2^k` and
+Cauchy at `|z| = 3` on `F(2,.)`:
+
+    2^k |T_k| <= M(3)/(k log 2) (2/3)^k,   M(3) = prod_p (1-3p^-2)^-1 <= 7.96896
+
+which beats `1.45/k` from `k >= 6` and at `k = 900` by `10^158`.
+`numerics/tk_certified.py`, log `tk.log`. Consequence: **the threshold 900 is
+inherited from `eq:full-sweep-ranges`, not forced by `T_k`** -- the paper used
+to say it came "from `T_k` alone", which is false. The repository's other
+`1.45` (`certified.py`'s `DELTA`, the quadrature ellipse semi-minor axis) is
+an unrelated coincidence; don't treat it as the source.
+
+### The appendix was stale by one run
+
+The committed certificate is `KMAX = 500` (`u_+ = 1750`, 2194 panels, largest
+radius `4.539e-87`, at `k = 2`). The appendix described a superseded
+`KMAX = 199` run and quoted `1.1e-87` -- a figure no committed artifact
+contains -- with the "twenty orders of magnitude" gap belonging to it. Now
+stated for the run of record (tails `10^-272` and `10^-24618`, radius
+`4.6e-87`, gap 185 orders), and `check_proof_spine.py` reads both out of
+`certificate.json`. Only `6 <= k <= 199` of the run is used.
+
 ### `Sigma_2 <= 14414` is a TWO-LOG assembly with 0.16 of margin
 
 It is the largest constant in the paper and carries `4395.55` of the `4857.88`

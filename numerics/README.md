@@ -125,6 +125,7 @@ and no `NumericalFacts` field depends on them.  Read them that way.
 | `genP_check.py` | the interior case `q >= 3`: the constants `c_0` and `c_2` of Proposition 7.2(iv), against `f_k^P` computed independently | `genP.log` |
 | `boundary_check.py` | the boundary case `q = 2`: that the ratio to the all-primes case tends to `prod_{p in Q}(1-2/p)`, which is what the reduction in section 7 needs | `boundary.log` |
 | `Im_check.py` | the exact identity behind the boundary reduction, and the single primes-free asymptotic the boundary case now rests on | `Im.log` |
+| `boundary_freeze_check.py` | the size of the freezing error, against an independent computation of `f_k^P`: `residual/2^-k` stays near `1.1`, so it is NOT `o(2^-k)` | `freeze.log` |
 
 `Im_check.py` does two separate things, and the first is a hard check rather
 than evidence.  `--identity` verifies
@@ -221,6 +222,35 @@ consistent with proved mathematics.
 The tail estimates use analyticity of G2 in |z| <= 2.9 (`M1_R2.9`,
 `M2sup_R2.9`).  The Lean wide-radius chain runs at |z| <= 29/10, so this is
 formally proved, not only argued in the manuscript.
+
+## The two constants that had no artifact at all: `101.245` and `1.45`
+
+Added 2026-11-05.  Both appeared only as hardcoded literals, annotated
+"certified separately", with `check_paper_phi.py` reading them back out of the
+manuscript.  Writing the artifacts found that one of them was attached to the
+wrong function.
+
+| script | what it certifies | log |
+|---|---|---|
+| `contour_certified.py` | `sup_{|z|=4.2}` of BOTH `G_2(1,z) - rho/(3-z)` (`95.49`) and `(1-z/3)G_2(1,z)` (`228.94`), plus `rho` from the same series | `contour.log` |
+| `tk_certified.py` | `M(3) = prod_p (1-3p^-2)^-1 <= 7.96896`, whence `2^k|T_k| <= M(3)(2/3)^k/(k log 2)` | `tk.log` |
+
+`101.245` bounds the **pole-free part**, which is what the tail envelope
+`T(i) = rho/3^(i+1) + supH/4.2^i` in `k0_end_to_end.py` and
+`measure_impact.py` has always used, with 5.7% to spare.  The manuscript named
+the regularized product instead, whose sup is `228.94`, and derived
+`|c_i| <= 354.36 3^-i` from that false premise; the corrected derivation gives
+`101.31 3^-i`, so the stated constant survives a fortiori.  `U_max`, `V_max`
+and `S*` were never affected -- they come from the first line -- but the
+sensitivity is worth knowing: `supH = 226.1` in `T(i)` gives a `U` tail of
+`0.1076`, above the stated `U_max = 0.08436`.
+
+`1.45` is elementary: `T_k = sum_{Omega(n)=k} n^-2/log n`, all positive, and
+`n >= 2^k`.  The bound holds from `k >= 6`, and at `k = 900` by a factor
+`10^158`, so the threshold `900` is inherited from `eq:full-sweep-ranges` and
+not forced by `T_k`.  Note the repository's other `1.45` -- `certified.py`'s
+`DELTA`, the quadrature ellipse semi-minor axis -- is an unrelated
+coincidence.
 
 ## Provenance of the three constants: RESOLVED
 
