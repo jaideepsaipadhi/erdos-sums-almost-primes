@@ -54,6 +54,29 @@ if gc and g2:
 else:
     check("gamma jsons present", False)
 
+# The certificate stores a SHA-256 of its numerical payload, and Section 8's
+# "Availability" paragraph says so -- but nothing in the repository recomputed
+# it, so the hash was decoration.  It is cheap: hash the canonical JSON of
+# everything except the hash field itself.
+print("== certificate payload hash ==")
+import hashlib
+_cp = next((f for f in ("certificate.json", "../certificate.json")
+            if os.path.exists(f)), None)
+if _cp:
+    _d = json.load(open(_cp))
+    _stored = _d.pop("sha256_of_payload_without_hash", None)
+    # certificate.py hashes json.dumps(payload, indent=1, sort_keys=True) with
+    # the hash field absent -- match that exactly, not a canonical form of
+    # one's own choosing.
+    _got = hashlib.sha256(
+        json.dumps(_d, indent=1, sort_keys=True).encode()).hexdigest()
+    check("certificate.json payload matches its stored SHA-256",
+          _stored == _got,
+          "stored %s..., recomputed %s..."
+          % ((_stored or "ABSENT")[:16], _got[:16]))
+else:
+    check("certificate.json present", False, "not found from this directory")
+
 print("== criterion sweeps ==")
 # A missing file must FAIL, not be skipped.  It used to `continue`, so with
 # crit_900_2439.json deleted this script printed "all checks passed" while

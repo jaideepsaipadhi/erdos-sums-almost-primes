@@ -1,0 +1,20 @@
+== the first moment K_m, and what it refutes ==
+   claimed in the first write-up:  freezing error = O(e^-k)
+   actual:                         K_m of order m 2^-m
+
+   m                     K_m       K_m 2^m / m      e^-m / K_m   K2_m / K_m 2^-m
+   8     0.01246565968905032        0.39890111       0.0269109         26.729342
+  12    0.001107023209609274      0.3778639222      0.00555021         177.39092
+  16    9.296208177445544e-5      0.3807726869      0.00121055         1458.6032
+  20    7.408679971943474e-6      0.3884282005     0.000278208          13785.78
+  24    5.672308245206262e-7       0.396523086      6.65538e-5          143469.4
+  28    4.213868444511967e-8      0.4039827491      1.64087e-5         1599742.8
+  32    3.059204368049086e-9      0.4105994598      4.13969e-6        18771803.0
+  36   2.181446087664208e-10      0.4164106491       1.0633e-6      2.2901921e+8
+
+K_m 2^m / m rises over this range without flattening, so the data fix the
+order as m 2^-m only up to a slowly varying factor.  Either way K_m is
+Theta(m 2^-m) at worst a log off, hence o(m^2 2^-m), which is what the
+reduction needs, and hugely larger than e^-m.  The last column shows the
+second moment is smaller by a factor ~2^-m, so the Taylor remainder of
+eq:freeze-error does not disturb the order.

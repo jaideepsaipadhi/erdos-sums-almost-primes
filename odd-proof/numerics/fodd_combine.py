@@ -50,9 +50,12 @@ print("k   f_k^odd")
 for k in range(1, KMAX + 1):
     print("%2d  %s" % (k, fk[k].str(20)), flush=True)
 print()
-# range(1, KMAX) compares every adjacent pair (k, k+1) for 1 <= k <= KMAX-1,
-# i.e. certifies monotonicity on the whole of [1, KMAX].
+# range(1, KMAX) compares every adjacent pair (k, k+1) for 1 <= k <= KMAX-1.
+# So with KMAX = 75 the comparison is certified for 1 <= k <= 74, NOT 1 <= k
+# <= 75: the pair (75, 76) would need g_76, which is not computed.  The
+# enclosures cover [1, KMAX]; the monotonicity verdict covers [1, KMAX-1].
+# The paper states both ranges separately for this reason.
 dec = all((fk[k] - fk[k + 1]) > 0 for k in range(1, KMAX))
-print("f_k^odd strictly decreasing on [1,%d]: %s" % (KMAX, dec))
+print("f_k^odd strictly decreasing on [1,%d]: %s" % (KMAX - 1, dec))
 inc = all((fk[k + 1] - fk[k]) > 0 for k in range(1, KMAX))
-print("f_k^odd strictly increasing on [1,%d]: %s" % (KMAX, inc))
+print("f_k^odd strictly increasing on [1,%d]: %s" % (KMAX - 1, inc))

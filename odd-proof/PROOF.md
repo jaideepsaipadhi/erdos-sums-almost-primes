@@ -150,7 +150,11 @@ argument it formalizes.
 
 (a) The two coefficient tails.  The main terms of section 4 integrate to the
 partial sums over j <= k, not to 1/2 and beta 2^-k; the differences
-sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k} (b_j + 2 gamma h_j(1)) 2^j join R_k.
+sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k} b_j 2^j join R_k, where
+b_j = h_j'(1) + 2 gamma h_j(1) ALREADY contains the 2 gamma h_j(1) term --
+writing (b_j + 2 gamma h_j(1)) here, as an earlier version did, double-counts
+it and contradicts the identification B(z) = d_s H_o + 2 gamma H_o = sum b_j
+z^j two lines below.  The manuscript's eq:Rk-def has the correct sum.
 Both are bounded by the same pole-cancellation device as (5.4)-(5.5), but at
 first and second order rather than third:
 (The paper writes Sigma_0, Sigma_1, Sigma_2 for S_0, S_1 and the S of 5.2,
@@ -210,10 +214,23 @@ sample, is 3^k T_k <= 34.14, and <= 9.66 beyond 200 -- so CN = 367.8436 covers
 the absolute sum too on k >= 59, with better than tenfold slack, and the ledger
 above is unchanged.
 
-Below k = 59 it does not: 3^k T_k peaks at 15329 near k = 12 and only falls
-under CN at k = 24.  A single constant valid for all k >= 1 would be about
-19819, which would move K0 to 63 -- past OddNumericalFacts.sweep_low (k <= 58)
--- so restricting the range of (5.1) is much the better repair.
+Below k = 59 it does not.  Run with K0 = 1 (the settings of record otherwise:
+`nearabs_certified.py 60 8.0 220 60 60 400 1`), the certified integral bound
+peaks at 699.87 at k = 14 and exceeds CN = 367.8436 for exactly 9 <= k <= 25
+(k=25 gives 369.96, k=26 gives 343.51).  So k >= 26 would in fact serve, and
+59 is stated only because it is the only range in which (5.1) is ever applied.
+
+An earlier version of this paragraph said "3^k T_k peaks at 15329 near k = 12
+and only falls under CN at k = 24", and that a single all-k constant would be
+"about 19819, which would move K0 to 63".  Both figures are WRONG HERE.
+15329 is absratio.py's POINTWISE sum 3^k A_k(s(3)) at k = 12 (absratio.log:
+15328.840), a different quantity from the integral that
+eq:odd-nearabs-certified bounds, and "falls under CN at k = 24" is likewise
+absratio's pointwise crossing.  19819 has no artifact at all.  And the
+consequence does not follow: with an all-k constant near 700 in place of
+367.84 the ledger becomes about 5190 and q(59) = 0.918*5190/4900 = 0.973 < 1,
+so K0 would stay at 59.  Quote the figures above, from the integral run, and
+do not reuse the pointwise ones.
 
 The bridge from the pointwise bound to the integral is an analytic step that
 neither this note nor the manuscript used to state.  It is short.  By

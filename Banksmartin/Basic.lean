@@ -10007,7 +10007,14 @@ theorem source_bound_derived (k : ℕ) (hk : 1 ≤ k)
     (hUV : |2 * (2 * (k : ℝ) * Uk k - Vk k)
              - (2 * ((k : ℝ) + 1) * Uk (k + 1) - Vk (k + 1))|
            ≤ (2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax)
-    (hEexp : ∀ m : ℕ, |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3) :
+    -- The quantifier MUST be bounded.  Stated as `∀ m, |Eexpk m| ≤ 1.45/k +
+    -- 1e-3` with `k` fixed, this hypothesis is UNSATISFIABLE: it would force
+    -- the bound at m = 1, where the first two terms of E_exp already total
+    -- 1.069, and the manuscript's own Section 6 says they fall below 1e-3
+    -- only from k >= 37.  An unsatisfiable field makes every theorem
+    -- assuming it vacuous rather than false, and nothing would catch it.
+    -- Only m = k and m = k+1 are ever used below.
+    (hEexp : ∀ m : ℕ, k ≤ m → m ≤ k + 1 → |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3) :
     |2 * Ek k - Ek (k + 1)| ≤ RBound Umax Vmax Sstar alph k := by
   have hk1 : 1 ≤ k + 1 := by omega
   rw [prop_2_5 k hk, prop_2_5 (k + 1) hk1]
@@ -10018,8 +10025,8 @@ theorem source_bound_derived (k : ℕ) (hk : 1 ≤ k)
   have hA := hE1 k hk
   have hA1 := hE1 (k + 1) hk1
   rw [hcast] at hA1
-  have hX := hEexp k
-  have hX1 := hEexp (k + 1)
+  have hX := hEexp k le_rfl (by omega)
+  have hX1 := hEexp (k + 1) (by omega) le_rfl
   have hq : (0:ℝ) < Real.log 2 / 4 := by
     have := Real.log_pos (by norm_num : (1:ℝ) < 2); linarith
   unfold RBound
@@ -14107,7 +14114,14 @@ theorem source_bound_full (k : ℕ) (hk : 1 ≤ k)
     (hUV : |2 * (2 * (k : ℝ) * Uk k - Vk k)
              - (2 * ((k : ℝ) + 1) * Uk (k + 1) - Vk (k + 1))|
            ≤ (2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax)
-    (hEexp : ∀ m : ℕ, |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3) :
+    -- The quantifier MUST be bounded.  Stated as `∀ m, |Eexpk m| ≤ 1.45/k +
+    -- 1e-3` with `k` fixed, this hypothesis is UNSATISFIABLE: it would force
+    -- the bound at m = 1, where the first two terms of E_exp already total
+    -- 1.069, and the manuscript's own Section 6 says they fall below 1e-3
+    -- only from k >= 37.  An unsatisfiable field makes every theorem
+    -- assuming it vacuous rather than false, and nothing would catch it.
+    -- Only m = k and m = k+1 are ever used below.
+    (hEexp : ∀ m : ℕ, k ≤ m → m ≤ k + 1 → |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3) :
     |2 * Ek k - Ek (k + 1)| ≤ RBound Umax Vmax Sstar alph k :=
   source_bound_derived k hk Sstar alph Umax Vmax hS
     (fun m hm => E1k_le_alpha m hm beta hbeta0 hderiv hbnd M0 hM00 hM0 alph halpha)
@@ -14272,8 +14286,15 @@ structure NumericalFactsFull (beta : ℕ → ℝ) (Sstar alph Gam Umax Vmax M0 :
     |2 * (2 * (k : ℝ) * Uk k - Vk k)
        - (2 * ((k : ℝ) + 1) * Uk (k + 1) - Vk (k + 1))|
     ≤ (2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax
-  /-- Section 7: the exponentially small source, at the two indices used. -/
-  Eexp_bound    : ∀ k : ℕ, 2440 ≤ k → ∀ m : ℕ,
+  /-- Section 6: the exponentially small source, at the two indices used.
+
+  The inner quantifier is BOUNDED to `k <= m <= k+1` on purpose.  Unbounded,
+  this field asserts `|Eexpk m| <= 1.45/k + 1e-3` for every `m` at once, which
+  no real `Eexpk` satisfies (`m = 1` gives 1.069), so the field would be
+  unsatisfiable and `erdos_sums_increase_from_six'` vacuous.  Caught in the
+  November 2026 referee pass; the correction is NOT yet confirmed by a build,
+  since no Lean toolchain in this environment can fetch a Mathlib cache. -/
+  Eexp_bound    : ∀ k : ℕ, 2440 ≤ k → ∀ m : ℕ, k ≤ m → m ≤ k + 1 →
     |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3
   /-- `phi_mono` stood here.  It is now proved -- `phiBound_mono_of_bounds` --
   and what it needed that this structure did not carry is an upper bound on
@@ -14432,7 +14453,14 @@ theorem source_bound_refined (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ)
     (hUV : |2 * (2 * (k : ℝ) * Uk k - Vk k)
              - (2 * ((k : ℝ) + 1) * Uk (k + 1) - Vk (k + 1))|
            ≤ (2 * (k : ℝ) - 2) * Umax + 2 * Vmax + 4 * Umax)
-    (hEexp : ∀ m : ℕ, |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3) :
+    -- The quantifier MUST be bounded.  Stated as `∀ m, |Eexpk m| ≤ 1.45/k +
+    -- 1e-3` with `k` fixed, this hypothesis is UNSATISFIABLE: it would force
+    -- the bound at m = 1, where the first two terms of E_exp already total
+    -- 1.069, and the manuscript's own Section 6 says they fall below 1e-3
+    -- only from k >= 37.  An unsatisfiable field makes every theorem
+    -- assuming it vacuous rather than false, and nothing would catch it.
+    -- Only m = k and m = k+1 are ever used below.
+    (hEexp : ∀ m : ℕ, k ≤ m → m ≤ k + 1 → |Eexpk m| ≤ 1.45 / (k : ℝ) + 1e-3) :
     |2 * Ek k - Ek (k + 1)| ≤ RBound2 Umax Vmax Sstar Bhat Gam k := by
   have hk1 : 1 ≤ k + 1 := by omega
   rw [prop_2_5 k hk, prop_2_5 (k + 1) hk1]
@@ -14443,8 +14471,8 @@ theorem source_bound_refined (k : ℕ) (hk : 1 ≤ k) (f1 : ℝ)
   have hA := E1k_le_refined f1 k Bhat Gam (hB k) (h61 k)
   have hA1 := E1k_le_refined f1 (k + 1) Bhat Gam (hB (k + 1)) (h61 (k + 1))
   rw [hcast] at hA1
-  have hX := hEexp k
-  have hX1 := hEexp (k + 1)
+  have hX := hEexp k le_rfl (by omega)
+  have hX1 := hEexp (k + 1) (by omega) le_rfl
   have hq : (0 : ℝ) < Real.log 2 / 4 := by
     have := Real.log_pos (by norm_num : (1 : ℝ) < 2); linarith
   unfold RBound2

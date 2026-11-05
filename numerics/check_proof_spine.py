@@ -160,12 +160,14 @@ def union_covers(ranges, lo, hi):
     return todo
 
 
-odd_sweep = (1, 75)
+# The COMPARISON range, not the enclosure range: fodd_combine.py with
+# KMAX = 75 compares pairs (k, k+1) for k = 1..74 only.
+odd_sweep = (1, 74)
 odd_gap = union_covers([odd_sweep, (59, 10000)], 1, 10000)
-check("odd: sweep 1..75 and analytic k>=59 tile all k >= 1",
+check("odd: sweep 1..74 and analytic k>=59 tile all k >= 1",
       not odd_gap,
-      "uncovered: %s; overlap 59..75 is %d indices"
-      % (sorted(odd_gap)[:5] or "none", 75 - 59 + 1))
+      "uncovered: %s; overlap 59..74 is %d indices"
+      % (sorted(odd_gap)[:5] or "none", 74 - 59 + 1))
 
 full_sweeps = [(6, 199), (78, 899), (900, 2439)]
 full_gap = union_covers(full_sweeps + [(2440, 10000)], 6, 10000)
@@ -184,10 +186,20 @@ m = re.search(r"overlap on the ([a-z]+) indices", TEX)
 words = {"fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
          "nineteen": 19}
 said = words.get(m.group(1)) if m else None
+# The overlap is between the analytic range k >= 59 and the range in which the
+# direct sweep supplies the COMPARISON g_k > g_{k+1}.  With KMAX = 75 the
+# enclosures cover [1,75] but the last comparison available is (74,75), so the
+# comparison range is [1,74] and the overlap is 59..74 -- sixteen indices, not
+# seventeen.  The paper used to say seventeen, from the enclosure range.
+m2 = re.search(r"direct computation gives the comparison for \$1\\leq k\\leq([0-9]+)\$", TEX)
+m3 = re.search(r"overlap on the [a-z]+ indices \$59\\leq k\\leq([0-9]+)\$", TEX)
+hi = int(m2.group(1)) if m2 else None
 check("stated odd overlap count is right",
-      said == 75 - 59 + 1,
-      "text says %r (= %s), actual is %d"
-      % (m.group(1) if m else None, said, 75 - 59 + 1))
+      said is not None and hi is not None and m3 is not None
+      and int(m3.group(1)) == hi and said == hi - 59 + 1,
+      "text says %r (= %s) over 59..%s, comparison range ends at %s"
+      % (m.group(1) if m else None, said,
+         m3.group(1) if m3 else None, hi))
 
 # ------------------------------------------- the underbraces round the RIGHT way
 # An underbrace standing for an UPPER bound must round UP, or the display
@@ -221,12 +233,20 @@ certs = [
 ]
 for name, logname, pat, stated in certs:
     f = LOGS / logname
+    # An absent or unparseable log must FAIL.  These five branches used to
+    # print "skipped" and continue, so deleting the logs made this script
+    # print its closing banner -- "every stated constant is at or above what
+    # its certificate gives" -- with rc = 0, having checked none of them.
+    # They are exactly the Sigma_1 = 486.1945 / C_N = 367.8435 round-down
+    # errors the script was written to prevent.
     if not f.exists():
-        print("%-56s %s" % ("%s: %s absent" % (name, logname), "skipped"))
+        check("%s: its certificate %s is present" % (name, logname), False,
+              "absent -- the round-up property is UNCHECKED for this constant")
         continue
     m = re.search(pat, f.read_text())
     if not m:
-        print("%-56s %s" % ("%s: cannot parse %s" % (name, logname), "skipped"))
+        check("%s: %s is parseable" % (name, logname), False,
+              "cannot match %r -- the round-up property is UNCHECKED" % pat)
         continue
     true_val = arb(m.group(1))
     ok = float(stated.str(30, radius=False)) >= float(true_val.upper())
@@ -328,6 +348,28 @@ if _cert.exists():
           "stated %s, certificate %.6g" % (_mr.group(1) if _mr else "UNPARSEABLE", _rad))
 else:
     check("certificate.json present for the appendix figures", False, "absent")
+
+# Section 7's K_m numerals had no artifact until km_check.py; check them.
+print()
+_km = ROOT / "numerics" / "km.log"
+_mkm = re.search(r"K_m2\^\{m\}/m=([0-9.,]+)\$ at \$m=([0-9,]+)\$", TEX)
+if _km.exists() and _mkm:
+    # km.log columns: m | K_m | K_m 2^m/m | e^-m/K_m | second-moment ratio
+    rows = dict((int(f[0]), float(f[2])) for f in
+                (ln.split() for ln in _km.read_text().splitlines())
+                if len(f) >= 3 and f[0].isdigit())
+    said = [float(x) for x in _mkm.group(1).split(",")]
+    at = [int(x) for x in _mkm.group(2).split(",")]
+    bad = [(m, v) for m, v in zip(at, said)
+           if m not in rows or abs(rows[m] - v) > 5e-4]
+    check("Section 7's K_m 2^m/m figures match km.log",
+          not bad and len(said) == len(at),
+          "paper %s at m=%s; mismatches: %s"
+          % (said, at, bad or "none"))
+else:
+    check("km.log present and Section 7's K_m figures parseable", False,
+          "log %s, numerals %s"
+          % (_km.exists(), bool(_mkm)))
 
 print()
 if fails:

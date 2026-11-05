@@ -377,6 +377,40 @@ corroboration of GLW's `O(k log(k+1))`: the basis was chosen with that
 remainder in mind. Don't upgrade it.
 `numerics/Im_check.py`, log in `Im.log`; mpmath, no certificate.
 
+### The unfrozen m=0 term needs EXPANDING circles, not fixed ones
+
+Found by referee 2026-11-05. The step disposing of the divergent `m = 0` term
+used to read "Cauchy on `|z| = R^s` with `R < 3` gives
+`|phi_k(s)| <= M R^-ks` uniformly in `s`, by Proposition 7.2(ii)". **No such
+uniform `M` exists.** The complement of `P \ {2}` contains 2, contributing
+`(1-2^-s)^z`, and at `z = -R^s` that factor has modulus
+`exp(R^s log(1-2^-s)^-1) ~ exp((R/2)^s)`, unbounded for `R > 2`. Measured for
+`P` = all primes, `R = 2.5`: `log|Phi|` at `z = -R^s` runs
+`2.50, 2.61, 6.00, 14.56, 35.53, 86.74` at `s = 1,4,8,12,16,20`.
+
+The repair is the circles `|z| = R 2^{s-1}`, on which `|z| 2^-s = R/2` is
+CONSTANT and `|z| p^-s <= (R/2)(2/3)^s` for `p >= 3`. Then
+`M_R = sup_s sup_{|z|=R2^{s-1}} |Phi_P| < infty` (measured: `log|Phi|`
+decreases monotonically to exactly `R/2 = 1.25`), and
+`|phi_k(s)| <= M_R R^-k 2^-k(s-1)`, so the integral is
+`<= M_R R^-k/(k log 2)`. Note this uses 7.2(i)'s ESTIMATE, not 7.2(ii)'s
+fixed-circle conclusion -- don't cite (ii) here.
+
+Two related corrections in the same paragraph: the `i`-tails are `O_R(R^-k)`
+and `O_R((2/R)^k)` for each fixed `R < 3`, not `O(3^-k)` and `O((2/3)^k)`
+(7.2(ii) forbids `R = 3`); and `E_k = Theta(k 2^-k)` holds iff
+`d_s Phi_P(1,2) != 0`, NOT iff `phi_1'(1) != 0` -- no single `i` dominates,
+every `i` contributes at that order.
+
+### Section 7's convergence aside was false as written
+
+"The product converges locally uniformly for ANY set of primes, since
+`sum_p p^-sigma < infty` for `sigma > 1/2`" is true only of the `prod_{p in P}
+L_p` factor. The complement factor `prod_{p in Q}(1-p^-s)^z` has logarithm
+`~ -z p^-s` and needs `sum_{p in Q} p^-sigma < infty`, i.e. `sigma > 1` --
+and `s = 1` is where every constant in the section is evaluated. It
+contradicted both the preceding paragraph and 7.2(i)'s own proof.
+
 ### Four traps in the Section 7 write-up, all hit once
 
 - **`H_P` must be defined by the regularized product, never by

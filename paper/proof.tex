@@ -51,8 +51,9 @@ $f_k^{\mathcal P}=\prod_{p\notin\mathcal P}(1-1/p)+c_{\mathcal P}2^{-k}
 remaining case, $2\in\mathcal P$, is reduced to a single asymptotic in which no
 primes appear. The finite inequalities and coefficient bounds used in the last
 step are certified by ball arithmetic, and the reductions themselves are
-machine-checked in Lean~4 on top of those certified inputs; the separation
-between analytic argument and certified input is stated precisely, and
+formalized in Lean~4 on top of those certified inputs, as an implication
+from them rather than a closed proof; the separation between analytic
+argument, certified input and assumed hypothesis is stated precisely, and
 tabulated.
 \end{abstract}
 
@@ -139,13 +140,19 @@ $\mathcal Q$, Proposition~\ref{prop:general-interior} gives
 \]
 and Corollary~\ref{cor:general-positivity} that $c_{\mathcal P}>0$, so every
 such family eventually decreases: Theorem~\ref{thm:main-odd} is the case
-$\mathcal Q=\{2\}$ of a phenomenon that holds whenever $2\notin\mathcal P$. The
+$\mathcal Q=\{2\}$ of a phenomenon governed by the position of $z=2$ relative
+to the first singular circle, and not by any arithmetic special to the prime
+$2$. Both hypotheses are needed, and the thin-complement one is not implied by
+$2\notin\mathcal P$: for $\mathcal P=\{p\equiv1\bmod4\}$ the leading constant
+is the empty product's limit $0$, and the proposition says nothing. The
 complementary case $2\in\mathcal P$, where the evaluation sits on the singular
 circle, is reduced in \S\ref{subsec:boundary-reduction} to a single asymptotic
 for an integral containing no primes at all; granting it, every such family
 eventually increases, which is Theorem~\ref{thm:main-full} without the
-certified sweeps. That asymptotic is not proved here, and
-Conjecture~\ref{conj:general} records what remains.
+certified sweeps --- an eventual statement with no explicit threshold, so
+weaker than Theorem~\ref{thm:main-full}, which asserts $f_k<f_{k+1}$ for
+\emph{every} $k\geq6$ and is what the sweeps are for. That asymptotic is not
+proved here, and Conjecture~\ref{conj:general} records what remains.
 
 The proof has two kinds of input. Identities, coefficient reductions and
 inequalities are proved in the text. Bounds produced by interval arithmetic
@@ -234,8 +241,9 @@ branch must be fixed; the principal one will do throughout, since $1-x$ then
 lies in the disc of radius $2^{-1/2}<1$ about $1$, on which the principal
 logarithm is analytic and where no branch cut is met. With that convention,
 for $(s,z)$ in a compact subset of the domain --- so that
-$\sigma\geq s_0>1/2$ and $\abs z\leq R<2^{s_0}$, whence $\abs{zx}<1$ for every
-$p$ --- the logarithm of the $p$th regularized factor is
+$\sigma\geq s_0>1/2$ and $\abs z\leq R<2^{s_0}$ in the case of
+\eqref{eq:H-full}, or $R<3^{s_0}$ with $p\geq3$ in the case of
+\eqref{eq:H-odd}, whence $\abs{zx}<1$ for every $p$ occurring --- the logarithm of the $p$th regularized factor is
 \begin{align*}
  -\log(1-zx)+z\log(1-x)
  &=\sum_{m\geq1}\frac{z^m-z}{m}x^m\\
@@ -248,9 +256,13 @@ $\sum_pp^{-2\sigma}<\infty$ for $\sigma>1/2$, the product of the regularized fac
 locally uniformly wherever none of the factors has a pole. The poles occur at
 $z=p^s$, of modulus $p^\sigma$; the nearest has modulus $2^{\sigma}$ for
 \eqref{eq:H-full} and $3^{\sigma}$ for \eqref{eq:H-odd}. A locally uniform limit of analytic functions is analytic,
-which proves the first assertion.
+which gives analyticity in $z$ for each fixed real $s$. That much is not what
+is needed, and the next paragraph supersedes it: the same estimate, read in
+the complex $s$ variable, gives joint analyticity and hence the first
+assertion outright. We keep the real-variable computation only because the
+cancellation of the $m=1$ terms displayed in it is used again below.
 
-Differentiability in $s$ does not follow from this if $s$ is held real:
+Differentiability in $s$ does not follow from the real-variable argument:
 uniform convergence of real-variable functions says nothing about the
 derivative of the limit. What is used instead is that the variable $s$ may be
 taken complex. Each $p^{-s}=\e^{-s\log p}$ is entire in $s$, so every
@@ -573,8 +585,10 @@ With $\Sigma_i$ as in \eqref{eq:sigma-def} and $C_E$ as in
   4900(62)^3 3^{-59}<\frac{\beta}{3}2^{-59}.
 \end{equation}
 
-\noindent(v) Direct interval evaluation gives $g_k>g_{k+1}$ for
-$1\leq k\leq75$.
+\noindent(v) Direct interval evaluation encloses $g_k$ for
+$1\leq k\leq75$, and gives $g_k>g_{k+1}$ for $1\leq k\leq74$; the last
+comparison available is between $g_{74}$ and $g_{75}$, since $g_{76}$ is not
+computed.
 \end{proposition}
 
 \noindent
@@ -670,15 +684,44 @@ may be absorbed once, at the end.
 certified Taylor model of \eqref{eq:odd-far-certified} applies to the
 integrand. Its $k$-dependence is supplied not by that computation, which
 certifies finitely many numbers, but by
-Lemma~\ref{lem:pole-coefficient-bounds}(iii): applied to the second
-$s$-derivative of $H_{\mathrm o}$ with $S=\Sigma_2$, \eqref{eq:second-derivative-sum}
-gives $\sum_{j\leq k}3^j\abs{\partial_s^2h_j}\leq\binom{k+3}{3}\Sigma_2
-\leq(k+3)^3\Sigma_2/6$. The remaining factor $3$ is not a width --- the far
-range $u\geq3$ is unbounded --- but a rate: the far-range error is
-$O(\e^{-3u})$, which is what the powers of $\zeta$ in \eqref{eq:CE-def}
-encode, and $\int_0^\infty u^m\e^{-3u}\dd u/m!=3^{-m-1}$. Hence
-$\abs{R_{k,\mathrm{far}}}\leq\frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k}$, the
-$18=6\cdot3$ recording those two steps.
+Lemma~\ref{lem:pole-coefficient-bounds}, and the three terms of
+\eqref{eq:odd-local-product} call on three different parts of it, since they
+carry $h_j(1)$, $h_j'(1)$ and $\partial_s^2h_j$ respectively. The factor $3$
+in each is not a width --- the far range $u\geq3$ is unbounded --- but a rate:
+the far-range error is $O(\e^{-3u})$, which is what the powers of $\zeta$ in
+\eqref{eq:CE-def} encode, and $\int_0^\infty u^m\e^{-3u}\dd u/m!=3^{-m-1}$.
+Parts (i), (ii) and (iii) of the lemma then give
+\[
+ \sum_{j\leq k}3^j\abs{h_j(1)}\leq(k+1)\Sigma_0,
+ \quad
+ \sum_{j\leq k}3^j\abs{h_j'(1)}\leq\tbinom{k+2}{2}\Sigma_1,
+ \quad
+ \sum_{j\leq k}3^j\abs{\partial_s^2h_j}\leq\tbinom{k+3}{3}\Sigma_2,
+\]
+so with $C_J$, $C_P$ and $C_b^2(C_f+1)$ as the respective prefactors of
+\eqref{eq:CE-def} --- the last halved by the Taylor remainder's
+$\tfrac12\varepsilon^2$ --- the far-range error is at most
+\[
+ \frac{3^{-k}}{3}\Bigl(
+   C_J(k+1)\Sigma_0
+   +C_P\tbinom{k+2}{2}\Sigma_1
+   +\tfrac12C_b^2(C_f+1)\tbinom{k+3}{3}\Sigma_2
+ \Bigr).
+\]
+Only the third term is cubic in $k$, and it is the dominant one by three
+orders of magnitude: the bracket is at most
+$\bigl(C_J+C_P+\tfrac12C_b^2(C_f+1)\bigr)\binom{k+3}{3}\Sigma_2$, which is
+below $C_E\binom{k+3}{3}\Sigma_2$ since
+$\tfrac12C_b^2(C_f+1)<C_b^2(C_f+1)$, so
+\begin{equation}\label{eq:odd-far-assembled}
+ \abs{R_{k,\mathrm{far}}}\leq\frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k},
+\end{equation}
+the $18=6\cdot3$ recording $\binom{k+3}{3}\leq(k+3)^3/6$ and the rate. The
+collapse to a single constant costs a factor of about $1.6$ at every $k$ --- at
+$k=1$ the three terms total $1.84\cdot10^{5}$ against the
+$2.81\cdot10^{5}$ of \eqref{eq:odd-far-assembled}, and the ratio improves as
+$k$ grows --- so nothing is lost that the ledger of
+Proposition~\ref{prop:odd-remainder} needs.
 
 \emph{First tail.} By Lemma~\ref{lem:pole-coefficient-bounds}(i),
 $\Bigl\lvert\sum_{j>k}h_j(1)\Bigr\rvert\leq\Sigma_0\sum_{j>k}3^{-j}=\frac{\Sigma_0}{2}3^{-k}$.
@@ -862,8 +905,8 @@ Thus $q(k)<1$ for every $k\geq59$, and
 Proposition~\ref{prop:odd-remainder} gives
 $\abs{R_k}<\beta2^{-k}/3$ throughout that range. Equation
 \eqref{eq:odd-difference} proves monotonicity for $k\geq59$. The certified
-direct computation covers $1\leq k\leq75$, so the two ranges cover every
-$k\geq1$. They overlap on the seventeen indices $59\leq k\leq75$.
+direct computation gives the comparison for $1\leq k\leq74$, so the two ranges
+cover every $k\geq1$. They overlap on the sixteen indices $59\leq k\leq74$.
 \end{proof}
 
 %=======================================================================
@@ -893,7 +936,11 @@ Set
  \qquad
  G_2(s,z)=(s-1)^z(1-z2^{-s})F(s,z),
 \]
-and write $c_i=[z^i]G_2(1,z)$. Since
+and write $c_i=[z^i]G_2(1,z)$. Here $G_2(s,z)=\bigl((s-1)\zeta(s)\bigr)^z
+H_{\mathrm o}(s,z)$ for $s>1$, and $((s-1)\zeta(s))^z\to1$ as $s\to1^+$
+because $(s-1)\zeta(s)$ extends analytically to $1$ with value $1$; the
+value at $s=1$ is to be read through that removable singularity, the
+displayed product being $0\cdot\infty$ if taken literally. So
 $G_2(1,z)=H_{\mathrm o}(1,z)$, the power series has radius $3$ and
 \begin{equation}\label{eq:c-moments}
   \sum_{i\geq0}c_i=\frac12,
@@ -1231,7 +1278,7 @@ pole $z=3$, so that $\abs\rho\leq0.1749324$,
 \end{equation}
 The subtraction is not cosmetic. The regularized product
 $\widetilde G_2(z)=(1-z/3)G_2(1,z)$ has
-$\sup_{\abs z=4.2}\abs{\widetilde G_2}=228.95$, so $101.245$ is not a bound for
+$\sup_{\abs z=4.2}\abs{\widetilde G_2}\leq228.95$ and is at least $228.94$, so $101.245$ is not a bound for
 it; it is a bound for \eqref{eq:contour-certified}, with about $5.7\%$ to
 spare. Both suprema are certified in \texttt{numerics/contour\_certified.py}
 (log \texttt{contour.log}), which also recovers $\rho$ from the same series and
@@ -1258,8 +1305,12 @@ established the same way, and the distinction matters to anyone checking the
 certificates. On the first, $f_k$ itself is computed as an enclosure for each
 $k$ and the two enclosures are compared; the quadrature behind those values,
 and the six error sources entering each, are described in
-Appendix~\ref{app:quadrature}. (That computation in fact covers $2\leq k\leq500$;
-only $6\leq k\leq199$ is needed here.) On the other two, it is the left-hand
+Appendix~\ref{app:quadrature}. (That computation in fact encloses $f_k$ for
+$2\leq k\leq500$, but the pairwise comparison closes only up to $k=297$: past
+there the gap $f_{k+1}-f_k$ falls below the common radius, and the
+certificate's own \texttt{monotonicity} entries record \texttt{verified:
+false} from $k=298$ on. Only $6\leq k\leq199$ is needed here, and that range
+is fully verified.) On the other two, it is the left-hand
 side of \eqref{eq:full-criterion} that is evaluated in ball arithmetic at each
 $k$ and found positive --- the same quantity whose closed-form lower bound
 $\varphi$ drives Section~\ref{sec:assembly}, but evaluated per $k$ rather than
@@ -1513,9 +1564,14 @@ product rather than a separate phenomenon.
 
 It is worth saying separately why
 \eqref{eq:thin-complement} carries the weight $\log p$ instead. It is not
-needed for convergence: the product below converges locally uniformly for
-\emph{any} set of primes, since $\sum_pp^{-\sigma}<\infty$ for $\sigma>1/2$.
-What needs the weight is the $s$-derivative at $s=1$, where the constant
+needed for the convergence of the \emph{first} product in
+\eqref{eq:HP-def}, the one over $\mathcal P$: that converges locally uniformly
+for any set of primes whatever on $\sigma>1/2$, since $\log L_p=O(p^{-2s})$.
+It is needed for the second product, over the complement, whose logarithm is
+$\asymp-zp^{-s}$ and so requires $\sum_{p\in\mathcal Q}p^{-\sigma}<\infty$;
+that is why the unweighted condition appears in the paragraph above as the
+dividing line between a positive limit and $0$. What needs the \emph{weight}
+is the $s$-derivative at $s=1$, where the constant
 multiplying $2^{-k}$ lives. That constant involves
 $\sum_{p\notin\mathcal P}\frac{\log p}{p-1}$, which is finite precisely
 under~\eqref{eq:thin-complement} and can diverge under the weaker condition:
@@ -1903,7 +1959,8 @@ within $5\cdot10^{-4}$ of $1/3$. Two caveats keep this from being quoted more
 sharply. A three-parameter fit through three points has no residual, so the
 agreement is not an error estimate: fitting $L+a\log k/k+b/k$ instead gives
 $0.329517$ and the one-term fit $L+a/k$ gives $0.336577$, so the spread across
-reasonable bases, about $1\%$, is the honest uncertainty. And the choice of the
+reasonable bases --- $0.329517$ to $0.336577$, a spread of $2.1\%$ of $1/3$ ---
+is the honest uncertainty. And the choice of the
 $1/k$ basis is not independent of the conclusion, since
 \eqref{eq:GLW-asymptotic} carries a subleading $O(k\log(k+1))$ whose logarithm
 cancels in the ratio only if its coefficient also scales by
@@ -1924,7 +1981,8 @@ For $\mathcal Q=\{5\}$, where the prediction is $1-2/5=3/5$, the ratio rises
 monotonically over the same range to $0.572066$, and the three $1/k$ fits give
 $0.600056$, $0.600424$ and $0.600537$, within $10^{-3}$ of $3/5$, against
 $0.603172$ for the one-term fit and $0.596605$ for the $\log k/k$ basis --- a
-spread of about $0.6\%$. This tests the prediction and the computation on a
+spread of $1.1\%$ of $3/5$, from $0.596605$ to $0.603172$. This tests the
+prediction and the computation on a
 case with a different answer; what it cannot do is separate
 \eqref{eq:GLW-value} from a small admixture of
 $\partial_s H_{\mathcal P\setminus\{2\}}(1,2)$, since the residual at
@@ -1999,17 +2057,38 @@ term $1$ and the prefactor is $1$, so $I_0=\int_1^\infty\dd s=\infty$. The
 $m=0$ term of \eqref{eq:boundary-exact} is $\varphi_k(s)$, whose $s$-integral
 converges because $\varphi_k(s)\to0$, not because of any decay supplied by the
 rest of the integrand; freezing it at $s=1$ would destroy that, so it is kept
-unfrozen above. It is harmless: Cauchy's estimate on $\abs z=R^{s}$ with
-$R<3$ gives $\abs{\varphi_k(s)}\leq MR^{-ks}$ uniformly for $s\geq1$, by
-Proposition~\ref{prop:general-interior}(ii) applied to
-$\mathcal P\setminus\{2\}$, whence
-$\int_1^\infty\varphi_k(s)\dd s=O(R^{-k}/k)=o(2^{-k})$.
+unfrozen above. It is harmless, but the estimate needs the right contour.
+Fix $R\in(2,3)$ and apply Cauchy on the \emph{expanding} circles
+$\abs z=R2^{s-1}$. On them $\abs z2^{-s}=R/2$ is constant and
+$\abs zp^{-s}\leq(R/2)(2/3)^{s}$ for $p\geq3$, both bounded uniformly in
+$s\geq1$, so
+\[
+ M_R:=\sup_{s\geq1}\ \sup_{\abs z=R2^{s-1}}\abs{\Phi_{\mathcal P}(s,z)}<\infty
+\]
+by the estimate of Proposition~\ref{prop:general-interior}(i) applied to
+$\mathcal P\setminus\{2\}$, and
+$\abs{\varphi_k(s)}\leq M_R(R2^{s-1})^{-k}=M_RR^{-k}2^{-k(s-1)}$, whence
+\begin{equation}\label{eq:unfrozen-tail}
+ \Bigl\lvert\int_1^\infty\varphi_k(s)\dd s\Bigr\rvert
+ \leq\frac{M_RR^{-k}}{k\log2}=o(2^{-k}).
+\end{equation}
+The circles must expand with $s$. On the fixed-radius circles of
+Proposition~\ref{prop:general-interior}(ii), or on $\abs z=R^{s}$, no such
+uniform $M$ exists: the complement of $\mathcal P\setminus\{2\}$ contains $2$,
+contributing $(1-2^{-s})^{z}$, and at $z=-R^{s}$ that factor has modulus
+$\exp\bigl(R^{s}\log(1-2^{-s})^{-1}\bigr)\approx\exp\bigl((R/2)^{s}\bigr)$,
+which is unbounded for $R>2$. For $\mathcal P$ all primes and $R=2.5$ the
+quantity $\log\abs{\Phi}$ at $z=-R^{s}$ runs $2.50,\ 2.61,\ 6.00,\ 14.56,\
+35.53,\ 86.74$ at $s=1,4,8,12,16,20$, while on the circles
+$\abs z=R2^{s-1}$ it decreases monotonically to $R/2=1.25$.
 
 Second, the $i$-sum in \eqref{eq:boundary-exact} is finite --- the $j$-sum is
 empty for $i>k$ --- while $\Phi_{\mathcal P}(1,1)$ and
 $\Phi_{\mathcal P}(1,2)$ below are infinite sums. The difference is the tail
-$\sum_{i>k}$, which is $O(3^{-k})$ and $O((2/3)^{k})$ respectively by the same
-estimate, both $o(2^{-k})$.
+$\sum_{i>k}$. Proposition~\ref{prop:general-interior}(ii) gives
+$\varphi_i(1)=O_R(R^{-i})$ for each fixed $R<3$ --- not for $R=3$ --- so the
+two tails are $O_R(R^{-k})$ and $O_R((2/R)^{k})$, both $o(2^{-k})$ once
+$R\in(2,3)$ is fixed.
 
 Third, the freezing error. It is tempting to argue that the mass of the
 $s$-integral sits at $s-1\asymp\e^{-k}$, so that $E_k=O(\e^{-k})=o(2^{-k})$;
@@ -2018,19 +2097,34 @@ $s-1=\e^{-t}$ under the $I_m$ integrand is not $\e^{-\mathbb E t}$ even though
 $\mathbb E t=m$. The relevant weight is
 $K_m=\int_1^\infty(s-1)\,2^{-ms}\sum_{j\leq m}(2^{s}\log\zeta(s))^j/j!\dd s$,
 whose value is governed by the small-$t$ tail rather than by the bulk, and
-numerically $K_m2^{m}/m=0.381,0.397,0.411,0.416$ at $m=16,24,32,36$, so
-$K_m\asymp m2^{-m}$ and $\e^{-m}$ is smaller by a factor $10^{6}$ already at
-$m=36$. Since $\varphi_i'(1)=O(R^{-i})$ for $R<3$,
+numerically $K_m2^{m}/m=0.381,0.397,0.411,0.416$ at $m=16,24,32,36$
+(\texttt{numerics/\allowbreak km\_check.py}, log \texttt{km.log}), against
+$\e^{-m}/K_m=1.1\cdot10^{-6}$ at $m=36$. So $K_m$ is of order $m2^{-m}$ up to
+a slowly varying factor --- the column drifts upward over that range without
+flattening, so the data do not exclude an extra $\log m$, which would change
+nothing below --- and in particular $K_m$ is larger than $\e^{-m}$ by six
+orders of magnitude. Since $\varphi_i'(1)=O_R(R^{-i})$ for each $R<3$,
 \begin{equation}\label{eq:freeze-error}
   E_k=\sum_{i\geq1}\varphi_i'(1)K_{k-i}+\cdots=O\bigl(k2^{-k}\bigr),
 \end{equation}
-and $\Theta(k2^{-k})$ in general, since $\varphi_1'(1)\neq0$. So
+where the omitted terms are the second-order Taylor remainder, controlled by
+the second moment $\int(s-1)^2[\cdots]\dd s$ in the same way. The order is
+attained, not merely bounded, whenever
+$\partial_s\Phi_{\mathcal P}(1,2)\neq0$: no single $i$ dominates, and summing
+$K_{k-i}\approx c(k-i)2^{-(k-i)}$ against $\varphi_i'(1)$ gives
+$ck2^{-k}\sum_i2^{i}\varphi_i'(1)=ck2^{-k}\partial_s\Phi_{\mathcal P}(1,2)$,
+the series being absolutely convergent. So
 \eqref{eq:boundary-reduction} is accurate to $o(k^22^{-k})$ but \emph{not} to
 $o(2^{-k})$: it determines the limit and the $k^22^{-k}$ coefficient, and says
 nothing about the $k2^{-k}$ or $2^{-k}$ coefficients. That is enough for
 Conjecture~\ref{conj:general}, which turns on the sign of the leading
 coefficient, and it is worth noting against \eqref{eq:GLW-asymptotic}, whose
-remainder is $O(k\log(k+1))$.
+remainder is $O(k\log(k+1))$. We state \eqref{eq:freeze-error} as a reduction
+and not as a proposition: the first-moment computation is numerical and the
+Taylor remainder is bounded only in outline, so it is the second unproved
+ingredient here, alongside \eqref{eq:Im-asymptotic}. It is much the cheaper of
+the two --- an estimate on an explicit one-dimensional integral --- which is
+why the asymptotic, and not this, is what we record as the open problem.
 Suppose now only that $I_m=c_0+Am^22^{-m}+o(m^22^{-m})$ for constants
 $c_0,A$, the error being uniform in $m$. Substituting into
 \eqref{eq:boundary-reduction} and summing the resulting series against
@@ -2070,7 +2164,8 @@ and $\Phi(1,2)=d$; Lichtman's $f_k\to1$ \cite{Lichtman19} forces $c_0=2$, and
   [k^22^{-k}]\,f_k^{\mathcal P}
    =-\tfrac14(\log2)\,d\prod_{p\in\mathcal Q}\Bigl(1-\frac2p\Bigr)<0 ,
 \end{equation}
-which is \eqref{eq:boundary-predicted}, and which settles the centring constant
+whose $k^2$ coefficient is the negative of \eqref{eq:boundary-predicted}, as
+the sign convention there records, and which settles the centring constant
 used in the computation above rather than leaving it to analogy.
 
 So exactly one analytic statement remains, and it mentions no primes:
@@ -2130,9 +2225,23 @@ respectively --- and no instance of any of them is constructed. Lean therefore c
 hypotheses imply the theorems, and nothing in the kernel checks that the
 hypotheses are true, or even that they are mutually consistent: an
 unsatisfiable field would make the theorems assuming it vacuous rather than
-false, and would not be detected. That the imported intervals agree with what
-Arb computed is verified outside Lean, by the script \texttt{verify.py} against
-the certificate. The reader should take the Lean development as discharging the
+false, and would not be detected. One field was in exactly that position:
+\texttt{NumericalFactsFull.\allowbreak Eexp\_\allowbreak bound} quantified over
+the coefficient index with the bound depending on a different variable, which
+made it assert $\abs{E_{\exp}(m)}\leq1.45/k+10^{-3}$ for \emph{every} $m$ at
+once --- false at $m=1$, where the first two terms of \eqref{eq:Eexp-def}
+already total $1.069$, so the field was unsatisfiable and the theorem assuming
+it vacuous. The quantifier is now bounded to the two indices its only consumer
+uses. The correction has not been confirmed by a build, for the reason given at
+the end of this section.
+
+That the imported numerals agree with what Arb computed is verified outside
+Lean, and by script, but by three different scripts and not one:
+\texttt{check\_\allowbreak lean\_\allowbreak constants.py} compares the Lean
+numerals with the certificates, \texttt{check\_\allowbreak proof\_\allowbreak
+spine.py} compares the manuscript's with them, and \texttt{verify.py} checks
+the sweep tables and the $\Gamma$ data against the theorems they instantiate,
+and recomputes the SHA-256 the certificate records. The reader should take the Lean development as discharging the
 reductions below and nothing else; the trusted base is the structure fields,
 and it is listed in Table~\ref{tab:lean-status}.
 
@@ -2184,9 +2293,12 @@ and is not what either odd theorem is proved from. For those six the agreement
 between manuscript and formalization that this section asserts has no content,
 and the reader should rely on the Arb certificates instead.
 
-Four further constants appear in Lean at a numeral slightly \emph{looser} than
+Five further constants appear in Lean at a numeral slightly \emph{looser} than
 the one certified here, and the discrepancy is deliberate rather than drift.
-The hypotheses carry $\alpha\leq15.4257$ against
+Besides $d\geq0.3786823$ in \texttt{dConst\_\allowbreak lower\_\allowbreak
+bound\_\allowbreak sharp} and $\rho\leq-0.1747885$ in
+\texttt{rhoConst\_\allowbreak upper\_\allowbreak bound}, both discussed above,
+the hypotheses carry $\alpha\leq15.4257$ against
 $\alpha_+\leq15.425661$, $V_{\max}\leq1.90747$ against $1.907462$, and
 \texttt{dConst\_\allowbreak lower\_\allowbreak bound} proves
 $d\geq0.3785913$ against the certified $d\geq0.3786949$; in each case the
@@ -2221,8 +2333,10 @@ bounds of Proposition~\ref{prop:full-certified}. Proposition~\ref{prop:criterion
 enters as a hypothesis in one of the two formal versions, and is proved in the
 other, from the primitive certified quantities rather than from the aggregate
 bound \eqref{eq:E-difference-lower}. (The bound \eqref{eq:Eexp-certified} is
-not what the primitive route replaces; it remains a hypothesis,
-\texttt{NumericalFactsFull.Eexp\_\allowbreak bound}, in both versions.) What the
+not what the primitive route replaces. It is a hypothesis of that route alone,
+as \texttt{NumericalFactsFull.Eexp\_\allowbreak bound}; on the aggregate route
+there is no such field, \eqref{eq:Eexp-certified} being one of the ingredients
+folded into \texttt{source\_\allowbreak bound}.) What the
 formalization proves from these is
 the passage to $f_k<f_{k+1}$ for $k\geq2440$, together with the assembly of
 the four ranges.
@@ -2236,8 +2350,9 @@ what the formalization had been assuming was arithmetic. Proving them needed
 one quantity the certified hypotheses did not carry, the bound
 $\abs U\leq U_{\max}$ of \eqref{eq:full-certified-constants}, which is now
 among them. The sharpness required is not uniform: the base case turns on
-$\log2441$ to a tenth of a percent, where $\log2441\leq12\log2$ is already too
-weak, while the monotonicity step needs only $\log2441\leq12\log2$ itself.
+$\log2443$ to a tenth of a percent, where $\log2443\leq12\log2$ is already too
+weak, while the monotonicity step needs only that cruder inequality itself.
+(The argument of the logarithm is $k+3$ at $k=2440$, hence $2443$.)
 
 For the odd theorem the lower bound on $\gamma$ was likewise a hypothesis and
 is now proved, as \texttt{gamma\_\allowbreak lower\_\allowbreak bound}, from
@@ -2413,9 +2528,14 @@ Table~\ref{tab:lean-status}, in the two audit files
 audit is not redundant with the build: a green \texttt{lake build} reports
 that the files compiled, not that a particular theorem is free of
 \texttt{sorryAx}. The numerics use
-python-flint~0.9.0 against FLINT~3.6.0. The certificate records the parameters
-of every run together with a SHA-256 hash of the numerical payload, and
-\texttt{verify.py} checks the imported intervals against it.
+python-flint~0.9.0; the certificate's \texttt{versions} block records that
+binding's version but not the FLINT release under it, which should be added
+before submission. The certificate records the parameters of the
+\emph{quadrature} run --- $k_{\max}$, the precision, the panel geometry, the
+ellipse --- together with a SHA-256 hash of the numerical payload, which
+\texttt{verify.py} recomputes. The coefficient sweeps' parameters are recorded
+separately, in \texttt{uv\_constants.json} and \texttt{gamma\_constant.json},
+not in the certificate.
 \endgroup
 
 %=======================================================================
@@ -2456,8 +2576,15 @@ $P_k(s)\leq2.78^k2^{-ks}$, and
  \leq\frac{2.78^k2^{-ks_-}}{k\log2}.
 \end{equation}
 For the right tail, $P_k(s)\leq(\log\zeta(s))^k/k!$ for $s>1$
-\cite[Lemma 5.6]{Lichtman19}, so with $u=\log\zeta(s)$ the integral is
-dominated by $\int_{u_+}^\infty u^k\e^{-u}\dd u/k!$; the resulting
+\cite[Lemma 5.6]{Lichtman19}. Substituting $u=\log\zeta(s)$ gives
+$\dd s=J(u)\dd u$ with $J=\varepsilon(1+\gamma\varepsilon+\cdots)$ by
+Lemma~\ref{lem:zeta-coordinate}, and $\varepsilon=1/\zeta\cdot
+(1+\gamma\varepsilon+\cdots)\geq\e^{-u}$, so $J\geq\e^{-u}$ rather than
+$\leq$: the clean form $\int_{u_+}^\infty u^k\e^{-u}\dd u/k!$ is not immediate.
+What is true is $J(u)\leq\e^{-u}(1+C\e^{-u})$ for $u\geq1$ with $C$ absolute,
+and at $u\geq u_+=1750$ the correction is $1+O(\e^{-1750})$, absorbed by the
+factor $2$ below with room to spare. With that, the integral is dominated by
+$2\int_{u_+}^\infty u^k\e^{-u}\dd u/k!$ and the resulting
 incomplete-Gamma integral obeys
 $\Gamma(k+1,u_+)/k!\leq2u_+^k\e^{-u_+}/k!$ provided $u_+\geq2k+2$, so
 \begin{equation}\label{eq:tail-near-1}
@@ -2465,13 +2592,17 @@ $\Gamma(k+1,u_+)/k!\leq2u_+^k\e^{-u_+}/k!$ provided $u_+\geq2k+2$, so
 \end{equation}
 The hypothesis $u_+\geq2k+2$ holds throughout, since $u_+=3.5k_{\max}$ and
 $k\leq k_{\max}$. Both bounds are added to every reported enclosure. They are
-largest at $k=k_{\max}$, and even there they are far below the differences
-$f_{k+1}-f_k\asymp a_1k^22^{-k}$ that the sweep has to resolve. The run of
-record is the one the committed certificate holds, with $k_{\max}=500$ and so
-$u_+=1750$ over $2194$ panels; there the right-hand side of
-\eqref{eq:tail-near-1} is below $10^{-272}$ and that of
-\eqref{eq:tail-large-s} below $10^{-24618}$, while the smallest difference in
-the range actually used, $6\leq k\leq199$, exceeds $10^{-57}$.
+worst at opposite ends of the range, and at their worst they are far below the
+differences $f_{k+1}-f_k\asymp a_1k^22^{-k}$ that the sweep has to resolve.
+The right-hand side of \eqref{eq:tail-near-1} increases in $k$, since
+$u_+$ is fixed and $u_+^k/k!$ is increasing while $k\leq u_+$; that of
+\eqref{eq:tail-large-s} is $(2.78\cdot2^{-s_-})^k/(k\log2)$ and so
+\emph{decreases}, very fast. The run of record is the one the committed
+certificate holds, with $k_{\max}=500$ and so $u_+=1750$ over $2194$ panels.
+There \eqref{eq:tail-near-1} is below $10^{-272}$ at its worst, $k=500$, and
+\eqref{eq:tail-large-s} below $2.5\cdot10^{-99}$ at its worst, $k=2$, while the
+smallest difference in the range actually used, $6\leq k\leq199$, exceeds
+$10^{-57}$.
 
 For $f$ analytic inside the Bernstein ellipse $E_\rho$ and bounded there by
 $M$, the $N$-node Gauss rule satisfies
@@ -2497,17 +2628,21 @@ until $u\approx k$ and only then decays, so $M$ rises across the bulk of the
 range before falling. What is used is therefore the maximum over all panels and
 all $k\leq k_{\max}$, which the certificate records; the largest radius it
 reports is $4.6\times10^{-87}$, attained at $k=2$, and so is negligible beside
-the differences the sweep resolves. It is also some $185$ orders of magnitude
-larger than either tail \eqref{eq:tail-large-s}--\eqref{eq:tail-near-1}, so
-the discretization bound and not the truncation is what limits the accuracy of
-the $f_k$. (An earlier run with $k_{\max}=199$ gave $1.1\times10^{-87}$, and
+the differences the sweep resolves. It also dominates both tails everywhere in
+the range --- by some $185$ orders of magnitude against
+\eqref{eq:tail-near-1}, and by $12$ at $k=2$ against
+\eqref{eq:tail-large-s}, which is where that tail is worst --- so the
+discretization bound and not the truncation is what limits the accuracy of the
+$f_k$. (An earlier run with $k_{\max}=199$ gave $1.1\times10^{-87}$, and
 that figure, together with the $u_+$ and panel count belonging to it, should
 not be quoted for the committed certificate.)
 
 The pinned coefficient sweeps use primes up to $10^5$ and $300$ bits of
 precision, with $1600$ boxes in $s$ for $\alpha_+$ and $800$ boxes for the
-second-derivative sweep. The certificate records these parameters together
-with a SHA-256 hash of the numerical payload.
+second-derivative sweep. These parameters are recorded in
+\texttt{uv\_constants.json} and \texttt{gamma\_constant.json} respectively, not
+in \texttt{certificate.json}, whose \texttt{parameters} block covers the
+quadrature run alone.
 
 \section*{Acknowledgements}
 

@@ -125,6 +125,7 @@ and no `NumericalFacts` field depends on them.  Read them that way.
 | `genP_check.py` | the interior case `q >= 3`: the constants `c_0` and `c_2` of Proposition 7.2(iv), against `f_k^P` computed independently | `genP.log` |
 | `boundary_check.py` | the boundary case `q = 2`: that the ratio to the all-primes case tends to `prod_{p in Q}(1-2/p)`, which is what the reduction in section 7 needs | `boundary.log` |
 | `Im_check.py` | the exact identity behind the boundary reduction, and the single primes-free asymptotic the boundary case now rests on | `Im.log` |
+| `km_check.py` | the first moment `K_m` behind `eq:freeze-error` -- `K_m 2^m/m` = 0.381/0.397/0.411/0.416 at m=16/24/32/36, against `e^-m/K_m = 1.1e-6` at m=36; its four numerals lived only in docstrings until Nov 2026 | `km.log` |
 | `boundary_freeze_check.py` | the size of the freezing error, against an independent computation of `f_k^P`: `residual/2^-k` stays near `1.1`, so it is NOT `o(2^-k)` | `freeze.log` |
 
 `Im_check.py` does two separate things, and the first is a hard check rather
