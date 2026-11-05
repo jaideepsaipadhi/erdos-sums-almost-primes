@@ -1,0 +1,8 @@
+# M(3) = sup_{|z|=3} |F(2,z)| <= [7.968955046 +/- 1.97e-10]   (primes to 2000000 + Euler tail)
+# need 2^k P_k(2) <= 1.45 log 2 = [1.005063412 +/- 1.89e-10] for every k >= 900
+# envelope M(3)(2/3)^k at k = 900: <= [2.62584e-158 +/- 2.00e-165]
+# envelope drops below the requirement at k = 6, far below 900
+
+stated      2^k |T_k| <= 1.45/k   (k >= 900)
+certified   2^k  T_k  <= M(3)(2/3)^k / (k log 2) <= [3.78829e-158 +/- 3.95e-164] / k
+VERDICT: stated bound HOLDS, with margin of order 10^-150

@@ -2,6 +2,8 @@
 -- Every line must report exactly [propext, Classical.choice, Quot.sound].
 import Odd.Basic
 #print axioms fOdd_decreasing
+#print axioms gamma_lower_bound  -- named in Table 1; was the one such
+                                 -- theorem missing from either audit file
 #print axioms fOdd_tendsto_half
 #print axioms fOdd_decreasing_of_facts
 #print axioms fOdd_expansion_final

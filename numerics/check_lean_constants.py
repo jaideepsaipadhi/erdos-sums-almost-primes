@@ -171,6 +171,34 @@ if rnum is not None and rps is not None:
           "Lean proves rhoConst <= %.10f, weaker than the certified "
           "-0.1749323 -- no conflict" % float(rnum))
 
+# --- the LOOSER Lean numerals: direction, and that they still suffice.
+# alpha_bound and V_bound carry short-decimal rationals a hair above the
+# certified values.  Looser is safe, TIGHTER would be a false hypothesis that
+# no instance could satisfy -- and since no instance of the structure is ever
+# constructed, a too-tight field would make the theorems vacuous rather than
+# refutable.  So the direction is the thing to check.
+print()
+LEAN_SRC = (ROOT / "Banksmartin" / "Basic.lean").read_text()
+TEX_SRC = (ROOT / "paper" / "proof.tex").read_text()
+for name, pat_lean, pat_tex, label in (
+        ("alpha_bound", r"\(hal *: *alph *(?:\u2264|<=) *([0-9.]+)\)",
+         r"\\alpha_\+\\leq([0-9]+\.[0-9]+)", "alpha_+"),
+        ("V_bound", r"\(hV *: *Vmax *(?:\u2264|<=) *([0-9.]+)\)",
+         r"V_\{\\max\}=([0-9]+\.[0-9]+)", "V_max")):
+    ml = re.search(pat_lean, LEAN_SRC)
+    mt = re.search(pat_tex, TEX_SRC)
+    if ml and mt:
+        lv, tv = F(ml.group(1)), F(mt.group(1))
+        check("%s: Lean numeral %s is >= the certified %s (looser, safe)"
+              % (name, ml.group(1), mt.group(1)),
+              lv >= tv,
+              "Lean %.8f vs paper %.8f, slack %.2e"
+              % (float(lv), float(tv), float(lv - tv)))
+    else:
+        check("%s: both numerals are parseable" % name, False,
+              "Lean %s / paper %s -- guard would be vacuous"
+              % (bool(ml), bool(mt)))
+
 # --- what the consumers need, restated so a reader can see the budget
 print()
 print("requirement budget, against the bounds the LEAN PROOFS have:")

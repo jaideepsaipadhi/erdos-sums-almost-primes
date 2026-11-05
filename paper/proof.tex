@@ -42,8 +42,15 @@ function $\sum_kP_k(s)z^k$ of the associated Dirichlet series as
 $\zeta(s)^zH(s,z)$, at $s=1$ the point $z=2$ lies on the first singular circle
 for the unrestricted product, and strictly inside the first singular circle of
 the product with the prime $2$ removed. The analytic reductions are written
-explicitly below. The finite inequalities and coefficient bounds used in the
-last step are certified by ball arithmetic, and the reductions themselves are
+explicitly below. We then show that this distinction, and not any arithmetic
+special to the two cases, is what governs: for every set of primes
+$\mathcal P$ whose complement is thin and whose least element is at least
+$3$, the corresponding sums satisfy
+$f_k^{\mathcal P}=\prod_{p\notin\mathcal P}(1-1/p)+c_{\mathcal P}2^{-k}
++o(2^{-k})$ with $c_{\mathcal P}>0$, so they eventually decrease; the
+remaining case, $2\in\mathcal P$, is reduced to a single asymptotic in which no
+primes appear. The finite inequalities and coefficient bounds used in the last
+step are certified by ball arithmetic, and the reductions themselves are
 machine-checked in Lean~4 on top of those certified inputs; the separation
 between analytic argument and certified input is stated precisely, and
 tabulated.
@@ -119,11 +126,35 @@ strictly inside the disc of analyticity. For the unrestricted sums the first
 pole is at $z=2$ itself. The boundary contribution then acquires the factor
 $k^2$ in \eqref{eq:GLW-asymptotic}.
 
+That contrast is not an accident of the two cases, and
+Section~\ref{sec:general-principle} makes it a general statement. For a set of
+primes $\mathcal P$ with least element $q\geq3$ and thin complement
+$\mathcal Q$, Proposition~\ref{prop:general-interior} gives
+\[
+  f_k^{\mathcal P}
+   =\prod_{p\in\mathcal Q}\Bigl(1-\frac1p\Bigr)+c_{\mathcal P}2^{-k}+o(2^{-k}),
+  \qquad
+  c_{\mathcal P}=H_{\mathcal P}(1,2)
+   \bigl(\gamma+\tfrac12\partial_s\log H_{\mathcal P}(1,2)\bigr),
+\]
+and Corollary~\ref{cor:general-positivity} that $c_{\mathcal P}>0$, so every
+such family eventually decreases: Theorem~\ref{thm:main-odd} is the case
+$\mathcal Q=\{2\}$ of a phenomenon that holds whenever $2\notin\mathcal P$. The
+complementary case $2\in\mathcal P$, where the evaluation sits on the singular
+circle, is reduced in \S\ref{subsec:boundary-reduction} to a single asymptotic
+for an integral containing no primes at all; granting it, every such family
+eventually increases, which is Theorem~\ref{thm:main-full} without the
+certified sweeps. That asymptotic is not proved here, and
+Conjecture~\ref{conj:general} records what remains.
+
 The proof has two kinds of input. Identities, coefficient reductions and
 inequalities are proved in the text. Bounds produced by interval arithmetic
 are isolated as certified propositions. Thus a sentence of the form ``the
 computation gives'' never substitutes for an analytic step: the exact
-inequality supplied by the computation is stated before it is used.
+inequality supplied by the computation is stated before it is used. The
+interval arithmetic certifies the computations; the passage from a logged
+enclosure to a numeral printed here is ordinary writing, and is checked by
+guard scripts in the repository rather than by the arithmetic itself.
 
 %=======================================================================
 \section{Generating functions and the analytic boundary}
@@ -1275,11 +1306,41 @@ the contour bound; the weaker form suffices below. With $C=354.36$,
  =\frac{30C\log2}{4}(2/3)^k.
 \end{align*}
 Both terms are less than $10^{-3}$ in total for $k\geq900$, and both bounds are
-geometric in $k$, so no computation is needed to make them uniform. The third
-term is the one that needs a certificate, namely \eqref{eq:Tk-certified};
-substituting it into \eqref{eq:Eexp-def} proves \eqref{eq:Eexp-certified}, and
-no asymptotic $O$-term enters the final criterion. The first two terms are in fact below
-$10^{-3}$ from $k\geq37$ on, so the threshold $900$ comes from $T_k$ alone.
+geometric in $k$, so no computation is needed to make them uniform.
+
+The third term admits an elementary bound, which we give because
+\eqref{eq:Tk-certified} is otherwise the one input of
+Proposition~\ref{prop:full-certified} not visibly tied to a computation. Since
+$[z^k]F(s,z)=\sum_{\Omega(n)=k}n^{-s}$, \eqref{eq:Tk-def} and
+\eqref{eq:Ik-def} give
+\[
+ T_k=\int_2^\infty\sum_{\Omega(n)=k}n^{-s}\dd s
+     =\sum_{\Omega(n)=k}\frac{n^{-2}}{\log n},
+\]
+a sum of positive terms, so $T_k>0$ and nothing is lost in absolute value.
+Every such $n$ is at least $2^k$, whence $\log n\geq k\log2$ and
+\[
+ 2^k\abs{T_k}\leq\frac{2^kP_k(2)}{k\log2},
+ \qquad P_k(2)=[z^k]F(2,z).
+\]
+As $F(2,\cdot)$ is holomorphic on $\abs z<4$, Cauchy's estimate on $\abs z=3$
+gives $P_k(2)\leq M3^{-k}$ with
+$M=\prod_p(1-3p^{-2})^{-1}\leq7.96896$, so
+\begin{equation}\label{eq:Tk-elementary}
+ 2^k\abs{T_k}\leq\frac{M}{k\log2}\Bigl(\frac23\Bigr)^{k},
+\end{equation}
+which is below $1.45/k$ for every $k\geq6$ and at $k=900$ is smaller by a
+factor of about $10^{158}$. So \eqref{eq:Tk-certified} is true with room of
+that order; it is stated in that form because $1.45/k$ is what the criterion
+consumes, not because the constant is near optimal, and the threshold $900$ is
+inherited from \eqref{eq:full-sweep-ranges} rather than forced here. (The
+first two terms of \eqref{eq:Eexp-def} are below $10^{-3}$ from $k\geq37$ on,
+so no term of $E_{\exp}$ requires $k\geq900$.) The computation behind
+$M$ is \texttt{numerics/tk\_certified.py}, log \texttt{tk.log}.
+
+Substituting \eqref{eq:Tk-certified} into \eqref{eq:Eexp-def} proves
+\eqref{eq:Eexp-certified}, and no asymptotic $O$-term enters the final
+criterion.
 
 %=======================================================================
 \section{Assembly of the unrestricted theorem}\label{sec:assembly}
@@ -1819,7 +1880,12 @@ $\mathcal P$ with $q=2$ is
   a_1^{\mathcal P}=\tfrac14(\log2)\,H_{\mathcal P\setminus\{2\}}(1,2)
    =a_1\prod_{p\in\mathcal Q}\Bigl(1-\frac2p\Bigr)>0,
 \end{equation}
-and no cancellation occurs for any of them.
+and no cancellation occurs for any of them. A note on signs, since both
+conventions appear below: $a_1^{\mathcal P}$ is positive because
+\eqref{eq:GLW-asymptotic} writes $f_k=1-2^{-k}(a_1k^2+\cdots)$, so the
+coefficient of $k^22^{-k}$ in $f_k^{\mathcal P}$ itself is
+$-a_1^{\mathcal P}<0$. That is the quantity \eqref{eq:boundary-final} returns,
+and the two statements agree.
 
 This is testable, and the prediction \eqref{eq:boundary-predicted} is the ratio
 $\prod_{p\in\mathcal Q}(1-2/p)$. For $\mathcal Q=\{3\}$ the quantity
@@ -1843,10 +1909,15 @@ $1/k$ basis is not independent of the conclusion, since
 cancels in the ratio only if its coefficient also scales by
 $\prod(1-2/p)$ --- a stronger form of what is being tested. The stability of
 the $1/k$ fits across windows is evidence for that basis, not a proof of it.
-The centring constant $\prod_{p\in\mathcal Q}(1-1/p)$ is likewise not supplied
-by Proposition~\ref{prop:general-interior}, which excludes $q=2$; it is the
-value \eqref{eq:HP-def} gives at $z=1$, and at $\mathcal Q=\varnothing$ it is
-$1$, which is Lichtman's $f_k\to1$.
+The centring constant $\prod_{p\in\mathcal Q}(1-1/p)$ is not supplied by
+Proposition~\ref{prop:general-interior}, which excludes $q=2$. At the time
+these computations were made it was taken from \eqref{eq:HP-def} at $z=1$ by
+analogy with the interior case, checked only against
+$\mathcal Q=\varnothing$, where it is $1$ and is Lichtman's $f_k\to1$. It is
+\emph{derived} in \S\ref{subsec:boundary-reduction} below, as the first half of
+\eqref{eq:boundary-final}; the reader may prefer to read that subsection first
+and treat the present one as the numerical evidence that was gathered before
+the derivation was found.
 
 A second complement behaves the same way against a different predicted value.
 For $\mathcal Q=\{5\}$, where the prediction is $1-2/5=3/5$, the ratio rises
@@ -1855,10 +1926,11 @@ $0.600056$, $0.600424$ and $0.600537$, within $10^{-3}$ of $3/5$, against
 $0.603172$ for the one-term fit and $0.596605$ for the $\log k/k$ basis --- a
 spread of about $0.6\%$. This tests the prediction and the computation on a
 case with a different answer; what it cannot do is separate
-\eqref{eq:GLW-value} from a small $B$ in the third alternative below, since the
-residual at $\mathcal Q=\{3\}$ would imply a shift of only $1.6\cdot10^{-4}$
-here, well inside the spread. For that, \eqref{eq:GLW-value} itself is the
-evidence, not a second complement.
+\eqref{eq:GLW-value} from a small admixture of
+$\partial_s H_{\mathcal P\setminus\{2\}}(1,2)$, since the residual at
+$\mathcal Q=\{3\}$ would imply a shift of only $1.6\cdot10^{-4}$ here, well
+inside the spread. The numerics cannot settle that; \S\ref{subsec:boundary-reduction}
+does, by showing that no such term can enter the $k^2$ coefficient.
 
 The constants of Proposition~\ref{prop:general-interior}(iv) are checked
 separately, and the two checks should not be conflated. The constant
@@ -1880,8 +1952,11 @@ floating-point arithmetic and not ball arithmetic: they are checks on the
 formulas of this section, carrying no certificate, and nothing elsewhere in the
 paper or in the formalization depends on them.
 
+\subsection{The boundary case reduces to one primes-free
+asymptotic}\label{subsec:boundary-reduction}
+
 The boundary case reduces further, and in a way that removes the
-$s$-derivatives from consideration altogether. Expanding the pole of
+$s$-derivatives from the $k^2$ coefficient altogether. Expanding the pole of
 \eqref{eq:boundary-pole} in powers of $z$ and reading off the coefficient gives,
 for every set of primes $\mathcal P$ containing $2$,
 \begin{equation}\label{eq:boundary-exact}
@@ -2108,6 +2183,20 @@ odd-remainder route that would consume them takes them as abstract parameters
 and is not what either odd theorem is proved from. For those six the agreement
 between manuscript and formalization that this section asserts has no content,
 and the reader should rely on the Arb certificates instead.
+
+Four further constants appear in Lean at a numeral slightly \emph{looser} than
+the one certified here, and the discrepancy is deliberate rather than drift.
+The hypotheses carry $\alpha\leq15.4257$ against
+$\alpha_+\leq15.425661$, $V_{\max}\leq1.90747$ against $1.907462$, and
+\texttt{dConst\_\allowbreak lower\_\allowbreak bound} proves
+$d\geq0.3785913$ against the certified $d\geq0.3786949$; in each case the
+Lean numeral is a rational with a short decimal expansion, chosen so that the
+arithmetic is checkable by \texttt{norm\_num}, and it is on the safe side of
+the certified value, so the formal statement is weaker and holds a fortiori.
+What must be checked is the \emph{direction}, and that the looser numeral
+still suffices for the conclusion the Lean proof draws from it; both are
+verified by \texttt{numerics/\allowbreak check\_\allowbreak lean\_\allowbreak constants.py},
+which also reports the margin.
 \endgroup
 
 The numerical propositions are Proposition~\ref{prop:odd-certified} and
@@ -2318,7 +2407,12 @@ formalization is built with Lean~4, toolchain
 \texttt{leanprover/\allowbreak lean4:\allowbreak v4.33.0-rc1}, against Mathlib at revision
 \texttt{79d0395a1825}; the permitted axioms are exactly
 \texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound}, which is
-checked by \texttt{\#print axioms} on each named theorem. The numerics use
+checked by \texttt{\#print axioms} on every theorem named in
+Table~\ref{tab:lean-status}, in the two audit files
+\texttt{axcheck-bm.lean} and \texttt{odd-proof/\allowbreak axcheck.lean}. The
+audit is not redundant with the build: a green \texttt{lake build} reports
+that the files compiled, not that a particular theorem is free of
+\texttt{sorryAx}. The numerics use
 python-flint~0.9.0 against FLINT~3.6.0. The certificate records the parameters
 of every run together with a SHA-256 hash of the numerical payload, and
 \texttt{verify.py} checks the imported intervals against it.
@@ -2372,9 +2466,12 @@ $\Gamma(k+1,u_+)/k!\leq2u_+^k\e^{-u_+}/k!$ provided $u_+\geq2k+2$, so
 The hypothesis $u_+\geq2k+2$ holds throughout, since $u_+=3.5k_{\max}$ and
 $k\leq k_{\max}$. Both bounds are added to every reported enclosure. They are
 largest at $k=k_{\max}$, and even there they are far below the differences
-$f_{k+1}-f_k\asymp a_1k^22^{-k}$ that the sweep has to resolve: for
-$k_{\max}=199$ the right-hand side of \eqref{eq:tail-near-1} is below
-$10^{-100}$ while the smallest difference in range exceeds $10^{-57}$.
+$f_{k+1}-f_k\asymp a_1k^22^{-k}$ that the sweep has to resolve. The run of
+record is the one the committed certificate holds, with $k_{\max}=500$ and so
+$u_+=1750$ over $2194$ panels; there the right-hand side of
+\eqref{eq:tail-near-1} is below $10^{-272}$ and that of
+\eqref{eq:tail-large-s} below $10^{-24618}$, while the smallest difference in
+the range actually used, $6\leq k\leq199$, exceeds $10^{-57}$.
 
 For $f$ analytic inside the Bernstein ellipse $E_\rho$ and bounded there by
 $M$, the $N$-node Gauss rule satisfies
@@ -2398,12 +2495,14 @@ wrong to locate its maximum by inspection: on the right-hand side
 $F(u)\approx u^k\e^{-u}/k!$ by \eqref{eq:fk-as-u-integral}, which increases
 until $u\approx k$ and only then decays, so $M$ rises across the bulk of the
 range before falling. What is used is therefore the maximum over all panels and
-all $k\leq k_{\max}$, which the certificate records; it is
-$1.1\times10^{-87}$, and so is negligible beside the widths actually reported.
-It is also, at $k_{\max}=199$, some twenty orders of magnitude larger than
-either tail \eqref{eq:tail-large-s}--\eqref{eq:tail-near-1}, so the
-discretization bound and not the truncation is what limits the accuracy of
-the $f_k$.
+all $k\leq k_{\max}$, which the certificate records; the largest radius it
+reports is $4.6\times10^{-87}$, attained at $k=2$, and so is negligible beside
+the differences the sweep resolves. It is also some $185$ orders of magnitude
+larger than either tail \eqref{eq:tail-large-s}--\eqref{eq:tail-near-1}, so
+the discretization bound and not the truncation is what limits the accuracy of
+the $f_k$. (An earlier run with $k_{\max}=199$ gave $1.1\times10^{-87}$, and
+that figure, together with the $u_+$ and panel count belonging to it, should
+not be quoted for the committed certificate.)
 
 The pinned coefficient sweeps use primes up to $10^5$ and $300$ bits of
 precision, with $1600$ boxes in $s$ for $\alpha_+$ and $800$ boxes for the
@@ -2445,12 +2544,28 @@ absolute values by a signed coefficient identity, which is invalid because the
 $h_j$ alternate in sign. It is the reason that proposition is stated on
 $k\geq59$.
 
-Two limits on what the foregoing should be taken to mean. The numerical claims
-do not rest on the assistant's reliability: they are certified by interval
-arithmetic and are reproducible from the scripts and logs in the repository
-cited in Section~\ref{sec:lean}. The Lean development, by contrast,
-establishes an implication from assumed hypotheses rather than a closed proof,
-as Section~\ref{sec:lean} and Table~\ref{tab:lean-status} set out in detail.
+Three limits on what the foregoing should be taken to mean. First, the
+\emph{computations} behind the certified constants do not rest on the
+assistant's reliability: they are carried out in ball arithmetic and are
+reproducible from the scripts and logs in the repository cited in
+Section~\ref{sec:lean}. What is not certified by that arithmetic is the step
+from a logged ball to a numeral printed here, nor the algebra that combines
+several such numerals; that step is ordinary mathematical writing and is
+exactly where the errors in this manuscript have been found. Three were found
+in a late adversarial pass: a stated bound that had been rounded down rather
+than up, the two-part assembly of $\Sigma_2$ whose displayed chain did not
+close under its own stated value, and a contour bound stated for the wrong
+function --- the certified number $101.245$ bounds the pole-free part
+$G_2(1,z)-\rho/(3-z)$, as every consuming script has always assumed, and not
+the regularized product, whose supremum on $\abs z=4.2$ is $228.95$. None of
+the three invalidated a conclusion, and each is now checked mechanically
+against its certificate by a script in the repository; but the reader should
+understand the certification as covering the computations, with the
+manuscript's arithmetic guarded separately rather than certified. Second, the
+floating-point checks of Section~\ref{sec:general-principle} carry no
+certificate at all, as noted there. Third, the Lean development establishes an
+implication from assumed hypotheses rather than a closed proof, as
+Section~\ref{sec:lean} and Table~\ref{tab:lean-status} set out in detail.
 
 \begin{thebibliography}{9}
 

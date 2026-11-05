@@ -305,6 +305,30 @@ else:
     check("Section 8 Sigma_2 chain: its four numerals are parseable", False,
           "cannot locate them in proof.tex -- guard would be vacuous")
 
+# The appendix quotes the certificate's largest radius and k_max.  Both were
+# stale: the committed certificate is the KMAX = 500 run with max radius
+# 4.539e-87, while the appendix described a superseded KMAX = 199 run and
+# quoted 1.1e-87 -- a number no committed artifact contains.
+print()
+_cert = ROOT / "numerics" / "certificate.json"
+if _cert.exists():
+    import json as _json
+    _d = _json.loads(_cert.read_text())
+    _kmax = _d["parameters"]["KMAX"]
+    _rad = max(float(e["radius"]) for e in _d["enclosures"])
+    _mk = re.search(r"with \$k_\{\\max\}=([0-9]+)\$ and so", TEX)
+    _mr = re.search(r"largest radius it\nreports is \$([0-9.]+)\\times10\^\{-87\}\$", TEX)
+    check("appendix k_max %s matches certificate.json KMAX %d"
+          % (_mk.group(1) if _mk else "?", _kmax),
+          bool(_mk) and int(_mk.group(1)) == _kmax,
+          "certificate KMAX = %d" % _kmax)
+    check("appendix radius %s e-87 >= certificate's largest %.4g"
+          % (_mr.group(1) if _mr else "?", _rad),
+          bool(_mr) and float(_mr.group(1)) * 1e-87 >= _rad,
+          "stated %s, certificate %.6g" % (_mr.group(1) if _mr else "UNPARSEABLE", _rad))
+else:
+    check("certificate.json present for the appendix figures", False, "absent")
+
 print()
 if fails:
     print("FAILED: %d check(s): %s" % (len(fails), ", ".join(fails)))

@@ -110,6 +110,32 @@ notes.append("Lean is not built in this container, so Section 8 and Table 1 "
              "with no runner reports the same conclusion as a build error "
              "(see the comment block in .github/workflows/lean.yml).")
 
+# Section 8 claims #print axioms is run on every theorem named in Table 1.
+# It was not: gamma_lower_bound was in neither audit file, which no check
+# noticed because the audit files and the table were written independently.
+import re as _re
+_src = TEX.read_text()
+_tab = _src[_src.index("tab:lean-status"):]
+_tab = _tab[:_tab.index("end{table}")]
+_named = set(n.replace("\\_", "_").replace("\\allowbreak", "").replace(" ", "")
+                 .replace("\n", "")
+             for n in _re.findall(r"texttt\{([a-zA-Z_0-9\\' \n]*)\}", _tab))
+_thms = set()
+for _f in ("Odd/Basic.lean", "Banksmartin/Basic.lean"):
+    _p = ROOT / _f
+    if _p.exists():
+        _thms |= set(_re.findall(r"^theorem (\S+)", _p.read_text(), _re.M))
+_cov = set()
+for _f in ("axcheck-bm.lean", "odd-proof/axcheck.lean"):
+    _p = ROOT / _f
+    if _p.exists():
+        _cov |= set(_re.findall(r"#print axioms (\S+)", _p.read_text()))
+_missing = sorted(n for n in _named if n in _thms and n not in _cov)
+check("every theorem named in Table 1 is a #print axioms target",
+      not _missing and bool(_thms) and bool(_cov),
+      "missing from the audit files: %s" % (", ".join(_missing) or "none")
+      if _thms and _cov else "could not read the Lean or axcheck files")
+
 print()
 for n in notes:
     print("NOTE: %s" % n)
