@@ -349,6 +349,29 @@ if _cert.exists():
 else:
     check("certificate.json present for the appendix figures", False, "absent")
 
+# The odd sweep's verdict line must match the comparison range the paper
+# claims.  fodd_combine.py used to add tails only from k = 2 and compare only
+# from k = 2, so the log said [2,75] while the paper said 1 <= k <= 75; and the
+# verdict covers pairs, so with KMAX = 75 it reaches k = 74, not 75.
+print()
+_fl = ROOT / "odd-proof" / "numerics" / "fodd75.log"
+_mp = re.search(r"direct interval evaluation .{0,400}?gives \$g_k>g_\{k\+1\}\$ for\s*\$1\\leq k\\leq([0-9]+)\$",
+                TEX, re.S | re.I)
+if _fl.exists() and _mp:
+    _t = _fl.read_text()
+    _mv = re.search(r"strictly decreasing on \[(\d+),(\d+)\]: (\w+)", _t)
+    _k1 = re.search(r"^\s*1\s+\[", _t, re.M)
+    check("odd sweep log certifies the comparison range the paper claims",
+          bool(_mv) and _mv.group(3) == "True"
+          and int(_mv.group(1)) == 1 and int(_mv.group(2)) == int(_mp.group(1))
+          and bool(_k1),
+          "log says %s, paper claims 1..%s, k=1 row %s"
+          % (_mv.group(0) if _mv else "UNPARSEABLE", _mp.group(1),
+             "present" if _k1 else "ABSENT"))
+else:
+    check("fodd75.log present and the paper's comparison range parseable", False,
+          "log %s, claim %s" % (_fl.exists(), bool(_mp)))
+
 # Section 7's K_m numerals had no artifact until km_check.py; check them.
 print()
 _km = ROOT / "numerics" / "km.log"

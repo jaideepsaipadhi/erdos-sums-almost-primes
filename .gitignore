@@ -18,6 +18,12 @@ install_payload.py
 # case's chunk directory and bytecode showed up as untracked.
 **/cchunks/
 **/ochunks/
+# ...except the odd sweep's run of record.  44K, and without it fodd_combine.py
+# cannot be run at all: the 335-panel sweep behind fodd75.log takes about an
+# hour, so a referee could not reproduce the combine step or the monotonicity
+# verdict.  Provenance has been this repository's recurring defect class.
+!odd-proof/numerics/ochunks/
+!odd-proof/numerics/ochunks/*.txt
 **/__pycache__/
 
 # LaTeX build artifacts

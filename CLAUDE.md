@@ -154,6 +154,26 @@ false and nothing would catch it.
 tighten to `59 ≤ k`; it is unbuilt here, so the binder was left alone and the
 reason recorded in its docstring.
 
+### The odd sweep now certifies from k=1, and its chunks are committed
+
+Regenerated 2026-11-05. `fodd_combine.py` added tail terms only from `k = 2`
+and compared only adjacent pairs from `k = 2`, so the committed log said
+`[2,75]` while the manuscript claimed `1 <= k <= 75`. Both loops now start at
+1. The rerun (335 panels, two halves, ~50 min on 2 cores at PREC=1000)
+reproduces **every enclosure identically** -- no midpoint moved, no radius
+widened -- and now certifies `[1,74]`.
+
+**The verdict range is `[1, KMAX-1]`, not `[1, KMAX]`**: the loop compares
+pairs `(k, k+1)`, so `KMAX = 75` reaches `k = 74`; the pair `(75,76)` would
+need `g_76`. The enclosure range is `[1,75]`. The paper now states the two
+separately, and the overlap with the analytic `k >= 59` range is therefore
+**sixteen** indices (59..74), not seventeen. `check_proof_spine.py` checks the
+log's verdict line against the paper's claim, and that a `k = 1` row exists.
+
+`ochunks/*.txt` are now committed (44K, with a `.gitignore` negation), because
+without them `fodd_combine.py` cannot be run at all and the hour-long sweep
+would have to be redone to re-derive the verdict.
+
 ## The committed certificates, and what actually backs each sweep range
 
 `numerics/verify.py` must be **run from `numerics/bm-rebuild-v21/`** — its

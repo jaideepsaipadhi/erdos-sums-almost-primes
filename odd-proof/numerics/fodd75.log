@@ -1,17 +1,4 @@
-nohup: ignoring input
-panel 25/335  t=420s  eta=5214s
-panel 50/335  t=982s  eta=5595s
-panel 75/335  t=1545s  eta=5356s
-panel 100/335  t=2109s  eta=4957s
-panel 125/335  t=2676s  eta=4495s
-panel 150/335  t=3238s  eta=3994s
-panel 175/335  t=3803s  eta=3477s
-panel 200/335  t=4368s  eta=2949s
-panel 225/335  t=4930s  eta=2410s
-panel 250/335  t=5494s  eta=1868s
-panel 275/335  t=6058s  eta=1322s
-panel 300/335  t=6623s  eta=773s
-panel 325/335  t=7186s  eta=221s
+# 2 chunks cover panels 0..335 with no gap
 k   f_k^odd
  1  [0.91526880290677916489 +/- 3.05e-22]
  2  [0.61968509444107629153 +/- 3.16e-21]
@@ -89,5 +76,5 @@ k   f_k^odd
 74  [0.50000000000000000000 +/- 8.4e-24]
 75  [0.50000000000000000000 +/- 4.3e-24]
 
-f_k^odd strictly decreasing on [2,75]: True
-f_k^odd strictly increasing on [2,75]: False
+f_k^odd strictly decreasing on [1,74]: True
+f_k^odd strictly increasing on [1,74]: False
