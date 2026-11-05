@@ -82,6 +82,14 @@ Both are now regenerated from committed scripts and declared inputs only:
 | `crit_650_899.json` | `crit_fallback.py 650 899 crit_650_899.json` | positive on **[728,899]**, min 27.65 at 728; at k=735 it is 362.62 against the old file's 43.04 |
 | `crit_900_2439.json` | `python3 sweep_900_2439.py` | positive on [900,2439], min 10115.96 (was 9724.11) |
 
+The refined certificate, by contrast, was never affected and reproduces
+exactly: `python3 crit_refined.py 78 734 out.json` (about 6 minutes) gives
+`crit_78_734.json` **byte-identical**, 657 of 657 values, and reprints
+`sweep_78_734.log`'s verdict (`0 non-positive`, `k=78: 0.91`,
+`k=734: 33754.05`).  Re-run that one before trusting any change to the
+coefficient inputs: it carries a margin of `0.91` against values reaching
+`33754`, and it is the only sweep where a drift could move `K0` off 78.
+
 `crit_fallback.py` is `sweep_900_2439.py` generalized to an arbitrary range,
 and it reproduces that script's committed-script output on [900,2439] **bit for
 bit** -- that is its regression test, and the reason to trust it on [650,899].
