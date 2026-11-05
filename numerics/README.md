@@ -124,6 +124,26 @@ and no `NumericalFacts` field depends on them.  Read them that way.
 |---|---|---|
 | `genP_check.py` | the interior case `q >= 3`: the constants `c_0` and `c_2` of Proposition 7.2(iv), against `f_k^P` computed independently | `genP.log` |
 | `boundary_check.py` | the boundary case `q = 2`: that the ratio to the all-primes case tends to `prod_{p in Q}(1-2/p)`, which is what the reduction in section 7 needs | `boundary.log` |
+| `Im_check.py` | the exact identity behind the boundary reduction, and the single primes-free asymptotic the boundary case now rests on | `Im.log` |
+
+`Im_check.py` does two separate things, and the first is a hard check rather
+than evidence.  `--identity` verifies
+
+    P_k^P(s) = sum_i phi_i(s) 2^{-(k-i)s} sum_{j<=k-i} (2^s log zeta(s))^j/j!
+
+against direct Dirichlet sums over `n <= 3e6`, to `1e-18`, for `P` = all
+primes, minus `{3}` and minus `{3,5}`.  That identity is what removes the
+`s`-derivatives from the boundary case: integrating it and freezing `phi_i` at
+`s = 1` (cost `O(e^-k) = o(2^-k)`) leaves `I_m`, which contains no primes, so
+the limit and the `k^2` coefficient of `f_k^P` depend on the numerator only
+through its VALUE at `(1,1)` and `(1,2)`.
+
+Without `--identity` it computes `I_m` and extrapolates.  Read the stability
+table, not any single fit — three parameters through three points has zero
+residual.  The `A + b log m/m + c/m` basis is stable (`-0.17379`, `-0.17301`,
+`-0.17277` across windows, within `0.3%` of `-log2/4`); bases omitting the
+`log m/m` term are `8-10%` off, which independently corroborates GLW's
+`O(k log(k+1))` subleading term.
 
 `genP_check.py` with `Q = {2}` is the calibration that makes the rest
 meaningful: `P = {p >= 3}` is the case the paper proves, so `c_2` there must

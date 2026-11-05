@@ -1,0 +1,39 @@
+== identity (*) against direct Dirichlet sums, s = 4, n <= 3e6 ==
+   P = all primes   k=1  formula 0.0769931397642468449  direct 0.0769931397642468449  reldiff 1.05e-20
+   P = all primes   k=2  formula 0.00499467446863733964  direct 0.00499467446863733963  reldiff 4.67e-19
+   P = all primes   k=3  formula 0.000314427496832941742  direct 0.000314427496832941739  reldiff 9.59e-18
+   P = minus {3}    k=1  formula 0.0646474607519011659  direct 0.0646474607519011659  reldiff 1.25e-20
+   P = minus {3}    k=2  formula 0.00404414187895527982  direct 0.00404414187895527982  reldiff 5.05e-19
+   P = minus {3}    k=3  formula 0.000252764849071986932  direct 0.00025276484907198693  reldiff 8.71e-18
+   P = minus {3,5}  k=1  formula 0.0630474607519011659  direct 0.0630474607519011659  reldiff 1.28e-20
+   P = minus {3,5}  k=2  formula 0.00394070594175223796  direct 0.00394070594175223795  reldiff 4.73e-19
+   P = minus {3,5}  k=3  formula 0.000246294222065658484  direct 0.000246294222065658482  reldiff 7.18e-18
+
+== I_m and the implied A ==
+   predicted c0 = 2 (from Lichtman's f_k -> 1)
+   predicted A  = -log2/4 = -0.17328679514 (from GLW's a_1 = d log2/4)
+
+  m            I_m                  I_m - 2        (I_m-2)/(m^2 2^-m)
+   8  1.9781164364257271198  -0.0218835635743  -0.0875342542971
+  12  1.9967773337515367226  -0.00322266624846  -0.0916669510674
+  16  1.9996202620664501565  -0.00037973793355  -0.0972129109888
+  20  1.9999608253639185076  -3.91746360815e-5  -0.102693958009
+  24  1.9999963030569146576  -3.69694308534e-6  -0.107681272018
+  28  1.9999996725943569709  -3.27405643029e-7  -0.112101126382
+  32  1.9999999723455980154  -2.76544019846e-8  -0.115990968862
+  36  1.999999997747881875  -2.252118125e-9  -0.11941695918
+
+== stability of the extrapolated A ==
+A three-parameter fit through three points has ZERO residual, so no single
+fit is an error bar.  What is informative is which basis is stable.
+
+fit                                                 A    rel.err
+log m/m + 1/m  (28,32,36)               -0.1737870386   0.002887
+log m/m + 1/m  (24,28,32)               -0.1730071625   0.001614
+log m/m + 1/m  (20,28,36)               -0.1727731077   0.002964
+1/m + 1/m^2    (28,32,36)                -0.159442436    0.07989
+log m/m only   (32,36)                  -0.1583382646    0.08626
+
+The bases WITHOUT a log m/m term land ~8-10% off, which is independent
+corroboration of GLW's O(k log(k+1)) subleading term: the data select
+that correction, and with it A agrees with -log2/4 to a few parts in 1000.

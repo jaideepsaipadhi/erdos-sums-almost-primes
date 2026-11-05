@@ -1867,35 +1867,106 @@ floating-point arithmetic and not ball arithmetic: they are checks on the
 formulas of this section, carrying no certificate, and nothing elsewhere in the
 paper or in the formalization depends on them.
 
-Three things are therefore unverified in the boundary case, and it is worth
-separating them. First, that an expansion
-$f_k^{\mathcal P}=c_0+O(k^22^{-k})$ with a genuine $k^2$ leading term exists at
-all for a general admissible $\mathcal P$ with $q=2$;
-Proposition~\ref{prop:general-interior} does not reach that case, and
-\eqref{eq:GLW-asymptotic} is the single case $\mathcal Q=\varnothing$. Second,
-that its coefficient is \eqref{eq:boundary-predicted}. Third, failing that,
-something weaker still suffices: if the coefficient is
-$A\Phi(1,2)+B\,\partial_s\Phi(1,2)$ for the numerator
-$\Phi_{\mathcal P}=H_{\mathcal P\setminus\{2\}}$ with $A,B$ independent of
-$\mathcal P$, then because
-$\partial_s\log\Phi_{\mathcal P}=\partial_s\log H_{\mathrm o}
- +\partial_s\log E_{\mathcal Q}$ with
-$E_{\mathcal Q}(s,z)=\prod_{p\in\mathcal Q}(1-zp^{-s})$, the coefficient for
-$\mathcal P$ is $E_{\mathcal Q}(1,2)$ times
+The boundary case reduces further, and in a way that removes the
+$s$-derivatives from consideration altogether. Expanding the pole of
+\eqref{eq:boundary-pole} in powers of $z$ and reading off the coefficient gives,
+for every set of primes $\mathcal P$ containing $2$,
+\begin{equation}\label{eq:boundary-exact}
+  P_k^{\mathcal P}(s)
+   =\sum_{i\geq0}\varphi_i(s)\,2^{-(k-i)s}
+     \sum_{j=0}^{k-i}\frac{\bigl(2^{s}\log\zeta(s)\bigr)^{j}}{j!},
+  \qquad
+  \varphi_i=[z^i]\Phi_{\mathcal P},
+\end{equation}
+an identity, not an approximation: it is \eqref{eq:euler-products-P} with
+$(1-z2^{-s})^{-1}=\sum_n2^{-ns}z^n$ substituted and the two series
+convolved. At $k=1$ it collapses to $\sum_pp^{-s}$, the terms in
+$\log\zeta$ cancelling against $\varphi_1$.
+
+Now integrate \eqref{eq:boundary-exact} over $s\geq1$. The mass of that
+integral sits at $s-1\asymp\e^{-k}$, so replacing $\varphi_i(s)$ by
+$\varphi_i(1)$ costs $O(\e^{-k})$, which is $o(2^{-k})$ because $\e>2$; and
+what is left carries no primes at all. Writing
+\begin{equation}\label{eq:Im-def}
+  I_m=\int_1^\infty 2^{-ms}\sum_{j=0}^m
+      \frac{\bigl(2^{s}\log\zeta(s)\bigr)^{j}}{j!}\dd s
+   =\frac1{m!}\int_1^\infty\!\!\int_0^\infty
+      \bigl(\log\zeta(s)+2^{-s}v\bigr)^{m}\e^{-v}\dd v\dd s,
+\end{equation}
+the second form by $\sum_{j\leq m}y^j/j!=\e^{y}\Gamma(m+1,y)/m!$ and
+$2^{-s}\cdot2^{s}\log\zeta(s)=\log\zeta(s)$, we therefore have
+\begin{equation}\label{eq:boundary-reduction}
+  f_k^{\mathcal P}=\sum_{i\geq0}\varphi_i(1)I_{k-i}+O(\e^{-k}).
+\end{equation}
+Suppose now only that $I_m=c_0+Am^22^{-m}+o(m^22^{-m})$ for constants
+$c_0,A$. Summing \eqref{eq:boundary-reduction} against $\varphi_i(1)$ and
+against $\varphi_i(1)2^{i}(k-i)^2$ --- the interchange being legitimate because
+$\varphi_i(1)=O(3^{-i})$ by Cauchy's estimate on $\abs z=R$ for any $R<3$,
+so the terms with $i$ large contribute $O(3^{-k})=o(2^{-k})$ --- gives at
+once
+\begin{equation}\label{eq:boundary-consequence}
+  f_k^{\mathcal P}\longrightarrow c_0\,\Phi_{\mathcal P}(1,1),
+  \qquad
+  [k^22^{-k}]\,f_k^{\mathcal P}=A\,\Phi_{\mathcal P}(1,2),
+\end{equation}
+since $\sum_i\varphi_i(1)=\Phi_{\mathcal P}(1,1)$ and
+$\sum_i\varphi_i(1)2^{i}=\Phi_{\mathcal P}(1,2)$, both convergent because
+$1,2<3\leq q(\mathcal P\setminus\{2\})$. So both constants depend on the
+numerator \emph{only through its value} at the critical point. The alternative
+$A\Phi(1,2)+B\,\partial_s\Phi(1,2)$ contemplated above cannot arise: no
+$s$-derivative of $\Phi_{\mathcal P}$ appears in
+\eqref{eq:boundary-consequence}, because the $s$-dependence was discharged by
+the $O(\e^{-k})$ freezing before any expansion in $\mathcal P$ took place.
+
+Since $I_m$ is independent of $\mathcal P$, its two constants are pinned by the
+single case $\mathcal Q=\varnothing$, where both answers are known. There
+$\Phi_{\mathcal P}=H_{\mathrm o}$, so $\Phi(1,1)=H_{\mathrm o}(1,1)=\tfrac12$
+and $\Phi(1,2)=d$; Lichtman's $f_k\to1$ \cite{Lichtman19} forces $c_0=2$, and
+\eqref{eq:GLW-value} forces $A=-\tfrac14\log2$. Feeding those back into
+\eqref{eq:boundary-consequence} and using \eqref{eq:boundary-ratio},
+\begin{equation}\label{eq:boundary-final}
+  f_k^{\mathcal P}\longrightarrow\prod_{p\in\mathcal Q}\Bigl(1-\frac1p\Bigr),
+  \qquad
+  [k^22^{-k}]\,f_k^{\mathcal P}
+   =-\tfrac14(\log2)\,d\prod_{p\in\mathcal Q}\Bigl(1-\frac2p\Bigr)<0 ,
+\end{equation}
+which is \eqref{eq:boundary-predicted}, and which settles the centring constant
+used in the computation above rather than leaving it to analogy.
+
+So exactly one analytic statement remains, and it mentions no primes:
+\begin{equation}\label{eq:Im-asymptotic}
+  I_m=2-\tfrac14(\log2)\,m^22^{-m}+o\bigl(m^22^{-m}\bigr).
+\end{equation}
+Granting \eqref{eq:Im-asymptotic}, Conjecture~\ref{conj:general} holds for
+every admissible $\mathcal P$ with $q=2$ for which $f_k^{\mathcal P}$ has an
+expansion to that order at all. For if that coefficient is $C<0$, as
+\eqref{eq:boundary-final} gives, then
 \[
-  A\Phi(1,2)+B\,\partial_s\Phi(1,2)
-  +B\,\Phi(1,2)\sum_{p\in\mathcal Q}\frac{2\log p}{p-2},
+  f_{k+1}^{\mathcal P}-f_k^{\mathcal P}
+   =C2^{-k}\,\frac{1+2k-k^2}{2}+o(k^22^{-k}),
 \]
-the sum being $\partial_s\log E_{\mathcal Q}(1,2)$, whose terms are positive
-because $p\geq3$ on $\mathcal Q$ and which converges precisely
-by~\eqref{eq:thin-complement} --- the third distinct task that hypothesis
-performs here, after making the limit in \eqref{eq:general-interior} positive
-and the $2^{-k}$ coefficient finite. Since $E_{\mathcal Q}(1,2)>0$, such a
-coefficient vanishes only if that sum takes one exact value $\kappa$ fixed by
-$A$, $B$ and the all-primes data, so non-cancellation would fail at most on a
-single level set of an explicit functional of $\mathcal Q$, and nowhere at all
-if $\kappa\leq0$. Against \eqref{eq:GLW-value}, which has $B=0$, that case is
-expected to be empty.
+and the bracket is negative for $k\geq3$, so the difference is eventually
+\emph{positive} and the sequence eventually increases --- which is the half of
+Conjecture~\ref{conj:general} that Corollary~\ref{cor:general-positivity} does
+not supply. We have not proved \eqref{eq:Im-asymptotic}; the obstacle is that
+$J=-\zeta/\zeta'$ is not integrable at $u=0$, so the naive bound on the inner
+integral of \eqref{eq:Im-def} fails and the $v$-integral's convergence is
+marginal, which is precisely where the factor $m^2$ comes from. What can be
+said is that \eqref{eq:Im-asymptotic} is a single one-dimensional asymptotic
+with explicit constants, rather than a statement about a family of prime sets,
+and that it is numerically unambiguous: $I_m$ computed for
+$8\leq m\leq36$ gives $I_m\to2$ to $2\cdot10^{-9}$, while
+$(I_m-2)/(m^22^{-m})$ rises monotonically from $-0.0875$ to $-0.1194$ and
+extrapolates, in the basis $A+b\log m/m+c/m$ that
+\eqref{eq:GLW-asymptotic}'s subleading $O(k\log(k+1))$ dictates, to
+$-0.17379$, $-0.17301$ and $-0.17277$ over three windows --- within $0.3\%$ of
+$-\tfrac14\log2=-0.17329$. Bases omitting the $\log m/m$ term land $8$--$10\%$
+away, so the data select that correction independently, which is a check on
+\eqref{eq:GLW-asymptotic} itself. The identity
+\eqref{eq:boundary-exact} is verified against direct Dirichlet sums to
+$10^{-18}$ for three different $\mathcal P$, and both computations are in
+\texttt{Im\_check.py}; like the others in this section they are ordinary
+floating-point and carry no certificate.
 
 The present paper proves the two cases $\mathcal P=\{\text{all primes}\}$ and
 $\mathcal P=\{p:p\geq3\}$, which are extremal among admissible sets in the

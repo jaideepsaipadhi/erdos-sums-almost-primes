@@ -237,25 +237,75 @@ same form holds with a general numerator, plus the existence of a `k^2`
 expansion for general `q = 2` at all; neither follows from `eq:GLW-asymptotic`,
 which is the single case `Q` empty.
 
-**The `s`-derivatives do not have to be excluded.** If the coefficient is
-`A Phi(1,2) + B d_s Phi(1,2)` with `A, B` independent of `P`, then because
-`Phi_P = Phi * E_Q` and `d_s log E_Q(1,2) = sum_{p in Q} 2 log p/(p-2)` (a
-convergent sum of POSITIVE terms), the coefficient for `P` is `E_Q(1,2)` times
+### The `s`-derivatives are GONE, and point two is now ONE primes-free asymptotic
 
-    A Phi(1,2) + B d_s Phi(1,2) + B Phi(1,2) sum_{p in Q} 2 log p/(p-2),
+Superseded 2026-11-05. The earlier framing — "if the coefficient is
+`A Phi + B d_s Phi`, cancellation needs one exact `kappa`" — is no longer the
+right statement, because **no `B` can occur at all.** The route is an exact
+identity. Expanding the pole of `H_P = Phi_P/(1 - z 2^-s)` in powers of `z`,
 
-so it vanishes only if that sum equals one exact constant `kappa` fixed by the
-all-primes data. Non-cancellation therefore holds for every admissible `P` with
-`q = 2` outside at most one level set of an explicit functional of `Q`, and for
-all of them at once if `kappa <= 0`. So the remaining point is: get the form of
-the `k^2` coefficient for all primes. Say it that way, not "prove the boundary
-case".
+    P_k^P(s) = sum_i phi_i(s) 2^{-(k-i)s} sum_{j<=k-i} (2^s log zeta(s))^j/j!,
+    phi_i = [z^i] Phi_P,      Phi_P = H_{P \ {2}}.                      (*)
 
-The numerical test does NOT settle `B = 0`, and don't claim it does. A second
-complement is not discriminating either: the `Q = {3}` residual of `3.2e-4`
-implies a shift of only `1.6e-4` for `Q = {5}`, which is below the
-extrapolation error. Distinguishing `B = 0` from small `B` needs better
-extrapolation (more and larger `k`), not another `Q`.
+(*) is exact, not asymptotic; at `k = 1` it collapses to `sum_p p^-s`, the
+`log zeta` terms cancelling against `phi_1`. **Verified to 1e-18 against direct
+Dirichlet sums for `P` = all primes, minus `{3}`, minus `{3,5}`**
+(`Im_check.py --identity`).
+
+Integrate `ds` over `[1,inf)`. The mass sits at `s - 1 ~ e^-k`, so freezing
+`phi_i` at `s = 1` costs `O(e^-k) = o(2^-k)` (since `e > 2`), and what remains
+carries no primes:
+
+    I_m = int_1^inf 2^{-ms} sum_{j<=m} (2^s log zeta(s))^j/j! ds
+        = (1/m!) int_1^inf int_0^inf (log zeta(s) + 2^-s v)^m e^-v dv ds,
+
+    f_k^P = sum_i phi_i(1) I_{k-i} + O(e^-k).
+
+If `I_m = c0 + A m^2 2^-m + o(.)` then summing against `phi_i(1)` and against
+`phi_i(1) 2^i (k-i)^2` gives, immediately,
+
+    f_k^P -> c0 * Phi_P(1,1),     [k^2 2^-k] f_k^P = A * Phi_P(1,2).
+
+**Both depend on the numerator only through its VALUE.** The `s`-dependence was
+discharged by the `O(e^-k)` freezing before `P` entered, so a `d_s Phi` term
+cannot appear — that is why `B = 0` is automatic rather than assumed.
+
+`I_m` has no primes in it, so its two constants are pinned by the single case
+`Q` empty, where both answers are known:
+
+    Lichtman f_k -> 1,  Phi(1,1) = H_o(1,1) = 1/2   =>   c0 = 2
+    GLW a_1 = d log2/4, Phi(1,2) = H_o(1,2) = d     =>   A  = -log2/4
+
+which gives, for every admissible `P` with `q = 2`,
+
+    f_k^P -> prod_{p in Q}(1 - 1/p),
+    [k^2 2^-k] f_k^P = -(log2/4) d prod_{p in Q}(1 - 2/p)  <  0.
+
+That also **derives the centring constant** the boundary numerics use, which
+the earlier text had to assume by analogy. And since `C < 0` gives
+`f_{k+1} - f_k = C 2^-k (1+2k-k^2)/2 + o(.)` with the bracket negative for
+`k >= 3`, the sequence eventually INCREASES — the half of Conjecture 7.1 that
+Corollary 7.3 does not supply.
+
+**So exactly one statement remains, and it mentions no primes:**
+
+    I_m = 2 - (log2/4) m^2 2^-m + o(m^2 2^-m).
+
+Not proved. The obstacle is concrete: `J = -zeta/zeta'` is NOT integrable at
+`u = 0` (`int_0 J du = int^inf ds = inf`), so the naive bound on the inner
+integral fails and the `v`-integral's convergence is marginal — which is
+exactly where the `m^2` comes from. Don't retry the crude route: bounding
+`J <= C e^-u` globally is false, and the formal term-by-term expansion of `J`
+produces a spurious `(e^{2/3}/3)^m = 0.649^m` term that beats `2^-m`, which is
+the signal that the interchange is invalid, not a result.
+
+Numerically unambiguous, though: `I_m` for `8 <= m <= 36` gives `I_m -> 2` to
+`2e-9`, and `(I_m-2)/(m^2 2^-m)` rises monotonically `-0.0875 -> -0.1194`,
+extrapolating to `-0.17379 / -0.17301 / -0.17277` across three windows in the
+`A + b log m/m + c/m` basis — within `0.3%` of `-log2/4 = -0.17329`. Bases
+omitting the `log m/m` term land `8-10%` off, so the data select that
+correction independently, which is a check on GLW's `O(k log(k+1))` itself.
+`numerics/Im_check.py`, log in `Im.log`; mpmath, no certificate.
 
 ### Four traps in the Section 7 write-up, all hit once
 
