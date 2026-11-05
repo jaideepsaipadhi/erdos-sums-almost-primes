@@ -7,12 +7,12 @@ in powers of z gives, for every set of primes P with 2 in P,
     P_k^P(s) = sum_i phi_i(s) 2^{-(k-i)s} sum_{j<=k-i} (2^s log zeta(s))^j / j!,
     phi_i = [z^i] Phi_P.                                              (*)
 
-(*) is exact.  It is verified here against direct Dirichlet sums, to ~1e-18,
-for P = all primes, P = primes minus {3} and P = primes minus {3,5}.
+(*) is exact.  It is verified here against direct Dirichlet sums over
+n <= 3e6 at s = 4 and k <= 3, to ~1e-17, for P = all primes, P = primes
+minus {3} and P = primes minus {3,5}.
 
-Integrating ds over [1,inf) and freezing phi_i at s = 1 -- legitimate to
-O(e^-k), since the mass of the s-integral sits at s - 1 ~ e^-k and
-e^-k = o(2^-k) -- isolates ALL the k-dependence in
+Integrating ds over [1,inf) and freezing phi_i at s = 1 isolates ALL the
+k-dependence in
 
     I_m = int_1^inf 2^{-ms} sum_{j=0}^m (2^s log zeta(s))^j / j!  ds,
 
@@ -23,14 +23,28 @@ and 2^-s y = u,
     I_m = (1/m!) int_1^inf int_0^inf (u(s) + 2^-s v)^m e^-v dv ds,
     u(s) = log zeta(s).
 
-So f_k^P = sum_i phi_i(1) I_{k-i} + O(e^-k).  If I_m = c0 + A m^2 2^-m +
-o(m^2 2^-m), then summing phi_i(1) 2^i against 1 and against (k-i)^2 gives
+The cost of the freezing is NOT O(e^-k).  The mass of the s-integral sits at
+s - 1 ~ e^-k, but the integrand is a sum of ~m terms of alternating size and
+the Jensen error is governed by the first moment
+
+    K_m = int_1^inf (s-1) * [I_m integrand] ds,
+
+which is Theta(m 2^-m), not O(e^-m): numerically K_m 2^m / m = 0.381, 0.397,
+0.411, 0.416 at m = 16, 24, 32, 36, while e^-m/K_m = 1.1e-6 at m = 36.  So
+
+    f_k^P = sum_{m=1}^{k} phi_{k-m}(1) I_m + int_1^inf phi_k(s) ds + O(k 2^-k),
+
+the m = 0 term being kept unfrozen because I_0 = int_1^inf 1 ds DIVERGES.
+If I_m = c0 + A m^2 2^-m + o(m^2 2^-m), then summing against phi_{k-m}(1)
+and against phi_{k-m}(1) 2^{k-m} m^2 gives
 
     f_k^P -> c0 * Phi_P(1,1),      k^2 2^-k coefficient = A * Phi_P(1,2),
 
 both depending on the numerator only through its VALUE at the critical point.
-No s-derivative of Phi_P can enter, so the "B = 0" case of the Section 7
-reduction is automatic rather than assumed.
+So no s-derivative of Phi_P enters the k^2 2^-k coefficient -- the "B = 0"
+case of the Section 7 reduction, at that order.  It does enter at order
+k 2^-k, through the freezing error sum_i phi_i'(1) K_{k-i}; the reduction is
+accurate to o(k^2 2^-k), NOT to o(2^-k).
 
 Because I_m is P-independent, the two universal constants are pinned by the
 single case Q empty, where both answers are known:
@@ -193,6 +207,8 @@ for name, ms, bs in wins:
     A = fit(ms, bs)
     print("%-36s %16s %10s" % (name, mp.nstr(A, 10), mp.nstr(abs(A / tgt - 1), 4)))
 print()
-print("The bases WITHOUT a log m/m term land ~8-10% off, which is independent")
-print("corroboration of GLW's O(k log(k+1)) subleading term: the data select")
-print("that correction, and with it A agrees with -log2/4 to a few parts in 1000.")
+print("The one tabulated basis omitting log m/m (1/m + 1/m^2) lands ~8.0% off and")
+print("the two-parameter log m/m fit ~8.6%, so the three-parameter fit with that")
+print("correction is doing real work and A then agrees with -log2/4 to a few parts")
+print("in 1000.  This is NOT independent corroboration of GLW's O(k log(k+1)):")
+print("the basis was chosen with that remainder already in mind.")

@@ -1,0 +1,15 @@
+# R = 4.2000  primes 5..200000 (17982)  MMAX = 300  NSAMP = 1440  prec = 300
+# |log-series m-tail beyond MMAX| <= [3.3638e-25 +/- 4.88e-30]
+# rho = 3 Gtilde(3) = 0.174932   (scripts hardcode 0.17493240)
+# residue agrees with the hardcoded literal: True
+
+pole-free part   sup |G_2(1,z) - rho/(3-z)| <= [95.49058478 +/- 4.35e-9]   (arc factor [1.01419 +/- 4.41e-6])
+regularized      sup |(1 - z/3) G_2(1,z)|   <= [228.9429966 +/- 3.07e-8]   (arc factor [1.01290 +/- 4.31e-6])
+
+corrected  |c_i| <= [95.548896 +/- 4.17e-7] * 3^-i   (manuscript states 354.36, so the
+           stated constant holds a fortiori; Lemma 3.7(i) gives 44.5987)
+
+stated 101.245 bounds the pole-free part : YES
+stated 101.245 bounds the regularized G_2: NO  <-- it does NOT; the
+    manuscript's eq:contour-certified named this function and must name
+    the pole-free part instead.

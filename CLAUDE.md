@@ -107,7 +107,7 @@ reason recorded in its docstring.
 `numerics/verify.py` must be **run from `numerics/bm-rebuild-v21/`** — its
 docstring says so, and from anywhere else it silently skips the criterion
 sweeps (`load()` returns `None` and the loop `continue`s) while two unrelated
-checks error out. Run correctly it passes all 12. Don't report it as broken
+checks error out. Run correctly it passes all 17. Don't report it as broken
 without checking the directory first.
 
 What backs `eq:full-sweep-ranges`, regenerated 2026-11-05:
@@ -116,7 +116,7 @@ What backs `eq:full-sweep-ranges`, regenerated 2026-11-05:
 |---|---|---|---|
 | `numerics/certificate.json` | `f_k` enclosures, compared pairwise | `k = 2..500` | `certificate.py` |
 | `bm-rebuild-v21/crit_78_734.json` | refined criterion `> 0` (min 0.91) | `78..734` | `crit_refined.py 78 734` |
-| `bm-rebuild-v21/crit_650_899.json` | fallback criterion `> 0` from 728 (min 27.65) | `728..899` | `crit_fallback.py 650 899` |
+| `bm-rebuild-v21/crit_650_899.json` | fallback criterion `> 0` from 728 (min 27.65) | `728..899` | `crit_fallback.py 650 899 crit_650_899.json` |
 | `bm-rebuild-v21/crit_900_2439.json` | fallback criterion `> 0` (min 10115.96) | `900..2439` | `sweep_900_2439.py` |
 
 The blocks now **overlap**: `[78,734] [728,899] [900,2439]`. They used to abut
@@ -248,28 +248,42 @@ identity. Expanding the pole of `H_P = Phi_P/(1 - z 2^-s)` in powers of `z`,
     P_k^P(s) = sum_i phi_i(s) 2^{-(k-i)s} sum_{j<=k-i} (2^s log zeta(s))^j/j!,
     phi_i = [z^i] Phi_P,      Phi_P = H_{P \ {2}}.                      (*)
 
-(*) is exact, not asymptotic; at `k = 1` it collapses to `sum_p p^-s`, the
-`log zeta` terms cancelling against `phi_1`. **Verified to 1e-18 against direct
-Dirichlet sums for `P` = all primes, minus `{3}`, minus `{3,5}`**
-(`Im_check.py --identity`).
+(*) is exact for `s > 1`, not asymptotic; at `k = 1` it collapses to
+`sum_{p in P} p^-s` — the RESTRICTED sum, not `sum_p p^-s` — the `log zeta`
+terms cancelling against `phi_1`. **Verified to 1e-17 against direct Dirichlet
+sums over `n <= 3e6` at `s = 4`, `k <= 3`, for `P` = all primes, minus `{3}`,
+minus `{3,5}`** (`Im_check.py --identity`).
 
-Integrate `ds` over `[1,inf)`. The mass sits at `s - 1 ~ e^-k`, so freezing
-`phi_i` at `s = 1` costs `O(e^-k) = o(2^-k)` (since `e > 2`), and what remains
+Integrate `ds` over `[1,inf)` and freeze `phi_i` at `s = 1`. What remains
 carries no primes:
 
     I_m = int_1^inf 2^{-ms} sum_{j<=m} (2^s log zeta(s))^j/j! ds
         = (1/m!) int_1^inf int_0^inf (log zeta(s) + 2^-s v)^m e^-v dv ds,
 
-    f_k^P = sum_i phi_i(1) I_{k-i} + O(e^-k).
+    f_k^P = sum_{m=1}^{k} phi_{k-m}(1) I_m + int_1^inf phi_k(s) ds + O(k 2^-k).
 
-If `I_m = c0 + A m^2 2^-m + o(.)` then summing against `phi_i(1)` and against
-`phi_i(1) 2^i (k-i)^2` gives, immediately,
+Two things here were wrong in the first write-up and are load-bearing:
+
+- **`I_0 = int_1^inf 1 ds` DIVERGES**, so the `m = 0` term must be kept
+  unfrozen; `int phi_k(s) ds = O(R^-k/k)` for any `R < 3` by Cauchy.
+- **The freezing does NOT cost `O(e^-k)`.** The mass sits at `s - 1 ~ e^-k`,
+  but the Jensen error is governed by the first moment
+  `K_m = int (s-1) [I_m integrand] ds`, which is `Theta(m 2^-m)`:
+  `K_m 2^m/m` = 0.381/0.397/0.411/0.416 at `m = 16/24/32/36`, against
+  `e^-m/K_m = 1.1e-6` at `m = 36`. So the error is `sum_i phi_i'(1) K_{k-i}
+  = O(k 2^-k)`, and **the reduction is accurate to `o(k^2 2^-k)`, not
+  `o(2^-k)`.**
+
+If `I_m = c0 + A m^2 2^-m + o(.)` then summing against `phi_{k-m}(1)` and
+against `phi_{k-m}(1) 2^{k-m} m^2` gives, immediately,
 
     f_k^P -> c0 * Phi_P(1,1),     [k^2 2^-k] f_k^P = A * Phi_P(1,2).
 
-**Both depend on the numerator only through its VALUE.** The `s`-dependence was
-discharged by the `O(e^-k)` freezing before `P` entered, so a `d_s Phi` term
-cannot appear — that is why `B = 0` is automatic rather than assumed.
+**Both depend on the numerator only through its VALUE** — but the honest claim
+is only that no `d_s Phi` term enters the `k^2 2^-k` COEFFICIENT. One does
+enter, via the freezing error, at order `k 2^-k`. That order is irrelevant to
+Conjecture 7.1, whose sign is decided by `k^2 2^-k`, which is why `B = 0`
+still does the work; do not state it unqualified.
 
 `I_m` has no primes in it, so its two constants are pinned by the single case
 `Q` empty, where both answers are known:
@@ -301,11 +315,14 @@ produces a spurious `(e^{2/3}/3)^m = 0.649^m` term that beats `2^-m`, which is
 the signal that the interchange is invalid, not a result.
 
 Numerically unambiguous, though: `I_m` for `8 <= m <= 36` gives `I_m -> 2` to
-`2e-9`, and `(I_m-2)/(m^2 2^-m)` rises monotonically `-0.0875 -> -0.1194`,
-extrapolating to `-0.17379 / -0.17301 / -0.17277` across three windows in the
-`A + b log m/m + c/m` basis — within `0.3%` of `-log2/4 = -0.17329`. Bases
-omitting the `log m/m` term land `8-10%` off, so the data select that
-correction independently, which is a check on GLW's `O(k log(k+1))` itself.
+`3e-9`, and `(I_m-2)/(m^2 2^-m)` DECREASES monotonically `-0.0875 -> -0.1194`
+(its magnitude rising), extrapolating to `-0.17379 / -0.17301 / -0.17277`
+across three windows in the `A + b log m/m + c/m` basis — within `0.3%` of
+`-log2/4 = -0.17329`. The one tabulated basis omitting `log m/m`
+(`1/m + 1/m^2`) lands `8.0%` off and the two-parameter `log m/m` fit `8.6%`,
+so that correction is doing real work — but this is **not** independent
+corroboration of GLW's `O(k log(k+1))`: the basis was chosen with that
+remainder in mind. Don't upgrade it.
 `numerics/Im_check.py`, log in `Im.log`; mpmath, no certificate.
 
 ### Four traps in the Section 7 write-up, all hit once

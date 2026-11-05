@@ -157,11 +157,30 @@ for label, value, sense, pat in mono:
 # certified inputs, included so one command covers all of them.
 print()
 C = grab(r"With \$C=([0-9]+(?:\.[0-9]+)?)\$", "the tail-coefficient constant C")
-sup = grab(r"\\widetilde G_2\(z\)\\bigr\\rvert\\leq([0-9]+(?:\.[0-9]+)?)", "the |z|=4.2 contour bound")
-geo = sup * arb("4.2") / arb("1.2")        # sum_{m>=0} (3/4.2)^m = 4.2/1.2
-check("C = %s covers sup * sum (3/4.2)^m" % C.str(10, radius=False),
-      float(geo.upper()) <= float(C.str(20, radius=False)),
-      "sup * 3.5 = %.6f" % float(geo.upper()))
+# eq:contour-certified bounds the POLE-FREE part G_2 - rho/(3-z), not the
+# regularized product (1-z/3)G_2 -- the manuscript named the latter until
+# contour_certified.py showed its sup is 228.95, i.e. 2.3x the stated 101.245.
+# So the consequence to check is rho/3 + sup, not sup * sum (3/4.2)^m.
+sup = grab(r"\\frac\{\\rho\}\{3-z\}\\Bigr\\rvert\\leq([0-9]+(?:\.[0-9]+)?)",
+           "the |z|=4.2 contour bound on the pole-free part")
+rho = grab(r"\\abs\\rho\\leq([0-9]+(?:\.[0-9]+)?)", "|rho|, the residue at z=3")
+ci = grab(r"\\leq([0-9]+(?:\.[0-9]+)?)\\,3\^\{-i\}\n *<", "the sharp c_i constant")
+check("c_i constant %s covers |rho|/3 + sup" % ci.str(10, radius=False),
+      float((rho / 3 + sup).upper()) <= float(ci.str(20, radius=False)),
+      "|rho|/3 + sup = %.6f" % float((rho / 3 + sup).upper()))
+check("C = %s is weaker than the sharp c_i constant" % C.str(10, radius=False),
+      float(ci.upper()) <= float(C.str(20, radius=False)),
+      "%s <= %s" % (ci.str(8, radius=False), C.str(8, radius=False)))
+# and against the certificate itself
+_cl = ROOT / "numerics" / "contour.log"
+if _cl.exists():
+    import re as _re
+    _m = _re.search(r"pole-free part.*?<= \[([0-9.]+)", _cl.read_text())
+    check("stated 101.245 >= certified pole-free sup (contour.log)",
+          bool(_m) and float(sup.lower()) >= float(_m.group(1)),
+          "certified %s" % (_m.group(1) if _m else "UNPARSEABLE"))
+else:
+    check("contour.log present", False, "the contour bound has no certificate")
 
 S0 = grab(r"\\Sigma_0\\leq([0-9]+(?:\.[0-9]+)?)", "Sigma_0")
 S1 = grab(r"\\Sigma_1\\leq([0-9]+(?:\.[0-9]+)?)", "Sigma_1")

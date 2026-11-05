@@ -38,14 +38,21 @@ for f in files:
         mid, rad = arb(p[1]), arb(p[2])
         fk[k] += mid.union(mid - rad).union(mid + rad)
 
-for k in range(2, KMAX + 1):
+# From k = 1, not k = 2.  This loop used to start at 2, so f_1 carried no
+# tail terms and the verdict below never compared f_1 with f_2 -- the sweep
+# certified [2,75] while the manuscript claims 1 <= k <= 75.  (The tails at
+# k = 1 are ~3e-79 against a radius of ~3e-22, so nothing was false; it was
+# simply unverified.)
+for k in range(1, KMAX + 1):
     fk[k] += F.tail_large_s_odd(k) + C.tail_near_1(k)
 
 print("k   f_k^odd")
 for k in range(1, KMAX + 1):
     print("%2d  %s" % (k, fk[k].str(20)), flush=True)
 print()
-dec = all((fk[k] - fk[k + 1]) > 0 for k in range(2, KMAX))
-print("f_k^odd strictly decreasing on [2,%d]: %s" % (KMAX, dec))
-inc = all((fk[k + 1] - fk[k]) > 0 for k in range(2, KMAX))
-print("f_k^odd strictly increasing on [2,%d]: %s" % (KMAX, inc))
+# range(1, KMAX) compares every adjacent pair (k, k+1) for 1 <= k <= KMAX-1,
+# i.e. certifies monotonicity on the whole of [1, KMAX].
+dec = all((fk[k] - fk[k + 1]) > 0 for k in range(1, KMAX))
+print("f_k^odd strictly decreasing on [1,%d]: %s" % (KMAX, dec))
+inc = all((fk[k + 1] - fk[k]) > 0 for k in range(1, KMAX))
+print("f_k^odd strictly increasing on [1,%d]: %s" % (KMAX, inc))

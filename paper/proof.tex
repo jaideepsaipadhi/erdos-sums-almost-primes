@@ -1192,11 +1192,19 @@ For every $k\geq900$,
 \begin{equation}\label{eq:Tk-certified}
  2^k\abs{T_k}\leq\frac{1.45}{k},
 \end{equation}
-and a contour bound for the regularized generating function
-$\widetilde G_2$ of the $c_i$,
+and a contour bound for the \emph{pole-free part} of the generating function
+of the $c_i$: writing $\rho$ for the residue of $G_2(1,\cdot)$ at its nearest
+pole $z=3$, so that $\abs\rho\leq0.1749324$,
 \begin{equation}\label{eq:contour-certified}
- \sup_{\abs z=4.2}\bigl\lvert\widetilde G_2(z)\bigr\rvert\leq101.245 .
+ \sup_{\abs z=4.2}\Bigl\lvert G_2(1,z)-\frac{\rho}{3-z}\Bigr\rvert\leq101.245 .
 \end{equation}
+The subtraction is not cosmetic. The regularized product
+$\widetilde G_2(z)=(1-z/3)G_2(1,z)$ has
+$\sup_{\abs z=4.2}\abs{\widetilde G_2}=228.95$, so $101.245$ is not a bound for
+it; it is a bound for \eqref{eq:contour-certified}, with about $5.7\%$ to
+spare. Both suprema are certified in \texttt{numerics/contour\_certified.py}
+(log \texttt{contour.log}), which also recovers $\rho$ from the same series and
+matches the value the sweep scripts use.
 Together these give
 \begin{equation}\label{eq:Eexp-certified}
  \abs{E_{\exp}(k)}\leq\frac{1.45}{k}+10^{-3}
@@ -1236,19 +1244,24 @@ here, and the overlap is recorded because it is what makes the union of
 \end{proposition}
 
 The coefficient tails in \eqref{eq:Eexp-certified} are obtained only after the
-pole at $z=3$ has been removed. Put
+pole at $z=3$ has been removed, and the removal is by subtraction of the
+principal part rather than by multiplication. Put
 \[
- \widetilde G_2(z)=(1-z/3)G_2(1,z)=\sum_{m\geq0}w_mz^m.
+ H(z)=G_2(1,z)-\frac{\rho}{3-z}=\sum_{m\geq0}w_mz^m,
 \]
-The certified contour bound is
-\eqref{eq:contour-certified}. Hence
-$\abs{w_m}\leq101.245\,4.2^{-m}$, and from
-$G_2(1,z)=(1-z/3)^{-1}\widetilde G_2(z)$ we obtain
+which is holomorphic on $\abs z<5$, the next pole of $G_2(1,\cdot)$ being at
+$z=5$. Cauchy's estimate on $\abs z=4.2$ together with
+\eqref{eq:contour-certified} gives $\abs{w_m}\leq101.245\,4.2^{-m}$, while
+$[z^i]\rho/(3-z)=\rho\,3^{-i-1}$, so
 \begin{equation}\label{eq:ci-geometric-bound}
  \abs{c_i}
- \leq101.245\,3^{-i}\sum_{m=0}^i(3/4.2)^m
+ \leq\frac{\abs\rho}{3}3^{-i}+101.245\,(3/4.2)^i3^{-i}
+ \leq101.31\,3^{-i}
  <354.36\,3^{-i}.
 \end{equation}
+The weaker constant $354.36$ is the one carried below and into the
+formalization; the sharper $101.31$ is recorded only so that the chain can be
+checked.
 By \eqref{eq:ci-equals-hi} the $c_i$ are the coefficients $h_i(1)$, so
 Lemma~\ref{lem:pole-coefficient-bounds}(i) sharpens
 \eqref{eq:ci-geometric-bound} to $\abs{c_i}\leq\Sigma_03^{-i}$, dispensing with
@@ -1878,15 +1891,19 @@ for every set of primes $\mathcal P$ containing $2$,
   \qquad
   \varphi_i=[z^i]\Phi_{\mathcal P},
 \end{equation}
-an identity, not an approximation: it is \eqref{eq:euler-products-P} with
-$(1-z2^{-s})^{-1}=\sum_n2^{-ns}z^n$ substituted and the two series
-convolved. At $k=1$ it collapses to $\sum_pp^{-s}$, the terms in
-$\log\zeta$ cancelling against $\varphi_1$.
+an identity, not an approximation, valid for $s>1$: it is
+\eqref{eq:euler-products-P} with $(1-z2^{-s})^{-1}=\sum_n2^{-ns}z^n$
+substituted and the three series --- that one,
+$\zeta(s)^{z}=\exp(z\log\zeta(s))$, and $\Phi_{\mathcal P}$ --- convolved over
+$i+j+n=k$. At $k=1$ it collapses to $\sum_{p\in\mathcal P}p^{-s}
+=P_1^{\mathcal P}(s)$, the terms in $\log\zeta$ cancelling against
+$\varphi_1$. The identity needs nothing of $\mathcal Q$; the estimates on
+$\varphi_i$ used below need \eqref{eq:thin-complement}, through
+Proposition~\ref{prop:general-interior} applied to
+$\mathcal P\setminus\{2\}$.
 
-Now integrate \eqref{eq:boundary-exact} over $s\geq1$. The mass of that
-integral sits at $s-1\asymp\e^{-k}$, so replacing $\varphi_i(s)$ by
-$\varphi_i(1)$ costs $O(\e^{-k})$, which is $o(2^{-k})$ because $\e>2$; and
-what is left carries no primes at all. Writing
+Now integrate \eqref{eq:boundary-exact} over $s\geq1$ and replace
+$\varphi_i(s)$ by $\varphi_i(1)$. Writing
 \begin{equation}\label{eq:Im-def}
   I_m=\int_1^\infty 2^{-ms}\sum_{j=0}^m
       \frac{\bigl(2^{s}\log\zeta(s)\bigr)^{j}}{j!}\dd s
@@ -1896,14 +1913,55 @@ what is left carries no primes at all. Writing
 the second form by $\sum_{j\leq m}y^j/j!=\e^{y}\Gamma(m+1,y)/m!$ and
 $2^{-s}\cdot2^{s}\log\zeta(s)=\log\zeta(s)$, we therefore have
 \begin{equation}\label{eq:boundary-reduction}
-  f_k^{\mathcal P}=\sum_{i\geq0}\varphi_i(1)I_{k-i}+O(\e^{-k}).
+  f_k^{\mathcal P}=\sum_{m=1}^{k}\varphi_{k-m}(1)\,I_m
+   +\int_1^\infty\varphi_k(s)\dd s+E_k .
 \end{equation}
+Three points about \eqref{eq:boundary-reduction} need care, and the third
+limits what the reduction can deliver.
+
+First, $I_m$ is finite only for $m\geq1$: at $m=0$ the $j$-sum is the single
+term $1$ and the prefactor is $1$, so $I_0=\int_1^\infty\dd s=\infty$. The
+$m=0$ term of \eqref{eq:boundary-exact} is $\varphi_k(s)$, whose $s$-integral
+converges because $\varphi_k(s)\to0$, not because of any decay supplied by the
+rest of the integrand; freezing it at $s=1$ would destroy that, so it is kept
+unfrozen above. It is harmless: Cauchy's estimate on $\abs z=R^{s}$ with
+$R<3$ gives $\abs{\varphi_k(s)}\leq MR^{-ks}$ uniformly for $s\geq1$, by
+Proposition~\ref{prop:general-interior}(ii) applied to
+$\mathcal P\setminus\{2\}$, whence
+$\int_1^\infty\varphi_k(s)\dd s=O(R^{-k}/k)=o(2^{-k})$.
+
+Second, the $i$-sum in \eqref{eq:boundary-exact} is finite --- the $j$-sum is
+empty for $i>k$ --- while $\Phi_{\mathcal P}(1,1)$ and
+$\Phi_{\mathcal P}(1,2)$ below are infinite sums. The difference is the tail
+$\sum_{i>k}$, which is $O(3^{-k})$ and $O((2/3)^{k})$ respectively by the same
+estimate, both $o(2^{-k})$.
+
+Third, the freezing error. It is tempting to argue that the mass of the
+$s$-integral sits at $s-1\asymp\e^{-k}$, so that $E_k=O(\e^{-k})=o(2^{-k})$;
+that is false, and the error is a Jensen error --- the expectation of
+$s-1=\e^{-t}$ under the $I_m$ integrand is not $\e^{-\mathbb E t}$ even though
+$\mathbb E t=m$. The relevant weight is
+$K_m=\int_1^\infty(s-1)\,2^{-ms}\sum_{j\leq m}(2^{s}\log\zeta(s))^j/j!\dd s$,
+whose value is governed by the small-$t$ tail rather than by the bulk, and
+numerically $K_m2^{m}/m=0.381,0.397,0.411,0.416$ at $m=16,24,32,36$, so
+$K_m\asymp m2^{-m}$ and $\e^{-m}$ is smaller by a factor $10^{6}$ already at
+$m=36$. Since $\varphi_i'(1)=O(R^{-i})$ for $R<3$,
+\begin{equation}\label{eq:freeze-error}
+  E_k=\sum_{i\geq1}\varphi_i'(1)K_{k-i}+\cdots=O\bigl(k2^{-k}\bigr),
+\end{equation}
+and $\Theta(k2^{-k})$ in general, since $\varphi_1'(1)\neq0$. So
+\eqref{eq:boundary-reduction} is accurate to $o(k^22^{-k})$ but \emph{not} to
+$o(2^{-k})$: it determines the limit and the $k^22^{-k}$ coefficient, and says
+nothing about the $k2^{-k}$ or $2^{-k}$ coefficients. That is enough for
+Conjecture~\ref{conj:general}, which turns on the sign of the leading
+coefficient, and it is worth noting against \eqref{eq:GLW-asymptotic}, whose
+remainder is $O(k\log(k+1))$.
 Suppose now only that $I_m=c_0+Am^22^{-m}+o(m^22^{-m})$ for constants
-$c_0,A$. Summing \eqref{eq:boundary-reduction} against $\varphi_i(1)$ and
-against $\varphi_i(1)2^{i}(k-i)^2$ --- the interchange being legitimate because
-$\varphi_i(1)=O(3^{-i})$ by Cauchy's estimate on $\abs z=R$ for any $R<3$,
-so the terms with $i$ large contribute $O(3^{-k})=o(2^{-k})$ --- gives at
-once
+$c_0,A$, the error being uniform in $m$. Substituting into
+\eqref{eq:boundary-reduction} and summing the resulting series against
+$\varphi_{k-m}(1)$ and against $\varphi_{k-m}(1)2^{k-m}m^2$ --- the
+interchanges being dominated convergence, legitimate because
+$\sum_i\abs{\varphi_i(1)}2^{i}<\infty$ and $m^2\leq k^2$ --- gives
 \begin{equation}\label{eq:boundary-consequence}
   f_k^{\mathcal P}\longrightarrow c_0\,\Phi_{\mathcal P}(1,1),
   \qquad
@@ -1911,12 +1969,19 @@ once
 \end{equation}
 since $\sum_i\varphi_i(1)=\Phi_{\mathcal P}(1,1)$ and
 $\sum_i\varphi_i(1)2^{i}=\Phi_{\mathcal P}(1,2)$, both convergent because
-$1,2<3\leq q(\mathcal P\setminus\{2\})$. So both constants depend on the
-numerator \emph{only through its value} at the critical point. The alternative
-$A\Phi(1,2)+B\,\partial_s\Phi(1,2)$ contemplated above cannot arise: no
-$s$-derivative of $\Phi_{\mathcal P}$ appears in
-\eqref{eq:boundary-consequence}, because the $s$-dependence was discharged by
-the $O(\e^{-k})$ freezing before any expansion in $\mathcal P$ took place.
+$1,2<3\leq q(\mathcal P\setminus\{2\})$, and since the three error terms
+collected above --- the unfrozen $m=0$ term, the $i$-tails and
+$E_k=O(k2^{-k})$ --- are all $o(k^22^{-k})$.
+
+So the $k^2$ coefficient depends on the numerator \emph{only through its value}
+at the critical point, and the alternative
+$A\Phi(1,2)+B\,\partial_s\Phi(1,2)$ contemplated above cannot arise \emph{at
+that order}. This is the precise form of the claim, and it is weaker than it
+first appears: by \eqref{eq:freeze-error} an $s$-derivative of
+$\Phi_{\mathcal P}$ does enter, through $\sum_i\varphi_i'(1)K_{k-i}$, but only
+at order $k2^{-k}$. What is excluded is a $\partial_s\Phi$ contribution to the
+$k^22^{-k}$ coefficient, which is the coefficient whose sign decides
+Conjecture~\ref{conj:general}.
 
 Since $I_m$ is independent of $\mathcal P$, its two constants are pinned by the
 single case $\mathcal Q=\varnothing$, where both answers are known. There
@@ -1955,16 +2020,21 @@ marginal, which is precisely where the factor $m^2$ comes from. What can be
 said is that \eqref{eq:Im-asymptotic} is a single one-dimensional asymptotic
 with explicit constants, rather than a statement about a family of prime sets,
 and that it is numerically unambiguous: $I_m$ computed for
-$8\leq m\leq36$ gives $I_m\to2$ to $2\cdot10^{-9}$, while
-$(I_m-2)/(m^22^{-m})$ rises monotonically from $-0.0875$ to $-0.1194$ and
-extrapolates, in the basis $A+b\log m/m+c/m$ that
+$8\leq m\leq36$ gives $I_m\to2$ to $3\cdot10^{-9}$, while
+$(I_m-2)/(m^22^{-m})$ decreases monotonically from $-0.0875$ to $-0.1194$
+--- its magnitude rising --- and extrapolates, in the basis $A+b\log m/m+c/m$
+that
 \eqref{eq:GLW-asymptotic}'s subleading $O(k\log(k+1))$ dictates, to
 $-0.17379$, $-0.17301$ and $-0.17277$ over three windows --- within $0.3\%$ of
-$-\tfrac14\log2=-0.17329$. Bases omitting the $\log m/m$ term land $8$--$10\%$
-away, so the data select that correction independently, which is a check on
-\eqref{eq:GLW-asymptotic} itself. The identity
-\eqref{eq:boundary-exact} is verified against direct Dirichlet sums to
-$10^{-18}$ for three different $\mathcal P$, and both computations are in
+$-\tfrac14\log2=-0.17329$. The one tabulated basis that omits the
+$\log m/m$ term, $A+b/m+c/m^2$, lands $8.0\%$ away, and the two-parameter
+$A+b\log m/m$ lands $8.6\%$ away, so the three-parameter fit with that
+correction is doing real work; we do not claim this as independent
+corroboration of \eqref{eq:GLW-asymptotic}, since the basis was chosen with
+that remainder in mind. The identity
+\eqref{eq:boundary-exact} is verified against direct Dirichlet sums over
+$n\leq3\cdot10^{6}$ at $s=4$ and $k\leq3$, to $10^{-17}$, for three different
+$\mathcal P$, and both computations are in
 \texttt{Im\_check.py}; like the others in this section they are ordinary
 floating-point and carry no certificate.
 
@@ -2200,9 +2270,9 @@ in $s$, giving $8423.91$; a Cauchy estimate would be far lossier there, because
 it is dominated by the maximum over the circle and discards the cancellation
 among the true coefficients. The tail $j>16$ is then exactly where a Cauchy
 estimate is cheap: with $\sup_{\abs z=4.5}$ of the pole-free part at most
-$1.9673\cdot10^{6}$, the tail is at most that times
+$1.9672165\cdot10^{6}$, the tail is at most that times
 $(3/4.5)^{17}(1-3/4.5)^{-1}$, which is $5989.94$. The two sum to
-$14413.85$, so the stated $\Sigma_2\leq14414$ holds with $0.16$ to spare --- the
+$14413.85$, so the stated $\Sigma_2\leq14414$ holds with $0.15$ to spare --- the
 narrowest margin of any constant here except $C_E$. Both halves are recorded in
 the repository, and the $40$ boxes in $s$ behind the tail are coarse enough
 that it is likely several-fold loose; that direction is safe, and the budget

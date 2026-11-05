@@ -260,9 +260,50 @@ if h2.exists() and md.exists():
               % (total.str(12, radius=False),
                  (S2 - total).str(6, radius=False) if ok else "NEGATIVE -- FALSE"))
     else:
-        print("%-56s %s" % ("Sigma_2: cannot parse its two logs", "skipped"))
+        check("Sigma_2: its two logs are parseable", False,
+              "cannot parse 'S (head, j <= 16)' / 'G_2 <=' -- guard would be vacuous")
 else:
-    print("%-56s %s" % ("Sigma_2: logs absent", "skipped"))
+    check("Sigma_2: hcoeff2.log and mr_deriv_sweep.log both present", False,
+          "absent: %s -- guard would be vacuous"
+          % ", ".join(str(x) for x in (h2, md) if not x.exists()))
+
+# The check above recomputes the assembly from the LOGS, so it cannot see an
+# error in the chain the manuscript prints.  It could not, and did not: Section
+# 8 printed sup <= 1.9673e6, from which the tail is 5990.19 and the printed
+# head + tail is 14414.10 -- ABOVE the stated 14414.  Nothing was unsound (the
+# logged sup is 1967216.5, giving 5989.93), but the paper's own displayed
+# arithmetic contradicted its own bound.  So parse Section 8's numerals too and
+# require (a) each to be >= what the certificate gives, and (b) the printed
+# chain itself to close.
+print()
+m_sup = re.search(r"of the pole-free part at most\s*\$([0-9.]+)\\cdot10\^\{6\}\$", TEX)
+m_head = re.search(r"in \$s\$, giving \$([0-9.]+)\$", TEX)
+m_tail = re.search(r"\(1-3/4\.5\)\^\{-1\}\$, which is \$([0-9.]+)\$", TEX)
+m_tot = re.search(r"The two sum to\s*\$([0-9.]+)\$", TEX)
+if all((m_sup, m_head, m_tail, m_tot)) and h2.exists() and md.exists():
+    psup = arb(m_sup.group(1)) * arb(10) ** 6
+    phead, ptail, ptot = (arb(m.group(1)) for m in (m_head, m_tail, m_tot))
+    r = arb(3) / arb("4.5")
+    chain = phead + psup * r ** 17 / (1 - r)
+    check("Section 8 Sigma_2 chain: printed sup %s >= certified %s"
+          % (m_sup.group(1) + "e6", mg.group(1)),
+          float(psup.lower()) >= float(arb(mg.group(1)).upper()),
+          "printed sup is below the certificate" if
+          float(psup.lower()) < float(arb(mg.group(1)).upper()) else "ok")
+    check("Section 8 Sigma_2 chain: printed head %s >= certified %s"
+          % (m_head.group(1), mh.group(1)),
+          float(phead.lower()) >= float(arb(mh.group(1)).upper()), "ok")
+    check("Section 8 Sigma_2 chain closes as PRINTED (sup -> tail -> total)",
+          float(ptail.lower()) >= float((psup * r ** 17 / (1 - r)).upper())
+          and float(ptot.lower()) >= float(chain.upper())
+          and float(ptot.upper()) <= float(S2.str(30, radius=False)),
+          "printed tail %s vs %s, printed total %s vs chain %s, stated %s"
+          % (m_tail.group(1), (psup * r ** 17 / (1 - r)).str(10, radius=False),
+             m_tot.group(1), chain.str(10, radius=False),
+             S2.str(8, radius=False)))
+else:
+    check("Section 8 Sigma_2 chain: its four numerals are parseable", False,
+          "cannot locate them in proof.tex -- guard would be vacuous")
 
 print()
 if fails:

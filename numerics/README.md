@@ -131,19 +131,27 @@ than evidence.  `--identity` verifies
 
     P_k^P(s) = sum_i phi_i(s) 2^{-(k-i)s} sum_{j<=k-i} (2^s log zeta(s))^j/j!
 
-against direct Dirichlet sums over `n <= 3e6`, to `1e-18`, for `P` = all
-primes, minus `{3}` and minus `{3,5}`.  That identity is what removes the
-`s`-derivatives from the boundary case: integrating it and freezing `phi_i` at
-`s = 1` (cost `O(e^-k) = o(2^-k)`) leaves `I_m`, which contains no primes, so
-the limit and the `k^2` coefficient of `f_k^P` depend on the numerator only
-through its VALUE at `(1,1)` and `(1,2)`.
+against direct Dirichlet sums over `n <= 3e6` at `s = 4`, `k <= 3`, to
+`1e-17`, for `P` = all primes, minus `{3}` and minus `{3,5}`.  That identity
+is what removes the `s`-derivatives from the `k^2` coefficient of the boundary
+case: integrating it and freezing `phi_i` at `s = 1` leaves `I_m`, which
+contains no primes, so the limit and the `k^2` coefficient of `f_k^P` depend
+on the numerator only through its VALUE at `(1,1)` and `(1,2)`.
+
+Two caveats, both corrected after the first write-up stated them wrongly:
+`I_0` DIVERGES, so the `m = 0` term stays unfrozen; and the freezing costs
+`Theta(k 2^-k)`, **not** `O(e^-k)` — the Jensen error is governed by the first
+moment `K_m = Theta(m 2^-m)`, so the reduction is accurate to `o(k^2 2^-k)`
+only, and an `s`-derivative of `Phi_P` does enter at order `k 2^-k`.
 
 Without `--identity` it computes `I_m` and extrapolates.  Read the stability
 table, not any single fit — three parameters through three points has zero
 residual.  The `A + b log m/m + c/m` basis is stable (`-0.17379`, `-0.17301`,
-`-0.17277` across windows, within `0.3%` of `-log2/4`); bases omitting the
-`log m/m` term are `8-10%` off, which independently corroborates GLW's
-`O(k log(k+1))` subleading term.
+`-0.17277` across windows, within `0.3%` of `-log2/4`); the one tabulated
+basis omitting `log m/m` is `8.0%` off and the two-parameter `log m/m` fit
+`8.6%`.  That is evidence the correction is real, but not independent
+corroboration of GLW's `O(k log(k+1))`: the basis was chosen with that
+remainder in mind.
 
 `genP_check.py` with `Q = {2}` is the calibration that makes the rest
 meaningful: `P = {p >= 3}` is the case the paper proves, so `c_2` there must
