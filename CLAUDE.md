@@ -231,11 +231,12 @@ ratio extends continuously to the critical point `(1,2)` with value
 So IF the `k^2` coefficient involves the analytic factor only through its value
 at `(1,2)` and not its `s`-derivatives, the whole boundary case follows from
 all primes alone -- and that is **known to hold in the all-primes case
-itself**, since GLW's `a_1 = d log2/4` is exactly `H_o(1,2) log2/4` (see "the
-boundary numerator is an interior object" below). What is left is that the
-same form holds with a general numerator, plus the existence of a `k^2`
-expansion for general `q = 2` at all; neither follows from `eq:GLW-asymptotic`,
-which is the single case `Q` empty.
+itself**, since GLW's `a_1 = d log2/4` is exactly `H_o(1,2) log2/4`.
+
+**Read the next subsection before using any of this.** The paragraph above is
+how the reduction was first found, and it is superseded: the `s`-derivative
+possibility is now ruled out outright rather than argued around, and what
+remains is one asymptotic with no primes in it.
 
 ### The `s`-derivatives are GONE, and point two is now ONE primes-free asymptotic
 
@@ -348,10 +349,10 @@ applies to it -- the boundary case's crux is an interior object.
 And GLW's `k^2` coefficient is exactly that numerator's value: `eq:d-def`'s `d`
 is `eq:H-odd` at `(1,2)`, so `a_1 = d log2/4 = H_o(1,2) log2/4`, with no
 `s`-derivative and no prime sum. Contrast `beta = d(gamma + (1/2) d_s log
-H_o(1,2))`, which carries both. That contrast is the reason to think the form
-is structural, and it is what makes the `B = 0` case of the reduction the
-expected one. The predicted general coefficient is then
-`a_1 prod_{p in Q}(1 - 2/p) > 0`.
+H_o(1,2))`, which carries both. That contrast was the first reason to think the
+form is structural; the exact identity in "the `s`-derivatives are GONE" above
+then settled it, so `B = 0` is established and not merely expected. The general
+coefficient is `a_1 prod_{p in Q}(1 - 2/p) > 0`.
 
 ### The two Section 7 scripts are mpmath, NOT Arb
 
