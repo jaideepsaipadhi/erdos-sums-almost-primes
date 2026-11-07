@@ -179,24 +179,13 @@ For every $k\geq1$,
 \end{lemma}
 
 \begin{proof}
-For $n\geq2$,
-\[
-  \int_1^\infty n^{-s}\dd s
-   =\int_1^\infty \e^{-s\log n}\dd s
-   =\left[-\frac{\e^{-s\log n}}{\log n}\right]_{s=1}^{\infty}
-   =\frac1{n\log n}.
-\]
-All summands are non-negative. Tonelli's theorem therefore permits the sum and
-integral to be interchanged in both cases, giving
-\[
-  \int_1^\infty\sum_{\Omega(n)=k}n^{-s}\dd s
-   =\sum_{\Omega(n)=k}\int_1^\infty n^{-s}\dd s=f_k,
-\]
-and the same calculation with the sum restricted to odd $n$ proves the second
-identity.
+The first identity is \cite[(3.1)]{Lichtman19}: one has
+$\int_1^\infty n^{-s}\dd s=1/(n\log n)$ for $n\geq2$, and the summands are
+non-negative, so Tonelli's theorem permits the interchange. The same
+calculation with the sum restricted to odd $n$ gives the second.
 \end{proof}
 
-The generating functions are
+The generating functions are, by \cite[Prop.~3.1]{Lichtman19},
 \begin{equation}\label{eq:euler-products}
   \sum_{k\geq0}P_k(s)z^k=\prod_p(1-zp^{-s})^{-1},
   \qquad
@@ -229,49 +218,35 @@ the same holds for $H$ in $\abs z<2^s$.
 \end{proposition}
 
 \begin{proof}
-Let $x=p^{-s}$, so that $\abs x=p^{-\sigma}\leq2^{-\sigma}<2^{-1/2}$ on the
-domain. The factor $(1-x)^z$ is a non-integer power of a complex number, so a
-branch must be fixed; the principal one will do throughout, since $1-x$ then
-lies in the disc of radius $2^{-1/2}<1$ about $1$, on which the principal
-logarithm is analytic and where no branch cut is met. With that convention,
-for $(s,z)$ in a compact subset of the domain, so that
-$\sigma\geq s_0>1/2$ and $\abs z\leq R<2^{s_0}$ in the case of
-\eqref{eq:H-full}, or $R<3^{s_0}$ with $p\geq3$ in the case of
-\eqref{eq:H-odd}, whence $\abs{zx}<1$ for every $p$ occurring. The logarithm of the $p$th regularized factor is
-\begin{align*}
- -\log(1-zx)+z\log(1-x)
- &=\sum_{m\geq1}\frac{z^m-z}{m}x^m\\
- &=\sum_{m\geq2}\frac{z^m-z}{m}x^m
-  =O_K(p^{-2\sigma}),
-\end{align*}
-the $m=1$ terms cancelling. The estimate is uniform for $z\in K$ and depends
-on $s$ only through $\sigma$. Since
-$\sum_pp^{-2\sigma}<\infty$ for $\sigma>1/2$, the product of the regularized factors converges
-locally uniformly wherever none of the factors has a pole. The poles occur at
-$z=p^s$, of modulus $p^\sigma$; the nearest has modulus $2^{\sigma}$ for
-\eqref{eq:H-full} and $3^{\sigma}$ for \eqref{eq:H-odd}. A locally uniform limit of analytic functions is analytic,
-which gives analyticity in $z$ for each fixed real $s$. That much is not what
-is needed, and the next paragraph supersedes it: the same estimate, read in
-the complex $s$ variable, gives joint analyticity and hence the first
-assertion outright. We keep the real-variable computation only because the
-cancellation of the $m=1$ terms displayed in it is used again below.
+It is essential that $s$ be taken complex here: uniform convergence of
+real-variable functions says nothing about the derivative of the limit, so the
+real-variable argument would give analyticity in $z$ alone.
 
-Differentiability in $s$ does not follow from the real-variable argument:
-uniform convergence of real-variable functions says nothing about the
-derivative of the limit. What is used instead is that the variable $s$ may be
-taken complex. Each $p^{-s}=\e^{-s\log p}$ is entire in $s$, so every
-regularized factor is analytic in $(s,z)$ jointly wherever its denominator does
-not vanish, which on $\{\abs z<3^{\sigma}\}$ it does not, since
-$\abs z<3^{\sigma}\leq p^{\sigma}=\abs{p^{s}}$ for every $p\geq3$. The
-estimate above depends on $s$ only through $\abs{p^{-s}}=p^{-\sigma}$, so it
-holds uniformly on any set with $\sigma\geq s_0>1/2$, and
-$\sum_pp^{-2s_0}<\infty$. The product therefore converges locally uniformly on
-the stated domain in $\mathbb C^2$, and a locally uniform limit of analytic
-functions of several complex variables is analytic; this is the first
-assertion. Analyticity in $s$ gives derivatives of every order at real $s$,
-and since $[z^j]$ is a Cauchy integral over a circle that may be held fixed on
-a compact subset, the two operations commute, which is
-\eqref{eq:coeff-commute}.
+Let $x=p^{-s}$, so that $\abs x=p^{-\sigma}<2^{-1/2}$ on the domain. The
+factor $(1-x)^z$ needs a branch, and the principal one serves throughout,
+since $1-x$ lies in the disc of radius $2^{-1/2}<1$ about $1$. Fix a compact
+subset of the domain, so that $\sigma\geq s_0>1/2$ and $\abs z\leq R<2^{s_0}$
+for \eqref{eq:H-full}, or $R<3^{s_0}$ with $p\geq3$ for \eqref{eq:H-odd}; then
+$\abs{zx}<1$ for every $p$ occurring. The logarithm of the $p$th regularized
+factor is
+\begin{align}
+ -\log(1-zx)+z\log(1-x)
+ &=\sum_{m\geq1}\frac{z^m-z}{m}x^m
+  =\sum_{m\geq2}\frac{z^m-z}{m}x^m
+  =O(p^{-2\sigma}),                       \label{eq:reg-factor-log}
+\end{align}
+the $m=1$ terms cancelling. The estimate is uniform on the compact set and
+depends on $s$ only through $\sigma$. Each $p^{-s}=\e^{-s\log p}$ is entire,
+so every regularized factor is analytic in $(s,z)$ jointly wherever its
+denominator does not vanish, and on $\{\abs z<3^{\sigma}\}$ it does not, since
+$\abs z<3^{\sigma}\leq\abs{p^{s}}$ for every $p\geq3$. As
+$\sum_pp^{-2s_0}<\infty$, the product converges locally uniformly on the
+stated domain in $\mathbb C^2$, and a locally uniform limit of analytic
+functions of several complex variables is analytic. This is the first
+assertion, the nearest pole being at $z=p^s$ with $\abs{p^s}=2^{\sigma}$ for
+\eqref{eq:H-full} and $3^{\sigma}$ for \eqref{eq:H-odd}. Finally $[z^j]$ is a
+Cauchy integral over a circle that may be held fixed on a compact subset, so
+it commutes with $\dd/\dd s$, which is \eqref{eq:coeff-commute}.
 \end{proof}
 
 At $s=1$ the point $z=2$ lies on the first singular circle for $H$ and lies
@@ -295,10 +270,10 @@ The point of the argument is that the expansions below are convergent power
 series and not merely asymptotic, which is what allows the second of them to be
 differentiated term by term.
 
-Since $\zeta$ is meromorphic on $\mathbb C$ with a single simple pole, of
-residue $1$, at $s=1$, the function $\varepsilon\mapsto\varepsilon\,
-\zeta(1+\varepsilon)$ is analytic near $\varepsilon=0$ with value $1$ there;
-its expansion is $1+\gamma\varepsilon+O(\varepsilon^2)$. Hence
+By the Laurent expansion of $\zeta$ at its simple pole
+\cite[Ch.~1]{MV}, the function $\varepsilon\mapsto\varepsilon\,
+\zeta(1+\varepsilon)$ is analytic near $\varepsilon=0$ with expansion
+$1+\gamma\varepsilon+O(\varepsilon^2)$. Hence
 \[
  x=\frac1{\zeta(1+\varepsilon)}
   =\frac{\varepsilon}{\varepsilon\,\zeta(1+\varepsilon)}
@@ -392,7 +367,7 @@ Multiplication by $J(u)$ now gives the exact identity
        h_j''(1+\theta_{j,u}\varepsilon(u)).
 \end{aligned}
 \end{equation}
-Thus no error is suppressed in the notation $E_j$: its three summands are the
+No error is suppressed in the notation $E_j$: its three summands are the
 Jacobian error, the first-order coordinate error and the Taylor remainder.
 
 Insert \eqref{eq:odd-local-product} into \eqref{eq:odd-u-integral}. Since
@@ -413,9 +388,9 @@ the first two terms become
 \end{align}
 Substituting \eqref{eq:first-coefficient-tail} and
 \eqref{eq:second-coefficient-tail}, and collecting the $E_j$ integrals with the
-two tails, is exactly \eqref{eq:Rk-def}; this gives \eqref{eq:odd-two-term}.
-Note that \eqref{eq:Rk-def} is an identity, not an error term absorbed into an
-$O$: every later estimate is an estimate of those three explicit quantities.
+two tails, is exactly \eqref{eq:Rk-def}, and this gives
+\eqref{eq:odd-two-term}. Note that \eqref{eq:Rk-def} is an identity, so every
+later estimate is an estimate of those three explicit quantities.
 \end{proof}
 
 \begin{lemma}\label{lem:odd-constants}
@@ -433,16 +408,10 @@ and
 \end{lemma}
 
 \begin{proof}
-At $s=z=1$, every factor in the product over $p\geq3$ cancels, and hence
-\[
-  H_{\mathrm o}(1,1)=(1-2^{-1})=\frac12.
-\]
-At $(s,z)=(1,2)$,
-\[
-  H_{\mathrm o}(1,2)
-   =\frac14\prod_{p\geq3}
-      \left(1-\frac2p\right)^{-1}\left(1-\frac1p\right)^2=d.
-\]
+The first two values are immediate from \eqref{eq:H-odd}: at $s=z=1$ every
+factor in the product over $p\geq3$ cancels, leaving
+$H_{\mathrm o}(1,1)=1-2^{-1}=\tfrac12$, and at $(s,z)=(1,2)$ the product is
+\eqref{eq:d-def}, so $H_{\mathrm o}(1,2)=d$.
 
 For the derivative, take logarithms:
 \[
@@ -631,23 +600,13 @@ $\sum_m3^m\abs{[z^m](1-z/3)^3A(z)}\leq S$, then
 \end{equation}
 \end{lemma}
 
-\begin{proof}
-Write $(1-z/3)^rA(z)=\sum_mw_mz^m$. Then
-\[
-  A(z)=\left(\sum_{q\geq0}\binom{q+r-1}{r-1}3^{-q}z^q\right)
-       \left(\sum_{m\geq0}w_mz^m\right).
-\]
-For $r=1$ this gives
-$\abs{a_j}\leq3^{-j}\sum_{m\leq j}3^m\abs{w_m}\leq S3^{-j}$.
-For $r=2$ it gives
-$\abs{a_j}\leq(j+1)3^{-j}S$. For $r=3$,
-\begin{align*}
- \sum_{j=0}^k3^j\abs{a_j}
- &\leq\sum_{m=0}^k3^m\abs{w_m}
-       \sum_{q=0}^{k-m}\binom{q+2}{2}\\
- &=\sum_{m=0}^k3^m\abs{w_m}\binom{k-m+3}{3}
- \leq\binom{k+3}{3}S.
-\end{align*}
+\begin{proof}[Sketch]
+Write $(1-z/3)^rA(z)=\sum_mw_mz^m$ and expand $(1-z/3)^{-r}$, so that $A$ is
+the Cauchy product of $\sum_q\binom{q+r-1}{r-1}3^{-q}z^q$ with $\sum_mw_mz^m$.
+Comparing coefficients gives (i) and (ii) at once. For (iii), summing the
+product bound over $j\leq k$ and using
+$\sum_{q\leq k-m}\binom{q+2}{2}=\binom{k-m+3}{3}\leq\binom{k+3}{3}$ gives the
+claim.
 \end{proof}
 
 \begin{proposition}\label{prop:odd-remainder}
@@ -1232,14 +1191,10 @@ Lemma~\ref{lem:delta-bound},
 \end{equation}
 \end{lemma}
 
-\begin{proof}
-Since $D$ is increasing,
-\begin{align*}
- \abs{\Delta(k)}
- &\leq\sum_{i=0}^k2^i\abs{c_i}D(k-i)
- \leq S^*D(k).
-\end{align*}
-Apply the triangle inequality to $2\Delta(k)-\Delta(k+1)$.
+\begin{proof}[Sketch]
+Since $D$ is increasing, $\abs{\Delta(k)}\leq\sum_{i\leq k}2^i\abs{c_i}D(k-i)
+\leq S^*D(k)$. Now apply the triangle inequality to
+$2\Delta(k)-\Delta(k+1)$.
 \end{proof}
 
 \subsection{The exponentially small term}\label{subsec:Eexp}
@@ -1576,8 +1531,8 @@ direction, where strengthening it makes the conjecture claim less.
 
 The singularity structure is the one the two theorems above exploit. On
 $\abs z<q^\sigma$ the product $\prod_{p\in\mathcal P}(1-zp^{-s})^{-1}$
-converges directly, by the estimate in the proof of
-Proposition~\ref{prop:analyticity}, so its first $z$-singularity is at
+converges directly, by \eqref{eq:reg-factor-log}, so its first
+$z$-singularity is at
 $z=q^s$; the factorization
 \[
  \prod_{p\in\mathcal P}(1-zp^{-s})^{-1}
@@ -1601,8 +1556,7 @@ the extraction needs, and the constant can be identified. Write
  \qquad
  \log L_p(s,z)=\sum_{m\geq2}\frac{z^m-z}{m}p^{-ms},
 \end{equation}
-the second identity being the computation in the proof of
-Proposition~\ref{prop:analyticity}. Define $H_{\mathcal P}$ by the regularized
+the second identity being \eqref{eq:reg-factor-log}. Define $H_{\mathcal P}$ by the regularized
 product, as \eqref{eq:H-full} and \eqref{eq:H-odd} define $H$ and
 $H_{\mathrm o}$:
 \begin{equation}\label{eq:HP-def}
@@ -1670,7 +1624,7 @@ $H_{\mathcal P}(1,2)=\prod_{p\in\mathcal P}(1-p^{-1})^2(1-2p^{-1})^{-1}
 (i) Fix $s\geq1$ and a compact $K\subset\{\abs z<q^{s}\}$, say
 $\abs z\leq R'<q^{s}$. For the product over $\mathcal P$,
 \eqref{eq:local-reg} gives $\log L_p(s,z)=O_{R'}(p^{-2s})$ uniformly on $K$ by
-the estimate in the proof of Proposition~\ref{prop:analyticity}, whose
+\eqref{eq:reg-factor-log}, whose
 hypothesis $\abs{zp^{-s}}<1$ holds because $\abs z\leq R'<q^{s}\leq p^{s}$ for
 every $p\in\mathcal P$; and $\sum_pp^{-2s}<\infty$ since $s\geq1$. For the
 product over $\mathcal Q$, $z\log(1-p^{-s})=O_{R'}(p^{-s})$ and
@@ -1936,56 +1890,55 @@ coefficient of $k^22^{-k}$ in $f_k^{\mathcal P}$ itself is
 $-a_1^{\mathcal P}<0$. That is the quantity \eqref{eq:boundary-final} returns,
 and the two statements agree.
 
-This is testable, and the prediction \eqref{eq:boundary-predicted} is the ratio
-$\prod_{p\in\mathcal Q}(1-2/p)$. For $\mathcal Q=\{3\}$ the quantity
+This is testable. By \eqref{eq:boundary-predicted} the ratio
 \[
-  \Bigl(f_k^{\mathcal P}-\prod_{p\in\mathcal Q}(1-1/p)\Bigr)\Big/(f_k-1),
+  \Bigl(f_k^{\mathcal P}-\prod_{p\in\mathcal Q}\Bigl(1-\frac1p\Bigr)\Bigr)
+  \Big/(f_k-1)
 \]
-computed from \eqref{eq:euler-products-P} and
-Lemma~\ref{lem:integral-representation} independently of everything above,
-rises monotonically over $24\leq k\leq44$ to $0.31209$ against a predicted
-$1/3$; the approach is from below with a correction of order $1/k$, so the
-value at $k=44$ is not the thing to read. Fitting $L+a/k+b/k^2$ through
-$k=36,40,44$ gives $L=0.333227$, and through the two other windows
-$k=24,32,40$ and $k=28,36,44$ gives $0.333171$ and $0.333447$, stable and
-within $5\cdot10^{-4}$ of $1/3$. Two caveats keep this from being quoted more sharply.
+should tend to $\prod_{p\in\mathcal Q}(1-2/p)$. Computed from
+\eqref{eq:euler-products-P} and Lemma~\ref{lem:integral-representation},
+independently of everything above, it rises monotonically over
+$24\leq k\leq44$, from below, with a correction of order $1/k$; the value at
+$k=44$ is therefore not the thing to read. Extrapolating in the basis
+$L+a/k+b/k^2$ through the windows $k=36,40,44$ and $k=24,32,40$ and
+$k=28,36,44$ gives Table~\ref{tab:boundary-fits}.
 
-First, a three-parameter fit through three points has no residual, so the
-agreement with $1/3$ is not an error estimate. Fitting $L+a\log k/k+b/k$
-instead gives $0.329517$, and the one-term fit $L+a/k$ gives $0.336577$. The
-spread across reasonable bases is thus $0.329517$ to $0.336577$, or $2.1\%$ of
-$1/3$, and it is that spread, not the agreement, that measures the
-uncertainty.
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}llllll@{}}
+\toprule
+$\mathcal Q$ & predicted & at $k=44$ & three $1/k$ fits
+  & $\log k/k$ & one term \\
+\midrule
+$\{3\}$ & $1/3$ & $0.31209$
+  & $0.333227$, $0.333171$, $0.333447$ & $0.329517$ & $0.336577$ \\
+$\{5\}$ & $3/5$ & $0.572066$
+  & $0.600056$, $0.600424$, $0.600537$ & $0.596605$ & $0.603172$ \\
+\bottomrule
+\end{tabular}
+\caption{Extrapolated boundary ratios against
+\eqref{eq:boundary-predicted}.}\label{tab:boundary-fits}
+\end{table}
 
-Second, the choice of the $1/k$ basis is not independent of the conclusion.
-By \eqref{eq:GLW-asymptotic} the ratio carries a subleading $O(k\log(k+1))$,
-whose logarithm cancels only if its coefficient also scales by
-$\prod(1-2/p)$, which is a stronger form of what is being tested. So the
-stability of the $1/k$ fits across windows is evidence for that basis, and not
-a proof of it.
-The centring constant $\prod_{p\in\mathcal Q}(1-1/p)$ is not supplied by
-Proposition~\ref{prop:general-interior}, which excludes $q=2$. At the time
-these computations were made it was taken from \eqref{eq:HP-def} at $z=1$ by
-analogy with the interior case, and checked only against
-$\mathcal Q=\varnothing$, where it is $1$ and is Lichtman's $f_k\to1$. It is
-derived in \S\ref{subsec:boundary-reduction} below, as the first half of
-\eqref{eq:boundary-final}. The reader may prefer to take that subsection
-first, and the present one as the numerical evidence gathered before the
-derivation was found.
+Two caveats. A three-parameter fit through three points has no residual, so
+the agreement with the prediction is not an error estimate; what measures the
+uncertainty is the spread across bases, $2.1\%$ of $1/3$ and $1.1\%$ of $3/5$.
+And the $1/k$ basis is not independent of the conclusion, since the subleading
+$O(k\log(k+1))$ of \eqref{eq:GLW-asymptotic} has its logarithm cancel in the
+ratio only if its coefficient also scales by $\prod(1-2/p)$, which is a
+stronger form of what is being tested.
 
-A second complement behaves the same way against a different predicted value.
-For $\mathcal Q=\{5\}$, where the prediction is $1-2/5=3/5$, the ratio rises
-monotonically over the same range to $0.572066$, and the three $1/k$ fits give
-$0.600056$, $0.600424$ and $0.600537$, within $10^{-3}$ of $3/5$, against
-$0.603172$ for the one-term fit and $0.596605$ for the $\log k/k$ basis, a
-spread of $1.1\%$ of $3/5$, from $0.596605$ to $0.603172$. This tests the
-prediction and the computation on a
-case with a different answer; what it cannot do is separate
-\eqref{eq:GLW-value} from a small admixture of
-$\partial_s H_{\mathcal P\setminus\{2\}}(1,2)$, since the residual at
-$\mathcal Q=\{3\}$ would imply a shift of only $1.6\cdot10^{-4}$ here, well
-inside the spread. The numerics cannot settle that; \S\ref{subsec:boundary-reduction}
-does, by showing that no such term can enter the $k^2$ coefficient.
+The second complement tests the prediction on a case with a different answer.
+What it cannot do is separate \eqref{eq:GLW-value} from a small admixture of
+$\partial_sH_{\mathcal P\setminus\{2\}}(1,2)$: the residual at
+$\mathcal Q=\{3\}$ would imply a shift of only $1.6\cdot10^{-4}$ at
+$\mathcal Q=\{5\}$, well inside the spread. That separation is settled in
+\S\ref{subsec:boundary-reduction}, which shows that no such term can enter the
+$k^2$ coefficient, and which also derives the centring constant
+$\prod_{p\in\mathcal Q}(1-1/p)$ used here. These computations were made before
+that derivation, and took the centring constant from \eqref{eq:HP-def} at
+$z=1$ by analogy with the interior case, checked only against
+$\mathcal Q=\varnothing$, where it is $1$ and is Lichtman's $f_k\to1$.
 
 The constants of Proposition~\ref{prop:general-interior}(iv) are checked
 separately, and the two checks should not be conflated. The constant
@@ -2039,7 +1992,8 @@ $\varphi_i(s)$ by $\varphi_i(1)$. Writing
    =\frac1{m!}\int_1^\infty\!\!\int_0^\infty
       \bigl(\log\zeta(s)+2^{-s}v\bigr)^{m}\e^{-v}\dd v\dd s,
 \end{equation}
-the second form by $\sum_{j\leq m}y^j/j!=\e^{y}\Gamma(m+1,y)/m!$ and
+the second form by $\sum_{j\leq m}y^j/j!=\e^{y}\Gamma(m+1,y)/m!$
+\cite[\S8.4]{DLMF} and
 $2^{-s}\cdot2^{s}\log\zeta(s)=\log\zeta(s)$, we therefore have
 \begin{equation}\label{eq:boundary-reduction}
   f_k^{\mathcal P}=\sum_{m=1}^{k}\varphi_{k-m}(1)\,I_m
@@ -2503,8 +2457,9 @@ $t=s,2s,\dots,200s$ for $s=s(3)$. At $s\approx1.05$ these converge too slowly
 to truncate: the Rosser--Schoenfeld bound applied beyond $10^8$ still
 overestimates the tail twofold, and that excess compounds through the
 coefficient recursion. Instead $\Pi$ is evaluated by the M\"obius series
-$\Pi(t)=\sum_{n\geq1}\mu(n)n^{-1}\log\zeta(nt)-2^{-t}$, which requires no prime
-enumeration. The recursion itself is run at $600$ bits, since cancellation
+$\Pi(t)=\sum_{n\geq1}\mu(n)n^{-1}\log\zeta(nt)-2^{-t}$, which requires no
+prime enumeration; this is the device of Cohen \cite{Cohen}, as used in
+\cite[(3.6)]{Lichtman19}. The recursion itself is run at $600$ bits, since cancellation
 costs about one digit every $2.3$ steps over the $200$ terms used; at $1200$
 bits the head agrees to every printed digit.
 
@@ -2560,8 +2515,8 @@ integrated by Gauss--Legendre quadrature with $N=52$ nodes at $1400$ bits of
 precision; the number of panels therefore grows linearly with $k_{\max}$.
 
 Four of the six error sources in the certificate are arithmetic: ball
-arithmetic throughout, the explicit truncation balls in the M\"obius series for
-the prime zeta function, the discretization bound derived below, and
+arithmetic throughout, the explicit truncation balls in the M\"obius series
+\cite{Cohen} for the prime zeta function, the discretization bound derived below, and
 interval-Newton enclosures for the Gauss nodes and weights. The remaining two
 are the tails of \eqref{eq:fk-as-u-integral}, which are bounded as follows and
 are not negligible by inspection.
@@ -2587,7 +2542,8 @@ and at $u\geq u_+=1750$ the correction is $1+O(\e^{-1750})$, absorbed by the
 factor $2$ below with room to spare. With that, the integral is dominated by
 $2\int_{u_+}^\infty u^k\e^{-u}\dd u/k!$ and the resulting
 incomplete-Gamma integral obeys
-$\Gamma(k+1,u_+)/k!\leq2u_+^k\e^{-u_+}/k!$ provided $u_+\geq2k+2$, so
+$\Gamma(k+1,u_+)/k!\leq2u_+^k\e^{-u_+}/k!$ provided $u_+\geq2k+2$
+\cite[\S8.11]{DLMF}, so
 \begin{equation}\label{eq:tail-near-1}
  \int_{u_+}^{\infty}\!\abs{F}\dd u\leq\frac{2u_+^k\e^{-u_+}}{k!}.
 \end{equation}
@@ -2634,9 +2590,7 @@ the range: by some $185$ orders of magnitude against
 \eqref{eq:tail-near-1}, and by $12$ at $k=2$ against
 \eqref{eq:tail-large-s}, where that tail is worst. So the
 discretization bound and not the truncation is what limits the accuracy of the
-$f_k$. (An earlier run with $k_{\max}=199$ gave $1.1\times10^{-87}$, and
-that figure, together with the $u_+$ and panel count belonging to it, should
-not be quoted for the committed certificate.)
+$f_k$.
 
 The pinned coefficient sweeps use primes up to $10^5$ and $300$ bits of
 precision, with $1600$ boxes in $s$ for $\alpha_+$ and $800$ boxes for the
@@ -2742,6 +2696,22 @@ SIAM Rev. \textbf{50} (2008), 67--87.
 L.~N. Trefethen,
 \emph{Approximation Theory and Approximation Practice},
 SIAM, Philadelphia, 2013.
+
+\bibitem{Cohen}
+H.~Cohen,
+\emph{High precision computation of Hardy--Littlewood constants},
+preprint (1991),
+\texttt{https://www.math.u-bordeaux.fr/\textasciitilde hecohen/}.
+
+\bibitem{MV}
+H.~L. Montgomery and R.~C. Vaughan,
+\emph{Multiplicative Number Theory I: Classical Theory},
+Cambridge Univ. Press, 2006.
+
+\bibitem{DLMF}
+F.~W.~J. Olver et al. (eds.),
+\emph{NIST Digital Library of Mathematical Functions},
+\texttt{https://dlmf.nist.gov/}, Release 1.2.1 (2024).
 
 \bibitem{Zhang}
 Z.~Zhang,
