@@ -59,10 +59,13 @@ else:
     check("AI-disclosure section has real wording",
           "PLACEHOLDER" not in sec and words >= 25,
           "%d words" % words)
-    notes_pending_ai = ("The AI disclosure is a complete statement but was "
-                        "drafted here, not taken from the author's wording of "
-                        "record (the Euclidean-distance-deflation L-infinity "
-                        "paper). Reconcile the two before submission.")
+    # The disclosure now follows the author's wording of record (the
+    # Euclidean-distance-deflation L-infinity paper), so the reconciliation
+    # note is retired.  What remains author-only is the model name: set it to
+    # whatever matches the project's own history.
+    if "Claude" not in sec:
+        notes_pending_ai = ("The AI disclosure names no model. The wording of "
+                            "record names one; add it.")
 
 # --- 3. the remainder range agrees in all three places -------------------
 # Widening any of these silently re-opens the sign gap; CLAUDE.md explains why.

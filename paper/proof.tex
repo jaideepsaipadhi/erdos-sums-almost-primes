@@ -2284,6 +2284,17 @@ it vacuous. The quantifier is now bounded to the two indices its only consumer
 uses. No build has yet confirmed the correction, for the reason given at the
 end of this section.
 
+The transcription of a certified value into a numeral printed in this paper is
+not itself certified, and that is where the errors in this manuscript have
+been found. A late adversarial pass turned up three: a stated bound rounded
+down rather than up; the two-part assembly of $\Sigma_2$, whose displayed
+chain did not close under its own stated value; and a contour bound stated for
+the wrong function, the certified $101.245$ bounding the pole-free part
+$G_2(1,z)-\rho/(3-z)$, as every consuming script had always assumed, and not
+the regularized product, whose supremum on $\abs z=4.2$ is $228.95$. None
+invalidated a conclusion, and each is now checked against its certificate by
+script.
+
 That the imported numerals agree with what Arb computed is verified outside
 Lean, by three scripts rather than one.
 \texttt{check\_\allowbreak lean\_\allowbreak constants.py} compares the Lean
@@ -2698,66 +2709,20 @@ quadrature run alone.
 
 \section*{Acknowledgements}
 
-I thank Jared Duker Lichtman for his guidance and for many helpful
-discussions throughout this work.
+I thank Jared Duker Lichtman, who advised this work, for many helpful
+discussions throughout.
 
 \section*{Statement on the use of AI}
 
-%% This wording should be reconciled against the statement used in the
-%% Euclidean-distance-deflation L-infinity paper, which is the author's
-%% wording of record.  It is a complete and accurate statement as it stands,
-%% not a placeholder, so check_ready.py passes; but the two should be made
-%% consistent before submission.
-
-The analytic reductions, the interval-arithmetic certificates, the Lean
-development and the text of this paper were all produced with extensive use of
-an AI assistant (Anthropic's Claude). I chose the problem, directed the work
-throughout, and take full responsibility for every claim made here, including
-those I reached with that assistance.
-
-In more detail, the assistant was used for four things. It derived and checked
-the reductions of Sections~2--6, the general-$\mathcal P$ results of
-Section~\ref{sec:general-principle} and the quadrature bounds of
-Appendix~\ref{app:quadrature}. It wrote and ran the Arb/FLINT scripts that
-produce the certified constants of Propositions~\ref{prop:odd-certified} and
-\ref{prop:full-certified}, together with the ordinary floating-point checks of
-Section~\ref{sec:general-principle}, which carry no certificate and on which
-nothing else depends. It wrote the Lean development described in
-Section~\ref{sec:lean}. And it drafted and revised this manuscript.
-
-It was also used adversarially, to look for errors in work already believed
-finished. That is how the defect in the near-range step of
-Proposition~\ref{prop:odd-remainder} was found. The step bounded a sum of
-absolute values by a signed coefficient identity, which is invalid because the
-$h_j$ alternate in sign, and it is the reason that proposition is stated on
-$k\geq59$.
-
-Three limits on what the foregoing should be taken to mean.
-
-First, the computations behind the certified constants do not rest on the
-assistant's reliability. They are carried out in ball arithmetic and are
-reproducible from the scripts and logs in the repository cited in
-Section~\ref{sec:lean}. What that arithmetic does not certify is the step from
-a logged ball to a numeral printed here, nor the algebra combining several
-such numerals. Those steps are ordinary mathematical writing, and they are
-where the errors in this manuscript have in fact been found. Three were found
-in a late adversarial pass: a stated bound rounded down rather than up; the
-two-part assembly of $\Sigma_2$, whose displayed chain did not close under its
-own stated value; and a contour bound stated for the wrong function. In the
-last of these the certified number $101.245$ bounds the pole-free part
-$G_2(1,z)-\rho/(3-z)$, which is what every consuming script had always
-assumed, and not the regularized product, whose supremum on $\abs z=4.2$ is
-$228.95$. None of the three invalidated a conclusion, and each is now checked
-against its certificate by a script in the repository. Still, the
-certification should be understood as covering the computations, with the
-manuscript's own arithmetic guarded separately rather than certified.
-
-Second, the floating-point checks of Section~\ref{sec:general-principle} carry
-no certificate at all, as noted there.
-
-Third, the Lean development establishes an implication from assumed hypotheses
-rather than a closed proof. Section~\ref{sec:lean} and
-Table~\ref{tab:lean-status} set out the position in detail.
+During the preparation of this work the author used Claude Opus~5 (Anthropic),
+a large language model, in order to develop and check proofs, write and run
+the interval-arithmetic and formalization code, search and check the
+literature, and draft and edit the text. The proofs were checked by additional
+adversarial review passes of the model, and the numerical claims were
+certified in ball arithmetic by scripts available in the repository cited in
+Section~\ref{sec:lean}. After using this tool, the author reviewed and edited
+the content as needed and takes full responsibility for the content of the
+article.
 
 \begin{thebibliography}{9}
 
