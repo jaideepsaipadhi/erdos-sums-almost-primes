@@ -372,7 +372,13 @@ else:
     check("fodd75.log present and the paper's comparison range parseable", False,
           "log %s, claim %s" % (_fl.exists(), bool(_mp)))
 
-# Section 7's K_m numerals had no artifact until km_check.py; check them.
+# Section 7's K_m numerals had no artifact until km_check.py.  The boundary
+# half of Section 7 was removed from the manuscript on 2026-11-07 and will be
+# treated separately, so the paper may no longer make this claim.  Guard the
+# claim IF it is made; do not demand that it be made.  (Note the asymmetry
+# with the five round-up checks above: there a missing LOG is a failure,
+# because the paper's numeral is present and unbacked.  Here a missing
+# NUMERAL is simply the paper not claiming it.)
 print()
 _km = ROOT / "numerics" / "km.log"
 _mkm = re.search(r"K_m2\^\{m\}/m=([0-9.,]+)\$ at \$m=([0-9,]+)\$", TEX)
@@ -389,10 +395,13 @@ if _km.exists() and _mkm:
           not bad and len(said) == len(at),
           "paper %s at m=%s; mismatches: %s"
           % (said, at, bad or "none"))
+elif _mkm and not _km.exists():
+    check("km.log is present, since the paper quotes K_m", False,
+          "the manuscript states the K_m figures but the log is absent")
+elif _km.exists() and not _mkm:
+    print("%-56s %s" % ("K_m: not claimed in the manuscript", "n/a"))
 else:
-    check("km.log present and Section 7's K_m figures parseable", False,
-          "log %s, numerals %s"
-          % (_km.exists(), bool(_mkm)))
+    print("%-56s %s" % ("K_m: not claimed, no log", "n/a"))
 
 print()
 if fails:

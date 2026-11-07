@@ -45,8 +45,8 @@ singular circle of $H$, and strictly inside the first singular circle of the
 product with the prime $2$ removed. We show that this distinction decides the
 direction in general. If the complement of a set of primes $\mathcal P$ is
 thin and its least element is at least $3$, the corresponding sums eventually
-decrease; if $2\in\mathcal P$, the question reduces to a single asymptotic in
-which no primes appear. The inequalities used at the last step of the first
+decrease, so the second theorem is one case of a general phenomenon. The
+inequalities used at the last step of the first
 theorem are certified by interval arithmetic, and the reductions are
 formalized in Lean~4 as an implication from those inputs.
 \end{abstract}
@@ -140,13 +140,9 @@ not follow from $q\geq3$: for $\mathcal P=\{p\equiv1\bmod4\}$ the leading
 product is $0$, and the proposition says nothing.
 
 The remaining case is $2\in\mathcal P$, where the evaluation sits on the
-singular circle. In \S\ref{subsec:boundary-reduction} we reduce it to a single
-asymptotic for an integral containing no primes at all. Granting that
-asymptotic, every such family eventually increases. This is weaker than
-Theorem~\ref{thm:main-full}, which gives $f_k<f_{k+1}$ at every index
-$k\geq6$, and it is for the explicit range that the certified computations are
-needed. The asymptotic remains out of reach, and
-Conjecture~\ref{conj:general} records what it would give.
+singular circle itself. That case is open, and
+Conjecture~\ref{conj:general} records what it would give; we comment on it at
+the end of Section~\ref{sec:general-principle} but do not treat it here.
 
 The proof has two kinds of input. Identities, coefficient reductions and
 inequalities are proved in the text. Bounds produced by interval arithmetic
@@ -1921,345 +1917,38 @@ Proposition~\ref{prop:general-interior}, whose parts (ii), (iii) and (iv) all
 require $R>2$ and so an admissible $R<q$; part~(i) needs neither, and
 \eqref{eq:HP-def} itself is a definition for any $\mathcal P$ whatever.
 
-What can be said is that the boundary case reduces to the single case of all
-primes, and that the object the reduction turns on is an interior one. For
-$q=2$ we have $2\in\mathcal P$, and separating that one factor in
-\eqref{eq:HP-def} gives the exact identity
-\begin{equation}\label{eq:boundary-pole}
-  H_{\mathcal P}(s,z)=\frac{H_{\mathcal P\setminus\{2\}}(s,z)}{1-z2^{-s}},
-\end{equation}
-since $L_2=(1-2^{-s})^z(1-z2^{-s})^{-1}$ and moving $2$ into the complement
-contributes exactly the compensating factor $(1-2^{-s})^z$. For
-$\mathcal P$ all primes this is $H=H_{\mathrm o}/(1-z2^{-s})$: the whole
-$z$-singularity of the unrestricted regularized product at $z=2^s$ is that one
-explicit pole, and its numerator is the odd product \eqref{eq:H-odd}. In
-general the numerator $H_{\mathcal P\setminus\{2\}}$ belongs to a set of primes
-with least element at least $3$, so Proposition~\ref{prop:general-interior}
-applies to \emph{it}: it is analytic and zero-free on $\abs z<3^{s}$, in
-particular at the critical point $(s,z)=(1,2)$, where by
-\eqref{eq:boundary-ratio} below it takes the value
-$d\prod_{p\in\mathcal Q}(1-2/p)>0$.
-
-Comparing \eqref{eq:HP-def} for $\mathcal P$ with the same for all primes gives
-\begin{equation}\label{eq:boundary-ratio}
-  \frac{H_{\mathcal P}(s,z)}{H(s,z)}
-  =\frac{H_{\mathcal P\setminus\{2\}}(s,z)}{H_{\mathrm o}(s,z)}
-  =\prod_{p\in\mathcal Q}(1-zp^{-s}),
-\end{equation}
-the first equality on $\abs z<2^{s}$, where all four functions are defined, and
-the second on the larger disc $\abs z<3^{s}$, both sides there being analytic
-by Proposition~\ref{prop:general-interior}(i) applied to
-$\mathcal P\setminus\{2\}$ and to the odd primes. It is the second equality
-that is used at $z=2$, which is interior to $\abs z<3^{s}$ for every $s\geq1$.
-Both $H$ and $H_{\mathcal P}$ blow up at $(1,2)$, which lies on the boundary of
-the smaller disc; the point of \eqref{eq:boundary-ratio} is that their
-\emph{ratio} does not, being equal there to a ratio of two interior objects.
-Since $q=2$
-forces $2\notin\mathcal Q$, every $p\in\mathcal Q$ is at least $3$, so the
-product is one of factors in $(0,1)$ which under \eqref{eq:thin-complement}
-converges to the non-zero value $\prod_{p\in\mathcal Q}(1-2/p)$.
-
-Now the $k^2$ coefficient is known in the all-primes case, and it is exactly
-the numerator's value. By \eqref{eq:GLW-asymptotic} and \eqref{eq:d-def} it is
-$a_1=d(\log2)/4$, and $d=H_{\mathrm o}(1,2)$, since \eqref{eq:d-def} is
-\eqref{eq:H-odd} at $(s,z)=(1,2)$. So
-\begin{equation}\label{eq:GLW-value}
-  a_1=\tfrac14(\log2)\,H_{\mathrm o}(1,2),
-\end{equation}
-the value of the pole's numerator at the critical point times a constant
-carrying no arithmetic of its own. The contrast with the interior case is
-sharp and is the reason to think \eqref{eq:GLW-value} is structural rather than
-a coincidence: the interior constant $\beta=d(\gamma+\tfrac12\partial_s\log
-H_{\mathrm o}(1,2))$ of \eqref{eq:beta-intro} does involve the $s$-derivative of
-the same numerator, and a prime sum with it, whereas $a_1$ involves neither.
-Granting that \eqref{eq:GLW-value} holds with $H_{\mathcal P\setminus\{2\}}$ in
-place of $H_{\mathrm o}$, that is, if the residue at the pole sees the
-numerator through its value, then the $k^2$ coefficient for a general admissible
-$\mathcal P$ with $q=2$ is
-\begin{equation}\label{eq:boundary-predicted}
-  a_1^{\mathcal P}=\tfrac14(\log2)\,H_{\mathcal P\setminus\{2\}}(1,2)
-   =a_1\prod_{p\in\mathcal Q}\Bigl(1-\frac2p\Bigr)>0,
-\end{equation}
-and no cancellation occurs for any of them. A note on signs, since both
-conventions appear below: $a_1^{\mathcal P}$ is positive because
-\eqref{eq:GLW-asymptotic} writes $f_k=1-2^{-k}(a_1k^2+\cdots)$, so the
-coefficient of $k^22^{-k}$ in $f_k^{\mathcal P}$ itself is
-$-a_1^{\mathcal P}<0$. That is the quantity \eqref{eq:boundary-final} returns,
-and the two statements agree.
-
-This is testable. By \eqref{eq:boundary-predicted} the ratio
-\[
-  \Bigl(f_k^{\mathcal P}-\prod_{p\in\mathcal Q}\Bigl(1-\frac1p\Bigr)\Bigr)
-  \Big/(f_k-1)
-\]
-should tend to $\prod_{p\in\mathcal Q}(1-2/p)$. Computed from
-\eqref{eq:euler-products-P} and Lemma~\ref{lem:integral-representation},
-independently of everything above, it rises monotonically over
-$24\leq k\leq44$, from below, with a correction of order $1/k$; the value at
-$k=44$ is therefore not the thing to read. Extrapolating in the basis
-$L+a/k+b/k^2$ through the windows $k=36,40,44$ and $k=24,32,40$ and
-$k=28,36,44$ gives Table~\ref{tab:boundary-fits}.
-
-\begin{table}[ht]
-\centering
-\begin{tabular}{@{}llllll@{}}
-\toprule
-$\mathcal Q$ & predicted & at $k=44$ & three $1/k$ fits
-  & $\log k/k$ & one term \\
-\midrule
-$\{3\}$ & $1/3$ & $0.31209$
-  & $0.333227$, $0.333171$, $0.333447$ & $0.329517$ & $0.336577$ \\
-$\{5\}$ & $3/5$ & $0.572066$
-  & $0.600056$, $0.600424$, $0.600537$ & $0.596605$ & $0.603172$ \\
-\bottomrule
-\end{tabular}
-\caption{Extrapolated boundary ratios against
-\eqref{eq:boundary-predicted}.}\label{tab:boundary-fits}
-\end{table}
-
-Two caveats. A three-parameter fit through three points has no residual, so
-the agreement with the prediction is not an error estimate; what measures the
-uncertainty is the spread across bases, $2.1\%$ of $1/3$ and $1.1\%$ of $3/5$.
-And the $1/k$ basis is not independent of the conclusion, since the subleading
-$O(k\log(k+1))$ of \eqref{eq:GLW-asymptotic} has its logarithm cancel in the
-ratio only if its coefficient also scales by $\prod(1-2/p)$, which is a
-stronger form of what is being tested.
-
-The second complement tests the prediction on a case with a different answer.
-What it cannot do is separate \eqref{eq:GLW-value} from a small admixture of
-$\partial_sH_{\mathcal P\setminus\{2\}}(1,2)$: the residual at
-$\mathcal Q=\{3\}$ would imply a shift of only $1.6\cdot10^{-4}$ at
-$\mathcal Q=\{5\}$, well inside the spread. That separation is settled in
-\S\ref{subsec:boundary-reduction}, which shows that no such term can enter the
-$k^2$ coefficient, and which also derives the centring constant
-$\prod_{p\in\mathcal Q}(1-1/p)$ used here. These computations were made before
-that derivation, and took the centring constant from \eqref{eq:HP-def} at
-$z=1$ by analogy with the interior case, checked only against
-$\mathcal Q=\varnothing$, where it is $1$ and is Lichtman's $f_k\to1$.
-
-The constants of Proposition~\ref{prop:general-interior}(iv) are checked
-separately, and the two checks should not be conflated. The constant
+The constants of Proposition~\ref{prop:general-interior}(iv) have been checked
+numerically, and the two checks should not be conflated. The constant
 \emph{formulas} specialize correctly to the certified values: at
 $\mathcal Q=\{2\}$ they return $H_{\mathcal P}(1,2)=0.378695020$ against
 $d=0.3786950315$ and $c_{\mathcal P}=0.155632714$ against $\beta$, both to
-about $10^{-7}$, the precision of the prime sums involved. The
-\emph{sequence} $f_k^{\mathcal P}$ converges to its asymptotic much more
-slowly, and how slowly depends on $q$: at $\mathcal Q=\{2\}$, where the
-subleading term is the $O(k^3 3^{-k})$ one of \eqref{eq:odd-intro-expansion}
-with the constant $4900$, the ratio of $(f_k^{\mathcal P}-c_0)2^{k}$ to
-$c_{\mathcal P}$ is still $1.13$ at $k=14$, the largest index computed; at
-$\mathcal Q=\{2,3\}$, where $q=5$, it is $1.003$. So it is the $q\geq5$ runs
-that test \eqref{eq:general-interior} end to end, and $\mathcal Q=\{2\}$ that
-calibrates the formulas against a case the paper proves. Both computations are
-in the repository, as \texttt{genP\_check.py} and \texttt{boundary\_check.py}.
-Unlike everything else in this paper that is computed, they use ordinary
-floating-point arithmetic and not ball arithmetic: they are checks on the
-formulas of this section, carrying no certificate, and nothing elsewhere in the
-paper or in the formalization depends on them.
+about $10^{-7}$, the precision of the prime sums involved. The \emph{sequence}
+$f_k^{\mathcal P}$ converges to its asymptotic much more slowly, and how
+slowly depends on $q$: at $\mathcal Q=\{2\}$, where the subleading term is the
+$O(k^33^{-k})$ one of \eqref{eq:odd-intro-expansion} with the constant $4900$,
+the ratio of $(f_k^{\mathcal P}-c_0)2^{k}$ to $c_{\mathcal P}$ is still $1.13$
+at $k=14$, the largest index computed; at $\mathcal Q=\{2,3\}$, where $q=5$,
+it is $1.003$. So it is the $q\geq5$ runs that test
+\eqref{eq:general-interior} end to end, and $\mathcal Q=\{2\}$ that calibrates
+the formulas against a case the paper proves. The computation is in the
+repository as \texttt{genP\_check.py}. Unlike everything else in this paper
+that is computed, it uses ordinary floating-point arithmetic and not ball
+arithmetic: it is a check on the formulas of this section, carrying no
+certificate, and nothing elsewhere in the paper or in the formalization
+depends on it.
 
-\subsection{Reduction of the boundary case}\label{subsec:boundary-reduction}
+The boundary case $q=2$ is a different problem, and we do not treat it here.
+Separating the factor $L_2$ in \eqref{eq:HP-def} gives the exact identity
+$H_{\mathcal P}=H_{\mathcal P\setminus\{2\}}/(1-z2^{-s})$, so the entire
+$z$-singularity at $z=2^{s}$ is one explicit pole whose numerator belongs to a
+prime set with least element at least $3$. Proposition~\ref{prop:general-interior}
+therefore applies to the numerator, and in that sense the crux of the boundary
+case is an interior object; the $k^2$ of \eqref{eq:GLW-asymptotic} comes from
+the pole. Whether the resulting coefficient depends on that numerator only
+through its value at the critical point, which is what
+Conjecture~\ref{conj:general} would need, we have been unable to settle, and
+we will return to it separately.
 
-The boundary case reduces further, and in a way that removes the
-$s$-derivatives from the $k^2$ coefficient altogether. Expanding the pole of
-\eqref{eq:boundary-pole} in powers of $z$ and reading off the coefficient gives,
-for every set of primes $\mathcal P$ containing $2$,
-\begin{equation}\label{eq:boundary-exact}
-  P_k^{\mathcal P}(s)
-   =\sum_{i\geq0}\varphi_i(s)\,2^{-(k-i)s}
-     \sum_{j=0}^{k-i}\frac{\bigl(2^{s}\log\zeta(s)\bigr)^{j}}{j!},
-  \qquad
-  \varphi_i=[z^i]\Phi_{\mathcal P},
-\end{equation}
-an identity, not an approximation, valid for $s>1$. It is
-\eqref{eq:euler-products-P} with $(1-z2^{-s})^{-1}=\sum_n2^{-ns}z^n$
-substituted, and the three series convolved over $i+j+n=k$: that one,
-$\zeta(s)^{z}=\exp(z\log\zeta(s))$, and $\Phi_{\mathcal P}$. At $k=1$ it
-collapses to $\sum_{p\in\mathcal P}p^{-s}=P_1^{\mathcal P}(s)$, the terms in
-$\log\zeta$ cancelling against $\varphi_1$. The identity itself needs nothing
-of $\mathcal Q$. The estimates on $\varphi_i$ used below need
-\eqref{eq:thin-complement}, through
-Proposition~\ref{prop:general-interior} applied to
-$\mathcal P\setminus\{2\}$.
-
-Now integrate \eqref{eq:boundary-exact} over $s\geq1$ and replace
-$\varphi_i(s)$ by $\varphi_i(1)$. Writing
-\begin{equation}\label{eq:Im-def}
-  I_m=\int_1^\infty 2^{-ms}\sum_{j=0}^m
-      \frac{\bigl(2^{s}\log\zeta(s)\bigr)^{j}}{j!}\dd s
-   =\frac1{m!}\int_1^\infty\!\!\int_0^\infty
-      \bigl(\log\zeta(s)+2^{-s}v\bigr)^{m}\e^{-v}\dd v\dd s,
-\end{equation}
-the second form by $\sum_{j\leq m}y^j/j!=\e^{y}\Gamma(m+1,y)/m!$
-\cite[\S8.4]{DLMF} and
-$2^{-s}\cdot2^{s}\log\zeta(s)=\log\zeta(s)$, we therefore have
-\begin{equation}\label{eq:boundary-reduction}
-  f_k^{\mathcal P}=\sum_{m=1}^{k}\varphi_{k-m}(1)\,I_m
-   +\int_1^\infty\varphi_k(s)\dd s+E_k .
-\end{equation}
-Three points here need care, and the third limits what the reduction can
-deliver.
-
-First, $I_m$ is finite only for $m\geq1$. At $m=0$ the $j$-sum is the single
-term $1$ and the prefactor is $1$, so $I_0=\int_1^\infty\dd s=\infty$. The
-$m=0$ term of \eqref{eq:boundary-exact} is $\varphi_k(s)$, whose $s$-integral
-converges because $\varphi_k(s)\to0$, and not because of any decay supplied by
-the rest of the integrand. Freezing it at $s=1$ would destroy that, so we keep
-it unfrozen above. This costs nothing, provided one takes the right contour.
-Fix $R\in(2,3)$ and apply Cauchy on the \emph{expanding} circles
-$\abs z=R2^{s-1}$. On them $\abs z2^{-s}=R/2$ is constant and
-$\abs zp^{-s}\leq(R/2)(2/3)^{s}$ for $p\geq3$, both bounded uniformly in
-$s\geq1$, so
-\[
- M_R:=\sup_{s\geq1}\ \sup_{\abs z=R2^{s-1}}\abs{\Phi_{\mathcal P}(s,z)}<\infty
-\]
-by the estimate of Proposition~\ref{prop:general-interior}(i) applied to
-$\mathcal P\setminus\{2\}$, and
-$\abs{\varphi_k(s)}\leq M_R(R2^{s-1})^{-k}=M_RR^{-k}2^{-k(s-1)}$, whence
-\begin{equation}\label{eq:unfrozen-tail}
- \Bigl\lvert\int_1^\infty\varphi_k(s)\dd s\Bigr\rvert
- \leq\frac{M_RR^{-k}}{k\log2}=o(2^{-k}).
-\end{equation}
-The circles must expand with $s$. On the fixed-radius circles of
-Proposition~\ref{prop:general-interior}(ii), or on $\abs z=R^{s}$, no such
-uniform $M$ exists: the complement of $\mathcal P\setminus\{2\}$ contains $2$,
-contributing $(1-2^{-s})^{z}$, and at $z=-R^{s}$ that factor has modulus
-$\exp\bigl(R^{s}\log(1-2^{-s})^{-1}\bigr)\approx\exp\bigl((R/2)^{s}\bigr)$,
-which is unbounded for $R>2$. For $\mathcal P$ all primes and $R=2.5$ the
-quantity $\log\abs{\Phi}$ at $z=-R^{s}$ runs $2.50,\ 2.61,\ 6.00,\ 14.56,\
-35.53,\ 86.74$ at $s=1,4,8,12,16,20$, while on the circles
-$\abs z=R2^{s-1}$ it decreases monotonically to $R/2=1.25$.
-
-Second, the $i$-sum in \eqref{eq:boundary-exact} is finite, the $j$-sum being
-empty for $i>k$, while $\Phi_{\mathcal P}(1,1)$ and $\Phi_{\mathcal P}(1,2)$
-below are infinite sums. The difference is the tail $\sum_{i>k}$. Here
-Proposition~\ref{prop:general-interior}(ii) gives
-$\varphi_i(1)=O_R(R^{-i})$ for each fixed $R<3$, and not for $R=3$, so the two
-tails are $O_R(R^{-k})$ and $O_R((2/R)^{k})$. Both are $o(2^{-k})$ once
-$R\in(2,3)$ is fixed.
-
-Third, the freezing error. One might argue that the mass of the $s$-integral
-sits at $s-1\asymp\e^{-k}$, so that $E_k=O(\e^{-k})=o(2^{-k})$. This is false.
-The error is a Jensen error: the expectation of $s-1=\e^{-t}$ under the $I_m$
-integrand is not $\e^{-\mathbb E t}$, even though $\mathbb E t=m$. The
-relevant weight is
-$K_m=\int_1^\infty(s-1)\,2^{-ms}\sum_{j\leq m}(2^{s}\log\zeta(s))^j/j!\dd s$,
-and its value is governed by the small-$t$ tail rather than by the bulk.
-Numerically $K_m2^{m}/m=0.381,0.397,0.411,0.416$ at $m=16,24,32,36$, against
-$\e^{-m}/K_m=1.1\cdot10^{-6}$ at $m=36$. So $K_m$ is of order $m2^{-m}$, up to
-a slowly varying factor: the column drifts upward over this range without
-flattening, so the data do not exclude an extra $\log m$, which would change
-nothing below. At any rate $K_m$ exceeds $\e^{-m}$ by six orders of magnitude.
-Since $\varphi_i'(1)=O_R(R^{-i})$ for each $R<3$,
-\begin{equation}\label{eq:freeze-error}
-  E_k=\sum_{i\geq1}\varphi_i'(1)K_{k-i}+\cdots=O\bigl(k2^{-k}\bigr),
-\end{equation}
-where the omitted terms are the second-order Taylor remainder, controlled by
-the second moment $\int(s-1)^2[\cdots]\dd s$ in the same way. The order is
-attained, and not merely bounded, whenever
-$\partial_s\Phi_{\mathcal P}(1,2)\neq0$. Indeed no single $i$ dominates:
-summing $K_{k-i}\approx c(k-i)2^{-(k-i)}$ against $\varphi_i'(1)$ gives
-$ck2^{-k}\sum_i2^{i}\varphi_i'(1)=ck2^{-k}\partial_s\Phi_{\mathcal P}(1,2)$,
-the series being absolutely convergent.
-
-So \eqref{eq:boundary-reduction} is accurate to $o(k^22^{-k})$, but not to
-$o(2^{-k})$. It determines the limit and the $k^22^{-k}$ coefficient, and says
-nothing about the $k2^{-k}$ or $2^{-k}$ coefficients. This is enough for
-Conjecture~\ref{conj:general}, which turns on the sign of the leading
-coefficient, and may be compared with \eqref{eq:GLW-asymptotic}, whose
-remainder is $O(k\log(k+1))$. We state \eqref{eq:freeze-error} as a reduction
-rather than as a proposition. Its first-moment computation is numerical and
-its Taylor remainder is bounded only in outline, so it is a second unproved
-ingredient, alongside \eqref{eq:Im-asymptotic}. Of the two it is much the
-cheaper, being an estimate on an explicit one-dimensional integral, and for
-that reason we record the asymptotic and not this as the open problem.
-
-Suppose now only that $I_m=c_0+Am^22^{-m}+o(m^22^{-m})$ for constants
-$c_0,A$, with the error uniform in $m$. Substitute into
-\eqref{eq:boundary-reduction} and sum the resulting series against
-$\varphi_{k-m}(1)$, and against $\varphi_{k-m}(1)2^{k-m}m^2$. Both
-interchanges are dominated convergence, since
-$\sum_i\abs{\varphi_i(1)}2^{i}<\infty$ and $m^2\leq k^2$. This gives
-\begin{equation}\label{eq:boundary-consequence}
-  f_k^{\mathcal P}\longrightarrow c_0\,\Phi_{\mathcal P}(1,1),
-  \qquad
-  [k^22^{-k}]\,f_k^{\mathcal P}=A\,\Phi_{\mathcal P}(1,2),
-\end{equation}
-since $\sum_i\varphi_i(1)=\Phi_{\mathcal P}(1,1)$ and
-$\sum_i\varphi_i(1)2^{i}=\Phi_{\mathcal P}(1,2)$, both convergent because
-$1,2<3\leq q(\mathcal P\setminus\{2\})$, and since the three error terms
-collected above are all $o(k^22^{-k})$: the unfrozen $m=0$ term, the
-$i$-tails, and $E_k=O(k2^{-k})$.
-
-So the $k^2$ coefficient depends on the numerator \emph{only through its value}
-at the critical point, so the alternative
-$A\Phi(1,2)+B\,\partial_s\Phi(1,2)$ contemplated above cannot arise at that
-order. The claim is weaker than it may appear. By \eqref{eq:freeze-error} an
-$s$-derivative of $\Phi_{\mathcal P}$ does enter, through
-$\sum_i\varphi_i'(1)K_{k-i}$, but only at order $k2^{-k}$. What is excluded is
-a $\partial_s\Phi$ contribution to the $k^22^{-k}$ coefficient, and that is
-the coefficient whose sign decides Conjecture~\ref{conj:general}.
-
-Since $I_m$ is independent of $\mathcal P$, its two constants are pinned by the
-single case $\mathcal Q=\varnothing$, where both answers are known. There
-$\Phi_{\mathcal P}=H_{\mathrm o}$, so $\Phi(1,1)=H_{\mathrm o}(1,1)=\tfrac12$
-and $\Phi(1,2)=d$; Lichtman's $f_k\to1$ \cite{Lichtman19} forces $c_0=2$, and
-\eqref{eq:GLW-value} forces $A=-\tfrac14\log2$. Feeding those back into
-\eqref{eq:boundary-consequence} and using \eqref{eq:boundary-ratio},
-\begin{equation}\label{eq:boundary-final}
-  f_k^{\mathcal P}\longrightarrow\prod_{p\in\mathcal Q}\Bigl(1-\frac1p\Bigr),
-  \qquad
-  [k^22^{-k}]\,f_k^{\mathcal P}
-   =-\tfrac14(\log2)\,d\prod_{p\in\mathcal Q}\Bigl(1-\frac2p\Bigr)<0 ,
-\end{equation}
-whose $k^2$ coefficient is the negative of \eqref{eq:boundary-predicted}, by
-the sign convention recorded there. This also settles the centring constant
-used in the computation above, which was taken there by analogy.
-
-So exactly one analytic statement remains, and it mentions no primes:
-\begin{equation}\label{eq:Im-asymptotic}
-  I_m=2-\tfrac14(\log2)\,m^22^{-m}+o\bigl(m^22^{-m}\bigr).
-\end{equation}
-Granting \eqref{eq:Im-asymptotic}, Conjecture~\ref{conj:general} holds for
-every admissible $\mathcal P$ with $q=2$ for which $f_k^{\mathcal P}$ has an
-expansion to that order at all. For if that coefficient is $C<0$, as
-\eqref{eq:boundary-final} gives, then
-\[
-  f_{k+1}^{\mathcal P}-f_k^{\mathcal P}
-   =C2^{-k}\,\frac{1+2k-k^2}{2}+o(k^22^{-k}),
-\]
-and the bracket is negative for $k\geq3$. So the difference is eventually
-positive and the sequence eventually increases. This is the half of
-Conjecture~\ref{conj:general} that Corollary~\ref{cor:general-positivity} does
-not supply.
-
-We have not proved \eqref{eq:Im-asymptotic}, and it remains out of reach for
-the moment. The obstacle is that $J=-\zeta/\zeta'$ is not integrable at $u=0$,
-so the naive bound on the inner integral of \eqref{eq:Im-def} fails and the
-convergence of the $v$-integral is marginal. That is precisely where the
-factor $m^2$ comes from. In its favour, \eqref{eq:Im-asymptotic} is a single
-one-dimensional asymptotic with explicit constants, and not a statement about
-a family of prime sets. It is also numerically unambiguous. Computing $I_m$
-for $8\leq m\leq36$ gives $I_m\to2$ to $3\cdot10^{-9}$, while
-$(I_m-2)/(m^22^{-m})$ decreases monotonically from $-0.0875$ to $-0.1194$, its
-magnitude rising. In the basis $A+b\log m/m+c/m$, which the subleading
-$O(k\log(k+1))$ of \eqref{eq:GLW-asymptotic} dictates, it extrapolates to
-$-0.17379$, $-0.17301$ and $-0.17277$ over three windows, within $0.3\%$ of
-$-\tfrac14\log2=-0.17329$. Of the other bases tabulated, $A+b/m+c/m^2$ lands
-$8.0\%$ away and the two-parameter $A+b\log m/m$ lands $8.6\%$ away, so the
-$\log m/m$ term is doing real work. We do not claim this as independent
-corroboration of \eqref{eq:GLW-asymptotic}, since the basis was chosen with
-that remainder in mind. The identity
-\eqref{eq:boundary-exact} is verified against direct Dirichlet sums over
-$n\leq3\cdot10^{6}$ at $s=4$ and $k\leq3$, to $10^{-17}$, for three different
-$\mathcal P$, and both computations are in
-\texttt{Im\_check.py}; like the others in this section they are ordinary
-floating-point and carry no certificate.
-
-The present paper proves the two cases $\mathcal P=\{\text{all primes}\}$ and
-$\mathcal P=\{p:p\geq3\}$, which are extremal among admissible sets in the
-sense just described.
-
-%=======================================================================
 \section{Certification and formalization}\label{sec:lean}
 %=======================================================================
 

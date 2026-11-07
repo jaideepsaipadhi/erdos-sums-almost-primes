@@ -224,6 +224,16 @@ The tail estimates use analyticity of G2 in |z| <= 2.9 (`M1_R2.9`,
 `M2sup_R2.9`).  The Lean wide-radius chain runs at |z| <= 29/10, so this is
 formally proved, not only argued in the manuscript.
 
+## The boundary scripts are no longer cited by the paper
+
+As of 2026-11-07 the manuscript carries only the interior case of Section 7,
+so `Im_check.py`, `km_check.py`, `boundary_freeze_check.py` and
+`boundary_check.py` -- with `Im.log`, `km.log`, `freeze.log` and
+`boundary.log` -- back no claim in `paper/proof.tex`. They are kept for the
+separate note on the boundary case `q = 2`; see CLAUDE.md for what each one
+established and for the two corrections that came out of them. `genP_check.py`
+is still cited, as the calibration of Proposition 7.2(iv)'s constants.
+
 ## The two constants that had no artifact at all: `101.245` and `1.45`
 
 Added 2026-11-05.  Both appeared only as hardcoded literals, annotated

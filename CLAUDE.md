@@ -310,6 +310,42 @@ how the reduction was first found, and it is superseded: the `s`-derivative
 possibility is now ruled out outright rather than argued around, and what
 remains is one asymptotic with no primes in it.
 
+### The boundary half of Section 7 is OUT of the manuscript (2026-11-07)
+
+Decision of record. The paper now carries only the **interior** case:
+Conjecture 7.1, the hypothesis discussion, the singularity structure,
+`eq:HP-def`, Proposition 7.2, Corollary 7.3, and the `genP_check.py`
+calibration. Everything on `q = 2` -- `eq:boundary-pole`,
+`eq:boundary-ratio`, `eq:GLW-value`, `eq:boundary-predicted`, the fitting
+table, and all of the former \S7.3 (`eq:boundary-exact`, `eq:Im-def`,
+`eq:boundary-reduction`, `eq:freeze-error`, `eq:boundary-consequence`,
+`eq:boundary-final`, `eq:Im-asymptotic`) -- was removed, and the section now
+closes with a short paragraph saying the boundary case is open and will be
+treated separately.
+
+**Why:** 35 pp -> 31 pp, and it was the only unproved material in the paper.
+Prop 7.2 + Cor 7.3 are proved outright; the boundary reduction rested on TWO
+unproved ingredients (`eq:Im-asymptotic` and `eq:freeze-error`), so a referee
+would have weighed them against Theorems 1.1 and 1.2, which do not depend on
+Section 7 at all. Verified before cutting: the dependency is one-directional.
+Section 7 cites 14 labels from \S\S1--3; the rest of the paper referenced
+Section 7 in exactly 5 places, all `\ref`s in the introduction's roadmap, plus
+two abstract sentences. Nothing in \S\S2--6, \S8 or the appendix touched it.
+
+**All the mathematics is kept in this repository** for the separate note:
+`Im_check.py`/`Im.log`, `km_check.py`/`km.log`,
+`boundary_freeze_check.py`/`freeze.log`, `boundary_check.py`/`boundary.log`,
+and every finding recorded in the sections below. Do not delete them, and do
+not re-derive them: the sections below are the state of that work, including
+the two corrections (`I_0` diverges; the freezing costs `Theta(k 2^-k)`, not
+`O(e^-k)`) and the expanding-circles repair.
+
+`check_proof_spine.py`'s `K_m` guard is now conditional: it fires if the
+manuscript quotes the figures and the log is missing, and reports `n/a` if the
+manuscript does not quote them. That asymmetry is deliberate -- contrast the
+five round-up checks, where a missing LOG is a hard failure because the
+paper's numeral is present and unbacked.
+
 ### The `s`-derivatives are GONE, and point two is now ONE primes-free asymptotic
 
 Superseded 2026-11-05. The earlier framing — "if the coefficient is
