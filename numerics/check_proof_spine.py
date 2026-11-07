@@ -360,7 +360,13 @@ _mp = re.search(r"direct interval evaluation .{0,400}?gives \$g_k>g_\{k\+1\}\$ f
 if _fl.exists() and _mp:
     _t = _fl.read_text()
     _mv = re.search(r"strictly decreasing on \[(\d+),(\d+)\]: (\w+)", _t)
-    _k1 = re.search(r"^\s*1\s+\[", _t, re.M)
+    # Accept either log format: the old `1  [mid +/- rad]` from str(arb), and
+    # the current `1  mid  rad` that prints the TRUE radius from .rad().  The
+    # format changed because str(arb) inflates the radius to cover its own
+    # rounding of the midpoint -- at k = 74 it displayed 8.4e-24 against a
+    # true radius of 6.2e-43 -- which made the enclosures look as though they
+    # overlapped.  This check fired when the format changed, which is correct.
+    _k1 = re.search(r"^\s*1\s+\[?[0-9]", _t, re.M)
     check("odd sweep log certifies the comparison range the paper claims",
           bool(_mv) and _mv.group(3) == "True"
           and int(_mv.group(1)) == 1 and int(_mv.group(2)) == int(_mp.group(1))

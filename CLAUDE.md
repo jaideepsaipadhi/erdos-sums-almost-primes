@@ -174,6 +174,32 @@ log's verdict line against the paper's claim, and that a `k = 1` row exists.
 without them `fodd_combine.py` cannot be run at all and the hour-long sweep
 would have to be redone to re-derive the verdict.
 
+### `fodd75.log`'s printed radii were PRINT ARTEFACTS, not enclosures
+
+Found 2026-11-07, by walking into the trap this file already warns about. The
+log printed `fk[k].str(20)`, which rounds the midpoint to 20 places and
+**inflates the radius to cover that rounding**. For large `k` the displayed
+radius was therefore the print error, not the enclosure:
+
+    k = 74   displayed  +/- 8.4e-24        TRUE rad()  6.2e-43
+
+Since `g_74 - g_75 = 4.1e-24`, the printed balls looked as though they
+OVERLAPPED, and a from-the-log check of monotonicity appears to fail for
+`k >= 65`. It does not: read with `.rad()` and `.lower()`, the tightest pair
+is `k = 74` with difference `>= 4.11956e-24` against radius `6.23371e-43`, a
+ratio of `6.6e18`. Monotonicity on `[1,74]` is certified with nineteen orders
+of margin.
+
+`fodd_combine.py` now prints the midpoint to 24 places and the true `.rad()`
+as a separate column, and reports the tightest pair so the verdict is
+auditable from the log alone. **This changed the log's row format**, which
+immediately broke `check_proof_spine.py`'s `k = 1` row regex -- the guard
+doing its job. The regex now accepts either format.
+
+No paper claim was affected: the appendix quotes the UNRESTRICTED
+certificate's radius (`4.6e-87`), and the guard reads this log's verdict line
+and the presence of its `k = 1` row, never its radii.
+
 ## The committed certificates, and what actually backs each sweep range
 
 `numerics/verify.py` must be **run from `numerics/bm-rebuild-v21/`** — its
