@@ -234,13 +234,17 @@ factor is
 the $m=1$ terms cancelling. The estimate is uniform on the compact set and
 depends on $s$ only through $\sigma$. Each $p^{-s}=\e^{-s\log p}$ is entire,
 so every regularized factor is analytic in $(s,z)$ jointly wherever its
-denominator does not vanish, and on $\{\abs z<3^{\sigma}\}$ it does not, since
-$\abs z<3^{\sigma}\leq\abs{p^{s}}$ for every $p\geq3$. As
-$\sum_pp^{-2s_0}<\infty$, the product converges locally uniformly on the
-stated domain in $\mathbb C^2$, and a locally uniform limit of analytic
-functions of several complex variables is analytic. This is the first
-assertion, the nearest pole being at $z=p^s$ with $\abs{p^s}=2^{\sigma}$ for
-\eqref{eq:H-full} and $3^{\sigma}$ for \eqref{eq:H-odd}. Finally $[z^j]$ is a
+denominator does not vanish, which on each of the two domains it does not: for
+\eqref{eq:H-full} one has $\abs z<2^{\sigma}\leq p^{\sigma}=\abs{p^{s}}$ for
+every prime $p$, and for \eqref{eq:H-odd} $\abs z<3^{\sigma}\leq\abs{p^{s}}$
+for every $p\geq3$. As $\sum_pp^{-2s_0}<\infty$, the sum of the logarithms
+converges absolutely and locally uniformly, so the product converges locally
+uniformly on the stated domain in $\mathbb C^2$ to a non-vanishing limit, and
+a locally uniform limit of analytic functions of several complex variables is
+analytic. This is the first assertion. The factors have poles at $z=p^s$, of
+modulus $p^{\sigma}$, so the nearest is at modulus $2^{\sigma}$ for
+\eqref{eq:H-full} and $3^{\sigma}$ for \eqref{eq:H-odd}, which is why the
+domains are as stated. Finally $[z^j]$ is a
 Cauchy integral over a circle that may be held fixed on a compact subset, so
 it commutes with $\dd/\dd s$, which is \eqref{eq:coeff-commute}.
 \end{proof}
@@ -691,12 +695,16 @@ $\tfrac12C_b^2(C_f+1)<C_b^2(C_f+1)$. Hence
 \begin{equation}\label{eq:odd-far-assembled}
  \abs{R_{k,\mathrm{far}}}\leq\frac{C_E\Sigma_2}{18}(k+3)^3 3^{-k},
 \end{equation}
-the $18=6\cdot3$ recording $\binom{k+3}{3}\leq(k+3)^3/6$ and the rate. The
-collapse to a single constant costs a factor of about $1.6$ at every $k$. At
-$k=1$ the three terms total $1.84\cdot10^{5}$ against the
-$2.81\cdot10^{5}$ of \eqref{eq:odd-far-assembled}, and the ratio improves as
-$k$ grows, so nothing is lost that the ledger of
-Proposition~\ref{prop:odd-remainder} needs.
+the $18=6\cdot3$ recording $\binom{k+3}{3}\leq(k+3)^3/6$ and the rate.
+
+Collapsing the three constants into $C_E$ is wasteful, and deliberately so.
+The three-term bracket is $7.1\cdot10^{4}$ at $k=1$ against the
+$8.4\cdot10^{5}$ of \eqref{eq:odd-far-assembled}, a factor of $12$; the factor
+falls to $4.9$ by $k=59$ and tends to
+$C_E/\bigl(\tfrac12C_b^2(C_f+1)\bigr)=4.67$. We keep the single constant
+because the ledger of Proposition~\ref{prop:odd-remainder} closes comfortably
+with it, and because one constant in the statement is easier to check than
+three; the slack is recorded here rather than spent.
 
 \emph{First tail.} By Lemma~\ref{lem:pole-coefficient-bounds}(i),
 $\Bigl\lvert\sum_{j>k}h_j(1)\Bigr\rvert\leq\Sigma_0\sum_{j>k}3^{-j}=\frac{\Sigma_0}{2}3^{-k}$.
@@ -749,9 +757,9 @@ sum exactly if they were, bounds $A_k$ from below rather than above. This is
 the whole source of the loss in the near range, and of the threshold in
 \eqref{eq:odd-remainder}.
 
-We majorize instead. The observation that makes this cheap is that $h_1$ is
-the \emph{only} negative coefficient: by \eqref{eq:odd-h1-negative} every
-coefficient of
+We majorize instead. What makes this cheap is that, of the coefficients of
+$\log H_{\mathrm o}$, only the first is negative. Indeed by
+\eqref{eq:odd-h1-negative} every coefficient of
 $\log H_{\mathrm o}(s,z)=h_1(s)z+\sum_{m\geq2}\Pi(ms)z^m/m$ beyond the first
 is positive, so replacing $h_1$ by $\abs{h_1}$ produces
 \[
@@ -1024,9 +1032,10 @@ Finally $f_k=I_k'+(I_k-I_k')+T_k$. Comparing with
 By \eqref{eq:E-decomposition} the criterion \eqref{eq:full-criterion} needs a
 lower bound for $2E(k)-E(k+1)$, and $E$ is a sum of four quantities of quite
 different character. Two of them, $S_1$ and the signed moments, are linear in
-$k$ and are bounded by suprema of coefficients. The third, $\Delta$, is
-logarithmic. The fourth is exponentially small and is the only one needing a
-certificate uniform in $k$. We treat them in that order.
+$k$ and are bounded by suprema of coefficients. The third, $\Delta$, grows
+like $k\log k$, and getting the logarithm rather than a power of $k$ is the
+only real work in this section. The fourth is exponentially small and is the
+only one needing a certificate uniform in $k$. We treat them in that order.
 
 One point of method recurs. Each bound is taken on the \emph{combination}
 $2E_\bullet(k)-E_\bullet(k+1)$ that the criterion produces, rather than on
@@ -1203,9 +1212,11 @@ $\log(m+1)\geq\log2>1/4$; and $\delta_0=-1=-D(0)$.
 
 The upper bound is where the $\log(m+1)$ comes from, and it comes from a
 split. Put $\Lambda_m=\sum_{i=0}^m2^i\eta_i(m-i)$. The elementary inequality
-$\e^{-x}-1+x\leq\min(x,x^2/2)$ offers two bounds, the linear one better for
-large $u$ and the quadratic one better for small; using each where it is
-better is what produces a logarithm rather than a power. Taking
+$\e^{-x}-1+x\leq\min(x,x^2/2)$ offers two bounds. Here
+$x=(m-i)\log2\,\e^{-u}$ is large for small $u$ and small for large $u$, so the
+linear bound is the better one near $u=0$ and the quadratic one is better out
+in the tail; using each where it is better is what produces a logarithm rather
+than a power of $m$. Taking
 $x=(m-i)\log2\,\e^{-u}$ gives
 \begin{equation}\label{eq:Lambda-integral-bound}
  \Lambda_m\leq\int_0^\infty \e^{-u}\sum_{i=0}^m\frac{(2u)^i}{i!}
@@ -1945,9 +1956,9 @@ prime set with least element at least $3$. Proposition~\ref{prop:general-interio
 therefore applies to the numerator, and in that sense the crux of the boundary
 case is an interior object; the $k^2$ of \eqref{eq:GLW-asymptotic} comes from
 the pole. Whether the resulting coefficient depends on that numerator only
-through its value at the critical point, which is what
-Conjecture~\ref{conj:general} would need, we have been unable to settle, and
-we will return to it separately.
+through its value at the critical point, which would give
+Conjecture~\ref{conj:general}, we have been unable to settle, and we will
+return to it separately.
 
 \section{Certification and formalization}\label{sec:lean}
 %=======================================================================
