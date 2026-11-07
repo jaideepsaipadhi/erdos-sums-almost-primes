@@ -342,6 +342,13 @@ Then
 \end{proposition}
 
 \begin{proof}
+The idea is to write the integrand of \eqref{eq:odd-u-integral} as its first
+two terms in $\e^{-u}$ plus an explicit error, and then to integrate each
+piece exactly. Two expansions are at work and they must be kept apart: the
+measure $J(u)\dd u$, which Lemma~\ref{lem:zeta-coordinate} expands, and the
+coefficient $h_j(s(u))$, which Taylor's theorem expands about $s=1$. Their
+product supplies the three error terms of \eqref{eq:odd-local-product}.
+
 Let $x=\e^{-u}$. By Lemma~\ref{lem:zeta-coordinate},
 $J(u)=x+2\gamma x^2+O(x^3)$ and
 $\varepsilon(u)J(u)=x^2+O(x^3)$. Taylor's theorem at $s=1$ gives
@@ -625,25 +632,44 @@ monotonicity for $k\leq75$ is certified directly and does not use
 \eqref{eq:odd-remainder}; see the proof of Theorem~\ref{thm:main-odd}.
 
 \begin{proof}
-Write $R_k$ as the sum of the far contribution, the near contribution, and the
-two coefficient tails of
-\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}. The far
-term and the near-range main term are cubic in $k$; the other two are bounded
-by constant multiples of $3^{-k}$, and since $(k+3)^3\geq1$ the cubic factor
-may be absorbed once, at the end.
+By \eqref{eq:Rk-def} the remainder has four parts: the error integrals
+$\int E_j$ over the far range $u\geq3$ and over the near range $0<u\leq3$, and
+the two coefficient tails of
+\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}. Each
+has to be brought to the common shape $(k+3)^33^{-k}$, and the four resist to
+very different degrees, so it is worth saying in advance where the work lies.
 
-\emph{Far range $u\geq3$.} The exact error is the sum of the three terms of
-\eqref{eq:odd-local-product}---no asymptotic series is summed---so the
-certified Taylor model of \eqref{eq:odd-far-certified} applies to the
-integrand. Its $k$-dependence is supplied not by that computation, which
-certifies finitely many numbers, but by
+The two tails are the easiest: they are geometric series in the $h_j$ and
+$b_j$, which Lemma~\ref{lem:pole-coefficient-bounds} bounds directly. The far
+range is harder only in bookkeeping. The integrand is small there, the
+certified Taylor model of \eqref{eq:odd-far-certified} controls it pointwise,
+and the only real task is to see how the three summands of
+\eqref{eq:odd-local-product} depend on $k$. The near range is where the
+difficulty is, and it is what forces the threshold $k\geq59$: there the $h_j$
+alternate in sign, so the coefficient identity that would \emph{evaluate} the
+sum instead bounds it from the wrong side, and one is pushed onto a majorant
+that is loosest precisely where the weights put most of their mass. We take
+the four in that order.
+
+Two remarks before starting. The far term and the near-range main term are
+cubic in $k$ while the other two are constant multiples of $3^{-k}$; since
+$(k+3)^3\geq1$, the cubic factor may be absorbed once, at the end. And every
+estimate below is an estimate of an explicit quantity: no asymptotic series is
+summed anywhere.
+
+\emph{Far range $u\geq3$.} The exact error here is the sum of the three terms
+of \eqref{eq:odd-local-product}, so the certified Taylor model of
+\eqref{eq:odd-far-certified} applies to the integrand as it stands. What that
+computation cannot supply is the dependence on $k$, since it certifies
+finitely many numbers; that comes instead from
 Lemma~\ref{lem:pole-coefficient-bounds}, and the three terms of
 \eqref{eq:odd-local-product} call on three different parts of it, since they
 carry $h_j(1)$, $h_j'(1)$ and $\partial_s^2h_j$ respectively. The factor $3$
 in each is not a width, the far range $u\geq3$ being unbounded, but a rate:
 the far-range error is $O(\e^{-3u})$, which is what the powers of $\zeta$ in
 \eqref{eq:CE-def} encode, and $\int_0^\infty u^m\e^{-3u}\dd u/m!=3^{-m-1}$.
-Parts (i), (ii) and (iii) of the lemma then give
+So each summand needs its own part of the lemma, and the three parts give
+exactly the three weights required:
 \[
  \sum_{j\leq k}3^j\abs{h_j(1)}\leq(k+1)\Sigma_0,
  \quad
@@ -701,8 +727,9 @@ Summing the resulting geometric series,
 \]
 and $(k+4)\leq\frac{5}{64}(k+3)^3$ for $k\geq1$, with equality at $k=1$.
 
-\emph{Near range $0<u\leq3$.} Here $\abs{E_j}$ is at most the true integrand
-plus the two subtracted main terms, and the latter contribute at most
+\emph{Near range $0<u\leq3$.} This is the delicate part. Here $\abs{E_j}$ is
+at most the true integrand plus the two subtracted main terms. The latter
+contribute at most
 $N_U(k+3)^33^{-k}$ by \eqref{eq:odd-near-main}. For the former,
 \eqref{eq:odd-coefficient-extraction} and the substitution $s=s(u)$, under
 which $u=\log\zeta(s)$ and $J(u)\dd u=\dd s$, give
@@ -712,18 +739,23 @@ which $u=\log\zeta(s)$ and $J(u)\dd u=\dd s$, give
  \qquad
  A_k(s)=\sum_{j=0}^k\frac{(\log\zeta(s))^{k-j}}{(k-j)!}\abs{h_j(s)}.
 \end{equation}
-It is $A_k$, and not the signed sum, that has to be estimated: writing
+It is $A_k$, with the absolute values inside, that has to be estimated, and
+this is the obstruction. Writing
 $\Pi(t)=\sum_{p\geq3}p^{-t}$, the $z$-linear coefficient of
 $\log H_{\mathrm o}$ in \eqref{eq:H-odd} is
 \begin{equation}\label{eq:odd-h1-negative}
  h_1(s)=\Pi(s)-\log\zeta(s)
  =\log(1-2^{-s})-\sum_{m\geq2}\frac{\Pi(ms)}{m}<0,
 \end{equation}
-both terms being negative, so the $h_j$ are not of one sign and the identity
-$\sum_j u^{k-j}h_j(s)/(k-j)!=P_k^{\mathrm{odd}}(s)$ bounds $A_k$ from below
-rather than above.
+both terms being negative. So the $h_j$ are not of one sign, and the identity
+$\sum_j u^{k-j}h_j(s)/(k-j)!=P_k^{\mathrm{odd}}(s)$, which would evaluate the
+sum exactly if they were, bounds $A_k$ from below rather than above. This is
+the whole source of the loss in the near range, and of the threshold in
+\eqref{eq:odd-remainder}.
 
-We majorize instead. By \eqref{eq:odd-h1-negative} every coefficient of
+We majorize instead. The observation that makes this cheap is that $h_1$ is
+the \emph{only} negative coefficient: by \eqref{eq:odd-h1-negative} every
+coefficient of
 $\log H_{\mathrm o}(s,z)=h_1(s)z+\sum_{m\geq2}\Pi(ms)z^m/m$ beyond the first
 is positive, so replacing $h_1$ by $\abs{h_1}$ produces
 \[
@@ -735,8 +767,10 @@ termwise. Hence, with $a(s)=2\abs{h_1(s)}$,
  A_k(s)\leq[z^k]\bigl(\zeta(s)^zH_{\mathrm o}^+(s,z)\bigr)
  =\sum_{i=0}^kP_{k-i}^{\mathrm{odd}}(s)\frac{a(s)^i}{i!}=:P_k^+(s).
 \end{equation}
-To estimate $\int_{s(3)}^\infty P_k^+$, fix a cut point $s_0>s(3)$ and treat
-the two pieces differently. Each is effective for its own reason.
+It remains to integrate $P_k^+$, and no single device does the whole of
+$[s(3),\infty)$. We fix a cut point $s_0>s(3)$ and treat the two pieces
+differently, each by the feature that makes it tractable: the compact piece by
+monotonicity, the tail by its decay rate.
 
 On the compact piece $[s(3),s_0]$, every $P_j^{\mathrm{odd}}$ is a Dirichlet
 series with positive terms and, by \eqref{eq:odd-h1-negative}, $a$ is a
@@ -765,20 +799,20 @@ bounds $\int_{s(3)}^\infty P_k^+$, hence $\int_{s(3)}^\infty A_k$ by
 \eqref{eq:odd-nearabs-certified} is its outcome for each of the $142$ indices
 $59\leq k\leq200$.
 
-That leaves the dependence on $k$, which no finite computation can settle, and
-which has to be reduced exactly as the far range's was. Here the reduction is
-Cauchy's estimate. Because $H_{\mathrm o}^+(s,\cdot)$ has non-negative
+That leaves the dependence on $k$, which no finite computation can settle,
+and which has to be reduced as the far range's was. The tool this time is
+Cauchy's estimate, and the reason it is available is again the positivity of
+the majorant's coefficients. Because $H_{\mathrm o}^+(s,\cdot)$ has non-negative
 coefficients, its maximum on a circle $\abs z=R$ is attained at $z=R$, so for
 any $R<3^{s(3)}$ and any $s\geq s(3)$,
 \begin{equation}\label{eq:odd-nearabs-cauchy}
  A_k(s)\leq R^{-k}\zeta(s)^RH_{\mathrm o}(s,R)\e^{a(s)R}
  =R^{-k}\!\!\prod_{p\geq3}\bigl(1-Rp^{-s}\bigr)^{-1}\e^{a(s)R},
 \end{equation}
-a bound whose only $k$-dependence is the factor $R^{-k}$. It cannot be
-integrated over the whole of $[s(3),\infty)$, since its right-hand side tends
-to $1$ rather than to $0$ as $s\to\infty$; so we use it on
-$[s(3),s_1]$ for a cut point $s_1$ and fall back on the decay already
-established beyond it. On $[s(3),s_1]$, \eqref{eq:odd-nearabs-cauchy} gives
+a bound whose only $k$-dependence is the factor $R^{-k}$. One cannot simply
+integrate it over $[s(3),\infty)$: its right-hand side tends to $1$, not to
+$0$, as $s\to\infty$. So we use it on $[s(3),s_1]$ for a second cut point
+$s_1$, and fall back beyond $s_1$ on the decay already established. On $[s(3),s_1]$, \eqref{eq:odd-nearabs-cauchy} gives
 $\int_{s(3)}^{s_1}A_k\leq R^{-k}\Theta_1$ with
 $\Theta_1=\int_{s(3)}^{s_1}\prod_{p\geq3}(1-Rp^{-s})^{-1}\e^{a(s)R}\dd s$,
 finite and independent of $k$. Beyond $s_1$, \eqref{eq:odd-majorant-tail}
@@ -804,7 +838,8 @@ $59\leq k\leq200$ the largest value is $34.14\cdot3^{-k}$, at $k=59$, and the
 Cauchy branch gives at most $9.66\cdot3^{-k}$ beyond, against the
 $C_N=367.8436$ carried in the ledger.
 
-The companion bound \eqref{eq:odd-near-main} reduces the same way. Here
+The companion bound \eqref{eq:odd-near-main}, for the two subtracted main
+terms, reduces the same way and needs no new idea. Here
 $\abs{h_j(1)}\leq\Sigma_03^{-j}$ by
 Lemma~\ref{lem:pole-coefficient-bounds}(i), while $b_j=h_j'(1)+2\gamma h_j(1)$
 needs both parts: (ii) gives $\abs{h_j'(1)}\leq(j+1)\Sigma_13^{-j}$ and (i)
@@ -820,7 +855,8 @@ is already $12.08$, below $N_U$, the maximum over the finite head
 $1\leq k\leq400$ governs. It is attained at $k=7$, far outside the range in
 which \eqref{eq:odd-remainder} is used.
 
-Substituting the certified constants, the four contributions are
+It remains only to add up. Substituting the certified constants, the four
+contributions are
 \[
  \abs{R_k}\leq\Bigl(
  \underbrace{\frac{5.48910\cdot14414}{18}}_{4395.55}
@@ -837,8 +873,9 @@ Proposition~\ref{prop:odd-remainder}. For monotonicity,
  g_k-g_{k+1}
  =\beta2^{-k-1}+R_k-R_{k+1}.
 \end{equation}
-It is enough to prove
-$\abs{R_m}<\beta2^{-m}/3$ for $m=k,k+1$, because then
+The main term $\beta2^{-k-1}$ has to survive two remainders, at $k$ and at
+$k+1$, so it is enough to give each a third of it: if
+$\abs{R_m}<\beta2^{-m}/3$ for $m=k,k+1$, then
 \[
  \abs{R_k}+\abs{R_{k+1}}
  <\frac{2\beta}{3}2^{-k-1}+\frac{\beta}{3}2^{-k-1}
@@ -866,11 +903,15 @@ cover every $k\geq1$. They overlap on the sixteen indices $59\leq k\leq74$.
 \section{An exact criterion for the unrestricted sums}
 %=======================================================================
 
-Write
+The asymptotic \eqref{eq:GLW-asymptotic} already says that $f_k$ eventually
+increases, but it does not say from where: its $O(k\log(k+1))$ carries no
+explicit constant, so no index can be read off it. The remedy is to stop
+treating the remainder as an error term. Define $E(k)$ by
 \begin{equation}\label{eq:E-definition}
   f_k=1-2^{-k}\bigl(a_1k^2+E(k)\bigr),
-  \qquad a_1=\frac{d\log2}{4}.
+  \qquad a_1=\frac{d\log2}{4},
 \end{equation}
+so that $E(k)$ is an exact quantity and not an estimate.
 Then
 \begin{align}
  f_{k+1}-f_k
@@ -983,6 +1024,19 @@ Finally $f_k=I_k'+(I_k-I_k')+T_k$. Comparing with
 %=======================================================================
 \section{Bounds for the four source terms}\label{sec:sources}
 %=======================================================================
+
+By \eqref{eq:E-decomposition} the criterion \eqref{eq:full-criterion} needs a
+lower bound for $2E(k)-E(k+1)$, and $E$ is a sum of four quantities of quite
+different character. Two of them, $S_1$ and the signed moments, are linear in
+$k$ and are bounded by suprema of coefficients. The third, $\Delta$, is
+logarithmic. The fourth is exponentially small and is the only one needing a
+certificate uniform in $k$. We treat them in that order.
+
+One point of method recurs. Each bound is taken on the \emph{combination}
+$2E_\bullet(k)-E_\bullet(k+1)$ that the criterion produces, rather than on
+$E_\bullet(k)$ and $E_\bullet(k+1)$ separately, since the combination enjoys
+cancellation that absolute values would destroy. The treatment of the signed
+moments below is the clearest instance.
 
 \subsection{The $S_1$ term}
 
@@ -1151,16 +1205,19 @@ For the lower bound, \eqref{eq:delta-decomposition} gives
 $\delta_m\geq-1-\frac{\log2}{4}m\geq-D(m)$ for $m\geq1$, because
 $\log(m+1)\geq\log2>1/4$; and $\delta_0=-1=-D(0)$.
 
-For the upper bound put $\Lambda_m=\sum_{i=0}^m2^i\eta_i(m-i)$. Since
-$\e^{-x}-1+x\leq\min(x,x^2/2)$ for $x\geq0$, taking
+The upper bound is where the $\log(m+1)$ comes from, and it comes from a
+split. Put $\Lambda_m=\sum_{i=0}^m2^i\eta_i(m-i)$. The elementary inequality
+$\e^{-x}-1+x\leq\min(x,x^2/2)$ offers two bounds, the linear one better for
+large $u$ and the quadratic one better for small; using each where it is
+better is what produces a logarithm rather than a power. Taking
 $x=(m-i)\log2\,\e^{-u}$ gives
 \begin{equation}\label{eq:Lambda-integral-bound}
  \Lambda_m\leq\int_0^\infty \e^{-u}\sum_{i=0}^m\frac{(2u)^i}{i!}
  \min\left((m-i)\log2\,\e^{-u},
  \frac{(m-i)^2(\log2)^2\e^{-2u}}2\right)\dd u.
 \end{equation}
-Let $v_m=\max\left(0,\log\frac{m+1}{3}\right)$. On $0\leq u\leq v_m$ use the
-linear bound together with $\sum_{i=0}^m(m-i)(2u)^i/i!\leq m\e^{2u}$, and on
+The crossover is at $v_m=\max\left(0,\log\frac{m+1}{3}\right)$. On
+$0\leq u\leq v_m$ use the linear bound together with $\sum_{i=0}^m(m-i)(2u)^i/i!\leq m\e^{2u}$, and on
 $u\geq v_m$ the quadratic bound together with
 $\sum_{i=0}^m(m-i)^2(2u)^i/i!\leq m^2\e^{2u}$. Then
 \begin{equation}\label{eq:Lambda-split}
@@ -1346,6 +1403,13 @@ criterion.
 %=======================================================================
 \section{Assembly of the unrestricted theorem}\label{sec:assembly}
 %=======================================================================
+
+The four bounds of Section~\ref{sec:sources} now combine into a single
+explicit function $\varphi$ whose positivity is equivalent to the inequality
+wanted, and the proof of Theorem~\ref{thm:main-full} becomes two statements
+about $\varphi$: that it is positive at one index, and that it increases
+thereafter. Neither is an asymptotic statement, and the remaining finitely
+many indices are settled by computation.
 
 For $k\geq900$ define
 \begin{align}
@@ -1621,6 +1685,15 @@ $H_{\mathcal P}(1,2)=\prod_{p\in\mathcal P}(1-p^{-1})^2(1-2p^{-1})^{-1}
 \end{proposition}
 
 \begin{proof}
+Parts (i)--(iii) are the analytic groundwork: that $H_{\mathcal P}$ exists,
+that it and its $s$-derivative are bounded on a circle $\abs z=R$ with
+$R\in(2,3)$, and that the coefficients $h_j^{\mathcal P}$ inherit geometric
+decay $R^{-j}$ from that. Part (iv) is the substance, and it uses nothing of
+$\mathcal P$ beyond those three facts. The reason the radius must lie strictly
+between $2$ and $3$ emerges there: $R>2$ is what makes the coefficient tails
+$o(2^{-k})$, and $R<3$ is what makes a geometric sum in the error terms
+dominated by its last term.
+
 (i) Fix $s\geq1$ and a compact $K\subset\{\abs z<q^{s}\}$, say
 $\abs z\leq R'<q^{s}$. For the product over $\mathcal P$,
 \eqref{eq:local-reg} gives $\log L_p(s,z)=O_{R'}(p^{-2s})$ uniformly on $K$ by
@@ -1681,7 +1754,15 @@ $M'R^{-j}$. At $z=2$ the inner sum in \eqref{eq:HP-dlog} is
 \]
 which gives \eqref{eq:HP-logderiv} after halving.
 
-(iv) Write $P_k^{\mathcal P}(s)=\sum n^{-s}$ over the $n$ counted by
+(iv) The plan is the one of Section~3, carried out with $\mathcal P$ in place
+of the odd primes. Pass to the variable $u=\log\zeta(s)$, where the measure
+$J(u)\dd u$ has the convergent expansion of
+Lemma~\ref{lem:zeta-coordinate}; expand each $h_j^{\mathcal P}$ about $s=1$ in
+three groups, its value, its derivative and a remainder; and read off the
+first two moments. The value gives the limit, the derivative gives the
+$2^{-k}$ coefficient, and everything else has to be shown to be $o(2^{-k})$.
+
+Write $P_k^{\mathcal P}(s)=\sum n^{-s}$ over the $n$ counted by
 $f_k^{\mathcal P}$. The proof of
 Lemma~\ref{lem:integral-representation} used nothing about the index set beyond
 non-negativity of the summands, so it applies verbatim and gives
@@ -1697,10 +1778,14 @@ Lemma~\ref{lem:zeta-coordinate}, then gives
    =\int_0^\infty\sum_{j=0}^k h_j^{\mathcal P}(s(u))
      \frac{u^{k-j}}{(k-j)!}J(u)\dd u .
 \]
-Split the integral at $u=1$ and write $s_1=s(1)$, so that $s_1>1$. The range
-$u\in(0,1]$ is $s\geq s_1$, where the contribution is
-$\int_{s_1}^\infty P_k^{\mathcal P}(s)\dd s$ and may be bounded without any of
-the above: every $n$ counted by $P_k^{\mathcal P}$ has $n\geq q^k\geq3^k$, so
+Split the integral at $u=1$ and write $s_1=s(1)$, so that $s_1>1$. The point
+of splitting there is that the expansions of
+Lemma~\ref{lem:zeta-coordinate} are only useful for $u$ bounded away from $0$,
+while for small $u$ a crude bound suffices. Indeed the range $u\in(0,1]$ is
+$s\geq s_1$, where the contribution is
+$\int_{s_1}^\infty P_k^{\mathcal P}(s)\dd s$ and may be bounded without any of the
+above, simply because the integers involved are large: every $n$ counted by
+$P_k^{\mathcal P}$ has $n\geq q^k\geq3^k$, so
 $P_k^{\mathcal P}(s)\leq3^{-k(s-s_1)}P_k^{\mathcal P}(s_1)$ for $s\geq s_1$,
 whence
 \[
@@ -1726,7 +1811,7 @@ $\int_0^\infty\frac{u^m}{m!}\e^{-au}\dd u=a^{-(m+1)}$,
 the restriction to $[1,\infty)$ costing at most
 $\int_0^1u^m/m!\dd u\leq1/(m+1)!$ in each, which is smaller than the error
 terms already present and is absorbed into them throughout.
-Write
+Now expand the coefficients. Write
 \[
   h_j^{\mathcal P}(s(u))=h_j^{\mathcal P}(1)
    +\varepsilon(u)\,(h_j^{\mathcal P})'(1)+r_j(u),
@@ -1746,38 +1831,50 @@ since $\Omega$ is non-decreasing and $s(u)-1=\varepsilon(u)$. Moreover
 $\Omega(\delta)\to0$ as $\delta\to0$: by (iii) the function
 $\partial_sH_{\mathcal P}$ is continuous on
 $[1,\infty)\times\{\abs z\leq R\}$, hence uniformly continuous on the compact
-set $[1,2]\times\{\abs z=R\}$, which covers $\delta\leq1$. The three
-groups of terms then contribute as follows. By (ii) with $R>2$, the tails
+set $[1,2]\times\{\abs z=R\}$, which covers $\delta\leq1$. The three groups now contribute as follows. Two sources of error recur in
+each, and both are controlled by the position of $R$: a coefficient tail
+$\sum_{j>k}$, which needs $R>2$, and the $O(3^{-m})$ remainders of
+\eqref{eq:gen-moments}, which need $R<3$.
+
+\emph{First group, the values $h_j^{\mathcal P}(1)$.} By (ii) the tails
 $\sum_{j>k}$ of $\sum_jh_j^{\mathcal P}(1)$ and of
 $2^{-k}\sum_jh_j^{\mathcal P}(1)2^{j}$ are $O(R^{-k})$ and
-$O(2^{-k}(2/R)^{k})$, both $o(2^{-k})$, and the $O(3^{-m})$ terms contribute
-$O\bigl(3^{-k}\sum_{j\leq k}MR^{-j}3^{j}\bigr)=O(R^{-k})=o(2^{-k})$, the
-middle equality using $R<3$, so that the geometric sum is dominated by its last
-term; so the
-first group gives $H_{\mathcal P}(1,1)+\gamma H_{\mathcal P}(1,2)2^{-k}
- +o(2^{-k})$.  The second group is handled the same way, using (iii) in place of
-(ii): its tail $\sum_{j>k}$ of $2^{-k}\sum_j(h_j^{\mathcal P})'(1)2^{j}$ is
-$O(2^{-k}(2/R)^{k})$ and its $O(3^{-m})$ terms are $O(R^{-k})$, so it gives
-$\tfrac12\partial_sH_{\mathcal P}(1,2)2^{-k}+o(2^{-k})$; the series
+$O(2^{-k}(2/R)^{k})$, both $o(2^{-k})$ since $R>2$. The $O(3^{-m})$ terms
+contribute
+$O\bigl(3^{-k}\sum_{j\leq k}MR^{-j}3^{j}\bigr)=O(R^{-k})=o(2^{-k})$, where the
+middle equality is where $R<3$ is used: it makes the geometric sum dominated
+by its last term. So this group gives
+$H_{\mathcal P}(1,1)+\gamma H_{\mathcal P}(1,2)2^{-k}+o(2^{-k})$.
+
+\emph{Second group, the derivatives $(h_j^{\mathcal P})'(1)$.} The same
+argument with (iii) in place of (ii). The tail of
+$2^{-k}\sum_j(h_j^{\mathcal P})'(1)2^{j}$ is $O(2^{-k}(2/R)^{k})$ and the
+$O(3^{-m})$ terms are $O(R^{-k})$, so the group gives
+$\tfrac12\partial_sH_{\mathcal P}(1,2)2^{-k}+o(2^{-k})$. Here
 $\sum_j(h_j^{\mathcal P})'(1)2^{j}$ converges to
-$\partial_sH_{\mathcal P}(1,2)$ because $R>2$. For the third, let
-$\delta>0$ and choose $U$ with $\Omega(\varepsilon(U))<\delta$, which is
-possible since $\varepsilon(U)\to0$. On $[U,\infty)$ the terms are at most
-$\delta R^{-j}$ times the second integral of \eqref{eq:gen-moments}, contributing
-$O(\delta2^{-k})$; on $[1,U]$ the integrand is $O_U(1)$ times
+$\partial_sH_{\mathcal P}(1,2)$, again because $R>2$.
+
+\emph{Third group, the remainders $r_j$.} This is the only place where
+$\Omega$ is needed, and the only $\varepsilon$-argument in the proof. Let
+$\delta>0$ and choose $U$ with $\Omega(\varepsilon(U))<\delta$, possible since
+$\varepsilon(U)\to0$. On $[U,\infty)$ the terms are at most $\delta R^{-j}$
+times the second integral of \eqref{eq:gen-moments}, contributing
+$O(\delta2^{-k})$. On $[1,U]$ the integrand is $O_U(1)$ times
 $u^{k-j}/(k-j)!$, and $\int_1^Uu^m/m!\dd u\leq U^{m+1}/(m+1)!$, so that range
-contributes $O_U\bigl(\sum_{j\leq k}R^{-j}U^{k-j+1}/(k-j+1)!\bigr)
- =O_U(R^{-k})=o(2^{-k})$. As $\delta$ was arbitrary the third group is
-$o(2^{-k})$. Collecting the two surviving coefficients gives
+contributes
+$O_U\bigl(\sum_{j\leq k}R^{-j}U^{k-j+1}/(k-j+1)!\bigr)=O_U(R^{-k})=o(2^{-k})$.
+As $\delta$ was arbitrary, the group is $o(2^{-k})$.
+
+Collecting the two surviving coefficients gives
 $c_{\mathcal P}=\gamma H_{\mathcal P}(1,2)
  +\tfrac12\partial_sH_{\mathcal P}(1,2)$, which is
-\eqref{eq:general-interior}. Finally $H_{\mathcal P}(s,1)=\prod_{p\in\mathcal
-Q}(1-p^{-s})$ by \eqref{eq:HP-def}, since $L_p(s,1)=1$, giving the limit; and
-the stated product for $H_{\mathcal P}(1,2)$ is \eqref{eq:HP-def} at
-$(s,z)=(1,2)$.  Its factors are positive because $p\geq q\geq3$ on $\mathcal P$,
-and the product is non-zero, which positivity of the factors alone would not
-give, by the convergence in (i) at $(s,z)=(1,2)$, legitimate since
-$2<3\leq q$.
+\eqref{eq:general-interior}. For the limit, $L_p(s,1)=1$, so
+$H_{\mathcal P}(s,1)=\prod_{p\in\mathcal Q}(1-p^{-s})$ by \eqref{eq:HP-def}.
+The stated product for $H_{\mathcal P}(1,2)$ is \eqref{eq:HP-def} at
+$(s,z)=(1,2)$; its factors are positive because $p\geq q\geq3$ on
+$\mathcal P$, and it is non-zero by the convergence in (i) at $(s,z)=(1,2)$,
+which is legitimate since $2<3\leq q$. Positivity of the factors alone would
+not give this.
 \end{proof}
 
 By \eqref{eq:general-interior} it is positivity of $c_{\mathcal P}$ that
