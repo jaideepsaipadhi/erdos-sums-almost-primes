@@ -1,5 +1,13 @@
 # The trusted base: what is assumed, and what need not be
 
+> **This note describes the Lean development, which the paper no longer
+> describes and no confirmed build has checked.** Section 8 of the manuscript
+> is now about certification only; see the caveat in `README.md`. The audit
+> below is accurate about what the Lean source assumes, and section and
+> proposition numbers in it refer to earlier drafts of the manuscript rather
+> than to the current 28-page version.
+
+
 `NumericalFacts`, `NumericalFactsFull` and `OddNumericalFacts` are `Prop`
 structures with no instance.  That is deliberate (manuscript section 8): Lean
 proves the reduction, the Arb certificates supply the numbers, and the two meet

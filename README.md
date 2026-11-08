@@ -1,140 +1,88 @@
 # Monotonicity of Erdős sums
 
-A Lean 4 formalization of the analytic reduction in *Monotonicity of Erdős
-sums* (Padhi–Lichtman), together with the certified computations it depends on.
+Certified computations for *Monotonicity of Erdős sums* (Jaideep Sai Padhi),
+together with a Lean 4 formalization of the analytic reduction.
 
-The Banks–Martin conjecture was disproved, and the global minimum located at
-k = 6, in Lichtman's *Almost primes and the Banks–Martin conjecture*
-(arXiv:1909.00804). What is new here is that the increase is strict at every
-step from k = 6 onward -- a minimum at 6 does not imply f_k < f_{k+1} for all
-k >= 6 -- together with the odd companion below.
+Write $f_k=\sum_{\Omega(n)=k}1/(n\log n)$, and let $g_k$ be the same sum over
+odd $n$. The Banks–Martin conjecture was disproved, and the global minimum
+located at $k=6$, in Lichtman's *Almost primes and the Banks–Martin
+conjecture* (arXiv:1909.00804). The paper proves that the increase is strict
+at every step from $k=6$ onward — a minimum at $6$ does not by itself give
+$f_k<f_{k+1}$ for all $k\geq6$ — and that $g_k>g_{k+1}$ for every $k\geq1$,
+which is the case $\mathcal{Q}=\{2\}$ of a general statement proved in the
+paper's Section 7.
 
-## The theorem
+## What in here backs the paper, and what does not
 
-    theorem erdos_sums_increase_from_six (Sstar alph Gam Umax Vmax : R)
-        (hnum : NumericalFacts Sstar alph Gam Umax Vmax) :
-        forall k, 6 <= k -> f k < f (k + 1)
+**This is the distinction to read first.** The paper's certified propositions
+rest on the Arb/FLINT computations in `numerics/` and
+`odd-proof/numerics/` — those, their logs and the certificate are what
+Section 8 of the paper cites.
 
-where f k is the sum of 1/(n log n) over n >= 2 with Omega(n) = k.
+**The Lean development in `Banksmartin/` and `Odd/` is not cited by the
+paper, and no build of it has been confirmed.** Earlier versions of the
+manuscript described it and earlier versions of this file claimed specific
+theorems were machine-checked with a given axiom set. Those claims were never
+verified in any environment available here: both Mathlib cache hosts are
+unreachable, so `lake exe cache get` cannot run, and CI accepts runs and then
+assigns no runner, which is reported identically to a build failure. The
+development is kept because the work is real and may be completed later, but
+until a run comes back having actually executed, nothing here should be read
+as a machine-checked claim. `.github/workflows/lean.yml` documents the
+one-command check that distinguishes a missing runner from a build error.
 
-Zero sorries.  Axioms: propext, Classical.choice, Quot.sound.
+## Reproducing the certified numbers
 
-## Two forms of the theorem
+Needs `python-flint` (`pip install python-flint`, with
+`--break-system-packages` on some images).
 
-    erdos_sums_increase_from_six       (Sstar alph Gam Umax Vmax) (NumericalFacts ...)
-    erdos_sums_increase_from_six'  (beta Sstar alph Gam Umax Vmax M0) (NumericalFactsFull ...)
-
-Same conclusion.  They differ in how much of the analysis is *used*.
-
-The first takes the section 7 source bound as a single assumed field
-(`source_bound`).  Short hypothesis list, but Proposition 2.5, Theorem 4.1 and
-section 3.5 are then proved and unreferenced.
-
-The second replaces that field with the quantities the Arb package actually
-computes -- the beta_i sweep, M_0, the S* and alpha partial-sum bounds, the U/V
-and E_exp sources -- and *derives* the source bound from them via
-`source_bound_full`.  Its dependency chain reaches Proposition 2.5 (the exact
-decomposition), Theorem 4.1 (through `deltaM_abs_le` and `deltaConv_le`) and
-section 3.5 (through `E1k_le_alpha`).
-
-The primed form is the one that demonstrates the formalization is doing work.
-The unprimed form is kept because it is easier to instantiate and states the
-same theorem.
-
-Theorem 6.1 (the refined enclosure) is consumed by `E1k_le_refined`, which
-combines it with `A2m_le` to give |E_1(k)| <= (Bhat/2)(k+1) + Gamma.  That is
-the bound behind K0, which the regenerated constants bring from the
-manuscript's 79 to 78; the coverage of [78,899] itself comes from the
-certified sweep, which no formalization can replace.
-
-## What is proved, and what is assumed
-
-Machine-checked, in Banksmartin/Basic.lean:
-
-  * Section 2, the exact reduction: Lemmas 2.1, 2.2, 2.4, Proposition 2.5, and
-    both coefficient identities (sum c_i = 1/2, sum 2^i c_i = d)
-  * Section 3: Lemma 3.9 (real and complex), Lemma 3.8 at r = 1 and r = 2,
-    section 3.5's mean-value step, manuscript (4) and (10), |E_1(k)| <= a+(k+1)
-  * Section 4: Theorem 4.1, both bounds
-  * Section 6: Theorem 6.1, including the k-independence of Gamma
-  * Section 7: Theorem 7.1, and the four-range assembly
-
-Assumed -- the NumericalFacts structure.  Its fields are the Arb ball
-computations in numerics/: the constant enclosures, the beta_i and gammahat_i
-sweeps, U_max and V_max, phi(2440) > 0 with its monotonicity, and the criterion
-sweeps over [6,199], [78,899] and [900,2439].
-
-NumericalFacts has no Lean instance and cannot have one: sweep_low and its
-siblings quantify over f k, an infinite sum over {n : Omega(n) = k}, which no
-proof assistant evaluates.  The theorem is conditional by construction -- the
-division section 8 of the manuscript draws.  (Older notes in this repository
-cite "Caveat 1.3(b)"; the manuscript has no such caveat -- it declares a
-`remark` environment but never uses it -- and section 8, "Certification and
-formalization", is where the division is actually stated.)
-
-## Constants
-
-The formalization takes these as parameters; the numerics certify them.  All
-four improve on the manuscript, because the sweeps were rerun at documented
-settings that are tighter than the ones originally used:
-
-| | manuscript | this repository |
-|---|---|---|
-| alpha_+ | 15.5716 | 15.4257 |
-| Gamma | 105.4060 | 104.5196 |
-| K0 | 79 | 78 |
-| K1 | 2440 | 2433 |
-
-See numerics/README.md for the settings and how they were recovered.
-
-## Verifying
-
-    lake build
-    #print axioms erdos_sums_increase_from_six
     cd numerics/bm-rebuild-v21 && python3 ../verify.py
 
-verify.py checks the Arb output against theorems proved here: Theorem 4.1's
-delta bound over 2441 entries, A2m_le, the Cauchy tails, Gamma's recomposition,
-and the sweep coverage.  Passing means the two halves describe the same objects.
+`verify.py` **must** be run from that directory; from anywhere else it
+silently skips the criterion sweeps. Run correctly it checks all 17 items:
+the sweep tables, the $\Gamma$ data, the union of the criterion ranges for
+gaps, and the certificate's SHA-256.
 
-## What the formalization found
+Four more guards check the manuscript against the certificates rather than
+against itself, which is the failure mode that produced most of the errors
+this project has found:
 
-Three convergence gaps invisible on paper, each making a downstream statement
-vacuous until closed:
+    python3 numerics/check_proof_spine.py      # every printed numeral vs its log
+    python3 numerics/check_paper_phi.py        # the criterion at the threshold
+    python3 numerics/odd_beta_certified.py     # beta > 0 and the k = 59 base case
+    python3 paper/check_ready.py               # submission blockers
 
-  * cFac's multipliability -- Lemma 2.2's hypotheses
-  * dConst's convergence -- d_enclosure was a claim about a junk value
-  * Sm's integrability -- load-bearing under Am, delta_m and Theorem 4.1
+`numerics/check_lean_constants.py` compares the Lean numerals with the
+certificates. It is retained for the development's own sake; the paper does
+not depend on it.
 
-## The odd companion
+Each script carries its settings of record in its docstring, and the log of
+that run sits beside it.
 
-    theorem fOdd_decreasing (MR : R) (hMR0 : 0 <= MR) (hnum : OddNumericalFacts MR) :
-        forall k, 1 <= k -> fOdd (k + 1) < fOdd k
+## Two traps worth knowing before reading any log
 
-where fOdd k restricts the sum to ODD n >= 3.  Lichtman's conjecture is that
-removing the prime 2 -- which is what drives the increase in the main theorem --
-restores the decrease.  Zero sorries; the same three axioms.  See odd-proof/PROOF.md
-for the argument and odd-proof/numerics/README.md for the certified inputs.
-
-The remainder bound |R_k| <= C (k+3)^3 3^-k holds with C = 4900, giving the
-analytic threshold K0 = 59.  C is derived rather than fitted: it is the sum of
-the Lagrange-remainder term CE*S/18, the two coefficient tails S_0/2 and
-5*590/64, and the near-region contributions CN and NEARU, each a certified
-interval computation.
+- **Arb prints lossily.** `str(arb)` rounds the midpoint and inflates the
+  radius to cover the rounding, so a tight ball can display as though it were
+  wide. Read `.lower()`, `.upper()` and `.rad()`. A monotonicity check in
+  `odd-proof/numerics/fodd75.log` appeared to fail for $k\geq65$ for exactly
+  this reason; the true radii are twenty orders of magnitude smaller than the
+  printed ones.
+- **Check the consuming script before inferring what a number means.** The
+  constant $101.245$ bounds the pole-free part $G_2(1,z)-\rho/(3-z)$, not the
+  regularized product $(1-z/3)G_2(1,z)$, whose supremum on $|z|=4.2$ is about
+  $228.95$. The manuscript named the wrong one of the two for several drafts.
 
 ## Layout
 
-    Banksmartin/Basic.lean       the main development (~13k lines)
-    Banksmartin/EulerGamma.lean  Euler's integral identity, built from scratch
-    Odd/Basic.lean               the odd companion (~8.9k lines)
-    numerics/                    certified computations for the main theorem
-    odd-proof/PROOF.md                 the odd argument, sections 1-8
-    odd-proof/numerics/                certified computations for the odd theorem
-    odd-proof/axcheck.lean             axiom audit: lake env lean odd-proof/axcheck.lean
-    paper/proof.tex              the joint write-up
-    HANDOFF.md                   design decisions and Lean-specific lessons
+    paper/proof.tex              the manuscript (28 pp)
+    paper/check_ready.py         submission gate
+    numerics/                    certified computations, unrestricted case
+    numerics/bm-rebuild-v21/     criterion sweeps and verify.py's working dir
+    odd-proof/PROOF.md           the odd argument
+    odd-proof/numerics/          certified computations, odd case
+    Banksmartin/, Odd/           the Lean development (see the caveat above)
+    TRUSTED-BASE.md              audit of the Lean structures' fields
 
-## Building
+## Acknowledgement
 
-Requires the toolchain in lean-toolchain and the Mathlib revision in
-lake-manifest.json.  Run "lake exe cache get" then "lake build".
+Jared Duker Lichtman provided guidance throughout this work.

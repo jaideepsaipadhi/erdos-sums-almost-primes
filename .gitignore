@@ -31,3 +31,9 @@ paper/*.aux
 paper/*.log
 paper/*.out
 paper/*.toc
+
+# Working notes, kept locally and not published with the repository.
+# The repository is cited by the paper; these are development logs rather
+# than artifacts a reader of the paper needs.
+CLAUDE.md
+HANDOFF.md
