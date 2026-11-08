@@ -1,5 +1,13 @@
 # The trusted base: what is assumed, and what need not be
 
+> **This note describes the Lean development, which the paper no longer
+> describes and no confirmed build has checked.** Section 8 of the manuscript
+> is now about certification only; see the caveat in `README.md`. The audit
+> below is accurate about what the Lean source assumes, and section and
+> proposition numbers in it refer to earlier drafts of the manuscript rather
+> than to the current 28-page version.
+
+
 `NumericalFacts`, `NumericalFactsFull` and `OddNumericalFacts` are `Prop`
 structures with no instance.  That is deliberate (manuscript section 8): Lean
 proves the reduction, the Arb certificates supply the numbers, and the two meet
@@ -160,8 +168,51 @@ content is in the fields that COUPLE those symbols to defined objects:
 estimate, and they are Tier C proper.
 
 Counting those nine as debt overstated the trusted base.  The honest count of
-assumptions about the world is six: `rho_enclosure`, `Sodd_enclosure`,
-`source_bound`, `remainder`, and the four sweeps.
+assumptions about the world, for `NumericalFacts` and `OddNumericalFacts`
+together, is **seven**:
+
+    Sodd_enclosure                                              1
+    source_bound                                                1
+    remainder                                                   1
+    sweeps: NumericalFacts low/mid/high + OddNumericalFacts low  4
+                                                               --
+                                                                7
+
+**This said "six" and listed eight.**  The list was `rho_enclosure`,
+`Sodd_enclosure`, `source_bound`, `remainder` and the four sweeps, which is
+`4 + 4 = 8`, under a stated total of six; and `rho_enclosure` has since been
+proved and removed (`rhoConst_upper_bound`, see the table below), which takes
+the true figure to seven.  Corrected 2026-10-22 after counting the fields
+directly: `NumericalFacts` has 13, `NumericalFactsFull` 21,
+`OddNumericalFacts` 4, `OddCoeffFacts` 8, `OddTailFacts` 5, `OddDomFacts` 5 --
+exactly the figures Section 8 of the manuscript states, so the two agree.
+`NumericalFactsFull` repeats the same three sweep statements as
+`NumericalFacts`, which is why the sweeps count 4 and not 7.
+
+Count these with something that skips `/-- ... -/` blocks.  A naive
+line-by-line match on `^  name :` picks up words inside the field docstrings
+and returns 14 for `NumericalFacts`; that is how this document briefly carried
+a wrong count against a correct one in the manuscript.
+
+That count is for `NumericalFacts` + `OddNumericalFacts`.  The
+`NumericalFactsFull` route carries its own extras, and they are additional
+assumptions about the world, so **always say which structure set you are
+counting**.  Counted directly 2026-10-22, `NumericalFactsFull` has nine fields
+that `NumericalFacts` does not:
+
+    beta_nonneg, M0_nonneg                     free (beta and M0 are structure
+                                               PARAMETERS -- no definition of
+                                               either exists -- so these are
+                                               nonnegativity on abstract
+                                               variables, like the other five)
+    g_deriv, g_deriv_bound, M0_bound,          couple to defined objects: 7
+    alpha_dom, Sstar_dom, UV_bound, Eexp_bound
+
+The table below calls these "eight extras", which matches neither the nine
+fields nor the seven substantive ones; read the breakdown above instead.  Note
+also that `NumericalFactsFull` has no `source_bound` field -- it is discharged
+on that route by `source_bound_full` -- so the two routes are not nested, and
+the counts cannot simply be added.
 
 ## Which fields are load-bearing, by actual use
 
@@ -270,7 +321,16 @@ listed here in error -- see the section on the nine fields above.)
 
 **The Cauchy estimate itself.**  `OddNumericalFacts.remainder` and
 `NumericalFacts.source_bound` / `UV_bound` / `Eexp_bound`.  This is the
-analytic heart, not a number: it is where complex analysis enters.
+analytic heart, not a number: it is where complex analysis enters.  Note the
+asymmetry, which is easy to miss and is set out under "`source_bound` is NOT
+blocked" below: `source_bound` is the analytic heart only on the
+`NumericalFacts` route, because on the `NumericalFactsFull` route it is
+*derived* -- the Cauchy estimate behind it is proved in Lean, and what is
+assumed in its place is the seven coupling fields listed just above.
+`remainder` has no such derivation wired in.  The seven above are also the
+right count for this document: the leancert table further down says "eight
+extras", which agrees with neither the nine fields `NumericalFactsFull` adds
+nor these seven.
 
 **The finite sweeps.**  `sweep_low` (6..199), `sweep_mid` (78..899),
 `sweep_high` (900..2439), and the odd `sweep_low` (1..58).  These are finite --
@@ -631,9 +691,14 @@ way to get there.  The reduction is the missing work:
 
 Neither exists in Mathlib, and `leancert` supplies neither: its machinery is
 Chebyshev/Mertens prime sums and Abel summation, not integration over an
-interval against an arbitrary integrand.  `source_bound` is in the same
-position for the same reason, with the extra difficulty of being infinite in
-`k` as well.
+interval against an arbitrary integrand.
+
+**This said `source_bound` is in the same position, and it is not** (corrected
+2026-10-22; see "`source_bound` is NOT blocked" below).  `source_bound` is
+derived by `source_bound_full` on the `NumericalFactsFull` route, so it needs
+no certified-integration machinery at all -- what it needs is the seven finer
+coupling fields, which are boxed suprema and finite sums.  `remainder` is the
+one in this position, and the two should not be named together.
 
 The practical consequence is that the trust decision below -- what to accept
 in exchange for `native_decide` -- **does not need to be made yet**, because no currently remaining field would be closed by
@@ -683,8 +748,65 @@ What that buys, item by item:
 | `alpha_dom`, `UV_bound`, `M0_bound`, `Eexp_bound`, `g_deriv_bound` | boxed suprema with `exp`/`log` -- the tactic's design target |
 | `Sodd_enclosure` | head is `sum logPrimeUB p depth / ((p-1)(p-2))`; see the tail below |
 | `Sstar_dom` | still blocked: `cCoeff` is `iteratedDeriv`, nothing to evaluate |
-| `source_bound`, `remainder` | still blocked: Cauchy estimates, analysis not computation |
+| `remainder` | still blocked: Cauchy estimate, analysis not computation |
 | the four sweeps | downstream of the above |
+
+### `source_bound` is NOT blocked -- it is already derived
+
+This row used to read "`source_bound`, `remainder` | still blocked: Cauchy
+estimates, analysis not computation", which is wrong for `source_bound` and was
+corrected 2026-10-22.  `source_bound` is an aggregate assumption on the
+`NumericalFacts` route only.  On the `NumericalFactsFull` route it does not
+exist as a field at all (checked: no `source_bound` in that structure's body),
+and `erdos_sums_increase_from_six'` discharges the obligation outright:
+
+    source_bound_full                       (Basic.lean:14093)
+      = source_bound_derived                (Basic.lean:10002)
+        with the E_1 hypothesis supplied by E1k_le_alpha (14052, a proved
+        theorem, not an assumption),
+
+applied at the call site (14326) with every remaining hypothesis taken from
+`NumericalFactsFull` fields -- `beta_nonneg`, `g_deriv`, `g_deriv_bound`,
+`M0_nonneg`, `M0_bound`, `alpha_dom`, `Sstar_dom`, `UV_bound`, `Eexp_bound`.
+
+So the Cauchy estimate behind `source_bound` is *proved in Lean*.  What stands
+in its place is the seven coupling fields above, which are boxed suprema and
+finite sums -- precisely what the first row of this table calls the tactic's
+design target.  The honest statement is that `source_bound` has been **traded
+for finer, more checkable assumptions**, not that it is unreachable; the
+`source_bound_full` docstring says as much ("they are certified numerics, and
+having them at the top is better than hiding them behind an aggregate
+assumption").  `remainder` is genuinely different: see below.
+
+### `remainder` has a derivation already, and it is wired to nothing
+
+Verified 2026-10-22 by `grep fOdd_expansion_final` across all `.lean`:
+`Odd/Basic.lean`'s `fOdd_expansion_final` proves a statement of exactly the
+shape of `OddNumericalFacts.remainder`, but **no term-level application of it
+exists anywhere** -- every other mention is prose, plus one `#print axioms`
+target in `odd-proof/axcheck.lean`.  `fOdd_decreasing` and `fOdd_tendsto_half`
+still take `OddNumericalFacts` and use `hnum.remainder`.  So the row above is
+right that the field is not discharged, but the reason is not that nothing has
+been proved; three distinct things stand in the way, and only the first is
+analysis:
+
+1. five analytic side conditions carried as hypotheses and threaded unproved
+   through the whole file -- `hsum1`, `hsum`, `hmul3`, `hcd1`, `hcd2`
+   (summability of the defining family and of the `zOmegaHom` Dirichlet
+   series, multipliability of the odd Euler product, two `ContDiffAt` facts).
+   Nothing discharges any of them; the file's own note at "The remaining leaves
+   of `fOdd_expansion_final`" says the proofs are the work that remains;
+2. the certified numerics `hCN`, `hNEARU`, `hsplitD`, `hMR`, which are fields
+   of `OddCoeffFacts` / `OddDomFacts` / `OddTailFacts` -- so wiring it in would
+   RELOCATE the trusted base, not shrink it.  That matters for the honest count
+   above: discharging `remainder` this way does not reduce the number of
+   assumptions about the world;
+3. the `hk : 1 <= k` binder, which is wider than the conclusion is true on.
+
+The practical consequence: "derive `remainder` in Lean" is not a single open
+problem but (1) plus a decision about (2), and the gain from (1) alone is
+presentational.  Do not report `remainder` as derived on the strength of
+`fOdd_expansion_final` existing.
 
 The `Sodd` tail is the interesting case, and it is closer than this document
 previously claimed.  LeanCert's `verify_all_theta_*` theorems are all FINITE

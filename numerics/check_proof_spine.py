@@ -1,0 +1,446 @@
+#!/usr/bin/env python3
+"""End-to-end check of the proof's arithmetic spine.
+
+check_paper_phi.py guards the substitutions inside Lemma phi-base, and
+check_lean_constants.py guards agreement between the paper and the Lean
+structures.  Neither checks that the PROOF CLOSES: that the ledger really comes
+in under 4900, that the base case at k = 59 really holds, that the ranges
+really tile without a gap, and that the thresholds each theorem claims really
+follow from the inequalities stated.  Those are the load-bearing arithmetic
+facts a referee would check by hand, and nothing in the repository checked them
+until this script.
+
+Every constant is read out of paper/proof.tex, never hardcoded and never taken
+from the Lean sources -- the Lean numerals are deliberately rounded away from
+the paper's, so checking the paper against them gives wrong answers in both
+directions.  Everything is an interval; `X < c` is tested on X.upper() and
+`X > c` on X.lower(), and str(arb) is never used for a decision.
+
+Exit status is nonzero if any check fails.
+    Usage: python3 numerics/check_proof_spine.py
+"""
+import re
+import sys
+from pathlib import Path
+
+try:
+    from flint import arb, ctx
+except ImportError:
+    sys.exit("needs python-flint: pip install python-flint "
+             "(--break-system-packages on this image)")
+
+ctx.dps = 40
+
+ROOT = Path(__file__).resolve().parent.parent
+TEX = (ROOT / "paper" / "proof.tex").read_text()
+
+fails = []
+
+
+def check(label, ok, detail):
+    print("%-56s %s" % (label, "ok" if ok else "FAIL"))
+    print("    %s" % detail)
+    if not ok:
+        fails.append(label)
+
+
+def grab(pattern, what):
+    m = re.search(pattern, TEX)
+    if not m:
+        sys.exit("could not find %s -- pattern %r.\nIf the manuscript was "
+                 "reworded, update the pattern; do NOT hardcode the value."
+                 % (what, pattern))
+    return arb(m.group(1))
+
+
+NUM = r"([0-9]+(?:\.[0-9]+)?)"
+
+# ---------------------------------------------------------------- inputs
+d = grab(r"d\\geq" + NUM, "d")
+Sstar = grab(r"S\^\*\\leq" + NUM, "S^*")
+S0 = grab(r"\\Sigma_0\\leq" + NUM, "Sigma_0")
+S1 = grab(r"\\Sigma_1\\leq" + NUM, "Sigma_1")
+S2 = grab(r"\\Sigma_2\\leq" + NUM, "Sigma_2")
+CE = grab(r"C_E\\leq" + NUM, "C_E")
+CN = grab(r"C_N&?\\leq" + NUM, "C_N")
+NU = grab(r"N_U&?\\leq" + NUM, "N_U")
+b590 = grab(r"\\Sigma_1\+4\\gamma\\Sigma_0<" + NUM, "the second-tail constant")
+MR = grab(r"\\abs\{R_k\}\\leq" + NUM + r"\(k\+3\)\^3", "the remainder constant")
+
+log2 = arb(2).log()
+gam = arb.const_euler() if hasattr(arb, "const_euler") else arb("0.5772156649015328606")
+
+print("read from paper/proof.tex:")
+for nm, v in (("d >=", d), ("S^* <=", Sstar), ("Sigma_0 <=", S0),
+              ("Sigma_1 <=", S1), ("Sigma_2 <=", S2), ("C_E <=", CE),
+              ("C_N <=", CN), ("N_U <=", NU), ("MR =", MR)):
+    print("  %-12s %s" % (nm, v.str(12, radius=False)))
+print()
+
+# ---------------------------------------------------------------- the ledger
+far = CE * S2 / 18
+rest = S0 / 2 + arb(5) * b590 / 64 + CN + NU
+total = far + rest
+far_claim = grab(r"_\{" + NUM + r"\}\n", "the far-range underbrace value")
+rest_claim = grab(r"\}_\{" + NUM + r"\}\n *\\Bigr\)", "the other underbrace value")
+
+check("far term C_E Sigma_2/18 = %s" % far_claim.str(10, radius=False),
+      float(far.upper()) <= float(far_claim.str(20, radius=False)) * 1.0001,
+      "computed <= %.4f, printed %s" % (float(far.upper()),
+                                        far_claim.str(10, radius=False)))
+check("Sigma_0/2 + 5*590/64 + C_N + N_U = %s" % rest_claim.str(10, radius=False),
+      float(rest.upper()) <= float(rest_claim.str(20, radius=False)) * 1.0001,
+      "computed <= %.4f, printed %s" % (float(rest.upper()),
+                                        rest_claim.str(10, radius=False)))
+check("ledger closes under MR = %s" % MR.str(10, radius=False),
+      float(total.upper()) < float(MR.str(20, radius=False)),
+      "C <= %.4f, margin %.2f (%.2f%%)"
+      % (float(total.upper()), float(MR.str(20)) - float(total.upper()),
+         100 * (1 - float(total.upper()) / float(MR.str(20)))))
+
+# ---------------------------------------------------------------- beta
+# beta = d (gamma + log2 - S) is read from beta.log, NOT from the manuscript.
+# It used to be derived from an upper bound on S parsed out of proof.tex -- a
+# numeral that appeared in exactly one sentence of the formalization section
+# and had no certificate behind it.  So eq:odd-base-59, the tightest
+# inequality in the odd case, was being checked against a number the paper
+# asserted about itself.  When that section came out the numeral went with it
+# and this check failed, which is how the gap was found.
+#
+# An absent or unparseable beta.log is a HARD failure, not a skip: the paper
+# prints eq:odd-base-59 and beta > 0, so leaving them unchecked is exactly the
+# round-down situation the five checks below exist to prevent.  Everything
+# downstream (the k = 58 margin, q(k)) needs beta, so there is nothing to
+# continue with.
+BETALOG = ROOT / "numerics" / "odd_beta.log"
+if not BETALOG.exists():
+    sys.exit("numerics/odd_beta.log is absent, so beta has no certificate and\n"
+             "eq:odd-base-59 cannot be checked.  Run:\n"
+             "    python3 numerics/odd_beta_certified.py > numerics/odd_beta.log")
+_m = re.search(r"beta\s+>=\s*\[([0-9.]+)", BETALOG.read_text())
+if not _m:
+    sys.exit("numerics/odd_beta.log does not carry a parseable lower bound for\n"
+             "beta.  If odd_beta_certified.py was reworded, update this pattern;\n"
+             "do NOT fall back on a numeral from the manuscript.")
+beta_lo = arb(_m.group(1))
+check("beta >= %s, from beta.log and not from the paper"
+      % beta_lo.str(10, radius=False),
+      float(beta_lo.lower()) > 0,
+      "certified from S <= partial sum + integral tail and d >= partial "
+      "product")
+
+a1_lo = d * log2 / 4
+check("a_1 = d log2/4 >= %s, from the paper's certified d"
+      % a1_lo.lower().str(10),
+      float(a1_lo.lower()) > 0.0656,
+      "lem:phi-base consumes a_1(2440^2-2*2440-1) > 390371.6, i.e. "
+      "a_1 > 0.0656")
+
+# ------------------------------------------------- the odd base case, k = 59
+# eq:odd-base-59:  MR (62)^3 3^-59 < (beta/3) 2^-59.  This is what makes
+# K0 = 59, and it is the tightest inequality in the odd case.
+lhs = MR * arb(62) ** 3 * arb(3) ** (-59)
+rhs = beta_lo / 3 * arb(2) ** (-59)
+check("base case at k = 59 (eq:odd-base-59)",
+      float(lhs.upper()) < float(rhs.lower()),
+      "LHS <= %.4e, RHS >= %.4e, margin %.1f%%"
+      % (float(lhs.upper()), float(rhs.lower()),
+         100 * (1 - float(lhs.upper()) / float(rhs.lower()))))
+
+# K0 = 59 must be the FIRST index that works: 58 must fail, or the stated
+# threshold is not tight and the sweep requirement is misstated.
+lhs58 = MR * arb(61) ** 3 * arb(3) ** (-58)
+rhs58 = beta_lo / 3 * arb(2) ** (-58)
+check("k = 58 does NOT satisfy it, so 59 is the first index",
+      float(lhs58.lower()) > float(rhs58.upper()),
+      "LHS >= %.4e vs RHS <= %.4e" % (float(lhs58.lower()), float(rhs58.upper())))
+
+# --------------------------------------------- q(k) < 1 for every k >= 59
+# q(k) = (3 MR / beta)(k+3)^3 (2/3)^k; q(59) < 1 is the base case above, and
+# q(k+1)/q(k) = (2/3)((k+4)/(k+3))^3 < 1 needs k >= 4.
+def q(k):
+    return 3 * MR / beta_lo * arb(k + 3) ** 3 * (arb(2) / 3) ** k
+
+
+check("q(59) < 1", float(q(59).upper()) < 1,
+      "q(59) <= %.6f" % float(q(59).upper()))
+ratio4 = arb(2) / 3 * (arb(8) / 7) ** 3
+ratio3 = arb(2) / 3 * (arb(7) / 6) ** 3
+check("q(k+1)/q(k) < 1 exactly from k >= 4",
+      float(ratio4.upper()) < 1 and float(ratio3.lower()) > 1,
+      "at k=4: %.6f < 1; at k=3: %.6f > 1 (so 4 is the right threshold)"
+      % (float(ratio4.upper()), float(ratio3.lower())))
+worst = max((float(q(k).upper()) for k in range(59, 400)))
+check("q(k) < 1 for every 59 <= k <= 400 (spot check)", worst < 1,
+      "max q = %.6f at the left end" % worst)
+
+# ------------------------------------------------------------ range unions
+def union_covers(ranges, lo, hi):
+    """Do the closed integer ranges cover [lo, hi] with no gap?"""
+    todo = set(range(lo, hi + 1))
+    for a, b in ranges:
+        todo -= set(range(a, b + 1))
+    return todo
+
+
+# The COMPARISON range, not the enclosure range: fodd_combine.py with
+# KMAX = 75 compares pairs (k, k+1) for k = 1..74 only.
+odd_sweep = (1, 74)
+odd_gap = union_covers([odd_sweep, (59, 10000)], 1, 10000)
+check("odd: sweep 1..74 and analytic k>=59 tile all k >= 1",
+      not odd_gap,
+      "uncovered: %s; overlap 59..74 is %d indices"
+      % (sorted(odd_gap)[:5] or "none", 74 - 59 + 1))
+
+full_sweeps = [(6, 199), (78, 899), (900, 2439)]
+full_gap = union_covers(full_sweeps + [(2440, 10000)], 6, 10000)
+check("unrestricted: sweeps + criterion from 2440 tile all k >= 6",
+      not full_gap,
+      "uncovered: %s; sweeps alone cover 6..%d"
+      % (sorted(full_gap)[:5] or "none",
+         max(b for _, b in full_sweeps)))
+check("the criterion starts exactly where the sweeps stop",
+      max(b for _, b in full_sweeps) + 1 == 2440,
+      "sweeps end at %d, criterion begins at 2440"
+      % max(b for _, b in full_sweeps))
+
+# ------------------------------------------------- the stated overlap count
+m = re.search(r"overlap on the ([a-z]+) indices", TEX)
+words = {"fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
+         "nineteen": 19}
+said = words.get(m.group(1)) if m else None
+# The overlap is between the analytic range k >= 59 and the range in which the
+# direct sweep supplies the COMPARISON g_k > g_{k+1}.  With KMAX = 75 the
+# enclosures cover [1,75] but the last comparison available is (74,75), so the
+# comparison range is [1,74] and the overlap is 59..74 -- sixteen indices, not
+# seventeen.  The paper used to say seventeen, from the enclosure range.
+m2 = re.search(r"direct computation gives the comparison for \$1\\leq k\\leq([0-9]+)\$", TEX)
+m3 = re.search(r"overlap on the [a-z]+ indices \$59\\leq k\\leq([0-9]+)\$", TEX)
+hi = int(m2.group(1)) if m2 else None
+check("stated odd overlap count is right",
+      said is not None and hi is not None and m3 is not None
+      and int(m3.group(1)) == hi and said == hi - 59 + 1,
+      "text says %r (= %s) over 59..%s, comparison range ends at %s"
+      % (m.group(1) if m else None, said,
+         m3.group(1) if m3 else None, hi))
+
+# ------------------------------------------- the underbraces round the RIGHT way
+# An underbrace standing for an UPPER bound must round UP, or the display
+# understates the bound it is presenting.  The total has 42 of margin either
+# way, so this is about the displayed numerals being honest, not about the
+# conclusion.
+for label, value, claim in (("far", far, far_claim), ("rest", rest, rest_claim)):
+    c = float(claim.str(20, radius=False))
+    v = float(value.upper())
+    check("%s underbrace %s is rounded up, not down"
+          % (label, claim.str(10, radius=False)),
+          c >= v,
+          "computed <= %.4f, printed %.4f, %s"
+          % (v, c, "ok" if c >= v else "UNDERSTATES by %.4f" % (v - c)))
+
+# ------------------------------------- stated constants must ROUND UP
+# This is the hole that let two false inequalities into print.  Sigma_1 was
+# stated as 486.1945 while s1_cauchy.log certifies 486.19450958...; C_N was
+# stated as 367.8435 while cn.log certifies 367.84350183....  Both were rounded
+# DOWN, so the manuscript asserted bounds its own certificates do not
+# establish, and every other guard passed because they only ever compared the
+# paper against itself.  Compare against the logs instead.
+print()
+LOGS = ROOT / "odd-proof" / "numerics"
+certs = [
+    ("Sigma_0", "s0_cauchy.log", r"S_0 = HEAD \+ TAIL\s*<=\s*\[([0-9.]+)", S0),
+    ("Sigma_1", "s1_cauchy.log", r"S_1 = HEAD \+ TAIL\s*<=\s*\[([0-9.]+)", S1),
+    ("C_N", "cn.log", r"CN <= \[([0-9.]+)", CN),
+    ("C_E", "ce_taylor.log", r"CE <= \[([0-9.]+)", CE),
+    ("N_U", "nearu.log", r"NEARU <= \[([0-9.]+)", NU),
+]
+for name, logname, pat, stated in certs:
+    f = LOGS / logname
+    # An absent or unparseable log must FAIL.  These five branches used to
+    # print "skipped" and continue, so deleting the logs made this script
+    # print its closing banner -- "every stated constant is at or above what
+    # its certificate gives" -- with rc = 0, having checked none of them.
+    # They are exactly the Sigma_1 = 486.1945 / C_N = 367.8435 round-down
+    # errors the script was written to prevent.
+    if not f.exists():
+        check("%s: its certificate %s is present" % (name, logname), False,
+              "absent -- the round-up property is UNCHECKED for this constant")
+        continue
+    m = re.search(pat, f.read_text())
+    if not m:
+        check("%s: %s is parseable" % (name, logname), False,
+              "cannot match %r -- the round-up property is UNCHECKED" % pat)
+        continue
+    true_val = arb(m.group(1))
+    ok = float(stated.str(30, radius=False)) >= float(true_val.upper())
+    check("%s: stated %s >= certified %s"
+          % (name, stated.str(10, radius=False), true_val.str(12, radius=False)),
+          ok,
+          "rounded %s" % ("up, correct" if ok
+                          else "DOWN -- the stated bound is FALSE"))
+
+# Sigma_2 needs its own check: it is not a single logged number but a two-part
+# assembly, and it is the largest constant in the paper (it carries 4395.55 of
+# the 4857.88 ledger, i.e. 90% of it).  Head j <= 16 by interval recursion
+# (hcoeff2.log), tail j > 16 by Cauchy at radius 4.5 on the pole-free part
+# (mr_deriv_sweep.log, G_2), summed as G_2 (3/R)^17/(1-3/R).  Margin is 0.16.
+print()
+h2 = LOGS / "hcoeff2.log"
+md = LOGS / "mr_deriv_sweep.log"
+if h2.exists() and md.exists():
+    mh = re.search(r"S \(head, j <= 16\) = ([0-9.]+)", h2.read_text())
+    mg = re.search(r"G_2 <= ([0-9.]+)", md.read_text())
+    if mh and mg:
+        head = arb(mh.group(1))
+        G2 = arb(mg.group(1))
+        r = arb(3) / arb("4.5")
+        total = head + G2 * r ** 17 / (1 - r)
+        ok = float(S2.str(30, radius=False)) >= float(total.upper())
+        check("Sigma_2: stated %s >= head %s + Cauchy tail"
+              % (S2.str(8, radius=False), head.str(10, radius=False)),
+              ok,
+              "head + tail <= %s, margin %s"
+              % (total.str(12, radius=False),
+                 (S2 - total).str(6, radius=False) if ok else "NEGATIVE -- FALSE"))
+    else:
+        check("Sigma_2: its two logs are parseable", False,
+              "cannot parse 'S (head, j <= 16)' / 'G_2 <=' -- guard would be vacuous")
+else:
+    check("Sigma_2: hcoeff2.log and mr_deriv_sweep.log both present", False,
+          "absent: %s -- guard would be vacuous"
+          % ", ".join(str(x) for x in (h2, md) if not x.exists()))
+
+# The check above recomputes the assembly from the LOGS, so it cannot see an
+# error in the chain the manuscript prints.  It could not, and did not: Section
+# 8 printed sup <= 1.9673e6, from which the tail is 5990.19 and the printed
+# head + tail is 14414.10 -- ABOVE the stated 14414.  Nothing was unsound (the
+# logged sup is 1967216.5, giving 5989.93), but the paper's own displayed
+# arithmetic contradicted its own bound.  So parse Section 8's numerals too and
+# require (a) each to be >= what the certificate gives, and (b) the printed
+# chain itself to close.
+print()
+# Every literal space here is \s+ : the manuscript's prose gets reflowed when
+# it is shortened, and a numeral that moves to the next line must not silently
+# switch this guard off.  That is exactly what happened when Section 8 was
+# tightened -- the tail numeral wrapped and the guard reported itself vacuous,
+# which is the behaviour wanted, but the regexes should not be this brittle.
+m_sup = re.search(r"of\s+the\s+pole-free\s+part\s+at\s+most\s*\$([0-9.]+)"
+                  r"\\cdot10\^\{6\}\$", TEX)
+m_head = re.search(r"in\s+\$s\$,\s+giving\s+\$([0-9.]+)\$", TEX)
+m_tail = re.search(r"\(1-3/4\.5\)\^\{-1\}\$,\s+which\s+is\s*\$([0-9.]+)\$", TEX)
+m_tot = re.search(r"The\s+two\s+sum\s+to\s*\$([0-9.]+)\$", TEX)
+if all((m_sup, m_head, m_tail, m_tot)) and h2.exists() and md.exists():
+    psup = arb(m_sup.group(1)) * arb(10) ** 6
+    phead, ptail, ptot = (arb(m.group(1)) for m in (m_head, m_tail, m_tot))
+    r = arb(3) / arb("4.5")
+    chain = phead + psup * r ** 17 / (1 - r)
+    check("Section 8 Sigma_2 chain: printed sup %s >= certified %s"
+          % (m_sup.group(1) + "e6", mg.group(1)),
+          float(psup.lower()) >= float(arb(mg.group(1)).upper()),
+          "printed sup is below the certificate" if
+          float(psup.lower()) < float(arb(mg.group(1)).upper()) else "ok")
+    check("Section 8 Sigma_2 chain: printed head %s >= certified %s"
+          % (m_head.group(1), mh.group(1)),
+          float(phead.lower()) >= float(arb(mh.group(1)).upper()), "ok")
+    check("Section 8 Sigma_2 chain closes as PRINTED (sup -> tail -> total)",
+          float(ptail.lower()) >= float((psup * r ** 17 / (1 - r)).upper())
+          and float(ptot.lower()) >= float(chain.upper())
+          and float(ptot.upper()) <= float(S2.str(30, radius=False)),
+          "printed tail %s vs %s, printed total %s vs chain %s, stated %s"
+          % (m_tail.group(1), (psup * r ** 17 / (1 - r)).str(10, radius=False),
+             m_tot.group(1), chain.str(10, radius=False),
+             S2.str(8, radius=False)))
+else:
+    check("Section 8 Sigma_2 chain: its four numerals are parseable", False,
+          "cannot locate them in proof.tex -- guard would be vacuous")
+
+# The appendix quotes the certificate's largest radius and k_max.  Both were
+# stale: the committed certificate is the KMAX = 500 run with max radius
+# 4.539e-87, while the appendix described a superseded KMAX = 199 run and
+# quoted 1.1e-87 -- a number no committed artifact contains.
+print()
+_cert = ROOT / "numerics" / "certificate.json"
+if _cert.exists():
+    import json as _json
+    _d = _json.loads(_cert.read_text())
+    _kmax = _d["parameters"]["KMAX"]
+    _rad = max(float(e["radius"]) for e in _d["enclosures"])
+    _mk = re.search(r"with \$k_\{\\max\}=([0-9]+)\$ and so", TEX)
+    _mr = re.search(r"largest radius it\nreports is \$([0-9.]+)\\times10\^\{-87\}\$", TEX)
+    check("appendix k_max %s matches certificate.json KMAX %d"
+          % (_mk.group(1) if _mk else "?", _kmax),
+          bool(_mk) and int(_mk.group(1)) == _kmax,
+          "certificate KMAX = %d" % _kmax)
+    check("appendix radius %s e-87 >= certificate's largest %.4g"
+          % (_mr.group(1) if _mr else "?", _rad),
+          bool(_mr) and float(_mr.group(1)) * 1e-87 >= _rad,
+          "stated %s, certificate %.6g" % (_mr.group(1) if _mr else "UNPARSEABLE", _rad))
+else:
+    check("certificate.json present for the appendix figures", False, "absent")
+
+# The odd sweep's verdict line must match the comparison range the paper
+# claims.  fodd_combine.py used to add tails only from k = 2 and compare only
+# from k = 2, so the log said [2,75] while the paper said 1 <= k <= 75; and the
+# verdict covers pairs, so with KMAX = 75 it reaches k = 74, not 75.
+print()
+_fl = ROOT / "odd-proof" / "numerics" / "fodd75.log"
+_mp = re.search(r"direct interval evaluation .{0,400}?gives \$g_k>g_\{k\+1\}\$ for\s*\$1\\leq k\\leq([0-9]+)\$",
+                TEX, re.S | re.I)
+if _fl.exists() and _mp:
+    _t = _fl.read_text()
+    _mv = re.search(r"strictly decreasing on \[(\d+),(\d+)\]: (\w+)", _t)
+    # Accept either log format: the old `1  [mid +/- rad]` from str(arb), and
+    # the current `1  mid  rad` that prints the TRUE radius from .rad().  The
+    # format changed because str(arb) inflates the radius to cover its own
+    # rounding of the midpoint -- at k = 74 it displayed 8.4e-24 against a
+    # true radius of 6.2e-43 -- which made the enclosures look as though they
+    # overlapped.  This check fired when the format changed, which is correct.
+    _k1 = re.search(r"^\s*1\s+\[?[0-9]", _t, re.M)
+    check("odd sweep log certifies the comparison range the paper claims",
+          bool(_mv) and _mv.group(3) == "True"
+          and int(_mv.group(1)) == 1 and int(_mv.group(2)) == int(_mp.group(1))
+          and bool(_k1),
+          "log says %s, paper claims 1..%s, k=1 row %s"
+          % (_mv.group(0) if _mv else "UNPARSEABLE", _mp.group(1),
+             "present" if _k1 else "ABSENT"))
+else:
+    check("fodd75.log present and the paper's comparison range parseable", False,
+          "log %s, claim %s" % (_fl.exists(), bool(_mp)))
+
+# Section 7's K_m numerals had no artifact until km_check.py.  The boundary
+# half of Section 7 was removed from the manuscript on 2026-11-07 and will be
+# treated separately, so the paper may no longer make this claim.  Guard the
+# claim IF it is made; do not demand that it be made.  (Note the asymmetry
+# with the five round-up checks above: there a missing LOG is a failure,
+# because the paper's numeral is present and unbacked.  Here a missing
+# NUMERAL is simply the paper not claiming it.)
+print()
+_km = ROOT / "numerics" / "km.log"
+_mkm = re.search(r"K_m2\^\{m\}/m=([0-9.,]+)\$ at \$m=([0-9,]+)\$", TEX)
+if _km.exists() and _mkm:
+    # km.log columns: m | K_m | K_m 2^m/m | e^-m/K_m | second-moment ratio
+    rows = dict((int(f[0]), float(f[2])) for f in
+                (ln.split() for ln in _km.read_text().splitlines())
+                if len(f) >= 3 and f[0].isdigit())
+    said = [float(x) for x in _mkm.group(1).split(",")]
+    at = [int(x) for x in _mkm.group(2).split(",")]
+    bad = [(m, v) for m, v in zip(at, said)
+           if m not in rows or abs(rows[m] - v) > 5e-4]
+    check("Section 7's K_m 2^m/m figures match km.log",
+          not bad and len(said) == len(at),
+          "paper %s at m=%s; mismatches: %s"
+          % (said, at, bad or "none"))
+elif _mkm and not _km.exists():
+    check("km.log is present, since the paper quotes K_m", False,
+          "the manuscript states the K_m figures but the log is absent")
+elif _km.exists() and not _mkm:
+    print("%-56s %s" % ("K_m: not claimed in the manuscript", "n/a"))
+else:
+    print("%-56s %s" % ("K_m: not claimed, no log", "n/a"))
+
+print()
+if fails:
+    print("FAILED: %d check(s): %s" % (len(fails), ", ".join(fails)))
+    sys.exit(1)
+print("the arithmetic spine closes: ledger, base case, q(k), both range unions,")
+print("and every stated constant is at or above what its certificate gives")

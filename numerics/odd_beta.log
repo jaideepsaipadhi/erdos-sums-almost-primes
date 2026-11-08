@@ -1,0 +1,20 @@
+# primes 3..100000000, prec = 300 bits
+# 5761454 odd primes
+# d >= [0.378695031839 +/- 9.40e-14]   (partial product, every factor > 1, no tail needed)
+# S  = [0.859392221359 +/- 2.88e-13] + tail <= [0.859392415566 +/- 4.77e-13]   (tail <= [1.942e-7 +/- 6.82e-12])
+
+beta/d = gamma + log2 - S >= [0.410970429896 +/- 4.55e-14]
+beta                      >= [0.155632460034 +/- 2.98e-13]
+
+beta > 0  (Proposition 3.5(iv), first half)          ok
+    beta >= 0.1556324600
+eq:odd-base-59, the k = 59 base case                 ok
+    LHS <= 8.264510e-20, RHS >= 8.999309e-20, margin 8.17%
+d >= 0.378694900 as Proposition 5.8 states           ok
+    certified d >= 0.3786950318, stated 0.378694900
+beta/d = 0.41097000... as Corollary 7.3 prints       ok
+    certified beta/d in [0.4109704299, 0.4109704299]
+
+beta > 0 and the k = 59 base case are certified from S and d, both
+bounded one-sidedly in the safe direction.  check_proof_spine.py reads
+beta from this log, not from the manuscript.

@@ -1,0 +1,9 @@
+alpha_+ envelope of E1b (in-process) = [15.4256608821 +/- 3.11e-11]
+alpha_+ in uv_constants.json         = 15.425661  [consistent]
+k=800: 3779.4
+
+sweep [650,899]: 78 non-positive
+first positive k = 728   positive block contiguous: True
+min over positive block = 27.6508  (at k = 728)
+non-positive k: [650,727]  contiguous: True
+endpoints: crit(650)=-3271.0806, crit(899)=10046.1138

@@ -40,8 +40,10 @@ def fOdd (k : ℕ) : ℝ :=
 
 -- The limit f_k^odd -> 1/2 is derived in odd-proof/PROOF.md section 3 (it is
 -- H(1,1) = 1 - 2^-1, the omitted Euler factor at z = s = 1) and confirmed
--- numerically to k = 20.  It is not formalized here because the decreasing
--- theorem does not use it.
+-- numerically to k = 20.  It IS formalized here, as fOdd_tendsto_half below:
+-- the decreasing theorem does not need it, but it follows from the same
+-- OddNumericalFacts.remainder hypothesis and the manuscript's Table 1 lists it
+-- as proved.  (This comment said the opposite until 2026-10-22.)
 
 /-- F_k(s) := Σ_{Ω(n)=k} n^{-s}, the Dirichlet series restricted to
     k-almost-primes. -/
@@ -157,8 +159,33 @@ structure OddNumericalFacts (MR : ℝ) : Prop where
   Sodd_enclosure : |Sodd - 0.8593953| ≤ 3.3e-6
   /-- Cauchy bound: the sup of |Htilde| on |z| = 4.5, s in [1,2]. -/
   MR_bound       : MR ≤ 4900
-  /-- The remainder bound that Cauchy's estimate yields. -/
-  remainder      : ∀ k : ℕ, |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
+  /-- The remainder bound that Cauchy's estimate yields, on `59 <= k`.
+
+  The range restriction is not cosmetic and must not be dropped.  The
+  manuscript's near-range step bounds a sum of ABSOLUTE values
+  `sum_j u^{k-j}/(k-j)! |h_j(s(u))|`, and the coefficients `h_j` alternate in
+  sign -- `h_1(s) = Pi(s) - log zeta(s) < 0` for every `s` -- so that sum has
+  to be majorized rather than evaluated by the coefficient identity for
+  `P_k^odd`.  The resulting bound exceeds `CN 3^-k` for small `k`: run with
+  `K0 = 1` the certified integral bound peaks at `699.87` at `k = 14` and
+  exceeds `CN = 367.8436` for exactly `9 <= k <= 25`, so `k >= 26` would in
+  fact serve and 59 is stated because it is the only range in which the bound
+  is ever applied.  On `59 <= k` the certified value is `34.14`, so `CN` and
+  `MR <= 4900` both stand.
+
+  Do NOT quote `15329` or `19819` here, as an earlier version of this docstring
+  did.  `15329` is `absratio.py`'s POINTWISE sum `3^k A_k(s(3))` at `k = 12`, a
+  different quantity from the integral this field's bound concerns, and `19819`
+  has no artifact anywhere.  The consequence drawn from them was also wrong:
+  with an all-`k` constant near `700` the ledger is about `5190` and
+  `q(59) = 0.973 < 1`, so the threshold would stay at 59 rather than moving to
+  63.  See `odd-proof/numerics/nearabs_certified.py` and
+  Proposition 3.5 of the manuscript, which is stated on the same range.
+
+  Stating this for all `k` would assume more than the paper proves, and since
+  no instance of this structure is ever constructed, nothing would detect it. -/
+  remainder      : ∀ k : ℕ, 59 ≤ k →
+                     |fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k|
                      ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
   /-- Certified sweep below the analytic threshold. -/
   sweep_low      : ∀ k : ℕ, 1 ≤ k → k ≤ 58 → fOdd (k + 1) < fOdd k
@@ -266,12 +293,12 @@ theorem fOdd_decreasing_of_facts (MR : ℝ) (hMR0 : 0 ≤ MR)
             mul_le_mul hd hfac (by norm_num) hd0
     have hA : |(fOdd k - 1/2) - betaOdd * P| ≤ T := by
       rw [hPdef, hTdef]
-      have := hnum.remainder k
+      have := hnum.remainder k hk57
       calc |(fOdd k - 1/2) - betaOdd * ((1:ℝ)/2) ^ k|
           = |fOdd k - 1/2 - betaOdd * ((1:ℝ)/2) ^ k| := by ring_nf
         _ ≤ MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := this
     have hB : |(fOdd (k+1) - 1/2) - betaOdd * P / 2| ≤ T * (3503/10000) := by
-      have h := hnum.remainder (k+1)
+      have h := hnum.remainder (k+1) (by omega)
       have e1 : ((1:ℝ)/2) ^ (k+1) = ((1:ℝ)/2) ^ k / 2 := by
         rw [pow_succ]; ring
       have e3 : ((1:ℝ)/3) ^ (k+1) = ((1:ℝ)/3) ^ k * (1/3) := pow_succ _ _
@@ -342,10 +369,11 @@ the search those tactics were doing. -/
 theorem fOdd_tendsto_half (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts MR) :
     Filter.Tendsto fOdd Filter.atTop (nhds (1 / 2)) := by
   -- the triangle-inequality bound, by hand
-  have hbound : ∀ k : ℕ, |fOdd k - 1 / 2|
+  -- only for 59 <= k, which is all a limit needs; see OddNumericalFacts.remainder
+  have hbound : ∀ k : ℕ, 59 ≤ k → |fOdd k - 1 / 2|
       ≤ |betaOdd| * ((1:ℝ)/2) ^ k + MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k := by
-    intro k
-    have h := hnum.remainder k
+    intro k hk59
+    have h := hnum.remainder k hk59
     have hsplit : fOdd k - 1 / 2
         = (fOdd k - 1 / 2 - betaOdd * ((1:ℝ)/2) ^ k) + betaOdd * ((1:ℝ)/2) ^ k := by
       ring
@@ -387,8 +415,8 @@ theorem fOdd_tendsto_half (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts
   -- squeeze
   have habs : Filter.Tendsto (fun k : ℕ => |fOdd k - 1 / 2|) Filter.atTop (nhds 0) := by
     refine squeeze_zero' (Filter.Eventually.of_forall fun k => abs_nonneg _) ?_ hmaj
-    filter_upwards [Filter.eventually_ge_atTop 1] with k hk
-    have hcu := hcube k hk
+    filter_upwards [Filter.eventually_ge_atTop 59] with k hk
+    have hcu := hcube k (by omega)
     have hpos : (0:ℝ) ≤ ((1:ℝ)/3) ^ k := by positivity
     have hstep : MR * (((k:ℝ) + 3) ^ 3) * ((1:ℝ)/3) ^ k
         ≤ 64 * MR * ((k:ℝ) ^ 3 * ((1:ℝ)/3) ^ k) := by
@@ -396,7 +424,7 @@ theorem fOdd_tendsto_half (MR : ℝ) (hMR0 : 0 ≤ MR) (hnum : OddNumericalFacts
         mul_le_mul_of_nonneg_left hcu hMR0
       have := mul_le_mul_of_nonneg_right hinner hpos
       nlinarith [this]
-    linarith [hbound k, hstep]
+    linarith [hbound k hk, hstep]
   rw [tendsto_iff_norm_sub_tendsto_zero]
   simp only [Real.norm_eq_abs]
   exact habs
@@ -6769,7 +6797,7 @@ theorem betaFam_sum_bound (betaFam : ℕ → ℝ) (S : ℝ)
 
 /-- The two tail sums of PROOF.md 5.1's unquantified "(lower order)", now
 certified: S0 <= 44.5987 (odd-proof/numerics/s0_recursion.py head +
-s0_cauchy.py tail, first-order pole) and S1 <= 486.1945 (s1_recursion.py head
+s0_cauchy.py tail, first-order pole) and S1 <= 486.1946 (s1_recursion.py head
 453.0838 + s1_cauchy.py tail 33.1107, second-order pole).  An earlier note here
 gave S1 <= 453.1, which was the head alone. -/
 structure OddTailFacts (bHatOdd : ℕ → ℂ) (S0 S1 : ℝ) : Prop where
@@ -8671,9 +8699,42 @@ theorem fOdd_expansion_hsplitD_exists (dom betaFam : ℕ → ℝ) (bHatOdd : ℕ
   oddIntegrand_split dom betaFam bHatOdd S hf hd k
 
 set_option maxHeartbeats 4000000 in
-/-- STEP 5, the target: this is exactly OddNumericalFacts.remainder.
+/-- STEP 5, the target: the conclusion below has the shape of
+OddNumericalFacts.remainder.
 
     fOdd k = 1/2 + beta 2^-k + R_k,   |R_k| <= MR (2/9)^k
+
+IT IS NOT WIRED IN, and the gap is larger than the matching shape suggests.
+Nothing in the development consumes this theorem -- `grep fOdd_expansion_final`
+finds only docstrings -- and `fOdd_decreasing` / `fOdd_tendsto_half` still take
+`OddNumericalFacts` as a hypothesis and use `hnum.remainder`.  So this is a
+derivation of the right statement standing beside the assumed field, not a
+discharge of it.  Three things separate the two:
+
+  * five analytic side conditions carried as hypotheses here and threaded
+    unproved through the whole file -- `hsum1`, `hsum`, `hmul3`, `hcd1`,
+    `hcd2`: summability of the defining family, summability of the zOmegaHom
+    Dirichlet series, multipliability of the odd Euler product, and the two
+    ContDiffAt facts.  No lemma anywhere discharges any of them; cf. the note
+    at "The remaining leaves of fOdd_expansion_final";
+  * the certified numerics `hCN`, `hNEARU`, `hsplitD`, `hMR`, which live in
+    OddCoeffFacts / OddDomFacts / OddTailFacts -- so even wired in, this
+    relocates the trust rather than removing it;
+  * the range, below.
+
+Do not describe `remainder` as derived on the strength of this theorem.  Table 1
+of the manuscript lists prop:odd-remainder as assumed, which is correct.
+
+RANGE.  `hk : 1 <= k` below is wider than the conclusion is actually true on
+with `MR <= 4900`, and should tighten to `59 <= k` to match the field it
+targets.  The near range of the manuscript's proof bounds a sum of ABSOLUTE
+values and the `h_j` alternate in sign, so it goes through a majorant whose
+bound exceeds `MR (k+3)^3 3^-k` for `k <= 23`; see the docstring of
+`OddNumericalFacts.remainder` and `odd-proof/numerics/nearabs_certified.py`.
+The binder is left as it stands only because this file is not currently built
+here and silently changing a binder that the body may pass along would
+introduce an error nothing in this container can detect.  Tighten it, and add
+`have hk1 : 1 <= k := by omega` for the body, at the next build.
 
 Route: fOdd_u_form, then the integrand splits as
 oddSplitMain1 + oddSplitMain2 + rest, with the two main integrals above and
@@ -8702,9 +8763,11 @@ theorem fOdd_expansion_final (MR CE U : ℝ) (k : ℕ) (hk : 1 ≤ k)
     -- The near-piece constant.  FkOdd k s <= CN 3^-k holds for each fixed
     -- s > 1 (the index set has every n >= 3^k), with CN depending on s = sOf U;
     -- it blows up only as s -> 1, i.e. as U -> infinity.  CN, NEARU and
-    -- hsplitD must all be instantiated at the SAME U; the certified values
-    -- CN <= 364 and NEARU <= 24.68 are at U = 3 (cn_recursion.py,
-    -- nearu_bound.py), which is also where CE <= 5.48910 is certified.
+    -- hsplitD must all be instantiated at the SAME U.  The certified values at
+    -- U = 3 are CN <= 367.8436 (cn_certified.py) and NEARU <= 26.0962
+    -- (nearu_certified.py), which is also where CE <= 5.48910 is certified.
+    -- The 364 and 24.68 quoted here before 2026-10-22 came from the
+    -- superseded cn_recursion.py / nearu_bound.py and were both too small.
     (CN : ℝ) (hCNnn : 0 ≤ CN)
     (hCN : FkOdd k (sOf U) ≤ CN * ((1:ℝ)/3) ^ k)
     -- the far-piece bound of LEAF 1, with its constant named.  This is

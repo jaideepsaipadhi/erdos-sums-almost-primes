@@ -30,9 +30,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-LOG2_LO = F(6931471803, 10 ** 10)        # Real.log_two_gt_d9
-SODD_HI = F(8593953, 10 ** 7) + F(33, 10 ** 7)   # Sodd_enclosure, worst end
-GAMMA_LO = F(57715, 10 ** 5)             # Odd.gamma_lower_bound
+LOG2_LO = F(6931471803, 10 ** 10)        # Real.log_two_gt_d9 (Mathlib)
+# SODD_HI and GAMMA_LO used to be hardcoded here, so this script printed its
+# "against the bounds the LEAN PROOFS have" budget, and passed, with
+# Odd/Basic.lean DELETED.  They are now parsed out of the source, and a parse
+# failure is a failed check rather than a silent fallback.
+_ODD = (ROOT / "Odd" / "Basic.lean")
+_odd_src = _ODD.read_text() if _ODD.exists() else ""
+_ms = re.search(r"Sodd_enclosure\s*:\s*\|Sodd - ([0-9.]+)\|\s*(?:\u2264|<=)\s*([0-9.e-]+)",
+                _odd_src)
+_mg = re.search(r"theorem gamma_lower_bound\s*:\s*\(([0-9.]+)\s*:", _odd_src)
+SODD_HI = (F(_ms.group(1)) + F(_ms.group(2))) if _ms else None
+GAMMA_LO = F(_mg.group(1)) if _mg else None
 A_ONE_TARGET = F(656, 10000)             # aOneConst_ge
 BETA_TARGET = F(1556, 10000)             # betaOdd >= 0.1556
 PAPER_D_LO = F(3786949, 10 ** 7)         # paper/proof.tex, prop:full-certified
@@ -78,12 +87,35 @@ odd = read_lean("Odd/Basic.lean")
 fails = []
 
 
+
 def check(label, ok, detail):
     print("%-58s %s" % (label, "ok" if ok else "FAIL"))
     print("    %s" % detail)
     if not ok:
         fails.append(label)
 
+
+
+check("Odd/Basic.lean is present and its two scalar bounds parse",
+      SODD_HI is not None and GAMMA_LO is not None,
+      "Sodd_enclosure %s, gamma_lower_bound %s"
+      % ("ok" if SODD_HI is not None else "UNPARSEABLE",
+         "ok" if GAMMA_LO is not None else "UNPARSEABLE"))
+if SODD_HI is None or GAMMA_LO is None:
+    print("\nFAILED: cannot read the Lean bounds this script claims to use")
+    sys.exit(1)
+
+# NumericalFactsFull.Eexp_bound once quantified over the coefficient index with
+# the bound depending on a different variable, which made it unsatisfiable and
+# erdos_sums_increase_from_six' vacuous.  Require the inner quantifier to be
+# bounded against the outer one.
+_me = re.search(r"Eexp_bound\s*:\s*\u2200 k[^\n]*\n?[^\n]*", bm)
+check("NumericalFactsFull.Eexp_bound's inner quantifier is bounded",
+      bool(_me) and ("k \u2264 m" in _me.group(0) and "m \u2264 k + 1" in _me.group(0)),
+      ("bounded to k <= m <= k+1" if (_me and "k \u2264 m" in _me.group(0))
+       else "UNBOUNDED: the field would assert the bound at every m at once, "
+            "which is false at m = 1 and makes the structure unsatisfiable")
+      if _me else "field not found")
 
 # --- the factor identity the whole approach rests on, verified numerically
 bad = [p for p in primes_upto(2000) if p >= 3
@@ -170,6 +202,34 @@ if rnum is not None and rps is not None:
           rnum >= F(-1749323, 10 ** 7),
           "Lean proves rhoConst <= %.10f, weaker than the certified "
           "-0.1749323 -- no conflict" % float(rnum))
+
+# --- the LOOSER Lean numerals: direction, and that they still suffice.
+# alpha_bound and V_bound carry short-decimal rationals a hair above the
+# certified values.  Looser is safe, TIGHTER would be a false hypothesis that
+# no instance could satisfy -- and since no instance of the structure is ever
+# constructed, a too-tight field would make the theorems vacuous rather than
+# refutable.  So the direction is the thing to check.
+print()
+LEAN_SRC = (ROOT / "Banksmartin" / "Basic.lean").read_text()
+TEX_SRC = (ROOT / "paper" / "proof.tex").read_text()
+for name, pat_lean, pat_tex, label in (
+        ("alpha_bound", r"\(hal *: *alph *(?:\u2264|<=) *([0-9.]+)\)",
+         r"\\alpha_\+\\leq([0-9]+\.[0-9]+)", "alpha_+"),
+        ("V_bound", r"\(hV *: *Vmax *(?:\u2264|<=) *([0-9.]+)\)",
+         r"V_\{\\max\}=([0-9]+\.[0-9]+)", "V_max")):
+    ml = re.search(pat_lean, LEAN_SRC)
+    mt = re.search(pat_tex, TEX_SRC)
+    if ml and mt:
+        lv, tv = F(ml.group(1)), F(mt.group(1))
+        check("%s: Lean numeral %s is >= the certified %s (looser, safe)"
+              % (name, ml.group(1), mt.group(1)),
+              lv >= tv,
+              "Lean %.8f vs paper %.8f, slack %.2e"
+              % (float(lv), float(tv), float(lv - tv)))
+    else:
+        check("%s: both numerals are parseable" % name, False,
+              "Lean %s / paper %s -- guard would be vacuous"
+              % (bool(ml), bool(mt)))
 
 # --- what the consumers need, restated so a reader can see the budget
 print()

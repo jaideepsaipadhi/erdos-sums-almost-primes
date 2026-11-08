@@ -45,12 +45,168 @@ where it is applied.
 | `source_bound`  | `m1_constant.json`, `tail_constants.json` | `crit_refined.py` |
 | `phi_at_k1`, `phi_mono` | `k1_far_range.log` | `k1_far_range.py` |
 | `sweep_low`  [6,199]    | `certificate*.json`  | `certificate.py`, `lowk_verify.py` |
-| `sweep_mid`  [78,899]   | `crit_78_734.json` (78-734, refined) + `crit_certified.json` (735-899, unrefined) | `crit_refined.py` |
+| `sweep_mid`  [78,899]   | `crit_78_734.json` (78-734, refined) + `crit_650_899.json` (728-899, fallback) | `crit_refined.py`, `crit_fallback.py` |
 | `sweep_high` [900,2439] | `crit_900_2439.json` | `sweep_900_2439.py` |
+
+### The 735-899 slice: what used to back it, and what does now
+
+This table used to credit `crit_refined.py` for `crit_certified.json` as well.
+That was wrong, and the error mattered because `crit_certified.json` was the
+only artifact covering 735-899 -- the slice between the refined run and
+`[900,2439]`.  Solving for the inputs that reproduce it (exactly, at k = 650,
+735 and 899) gives
+
+    |E1(k)| <= alpha*k + beta,   alpha = 15.5716454,  beta = -39.60918
+
+-- i.e. `crit_assembly.py`'s linear bound, whose `crit_sweep(650, 899)` is
+hardcoded in its `__main__`, run with the manuscript's **superseded** `alpha_+`
+(the paper now states `alpha_+ <= 15.425661`) plus a **negative intercept the
+manuscript does not state at all**.  `crit_900_2439.json` fits the same pair,
+exactly, at k = 900, 1500 and 2439.  So neither fallback certificate came from
+the script credited here, and `sweep_900_2439.py` does not reproduce its own
+committed output: rerun, it gives min 10115.96 where the committed file had
+9724.11.
+
+Nothing was false -- the larger `alpha` outweighs the negative `beta`, so both
+committed files were *more* conservative than the certified inputs require, and
+every positivity claim held a fortiori.  The defect was provenance and
+declaration: a referee following this repo could not regenerate either file,
+and `crit_assembly.py` run as committed produces `crit_sweep.json`, whose
+`ALPHA, BETA = "15.374", "-37.226"` its own docstring calls "clearly
+uncertified" and which crosses zero at 726 rather than 735.
+
+Both are now regenerated from committed scripts and declared inputs only:
+
+| file | script | result |
+|---|---|---|
+| `crit_650_899.json` | `crit_fallback.py 650 899 crit_650_899.json` | positive on **[728,899]**, min 27.65 at 728; at k=735 it is 362.62 against the old file's 43.04 |
+| `crit_900_2439.json` | `python3 sweep_900_2439.py` | positive on [900,2439], min 10115.96 (was 9724.11) |
+
+The refined certificate, by contrast, was never affected and reproduces
+exactly: `python3 crit_refined.py 78 734 out.json` (about 6 minutes) gives
+`crit_78_734.json` **byte-identical**, 657 of 657 values, and reprints
+`sweep_78_734.log`'s verdict (`0 non-positive`, `k=78: 0.91`,
+`k=734: 33754.05`).  Re-run that one before trusting any change to the
+coefficient inputs: it carries a margin of `0.91` against values reaching
+`33754`, and it is the only sweep where a drift could move `K0` off 78.
+
+`crit_fallback.py` is `sweep_900_2439.py` generalized to an arbitrary range,
+and it reproduces that script's committed-script output on [900,2439] **bit for
+bit** -- that is its regression test, and the reason to trust it on [650,899].
+It uses the per-`i` fallback `E1b` built from `beta_certified.json` plus the
+`M1` tail, needs no `beta` at all, and reports its own `alpha_+` envelope
+(`15.4256608821`) against `uv_constants.json` as a cross-check.
+
+Two consequences worth keeping:
+
+  * **the union now overlaps instead of abutting.**  It used to work only
+    because `crit_certified.json` covered exactly 735-899, with no slack on
+    either side; `verify.py` checked that file's zero crossing and not its
+    load-bearing role, so a one-off change would have opened a silent gap.  The
+    blocks are now `[78,734] [728,899] [900,2439]`, and `verify.py` checks the
+    union for gaps directly.
+  * `crit_certified.json` is kept, superseded, as the baseline the newer runs
+    improve on. `verify.py` checks that `crit_650_899.json` is nowhere weaker
+    than it (250 shared k, none weaker).
 
 Supporting: `bhat_signed_N60.json` (b-hat_i), `gamma2_certified.json`
 (gammahat_i), `delta_table.jsonl` (delta_m), `shards/` (256 shards;
 `merge_verify.py` reassembles).
+
+## Section 7, the general principle: `genP_check.py` and `boundary_check.py`
+
+These two back the general-`P` material in section 7 of the manuscript and
+nothing else.  **They are mpmath, not Arb** -- no ball arithmetic, no
+certification -- so they are verification of formulas, not certified inputs,
+and no `NumericalFacts` field depends on them.  Read them that way.
+
+| script | what it checks | log |
+|---|---|---|
+| `genP_check.py` | the interior case `q >= 3`: the constants `c_0` and `c_2` of Proposition 7.2(iv), against `f_k^P` computed independently | `genP.log` |
+| `boundary_check.py` | the boundary case `q = 2`: that the ratio to the all-primes case tends to `prod_{p in Q}(1-2/p)`, which is what the reduction in section 7 needs | `boundary.log` |
+| `Im_check.py` | the exact identity behind the boundary reduction, and the single primes-free asymptotic the boundary case now rests on | `Im.log` |
+| `km_check.py` | the first moment `K_m` behind `eq:freeze-error` -- `K_m 2^m/m` = 0.381/0.397/0.411/0.416 at m=16/24/32/36, against `e^-m/K_m = 1.1e-6` at m=36; its four numerals lived only in docstrings until Nov 2026 | `km.log` |
+| `boundary_freeze_check.py` | the size of the freezing error, against an independent computation of `f_k^P`: `residual/2^-k` stays near `1.1`, so it is NOT `o(2^-k)` | `freeze.log` |
+
+`Im_check.py` does two separate things, and the first is a hard check rather
+than evidence.  `--identity` verifies
+
+    P_k^P(s) = sum_i phi_i(s) 2^{-(k-i)s} sum_{j<=k-i} (2^s log zeta(s))^j/j!
+
+against direct Dirichlet sums over `n <= 3e6` at `s = 4`, `k <= 3`, to
+`1e-17`, for `P` = all primes, minus `{3}` and minus `{3,5}`.  That identity
+is what removes the `s`-derivatives from the `k^2` coefficient of the boundary
+case: integrating it and freezing `phi_i` at `s = 1` leaves `I_m`, which
+contains no primes, so the limit and the `k^2` coefficient of `f_k^P` depend
+on the numerator only through its VALUE at `(1,1)` and `(1,2)`.
+
+Two caveats, both corrected after the first write-up stated them wrongly:
+`I_0` DIVERGES, so the `m = 0` term stays unfrozen; and the freezing costs
+`Theta(k 2^-k)`, **not** `O(e^-k)` — the Jensen error is governed by the first
+moment `K_m = Theta(m 2^-m)`, so the reduction is accurate to `o(k^2 2^-k)`
+only, and an `s`-derivative of `Phi_P` does enter at order `k 2^-k`.
+
+Without `--identity` it computes `I_m` and extrapolates.  Read the stability
+table, not any single fit — three parameters through three points has zero
+residual.  The `A + b log m/m + c/m` basis is stable (`-0.17379`, `-0.17301`,
+`-0.17277` across windows, within `0.3%` of `-log2/4`); the one tabulated
+basis omitting `log m/m` is `8.0%` off and the two-parameter `log m/m` fit
+`8.6%`.  That is evidence the correction is real, but not independent
+corroboration of GLW's `O(k log(k+1))`: the basis was chosen with that
+remainder in mind.
+
+`genP_check.py` with `Q = {2}` is the calibration that makes the rest
+meaningful: `P = {p >= 3}` is the case the paper proves, so `c_2` there must
+reproduce the certified `beta` and `H_P(1,2)` the certified `d`.  It gives
+`0.155632714` against `beta = 0.15563259` and `0.378695020` against
+`d = 0.3786950315`, both inside the `~1e-7` error bar the p-sums carry (run to
+`X = 2e6` with the PNT tail `1/X`; the product tail
+`prod_{p>X}(1-1/p)^2/(1-2/p) = 1 - O(1/(X log X))` is deliberately NOT added,
+and is what the last digits of `H_P(1,2)` against `d` reflect).
+
+Read the right column.  In `genP.log` the final `/c_2` ratio is `1.13` at
+`k = 14` for `Q = {2}` but `1.003` for `Q = {2,3}`, and the first is not a
+failure: at `q = 3` the subleading term is the `O(k^3 3^-k)` one whose constant
+the paper bounds by `4900`, so `f_k` is nowhere near its asymptotic at `k = 14`
+and the integral is too expensive to push far enough.  For `q = 3` the
+meaningful check is the constants themselves against the certified `d` and
+`beta`, not the `f_k` column; for `q >= 5` the `f_k` column converges quickly
+(relative deviation `~0.9*(2/3)^k`) and is the end-to-end test.
+
+The all-primes side of `boundary_check.py` has its own check, independent of
+anything in section 7: fitting `f_k - 1 ~ -C k^a 2^-k` to the committed
+`boundary.log` values gives `a = 2.298, 2.279, 2.261, 2.247, 2.234` across
+consecutive pairs from `k = 24` to `44`, decreasing monotonically toward `2`.
+That is the factor `k^2` of Gorodetsky--Lichtman--Wong, reproduced here from
+scratch, and it is the reason to believe the `f_k^all` column at all.
+
+Two traps, both of which cost time here:
+
+  * **the convergence is slow and one-sided, and the printed `3.2e-4` is NOT an
+    error bar.**  The ratio approaches its limit from below with an `O(1/k)`
+    correction, so the raw value is useless as a check -- at `k = 44` it is
+    `0.31209` against a predicted `1/3`, and for `Q = {5}` it is `0.572066`
+    against `0.6`.  Read the two-term `1/k` extrapolation.  But that is a
+    three-parameter fit through three points, so it has zero residual and its
+    closeness to the prediction is a property of the basis, not a measured
+    error.  Judge it by stability instead:
+
+    | Q | two-term, three windows | one-term | `log k/k` basis | spread |
+    |---|---|---|---|---|
+    | `{3}` | `0.333227`, `0.333171`, `0.333447` | `0.336577` | `0.329517` | ~1% |
+    | `{5}` | `0.600056`, `0.600424`, `0.600537` | `0.603172` | `0.596605` | ~0.6% |
+
+    The `1/k` fits are stable under changing the window and the alternatives
+    are not, which is the argument for that basis -- but the choice is not
+    independent of the conclusion, since `eq:GLW-asymptotic`'s `O(k log k)`
+    cancels in the ratio only under a stronger form of the hypothesis being
+    tested.  The script's own `k*(E_Q - ratio)` column drifts monotonically
+    (`1.043 -> 0.935` for `Q={3}`) with no flattening; do not read it as
+    converged.  Below about `k = 20` nothing is readable at all.
+  * **`maxdegree` is quadrature depth, not digits**, and the working precision
+    has to grow with `k`: the substitution forms `1 + e^-t`, which rounds to
+    exactly `1` at the top of the `t`-range unless `dps > ~0.45*t`, and then
+    `zeta` is evaluated at its pole.  `dps_for` handles this; do not lower it.
 
 ## Checks against the formalization
 
@@ -67,6 +223,45 @@ consistent with proved mathematics.
 The tail estimates use analyticity of G2 in |z| <= 2.9 (`M1_R2.9`,
 `M2sup_R2.9`).  The Lean wide-radius chain runs at |z| <= 29/10, so this is
 formally proved, not only argued in the manuscript.
+
+## The boundary scripts are no longer cited by the paper
+
+As of 2026-11-07 the manuscript carries only the interior case of Section 7,
+so `Im_check.py`, `km_check.py`, `boundary_freeze_check.py` and
+`boundary_check.py` -- with `Im.log`, `km.log`, `freeze.log` and
+`boundary.log` -- back no claim in `paper/proof.tex`. They are kept for the
+separate note on the boundary case `q = 2`; see CLAUDE.md for what each one
+established and for the two corrections that came out of them. `genP_check.py`
+is still cited, as the calibration of Proposition 7.2(iv)'s constants.
+
+## The two constants that had no artifact at all: `101.245` and `1.45`
+
+Added 2026-11-05.  Both appeared only as hardcoded literals, annotated
+"certified separately", with `check_paper_phi.py` reading them back out of the
+manuscript.  Writing the artifacts found that one of them was attached to the
+wrong function.
+
+| script | what it certifies | log |
+|---|---|---|
+| `contour_certified.py` | `sup_{|z|=4.2}` of BOTH `G_2(1,z) - rho/(3-z)` (`95.49`) and `(1-z/3)G_2(1,z)` (`228.94`), plus `rho` from the same series | `contour.log` |
+| `tk_certified.py` | `M(3) = prod_p (1-3p^-2)^-1 <= 7.96896`, whence `2^k|T_k| <= M(3)(2/3)^k/(k log 2)` | `tk.log` |
+
+`101.245` bounds the **pole-free part**, which is what the tail envelope
+`T(i) = rho/3^(i+1) + supH/4.2^i` in `k0_end_to_end.py` and
+`measure_impact.py` has always used, with 5.7% to spare.  The manuscript named
+the regularized product instead, whose sup is `228.94`, and derived
+`|c_i| <= 354.36 3^-i` from that false premise; the corrected derivation gives
+`101.31 3^-i`, so the stated constant survives a fortiori.  `U_max`, `V_max`
+and `S*` were never affected -- they come from the first line -- but the
+sensitivity is worth knowing: `supH = 226.1` in `T(i)` gives a `U` tail of
+`0.1076`, above the stated `U_max = 0.08436`.
+
+`1.45` is elementary: `T_k = sum_{Omega(n)=k} n^-2/log n`, all positive, and
+`n >= 2^k`.  The bound holds from `k >= 6`, and at `k = 900` by a factor
+`10^158`, so the threshold `900` is inherited from `eq:full-sweep-ranges` and
+not forced by `T_k`.  Note the repository's other `1.45` -- `certified.py`'s
+`DELTA`, the quadrature ellipse semi-minor axis -- is an unrelated
+coincidence.
 
 ## Provenance of the three constants: RESOLVED
 
@@ -254,6 +449,16 @@ will correct itself the next time they are regenerated.
 
 ## Conjecture 7.1 beyond the two proved cases
 
+**Half of this section is now a theorem, and the labels in the log predate it.**
+Corollary 7.3 of the manuscript proves that `f_k^P` is eventually strictly
+decreasing for EVERY admissible `P` with `q >= 3`.  So in the table below the
+rows `drop {2}`, `drop {2,3}`, `drop {2} u INF` and `drop {2,5} u INF` are no
+longer open cases -- they are controls, and they pass.  `conj71_explore.log`
+still prints `(OPEN: says decreasing)` beside them because the run predates
+the corollary; the log is a run record and is left as it stands.  What remains
+open is only the `q = 2` direction: `drop nothing`, `drop {3}`, `drop {5}`,
+`drop INF`.
+
 `conj71_explore.py` tests the general principle numerically for sets of primes
 the paper does not cover.  Removing finitely many primes keeps the complement
 thin trivially, so these are legitimate instances, and two of them probe
@@ -298,3 +503,48 @@ quadrature machinery but NOT its error terms, which were derived for the full
 and odd cases; the script reports midpoints.  Extending the certified error
 analysis to general `P` would be needed before any of this could be stated as
 a result.
+
+### It agrees with `genP_check.py`, which shares no code with it
+
+The two general-`P` pipelines are independent implementations: this one runs
+flint/arb over `certified.py`'s panels, `genP_check.py` runs mpmath over the
+`prod L_p` factorization with `primezeta`.  On the two `P` both compute:
+
+| P | k | this (arb panels) | `genP_check.py` (mpmath) | difference |
+|---|---|---|---|---|
+| drop `{2}`   | 10 | `0.500196851` | `0.500196850821` | `1.8e-10` |
+| drop `{2}`   | 14 | `0.500010707` | `0.500010709023` | `2.0e-9`  |
+| drop `{2,3}` | 10 | `0.333522321` | `0.333522321396` | `4.0e-10` |
+| drop `{2,3}` | 14 | `0.333344998` | `0.333345000033` | `2.0e-9`  |
+
+Both are midpoint computations with no error term, so this is agreement rather
+than verification -- but they fail differently if either is wrong, and they do
+not.  Check any new general-`P` work against both.
+
+## `odd_beta_certified.py` — beta > 0 and the odd base case
+
+Certifies `beta = d(gamma + log2 - S)` from below, where
+`S = sum_{p>=3} log p/((p-1)(p-2))`, and with it `eq:odd-base-59`:
+
+    4900 * 62^3 * 3^-59  <  (beta/3) * 2^-59          margin 8.17%
+
+Both ingredients are one-sided in the safe direction, so neither needs a
+two-sided enclosure: every Euler factor of `d` exceeds 1, so a partial product
+is a lower bound with no tail at all; `S` needs an upper bound, supplied as a
+partial sum to `1e8` plus an integral tail over all integers (safe, since the
+terms are positive and decreasing).
+
+Log of record `odd_beta.log`, 13 s. **Do not lower `PCUT` below `1e8`**: at
+`1e7` the tail is `1.7e-6` and the certified `beta/d >= 0.4109690` fails to
+establish the `0.410970...` printed in Corollary 7.3.
+
+**The `odd_` prefix is not decoration.** `beta_certified.json` in this
+directory is a *different* beta — `beta_sweep.py`'s per-`i` coefficient bounds
+feeding `alpha_+`. The two are unrelated.
+
+Written 2026-11-08, when the Lean material came out of the manuscript. The
+formalization section had been the only place `beta`'s numeral was printed,
+and `check_proof_spine.py` was parsing it out of `proof.tex` to check
+`eq:odd-base-59` — i.e. checking the paper's tightest odd inequality against a
+number the paper asserted about itself. That guard now reads this log, and
+treats its absence as a hard failure.

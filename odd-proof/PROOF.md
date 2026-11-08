@@ -90,9 +90,13 @@ Write
 
 for the remainder after the two main terms of (4.1).  This section proves
 
-    |R_k| <= C (k+3)^3 3^-k,   C = 4900,                                (5.1)
+    |R_k| <= C (k+3)^3 3^-k,   C = 4900,   for k >= 59,                 (5.1)
 
 and hence, with section 6, the threshold K0^odd = 59.
+
+The range in (5.1) is necessary, not conservative; see 5.1(c) below.  It costs
+nothing, since (5.1) is used only for k >= K0^odd = 59 and monotonicity for
+k <= 74 comes from the certified sweep, which does not call on it.
 
 The rate is 3^-k, not the 4.5^-k of a naive Cauchy estimate: the pole of
 H(s,.) at z = 3^s sets it, and no contour argument does better.  The factor
@@ -146,14 +150,18 @@ argument it formalizes.
 
 (a) The two coefficient tails.  The main terms of section 4 integrate to the
 partial sums over j <= k, not to 1/2 and beta 2^-k; the differences
-sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k} (b_j + 2 gamma h_j(1)) 2^j join R_k.
+sum_{j>k} h_j(1) and 2^-(k+1) sum_{j>k} b_j 2^j join R_k, where
+b_j = h_j'(1) + 2 gamma h_j(1) ALREADY contains the 2 gamma h_j(1) term --
+writing (b_j + 2 gamma h_j(1)) here, as an earlier version did, double-counts
+it and contradicts the identification B(z) = d_s H_o + 2 gamma H_o = sum b_j
+z^j two lines below.  The manuscript's eq:Rk-def has the correct sum.
 Both are bounded by the same pole-cancellation device as (5.4)-(5.5), but at
 first and second order rather than third:
 (The paper writes Sigma_0, Sigma_1, Sigma_2 for S_0, S_1 and the S of 5.2,
 indexing the three constants by pole order; the Lean parameter is S.)
 
     S_0 := sum_i |a_i| 3^i,  a_i = [z^i] H(1,z)(1 - z/3),        S_0 <= 44.5987
-    S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 486.1945
+    S_1 := sum_i |g1_i| 3^i, g1_i = [z^i] (d_s H)(1,z)(1-z/3)^2, S_1 <= 486.1946
 Note the second tail's coefficient family is B(z) = d_s H_o(1,z) + 2 gamma
 H_o(1,z), not d_s H_o alone, so its weighted norm is S_1 + 4 gamma S_0 = 589.17
 (< 590) rather than S_1.  The lemma at r = 1 gives |h_j(1)| <= S_0 3^-j, and at
@@ -178,12 +186,54 @@ making it rigorous: the expansions in (b) are asymptotic, valid only for
 u >= U, and the original treats them as holding throughout.  This note uses
 U = 3 and bounds 0 < u <= U separately.  On 0 < u <= U the two groups are
 bounded separately: NEARU <= 26.0962 (nearu_certified.py) covers the two
-subtracted main terms, and CN <= 367.8435 (cn_certified.py) covers the true
+subtracted main terms, and CN <= 367.8436 (cn_certified.py) covers the true
 integrand.
 
-What cn_certified.py certifies is a POINTWISE bound, FkOdd k (sOf 3) <=
-CN 3^-k, not an integral, and the bridge to the integral is an analytic step
-that neither this note nor the manuscript used to state.  It is short.  By
+CN does NOT cover the true integrand as stated, and this is where the range in
+(5.1) comes from.  What has to be bounded is a sum of ABSOLUTE values,
+
+    sum_{j<=k} int_0^3 u^{k-j}/(k-j)! |h_j(s(u))| J(u) du,
+
+whereas cn_certified.py bounds the SIGNED coefficient identity
+sum_j u^{k-j}/(k-j)! h_j(s(u)) = P_k^odd(s(u)).  That identity bounds the
+absolute sum only if h_j >= 0, and the h_j alternate:
+
+    h_1(s) = Pi(s) - log zeta(s) = log(1 - 2^-s) - sum_{m>=2} Pi(ms)/m < 0
+
+for every s, with 1, -0.762, +0.377, -0.126, ... at s = sOf(3).
+
+nearabs_certified.py repairs this.  |h_j| <= [z^j] H^+ where
+H^+ = H exp(-2 h_1 z) has non-negative coefficients, so the sum is at most
+P_k^+(s) = sum_i P^odd_{k-i}(s) a(s)^i/i! with a = 2|h_1|.  Every factor is a
+Dirichlet series with positive terms, so P_k^+ decreases in s and a
+left-endpoint Riemann sum bounds the integral with no quadrature error to
+estimate; the s-tail closes as P_k^+(s_N)/(k log 2) because 3^-x <= 2^-x makes
+every term decay by at least 2^-kt, and the k-tail uses Cauchy at R = 3.15,
+just under 3^sOf(3) = 3.17383.  The result, over EVERY k in [59, 200] and not a
+sample, is 3^k T_k <= 34.14, and <= 9.66 beyond 200 -- so CN = 367.8436 covers
+the absolute sum too on k >= 59, with better than tenfold slack, and the ledger
+above is unchanged.
+
+Below k = 59 it does not.  Run with K0 = 1 (the settings of record otherwise:
+`nearabs_certified.py 60 8.0 220 60 60 400 1`), the certified integral bound
+peaks at 699.87 at k = 14 and exceeds CN = 367.8436 for exactly 9 <= k <= 25
+(k=25 gives 369.96, k=26 gives 343.51).  So k >= 26 would in fact serve, and
+59 is stated only because it is the only range in which (5.1) is ever applied.
+
+An earlier version of this paragraph said "3^k T_k peaks at 15329 near k = 12
+and only falls under CN at k = 24", and that a single all-k constant would be
+"about 19819, which would move K0 to 63".  Both figures are WRONG HERE.
+15329 is absratio.py's POINTWISE sum 3^k A_k(s(3)) at k = 12 (absratio.log:
+15328.840), a different quantity from the integral that
+eq:odd-nearabs-certified bounds, and "falls under CN at k = 24" is likewise
+absratio's pointwise crossing.  19819 has no artifact at all.  And the
+consequence does not follow: with an all-k constant near 700 in place of
+367.84 the ledger becomes about 5190 and q(59) = 0.918*5190/4900 = 0.973 < 1,
+so K0 would stay at 59.  Quote the figures above, from the integral run, and
+do not reuse the pointwise ones.
+
+The bridge from the pointwise bound to the integral is an analytic step that
+neither this note nor the manuscript used to state.  It is short.  By
 (1.1) and s = s(u),
 
     sum_{j<=k} int_0^3 (u^(k-j)/(k-j)!) h_j(s(u)) J(u) du
@@ -216,8 +266,8 @@ Since C(k+3,3) <= (k+3)^3/6, (5.3) and (5.5) give the Lagrange-remainder part
 of (5.1) with coefficient CE S/18 (the CE of 5.1(b); with CE = 3 this would be
 the S/6 of earlier drafts).  Adding 5.1(a) and 5.1(c),
     C = CE S/18 + S_0/2 + 5*590/64 + CN + NEARU
-      = 4395.5 + 22.3 + 46.1 + 367.8 + 26.1 = 4857.9,
-and (5.1) holds with C = 4900.
+      = 4395.55 + 22.30 + 46.10 + 367.85 + 26.10 = 4857.90,
+and (5.1) holds with C = 4900 on k >= 59.
 
 The 0.9% of margin reflects the NS = 1600 box width, not the method.  Halving
 it (odd-proof/numerics/hcoeff3200.log) gives head 7890.6 in place of 8423.9,
@@ -255,7 +305,7 @@ giving
     sum_{i>16} |w_i| 3^i <= M (3/R)^17/(1 - 3/R) <= 5990.
 
 Hence S <= 14414.  This is the S of 5.2; the constant C of (5.1) is
-CE S/18 + S_0/2 + 5*590/64 + CN + NEARU = 4857.9, not S/6 -- see 5.2.
+CE S/18 + S_0/2 + 5*590/64 + CN + NEARU = 4857.90, not S/6 -- see 5.2.
 
 Both halves are necessary.  Cauchy from i = 0 gives C = 327869 and K0 = 71,
 too weak to meet the certified sweep: the circle estimate discards the
@@ -271,8 +321,10 @@ which is width rather than signal.
   * sum_{i<=16} |w_i| 3^i <= 8424        (1600 s-boxes, primes to 1e5)
   * sup_{|z|=4.5, s in [1,2]} |G_2| <= 1.97e6   (200 theta x 40 s boxes)
   * S_0 <= 44.5987                       s0_recursion.py + s0_cauchy.py
-  * S_1 <= 486.1945                      s1_recursion.py + s1_cauchy.py
-  * CN  <= 367.8435                      cn_certified.py  (recursion + Cauchy)
+  * S_1 <= 486.1946                      s1_recursion.py + s1_cauchy.py
+  * CN  <= 367.8436                      cn_certified.py  (recursion + Cauchy)
+  * 3^k T_k <= 34.14  (k >= 59)          nearabs_certified.py (absolute sum;
+                                         what the near range actually needs)
   * NEARU <= 26.0962                     nearu_certified.py (head + envelope)
   * CE  <= 5.48910                       ce_taylor.py  (log: 5.4890962927)
 
@@ -334,9 +386,10 @@ and the sweep to 75 leaves sixteen values of overlap.
     sum|w_i|3^i <= 8424  (i <= 16)            hcoeff_recursion.py, 1600 s-boxes
     sup|G_2|    <= 1.97e6 on |z|=4.5          mr_deriv_sweep.py
     S_0         <= 44.5987                    s0_recursion.py, s0_cauchy.py
-    S_1         <= 486.1945                   s1_recursion.py, s1_cauchy.py
+    S_1         <= 486.1946                   s1_recursion.py, s1_cauchy.py
     S_1+4gS_0   <= 590                        the tail's coefficient family
-    CN          <= 367.8435                   cn_certified.py
+    CN          <= 367.8436                   cn_certified.py
+    3^k T_k     <= 34.14    (k >= 59)         nearabs_certified.py
     NEARU       <= 26.0962                    nearu_certified.py
     CE          <= 5.48910                    ce_taylor.py
     C           4900                          (5.1), see 5.2

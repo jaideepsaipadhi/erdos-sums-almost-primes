@@ -38,14 +38,42 @@ for f in files:
         mid, rad = arb(p[1]), arb(p[2])
         fk[k] += mid.union(mid - rad).union(mid + rad)
 
-for k in range(2, KMAX + 1):
+# From k = 1, not k = 2.  This loop used to start at 2, so f_1 carried no
+# tail terms and the verdict below never compared f_1 with f_2 -- the sweep
+# certified [2,75] while the manuscript claims 1 <= k <= 75.  (The tails at
+# k = 1 are ~3e-79 against a radius of ~3e-22, so nothing was false; it was
+# simply unverified.)
+for k in range(1, KMAX + 1):
     fk[k] += F.tail_large_s_odd(k) + C.tail_near_1(k)
 
-print("k   f_k^odd")
+# PRINT THE RADIUS SEPARATELY.  `fk[k].str(20)` rounds the midpoint to 20
+# places and INFLATES the radius to cover that rounding, so for large k the
+# displayed radius is the print error and not the enclosure: at k = 74 it
+# showed 8.4e-24 where the true radius is 6.2e-43, nearly twenty orders out.
+# A reader checking monotonicity from the printed text would then find the
+# balls apparently overlapping, since g_74 - g_75 is only 4.1e-24.  Read
+# .rad() and print it on its own.
+print("# midpoint to 24 places, then the TRUE radius from .rad();")
+print("# do not read a radius off a str(arb) of the midpoint -- it is inflated")
+print("k   f_k^odd (midpoint)           rad")
 for k in range(1, KMAX + 1):
-    print("%2d  %s" % (k, fk[k].str(20)), flush=True)
+    print("%2d  %s  %s" % (k, fk[k].str(24, radius=False),
+                             arb(fk[k].rad()).str(6, radius=False)), flush=True)
 print()
-dec = all((fk[k] - fk[k + 1]) > 0 for k in range(2, KMAX))
-print("f_k^odd strictly decreasing on [2,%d]: %s" % (KMAX, dec))
-inc = all((fk[k + 1] - fk[k]) > 0 for k in range(2, KMAX))
-print("f_k^odd strictly increasing on [2,%d]: %s" % (KMAX, inc))
+# range(1, KMAX) compares every adjacent pair (k, k+1) for 1 <= k <= KMAX-1.
+# So with KMAX = 75 the comparison is certified for 1 <= k <= 74, NOT 1 <= k
+# <= 75: the pair (75, 76) would need g_76, which is not computed.  The
+# enclosures cover [1, KMAX]; the monotonicity verdict covers [1, KMAX-1].
+# The paper states both ranges separately for this reason.
+dec = all((fk[k] - fk[k + 1]) > 0 for k in range(1, KMAX))
+print("f_k^odd strictly decreasing on [1,%d]: %s" % (KMAX - 1, dec))
+if dec:
+    _m = min(range(1, KMAX), key=lambda k: float((fk[k] - fk[k + 1]).lower()
+                                                 / arb(fk[k].rad()).upper()))
+    _d = fk[_m] - fk[_m + 1]
+    print("  tightest pair k=%d: difference >= %s against radius %s (ratio %.3g)"
+          % (_m, arb(_d.lower()).str(6, radius=False),
+             arb(fk[_m].rad()).str(6, radius=False),
+             float(arb(_d.lower()).mid() / arb(fk[_m].rad()).upper())))
+inc = all((fk[k + 1] - fk[k]) > 0 for k in range(1, KMAX))
+print("f_k^odd strictly increasing on [1,%d]: %s" % (KMAX - 1, inc))

@@ -1,0 +1,55 @@
+##### Q = {3} #####
+complement Q = [3]
+c_0 = prod(1-1/p)                     = 0.66666666666666666667
+predicted ratio E_Q(1,2) = prod(1-2/p) = 0.33333333333333333333
+
+  k     f_k^all - 1        f_k^P - c_0         ratio
+ 24  -1.39024994617e-6  -4.03002246422e-7  0.28987754866076
+ 28  -1.23822662255e-7  -3.68149849322e-8  0.29732025028258
+ 32  -1.04913874857e-8  -3.17486334385e-9  0.30261615521949
+ 36  -8.55842447549e-10  -2.623768189e-10  0.30657140184067
+ 40  -6.77789793498e-11  -2.09875173708e-11  0.30964640618884
+ 44  -5.24150770902e-12  -1.63584644035e-12  0.31209463596473
+
+deviation from the prediction, scaled by k (should tend to a constant
+if the ratio approaches E_Q(1,2) with a 1/k correction):
+   k=24    E_Q(1,2) - ratio = 0.043455785     k*(that) = 1.0429388
+   k=28    E_Q(1,2) - ratio = 0.036013083     k*(that) = 1.0083663
+   k=32    E_Q(1,2) - ratio = 0.030717178     k*(that) = 0.9829497
+   k=36    E_Q(1,2) - ratio = 0.026761931     k*(that) = 0.96342953
+   k=40    E_Q(1,2) - ratio = 0.023686927     k*(that) = 0.94747709
+   k=44    E_Q(1,2) - ratio = 0.021238697     k*(that) = 0.93450268
+
+ratio at k=44                         : 0.3120946359647292
+one-term  (L + a/k) extrapolation    : 0.336576933723581
+two-term  (L + a/k + b/k^2) extrapol.: 0.3332266315289948
+predicted E_Q(1,2)                   : 0.3333333333333333
+relative error of the two-term fit   : 0.00032010541
+
+##### Q = {5} #####
+complement Q = [5]
+c_0 = prod(1-1/p)                     = 0.8
+predicted ratio E_Q(1,2) = prod(1-2/p) = 0.6
+
+  k     f_k^all - 1        f_k^P - c_0         ratio
+ 24  -1.39024994617e-6  -7.57120724446e-7  0.54459324133137
+ 28  -1.23822662255e-7  -6.8548968625e-8  0.55360599890814
+ 32  -1.04913874857e-8  -5.87660819463e-9  0.56013641690653
+ 36  -8.55842447549e-10  -4.83616159622e-10  0.56507615508756
+ 40  -6.77789793498e-11  -3.85631875273e-11  0.56895497538086
+ 44  -5.24150770902e-12  -2.99848628654e-12  0.5720656065004
+
+deviation from the prediction, scaled by k (should tend to a constant
+if the ratio approaches E_Q(1,2) with a 1/k correction):
+   k=24    E_Q(1,2) - ratio = 0.055406759     k*(that) = 1.3297622
+   k=28    E_Q(1,2) - ratio = 0.046394001     k*(that) = 1.299032
+   k=32    E_Q(1,2) - ratio = 0.039863583     k*(that) = 1.2756347
+   k=36    E_Q(1,2) - ratio = 0.034923845     k*(that) = 1.2572584
+   k=40    E_Q(1,2) - ratio = 0.031045025     k*(that) = 1.241801
+   k=44    E_Q(1,2) - ratio = 0.027934393     k*(that) = 1.2291133
+
+ratio at k=44                         : 0.5720656065004031
+one-term  (L + a/k) extrapolation    : 0.6031719176958619
+two-term  (L + a/k + b/k^2) extrapol.: 0.6000559362346761
+predicted E_Q(1,2)                   : 0.6
+relative error of the two-term fit   : 9.3227058e-5

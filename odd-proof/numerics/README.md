@@ -10,13 +10,79 @@ explicit upper bound; the committed `.log` beside it is that run.
 | `hcoeff_recursion.py` | `sum_{i<=16} \|g_i\| 3^i <= 8424` | interval recursion, 1600 s-boxes |
 | `mr_deriv_sweep.py` | `sup_{\|z\|=4.5} \|G_2\| <= 1.97e6` | 200 theta x 40 s boxes |
 | `s0_recursion.py`, `s0_cauchy.py` | `S_0 <= 44.5987` | first-order pole; head by recursion, tail by Cauchy |
-| `s1_recursion.py`, `s1_cauchy.py` | `S_1 <= 486.1945` | second-order pole; head by recursion, tail by Cauchy |
-| `cn_certified.py` | `CN <= 367.8435` | odd Euler-product recursion (Moebius prime zeta) + Cauchy tail |
+| `s1_recursion.py`, `s1_cauchy.py` | `S_1 <= 486.1946` | second-order pole; head by recursion, tail by Cauchy |
+| `cn_certified.py` | `CN <= 367.8436` | odd Euler-product recursion (Moebius prime zeta) + Cauchy tail |
 | `nearu_certified.py` | `NEARU <= 26.0962` | exact head to k=400 + explicit envelope |
 | `ce_taylor.py` | `CE <= 5.48910` (log: `5.4890962927`) | Taylor model in eps, whole range at once |
 
 Together these give `C = CE S/18 + S_0/2 + 5*590/64 + CN + NEARU = 4857.9`,
 and (5.1) is stated with `C = 4900`.
+
+## The sign of the `h_j` and the range of (5.1)
+
+`absratio.py` records a defect in the near-range step as the manuscript states
+it.  That step bounds `sum_j int_0^3 u^{k-j}/(k-j)! |h_j(s(u))| J(u) du` by the
+*signed* coefficient identity `sum_j u^{k-j}/(k-j)! h_j(s(u)) = P_k^odd(s(u))`,
+which needs `h_j >= 0`.  The `h_j` alternate:
+
+    h_1(s) = P_3(s) - log zeta(s) = log(1 - 2^-s) - sum_{m>=2} P_3(ms)/m < 0
+
+for every `s`, and at `s = s(3)` the coefficients run
+`1, -0.762, +0.377, -0.126, +0.0353, ...`.  The script computes both sums; the
+signed one reproduces `P_k^odd(s(3))` to 267 digits and peaks at `367.8436` at
+`k = 11`, which is `CN`, so the comparison is against the right quantity.
+
+The inflation is confined to small `k`.  **Two different quantities, and they
+must not be mixed up.**  `absratio.py`'s POINTWISE sum `A_k 3^k` at `u = 3`
+peaks at `15329` at `k = 12`, falls back under `CN` at `k = 24`, and is `27.63`
+at `k = 59`.  What `eq:odd-nearabs-certified` actually bounds is the
+INTEGRAL, and for that the figures are different: run with `K0 = 1`
+(`nearabs_certified.py 60 8.0 220 60 60 400 1`) it peaks at `699.87` at
+`k = 14` and exceeds `CN = 367.8436` for exactly `9 <= k <= 25`.  Quote the
+integral figures whenever the subject is (5.1); the paper does.
+
+The analytic branch is invoked only for `k >= K0 = 59`; monotonicity for
+`k <= 74` comes from the certified sweep, which never calls on the remainder
+bound.  **No certified constant moves:** `CN`, `C = 4900` and `K0 = 59` all
+stand.  What has to change is the *range* on which (5.1) is asserted, and the
+near-range argument itself.
+
+An earlier version of this paragraph said a single all-`k` constant "would be
+about `19819`, which would push `K0` to `63`".  **Both halves are wrong.**
+`19819` has no artifact anywhere; the integral's all-`k` sup is about `700`.
+And with `700` in place of `367.84` the ledger becomes about `5190`, giving
+`q(59) = 0.918 * 5190/4900 = 0.973 < 1` — so `K0` would stay at 59 and would
+not outrun `sweep_low` at all.  Restricting the range is still the better
+repair, because the method is loosest at the left end of the `s` range rather
+than at small `k`, but not for the reason stated here.
+
+`nearabs_certified.py` carries out the repair and certifies
+
+    3^k T_k <= CN = 367.8436    for every k >= 59,
+
+i.e. the ABSOLUTE sum obeys the same bound the manuscript already states, so
+the ledger and `C = 4900` need no change at all.  Method: the majorant
+`H_o^+ = H_o exp(-2 h_1 z)` has non-negative coefficients dominating `|h_j|`
+termwise, so `A_k(s) <= P_k^+(s) = sum_i P^odd_{k-i}(s) a(s)^i/i!` with
+`a = 2|h_1|`.  Every factor there is a Dirichlet series with positive terms, so
+`P_k^+` is decreasing in `s` and a **left-endpoint Riemann sum is an upper bound
+outright** — no quadrature error analysis is needed.  The `s`-tail closes
+because `3^{-(k-i)t} 2^{-it} <= 2^{-kt}`, giving `P_k^+(s_N)/(k log 2)`; the
+`k`-tail uses Cauchy at `R = 3.15 < 3^{s(3)} = 3.17383`, where `(3/R)^{201}`
+supplies the decay.
+
+Result (`nearabs.log`, settings `200 8.0 220 60 60 400`): the head is evaluated
+at **every** `k` in `[59, 200]` — not a sample, since nothing here proves the
+values fall off — and its worst is `34.1375` at `k = 59`; beyond `k = 200` the
+Cauchy branch gives `9.6571`.  So `CN` has better than tenfold slack where the
+bound is used.
+
+| script | quantity | result |
+|---|---|---|
+| `absratio.py` | the defect, and where it bites | `A_k 3^k` peaks at `15329` (`k=12`), under `CN` from `k=24` |
+| `nearabs_certified.py` | repaired near-range bound | `3^k T_k <= 34.1375` for all `k >= 59` |
+
+## Margin under (5.1)
 
 The 0.9% of margin there is an artefact of the `NS = 1600` setting, not of the
 method: `hcoeff3200.log` halves the box width and gives head `7890.6376` in
