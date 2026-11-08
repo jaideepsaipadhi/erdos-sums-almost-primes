@@ -66,7 +66,6 @@ CN = grab(r"C_N&?\\leq" + NUM, "C_N")
 NU = grab(r"N_U&?\\leq" + NUM, "N_U")
 b590 = grab(r"\\Sigma_1\+4\\gamma\\Sigma_0<" + NUM, "the second-tail constant")
 MR = grab(r"\\abs\{R_k\}\\leq" + NUM + r"\(k\+3\)\^3", "the remainder constant")
-Sodd_hi = grab(r"S\\leq" + NUM, "the upper bound on S permitted by beta")
 
 log2 = arb(2).log()
 gam = arb.const_euler() if hasattr(arb, "const_euler") else arb("0.5772156649015328606")
@@ -100,18 +99,42 @@ check("ledger closes under MR = %s" % MR.str(10, radius=False),
          100 * (1 - float(total.upper()) / float(MR.str(20)))))
 
 # ---------------------------------------------------------------- beta
-Sodd = Sodd_hi
-beta_lo = d * (gam + log2 - Sodd)
-beta_claim = grab(r"\\beta\\geq" + NUM, "the stated lower bound for beta")
-check("beta >= %s from d and S" % beta_claim.str(10, radius=False),
-      float(beta_lo.lower()) > float(beta_claim.str(20, radius=False)),
-      "beta >= %.7f" % float(beta_lo.lower()))
+# beta = d (gamma + log2 - S) is read from beta.log, NOT from the manuscript.
+# It used to be derived from an upper bound on S parsed out of proof.tex -- a
+# numeral that appeared in exactly one sentence of the formalization section
+# and had no certificate behind it.  So eq:odd-base-59, the tightest
+# inequality in the odd case, was being checked against a number the paper
+# asserted about itself.  When that section came out the numeral went with it
+# and this check failed, which is how the gap was found.
+#
+# An absent or unparseable beta.log is a HARD failure, not a skip: the paper
+# prints eq:odd-base-59 and beta > 0, so leaving them unchecked is exactly the
+# round-down situation the five checks below exist to prevent.  Everything
+# downstream (the k = 58 margin, q(k)) needs beta, so there is nothing to
+# continue with.
+BETALOG = ROOT / "numerics" / "odd_beta.log"
+if not BETALOG.exists():
+    sys.exit("numerics/odd_beta.log is absent, so beta has no certificate and\n"
+             "eq:odd-base-59 cannot be checked.  Run:\n"
+             "    python3 numerics/odd_beta_certified.py > numerics/odd_beta.log")
+_m = re.search(r"beta\s+>=\s*\[([0-9.]+)", BETALOG.read_text())
+if not _m:
+    sys.exit("numerics/odd_beta.log does not carry a parseable lower bound for\n"
+             "beta.  If odd_beta_certified.py was reworded, update this pattern;\n"
+             "do NOT fall back on a numeral from the manuscript.")
+beta_lo = arb(_m.group(1))
+check("beta >= %s, from beta.log and not from the paper"
+      % beta_lo.str(10, radius=False),
+      float(beta_lo.lower()) > 0,
+      "certified from S <= partial sum + integral tail and d >= partial "
+      "product")
 
 a1_lo = d * log2 / 4
-a1_claim = grab(r"a_1\\geq" + NUM, "the stated lower bound for a_1")
-check("a_1 = d log2/4 >= %s" % a1_claim.str(10, radius=False),
-      float(a1_lo.lower()) > float(a1_claim.str(20, radius=False)),
-      "a_1 >= %.7f" % float(a1_lo.lower()))
+check("a_1 = d log2/4 >= %s, from the paper's certified d"
+      % a1_lo.lower().str(10),
+      float(a1_lo.lower()) > 0.0656,
+      "lem:phi-base consumes a_1(2440^2-2*2440-1) > 390371.6, i.e. "
+      "a_1 > 0.0656")
 
 # ------------------------------------------------- the odd base case, k = 59
 # eq:odd-base-59:  MR (62)^3 3^-59 < (beta/3) 2^-59.  This is what makes

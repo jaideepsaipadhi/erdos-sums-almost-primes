@@ -1,11 +1,16 @@
 # erdos-sums-almost-primes
 
-Lean 4 formalization of the analytic reduction for the Banks–Martin / Erdős
-almost-prime sums, plus the Arb-certified numerics it imports as hypotheses.
+The Banks–Martin / Erdős almost-prime sums: the manuscript, the Arb-certified
+numerics behind its certified propositions, and a Lean 4 formalization of the
+analytic reduction that the paper no longer describes.
 
-- `paper/proof.tex` — the manuscript (with J. D. Lichtman)
-- `Banksmartin/`, `Odd/` — the Lean development
-- `numerics/` — unrestricted case; `odd-proof/numerics/` — odd case
+- `paper/proof.tex` — the manuscript (sole author; Lichtman acknowledged for
+  guidance). **It makes no claim about Lean**; see "The Lean material is OUT
+  of the manuscript" below before putting any back.
+- `numerics/` — unrestricted case; `odd-proof/numerics/` — odd case. These
+  back the paper.
+- `Banksmartin/`, `Odd/` — the Lean development, kept but uncited by the
+  paper and never built
 
 ## Git
 
@@ -564,6 +569,83 @@ Two traps that cost real time:
   `k = 36,40,44` gives `0.3332266`, relative error `3.2e-4`. Below `k ~ 20`
   nothing is readable. Quote the extrapolation, and call it evidence -- it
   cannot distinguish "no `s`-derivative terms" from "they cancel for this `Q`".
+
+## The Lean material is OUT of the manuscript (2026-11-08)
+
+Decision of record. `paper/proof.tex` no longer mentions Lean, formalization,
+`sorry`, Mathlib, axioms, or any `*NumericalFacts` structure. Removed: all of
+Section 8's formalization half (the implication framing, the `Eexp_bound`
+vacuity discussion, the formalized/assumed division, the trusted-base
+discussion, the five looser-numeral constants, the phi/gamma/d/rho
+proved-in-Lean paragraphs, the S-budget paragraph, `eq:rho-def`, and Table 1),
+plus the abstract's Lean clause, MSC 68V20, the "formalized mathematics"
+keyword, and the AI statement's "formalization code". Section 8 is now
+**`\section{Certification}`, label `sec:certification`** -- the old
+`sec:lean` label is gone, and four cross-references were repointed.
+35 pp -> 29 pp.
+
+The Lean development itself is **kept in the repository**, as is
+`check_lean_constants.py`, which still checks it against the certificates.
+The repo now simply contains more than the paper claims, which is the safe
+direction -- Lean had never been built (no Mathlib cache reachable, CI gets no
+runner), so Section 8 and Table 1 were describing a state no green build had
+confirmed.
+
+### Removing it exposed a real gap: `beta` had no certificate
+
+**The formalization section was the only place `beta`'s numeral was printed**,
+inside the paragraph explaining why `S` had to stay a Lean hypothesis
+(`beta >= 0.1556` permits `S <= 0.8593986`). `check_proof_spine.py` parsed
+that `S` out of `proof.tex` and derived `beta` from it to re-check
+`eq:odd-base-59` -- the tightest inequality in the odd case. So the base case
+was being checked against a number the paper asserted about itself: the same
+provenance defect as `101.245` and `1.45`. Cutting the section deleted the
+numeral, the guard failed, and the gap surfaced.
+
+`numerics/odd_beta_certified.py` (log `odd_beta.log`) is the repair.
+**The `odd_` prefix is deliberate**: `numerics/beta_certified.json` is a
+different beta (`beta_sweep.py`'s per-`i` coefficient bounds for `alpha_+`). Both bounds are
+one-sided in the safe direction, so neither constant needs a two-sided
+enclosure:
+
+    d  >= (1/4) prod_{3<=p<=1e8} (1 + 1/(p(p-2)))        -- every factor > 1,
+                                                            so NO tail needed
+    S  <= sum_{3<=p<=1e8} log p/((p-1)(p-2)) + tail,
+          tail <= (log A + 1)/A + 1/A^2,  A = 1e8 - 2     -- integral over all
+                                                            integers, safe
+    beta >= d_lo (gamma + log2 - S_hi) = 0.1556324600
+
+Base case margin 8.17%. It also cross-checks the two places the manuscript
+prints these: `d >= 0.3786949` (eq:full-certified-constants) and
+`beta/d = 0.410970...` (Corollary 7.3).
+
+**`PCUT` must stay at `1e8`.** At `1e7` the tail is `1.7e-6` and the certified
+`beta/d >= 0.4109690`, which does **not** establish the printed `0.410970...`
+(true value `0.4109704`). That is slack in the tail bound, not a disagreement
+with the paper -- but a certificate has to establish what is printed. 13 s at
+`1e8`; don't lower it to save time.
+
+`check_proof_spine.py` now reads `beta` from `odd_beta.log` and treats an absent
+or unparseable log as a **hard** `sys.exit`, not a skip, since everything
+downstream (the `k = 58` margin, `q(k)`) needs it. Verified by moving the log
+aside: rc = 1.
+
+`paper/check_ready.py`'s Table-1-vs-`axcheck` guard and its Lean-not-built
+note were retired with the section. Two checks replaced them: one fails if
+`Lean` or `formaliz` reappears anywhere in `proof.tex` (verified by appending
+`% Lean`: BLOCKER), and one fails if `odd_beta.log` is missing while the paper
+still prints `eq:odd-base-59`.
+
+### What the cut did NOT break
+
+Checked before cutting. `a_1` and `beta` are never needed as printed numerals
+by the proof: `lem:phi-base` substitutes the certified one-sided bounds
+directly (`a_1(2440^2-2*2440-1) > 390371.6`), and `q(k) = (3*4900/beta)(k+3)^3
+(2/3)^k` uses `beta` symbolically, with `q(59) < 1` being exactly
+`eq:odd-base-59`. `d >= 0.3786949` survives in `eq:full-certified-constants`.
+`rho` survives as the residue in `eq:contour-certified`; only its closed form
+`eq:rho-def` went, which the section itself said "is used nowhere in the
+proofs above".
 
 ## `source_bound` is already derived; don't list it as open
 

@@ -520,3 +520,31 @@ flint/arb over `certified.py`'s panels, `genP_check.py` runs mpmath over the
 Both are midpoint computations with no error term, so this is agreement rather
 than verification -- but they fail differently if either is wrong, and they do
 not.  Check any new general-`P` work against both.
+
+## `odd_beta_certified.py` — beta > 0 and the odd base case
+
+Certifies `beta = d(gamma + log2 - S)` from below, where
+`S = sum_{p>=3} log p/((p-1)(p-2))`, and with it `eq:odd-base-59`:
+
+    4900 * 62^3 * 3^-59  <  (beta/3) * 2^-59          margin 8.17%
+
+Both ingredients are one-sided in the safe direction, so neither needs a
+two-sided enclosure: every Euler factor of `d` exceeds 1, so a partial product
+is a lower bound with no tail at all; `S` needs an upper bound, supplied as a
+partial sum to `1e8` plus an integral tail over all integers (safe, since the
+terms are positive and decreasing).
+
+Log of record `odd_beta.log`, 13 s. **Do not lower `PCUT` below `1e8`**: at
+`1e7` the tail is `1.7e-6` and the certified `beta/d >= 0.4109690` fails to
+establish the `0.410970...` printed in Corollary 7.3.
+
+**The `odd_` prefix is not decoration.** `beta_certified.json` in this
+directory is a *different* beta — `beta_sweep.py`'s per-`i` coefficient bounds
+feeding `alpha_+`. The two are unrelated.
+
+Written 2026-11-08, when the Lean material came out of the manuscript. The
+formalization section had been the only place `beta`'s numeral was printed,
+and `check_proof_spine.py` was parsing it out of `proof.tex` to check
+`eq:odd-base-59` — i.e. checking the paper's tightest odd inequality against a
+number the paper asserted about itself. That guard now reads this log, and
+treats its absence as a hard failure.

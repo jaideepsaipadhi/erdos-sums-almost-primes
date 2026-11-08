@@ -27,9 +27,8 @@
 \address{Department of Computer Science, Purdue University,
 West Lafayette, IN 47907, USA}
 \email{jpadhi@purdue.edu}
-\subjclass[2020]{Primary 11N25; Secondary 11Y60, 68V20}
-\keywords{Erd\H{o}s sums, almost primes, primitive sets, ball arithmetic,
-formalized mathematics}
+\subjclass[2020]{Primary 11N25; Secondary 11Y60}
+\keywords{Erd\H{o}s sums, almost primes, primitive sets, ball arithmetic}
 \date{}
 
 \begin{abstract}
@@ -47,8 +46,7 @@ direction in general. If the complement of a set of primes $\mathcal P$ is
 thin and its least element is at least $3$, the corresponding sums eventually
 decrease, so the second theorem is one case of a general phenomenon. The
 inequalities used at the last step of the first
-theorem are certified by interval arithmetic, and the reductions are
-formalized in Lean~4 as an implication from those inputs.
+theorem are certified by interval arithmetic.
 \end{abstract}
 
 \maketitle
@@ -514,7 +512,7 @@ of $\zeta^{-1}=\e^{-u}$. Let
 \end{equation}
 every supremum being over $1<s\leq s(3)$. Each of the four is a ratio in which
 the pole of $\zeta$ at $s=1$ cancels. How they are computed matters, and is
-described in Section~\ref{sec:lean}: evaluating them on boxes of $s$ loses that
+described in Section~\ref{sec:certification}: evaluating them on boxes of $s$ loses that
 cancellation and the enclosures diverge however finely the range is
 partitioned, so a Taylor model is used instead.
 
@@ -1356,9 +1354,8 @@ $[z^i]\rho/(3-z)=\rho\,3^{-i-1}$, so
  \leq101.31\,3^{-i}
  <354.36\,3^{-i}.
 \end{equation}
-The weaker constant $354.36$ is the one carried below and into the
-formalization; the sharper $101.31$ is recorded only so that the chain can be
-checked.
+The weaker constant $354.36$ is the one carried below; the sharper $101.31$
+is recorded only so that the chain can be checked.
 By \eqref{eq:ci-equals-hi} the $c_i$ are the coefficients $h_i(1)$, so
 Lemma~\ref{lem:pole-coefficient-bounds}(i) sharpens
 \eqref{eq:ci-geometric-bound} to $\abs{c_i}\leq\Sigma_03^{-i}$, dispensing with
@@ -1946,8 +1943,7 @@ the formulas against a case the paper proves. The computation is in the
 repository as \texttt{genP\_check.py}. Unlike everything else in this paper
 that is computed, it uses ordinary floating-point arithmetic and not ball
 arithmetic: it is a check on the formulas of this section, carrying no
-certificate, and nothing elsewhere in the paper or in the formalization
-depends on it.
+certificate, and nothing elsewhere in the paper depends on it.
 
 The boundary case $q=2$ is a different problem, and we do not treat it here.
 Separating the factor $L_2$ in \eqref{eq:HP-def} gives the exact identity
@@ -1961,273 +1957,53 @@ through its value at the critical point, which would give
 Conjecture~\ref{conj:general}, we have been unable to settle, and we will
 return to it separately.
 
-\section{Certification and formalization}\label{sec:lean}
+\section{Certification}\label{sec:certification}
 %=======================================================================
-
-What the formalization establishes is an \emph{implication}. The certified
-quantities enter as fields of six hypothesis structures ---
-\texttt{NumericalFacts}, \texttt{NumericalFactsFull},
-\texttt{OddNumericalFacts}, \texttt{OddCoeffFacts}, \texttt{OddTailFacts},
-\texttt{OddDomFacts}, with $13$, $21$, $4$, $8$, $5$ and $5$ fields
-respectively, and no instance of any of them is constructed. So Lean checks
-that those hypotheses imply the theorems. Nothing in the kernel checks that
-the hypotheses are true, or even that they are mutually consistent. In
-particular an unsatisfiable field would make the theorems assuming it vacuous
-rather than false, and would go undetected.
-
-One field was in exactly that position.
-\texttt{NumericalFactsFull.\allowbreak Eexp\_\allowbreak bound} quantified
-over the coefficient index with the bound depending on a different variable,
-and so asserted $\abs{E_{\exp}(m)}\leq1.45/k+10^{-3}$ for every $m$ at once.
-This is false at $m=1$, where the first two terms of \eqref{eq:Eexp-def}
-already total $1.069$, so the field was unsatisfiable and the theorem assuming
-it vacuous. The quantifier is now bounded to the two indices its only consumer
-uses. No build has yet confirmed the correction, for the reason given at the
-end of this section.
-
-The transcription of a certified value into a numeral printed in this paper is
-not itself certified, and that is where the errors in this manuscript have
-been found. A late adversarial pass turned up three: a stated bound rounded
-down rather than up; the two-part assembly of $\Sigma_2$, whose displayed
-chain did not close under its own stated value; and a contour bound stated for
-the wrong function, the certified $101.245$ bounding the pole-free part
-$G_2(1,z)-\rho/(3-z)$, as every consuming script had always assumed, and not
-the regularized product, whose supremum on $\abs z=4.2$ is $228.95$. None
-invalidated a conclusion, and each is now checked against its certificate by
-script.
-
-That the imported numerals agree with what Arb computed is verified outside
-Lean, by three scripts rather than one.
-\texttt{check\_\allowbreak lean\_\allowbreak constants.py} compares the Lean
-numerals with the certificates, \texttt{check\_\allowbreak proof\_\allowbreak
-spine.py} compares the manuscript's with them, and \texttt{verify.py} checks
-the sweep tables and the $\Gamma$ data against the theorems they instantiate
-and recomputes the SHA-256 the certificate records. The Lean development
-should be taken as discharging the reductions below and nothing else. The
-trusted base is the structure fields, listed in
-Table~\ref{tab:lean-status}.
-
-The division is as follows. Formalized in Lean~4 without
-\texttt{sorry} are Lemmas~\ref{lem:integral-representation} and
-\ref{lem:zeta-coordinate}, the coefficient identities
-\eqref{eq:odd-u-integral} and \eqref{eq:E-decomposition}, the assembly of the
-ranges in both theorems, and the lemmas named in the rest of this section.
-
-Two items one would expect to find among them are not there. First,
-Proposition~\ref{prop:analyticity}: a
-radius-specific consequence of it is proved, on the ball $\abs z<3$ for
-$s\geq1$, but its operative content \eqref{eq:coeff-commute}, that
-$\dd/\dd s$ commutes with $[z^j]$, is not, and the $s$-differentiability of
-the coefficient functions is itself a hypothesis, as field
-\texttt{g\_\allowbreak deriv} of \texttt{NumericalFactsFull} in the full case and as
-\texttt{deriv\_\allowbreak exists}, \texttt{deriv2\_\allowbreak exists} of \texttt{OddCoeffFacts} in the
-odd case. No interval computation can establish a differentiability claim, and
-none is attempted. Second, Proposition~\ref{prop:odd-remainder}: its statement
-is imported as field \texttt{remainder} of \texttt{OddNumericalFacts} rather
-than derived from Proposition~\ref{prop:odd-certified}; the derivation is the
-proof given in Section~\ref{sec:odd} above, which has not been formalized. The Lean
-development contains the intended route to it, but that route still rests on
-assumed coefficient and dominating-sequence data of its own, so it does not
-discharge the hypothesis.
-
-Likewise the source estimates of Section~\ref{sec:sources} are assumed, not proved, by the
-theorem named below: \texttt{NumericalFacts} carries
-$\abs{2E(k)-E(k+1)}\leq R(k)$ as the single field \texttt{source\_\allowbreak bound},
-which is the aggregate of that whole section. Only the second formal version
-discussed below derives it, from the four source terms separately.
-
-\begingroup\sloppy
-The trusted base is also not a list of intervals. Some fields are intervals.
-Others are quantified or analytic statements that no interval computation
-could discharge: a \texttt{Summable} hypothesis
-(\texttt{OddCoeffFacts.\allowbreak fam\_\allowbreak summable}), two one-sided limits as
-$s\downarrow1$ (\texttt{tendsto\_\allowbreak one} and
-\texttt{tendsto\_\allowbreak deriv}), several suprema quantified over all $m$, $k$ or
-$\theta$ (\texttt{alpha\_\allowbreak dom}, \texttt{Sstar\_\allowbreak dom},
-\texttt{UV\_\allowbreak bound}, \texttt{M0\_\allowbreak bound},
-\texttt{Eexp\_\allowbreak bound}), a certification predicate over all
-$k$ (\texttt{OddDomFacts.\allowbreak dom\_\allowbreak cert}). The sweeps are
-finitely checkable, but they too are $\forall$-statements rather than single
-enclosures. And six
-of the constants above, namely $\Sigma_0$, $\Sigma_1$, $\Sigma_2$, $C_E$,
-$C_N$ and $N_U$, do not appear in the Lean development at all, in any form:
-the
-odd-remainder route that would consume them takes them as abstract parameters
-and is not what either odd theorem is proved from. For those six the agreement
-between manuscript and formalization that this section asserts has no content,
-and the reader should rely on the Arb certificates instead.
-
-Five further constants appear in Lean at a numeral slightly \emph{looser} than
-the one certified here, and the discrepancy is deliberate rather than drift.
-Besides $d\geq0.3786823$ in \texttt{dConst\_\allowbreak lower\_\allowbreak
-bound\_\allowbreak sharp} and $\rho\leq-0.1747885$ in
-\texttt{rhoConst\_\allowbreak upper\_\allowbreak bound}, both discussed above,
-the hypotheses carry $\alpha\leq15.4257$ against
-$\alpha_+\leq15.425661$, $V_{\max}\leq1.90747$ against $1.907462$, and
-\texttt{dConst\_\allowbreak lower\_\allowbreak bound} proves
-$d\geq0.3785913$ against the certified $d\geq0.3786949$. In each case the Lean
-numeral is a rational with a short decimal expansion, chosen so that the
-arithmetic is checkable by \texttt{norm\_num}. In each case it is also on the
-safe side of the certified value, so the formal statement is weaker and holds
-a fortiori. What must be checked is the direction, and that the looser numeral
-still suffices for the conclusion the Lean proof draws from it. Both are
-verified by \texttt{numerics/\allowbreak check\_\allowbreak lean\_\allowbreak constants.py},
-which also reports the margin.
-\endgroup
 
 The numerical propositions are Proposition~\ref{prop:odd-certified} and
 Proposition~\ref{prop:full-certified}. Their statements are finite systems of
-interval inequalities, established by Arb/FLINT through its Python bindings.
-The Lean formalization imports the resulting intervals as hypotheses and proves
-that they imply Theorem~\ref{thm:main-full} and both assertions of
-Theorem~\ref{thm:main-odd}; the three formal statements are
-\texttt{erdos\_\allowbreak sums\_\allowbreak increase\_\allowbreak from\_\allowbreak six}, \texttt{fOdd\_\allowbreak decreasing} and
-\texttt{fOdd\_\allowbreak tendsto\_\allowbreak half}. The differentiability field belongs to
-\texttt{NumericalFactsFull} and so is a hypothesis of the second, primitive
-version of the full theorem rather than of
-\texttt{erdos\_\allowbreak sums\_\allowbreak increase\_\allowbreak from\_\allowbreak six}, which does not mention it. The limit $g_k\to\frac12$ was formerly left
-unformalized, the monotonicity argument making no use of it; it is now proved
-there as well, and from the same hypothesis, since
-\eqref{eq:odd-intro-expansion} already bounds
-$\abs{g_k-\frac12-\beta2^{-k}}$ by a multiple of $(k+3)^3 3^{-k}$, and both
-that and $2^{-k}$ vanish.
+interval inequalities, and each is established in ball arithmetic by
+Arb/FLINT through its Python bindings, so that every enclosure carries a
+rigorous error radius rather than a floating-point estimate. The scripts, the
+logs of the runs of record and the resulting certificate are in the repository
+cited below, and each script records its settings of record in its docstring.
 
-For Theorem~\ref{thm:main-full} the hypotheses are not only the interval
-bounds of Proposition~\ref{prop:full-certified}. Proposition~\ref{prop:criterion-phi}
-enters as a hypothesis in one of the two formal versions, and is proved in the
-other, from the primitive certified quantities rather than from the aggregate
-bound \eqref{eq:E-difference-lower}. (The bound \eqref{eq:Eexp-certified} is
-not what the primitive route replaces. It is a hypothesis of that route alone,
-as \texttt{NumericalFactsFull.Eexp\_\allowbreak bound}; on the aggregate route
-there is no such field, \eqref{eq:Eexp-certified} being one of the ingredients
-folded into \texttt{source\_\allowbreak bound}.) What the
-formalization proves from these is
-the passage to $f_k<f_{k+1}$ for $k\geq2440$, together with the assembly of
-the four ranges.
-
-Lemmas~\ref{lem:phi-base} and \ref{lem:phi-monotone} were formerly hypotheses
-of that development as well. They are now proved in it, as
-\texttt{phiBound\_\allowbreak pos\_\allowbreak at\_\allowbreak 2440} and \texttt{phiBound\_\allowbreak mono\_\allowbreak of\_\allowbreak bounds}, from
-upper bounds on the parameters alone: $\varphi$ is an explicit expression in
-$k$, so neither lemma is a statement about primes, contours or limits, and
-what the formalization had been assuming was arithmetic. Proving them needed
-one quantity the certified hypotheses did not carry, the bound
-$\abs U\leq U_{\max}$ of \eqref{eq:full-certified-constants}, which is now
-among them. The sharpness required is not uniform: the base case turns on
-$\log2443$ to a tenth of a percent, where $\log2443\leq12\log2$ is already too
-weak, while the monotonicity step needs only that cruder inequality itself.
-(The argument of the logarithm is $k+3$ at $k=2440$, hence $2443$.)
-
-For the odd theorem the lower bound on $\gamma$ was likewise a hypothesis and
-is now proved, as \texttt{gamma\_\allowbreak lower\_\allowbreak bound}, from
-$\mathrm{harmonic}(n)-\log(n+1)<\gamma$ at $n=8191$, chosen so that
-$n+1=2^{13}$ and the logarithm is $13\log2$ exactly.
-
-The constants $d$ of \eqref{eq:d-def} and $\rho$ were hypotheses of both
-developments and are now
-proved in them, as \texttt{dConst\_\allowbreak lower\_\allowbreak bound},
-\texttt{dConst\_\allowbreak lower\_\allowbreak bound\_\allowbreak sharp} and \texttt{rhoConst\_\allowbreak upper\_\allowbreak bound}. What
-makes this possible is that the Euler factors are rational and exceed $1$,
-\begin{align*}
-  \Bigl(1-\tfrac2p\Bigr)^{-1}\Bigl(1-\tfrac1p\Bigr)^{2}
-    &=\frac{(p-1)^2}{p(p-2)}=1+\frac1{p(p-2)},\\
-  \Bigl(1-\tfrac3p\Bigr)^{-1}\Bigl(1-\tfrac1p\Bigr)^{3}
-    &=\frac{(p-1)^3}{p^2(p-3)}=1+\frac{3p-1}{p^2(p-3)},
-\end{align*}
-the second because $(p-1)^3-p^2(p-3)=3p-1$. The constant regularized by the
-second display is
-\begin{equation}\label{eq:rho-def}
- \rho=-\frac19\prod_{p\geq5}\Bigl(1-\frac3p\Bigr)^{-1}
-      \Bigl(1-\frac1p\Bigr)^{3},
-\end{equation}
-which is recorded here only so that every constant proved in the formalization
-has a counterpart in the text; it is used nowhere in the proofs above. A
-product of factors each at least
-$1$ is bounded below by the product over any finite subset of them, with no
-tail estimate entering, so a one-sided bound on such a constant is a finite
-computation in the kernel even where the two-sided enclosure is not. Only
-one-sided bounds are used: $d$ enters through $a_1=d\log2/4$ and through
-$\beta=d(\log2-S+\gamma)$, in both cases from below, and $\rho$ is not used at
-all. The bounds proved are weaker than those of
-Proposition~\ref{prop:full-certified}, which are unchanged. The $94$ primes
-$p\leq499$ give $d\geq0.3785913$, which suffices for $a_1\geq0.0656$; the
-$668$ primes $p\leq4999$ give $d\geq0.3786823$, which is what
-$\beta\geq0.1556$ requires; and the $93$ primes $5\leq p\leq499$ give
-$\rho\leq-0.1747885$. In each case the requirement is computed against the
-bound for $\log2$ available in the formalization rather than against $\log2$
-itself, the two differing by enough to change how many primes are needed.
-
-The same device does not reach $S$. There the bound required is an upper one on
-a sum of positive terms, so the tail cannot be discarded, and the summands
-carry $\log p$ rather than being rational. The budget is narrow: with $d$ at
-the bound just proved, $\beta\geq0.1556$ permits $S\leq0.8593986$, while the
-partial sum over $p<2\cdot10^{6}$ already reaches $0.8593917$, so the
-admissible tail is below $7\cdot10^{-6}$ and primes beyond about
-$1.5\cdot10^{5}$ are needed. Accordingly $S$ remains a certified hypothesis,
-as do the sweeps and the Cauchy estimates of
-Propositions~\ref{prop:odd-certified} and \ref{prop:full-certified}.
+What ball arithmetic certifies is the computation. Transcribing an enclosure
+into a numeral printed here, and combining several such numerals into a
+displayed chain, is ordinary writing, and that is where the errors in this
+manuscript have been found. A late adversarial pass turned up three: a stated
+bound rounded down rather than up, so that the manuscript asserted a bound
+its own certificate did not establish; the two-part assembly of $\Sigma_2$,
+whose displayed chain did not close under its own stated value; and a contour
+bound stated for the wrong function, the certified $101.245$ bounding the
+pole-free part $G_2(1,z)-\rho/(3-z)$, as every consuming script had always
+assumed, and not the regularized product, whose supremum on $\abs z=4.2$ is
+$228.95$. None invalidated a conclusion, and each is now checked against its
+certificate by script rather than by eye:
+\texttt{check\_\allowbreak proof\_\allowbreak spine.py} compares every numeral
+printed in this paper against the log that certifies it and fails if a stated
+bound falls below it, and \texttt{verify.py} checks the sweep tables and the
+$\Gamma$ data against the statements they instantiate, checks the criterion
+sweeps for gaps in the union of their ranges, and recomputes the SHA-256 that
+the certificate records. One input deserves its own mention because the
+quantity it bounds is not an enclosure but a sum over all primes:
+$\beta>0$ and the base case \eqref{eq:odd-base-59} both reduce to an upper
+bound on $S=\sum_{p\geq3}(\log p)/((p-1)(p-2))$, certified in
+\texttt{odd\_\allowbreak beta\_\allowbreak certified.py} as a partial sum over
+$p\leq10^{8}$ plus a rigorous integral tail, together with a lower bound on
+$d$ obtained as a partial product, every Euler factor of $d$ exceeding $1$ so
+that no tail estimate is needed there.
 
 Two constants are stated above more conservatively than the computation
-requires, so that the text and the formalization carry the same values: the
-threshold $2440$ of Lemma~\ref{lem:phi-base} in place of $2433$, and
+requires. The threshold $2440$ of Lemma~\ref{lem:phi-base} is carried in place
+of $2433$, the first index at which $\varphi$ is positive, and
 \eqref{eq:ci-geometric-bound} in place of the sharper bound that
-Lemma~\ref{lem:pole-coefficient-bounds}(i) supplies. Neither changes the
-ranges covered. Two further discrepancies should be recorded rather than left
-for the reader to find. The certified odd sweep is stated above for
-$1\leq k\leq75$, whereas the field \texttt{OddNumericalFacts.sweep\_\allowbreak low}
-assumes only $1\leq k\leq58$; since the analytic branch begins at $k=59$ that
-is all the assembly needs, and assuming less is the safe direction, but the two
-ranges are not the same. And the field \texttt{NumericalFacts.\allowbreak Gamma\_\allowbreak bound},
-carrying $\Gamma\leq104.52$, has no counterpart above and no consumer in the
-development either; it is retained only so that the certified package and the
-text can be compared field by field.
-
-\begin{table}[htbp]
-\centering
-\caption{What the Lean development proves, what it assumes, and what it does
-not mention. The assumed rows are the trusted base: no instance of any
-structure is constructed, so these are not checked in the kernel. The last row
-is not part of that base at all. Those six constants enter the Lean
-development only through comments, so for them there is no formal counterpart
-to compare the manuscript against.}
-\label{tab:lean-status}
-\begin{tabular}{@{}p{0.33\textwidth}lp{0.34\textwidth}@{}}
-\toprule
-Statement & Status & Lean name \\
-\midrule
-Theorem~\ref{thm:main-full} & proved & \texttt{erdos\_\allowbreak sums\_\allowbreak increase\_\allowbreak from\_\allowbreak six} \\
-Theorem~\ref{thm:main-odd}, monotonicity & proved & \texttt{fOdd\_\allowbreak decreasing} \\
-Theorem~\ref{thm:main-odd}, limit & proved & \texttt{fOdd\_\allowbreak tendsto\_\allowbreak half} \\
-$\varphi(2440)>0$, not the stronger
-  Lemma~\ref{lem:phi-base} & proved & \texttt{phiBound\_\allowbreak pos\_\allowbreak at\_\allowbreak 2440} \\
-$\varphi$ non-decreasing on $k\geq2440$, not
-  strictly, as Lemma~\ref{lem:phi-monotone} says & proved & \texttt{phiBound\_\allowbreak mono\_\allowbreak of\_\allowbreak bounds} \\
-$\gamma$ from below & proved & \texttt{gamma\_\allowbreak lower\_\allowbreak bound} \\
-$d$ from below & proved & \texttt{dConst\_\allowbreak lower\_\allowbreak bound}, \texttt{\_\allowbreak sharp} \\
-$\rho$ from above & proved & \texttt{rhoConst\_\allowbreak upper\_\allowbreak bound} \\
-\midrule
-Proposition~\ref{prop:odd-remainder} & assumed & \texttt{OddNumericalFacts.\allowbreak remainder} \\
-Section~\ref{sec:sources} aggregate & assumed & \texttt{NumericalFacts.source\_\allowbreak bound} \\
-\eqref{eq:Eexp-certified} & assumed & \texttt{NumericalFactsFull.Eexp\_\allowbreak bound} \\
-$g_i$ differentiable on $(1,2)$ & assumed & \texttt{NumericalFactsFull.g\_\allowbreak deriv} \\
-$\partial_s$, $\partial_s^2$ of coefficients exist & assumed & \texttt{OddCoeffFacts.deriv\_\allowbreak exists}, \texttt{deriv2\_\allowbreak exists} \\
-$S^*$ from above & assumed & \texttt{NumericalFacts.Sstar\_\allowbreak bound} \\
-$S$ of \eqref{eq:beta-intro}, enclosed & assumed & \texttt{OddNumericalFacts.\allowbreak Sodd\_\allowbreak enclosure} \\
-$\abs{R_k}$'s constant $4900$ & assumed & \texttt{OddNumericalFacts.\allowbreak MR\_\allowbreak bound} \\
-Sweeps & assumed & \texttt{OddNumericalFacts.sweep\_\allowbreak low} and companions \\
-$\alpha_+$, $U$, $V$ & assumed & \texttt{alpha\_\allowbreak bound}, \texttt{U\_\allowbreak bound}, \texttt{V\_\allowbreak bound} \\
-$\Gamma\leq104.52$ & assumed, unused & \texttt{NumericalFacts.\allowbreak Gamma\_\allowbreak bound} \\
-\midrule
-$\Sigma_0$, $\Sigma_1$, $\Sigma_2$, $C_E$, $C_N$, $N_U$ & \emph{not in Lean} & see below \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-For the odd theorem, the coefficient bounds in
-\eqref{eq:odd-certified-coefficients} are obtained by cancelling the pole at
-$z=3$ before applying coefficient recursion or Cauchy bounds. The range
-$0<u\leq3$ is evaluated directly, while the range $u\geq3$ uses the Taylor
-model made explicit in Proposition~\ref{prop:odd-two-term}.
+Lemma~\ref{lem:pole-coefficient-bounds}(i) supplies. In both cases the sharper
+value is recorded in the repository as headroom rather than substituted here:
+a printed numeral is only as good as the certificate behind it, and replacing
+a conservative constant that is covered by the certified sweeps with a sharper
+one gains nothing while putting the printed chain at risk. Neither changes the
+ranges covered.
 
 \begingroup\sloppy
 $\Sigma_2$ is not a single computed number but a sum of two, and since it
@@ -2259,7 +2035,11 @@ as a power series in $\sigma=s-s_0$ about $s_0=1+E/2$, where $E=s(3)-1$, makes
 the cancellation symbolic. The resulting series are evaluated on
 $\abs{\sigma}\leq E/2$, which is the whole range; their coefficients fall off
 geometrically, and truncating after nine terms contributes less than
-$10^{-20}$.
+$10^{-20}$. Of every constant certified here this is the one with no headroom:
+the four suprema are attained at $s(3)$ and give $C_E=5.4890955\ldots$, so the
+stated $5.48910$ has about $4\cdot10^{-6}$ to spare, against $0.86\%$ for the
+ledger of Proposition~\ref{prop:odd-remainder}. Any change to the Taylor-model
+settings has to be rechecked against it rather than assumed safe.
 
 The constant $C_N$ requires $\Pi(t)=\sum_{p\geq3}p^{-t}$ at
 $t=s,2s,\dots,200s$ for $s=s(3)$. At $s\approx1.05$ these converge too slowly
@@ -2272,6 +2052,12 @@ prime enumeration; this is the device of Cohen \cite{Cohen}, as used in
 costs about one digit every $2.3$ steps over the $200$ terms used; at $1200$
 bits the head agrees to every printed digit.
 
+For the odd theorem, the coefficient bounds in
+\eqref{eq:odd-certified-coefficients} are obtained by cancelling the pole at
+$z=3$ before applying coefficient recursion or Cauchy bounds. The range
+$0<u\leq3$ is evaluated directly, while the range $u\geq3$ uses the Taylor
+model made explicit in Proposition~\ref{prop:odd-two-term}.
+
 For the unrestricted theorem, the $s$-uniform coefficient bounds defining
 $\alpha_+$ are obtained by carrying $s$ as an interval over a partition of
 $[1,2]$. The signed moments $U$ and $V$ are evaluated before absolute values
@@ -2280,27 +2066,17 @@ are taken, for the reason given at \eqref{eq:UV-exact-combination}.
 \subsection*{Availability and versions}
 \begingroup\sloppy
 Since the contribution is in part a certification, the artefacts and the
-versions they were produced with are part of the claim. The Lean development,
-the Arb scripts, their logs and the certificate are at
+versions they were produced with are part of the claim. The scripts, their
+logs and the certificate are at
 \url{https://github.com/jaideepsaipadhi/erdos-sums-almost-primes}. The
-formalization is built with Lean~4, toolchain
-\texttt{leanprover/\allowbreak lean4:\allowbreak v4.33.0-rc1}, against Mathlib at revision
-\texttt{79d0395a1825}; the permitted axioms are exactly
-\texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound}, which is
-checked by \texttt{\#print axioms} on every theorem named in
-Table~\ref{tab:lean-status}, in the two audit files
-\texttt{axcheck-bm.lean} and \texttt{odd-proof/\allowbreak axcheck.lean}. The
-audit is not redundant with the build: a green \texttt{lake build} reports
-that the files compiled, not that a particular theorem is free of
-\texttt{sorryAx}. The numerics use
-python-flint~0.9.0; the certificate's \texttt{versions} block records that
-binding's version but not the FLINT release under it, which should be added
-before submission. The certificate records the parameters of the
-\emph{quadrature} run, namely $k_{\max}$, the precision, the panel geometry
-and the ellipse, together with a SHA-256 hash of the numerical payload, which
-\texttt{verify.py} recomputes. The coefficient sweeps' parameters are recorded
-separately, in \texttt{uv\_constants.json} and \texttt{gamma\_constant.json},
-not in the certificate.
+numerics use python-flint~0.9.0; the certificate's \texttt{versions} block
+records that binding's version but not the FLINT release under it, which
+should be added before submission. The certificate records the parameters of
+the \emph{quadrature} run, namely $k_{\max}$, the precision, the panel
+geometry and the ellipse, together with a SHA-256 hash of the numerical
+payload, which \texttt{verify.py} recomputes. The coefficient sweeps'
+parameters are recorded separately, in \texttt{uv\_constants.json} and
+\texttt{gamma\_constant.json}, not in the certificate.
 \endgroup
 
 %=======================================================================
@@ -2379,8 +2155,8 @@ $M$, the $N$-node Gauss rule satisfies
 \cite[Thm.~4.5]{TrefCC}, where the rule is indexed so that $I_n$ uses $n+1$
 nodes and the stated exponent $\rho_B^{-(2n+2)}$ is the $\rho_B^{-2N}$ above;
 the bound appears as \cite[Thm.~19.3]{ATAP}. Here $\rho_B$ is the
-Bernstein-ellipse parameter, unrelated to the arithmetic constant $\rho$ of
-Section~\ref{sec:lean}. The implementation evaluates the right side of
+Bernstein-ellipse parameter, unrelated to the residue $\rho$ of
+\eqref{eq:contour-certified}. The implementation evaluates the right side of
 \eqref{eq:trefethen} with the interval-scaling factor $H/2$ and a further
 factor $10$ of margin. The ellipse is taken with semi-minor axis
 $\delta=1.45<\pi/2$ in the $u$ variable, giving $\rho_B\approx7.385$, and $M$ is
@@ -2417,11 +2193,11 @@ and for many helpful discussions.
 
 During the preparation of this work the author used Claude Opus~5 (Anthropic),
 a large language model, in order to develop and check proofs, write and run
-the interval-arithmetic and formalization code, search and check the
-literature, and draft and edit the text. The proofs were checked by additional
+the interval-arithmetic code, search and check the literature, and draft and
+edit the text. The proofs were checked by additional
 adversarial review passes of the model, and the numerical claims were
 certified in ball arithmetic by scripts available in the repository cited in
-Section~\ref{sec:lean}. After using this tool, the author reviewed and edited
+Section~\ref{sec:certification}. After using this tool, the author reviewed and edited
 the content as needed and takes full responsibility for the content of the
 article.
 

@@ -107,37 +107,30 @@ try:
     notes.append(notes_pending_ai)
 except NameError:
     pass
-notes.append("Lean is not built in this container, so Section 8 and Table 1 "
-             "describe a state no green build has confirmed. Run the `lean` "
-             "workflow before submission -- and check steps > 0, since a run "
-             "with no runner reports the same conclusion as a build error "
-             "(see the comment block in .github/workflows/lean.yml).")
-
-# Section 8 claims #print axioms is run on every theorem named in Table 1.
-# It was not: gamma_lower_bound was in neither audit file, which no check
-# noticed because the audit files and the table were written independently.
+# The manuscript no longer describes the Lean development, so there is no
+# Table 1 to audit against the #print axioms files and no build state for the
+# paper to misdescribe.  Both the old note and the table/axcheck guard were
+# retired with Section 8's formalization half.  What replaced them is the
+# check below: the paper's certified inputs must each have a generating
+# artifact, since the formalization section was the only place several of
+# their numerals were printed.
 import re as _re
 _src = TEX.read_text()
-_tab = _src[_src.index("tab:lean-status"):]
-_tab = _tab[:_tab.index("end{table}")]
-_named = set(n.replace("\\_", "_").replace("\\allowbreak", "").replace(" ", "")
-                 .replace("\n", "")
-             for n in _re.findall(r"texttt\{([a-zA-Z_0-9\\' \n]*)\}", _tab))
-_thms = set()
-for _f in ("Odd/Basic.lean", "Banksmartin/Basic.lean"):
-    _p = ROOT / _f
-    if _p.exists():
-        _thms |= set(_re.findall(r"^theorem (\S+)", _p.read_text(), _re.M))
-_cov = set()
-for _f in ("axcheck-bm.lean", "odd-proof/axcheck.lean"):
-    _p = ROOT / _f
-    if _p.exists():
-        _cov |= set(_re.findall(r"#print axioms (\S+)", _p.read_text()))
-_missing = sorted(n for n in _named if n in _thms and n not in _cov)
-check("every theorem named in Table 1 is a #print axioms target",
-      not _missing and bool(_thms) and bool(_cov),
-      "missing from the audit files: %s" % (", ".join(_missing) or "none")
-      if _thms and _cov else "could not read the Lean or axcheck files")
+if _re.search(r"Lean|formaliz", _src):
+    check("no stale formalization claims left in the manuscript", False,
+          "the Lean material was removed from Section 8, but some reference "
+          "to it survives elsewhere in proof.tex")
+
+# beta > 0 and eq:odd-base-59 are printed as certified, and until the
+# formalization section came out their only numeral lived inside it.  The
+# certificate that now backs them must exist.
+if r"\beta>0" in _src.replace(" ", "") or "odd-base-59" in _src:
+    _bl = ROOT / "numerics" / "odd_beta.log"
+    check("beta's certificate numerics/odd_beta.log exists",
+          _bl.exists() and "beta" in _bl.read_text(),
+          "run numerics/odd_beta_certified.py; without it eq:odd-base-59 is a "
+          "printed inequality with nothing behind it"
+          if not _bl.exists() else "present")
 
 print()
 for n in notes:
