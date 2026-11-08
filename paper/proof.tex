@@ -298,7 +298,7 @@ and $J(u)=-\varepsilon'(u)=x+2\gamma x^2+O(x^3)$.
 \end{proof}
 
 %=======================================================================
-\section{The odd sums}
+\section{The odd sums}\label{sec:odd}
 %=======================================================================
 
 Throughout this section write
@@ -449,7 +449,9 @@ Lemma~\ref{lem:odd-constants} gives
 \subsection{The remainder}
 
 Three weighted $\ell^1$ norms of coefficients carry all of the interval
-input for the odd sums. Put
+input for the odd sums. Throughout, $s(3)=s(u)\rvert_{u=3}=1.0512\ldots$ in the
+coordinate of Lemma~\ref{lem:zeta-coordinate}, that is, the value of $s$ at
+which $\log\zeta(s)=3$. Put
 \begin{equation}\label{eq:sigma-def}
 \begin{aligned}
  \Sigma_0&=\sum_{m\geq0}3^m
@@ -492,8 +494,7 @@ with $E_j$ the explicit expression in \eqref{eq:odd-local-product}, put
 \end{equation}
 so that $R_k$ is $R_{k,\mathrm{far}}+R_{k,\mathrm{near}}$ together with the two
 coefficient tails of
-\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}. Here
-$s(3)$ denotes the value of $s$ at $u=3$.
+\eqref{eq:first-coefficient-tail}--\eqref{eq:second-coefficient-tail}.
 
 The far range needs one further constant. Write $\varepsilon=s-1$ and
 $J=\zeta(s)/(-\zeta'(s))$; this is the $J$ of
@@ -945,7 +946,7 @@ $G_2(1,z)=H_{\mathrm o}(1,z)$, the power series has radius $3$ and
   \qquad
   \sum_{i\geq0}2^ic_i=d.
 \end{equation}
-The coefficients are those of Section~3:
+The coefficients are those of Section~\ref{sec:odd}:
 \begin{equation}\label{eq:ci-equals-hi}
   c_i=h_i(1).
 \end{equation}
@@ -1615,7 +1616,7 @@ $z=2$ lies on the singular circle exactly when $q=2$. Note that $z=2$ is
 distinguished here not because $2$ is prime, but because it is where the
 $\gamma\e^{-2u}$ term of $J$ in Lemma~\ref{lem:zeta-coordinate} evaluates the
 regularized product. If $q\geq3$ the extraction at $z=2$ is interior, and
-gives a constant multiple of $2^{-k}$ as in Section~3. If $q=2$ it is at the
+gives a constant multiple of $2^{-k}$ as in Section~\ref{sec:odd}. If $q=2$ it is at the
 boundary, and the mechanism producing a factor $k^2$ is the one identified by
 Gorodetsky, Lichtman and Wong \cite{GLW} for
 $\mathcal P=\{\text{all primes}\}$.
@@ -1761,7 +1762,7 @@ $M'R^{-j}$. At $z=2$ the inner sum in \eqref{eq:HP-dlog} is
 \]
 which gives \eqref{eq:HP-logderiv} after halving.
 
-(iv) The plan is the one of Section~3, carried out with $\mathcal P$ in place
+(iv) The plan is the one of Section~\ref{sec:odd}, carried out with $\mathcal P$ in place
 of the odd primes. Pass to the variable $u=\log\zeta(s)$, where the measure
 $J(u)\dd u$ has the convergent expansion of
 Lemma~\ref{lem:zeta-coordinate}; expand each $h_j^{\mathcal P}$ about $s=1$ in
@@ -2024,12 +2025,12 @@ odd case. No interval computation can establish a differentiability claim, and
 none is attempted. Second, Proposition~\ref{prop:odd-remainder}: its statement
 is imported as field \texttt{remainder} of \texttt{OddNumericalFacts} rather
 than derived from Proposition~\ref{prop:odd-certified}; the derivation is the
-proof given in Section~3 above, which has not been formalized. The Lean
+proof given in Section~\ref{sec:odd} above, which has not been formalized. The Lean
 development contains the intended route to it, but that route still rests on
 assumed coefficient and dominating-sequence data of its own, so it does not
 discharge the hypothesis.
 
-Likewise the source estimates of Section~5 are assumed, not proved, by the
+Likewise the source estimates of Section~\ref{sec:sources} are assumed, not proved, by the
 theorem named below: \texttt{NumericalFacts} carries
 $\abs{2E(k)-E(k+1)}\leq R(k)$ as the single field \texttt{source\_\allowbreak bound},
 which is the aggregate of that whole section. Only the second formal version
@@ -2206,7 +2207,7 @@ $d$ from below & proved & \texttt{dConst\_\allowbreak lower\_\allowbreak bound},
 $\rho$ from above & proved & \texttt{rhoConst\_\allowbreak upper\_\allowbreak bound} \\
 \midrule
 Proposition~\ref{prop:odd-remainder} & assumed & \texttt{OddNumericalFacts.\allowbreak remainder} \\
-Section~5 aggregate & assumed & \texttt{NumericalFacts.source\_\allowbreak bound} \\
+Section~\ref{sec:sources} aggregate & assumed & \texttt{NumericalFacts.source\_\allowbreak bound} \\
 \eqref{eq:Eexp-certified} & assumed & \texttt{NumericalFactsFull.Eexp\_\allowbreak bound} \\
 $g_i$ differentiable on $(1,2)$ & assumed & \texttt{NumericalFactsFull.g\_\allowbreak deriv} \\
 $\partial_s$, $\partial_s^2$ of coefficients exist & assumed & \texttt{OddCoeffFacts.deriv\_\allowbreak exists}, \texttt{deriv2\_\allowbreak exists} \\
@@ -2409,8 +2410,8 @@ quadrature run alone.
 
 \section*{Acknowledgements}
 
-I thank Jared Duker Lichtman for his guidance and for many helpful
-discussions throughout this work.
+I am grateful to Jared Duker Lichtman for his guidance throughout this work,
+and for many helpful discussions.
 
 \section*{Statement on the use of AI}
 
