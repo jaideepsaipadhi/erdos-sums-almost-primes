@@ -570,6 +570,22 @@ Two traps that cost real time:
   nothing is readable. Quote the extrapolation, and call it evidence -- it
   cannot distinguish "no `s`-derivative terms" from "they cancel for this `Q`".
 
+## Two citations were missing, and the Sigma_2 guard was too brittle
+
+Added 2026-11-08 while shortening to 28 pp. **Arb itself was never cited** --
+the whole numerical contribution rests on it. Now `\cite{Arb}` (Johansson,
+IEEE Trans. Comput. 66 (2017), 1281-1292). And the C_N paragraph appealed to
+"the Rosser--Schoenfeld bound" by name with no reference; now `\cite{RS}`
+(Illinois J. Math. 6 (1962), 64-94), **without a theorem number** -- the right
+one could not be verified from here, and a wrong pointer is worse than none.
+
+`check_proof_spine.py`'s four Section 8 Sigma_2 regexes had literal spaces in
+them, so reflowing that paragraph moved the tail numeral onto the next line
+and the guard reported itself vacuous (correct behaviour, caught the change).
+Every space in those four patterns is now `\s+`. This is the second time
+reflowing prose has broken a guard regex -- see the `fodd75.log` k=1 row -- so
+**prefer `\s+` to a literal space in any pattern that reads proof.tex**.
+
 ## The Lean material is OUT of the manuscript (2026-11-08)
 
 Decision of record. `paper/proof.tex` no longer mentions Lean, formalization,

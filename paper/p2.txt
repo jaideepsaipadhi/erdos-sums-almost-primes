@@ -61,36 +61,34 @@ For additional information on amsmath, use the `?' option.
 [6] [7] [8] [9] [10] [11] [12]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1047.
+(hyperref)                removing `math shift' on input line 1044.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1047.
+(hyperref)                removing `subscript' on input line 1044.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1047.
+(hyperref)                removing `math shift' on input line 1044.
 
 [13] [14]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1155.
+(hyperref)                removing `math shift' on input line 1152.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\delta' on input line 1155.
+(hyperref)                removing `\delta' on input line 1152.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1155.
+(hyperref)                removing `math shift' on input line 1152.
 
-[15] [16] [17] [18] [19] [20] [21] [22] [23] [24] [25]
-Underfull \vbox (badness 10000) has occurred while \output is active [26]
-[27]
-Underfull \hbox (badness 10000) in paragraph at lines 2240--2244
+[15] [16] [17] [18] [19] [20] [21] [22] [23] [24] [25] [26] [27]
+Underfull \hbox (badness 10000) in paragraph at lines 2227--2231
 []\OT1/cmr/m/n/9 H. Co-hen, \OT1/cmr/m/it/9 High pre-ci-sion com-pu-ta-tion of 
 Hardy--Littlewood con-stants\OT1/cmr/m/n/9 , preprint (1991),
-[28] [29] (./proof.aux) )
+[28] (./proof.aux) )
 (see the transcript file for additional information) </root/.texlive2023/texmf-
 var/fonts/pk/ljfour/jknappen/ec/tcti1095.600pk> </root/.texlive2023/texmf-var/f
 onts/pk/ljfour/jknappen/ec/tcrm1095.600pk></usr/share/texlive/texmf-dist/fonts/
@@ -116,5 +114,5 @@ are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/te
 xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texlive/t
 exmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texlive/te
 xmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on proof.pdf (29 pages, 472920 bytes).
+Output written on proof.pdf (28 pages, 472816 bytes).
 Transcript written on proof.log.

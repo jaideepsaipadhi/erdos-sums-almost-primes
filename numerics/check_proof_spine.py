@@ -319,10 +319,16 @@ else:
 # require (a) each to be >= what the certificate gives, and (b) the printed
 # chain itself to close.
 print()
-m_sup = re.search(r"of the pole-free part at most\s*\$([0-9.]+)\\cdot10\^\{6\}\$", TEX)
-m_head = re.search(r"in \$s\$, giving \$([0-9.]+)\$", TEX)
-m_tail = re.search(r"\(1-3/4\.5\)\^\{-1\}\$, which is \$([0-9.]+)\$", TEX)
-m_tot = re.search(r"The two sum to\s*\$([0-9.]+)\$", TEX)
+# Every literal space here is \s+ : the manuscript's prose gets reflowed when
+# it is shortened, and a numeral that moves to the next line must not silently
+# switch this guard off.  That is exactly what happened when Section 8 was
+# tightened -- the tail numeral wrapped and the guard reported itself vacuous,
+# which is the behaviour wanted, but the regexes should not be this brittle.
+m_sup = re.search(r"of\s+the\s+pole-free\s+part\s+at\s+most\s*\$([0-9.]+)"
+                  r"\\cdot10\^\{6\}\$", TEX)
+m_head = re.search(r"in\s+\$s\$,\s+giving\s+\$([0-9.]+)\$", TEX)
+m_tail = re.search(r"\(1-3/4\.5\)\^\{-1\}\$,\s+which\s+is\s*\$([0-9.]+)\$", TEX)
+m_tot = re.search(r"The\s+two\s+sum\s+to\s*\$([0-9.]+)\$", TEX)
 if all((m_sup, m_head, m_tail, m_tot)) and h2.exists() and md.exists():
     psup = arb(m_sup.group(1)) * arb(10) ** 6
     phead, ptail, ptot = (arb(m.group(1)) for m in (m_head, m_tail, m_tot))
