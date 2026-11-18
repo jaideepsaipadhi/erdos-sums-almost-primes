@@ -20,16 +20,43 @@ rest on the Arb/FLINT computations in `numerics/` and
 Section 8 of the paper cites.
 
 **The Lean development in `Banksmartin/` and `Odd/` is not cited by the
-paper, and no build of it has been confirmed.** Earlier versions of the
-manuscript described it and earlier versions of this file claimed specific
-theorems were machine-checked with a given axiom set. Those claims were never
-verified in any environment available here: both Mathlib cache hosts are
-unreachable, so `lake exe cache get` cannot run, and CI accepts runs and then
-assigns no runner, which is reported identically to a build failure. The
-development is kept because the work is real and may be completed later, but
-until a run comes back having actually executed, nothing here should be read
-as a machine-checked claim. `.github/workflows/lean.yml` documents the
-one-command check that distinguishes a missing runner from a build error.
+paper, and a passing build of it would not establish the paper's theorems.**
+Earlier versions of the manuscript described the development, and earlier
+versions of this file claimed specific theorems were machine-checked with a
+given axiom set. Those claims were never verified in any environment
+available here: both Mathlib cache hosts are unreachable, so
+`lake exe cache get` cannot run, and CI accepts runs and then assigns no
+runner, which is reported identically to a build failure.
+`.github/workflows/lean.yml` documents the one-command check that
+distinguishes a missing runner from a build error.
+
+A third-party service, [Paperlane](https://github.com/pragyaangaur/Paperlane),
+reports that the development compiles with no `sorry` at commit
+`18654533cb27` under `leanprover/lean4:v4.33.0-rc1`, with axioms **not**
+checked. Taken at face value that establishes one thing: the files typecheck
+at that commit. It is not a verification of the mathematics, for two
+reasons that are worth stating plainly.
+
+First, the `NumericalFacts`, `NumericalFactsFull` and `OddNumericalFacts`
+structures are assumed hypotheses, and **no instance of any of them is ever
+constructed**. Every theorem resting on them is therefore an implication from
+certified numerics, not an unconditional result. That is deliberate — it is
+the trusted computing base — but it means a green build says nothing about
+whether those hypotheses hold.
+
+Second, and more sharply: a field of such a structure can be *unsatisfiable*
+without any build noticing. `NumericalFactsFull.Eexp_bound` was in exactly
+that state until its quantifier was bounded, which would have made the
+theorems depending on it vacuous rather than false. Vacuous theorems compile
+cleanly and carry no `sorry`. That defect was found by reading the statement,
+not by running `lake build`, and no build check of any kind would have caught
+it.
+
+So the build report is welcome information and is recorded here, but nothing
+in this repository should be read as a machine-checked claim about the
+results in the paper. For the same reason no build badge is displayed: a
+green check would assert something neither that run nor any run of its kind
+can support.
 
 ## Reproducing the certified numbers
 
